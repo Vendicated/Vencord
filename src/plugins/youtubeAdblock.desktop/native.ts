@@ -13,10 +13,13 @@ app.on("browser-window-created", (_, win) => {
         frame?.once("dom-ready", () => {
             if (!RendererSettings.store.plugins?.YoutubeAdblock?.enabled) return;
 
-            if (frame.url.includes("youtube.com/embed/")) {
-                frame.executeJavaScript(adguard);
-            } else if (frame.parent?.url.includes("youtube.com/embed/")) {
-                frame.parent.executeJavaScript(adguard);
+            for (const context of [frame, frame.parent]) {
+                for (const domain of ["https://www.youtube.com/embed/", "https://www.youtube-nocookie.com/embed/"]) {
+                    if (context?.url.includes(domain)) {
+                        context.executeJavaScript(`${adguard}`);
+                        break;
+                    }
+                }
             }
         });
     });
