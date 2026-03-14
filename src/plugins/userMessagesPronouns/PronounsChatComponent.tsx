@@ -18,17 +18,32 @@
 
 import { getUserSettingLazy } from "@api/UserSettings";
 import ErrorBoundary from "@components/ErrorBoundary";
-import { getIntlMessage } from "@utils/discord";
+import { fetchUserProfile, getCurrentChannel, getIntlMessage } from "@utils/discord";
 import { classes } from "@utils/misc";
 import { Message } from "@vencord/discord-types";
 import { findCssClassesLazy } from "@webpack";
-import { Tooltip, UserStore } from "@webpack/common";
+import { Tooltip, useEffect, UserProfileStore, UserStore } from "@webpack/common";
 
 import { settings } from "./settings";
 import { useFormattedPronouns } from "./utils";
 
 const TimestampClasses = findCssClassesLazy("timestampInline", "timestamp");
 const MessageDisplayCompact = getUserSettingLazy("textAndImages", "messageDisplayCompact")!;
+
+const fetchingIds = new Set<string>();
+
+async function fetchWithRetry(id: string, guildId: string | undefined) {
+    try {
+        await fetchUserProfile(id, { guild_id: guildId });
+    } catch (e: any) {
+        if (e?.status === 429) {
+            await new Promise(r => setTimeout(r, (e?.body?.retry_after ?? 10) * 1000));
+            await fetchWithRetry(id, guildId);
+        }
+    } finally {
+        fetchingIds.delete(id);
+    }
+}
 
 const AUTO_MODERATION_ACTION = 24;
 
@@ -43,6 +58,13 @@ function shouldShow(message: Message): boolean {
 
 function PronounsChatComponent({ message }: { message: Message; }) {
     const pronouns = useFormattedPronouns(message.author.id);
+
+    useEffect(() => {
+        const { id } = message.author;
+        if (!settings.store.autoFetch || UserProfileStore.getUserProfile(id) || fetchingIds.has(id)) return;
+        fetchingIds.add(id);
+        fetchWithRetry(id, getCurrentChannel()?.getGuildId());
+    }, [message.author.id]);
 
     return pronouns && (
         <Tooltip text={getIntlMessage("USER_PROFILE_PRONOUNS")}>

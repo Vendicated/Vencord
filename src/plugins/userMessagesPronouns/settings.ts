@@ -44,5 +44,10 @@ export const settings = definePluginSettings({
         type: OptionType.BOOLEAN,
         description: "Enable or disable showing pronouns for yourself",
         default: true
+    },
+    autoFetch: {
+        type: OptionType.BOOLEAN,
+        description: "Automatically fetch pronouns for others when you see them in chat",
+        default: true
     }
 });
