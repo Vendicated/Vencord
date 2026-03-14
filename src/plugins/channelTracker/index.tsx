@@ -54,7 +54,7 @@ function markMessaged(channelId: string) {
     }
 }
 
-function ColorPickerSetting({ settingKey, label }: { settingKey: "viewedIconColor" | "messagedIconColor"; label: string; }) {
+function ColorPickerSetting({ settingKey, label }: { settingKey: "viewedIconColor" | "messagedIconColor" | "defaultIconColor"; label: string; }) {
     const color = parseInt(settings.store[settingKey], 16);
     return (
         <div style={{ marginBottom: "1em" }}>
@@ -98,18 +98,41 @@ const settings = definePluginSettings({
         description: "Show both viewed and messaged icons at the same time if both apply (instead of only the messaged icon)",
         default: false
     },
+    showDefaultIcon: {
+        type: OptionType.BOOLEAN,
+        description: "Show a default icon on channels you haven't interacted with",
+        default: false
+    },
+    defaultIconColor: {
+        type: OptionType.COMPONENT,
+        description: "Color of the default (no interaction) icon",
+        default: "808080",
+        component: () => <ColorPickerSetting settingKey="defaultIconColor" label="Default Icon Color" />
+    },
 });
 
 function InteractionIcons({ channelId }: { channelId: string; }) {
     const data = getInteraction(channelId);
-    if (!data.viewed && !data.messaged) return null;
+    const hasInteraction = data.viewed || data.messaged;
+
+    if (!hasInteraction && !settings.store.showDefaultIcon) return null;
 
     const showViewed = settings.store.showViewedIcon && data.viewed
         && (!data.messaged || !settings.store.showMessagedIcon || settings.store.showBothIcons);
     const showMessaged = settings.store.showMessagedIcon && data.messaged;
+    const showDefault = settings.store.showDefaultIcon && !hasInteraction;
 
     return (
         <span className="vc-cit-icons">
+            {showDefault && (
+                <Tooltip text="Not interacted">
+                    {props => (
+                        <span {...props} className="vc-cit-icon" style={{ color: `#${settings.store.defaultIconColor}` }} aria-label="Not interacted">
+                            ○
+                        </span>
+                    )}
+                </Tooltip>
+            )}
             {showViewed && (
                 <Tooltip text="Viewed">
                     {props => (
