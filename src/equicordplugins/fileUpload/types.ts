@@ -12,7 +12,12 @@ export enum ServiceType {
     CATBOX = "catbox",
     ZEROX0 = "0x0",
     LITTERBOX = "litterbox",
-    SHAREX = "sharex"
+    SHAREX = "sharex",
+    GOFILE = "gofile",
+    TMPFILES = "tmpfiles",
+    BUZZHEAVIER = "buzzheavier",
+    TEMPSH = "tempsh",
+    FILEBIN = "filebin"
 }
 
 export const serviceLabels: Record<ServiceType, string> = {
@@ -23,7 +28,12 @@ export const serviceLabels: Record<ServiceType, string> = {
     [ServiceType.CATBOX]: "Catbox",
     [ServiceType.ZEROX0]: "0x0.st",
     [ServiceType.LITTERBOX]: "Litterbox",
-    [ServiceType.SHAREX]: "ShareX Custom Uploader"
+    [ServiceType.SHAREX]: "ShareX Custom Uploader",
+    [ServiceType.GOFILE]: "GoFile",
+    [ServiceType.TMPFILES]: "tmpfiles.org",
+    [ServiceType.BUZZHEAVIER]: "buzzheavier.com",
+    [ServiceType.TEMPSH]: "temp.sh",
+    [ServiceType.FILEBIN]: "filebin.net"
 };
 
 export interface UploadResponse {

@@ -23,6 +23,11 @@ const serviceOptions = [
     { label: "Catbox.moe", value: ServiceType.CATBOX },
     ...(IS_DISCORD_DESKTOP ? [{ label: "0x0.st", value: ServiceType.ZEROX0 }] : []),
     { label: "Litterbox", value: ServiceType.LITTERBOX },
+    { label: "GoFile", value: ServiceType.GOFILE },
+    { label: "tmpfiles.org", value: ServiceType.TMPFILES },
+    { label: "buzzheavier.com", value: ServiceType.BUZZHEAVIER },
+    { label: "temp.sh", value: ServiceType.TEMPSH },
+    { label: "filebin.net", value: ServiceType.FILEBIN },
     { label: "ShareX Custom Uploader", value: ServiceType.SHAREX }
 ];
 
@@ -143,6 +148,36 @@ export const settings = definePluginSettings({
         default: "",
         hidden: true
     },
+    disableFallbacks: {
+        type: OptionType.BOOLEAN,
+        description: "Disable fallback upload services",
+        default: false,
+        hidden: true
+    },
+    autoSend: {
+        type: OptionType.BOOLEAN,
+        description: "Insert uploaded URL in chat input",
+        default: false,
+        hidden: true
+    },
+    autoFormat: {
+        type: OptionType.BOOLEAN,
+        description: "Wrap inserted URL in angle brackets",
+        default: false,
+        hidden: true
+    },
+    gofileToken: {
+        type: OptionType.STRING,
+        description: "Optional GoFile API token",
+        default: "",
+        hidden: true
+    },
+    uploadTimeoutMs: {
+        type: OptionType.NUMBER,
+        description: "Upload timeout in milliseconds",
+        default: 300000,
+        hidden: true
+    },
     stripQueryParams: {
         type: OptionType.BOOLEAN,
         description: "Strip query params from uploaded URLs",
@@ -198,6 +233,7 @@ export function SettingsComponent() {
     const isZipline = store.serviceType === ServiceType.ZIPLINE;
     const isCatbox = store.serviceType === ServiceType.CATBOX;
     const isLitterbox = store.serviceType === ServiceType.LITTERBOX;
+    const isGofile = store.serviceType === ServiceType.GOFILE;
     const isShareX = store.serviceType === ServiceType.SHAREX;
 
     const validateShareXConfig = () => {
@@ -388,6 +424,16 @@ export function SettingsComponent() {
                 </SettingsSection>
             )}
 
+            {isGofile && (
+                <SettingTextInput
+                    name="GoFile Token"
+                    description="Optional GoFile token to upload into your account"
+                    value={store.gofileToken}
+                    onChange={v => store.gofileToken = v}
+                    placeholder="Optional GoFile token"
+                />
+            )}
+
             {isShareX && (
                 <>
                     <SettingsSection
@@ -435,6 +481,46 @@ export function SettingsComponent() {
                 <Switch
                     checked={store.autoCopy}
                     onChange={v => store.autoCopy = v}
+                />
+            </SettingsSection>
+
+            <SettingsSection tag="label" name="Disable Fallback Uploaders" description="Only use the selected uploader without trying fallback hosts" inlineSetting>
+                <Switch
+                    checked={store.disableFallbacks}
+                    onChange={v => store.disableFallbacks = v}
+                />
+            </SettingsSection>
+
+            <SettingsSection tag="label" name="Insert URL into Chat Input" description="After upload, insert the resulting URL into the current chat input" inlineSetting>
+                <Switch
+                    checked={store.autoSend}
+                    onChange={v => store.autoSend = v}
+                />
+            </SettingsSection>
+
+            <SettingsSection tag="label" name="Format Inserted URL" description="Wrap inserted URLs in angle brackets to avoid Discord preview embedding" inlineSetting>
+                <Switch
+                    checked={store.autoFormat}
+                    onChange={v => store.autoFormat = v}
+                />
+            </SettingsSection>
+
+            <SettingsSection name="Upload Timeout" description="Maximum time to wait per upload attempt before switching to fallback">
+                <Select
+                    options={[
+                        { label: "30 seconds", value: 30000 },
+                        { label: "1 minute", value: 60000 },
+                        { label: "2 minutes", value: 120000 },
+                        { label: "5 minutes", value: 300000, default: true },
+                        { label: "10 minutes", value: 600000 }
+                    ]}
+                    isSelected={v => v === (store.uploadTimeoutMs || 300000)}
+                    select={v => {
+                        store.uploadTimeoutMs = v;
+                        update();
+                    }}
+                    serialize={v => v}
+                    placeholder="Select timeout"
                 />
             </SettingsSection>
         </>
