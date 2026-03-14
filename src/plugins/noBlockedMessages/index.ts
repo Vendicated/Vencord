@@ -172,10 +172,9 @@ export default definePlugin({
                 return !this.isReplyToBlocked(elem.content);
             });
         // Not removing doubled-dividers would lead to empty date separators which looks bad.
-        return semiFilteredStream.filter(elem => {
+        return semiFilteredStream.filter((elem, idx) => {
             if (elem.type !== "DIVIDER") return true;
-            const index = semiFilteredStream.indexOf(elem);
-            const next = semiFilteredStream[index + 1];
+            const next = semiFilteredStream[idx + 1];
             if (!next) return false;
             return next.type !== "DIVIDER";
         });
