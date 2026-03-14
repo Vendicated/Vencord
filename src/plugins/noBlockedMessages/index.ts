@@ -178,8 +178,7 @@ export default definePlugin({
             const index = semiFilteredStream.indexOf(elem);
             const next = semiFilteredStream[index + 1];
             if (!next) return false;
-            if (next.type === "DIVIDER") return false;
-            return true;
+            return next.type !== "DIVIDER";
         });
     },
 
