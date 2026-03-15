@@ -144,8 +144,8 @@ waitForStore("EditMessageStore", m => EditMessageStore = m);
 waitForStore("ExperimentStore", m => ExperimentStore = m);
 waitForStore("QuestStore", m => QuestStore = m);
 waitForStore("UserAffinitiesV2Store", m => UserAffinitiesStore = m);
-waitForStore("ApplicationStreamPreviewStore", m => ApplicationStreamPreviewStore = m);
 waitForStore("ApplicationStreamingStore", m => ApplicationStreamingStore = m);
+waitForStore("ApplicationStreamPreviewStore", m => ApplicationStreamPreviewStore = m);
 waitForStore("ThemeStore", m => {
     ThemeStore = m;
     // Importing this directly causes all webpack commons to be imported, which can easily cause circular dependencies.
