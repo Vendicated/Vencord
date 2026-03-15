@@ -27,7 +27,7 @@ function ClearCacheButton() {
 
     return (
         <Button
-            variant={cleared ? "primaryOutline" : "dangerPrimary"}
+            variant={cleared ? "secondary" : "dangerPrimary"}
             disabled={cleared}
             onClick={async () => {
                 await clearPronounsCache();
