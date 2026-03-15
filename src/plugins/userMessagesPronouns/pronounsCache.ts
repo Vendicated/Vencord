@@ -16,15 +16,17 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { createStore, get, set } from "@api/DataStore";
+import { clear, createStore, entries, get, set } from "@api/DataStore";
 
 const store = createStore("VencordPronounsCache", "pronouns");
 
 type CacheEntry = { pronouns: string; cachedAt: number; };
 const cache: Record<string, CacheEntry> = {};
 
-get<Record<string, CacheEntry>>("cache", store).then(stored => {
-    if (stored) Object.assign(cache, stored);
+entries<string, CacheEntry>(store).then(stored => {
+    for (const [id, entry] of stored) {
+        cache[id] = entry;
+    }
 });
 
 export function getCached(id: string, maxAgeDays: number): string | undefined {
@@ -36,12 +38,12 @@ export function getCached(id: string, maxAgeDays: number): string | undefined {
 
 export function setCached(id: string, pronouns: string) {
     cache[id] = { pronouns, cachedAt: Date.now() };
-    set("cache", cache, store);
+    set(id, cache[id], store);
 }
 
 export function clearPronounsCache() {
     for (const key of Object.keys(cache)) {
         delete cache[key];
     }
-    return set("cache", {}, store);
+    return clear(store);
 }
