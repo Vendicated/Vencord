@@ -26,7 +26,7 @@ export class UserAffinitiesStore extends FluxStore {
     getState(): UserAffinitiesResponse;
     getUserAffinities(): UserAffinity[];
     getUserAffinitiesMap(): Map<string, UserAffinity>;
-    getUserAffinity(): UserAffinity;
+    getUserAffinity(userId: string): UserAffinity;
     isFetching(): boolean;
     isHighlyAffinedVCUser(userId: string): boolean;
     shouldFetch(): boolean;
