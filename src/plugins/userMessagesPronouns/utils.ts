@@ -19,6 +19,7 @@
 import { getCurrentChannel } from "@utils/discord";
 import { UserProfileStore, useStateFromStores } from "@webpack/common";
 
+import { getCached, setCached } from "./pronounsCache";
 import { PronounsFormat, settings } from "./settings";
 
 function useDiscordPronouns(id: string, useGlobalProfile: boolean = false): string | undefined {
@@ -32,10 +33,8 @@ function useDiscordPronouns(id: string, useGlobalProfile: boolean = false): stri
 export function useFormattedPronouns(id: string, useGlobalProfile: boolean = false) {
     const discordPronouns = useDiscordPronouns(id, useGlobalProfile)?.trim().replace(/\n+/g, "");
 
-    if (discordPronouns) {
-        settings.store.cachedPronouns[id] = discordPronouns;
-    }
+    if (discordPronouns && getCached(id, Infinity) !== discordPronouns) setCached(id, discordPronouns);
 
-    const pronouns = discordPronouns || settings.store.cachedPronouns[id];
+    const pronouns = discordPronouns || getCached(id, settings.store.cacheExpiration);
     return settings.store.pronounsFormat === PronounsFormat.Lowercase ? pronouns?.toLowerCase() : pronouns;
 }

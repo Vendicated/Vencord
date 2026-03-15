@@ -17,8 +17,28 @@
 */
 
 import { definePluginSettings } from "@api/Settings";
-import { OptionType } from "@utils/types";
 import { Button } from "@components/Button";
+import { OptionType } from "@utils/types";
+import { useState } from "@webpack/common";
+import { clearPronounsCache } from "./pronounsCache";
+
+function ClearCacheButton() {
+    const [cleared, setCleared] = useState(false);
+
+    return (
+        <Button
+            variant={cleared ? "primaryOutline" : "dangerPrimary"}
+            disabled={cleared}
+            onClick={async () => {
+                await clearPronounsCache();
+                setCleared(true);
+                setTimeout(() => setCleared(false), 2000);
+            }}
+        >
+            {cleared ? "Cache Cleared!" : "Clear Cache"}
+        </Button>
+    );
+}
 
 export const enum PronounsFormat {
     Lowercase = "LOWERCASE",
@@ -46,20 +66,16 @@ export const settings = definePluginSettings({
         description: "Enable or disable showing pronouns for yourself",
         default: true
     },
-    cachedPronouns: {
-        type: OptionType.CUSTOM,
-        default: {} as Record<string, string>,
+    cacheExpiration: {
+        type: OptionType.SLIDER,
+        description: "How long to cache pronouns for (in days)",
+        markers: [1, 3, 7, 14, 30],
+        default: 7,
+        stickToMarkers: false,
     },
     clearCache: {
         type: OptionType.COMPONENT,
         description: "Clear the cached pronouns",
-        component: () => (
-            <Button
-                variant="dangerPrimary"
-                onClick={() => { settings.store.cachedPronouns = {}; }}
-            >
-                Clear Cache
-            </Button>
-        )
+        component: () => <ClearCacheButton />
     }
 });
