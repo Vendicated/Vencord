@@ -87,7 +87,7 @@ export default definePlugin({
         },
         // Current user area, at bottom of channels/dm list
         {
-            find: ".WIDGETS_RTC_UPSELL_COACHMARK),",
+            find: ".DISPLAY_NAME_STYLES_COACHMARK),",
             replacement: [
                 // Use Decor avatar decoration hook
                 {
@@ -97,7 +97,7 @@ export default definePlugin({
             ]
         },
         ...[
-            '"Message Username"', // Messages
+            "#{intl::GUILD_COMMUNICATION_DISABLED_ICON_TOOLTIP_BODY}", // Messages
             "#{intl::COLLECTIBLES_NAMEPLATE_PREVIEW_A11Y}", // Nameplate preview
             "#{intl::COLLECTIBLES_PROFILE_PREVIEW_A11Y}", // Avatar preview
         ].map(find => ({
