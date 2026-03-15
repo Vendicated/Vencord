@@ -34,6 +34,7 @@ let notifyFor: string[] = [];
 // Functional variables.
 const MuteStore = findByPropsLazy("isSuppressEveryoneEnabled");
 const SelectedChannelActionCreators = findByPropsLazy("selectPrivateChannel");
+const ChannelRTCActions = findByPropsLazy("updateChatOpen", "toggleParticipants");
 const UserUtils = findByPropsLazy("getGlobalName");
 
 // Adjustable variables.
@@ -395,6 +396,16 @@ function switchChannels(guildId: string | null, channelId: string) {
     NavigationRouter.transitionTo(`/channels/${guildId ?? "@me"}/${channelId}/`);
 }
 
+function navigateToChannel(channel: Channel) {
+    if (channel.isGuildVocal?.()) {
+        switchChannels(channel.guild_id, channel.id);
+        ChannelRTCActions.updateChatOpen(channel.id, true);
+        return;
+    }
+
+    switchChannels(channel.guild_id, channel.id);
+}
+
 enum NotificationLevel {
     ALL_MESSAGES = 0,
     ONLY_MENTIONS = 1,
@@ -458,7 +469,7 @@ async function handleGuildMessage(message: Message) {
         attachments: message.attachments?.length,
         richBody: null,
         permanent: false,
-        onClick() { switchChannels(channel.guild_id, channel.id); }
+        onClick() { navigateToChannel(channel); }
     };
 
     if (message.embeds?.length !== 0) {
@@ -527,7 +538,6 @@ async function handleGuildMessage(message: Message) {
         Notification.icon = undefined;
     }
 
-    console.log("noti that went through: " + t);
     await showNotification(Notification);
 
 }
