@@ -112,30 +112,6 @@ const CONSTANTS: Record<string, number> = {
     pi: Math.PI,
     tau: Math.PI * 2
 };
-const LATEX_SPACING_COMMANDS = new Set(["!", ",", ":", ";", "quad", "qquad"]);
-const LATEX_WRAPPER_COMMANDS = new Set(["big", "bigl", "bigr", "bigg", "biggl", "biggr", "bigg", "bigg", "bigg", "bigg", "bigg", "bigg", "bigg", "bigg", "Big", "Bigl", "Bigr", "Bigg", "Biggl", "Biggr"]);
-const LATEX_FUNCTION_COMMANDS = new Set([
-    "abs",
-    "acos",
-    "asin",
-    "atan",
-    "ceil",
-    "cos",
-    "cosh",
-    "exp",
-    "floor",
-    "ln",
-    "log",
-    "max",
-    "min",
-    "round",
-    "sin",
-    "sinh",
-    "sqrt",
-    "tan",
-    "tanh"
-]);
-
 const BUILT_INS: Record<string, (...args: number[]) => number> = {
     abs: value => Math.abs(value),
     acos: value => Math.acos(value),
@@ -164,144 +140,6 @@ const BUILT_INS: Record<string, (...args: number[]) => number> = {
 
 function normalizeMathWhitespace(input: string): string {
     return input.trim().replace(/\s+/g, " ");
-}
-
-function readBalancedGroup(input: string, start: number, open: string, close: string): { value: string; nextIndex: number; } | null {
-    if (input[start] !== open) return null;
-
-    let depth = 0;
-    for (let index = start; index < input.length; index++) {
-        const current = input[index];
-        if (current === open) depth += 1;
-        if (current === close) depth -= 1;
-        if (depth === 0) {
-            return {
-                value: input.slice(start + 1, index),
-                nextIndex: index + 1
-            };
-        }
-    }
-
-    return null;
-}
-
-function convertLatexFragments(input: string): string {
-    let output = "";
-
-    for (let index = 0; index < input.length;) {
-        const remainder = input.slice(index);
-
-        if (remainder.startsWith("\\frac")) {
-            let cursor = index + 5;
-            while (input[cursor] === " ") cursor += 1;
-            const numerator = readBalancedGroup(input, cursor, "{", "}");
-            if (!numerator) {
-                output += "\\frac";
-                index += 5;
-                continue;
-            }
-
-            cursor = numerator.nextIndex;
-            while (input[cursor] === " ") cursor += 1;
-            const denominator = readBalancedGroup(input, cursor, "{", "}");
-            if (!denominator) {
-                output += "\\frac";
-                index += 5;
-                continue;
-            }
-
-            output += `((${convertLatexFragments(numerator.value)})/(${convertLatexFragments(denominator.value)}))`;
-            index = denominator.nextIndex;
-            continue;
-        }
-
-        if (remainder.startsWith("\\sqrt")) {
-            let cursor = index + 5;
-            while (input[cursor] === " ") cursor += 1;
-            const group = readBalancedGroup(input, cursor, "{", "}") ?? readBalancedGroup(input, cursor, "(", ")");
-            if (!group) {
-                output += "sqrt";
-                index += 5;
-                continue;
-            }
-
-            output += `sqrt(${convertLatexFragments(group.value)})`;
-            index = group.nextIndex;
-            continue;
-        }
-
-        if (remainder.startsWith("\\operatorname")) {
-            let cursor = index + "\\operatorname".length;
-            while (input[cursor] === " ") cursor += 1;
-            const group = readBalancedGroup(input, cursor, "{", "}");
-            if (!group) {
-                output += "\\operatorname";
-                index += "\\operatorname".length;
-                continue;
-            }
-
-            output += convertLatexFragments(group.value);
-            index = group.nextIndex;
-            continue;
-        }
-
-        if (remainder.startsWith("\\cdot") || remainder.startsWith("\\times")) {
-            output += "*";
-            index += remainder.startsWith("\\cdot") ? 5 : 6;
-            continue;
-        }
-
-        if (remainder.startsWith("\\div")) {
-            output += "/";
-            index += 4;
-            continue;
-        }
-
-        if (remainder.startsWith("\\pi")) {
-            output += "pi";
-            index += 3;
-            continue;
-        }
-
-        if (remainder.startsWith("\\tau")) {
-            output += "tau";
-            index += 4;
-            continue;
-        }
-
-        if (remainder.startsWith("\\infty")) {
-            output += "infinity";
-            index += 6;
-            continue;
-        }
-
-        if (remainder.startsWith("\\left") || remainder.startsWith("\\right")) {
-            index += remainder.startsWith("\\left") ? 5 : 6;
-            continue;
-        }
-
-        if (remainder.startsWith("\\")) {
-            const commandMatch = remainder.match(/^\\([A-Za-z]+|[!,:;])/);
-            if (commandMatch) {
-                const command = commandMatch[1];
-                if (LATEX_SPACING_COMMANDS.has(command) || LATEX_WRAPPER_COMMANDS.has(command)) {
-                    index += commandMatch[0].length;
-                    continue;
-                }
-
-                if (LATEX_FUNCTION_COMMANDS.has(command)) {
-                    output += command.toLowerCase();
-                    index += commandMatch[0].length;
-                    continue;
-                }
-            }
-        }
-
-        output += input[index];
-        index += 1;
-    }
-
-    return output;
 }
 
 function convertUnicodeSuperscripts(input: string): string {
@@ -341,9 +179,8 @@ function normalizeAdvancedMathInput(rawInput: string): string | null {
         .replace(/∞/g, "infinity")
         .replace(/√/g, "sqrt")
         .replace(/square root of/gi, "sqrt ")
-        .replace(/([0-9.]+)\s*%\s+of\s+([a-z0-9_().\\{}^+\-*/\s]+)/gi, "(($1/100)*($2))");
+        .replace(/([0-9.]+)\s*%\s+of\s+([a-z0-9_().^+\-*/\s]+)/gi, "(($1/100)*($2))");
 
-    normalized = convertLatexFragments(normalized);
     normalized = convertUnicodeSuperscripts(normalized);
     normalized = normalized
         .replace(/[{}[\]]/g, match => (match === "{" || match === "[" ? "(" : ")"))
@@ -353,7 +190,6 @@ function normalizeAdvancedMathInput(rawInput: string): string | null {
         .toLowerCase();
 
     if (!normalized) return null;
-    if (/\\[a-z]+/i.test(normalized)) return null;
     if (!/[0-9a-z+\-*/%^()=;,]/i.test(normalized)) return null;
 
     return normalized;
