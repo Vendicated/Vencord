@@ -31,6 +31,7 @@ export type Parser = Record<
     | "parseGuildEventDescription"
     | "parseAutoModerationSystemMessage"
     | "parseForumPostGuidelines"
+    | "parseForumPostMostRecentMessage"
     | "parseVoiceChannelStatus",
     (content: string, inline?: boolean, state?: Record<string, any>) => ReactNode[]
 > & Record<
