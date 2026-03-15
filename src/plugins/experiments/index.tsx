@@ -38,7 +38,7 @@ const altKey = IS_MAC ? "opt" : "alt";
 const settings = definePluginSettings({
     toolbarDevMenu: {
         type: OptionType.BOOLEAN,
-        description: "Change the Help (?) toolbar button (top right in chat) to Discord's developer menu",
+        description: "Change the Help (?) toolbar button (top right in window) to Discord's developer menu",
         default: false,
         restartNeeded: true
     }
@@ -146,7 +146,7 @@ export default definePlugin({
             <Forms.FormTitle tag="h2">Hold on!!</Forms.FormTitle>
 
             <Forms.FormText>
-                Experiments are unreleased Discord features. They might not work, or even break your client or get your account disabled.
+                Experiments are unreleased Discord features, and intended to be visible only for Discord employees. They might not work, break your client or even get your account disabled.
             </Forms.FormText>
 
             <Forms.FormText className={Margins.top8}>

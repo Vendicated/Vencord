@@ -16,7 +16,7 @@ import definePlugin, { OptionType } from "@utils/types";
 const settings = definePluginSettings({
     originalImagesInChat: {
         type: OptionType.BOOLEAN,
-        description: "Also load the original image in Chat. WARNING: Read the caveats above",
+        description: "Also load the original image in Chat. WARNING: Read the caveat above",
         default: false,
     }
 });
@@ -48,11 +48,10 @@ export default definePlugin({
                             <li>&mdash; In the image modal, the original image will be loaded.</li>
                         </ul>
                     </Paragraph>
-                    <Paragraph size="md" weight="semibold" className={Margins.top8}>You can also enable original image in chat, but beware of the following caveats:</Paragraph>
+                    <Paragraph size="md" weight="semibold" className={Margins.top8}>You can also enable original image in chat, but beware of the following caveat:</Paragraph>
                     <Paragraph>
                         <ul>
-                            <li>&mdash; Animated images (GIF, WebP, etc.) in chat will always animate, regardless of if the App is focused.</li>
-                            <li>&mdash; May cause lag.</li>
+                            <li>&mdash; Animated images (GIF, WebP, etc.) will always animate in chat, even when the App is not focused, which may cause lag.</li>
                         </ul>
                     </Paragraph>
                 </Flex>
