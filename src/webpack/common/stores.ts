@@ -85,8 +85,8 @@ export let EditMessageStore: t.EditMessageStore;
 export let QuestStore: t.QuestStore;
 export let ExperimentStore: t.ExperimentStore;
 export let UserAffinitiesStore: t.UserAffinitiesStore;
-export let ApplicationStreamPreviewStore: t.ApplicationStreamPreviewStore;
 export let ApplicationStreamingStore: t.ApplicationStreamingStore;
+export let ApplicationStreamPreviewStore: t.ApplicationStreamPreviewStore;
 
 /**
  * @see jsdoc of {@link t.useStateFromStores}
