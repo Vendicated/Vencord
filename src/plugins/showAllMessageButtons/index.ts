@@ -16,22 +16,43 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
-import definePlugin from "@utils/types";
+import { canonicalizeMatch } from "@utils/patches";
+import definePlugin, { OptionType } from "@utils/types";
+
+export const settings = definePluginSettings({
+    showFrequentlyUsedReactions: {
+        description: "Show frequently used reactions",
+        type: OptionType.BOOLEAN,
+        default: true
+    }
+})
 
 export default definePlugin({
     name: "ShowAllMessageButtons",
     description: "Always show all message buttons no matter if you are holding the shift key or not.",
-    authors: [Devs.Nuckyz],
+    authors: [Devs.Nuckyz, Devs.LoganDark],
+
+    settings,
 
     patches: [
         {
             find: "#{intl::MESSAGE_UTILITIES_A11Y_LABEL}",
-            replacement: {
-                // isExpanded: isShiftPressed && other conditions...
-                match: /isExpanded:\i&&(.+?),/,
-                replace: "isExpanded:$1,"
-            }
+            replacement: [
+                {
+                    // isExpanded: isShiftPressed && other conditions...
+                    match: /isExpanded:\i&&(.+?),/,
+                    replace: "isExpanded:$1,"
+                },
+                {
+                    match: /function \i\(\i\){let{(?:\i:\i,)*canReact:(\i)(?:,\i:\i)*}=function\(\i\).*?}(?=function \i\(\i\))/,
+                    replace: (func, canReactVar) => {
+                        const reactionsElement = canonicalizeMatch(/(?<=\?null:)\(0,[^)]+\)\(\i\.Fragment,{children:\[[^\]]+\]}\)/).exec(func)![0];
+                        return func.replace(/children:\[/, children => `${children}!${canReactVar}||!$self.settings.store.showFrequentlyUsedReactions?null:${reactionsElement},`);
+                    }
+                }
+            ]
         }
     ]
 });
