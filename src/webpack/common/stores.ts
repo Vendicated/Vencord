@@ -83,9 +83,8 @@ export let PopoutWindowStore: t.PopoutWindowStore;
 export let ApplicationCommandIndexStore: t.ApplicationCommandIndexStore;
 export let EditMessageStore: t.EditMessageStore;
 export let QuestStore: t.QuestStore;
-export let PendingReplyStore: t.PendingReplyStore;
-export let ExperimentStore: GenericStore;
-export let UserAffinitiesStore: GenericStore;
+export let ExperimentStore: t.ExperimentStore;
+export let UserAffinitiesStore: t.UserAffinitiesStore;
 
 /**
  * @see jsdoc of {@link t.useStateFromStores}

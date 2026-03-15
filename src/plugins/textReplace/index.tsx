@@ -20,11 +20,9 @@ import "./styles.css";
 
 import { definePluginSettings } from "@api/Settings";
 import { Button } from "@components/Button";
-import { Divider } from "@components/Divider";
 import { ExpandableSection } from "@components/ExpandableCard";
 import { Flex } from "@components/Flex";
-import { HeadingSecondary, HeadingTertiary } from "@components/Heading";
-import { DeleteIcon } from "@components/Icons";
+import { HeadingSecondary } from "@components/Heading";
 import { Paragraph } from "@components/Paragraph";
 import { Span } from "@components/Span";
 import { TooltipContainer } from "@components/TooltipContainer";
