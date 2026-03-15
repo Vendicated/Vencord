@@ -30,6 +30,12 @@ function useDiscordPronouns(id: string, useGlobalProfile: boolean = false): stri
 }
 
 export function useFormattedPronouns(id: string, useGlobalProfile: boolean = false) {
-    const pronouns = useDiscordPronouns(id, useGlobalProfile)?.trim().replace(/\n+/g, "");
+    const discordPronouns = useDiscordPronouns(id, useGlobalProfile)?.trim().replace(/\n+/g, "");
+
+    if (discordPronouns) {
+        settings.store.cachedPronouns[id] = discordPronouns;
+    }
+
+    const pronouns = discordPronouns || settings.store.cachedPronouns[id];
     return settings.store.pronounsFormat === PronounsFormat.Lowercase ? pronouns?.toLowerCase() : pronouns;
 }

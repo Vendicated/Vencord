@@ -18,6 +18,7 @@
 
 import { definePluginSettings } from "@api/Settings";
 import { OptionType } from "@utils/types";
+import { Button } from "@components/Button";
 
 export const enum PronounsFormat {
     Lowercase = "LOWERCASE",
@@ -44,5 +45,21 @@ export const settings = definePluginSettings({
         type: OptionType.BOOLEAN,
         description: "Enable or disable showing pronouns for yourself",
         default: true
+    },
+    cachedPronouns: {
+        type: OptionType.CUSTOM,
+        default: {} as Record<string, string>,
+    },
+    clearCache: {
+        type: OptionType.COMPONENT,
+        description: "Clear the cached pronouns",
+        component: () => (
+            <Button
+                variant="dangerPrimary"
+                onClick={() => { settings.store.cachedPronouns = {}; }}
+            >
+                Clear Cache
+            </Button>
+        )
     }
 });
