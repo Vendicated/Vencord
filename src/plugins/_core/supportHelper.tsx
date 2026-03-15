@@ -24,6 +24,7 @@ import ErrorBoundary from "@components/ErrorBoundary";
 import { Flex } from "@components/Flex";
 import { Link } from "@components/Link";
 import { openSettingsTabModal, UpdaterTab } from "@components/settings";
+import { gitHash, gitHashShort } from "@shared/vencordUserAgent";
 import { CONTRIB_ROLE_ID, Devs, DONOR_ROLE_ID, KNOWN_ISSUES_CHANNEL_ID, REGULAR_ROLE_ID, SUPPORT_CATEGORY_ID, SUPPORT_CHANNEL_ID, VENBOT_USER_ID, VENCORD_GUILD_ID } from "@utils/constants";
 import { sendMessage } from "@utils/discord";
 import { Logger } from "@utils/Logger";
@@ -38,7 +39,6 @@ import { Channel } from "@vencord/discord-types";
 import { Alerts, Button, ChannelStore, Forms, GuildMemberStore, Parser, PermissionsBits, PermissionStore, RelationshipStore, showToast, Text, Toasts, UserStore } from "@webpack/common";
 import { JSX } from "react";
 
-import gitHash from "~git-hash";
 import plugins, { PluginMeta } from "~plugins";
 
 import SettingsPlugin from "./settings";
@@ -86,7 +86,7 @@ async function generateDebugInfoMessage() {
 
     const info = {
         Vencord:
-            `v${VERSION} • [${gitHash}](<https://github.com/Vendicated/Vencord/commit/${gitHash}>)` +
+            `v${VERSION} • [${gitHashShort}](<https://github.com/Vendicated/Vencord/commit/${gitHash}>)` +
             `${SettingsPlugin.additionalInfo} - ${Intl.DateTimeFormat("en-GB", { dateStyle: "medium" }).format(BUILD_TIMESTAMP)}`,
         Client: `${RELEASE_CHANNEL} ~ ${client}`,
         Platform: navigator.platform
