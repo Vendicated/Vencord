@@ -48,6 +48,9 @@ export const moment: typeof import("moment") = findByPropsLazy("parseTwoDigitYea
 
 export const hljs: typeof import("highlight.js").default = findByPropsLazy("highlight", "registerLanguage");
 
+export const Transforms: typeof import("slate").Transforms = findByPropsLazy("insertNodes", "textToText");
+export const Editor: typeof import("slate").Editor = findByPropsLazy("start", "end", "toSlateRange");
+
 export const { match, P }: { match: typeof TSPattern["match"], P: typeof TSPattern["P"]; } = mapMangledModuleLazy("@ts-pattern/matcher", {
     match: filters.byCode("return new"),
     P: filters.byProps("when")
