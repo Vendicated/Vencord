@@ -80,6 +80,11 @@ export let LocaleStore: t.LocaleStore;
 export let RTCConnectionStore: t.RTCConnectionStore;
 export let SoundboardStore: t.SoundboardStore;
 export let PopoutWindowStore: t.PopoutWindowStore;
+export let ApplicationCommandIndexStore: t.ApplicationCommandIndexStore;
+export let EditMessageStore: t.EditMessageStore;
+export let QuestStore: t.QuestStore;
+export let ExperimentStore: t.ExperimentStore;
+export let UserAffinitiesStore: t.UserAffinitiesStore;
 
 /**
  * @see jsdoc of {@link t.useStateFromStores}
@@ -132,6 +137,11 @@ waitForStore("RTCConnectionStore", m => RTCConnectionStore = m);
 waitForStore("SoundboardStore", m => SoundboardStore = m);
 waitForStore("PopoutWindowStore", m => PopoutWindowStore = m);
 waitForStore("PendingReplyStore", m => PendingReplyStore = m);
+waitForStore("ApplicationCommandIndexStore", m => ApplicationCommandIndexStore = m);
+waitForStore("EditMessageStore", m => EditMessageStore = m);
+waitForStore("ExperimentStore", m => ExperimentStore = m);
+waitForStore("QuestStore", m => QuestStore = m);
+waitForStore("UserAffinitiesV2Store", m => UserAffinitiesStore = m);
 waitForStore("ThemeStore", m => {
     ThemeStore = m;
     // Importing this directly causes all webpack commons to be imported, which can easily cause circular dependencies.
