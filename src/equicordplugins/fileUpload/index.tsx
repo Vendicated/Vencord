@@ -154,8 +154,8 @@ export default definePlugin({
         {
             find: ".CREATE_FORUM_POST||",
             replacement: {
-                match: /(textValue:.{0,50}channelId:\i\.id\}\)),\i/,
-                replace: "$1,$self.renderUploadProgress()"
+                match: /(textValue:.{0,50}channelId:\i\.id\}\))(?:,\i(,))?/,
+                replace: "$1,$self.renderUploadProgress()$2"
             }
         }
     ],

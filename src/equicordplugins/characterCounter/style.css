@@ -1,4 +1,4 @@
-.vc-char-counter {
+.vc-char-counter-counter {
     font-size: 12px;
     color: var(--text-muted);
     position: absolute;
@@ -8,12 +8,9 @@
     z-index: 2;
     background: transparent;
     transition: color 0.3s ease;
+    margin-right: 5px;
 }
 
-.vc-char-counter .vc-char-count {
+.vc-char-counter-counter .vc-char-counter-count {
     transition: color 0.3s ease;
-}
-
-.vc-char-counter .vc-char-max {
-    color: var(--primary-330);
 }
