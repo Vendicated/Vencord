@@ -10,7 +10,7 @@
     gap: 8px 16px;
 }
 
-.vc-compfinder-tabbar>div {
+.vc-compfinder-tabbar > div {
     flex-wrap: wrap !important;
     gap: 8px 16px;
 }
@@ -63,7 +63,7 @@
     background: rgb(0 0 0 / 15%);
     border: 1px solid rgb(255 255 255 / 6%);
     border-radius: 4px;
-    color: var(--text-normal);
+    color: var(--text-default);
     cursor: pointer;
 }
 
@@ -226,7 +226,7 @@
 
 .vc-compfinder-table td {
     padding: 8px 12px;
-    color: var(--text-normal);
+    color: var(--text-default);
     vertical-align: middle;
 }
 
@@ -261,7 +261,7 @@
 .vc-compfinder-table-field {
     font-weight: 600;
     font-size: 0.75rem;
-    color: var(--text-normal);
+    color: var(--text-default);
     font-family: var(--font-code);
     white-space: nowrap;
 }

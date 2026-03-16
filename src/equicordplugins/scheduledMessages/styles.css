@@ -159,7 +159,7 @@
     padding: 12px;
     background: var(--background-feedback-critical);
     border-radius: 5px;
-    color: var(--text-normal);
+    color: var(--text-default);
     font-size: 14px;
 }
 

@@ -1273,7 +1273,7 @@
 /* Tab Number Badge Styles */
 .vc-channeltabs-tab-number-badge {
     background-color: rgb(0 0 0 / 25%);
-    color: var(--text-normal);
+    color: var(--text-default);
     border-radius: 50%;
     width: 20px;
     height: 20px;

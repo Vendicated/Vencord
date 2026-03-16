@@ -217,7 +217,7 @@
 
 .eq-tidal-lyrics-current .eq-tidal-lyrics-char,
 .eq-tidal-lyrics-current .eq-tidal-lyrics-word {
-    color: var(--text-normal);
+    color: var(--text-default);
 }
 
 .eq-tidal-lyrics-next .eq-tidal-lyrics-char,

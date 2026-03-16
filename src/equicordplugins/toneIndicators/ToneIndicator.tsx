@@ -24,7 +24,7 @@ export default function ToneIndicator({
                 <span
                     {...tooltipProps}
                     style={{
-                        color: "var(--text-normal)",
+                        color: "var(--text-default)",
                         userSelect: "text",
                     }}
                 >
