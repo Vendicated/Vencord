@@ -316,12 +316,6 @@ export async function loadPresetAsPending(preset: ProfilePreset, guildId?: strin
         const pendingChanges = (isGuild && guildId
             ? UserProfileSettingsStore.getPendingChanges(guildId)
             : UserProfileSettingsStore.getPendingChanges());
-        const equippedAvatarDecoration = currentUser.avatarDecorationData ?? null;
-        const equippedProfileEffect = equippedProfile?.profileEffect ?? null;
-        const equippedNameplate = currentUser.collectibles?.nameplate ?? null;
-        const pendingAvatarDecoration = pendingChanges?.pendingAvatarDecoration ?? null;
-        const pendingProfileEffect = pendingChanges?.pendingProfileEffect ?? null;
-        const pendingNameplate = pendingChanges?.pendingNameplate ?? null;
         const setPending = (field: string, payload: Record<string, unknown>) => {
             const cleanPayload = Object.fromEntries(Object.entries(payload).filter(([, v]) => v !== undefined));
             if (!Object.keys(cleanPayload).length) return;
@@ -368,19 +362,19 @@ export async function loadPresetAsPending(preset: ProfilePreset, guildId?: strin
             }
         }
 
-        if (preset.avatarDecoration && ![pendingAvatarDecoration, equippedAvatarDecoration, current.avatarDecoration].some(d => avatarDecorationEq(preset.avatarDecoration, d))) {
+        if (preset.avatarDecoration !== undefined && !avatarDecorationEq(preset.avatarDecoration, current.avatarDecoration)) {
             setPending("COLLECTIBLES_ITEM", {
                 item: { type: 0, value: preset.avatarDecoration }
             });
         }
 
-        if (preset.profileEffect && ![pendingProfileEffect, equippedProfileEffect, current.profileEffect].some(d => collectibleEqBySku(preset.profileEffect, d))) {
+        if (preset.profileEffect !== undefined && !collectibleEqBySku(preset.profileEffect, current.profileEffect)) {
             setPending("COLLECTIBLES_ITEM", {
                 item: { type: 1, value: preset.profileEffect }
             });
         }
 
-        if (preset.nameplate && ![pendingNameplate, equippedNameplate, current.nameplate].some(d => nameplateEq(preset.nameplate, d))) {
+        if (preset.nameplate !== undefined && !nameplateEq(preset.nameplate, current.nameplate)) {
             setPending("COLLECTIBLES_ITEM", {
                 item: { type: 2, value: preset.nameplate }
             });

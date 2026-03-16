@@ -20,6 +20,11 @@ export class Guild extends DiscordRecord {
     constructor(guild: object);
     afkChannelId: string | undefined;
     afkTimeout: number;
+    applicationCommandCounts: {
+        0: number;
+        1: number;
+        2: number;
+    };
     application_id: string | null;
     banner: string | undefined;
     defaultMessageNotifications: GuildDefaultMessageNotifications;

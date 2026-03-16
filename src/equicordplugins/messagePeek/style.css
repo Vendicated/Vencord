@@ -5,14 +5,14 @@
     font-size: 12px;
     font-weight: 500;
     line-height: 16px;
-    color: var(--text-normal);
+    color: var(--text-default);
 }
 
 .vc-message-peek-timestamp-favorites {
     font-size: 12px;
     font-weight: 500;
     line-height: 16px;
-    color: var(--text-normal);
+    color: var(--text-default);
 }
 
 [class*="interactiveSelected__"] .vc-message-peek-timestamp {
@@ -44,10 +44,10 @@
     gap: 4px;
 }
 
-.vc-message-peek-activity-row>[class*="textXs"] {
+.vc-message-peek-activity-row > [class*="textXs"] {
     min-width: 0;
 }
 
-.vc-message-peek-activity-row>[class*="vc-bactivities-row"] {
+.vc-message-peek-activity-row > [class*="vc-bactivities-row"] {
     flex-shrink: 0;
 }

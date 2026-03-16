@@ -31,6 +31,7 @@ export type Parser = Record<
     | "parseGuildEventDescription"
     | "parseAutoModerationSystemMessage"
     | "parseForumPostGuidelines"
+    | "parseForumPostMostRecentMessage"
     | "parseVoiceChannelStatus",
     (content: string, inline?: boolean, state?: Record<string, any>) => ReactNode[]
 > & Record<
@@ -202,7 +203,7 @@ export interface IconUtils {
     getUserAvatarURL(user: User, canAnimate?: boolean, size?: number, format?: string): string;
     getDefaultAvatarURL(id: string, discriminator?: string): string;
     getUserBannerURL(data: { id: string, banner: string, canAnimate?: boolean, size: number; }): string | undefined;
-    getAvatarDecorationURL(dara: { avatarDecoration: string, size: number; canCanimate?: boolean; }): string | undefined;
+    getAvatarDecorationURL(data: { avatarDecoration: string, size: number; canCanimate?: boolean; }): string | undefined;
 
     getGuildMemberAvatarURL(member: GuildMember, canAnimate?: string): string | null;
     getGuildMemberAvatarURLSimple(data: { guildId: string, userId: string, avatar: string, canAnimate?: boolean; size?: number; }): string;

@@ -8,12 +8,15 @@ import { definePluginSettings } from "@api/Settings";
 import { BaseText } from "@components/BaseText";
 import { Button } from "@components/Button";
 import { EquicordDevs, IS_MAC } from "@utils/constants";
+import { classNameFactory } from "@utils/css";
 import definePlugin, { OptionType } from "@utils/types";
 import { useEffect, useState } from "@webpack/common";
 
 import { cleanupCommandPaletteRuntime, registerBuiltInCommands, wrapChatBarChildren } from "./registry";
 import { CommandPaletteSettingsPanel } from "./settingsPanel";
 import { openCommandPalette } from "./ui";
+
+const cl = classNameFactory("vc-command-palette-");
 
 const DEFAULT_KEYS = IS_MAC ? ["Meta", "Shift", "P"] : ["Control", "Shift", "P"];
 
@@ -37,7 +40,7 @@ function formatKeybind(keybind: string | string[]): string {
 function KeybindRecorder() {
     const [isListening, setIsListening] = useState(false);
     const [error, setError] = useState<string | null>(null);
-    const currentKeybind = settings.use(["hotkey"]).hotkey;
+    const currentKeybind = settings.use().hotkey;
 
     useEffect(() => {
         if (!isListening) return;
@@ -84,76 +87,50 @@ function KeybindRecorder() {
         };
     }, [isListening]);
 
-    const handleReset = () => {
-        settings.store.hotkey = DEFAULT_KEYS;
-        setError(null);
-    };
-
     return (
-        <div className="vc-command-palette-keybind-input">
-            <div className="vc-command-palette-keybind-info">
-                <BaseText size="md" weight="semibold">Command Palette Hotkey</BaseText>
-                <BaseText size="sm" weight="normal" style={{ color: "var(--text-muted)" }}>
-                    Hotkey used to open the command palette
-                </BaseText>
-                {error && (
-                    <BaseText size="xs" weight="normal" className="vc-command-palette-keybind-conflict">
-                        {error}
-                    </BaseText>
-                )}
+        <div className={cl("keybind-input")}>
+            <div className={cl("keybind-info")}>
+                <BaseText size="md" weight="semibold">Keybind</BaseText>
             </div>
-            <div className="vc-command-palette-keybind-controls">
+            <div className={cl("keybind-controls")}>
                 <Button
                     type="button"
                     variant="secondary"
-                    className={`vc-command-palette-keybind-button ${isListening ? "listening" : ""}`}
+                    className={`${cl("keybind-button")} ${isListening ? "listening" : ""}`}
                     onClick={() => setIsListening(true)}
                 >
-                    {isListening ? (
-                        <BaseText size="sm" weight="normal" style={{ color: "var(--white)", opacity: 0.8 }}>
-                            Press any key...
-                        </BaseText>
-                    ) : (
-                        formatKeybind(currentKeybind)
-                    )}
-                </Button>
-                <Button size="small" variant="secondary" onClick={handleReset}>
-                    Reset
+                    {isListening ? "Recording..." : formatKeybind(currentKeybind)}
                 </Button>
             </div>
+            {error && (
+                <BaseText size="xs" weight="normal" className={cl("keybind-conflict")}>
+                    {error}
+                </BaseText>
+            )}
         </div>
     );
 }
 
 export const settings = definePluginSettings({
     hotkey: {
-        description: "Hotkey used to open the command palette",
         type: OptionType.COMPONENT,
         default: DEFAULT_KEYS,
         component: KeybindRecorder
-    },
-    visualStyle: {
-        description: "Palette appearance",
-        type: OptionType.SELECT,
-        options: [
-            { label: "Classic", value: "classic", default: true },
-            { label: "Polished", value: "polished" }
-        ]
-    },
-    showTags: {
-        description: "Display tag chips for commands",
-        type: OptionType.BOOLEAN,
-        default: true
-    },
-    enableTagFilter: {
-        description: "Show the tag filter bar",
-        type: OptionType.BOOLEAN,
-        default: true
     },
     customCommands: {
         description: "Manage custom command palette entries",
         type: OptionType.COMPONENT,
         component: CommandPaletteSettingsPanel
+    },
+    compactStartEnabled: {
+        description: "Open the palette in compact mode first.",
+        type: OptionType.BOOLEAN,
+        default: true
+    },
+    closeAfterExecute: {
+        description: "Close palette after executing a command.",
+        type: OptionType.BOOLEAN,
+        default: true
     }
 });
 
@@ -224,7 +201,7 @@ function hotkeyUsesModifiers() {
 export default definePlugin({
     name: "CommandPalette",
     description: "Quickly run actions through a searchable command palette",
-    authors: [EquicordDevs.justjxke, EquicordDevs.Ethan],
+    authors: [EquicordDevs.justjxke],
     settings,
     patches: [
         {

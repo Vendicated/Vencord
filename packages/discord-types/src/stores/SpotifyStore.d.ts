@@ -60,7 +60,7 @@ export interface SpotifyTrack {
 export interface SpotifyPlayerState {
     track: SpotifyTrack;
     startTime: number;
-    context: { uri: string } | null;
+    context: { uri: string; } | null;
 }
 
 export interface SpotifyActivity {

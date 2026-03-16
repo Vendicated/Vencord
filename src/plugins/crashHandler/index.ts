@@ -19,13 +19,12 @@
 import { showNotification } from "@api/Notifications";
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
-import { openInviteModal } from "@utils/discord";
 import { Logger } from "@utils/Logger";
 import { closeAllModals } from "@utils/modal";
 import definePlugin, { OptionType } from "@utils/types";
 import { maybePromptToUpdate } from "@utils/updater";
 import { filters, findBulk, proxyLazyWebpack } from "@webpack";
-import { DraftType, ExpressionPickerStore, FluxDispatcher, NavigationRouter, SelectedChannelStore, showToast } from "@webpack/common";
+import { DraftType, ExpressionPickerStore, FluxDispatcher, NavigationRouter, SelectedChannelStore } from "@webpack/common";
 
 const CrashHandlerLogger = new Logger("CrashHandler");
 
@@ -99,11 +98,8 @@ export default definePlugin({
                         showNotification({
                             color: "#eed202",
                             title: "Discord has crashed!",
-                            body: "Awn :( Discord has crashed two times rapidly, not attempting to recover. Click here to join our support server!",
+                            body: "Awn :( Discord has crashed two times rapidly, not attempting to recover.",
                             noPersist: true,
-                            onClick: () => openInviteModal("wKgT9j2xfN").catch(() =>
-                                showToast("Invalid or expired invite"),
-                            )
                         });
                     } catch { }
 
@@ -137,11 +133,8 @@ export default definePlugin({
             showNotification({
                 color: "#eed202",
                 title: "Discord has crashed!",
-                body: "Attempting to recover... Click here to join our support server!",
+                body: "Attempting to recover...",
                 noPersist: true,
-                onClick: () => openInviteModal("wKgT9j2xfN").catch(() =>
-                    showToast("Invalid or expired invite"),
-                )
             });
         } catch { }
 

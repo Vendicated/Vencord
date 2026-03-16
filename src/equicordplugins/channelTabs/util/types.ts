@@ -29,6 +29,7 @@ export interface BookmarkFolder {
     bookmarks: Bookmark[];
     name: string;
     iconColor: string;
+    iconName?: string;
 }
 export interface BookmarkProps {
     bookmarks: Bookmarks,
@@ -38,7 +39,7 @@ export interface BookmarkProps {
 export type Bookmarks = (Bookmark | BookmarkFolder)[];
 export type UseBookmarkMethods = {
     addBookmark: (bookmark: Omit<Bookmark, "name"> & { name?: string; }, folderIndex?: number) => void;
-    addFolder: () => number;
+    addFolder: (name?: string, iconColor?: string, iconName?: string) => number;
     deleteBookmark: (index: number, folderIndex?: number) => void;
     editBookmark: (index: number, bookmark: Partial<Bookmark | BookmarkFolder>, modalKey?) => void;
     moveDraggedBookmarks: (index1: number, index2: number) => void;

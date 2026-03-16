@@ -36,6 +36,7 @@ export let GuildChannelStore: t.GuildChannelStore;
 export let ReadStateStore: t.ReadStateStore;
 export let PresenceStore: t.PresenceStore;
 export let AccessibilityStore: t.AccessibilityStore;
+export let PendingReplyStore: t.PendingReplyStore;
 
 export let GuildStore: t.GuildStore;
 export let GuildRoleStore: t.GuildRoleStore;
@@ -82,9 +83,8 @@ export let PopoutWindowStore: t.PopoutWindowStore;
 export let ApplicationCommandIndexStore: t.ApplicationCommandIndexStore;
 export let EditMessageStore: t.EditMessageStore;
 export let QuestStore: t.QuestStore;
-export let PendingReplyStore: t.PendingReplyStore;
-export let ExperimentStore: GenericStore;
-export let UserAffinitiesStore: GenericStore;
+export let ExperimentStore: t.ExperimentStore;
+export let UserAffinitiesStore: t.UserAffinitiesStore;
 
 /**
  * @see jsdoc of {@link t.useStateFromStores}
@@ -136,9 +136,9 @@ waitForStore("LocaleStore", m => LocaleStore = m);
 waitForStore("RTCConnectionStore", m => RTCConnectionStore = m);
 waitForStore("SoundboardStore", m => SoundboardStore = m);
 waitForStore("PopoutWindowStore", m => PopoutWindowStore = m);
+waitForStore("PendingReplyStore", m => PendingReplyStore = m);
 waitForStore("ApplicationCommandIndexStore", m => ApplicationCommandIndexStore = m);
 waitForStore("EditMessageStore", m => EditMessageStore = m);
-waitForStore("PendingReplyStore", m => PendingReplyStore = m);
 waitForStore("ExperimentStore", m => ExperimentStore = m);
 waitForStore("QuestStore", m => QuestStore = m);
 waitForStore("UserAffinitiesV2Store", m => UserAffinitiesStore = m);

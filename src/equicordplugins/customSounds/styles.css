@@ -26,7 +26,7 @@
     background: var(--input-background-default, var(--input-background));
     border: none;
     border-radius: 3px;
-    color: var(--text-normal);
+    color: var(--text-default);
 }
 
 .vc-custom-sounds-buttons {
@@ -45,7 +45,7 @@
     background: var(--input-background-default, var(--input-background));
     border: none;
     border-radius: 3px;
-    color: var(--text-normal);
+    color: var(--text-default);
 }
 
 .vc-custom-sounds-sounds-list {

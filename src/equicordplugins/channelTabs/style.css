@@ -1,3 +1,14 @@
+:root {
+    --channeltabs-red: #f23f42;
+    --channeltabs-blue: #0052b6;
+    --channeltabs-yellow: #f0b132;
+    --channeltabs-green: #24934f;
+    --channeltabs-black: #000;
+    --channeltabs-white: #fff;
+    --channeltabs-orange: #e67e22;
+    --channeltabs-pink: #ff73fa;
+}
+
 .vc-channeltabs-icon {
     height: 1.5rem;
     width: 1.5rem;
@@ -45,16 +56,11 @@
     padding: 0 4px;
 }
 
-.vc-channeltabs-container {
-    --channeltabs-red: #f23f42;
-    --channeltabs-blue: #0052b6;
-    --channeltabs-yellow: #f0b132;
-    --channeltabs-green: #24934f;
-    --channeltabs-black: #000;
-    --channeltabs-white: #fff;
-    --channeltabs-orange: #e67e22;
-    --channeltabs-pink: #ff73fa;
+.vc-channeltabs-bookmark-container {
+    position: relative;
+}
 
+.vc-channeltabs-container {
     padding: 4px;
     display: flex;
     flex-direction: column-reverse;
@@ -159,10 +165,17 @@
     padding: 4px 8px;
     border-radius: 4px;
     align-items: center;
+    position: relative;
+    transition: transform 0.14s ease, border-color 0.14s ease, box-shadow 0.14s ease, background-color 0.14s ease;
 }
 
 .vc-channeltabs-bookmark.vc-channeltabs-wider {
     max-width: calc(12rem * var(--tab-width-scale, 1));
+}
+
+.vc-channeltabs-bookmark.vc-channeltabs-bookmark-folder {
+    margin-left: 4px;
+    margin-right: 4px;
 }
 
 .vc-channeltabs-bookmark .vc-channeltabs-name-text {
@@ -359,6 +372,61 @@
 .vc-channeltabs-button {
     background-color: transparent;
     color: var(--text-default);
+}
+
+.vc-channeltabs-bookmark-search-shell {
+    position: relative;
+    width: 28px;
+    height: 28px;
+    margin-right: 6px;
+    flex-shrink: 0;
+}
+
+.vc-channeltabs-bookmark-search-shell-open {
+    z-index: 3;
+}
+
+.vc-channeltabs-bookmark-search-field {
+    position: absolute;
+    right: 0;
+    top: 50%;
+    width: 0;
+    opacity: 0;
+    pointer-events: none;
+    overflow: hidden;
+    transform: translateY(-50%) scaleX(0.92);
+    transform-origin: right center;
+    transition: width 0.18s ease, opacity 0.15s ease, transform 0.18s ease;
+}
+
+.vc-channeltabs-bookmark-search-shell-open .vc-channeltabs-bookmark-search-field {
+    width: 160px;
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(-50%) scaleX(1);
+}
+
+.vc-channeltabs-bookmark-search-input {
+    padding-right: 34px !important;
+}
+
+.vc-channeltabs-bookmark-search-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    position: absolute;
+    right: 0;
+    top: 0;
+    flex-shrink: 0;
+    color: var(--text-muted);
+    transition: color 0.15s ease;
+}
+
+.vc-channeltabs-bookmark-search-button:hover {
+    color: var(--interactive-icon-hover);
 }
 
 .vc-channeltabs-new-button {
@@ -1004,19 +1072,56 @@
 
 /* Drag and drop visual feedback */
 .vc-channeltabs-bookmarks-drop-target {
-    background-color: color-mix(in srgb, var(--brand-500) 20%, transparent);
-    border: 2px dashed var(--brand-500);
-    border-radius: 4px;
+    background-color: color-mix(in srgb, var(--brand-500) 15%, transparent);
+    border: 1px dashed color-mix(in srgb, var(--brand-500) 65%, transparent);
+    border-radius: 6px;
+}
+
+.vc-channeltabs-bookmark.vc-channeltabs-bookmark-dragging {
+    opacity: 0.55;
+    transform: scale(0.98);
+}
+
+.vc-channeltabs-bookmark.vc-channeltabs-bookmark-drop-target {
+    border-color: color-mix(in srgb, var(--brand-500) 70%, var(--border-subtle));
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--brand-500) 35%, transparent);
+}
+
+.vc-channeltabs-bookmark.vc-channeltabs-bookmark-drop-before::before,
+.vc-channeltabs-bookmark.vc-channeltabs-bookmark-drop-after::after {
+    content: "";
+    position: absolute;
+    top: 3px;
+    bottom: 3px;
+    width: 2px;
+    border-radius: 999px;
+    background-color: var(--brand-500);
+    box-shadow: 0 0 0 1px color-mix(in srgb, var(--brand-500) 30%, transparent);
+}
+
+.vc-channeltabs-bookmark.vc-channeltabs-bookmark-drop-before::before {
+    left: -3px;
+}
+
+.vc-channeltabs-bookmark.vc-channeltabs-bookmark-drop-after::after {
+    right: -3px;
+}
+
+.vc-channeltabs-bookmark.vc-channeltabs-bookmark-drop-before {
+    transform: translateX(5px);
+}
+
+.vc-channeltabs-bookmark.vc-channeltabs-bookmark-drop-after {
+    transform: translateX(-5px);
 }
 
 .vc-channeltabs-bookmark.vc-channeltabs-folder-drop-target {
-    background-color: color-mix(in srgb, var(--brand-500) 30%, transparent);
-    border: 2px solid var(--brand-500);
-    transform: scale(1.05);
-    box-shadow: 0 0 8px var(--brand-500);
+    background-color: color-mix(in srgb, var(--brand-500) 22%, transparent);
+    border: 1px solid color-mix(in srgb, var(--brand-500) 80%, var(--border-subtle));
+    transform: scale(1.03);
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--brand-500) 20%, transparent);
 }
 
-/* Folder expansion */
 .vc-channeltabs-bookmark.vc-channeltabs-folder-expanded {
     background-color: var(--background-mod-strong);
 }
@@ -1168,7 +1273,7 @@
 /* Tab Number Badge Styles */
 .vc-channeltabs-tab-number-badge {
     background-color: rgb(0 0 0 / 25%);
-    color: var(--text-normal);
+    color: var(--text-default);
     border-radius: 50%;
     width: 20px;
     height: 20px;

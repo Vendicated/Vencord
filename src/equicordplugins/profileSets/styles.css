@@ -60,7 +60,7 @@
 
 .vc-profile-presets-page-of {
     font-size: 14px;
-    color: var(--text-normal);
+    color: var(--text-default);
     font-weight: 500;
 }
 
@@ -183,7 +183,7 @@
 
 .vc-profile-presets-timestamp {
     font-size: 12px;
-    color: var(--text-normal);
+    color: var(--text-default);
     font-weight: 500;
     opacity: 0.8;
 }
@@ -205,5 +205,5 @@
     background-color: var(--background-secondary);
     border: 2px solid var(--background-modifier-accent);
     border-radius: 4px;
-    color: var(--text-normal);
+    color: var(--text-default);
 }

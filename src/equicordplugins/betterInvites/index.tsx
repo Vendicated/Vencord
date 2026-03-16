@@ -46,7 +46,7 @@ export default definePlugin({
             ]
         },
         {
-            find: "onlineCount})})]",
+            find: "isBannerVisible:!1})},",
             replacement: [
                 {
                     // make the button clickable

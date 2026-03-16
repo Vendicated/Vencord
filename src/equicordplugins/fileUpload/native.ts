@@ -204,6 +204,178 @@ export async function uploadToLitterbox(
     }
 }
 
+export async function uploadToGofile(
+    _: IpcMainInvokeEvent,
+    fileBuffer: ArrayBuffer,
+    filename: string,
+    token?: string
+): Promise<NativeUploadResult> {
+    try {
+        const formData = new FormData();
+        if (token?.trim()) {
+            formData.append("token", token.trim());
+        }
+        formData.append("file", new Blob([fileBuffer]), filename);
+
+        const response = await fetch("https://upload.gofile.io/uploadfile", {
+            method: "POST",
+            body: formData
+        });
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            return { success: false, error: `Upload failed: ${response.status} ${errorText}` };
+        }
+
+        const data = await response.json() as {
+            status?: string;
+            error?: string;
+            data?: { downloadPage?: string; code?: string; };
+        };
+
+        if (data.status !== "ok") {
+            return { success: false, error: data.error || "Upload failed" };
+        }
+
+        const url = data.data?.downloadPage || (data.data?.code ? `https://gofile.io/d/${data.data.code}` : "");
+        if (!url) {
+            return { success: false, error: "No URL returned from upload" };
+        }
+
+        return { success: true, url };
+    } catch (e) {
+        return { success: false, error: e instanceof Error ? e.message : "Unknown error" };
+    }
+}
+
+export async function uploadToTmpfiles(
+    _: IpcMainInvokeEvent,
+    fileBuffer: ArrayBuffer,
+    filename: string
+): Promise<NativeUploadResult> {
+    try {
+        const formData = new FormData();
+        formData.append("file", new Blob([fileBuffer]), filename);
+
+        const response = await fetch("https://tmpfiles.org/api/v1/upload", {
+            method: "POST",
+            body: formData
+        });
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            return { success: false, error: `Upload failed: ${response.status} ${errorText}` };
+        }
+
+        const data = await response.json() as { status?: string; data?: { url?: string; }; };
+        const rawUrl = data.data?.url || "";
+        if (!rawUrl || data.status !== "success") {
+            return { success: false, error: "No URL returned from upload" };
+        }
+
+        const url = rawUrl.includes("tmpfiles.org/") && !rawUrl.includes("/dl/")
+            ? rawUrl.replace(/tmpfiles\.org\/(\d+)/, "tmpfiles.org/dl/$1")
+            : rawUrl;
+
+        return { success: true, url };
+    } catch (e) {
+        return { success: false, error: e instanceof Error ? e.message : "Unknown error" };
+    }
+}
+
+export async function uploadToBuzzheavier(
+    _: IpcMainInvokeEvent,
+    fileBuffer: ArrayBuffer,
+    filename: string
+): Promise<NativeUploadResult> {
+    try {
+        const response = await fetch(`https://w.buzzheavier.com/${encodeURIComponent(filename)}`, {
+            method: "PUT",
+            body: new Blob([fileBuffer])
+        });
+
+        const text = await response.text();
+        if (!response.ok) {
+            return { success: false, error: `Upload failed: ${response.status} ${text}` };
+        }
+
+        try {
+            const data = JSON.parse(text) as { code?: number; data?: { id?: string; }; };
+            if (data.code === 201 && data.data?.id) {
+                return { success: true, url: `https://buzzheavier.com/${data.data.id}` };
+            }
+        } catch {
+        }
+
+        const url = text.trim();
+        if (!url) {
+            return { success: false, error: "No URL returned from upload" };
+        }
+
+        return { success: true, url };
+    } catch (e) {
+        return { success: false, error: e instanceof Error ? e.message : "Unknown error" };
+    }
+}
+
+export async function uploadToTempSh(
+    _: IpcMainInvokeEvent,
+    fileBuffer: ArrayBuffer,
+    filename: string
+): Promise<NativeUploadResult> {
+    try {
+        const formData = new FormData();
+        formData.append("file", new Blob([fileBuffer]), filename);
+
+        const response = await fetch("https://temp.sh/upload", {
+            method: "POST",
+            body: formData
+        });
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            return { success: false, error: `Upload failed: ${response.status} ${errorText}` };
+        }
+
+        const url = (await response.text()).trim();
+        if (!url) {
+            return { success: false, error: "No URL returned from upload" };
+        }
+
+        return { success: true, url };
+    } catch (e) {
+        return { success: false, error: e instanceof Error ? e.message : "Unknown error" };
+    }
+}
+
+export async function uploadToFilebin(
+    _: IpcMainInvokeEvent,
+    fileBuffer: ArrayBuffer,
+    filename: string
+): Promise<NativeUploadResult> {
+    try {
+        const binId = `${Date.now().toString(16)}${Math.random().toString(16).slice(2, 10)}`;
+        const uploadUrl = `https://filebin.net/${binId}/${encodeURIComponent(filename)}`;
+
+        const formData = new FormData();
+        formData.append("file", new Blob([fileBuffer]), filename);
+
+        const response = await fetch(uploadUrl, {
+            method: "POST",
+            body: formData
+        });
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            return { success: false, error: `Upload failed: ${response.status} ${errorText}` };
+        }
+
+        return { success: true, url: `https://filebin.net/${binId}/${encodeURIComponent(filename)}` };
+    } catch (e) {
+        return { success: false, error: e instanceof Error ? e.message : "Unknown error" };
+    }
+}
+
 export async function fetchFile(
 
     _: IpcMainInvokeEvent,

@@ -10,19 +10,111 @@ import { SettingsStore } from "@api/Settings";
 import { getUserSettingLazy } from "@api/UserSettings";
 import { openPluginModal } from "@components/settings/tabs";
 import { toggleEnabled } from "@equicordplugins/equicordHelper/utils";
+import { copyWithToast } from "@utils/discord";
+import { Logger } from "@utils/Logger";
 import type { Plugin } from "@utils/types";
 import { changes, checkForUpdates } from "@utils/updater";
 import { Guild } from "@vencord/discord-types";
-import { findByPropsLazy, findStoreLazy } from "@webpack";
-import { ChannelActionCreators, ChannelRouter, ChannelStore, ComponentDispatch, FluxDispatcher, GuildStore, MediaEngineStore, NavigationRouter, React, ReadStateUtils, RelationshipStore, SelectedChannelStore, SelectedGuildStore, SettingsRouter, StreamerModeStore, Toasts, useEffect, UserStore, VoiceActions } from "@webpack/common";
+import { findByPropsLazy, findExportedComponentLazy, findStoreLazy } from "@webpack";
+import { Alerts, ChannelActionCreators, ChannelRouter, ChannelStore, ComponentDispatch, FluxDispatcher, GuildStore, IconUtils, MediaEngineStore, MessageStore, NavigationRouter, React, ReadStateStore, ReadStateUtils, SelectedChannelStore, SelectedGuildStore, SettingsRouter, StreamerModeStore, Toasts, useEffect, UserStore, VoiceActions } from "@webpack/common";
 import type { FC, ReactElement, ReactNode } from "react";
 import { Settings } from "Vencord";
 
 import commandPalette from ".";
+import {
+    resolveActionByActionKey,
+    resolveActionIntentByActionKey,
+    type ResolvedActionByKey
+} from "./actions/actionRouting";
+import {
+    type CustomCommandIconId,
+    getCustomCommandIconById,
+    isCustomCommandIconId,
+    resolveCustomCommandDefaultIconId } from "./customCommandIcons";
+import {
+    createExtensionsState,
+    EXTENSIONS_CATALOG_CATEGORY_ID,
+    registerExtensionProviders
+} from "./extensions";
+import {
+    BUILT_IN_CATEGORIES,
+    CATEGORY_DEFAULT_TAGS,
+    CATEGORY_GROUP_LABELS,
+    CATEGORY_WEIGHTS,
+    CHATBAR_ACTIONS_CATEGORY_ID,
+    CONTEXT_PROVIDER_ID,
+    CUSTOM_COMMANDS_CATEGORY_ID,
+    CUSTOM_PROVIDER_ID,
+    DEFAULT_CATEGORY_ID,
+    DEFAULT_CATEGORY_WEIGHT,
+    GUILD_CATEGORY_ID,
+    MENTION_PROVIDER_ID,
+    MENTIONS_CATEGORY_ID,
+    PINNED_CATEGORY_ID,
+    PLUGIN_MANAGER_DISABLE_COMMAND_ID,
+    PLUGIN_MANAGER_ENABLE_COMMAND_ID,
+    PLUGIN_MANAGER_ROOT_COMMAND_ID,
+    PLUGIN_MANAGER_SETTINGS_COMMAND_ID,
+    RECENTS_CATEGORY_ID,
+    SESSION_TOOLS_CATEGORY_ID,
+    TOOLBOX_ACTIONS_CATEGORY_ID,
+    TOOLBOX_ACTIONS_PROVIDER_ID
+} from "./metadata/categories";
+import {
+    normalizeTag,
+    TAG_CONTEXT,
+    TAG_CORE,
+    TAG_CUSTOMIZATION,
+    TAG_DEVELOPER,
+    TAG_GUILDS,
+    TAG_NAVIGATION,
+    TAG_PLUGINS,
+    TAG_SESSION,
+    TAG_UTILITY
+} from "./metadata/tags";
+import { createPinsStore } from "./runtime/pins";
+import { createRecentsStore } from "./runtime/recents";
+import { createRegistryStore } from "./runtime/registryStore";
+import { makeIconFromUrl } from "./ui/iconFromUrl";
+import { createCommandPageCommand } from "./ui/pages/createCommandPageCommand";
+import type { PalettePageRef } from "./ui/pages/types";
+
+export { DEFAULT_CATEGORY_ID, normalizeTag, PINNED_CATEGORY_ID };
+export { normalizeActionKey } from "./actions/actionRouting";
 
 type CommandHandler = () => void | Promise<void>;
 
 type ToastKind = (typeof Toasts.Type)[keyof typeof Toasts.Type];
+
+export type CommandActionIntent =
+    | { type: "execute-primary"; }
+    | { type: "execute-secondary"; actionKey: string; }
+    | { type: "toggle-pin"; commandId: string; }
+    | { type: "open-page"; page: PalettePageRef; }
+    | { type: "open-drilldown"; categoryId: string; }
+    | { type: "submit-active-page"; }
+    | { type: "go-back"; }
+    | { type: "toggle-calculator-view"; mode: "result" | "graph"; }
+    | { type: "copy-calculator"; mode: "formatted" | "raw" | "qa"; };
+
+export interface CommandActionContext {
+    command: CommandEntry;
+    drilldownCategoryId: string | null;
+    isPageOpen: boolean;
+    hasCalculatorResult: boolean;
+    canGoBack: boolean;
+}
+
+export interface CommandActionDefinition {
+    id: string;
+    label: string;
+    shortcut: string;
+    icon?: React.ComponentType<{ className?: string; size?: string; }>;
+    intent: CommandActionIntent;
+    handler?: CommandHandler;
+    isVisible?(ctx: CommandActionContext): boolean;
+    isEnabled?(ctx: CommandActionContext): boolean;
+}
 
 export interface CommandCategory {
     id: string;
@@ -43,6 +135,27 @@ export interface CommandEntry {
     danger?: boolean;
     hiddenInSearch?: boolean;
     searchGroup?: string;
+    icon?: React.ComponentType<{ className?: string; size?: string; }>;
+    drilldownCategoryId?: string;
+    page?: PalettePageRef;
+    queryTemplate?: string;
+    queryPlaceholder?: string;
+    closeAfterExecute?: boolean;
+    actions?(ctx: CommandActionContext): CommandActionDefinition[];
+}
+
+export interface ExtensionDefinition {
+    id: string;
+    label: string;
+    description: string;
+    detailCategoryId: string;
+    commandId: string;
+    commandLabel: string;
+    commandDescription: string;
+    sourcePath?: string;
+    readmePath?: string;
+    tags?: string[];
+    keywords?: string[];
 }
 
 export interface CommandTagMeta {
@@ -63,6 +176,76 @@ interface ChatBarCommandState {
     getters: Set<() => HTMLElement | null>;
 }
 
+interface NotificationsInboxStoreLike {
+    getInboxMessages?: () => unknown[] | null;
+    getNotifyingChannelIds?: () => string[] | null;
+}
+
+interface RecentMentionsStoreLike {
+    getMentions?: () => unknown[] | null;
+    getSettingsFilteredMentions?: () => unknown[] | null;
+}
+
+interface MentionEntry {
+    key: string;
+    messageId?: string;
+    channelId?: string;
+    guildId?: string;
+    authorId?: string;
+    content?: string;
+    timestamp?: number;
+}
+
+interface ReadStateStoreLike {
+    getMentionCount?: (channelId: string) => number;
+    getUnreadCount?: (channelId: string) => number;
+    getMentionChannelIds?: () => string[];
+    hasUnreadOrMentions?: (channelId: string) => boolean;
+    getReadStatesByChannel?: () => Record<string, unknown>;
+}
+
+interface DiscordNativeLike {
+    app?: {
+        openExternalURL?: (url: string) => void;
+    };
+    window?: {
+        openDevTools?: () => void;
+        toggleDevTools?: () => void;
+    };
+    notifications?: {
+        clearAll?: () => void;
+    };
+}
+
+interface ChannelLike {
+    id: string;
+    type?: number;
+    name?: string;
+    recipients?: string[];
+    rawRecipients?: Array<string | { id?: string; }>;
+    isDM?: () => boolean;
+    isGroupDM?: () => boolean;
+    getRecipientId?: () => string | null | undefined;
+}
+
+interface WindowWithDiscordNative extends Window {
+    DiscordNative?: DiscordNativeLike;
+}
+
+interface ChannelClosePayloadLike {
+    channel?: unknown;
+    channel_id?: string;
+    recipients?: unknown;
+    rawRecipients?: unknown;
+    type?: unknown;
+    id?: unknown;
+}
+
+interface ChannelStoreAccessorMixins {
+    getDMFromUserId?: (id: string) => string | null;
+    getSortedPrivateChannels?: () => Array<string | { id?: string; channelId?: string; }>;
+}
+
 export const chatBarCommandStates = new Map<string, ChatBarCommandState>();
 export const chatBarCommandStatesById = new Map<string, ChatBarCommandState>();
 const CHATBAR_DATASET_KEY = "vcCommandPaletteId";
@@ -71,51 +254,20 @@ const CHATBAR_DATA_ATTRIBUTE = "data-vc-command-palette-id";
 const categories = new Map<string, CommandCategory>();
 const registry = new Map<string, CommandEntry>();
 
-let registryVersion = 0;
-let cachedSortedCommands: CommandEntry[] | null = null;
-const categoryCommandCache = new Map<string, CommandEntry[]>();
-const treeCommandCache = new Map<string, CommandEntry[]>();
-const searchTextCache = new Map<string, string>();
-const registryListeners = new Set<(version: number) => void>();
-const RECENT_COMMAND_LIMIT = 10;
-const recentCommandIds: string[] = [];
-const RECENT_COMMAND_SKIP_IDS = new Set<string>([
-    "command-palette-rerun-last",
-    "command-palette-toggle-pin-last",
-    "command-palette-show-recent",
-    "command-palette-open-settings"
-]);
+const registryStore = createRegistryStore();
+const recentsStore = createRecentsStore(() => registryStore.bumpRegistryVersion());
+const pinsStore = createPinsStore();
+const extensionsState = createExtensionsState(
+    id => refreshContextProvider(id),
+    () => registryStore.bumpRegistryVersion()
+);
 const StatusSetting = getUserSettingLazy<string>("status", "status");
 const COMMAND_PALETTE_PLUGIN_NAME = "CommandPalette";
+const logger = new Logger(COMMAND_PALETTE_PLUGIN_NAME);
 const CUSTOM_COMMANDS_KEY = "CommandPaletteCustomCommands";
-const CUSTOM_COMMANDS_CATEGORY_ID = "custom-commands";
-const SESSION_TOOLS_CATEGORY_ID = "session-tools";
-const CONTEXT_PROVIDER_ID = "context-current";
-const CUSTOM_PROVIDER_ID = "custom-commands";
-const TOOLBOX_ACTIONS_CATEGORY_ID = "plugins-actions";
-const TOOLBOX_ACTIONS_PROVIDER_ID = "plugin-toolbox-actions";
-const CHATBAR_ACTIONS_CATEGORY_ID = "chatbar-actions";
-const GUILD_CATEGORY_ID = "guilds-actions";
-const FRIENDS_CATEGORY_ID = "friends-actions";
 
 const commandTagIds = new Map<string, string[]>();
 const tagMetadata = new Map<string, { label: string; count: number; }>();
-
-const TAG_CORE = "Core";
-const TAG_NAVIGATION = "Navigation";
-const TAG_UTILITY = "Utility";
-const TAG_DEVELOPER = "Developer";
-const TAG_CUSTOMIZATION = "Customization";
-const TAG_PLUGINS = "Plugins";
-const TAG_SESSION = "Session";
-const TAG_CONTEXT = "Context";
-const TAG_CUSTOM = "Custom";
-const TAG_GUILDS = "Guilds";
-const TAG_FRIENDS = "Friends";
-
-export function normalizeTag(tag: string): string {
-    return tag.trim().toLowerCase();
-}
 
 export function wrapChatBarChildren(children: ReactNode): ReactNode {
     if (!Array.isArray(children) || children.length === 0) return children;
@@ -139,7 +291,7 @@ export function wrapChatBarChildren(children: ReactNode): ReactNode {
         };
 
         return (
-            <ChatBarCommandBridge key={existingKey} {...bridgeProps} />
+            <ChatBarCommandBridge key={existingKey ?? buttonKey} {...bridgeProps} />
         );
     });
 
@@ -236,7 +388,7 @@ export function attachChatBarInstance(buttonKey: string, label: string, containe
         if (element.isConnected) return element;
         const scoped = container.querySelector<HTMLElement>(`[${CHATBAR_DATA_ATTRIBUTE}="${commandId}"]`);
         if (scoped) return scoped;
-        return document.querySelector<HTMLElement>(`[${CHATBAR_DATA_ATTRIBUTE}="${commandId}"]`);
+        return null;
     };
 
     state.getters.add(getter);
@@ -339,6 +491,7 @@ function buildChatBarCommand(state: ChatBarCommandState): CommandEntry {
         label: state.label,
         keywords,
         categoryId: CHATBAR_ACTIONS_CATEGORY_ID,
+        hiddenInSearch: true,
         tags: [TAG_PLUGINS, TAG_UTILITY],
         handler: () => activateChatBarCommand(state)
     } satisfies CommandEntry;
@@ -353,8 +506,7 @@ export function activateChatBarCommand(state: ChatBarCommandState) {
 
     try {
         element.click();
-    } catch (error) {
-        console.error("CommandPalette", "Failed to click chat bar button", state.label, error);
+    } catch {
         showToast(`Failed to trigger ${state.label}.`, Toasts.Type.FAILURE);
         return;
     }
@@ -367,11 +519,11 @@ export function resolveChatBarElement(state: ChatBarCommandState): HTMLElement |
         try {
             const candidate = getter();
             if (candidate && candidate.isConnected) return candidate;
-        } catch (error) {
-            console.error("CommandPalette", "Failed to resolve chat bar button", error);
+        } catch {
+            continue;
         }
     }
-    return document.querySelector<HTMLElement>(`[${CHATBAR_DATA_ATTRIBUTE}="${state.commandId}"]`);
+    return null;
 }
 
 function incrementTagMetadata(tagId: string, label: string) {
@@ -471,23 +623,45 @@ function findUserIdInArgs(args: unknown[]): string | null {
     return null;
 }
 
-function resolveChannelFromPayload(input: unknown): any | null {
+function resolveChannelFromPayload(input: unknown): ChannelLike | null {
     if (!input) return null;
 
     if (typeof input === "object") {
         const candidate = input as Record<string, unknown>;
         if (candidate && typeof candidate.id === "string" && ("type" in candidate || "isDM" in candidate)) {
-            return candidate;
+            const resolved = candidate as { id: string; type?: unknown; name?: unknown; recipients?: unknown; rawRecipients?: unknown; isDM?: unknown; isGroupDM?: unknown; getRecipientId?: unknown; };
+            return {
+                id: resolved.id,
+                type: typeof resolved.type === "number" ? resolved.type : undefined,
+                name: typeof resolved.name === "string" ? resolved.name : undefined,
+                recipients: Array.isArray(resolved.recipients)
+                    ? resolved.recipients.filter((value): value is string => typeof value === "string")
+                    : undefined,
+                rawRecipients: Array.isArray(resolved.rawRecipients)
+                    ? resolved.rawRecipients.filter((value): value is string | { id?: string; } => typeof value === "string" || Boolean(value && typeof value === "object"))
+                    : undefined,
+                isDM: typeof resolved.isDM === "function" ? (resolved.isDM as () => boolean) : undefined,
+                isGroupDM: typeof resolved.isGroupDM === "function" ? (resolved.isGroupDM as () => boolean) : undefined,
+                getRecipientId: typeof resolved.getRecipientId === "function" ? (resolved.getRecipientId as () => string | null | undefined) : undefined
+            };
         }
         if (candidate.channel) {
             const nested = resolveChannelFromPayload(candidate.channel);
             if (nested) return nested;
         }
         if (typeof candidate.channel_id === "string") {
-            const fallback: Record<string, unknown> = { id: candidate.channel_id };
-            if (candidate.recipients) fallback.recipients = candidate.recipients;
-            if (candidate.rawRecipients) fallback.rawRecipients = candidate.rawRecipients;
-            if (candidate.type) fallback.type = candidate.type;
+            const fallback: ChannelLike = { id: candidate.channel_id };
+            if (Array.isArray(candidate.recipients)) {
+                fallback.recipients = candidate.recipients.filter((value): value is string => typeof value === "string");
+            }
+            if (Array.isArray(candidate.rawRecipients)) {
+                fallback.rawRecipients = candidate.rawRecipients.filter((value): value is string | { id?: string; } => {
+                    if (typeof value === "string") return true;
+                    return Boolean(value && typeof value === "object");
+                });
+            }
+            if (typeof candidate.type === "number") fallback.type = candidate.type;
+            if (typeof candidate.name === "string") fallback.name = candidate.name;
             return fallback;
         }
     }
@@ -497,7 +671,7 @@ function resolveChannelFromPayload(input: unknown): any | null {
     return ChannelStore.getChannel(channelId) ?? { id: channelId };
 }
 
-function deriveDmRecipient(channel: any): string | undefined {
+function deriveDmRecipient(channel: ChannelLike | null): string | undefined {
     if (!channel) return undefined;
     const currentUserId = UserStore?.getCurrentUser?.()?.id;
     try {
@@ -529,7 +703,7 @@ function deriveDmRecipient(channel: any): string | undefined {
     return undefined;
 }
 
-function trackClosedChannel(channel: any) {
+function trackClosedChannel(channel: ChannelLike | null) {
     if (!channel || typeof channel.id !== "string") return;
 
     try {
@@ -560,8 +734,8 @@ function trackClosedRecipient(recipientId: string | null | undefined, fallbackCh
     if (typeof getDmFromUserId === "function") {
         try {
             dmChannelId = getDmFromUserId(recipientId) ?? null;
-        } catch (error) {
-            console.error("CommandPalette", "Failed to resolve DM channel", error);
+        } catch {
+            dmChannelId = null;
         }
     }
 
@@ -591,7 +765,7 @@ function patchChannelCloseMethods() {
         const original = actions[name];
         if (typeof original !== "function") continue;
 
-        const patched = function patchedChannelClose(this: unknown, ...args: any[]) {
+        const patched = function patchedChannelClose(this: unknown, ...args: unknown[]) {
             try {
                 const channel = resolveChannelFromPayload(args[0]);
                 trackClosedChannel(channel);
@@ -604,10 +778,10 @@ function patchChannelCloseMethods() {
                         trackClosedRecipient(userId, fallbackChannelId);
                     }
                 }
-            } catch (error) {
-                console.error("CommandPalette", `Failed to record closed channel via ${name}`, error);
+            } catch {
+                lastClosedDm = lastClosedDm ?? null;
             }
-            return (original as (...inner: any[]) => unknown).apply(this, args);
+            return (original as (...inner: unknown[]) => unknown).apply(this, args);
         };
 
         (actions as Record<string, unknown>)[name] = patched;
@@ -623,8 +797,8 @@ function patchChannelCloseMethods() {
         for (const restore of restorers) {
             try {
                 restore();
-            } catch (error) {
-                console.error("CommandPalette", "Failed to restore channel close method", error);
+            } catch {
+                continue;
             }
         }
         channelClosePatched = false;
@@ -641,69 +815,13 @@ const runtimeCleanupCallbacks: Array<() => void> = [];
 
 const NotificationSettingsActionCreators = findByPropsLazy("updateGuildNotificationSettings", "updateChannelOverrideSettings");
 const GuildSettingsActions = findByPropsLazy("open", "selectRole", "updateGuild");
+const GuildMembershipActions = findByPropsLazy("leaveGuild");
+const HeadphonesIcon = findExportedComponentLazy("HeadphonesIcon");
 const UserGuildSettingsStore = findStoreLazy("UserGuildSettingsStore");
-
-export const DEFAULT_CATEGORY_ID = "quick-actions";
-
-const CATEGORY_WEIGHTS = new Map<string, number>([
-    [DEFAULT_CATEGORY_ID, 100],
-    [CONTEXT_PROVIDER_ID, 95],
-    [SESSION_TOOLS_CATEGORY_ID, 90],
-    ["discord-settings", 90],
-    ["updates", 75],
-    [CUSTOM_COMMANDS_CATEGORY_ID, 80],
-    ["plugins", 45],
-    ["plugins-enable", 45],
-    ["plugins-disable", 45],
-    ["plugins-settings", 40],
-    ["plugins-changes", 40],
-    [TOOLBOX_ACTIONS_CATEGORY_ID, 45],
-    [CHATBAR_ACTIONS_CATEGORY_ID, 45],
-    [GUILD_CATEGORY_ID, 40],
-    [FRIENDS_CATEGORY_ID, 40]
-]);
-
-const CATEGORY_GROUP_LABELS = new Map<string | undefined, string>([
-    [DEFAULT_CATEGORY_ID, "Core Actions"],
-    [CONTEXT_PROVIDER_ID, "Core Actions"],
-    [SESSION_TOOLS_CATEGORY_ID, "Core Actions"],
-    ["discord-settings", "Discord Settings"],
-    ["updates", "Updates"],
-    [CUSTOM_COMMANDS_CATEGORY_ID, "Custom Commands"],
-    ["plugins", "Plugin Controls"],
-    ["plugins-enable", "Plugin Controls"],
-    ["plugins-disable", "Plugin Controls"],
-    ["plugins-settings", "Plugin Controls"],
-    ["plugins-changes", "Plugin Controls"],
-    [TOOLBOX_ACTIONS_CATEGORY_ID, "Plugin Controls"],
-    [CHATBAR_ACTIONS_CATEGORY_ID, "Plugin Controls"],
-    [GUILD_CATEGORY_ID, "Guilds"],
-    [FRIENDS_CATEGORY_ID, "Friends"]
-]);
-
-const DEFAULT_CATEGORY_WEIGHT = 50;
-
-const CATEGORY_DEFAULT_TAGS = new Map<string, string[]>([
-    [DEFAULT_CATEGORY_ID, [TAG_CORE]],
-    [CONTEXT_PROVIDER_ID, [TAG_CONTEXT]],
-    [SESSION_TOOLS_CATEGORY_ID, [TAG_SESSION]],
-    ["discord-settings", [TAG_NAVIGATION]],
-    ["updates", [TAG_DEVELOPER]],
-    [CUSTOM_COMMANDS_CATEGORY_ID, [TAG_CUSTOM]],
-    ["plugins", [TAG_PLUGINS]],
-    ["plugins-enable", [TAG_PLUGINS]],
-    ["plugins-disable", [TAG_PLUGINS]],
-    ["plugins-settings", [TAG_PLUGINS]],
-    ["plugins-changes", [TAG_PLUGINS]],
-    [TOOLBOX_ACTIONS_CATEGORY_ID, [TAG_PLUGINS, TAG_UTILITY]],
-    [CHATBAR_ACTIONS_CATEGORY_ID, [TAG_PLUGINS, TAG_UTILITY]],
-    [GUILD_CATEGORY_ID, [TAG_GUILDS]],
-    [FRIENDS_CATEGORY_ID, [TAG_FRIENDS]]
-]);
-
-const PINNED_STORAGE_KEY = "CommandPalettePinned";
-const pinnedCommandIds = new Set<string>();
-const pinListeners = new Set<(pins: Set<string>) => void>();
+const NotificationsInboxStore = findStoreLazy("NotificationsInboxStore") as NotificationsInboxStoreLike;
+const RecentMentionsStore = findStoreLazy("RecentMentionsStore") as RecentMentionsStoreLike;
+const ReadStateStoreRef = (ReadStateStore as ReadStateStoreLike | undefined) ?? (findStoreLazy("ReadStateStore") as ReadStateStoreLike | undefined);
+const channelStoreAccessors = ChannelStore as ChannelStoreAccessorMixins;
 
 interface ContextCommandProvider {
     id: string;
@@ -731,9 +849,9 @@ export interface CustomCommandDefinition {
     label: string;
     description?: string;
     keywords?: string[];
-    tags?: string[];
     categoryId?: string;
-    danger?: boolean;
+    showConfirmation?: boolean;
+    iconId?: CustomCommandIconId;
     action: CustomCommandAction;
 }
 
@@ -746,10 +864,201 @@ const customCommandsReady = (async () => {
         if (Array.isArray(stored)) {
             setCustomCommands(stored);
         }
-    } catch (error) {
-        console.error("CommandPalette", "Failed to load custom commands", error);
+    } catch {
+        setCustomCommands([]);
     }
 })();
+
+export const DISCORD_INTERNAL_HOSTS = new Set([
+    "discord.com",
+    "www.discord.com",
+    "canary.discord.com",
+    "ptb.discord.com"
+]);
+
+const DISCORD_SETTINGS_ROUTE_ALIASES = new Map<string, string[]>([
+    ["my_account", ["my_account_panel", "account"]],
+    ["data_and_privacy", ["privacy_and_safety", "privacy_&_safety", "data_and_privacy_panel"]],
+    ["notifications", ["legacy_notifications_settings", "notifications_panel"]],
+    ["voice_and_video", ["voice_video", "voice_and_video_panel"]],
+    ["text_and_images", ["text_images", "text_and_images_panel"]],
+    ["appearance", ["appearance_panel"]],
+    ["accessibility", ["accessibility_panel"]],
+    ["keybinds", ["keybinds_panel"]],
+    ["advanced", ["advanced_panel"]]
+]);
+
+const DISCORD_SETTINGS_ROUTE_LOOKUP = (() => {
+    const lookup = new Map<string, string>();
+    for (const [canonical, aliases] of DISCORD_SETTINGS_ROUTE_ALIASES) {
+        lookup.set(canonical, canonical);
+        for (const alias of aliases) {
+            lookup.set(alias, canonical);
+        }
+    }
+    return lookup;
+})();
+
+function normalizeSettingsRouteInput(route: string): string {
+    return route
+        .trim()
+        .toLowerCase()
+        .replace(/^\/+/, "")
+        .replace(/\s+/g, "_")
+        .replace(/&/g, "and");
+}
+
+function resolveCanonicalSettingsRoute(route: string): string {
+    const normalized = normalizeSettingsRouteInput(route);
+    return DISCORD_SETTINGS_ROUTE_LOOKUP.get(normalized) ?? normalized;
+}
+
+function resolveSettingsRouteCandidates(route: string): string[] {
+    const normalized = normalizeSettingsRouteInput(route);
+    if (!normalized) return [];
+
+    const canonical = resolveCanonicalSettingsRoute(normalized);
+    const aliases = DISCORD_SETTINGS_ROUTE_ALIASES.get(canonical) ?? [];
+    const candidates = [canonical, ...aliases, normalized];
+    const seen = new Set<string>();
+    const unique: string[] = [];
+
+    for (const candidate of candidates) {
+        const sanitized = normalizeSettingsRouteInput(candidate);
+        if (!sanitized) continue;
+
+        const expanded = sanitized.endsWith("_panel")
+            ? [sanitized, sanitized.slice(0, -"_panel".length)]
+            : [`${sanitized}_panel`, sanitized];
+
+        for (const expandedCandidate of expanded) {
+            const normalizedCandidate = normalizeSettingsRouteInput(expandedCandidate);
+            if (!normalizedCandidate || seen.has(normalizedCandidate)) continue;
+            seen.add(normalizedCandidate);
+            unique.push(normalizedCandidate);
+        }
+    }
+
+    return unique;
+}
+
+async function openDiscordSettingsRoute(route: string, label?: string) {
+    const candidates = resolveSettingsRouteCandidates(route);
+    if (candidates.length === 0) {
+        showToast("No settings page was provided.", Toasts.Type.FAILURE);
+        return false;
+    }
+
+    for (const candidate of candidates) {
+        try {
+            await Promise.resolve(SettingsRouter.openUserSettings(candidate));
+            return true;
+        } catch {
+            continue;
+        }
+    }
+
+    showToast(`Unable to open ${label ?? "that settings page"}.`, Toasts.Type.FAILURE);
+    return false;
+}
+
+function openExternalUrl(url: string) {
+    const discordNative = window as WindowWithDiscordNative;
+    const external = discordNative.DiscordNative?.app?.openExternalURL;
+    if (typeof external === "function") {
+        external(url);
+        return;
+    }
+
+    window.open(url, "_blank", "noopener,noreferrer");
+}
+
+function openDevToolsWindow() {
+    const discordNative = window as WindowWithDiscordNative;
+    const nativeWindow = discordNative.DiscordNative?.window;
+
+    if (typeof nativeWindow?.openDevTools === "function") {
+        nativeWindow.openDevTools();
+        return true;
+    }
+
+    if (typeof nativeWindow?.toggleDevTools === "function") {
+        nativeWindow.toggleDevTools();
+        return true;
+    }
+
+    try {
+        FluxDispatcher.dispatch({
+            type: "DEV_TOOLS_SETTINGS_UPDATE",
+            settings: {
+                displayTools: true,
+                lastOpenTabId: "analytics"
+            }
+        });
+        return true;
+    } catch (error) {
+        logger.error("Failed to open DevTools via FluxDispatcher fallback", error);
+    }
+
+    return false;
+}
+
+function getLastPrivateChannelId(): string | null {
+    const channels = channelStoreAccessors.getSortedPrivateChannels?.() ?? [];
+
+    for (const raw of channels) {
+        const channelId = typeof raw === "string" ? raw : raw?.id ?? raw?.channelId ?? null;
+        if (!channelId) continue;
+
+        const channel = ChannelStore.getChannel(channelId);
+        const isDm = channel && (typeof channel.isDM === "function" ? channel.isDM() : channel.type === 1);
+        const isGroupDm = channel && (typeof channel.isGroupDM === "function" ? channel.isGroupDM() : channel.type === 3);
+        if (!isDm && !isGroupDm) continue;
+        return channelId;
+    }
+
+    return null;
+}
+
+function getMessagePermalink(channelId: string, messageId: string): string {
+    const channel = ChannelStore.getChannel(channelId);
+    const guildId = channel?.guild_id ?? "@me";
+    return `https://discord.com/channels/${guildId}/${channelId}/${messageId}`;
+}
+
+function copyDebugContext() {
+    const guildId = getActiveGuildId();
+    const channelId = SelectedChannelStore?.getChannelId?.();
+    const userId = UserStore?.getCurrentUser?.()?.id;
+    const payload = [
+        `guildId=${guildId ?? "@me"}`,
+        `channelId=${channelId ?? "none"}`,
+        `userId=${userId ?? "unknown"}`
+    ].join("\n");
+    return copyWithToast(payload, "Debug context copied.");
+}
+
+function toggleDoNotDisturb() {
+    if (!StatusSetting) {
+        showToast("Unable to change status right now.", Toasts.Type.FAILURE);
+        return;
+    }
+
+    const current = StatusSetting.getSetting?.() ?? "online";
+    const target = current === "dnd" ? "online" : "dnd";
+    setPresenceStatus(target);
+}
+
+function isDiscordHost(host: string): boolean {
+    return DISCORD_INTERNAL_HOSTS.has(host.toLowerCase());
+}
+
+function toDiscordInternalRoute(url: URL): string | null {
+    if (!isDiscordHost(url.hostname)) return null;
+    const path = `${url.pathname}${url.search}${url.hash}`.trim();
+    if (!path) return "/";
+    return path.startsWith("/") ? path : `/${path}`;
+}
 
 function generateCustomId(existing: Set<string>) {
     let id: string;
@@ -773,15 +1082,18 @@ function sanitizeCustomCommands(input: CustomCommandDefinition[] | undefined | n
                 case "command":
                     return { type: "command", commandId: String(action.commandId ?? "") } as CustomCommandAction;
                 case "settings":
-                    return { type: "settings", route: String(action.route ?? "") } as CustomCommandAction;
+                    return { type: "settings", route: resolveCanonicalSettingsRoute(String(action.route ?? "")) } as CustomCommandAction;
                 case "url":
                     return { type: "url", url: String(action.url ?? ""), openExternal: Boolean(action.openExternal) } as CustomCommandAction;
-                case "macro":
-                    if (!Array.isArray((action as any).steps)) return { type: "macro", steps: [] } as CustomCommandAction;
+                case "macro": {
+                    const macroAction = action as { steps?: unknown; };
+                    const rawSteps = macroAction.steps;
+                    if (!Array.isArray(rawSteps)) return { type: "macro", steps: [] } as CustomCommandAction;
                     return {
                         type: "macro",
-                        steps: (action as any).steps.map((step: unknown) => String(step)).filter(Boolean)
+                        steps: rawSteps.map((step: unknown) => String(step)).filter(Boolean)
                     } as CustomCommandAction;
+                }
                 default:
                     return null;
             }
@@ -792,19 +1104,6 @@ function sanitizeCustomCommands(input: CustomCommandDefinition[] | undefined | n
         const keywords = Array.isArray(entry.keywords)
             ? entry.keywords.map(keyword => String(keyword).trim()).filter(Boolean)
             : [];
-
-        const tags: string[] = [];
-        if (Array.isArray(entry.tags)) {
-            const seenTags = new Set<string>();
-            for (const rawTag of entry.tags) {
-                const trimmedTag = String(rawTag ?? "").trim();
-                if (!trimmedTag) continue;
-                const tagSlug = normalizeTag(trimmedTag);
-                if (!tagSlug || seenTags.has(tagSlug)) continue;
-                seenTags.add(tagSlug);
-                tags.push(trimmedTag);
-            }
-        }
 
         let id = typeof entry.id === "string" && entry.id.trim().length ? entry.id.trim() : "";
         if (!id || seen.has(id)) {
@@ -818,9 +1117,11 @@ function sanitizeCustomCommands(input: CustomCommandDefinition[] | undefined | n
             label,
             description: entry.description ? String(entry.description) : undefined,
             keywords,
-            tags,
             categoryId: entry.categoryId ? String(entry.categoryId) : undefined,
-            danger: Boolean(entry.danger),
+            showConfirmation: Boolean((entry as { showConfirmation?: unknown; danger?: unknown; }).showConfirmation ?? (entry as { danger?: unknown; }).danger),
+            iconId: isCustomCommandIconId((entry as { iconId?: unknown; }).iconId)
+                ? (entry as { iconId: CustomCommandIconId; }).iconId
+                : undefined,
             action: normalizedAction
         };
 
@@ -834,8 +1135,7 @@ function sanitizeCustomCommands(input: CustomCommandDefinition[] | undefined | n
 function emitCustomCommands() {
     const snapshot = customCommands.map(command => ({
         ...command,
-        keywords: command.keywords ? [...command.keywords] : undefined,
-        tags: command.tags ? [...command.tags] : undefined
+        keywords: command.keywords ? [...command.keywords] : undefined
     }));
     for (const listener of customCommandListeners) listener(snapshot);
 }
@@ -849,9 +1149,12 @@ function setCustomCommands(commands: CustomCommandDefinition[]) {
 export function getCustomCommandsSnapshot(): CustomCommandDefinition[] {
     return customCommands.map(command => ({
         ...command,
-        keywords: command.keywords ? [...command.keywords] : undefined,
-        tags: command.tags ? [...command.tags] : undefined
+        keywords: command.keywords ? [...command.keywords] : undefined
     }));
+}
+
+export function getCustomCommandById(commandId: string): CustomCommandDefinition | undefined {
+    return customCommands.find(command => command.id === commandId);
 }
 
 export function subscribeCustomCommands(listener: (commands: CustomCommandDefinition[]) => void) {
@@ -866,8 +1169,8 @@ export async function saveCustomCommands(commands: CustomCommandDefinition[]) {
     setCustomCommands(commands);
     try {
         await DataStore.set(CUSTOM_COMMANDS_KEY, customCommands);
-    } catch (error) {
-        console.error("CommandPalette", "Failed to persist custom commands", error);
+    } catch {
+        return;
     }
 }
 
@@ -919,13 +1222,27 @@ function scheduleStatusReset(durationMinutes: number) {
     showToast(`Do Not Disturb for ${durationMinutes} minutes.`, Toasts.Type.SUCCESS);
 }
 
+export function setStatusDndForDuration(durationMinutes: number) {
+    if (!Number.isFinite(durationMinutes) || durationMinutes < 1) {
+        showToast("Choose a valid duration.", Toasts.Type.FAILURE);
+        return false;
+    }
+
+    scheduleStatusReset(Math.floor(durationMinutes));
+    return true;
+}
+
+export function cancelScheduledStatusReset() {
+    clearScheduledStatusReset(true);
+}
+
 function ensureSessionHooks() {
     if (sessionHooksInitialized) return;
     sessionHooksInitialized = true;
 
     patchChannelCloseMethods();
 
-    const handleChannelClose = (payload: any) => {
+    const handleChannelClose = (payload: unknown) => {
         const channel = resolveChannelFromPayload(payload);
         if (channel) trackClosedChannel(channel);
 
@@ -954,23 +1271,23 @@ export function cleanupCommandPaletteRuntime() {
         const callback = sessionCleanupCallbacks.pop();
         try {
             callback?.();
-        } catch (error) {
-            console.error("CommandPalette", "Failed to cleanup session callback", error);
+        } catch {
+            continue;
         }
     }
     while (runtimeCleanupCallbacks.length) {
         const callback = runtimeCleanupCallbacks.pop();
         try {
             callback?.();
-        } catch (error) {
-            console.error("CommandPalette", "Failed to cleanup runtime callback", error);
+        } catch {
+            continue;
         }
     }
     for (const record of contextProviders.values()) {
         try {
             record.unsubscribe?.();
-        } catch (error) {
-            console.error("CommandPalette", "Failed to unsubscribe context provider", record.provider.id, error);
+        } catch {
+            continue;
         }
         record.unsubscribe = undefined;
         record.commandIds.clear();
@@ -979,17 +1296,14 @@ export function cleanupCommandPaletteRuntime() {
     contextProviders.clear();
     categories.clear();
     registry.clear();
-    cachedSortedCommands = null;
-    categoryCommandCache.clear();
-    treeCommandCache.clear();
-    searchTextCache.clear();
+    registryStore.setCachedSortedCommands(null);
+    registryStore.getCategoryCommandCache().clear();
+    registryStore.getTreeCommandCache().clear();
+    registryStore.clearSearchTextCache();
     commandTagIds.clear();
     tagMetadata.clear();
-    recentCommandIds.length = 0;
     builtInsRegistered = false;
-    registryVersion += 1;
-    emitRegistryVersion();
-    registryListeners.clear();
+    registryStore.bumpRegistryVersion();
 }
 
 export function getCategoryWeight(categoryId?: string): number {
@@ -1002,7 +1316,7 @@ export function getCategoryGroupLabel(categoryId?: string): string {
 }
 
 export function getRecentRank(commandId: string): number {
-    return recentCommandIds.indexOf(commandId);
+    return recentsStore.list().indexOf(commandId);
 }
 
 function refreshContextProvider(id: string) {
@@ -1015,7 +1329,7 @@ function refreshContextProvider(id: string) {
 
     if (previousIds.length) {
         for (const commandId of previousIds) {
-            const preservePin = pinnedCommandIds.has(commandId);
+            const preservePin = pinsStore.has(commandId);
             if (preservePin) preservedPins.add(commandId);
             removeCommand(commandId, preservePin ? { preservePin: true } : undefined);
             commandIds.delete(commandId);
@@ -1025,8 +1339,7 @@ function refreshContextProvider(id: string) {
     let commands: CommandEntry[] = [];
     try {
         commands = record.provider.getCommands() ?? [];
-    } catch (error) {
-        console.error("CommandPalette", "Failed to compute commands for provider", record.provider.id, error);
+    } catch {
         commands = [];
     }
 
@@ -1041,11 +1354,12 @@ function refreshContextProvider(id: string) {
     if (preservedPins.size) {
         let changed = false;
         for (const commandId of preservedPins) {
-            if (!nextIds.has(commandId) && pinnedCommandIds.delete(commandId)) {
+            if (!nextIds.has(commandId) && pinsStore.has(commandId)) {
+                pinsStore.delete(commandId);
                 changed = true;
             }
         }
-        if (changed) emitPinned();
+        if (changed) pinsStore.emit();
     }
 }
 
@@ -1083,16 +1397,16 @@ function removeCommand(commandId: string, options?: RemoveCommandOptions) {
     const existing = registry.get(commandId);
     if (!existing) return;
 
-    const wasPinned = pinnedCommandIds.has(commandId);
+    const wasPinned = pinsStore.has(commandId);
 
     registry.delete(commandId);
 
     if (wasPinned && !options?.preservePin) {
-        pinnedCommandIds.delete(commandId);
-        emitPinned();
+        pinsStore.delete(commandId);
+        pinsStore.emit();
     }
 
-    searchTextCache.delete(commandId);
+    registryStore.deleteCommandSearchText(commandId);
 
     const tagIds = commandTagIds.get(commandId);
     if (tagIds) {
@@ -1102,38 +1416,27 @@ function removeCommand(commandId: string, options?: RemoveCommandOptions) {
         commandTagIds.delete(commandId);
     }
 
-    bumpRegistryVersion();
+    registryStore.bumpRegistryVersion();
 }
 
 export function getCommandById(commandId: string): CommandEntry | undefined {
     return registry.get(commandId);
 }
 
-const pinsReady = (async () => {
-    try {
-        const stored = await DataStore.get<string[]>(PINNED_STORAGE_KEY);
-        if (Array.isArray(stored)) {
-            for (const id of stored) pinnedCommandIds.add(id);
-        }
-    } catch (error) {
-        console.error("CommandPalette", "Failed to load pinned commands", error);
-    }
-})();
-
-function invalidateCaches() {
-    cachedSortedCommands = null;
-    categoryCommandCache.clear();
-    treeCommandCache.clear();
+export function listExtensions(): ExtensionDefinition[] {
+    return extensionsState.listExtensions().map(extension => ({ ...extension }));
 }
 
-function emitRegistryVersion() {
-    for (const listener of registryListeners) listener(registryVersion);
+export function isExtensionInstalled(extensionId: string): boolean {
+    return extensionsState.isInstalled(extensionId);
 }
 
-function bumpRegistryVersion() {
-    registryVersion += 1;
-    invalidateCaches();
-    emitRegistryVersion();
+export async function installExtension(extensionId: string): Promise<boolean> {
+    return extensionsState.install(extensionId);
+}
+
+export async function uninstallExtension(extensionId: string): Promise<boolean> {
+    return extensionsState.uninstall(extensionId);
 }
 
 function computeSearchText(entry: CommandEntry) {
@@ -1146,17 +1449,17 @@ function computeSearchText(entry: CommandEntry) {
 }
 
 function recordRecent(commandId: string) {
-    const index = recentCommandIds.indexOf(commandId);
-    if (index !== -1) recentCommandIds.splice(index, 1);
-    recentCommandIds.unshift(commandId);
-    if (recentCommandIds.length > RECENT_COMMAND_LIMIT) {
-        recentCommandIds.length = RECENT_COMMAND_LIMIT;
-    }
+    void recentsStore.record(commandId);
+}
+
+export function markCommandAsRecent(commandId: string) {
+    if (!registry.has(commandId)) return;
+    recordRecent(commandId);
 }
 
 export function getRecentCommands(): CommandEntry[] {
     const results: CommandEntry[] = [];
-    for (const id of recentCommandIds) {
+    for (const id of recentsStore.list()) {
         const entry = registry.get(id);
         if (entry) results.push(entry);
     }
@@ -1164,117 +1467,28 @@ export function getRecentCommands(): CommandEntry[] {
 }
 
 function getNewestRecentCommand(excludeId?: string): CommandEntry | undefined {
-    for (const id of recentCommandIds) {
-        if (id === excludeId || RECENT_COMMAND_SKIP_IDS.has(id)) continue;
-        const entry = registry.get(id);
-        if (entry) return entry;
-    }
-    return undefined;
+    const id = recentsStore.newest(excludeId);
+    if (!id) return undefined;
+    const entry = registry.get(id);
+    if (!entry || recentsStore.isSkippable(id)) return undefined;
+    return entry;
 }
 
-function emitPinned() {
-    const snapshot = new Set(pinnedCommandIds);
-    for (const listener of pinListeners) listener(snapshot);
-}
-
-async function persistPinned() {
-    try {
-        await DataStore.set(PINNED_STORAGE_KEY, Array.from(pinnedCommandIds));
-    } catch (error) {
-        console.error("CommandPalette", "Failed to save pinned commands", error);
-    }
-}
-
-function prunePinned() {
+async function prunePinned() {
     let changed = false;
-    for (const id of Array.from(pinnedCommandIds)) {
+    for (const id of pinsStore.values()) {
         if (!registry.has(id)) {
-            pinnedCommandIds.delete(id);
+            pinsStore.delete(id);
             changed = true;
         }
+    }
+    if (changed) {
+        await pinsStore.persist();
     }
     return changed;
 }
 
-pinsReady.then(() => emitPinned());
-
-const BUILT_IN_CATEGORIES: CommandCategory[] = [
-    {
-        id: DEFAULT_CATEGORY_ID,
-        label: "Quick Actions",
-        description: "Common Equicord shortcuts"
-    },
-    {
-        id: "plugins",
-        label: "Plugins",
-        description: "Manage Equicord and Vencord plugins"
-    },
-    {
-        id: CONTEXT_PROVIDER_ID,
-        label: "Current Context",
-        description: "Actions for the selected channel and guild"
-    },
-    {
-        id: "plugins-enable",
-        label: "Enable Plugin",
-        parentId: "plugins"
-    },
-    {
-        id: "plugins-disable",
-        label: "Disable Plugin",
-        parentId: "plugins"
-    },
-    {
-        id: "plugins-settings",
-        label: "Plugin Settings",
-        parentId: "plugins"
-    },
-    {
-        id: TOOLBOX_ACTIONS_CATEGORY_ID,
-        label: "Plugin Actions",
-        parentId: "plugins"
-    },
-    {
-        id: CHATBAR_ACTIONS_CATEGORY_ID,
-        label: "Chat Bar Buttons",
-        parentId: "plugins"
-    },
-    {
-        id: "plugins-changes",
-        label: "Plugin Changes",
-        parentId: "plugins"
-    },
-    {
-        id: "updates",
-        label: "Updates",
-        description: "Stay up to date with Equicord"
-    },
-    {
-        id: "discord-settings",
-        label: "Discord Settings",
-        description: "Jump to Discord configuration pages"
-    },
-    {
-        id: CUSTOM_COMMANDS_CATEGORY_ID,
-        label: "Custom Commands",
-        description: "User-defined command palette entries"
-    },
-    {
-        id: SESSION_TOOLS_CATEGORY_ID,
-        label: "Session Tools",
-        description: "Utilities for managing your Discord session"
-    },
-    {
-        id: GUILD_CATEGORY_ID,
-        label: "Guilds",
-        description: "Quickly navigate to your guilds"
-    },
-    {
-        id: FRIENDS_CATEGORY_ID,
-        label: "Friends",
-        description: "Quickly DM your friends"
-    }
-];
+void pinsStore.ready.then(() => pinsStore.emit());
 
 const BUILT_IN_COMMANDS: CommandEntry[] = [
     {
@@ -1286,18 +1500,10 @@ const BUILT_IN_COMMANDS: CommandEntry[] = [
         handler: () => SettingsRouter.openUserSettings("equicord_main_panel")
     },
     {
-        id: "open-plugin-settings",
-        label: "Open Plugin Settings",
-        keywords: ["settings", "plugins"],
-        categoryId: DEFAULT_CATEGORY_ID,
-        tags: [TAG_NAVIGATION, TAG_PLUGINS],
-        handler: () => SettingsRouter.openUserSettings("equicord_plugins_panel")
-    },
-    {
         id: "reload-windows",
         label: "Reload Discord",
         description: "Reloads the current Discord window",
-        keywords: ["reload"],
+        keywords: ["reload", "refresh", "restart client", "developer"],
         categoryId: DEFAULT_CATEGORY_ID,
         tags: [TAG_DEVELOPER, TAG_UTILITY],
         handler: () => window.location.reload()
@@ -1305,15 +1511,21 @@ const BUILT_IN_COMMANDS: CommandEntry[] = [
 ];
 
 const DISCORD_SETTINGS_COMMANDS: Array<{ id: string; label: string; route: string; keywords: string[]; description?: string; }> = [
-    { id: "settings-account", label: "Open My Account", route: "my_account_panel", keywords: ["account", "profile"] },
-    { id: "settings-privacy", label: "Open Data & Privacy", route: "data_and_privacy_panel", keywords: ["privacy", "safety", "data"] },
-    { id: "settings-notifications", label: "Open Notifications", route: "notifications_panel", keywords: ["notifications"] },
-    { id: "settings-voice", label: "Open Voice & Video", route: "voice_and_video_panel", keywords: ["voice", "video", "audio"] },
-    { id: "settings-text", label: "Open Text & Images", route: "text_and_images_panel", keywords: ["text", "images"] },
-    { id: "settings-appearance", label: "Open Appearance", route: "appearance_panel", keywords: ["appearance", "theme"] },
-    { id: "settings-accessibility", label: "Open Accessibility", route: "accessibility_panel", keywords: ["accessibility"] },
-    { id: "settings-keybinds", label: "Open Keybinds", route: "keybinds_panel", keywords: ["keybinds", "shortcuts"] },
-    { id: "settings-advanced", label: "Open Advanced", route: "advanced_panel", keywords: ["advanced"] }
+    { id: "settings-account", label: "Open My Account", route: "my_account", keywords: ["account", "profile"] },
+    { id: "settings-profiles", label: "Open Profiles", route: "profiles", keywords: ["profile", "avatar", "bio"] },
+    { id: "settings-privacy", label: "Open Data & Privacy", route: "data_and_privacy", keywords: ["privacy", "safety", "data"] },
+    { id: "settings-notifications", label: "Open Notifications", route: "notifications", keywords: ["notifications"] },
+    { id: "settings-voice", label: "Open Voice & Video", route: "voice_and_video", keywords: ["voice", "video", "audio", "mic", "microphone", "input", "output", "speaker", "camera"] },
+    { id: "settings-chat", label: "Open Chat", route: "chat", keywords: ["chat", "messages"] },
+    { id: "settings-text", label: "Open Text & Images", route: "text_and_images", keywords: ["text", "images"] },
+    { id: "settings-appearance", label: "Open Appearance", route: "appearance", keywords: ["appearance", "theme"] },
+    { id: "settings-accessibility", label: "Open Accessibility", route: "accessibility", keywords: ["accessibility"] },
+    { id: "settings-devices", label: "Open Devices", route: "devices", keywords: ["devices", "sessions"] },
+    { id: "settings-connections", label: "Open Connections", route: "connections", keywords: ["connections", "accounts", "integrations"] },
+    { id: "settings-authorized-apps", label: "Open Authorized Apps", route: "authorized_apps", keywords: ["authorized", "apps", "oauth"] },
+    { id: "settings-family-center", label: "Open Family Center", route: "family_center", keywords: ["family", "safety"] },
+    { id: "settings-keybinds", label: "Open Keybinds", route: "keybinds", keywords: ["keybinds", "shortcuts"] },
+    { id: "settings-advanced", label: "Open Advanced", route: "advanced", keywords: ["advanced"] }
 ];
 
 const settingsCommandsById = new Map<string, typeof DISCORD_SETTINGS_COMMANDS[number]>();
@@ -1336,7 +1548,7 @@ export function registerCategory(category: CommandCategory) {
     }
 
     categories.set(category.id, normalized);
-    bumpRegistryVersion();
+    registryStore.bumpRegistryVersion();
 }
 
 export function listCategories(): CommandCategory[] {
@@ -1363,7 +1575,7 @@ export function getCategoryPath(categoryId?: string): CommandCategory[] {
 }
 
 export function registerCommand(entry: CommandEntry) {
-    const preservePin = pinnedCommandIds.has(entry.id);
+    const preservePin = pinsStore.has(entry.id);
     if (registry.has(entry.id)) {
         removeCommand(entry.id, preservePin ? { preservePin: true } : undefined);
     }
@@ -1418,18 +1630,23 @@ export function registerCommand(entry: CommandEntry) {
         const label = labelByTagId.get(tagId) ?? tagId;
         incrementTagMetadata(tagId, label);
     }
-    searchTextCache.set(entry.id, computeSearchText(normalized));
-    bumpRegistryVersion();
+    registryStore.setCommandSearchText(entry.id, computeSearchText(normalized));
+    registryStore.bumpRegistryVersion();
 }
 
 export function listCommands(): CommandEntry[] {
-    if (!cachedSortedCommands) {
-        cachedSortedCommands = Array.from(registry.values()).sort((a, b) => a.label.localeCompare(b.label));
+    const cached = registryStore.getCachedSortedCommands();
+    if (cached) {
+        return cached;
     }
-    return cachedSortedCommands;
+
+    const sorted = Array.from(registry.values()).sort((a, b) => a.label.localeCompare(b.label));
+    registryStore.setCachedSortedCommands(sorted);
+    return sorted;
 }
 
 export function listCommandsByCategory(categoryId: string): CommandEntry[] {
+    const categoryCommandCache = registryStore.getCategoryCommandCache();
     const cached = categoryCommandCache.get(categoryId);
     if (cached) return cached;
 
@@ -1439,11 +1656,11 @@ export function listCommandsByCategory(categoryId: string): CommandEntry[] {
 }
 
 export function isCommandPinned(commandId: string): boolean {
-    return pinnedCommandIds.has(commandId);
+    return pinsStore.has(commandId);
 }
 
 export async function togglePinned(commandId: string): Promise<boolean | null> {
-    await pinsReady;
+    await pinsStore.ready;
     if (!commandId) return null;
 
     if (!registry.has(commandId)) {
@@ -1451,36 +1668,23 @@ export async function togglePinned(commandId: string): Promise<boolean | null> {
     }
 
     if (!registry.has(commandId)) {
-        console.warn("CommandPalette", "Attempted to pin unavailable command", commandId);
         return null;
     }
 
-    const willPin = !pinnedCommandIds.has(commandId);
+    const willPin = !pinsStore.has(commandId);
     if (willPin) {
-        pinnedCommandIds.add(commandId);
+        pinsStore.add(commandId);
     } else {
-        pinnedCommandIds.delete(commandId);
+        pinsStore.delete(commandId);
     }
 
-    await persistPinned();
-    emitPinned();
+    await pinsStore.persist();
+    pinsStore.emit();
     return willPin;
 }
 
 export function subscribePinned(listener: (pins: Set<string>) => void) {
-    let active = true;
-    const wrapped = (pins: Set<string>) => {
-        if (!active) return;
-        listener(new Set(pins));
-    };
-
-    pinListeners.add(wrapped);
-    void pinsReady.then(() => wrapped(pinnedCommandIds));
-
-    return () => {
-        active = false;
-        pinListeners.delete(wrapped);
-    };
+    return pinsStore.subscribe(listener);
 }
 
 function collectCategoryTreeIds(rootId: string): Set<string> {
@@ -1504,6 +1708,7 @@ function collectCategoryTreeIds(rootId: string): Set<string> {
 }
 
 export function listCommandsInTree(categoryId: string): CommandEntry[] {
+    const treeCommandCache = registryStore.getTreeCommandCache();
     const cached = treeCommandCache.get(categoryId);
     if (cached) return cached;
 
@@ -1514,11 +1719,11 @@ export function listCommandsInTree(categoryId: string): CommandEntry[] {
 }
 
 export function getCommandSearchText(commandId: string): string {
-    return searchTextCache.get(commandId) ?? "";
+    return registryStore.getCommandSearchText(commandId);
 }
 
 export function getRegistryVersion(): number {
-    return registryVersion;
+    return registryStore.getRegistryVersion();
 }
 
 export function listAllTags(): CommandTagMeta[] {
@@ -1535,33 +1740,81 @@ export function getCommandTagIds(commandId: string): string[] {
 }
 
 export function subscribeRegistry(listener: (version: number) => void) {
-    let active = true;
-    const wrapped = (version: number) => {
-        if (!active) return;
-        listener(version);
-    };
+    return registryStore.subscribeRegistry(listener);
+}
 
-    registryListeners.add(wrapped);
-    wrapped(registryVersion);
-
-    return () => {
-        active = false;
-        registryListeners.delete(wrapped);
+function createDefaultCommandActionContext(command: CommandEntry): CommandActionContext {
+    return {
+        command,
+        drilldownCategoryId: command.drilldownCategoryId ?? null,
+        isPageOpen: false,
+        hasCalculatorResult: false,
+        canGoBack: false
     };
 }
 
-export async function executeCommand(entry: CommandEntry) {
+export type ResolvedCommandAction = ResolvedActionByKey<CommandActionDefinition>;
+
+export function resolveCommandActionByActionKey(entry: CommandEntry, actionKey: string, context: CommandActionContext): ResolvedCommandAction | null {
+    return resolveActionByActionKey(entry.actions?.(context), actionKey);
+}
+
+export function resolveCommandActionIntentByActionKey(entry: CommandEntry, actionKey: string, context: CommandActionContext): CommandActionIntent | null {
+    const intent = resolveActionIntentByActionKey(entry.actions?.(context), actionKey);
+    if (!intent) return null;
+
+    switch (intent.type) {
+        case "execute-primary":
+            return { type: "execute-primary" };
+        case "execute-secondary":
+            return intent.actionKey ? { type: "execute-secondary", actionKey: intent.actionKey } : null;
+        case "open-page":
+            return "page" in intent ? { type: "open-page", page: intent.page as PalettePageRef } : null;
+        case "open-drilldown":
+            return "categoryId" in intent && typeof intent.categoryId === "string"
+                ? { type: "open-drilldown", categoryId: intent.categoryId }
+                : null;
+        case "submit-active-page":
+            return { type: "submit-active-page" };
+        case "go-back":
+            return { type: "go-back" };
+        case "copy-calculator":
+            return "mode" in intent && (intent.mode === "formatted" || intent.mode === "raw" || intent.mode === "qa")
+                ? { type: "copy-calculator", mode: intent.mode }
+                : null;
+        default:
+            return null;
+    }
+}
+
+export async function executeCommandAction(entry: CommandEntry, actionKey: string = "primary", context?: CommandActionContext): Promise<boolean> {
+    const resolvedAction = actionKey === "primary"
+        ? null
+        : resolveCommandActionByActionKey(entry, actionKey, context ?? createDefaultCommandActionContext(entry));
+    const action = actionKey === "primary"
+        ? entry.handler
+        : resolvedAction?.action.handler;
+    if (!action) return false;
+
     try {
-        await entry.handler();
-        recordRecent(entry.id);
+        await action();
+        await recentsStore.record(entry.id);
+        return true;
     } catch (error) {
+        if (error instanceof Error && error.name === "CommandExecutionCanceled") {
+            return false;
+        }
         Toasts.show({
             message: `Command failed: ${entry.label}`,
             type: Toasts.Type.FAILURE,
             id: Toasts.genId(),
         });
-        console.error("CommandPalette", error);
+        return false;
     }
+}
+
+export async function executeCommand(entry: CommandEntry) {
+    await executeCommandAction(entry, "primary");
 }
 
 function showToast(message: string, type: ToastKind) {
@@ -1599,6 +1852,7 @@ function buildPluginToggleCommand(plugin: Plugin): CommandEntry {
         keywords,
         categoryId: enabled ? "plugins-disable" : "plugins-enable",
         searchGroup: `plugin-${plugin.name.toLowerCase()}`,
+        hiddenInSearch: true,
         tags: [TAG_PLUGINS, TAG_UTILITY],
         handler: async () => {
             const before = isPluginEnabled(plugin.name);
@@ -1618,6 +1872,388 @@ function buildPluginToggleCommand(plugin: Plugin): CommandEntry {
 
 function refreshPluginToggleCommand(plugin: Plugin) {
     registerCommand(buildPluginToggleCommand(plugin));
+}
+
+function registerPluginManagerCommands() {
+    registerCommand({
+        id: PLUGIN_MANAGER_ROOT_COMMAND_ID,
+        label: "Plugins",
+        description: "Manage plugins by category.",
+        keywords: ["plugins", "plugin manager", "enable", "disable", "settings"],
+        categoryId: DEFAULT_CATEGORY_ID,
+        tags: [TAG_PLUGINS, TAG_NAVIGATION],
+        drilldownCategoryId: "plugins",
+        handler: () => undefined
+    });
+
+    registerCommand({
+        id: PLUGIN_MANAGER_ENABLE_COMMAND_ID,
+        label: "Enable",
+        description: "Enable plugins.",
+        keywords: ["plugins", "enable"],
+        categoryId: "plugins",
+        tags: [TAG_PLUGINS, TAG_NAVIGATION],
+        hiddenInSearch: true,
+        drilldownCategoryId: "plugins-enable",
+        handler: () => undefined
+    });
+
+    registerCommand({
+        id: PLUGIN_MANAGER_DISABLE_COMMAND_ID,
+        label: "Disable",
+        description: "Disable plugins.",
+        keywords: ["plugins", "disable"],
+        categoryId: "plugins",
+        tags: [TAG_PLUGINS, TAG_NAVIGATION],
+        hiddenInSearch: true,
+        drilldownCategoryId: "plugins-disable",
+        handler: () => undefined
+    });
+
+    registerCommand({
+        id: PLUGIN_MANAGER_SETTINGS_COMMAND_ID,
+        label: "Settings",
+        description: "Open plugin settings and actions.",
+        keywords: ["plugins", "settings", "actions"],
+        categoryId: "plugins",
+        tags: [TAG_PLUGINS, TAG_NAVIGATION],
+        hiddenInSearch: true,
+        drilldownCategoryId: "plugins-settings",
+        handler: () => undefined
+    });
+}
+
+function readField(record: Record<string, unknown>, keys: string[]): unknown {
+    for (const key of keys) {
+        if (key in record) return record[key];
+    }
+    return undefined;
+}
+
+function toRecord(input: unknown): Record<string, unknown> | null {
+    if (!input || typeof input !== "object") return null;
+    return input as Record<string, unknown>;
+}
+
+function parseTimestamp(input: unknown): number | undefined {
+    if (typeof input === "number" && Number.isFinite(input)) return input;
+    if (typeof input !== "string") return undefined;
+    const parsed = Date.parse(input);
+    if (Number.isNaN(parsed)) return undefined;
+    return parsed;
+}
+
+function cleanMentionContent(input: string | undefined): string | undefined {
+    if (!input) return undefined;
+    const normalized = input.replace(/\s+/g, " ").trim();
+    if (!normalized) return undefined;
+    return normalized.length > 80 ? `${normalized.slice(0, 79)}…` : normalized;
+}
+
+function normalizeMentionEntry(input: unknown): MentionEntry | null {
+    const root = toRecord(input);
+    if (!root) return null;
+
+    const nested = [
+        root,
+        toRecord(root.message),
+        toRecord(root.messageSnapshot),
+        toRecord(root.rawMessage),
+        toRecord(root.latestMessage)
+    ].filter(Boolean) as Array<Record<string, unknown>>;
+
+    const readString = (keys: string[]): string | undefined => {
+        for (const source of nested) {
+            const value = readField(source, keys);
+            if (typeof value === "string" && value.length) return value;
+        }
+        return undefined;
+    };
+
+    const readId = (keys: string[]): string | undefined => {
+        for (const source of nested) {
+            const value = readField(source, keys);
+            if (typeof value === "string" && value.length) return value;
+            if (typeof value === "number" && Number.isFinite(value)) return `${Math.trunc(value)}`;
+            if (typeof value === "bigint") return value.toString();
+        }
+        return undefined;
+    };
+
+    const readTimestamp = (): number | undefined => {
+        for (const source of nested) {
+            const value = readField(source, ["timestamp", "created_at", "sent_at"]);
+            const parsed = parseTimestamp(value);
+            if (parsed != null) return parsed;
+        }
+        return undefined;
+    };
+
+    const authorFromNested = () => {
+        for (const source of nested) {
+            const author = toRecord(source.author) ?? toRecord(source.user);
+            if (!author) continue;
+            const id = readField(author, ["id", "user_id"]);
+            if (typeof id === "string" && id.length) return id;
+            if (typeof id === "number" && Number.isFinite(id)) return `${Math.trunc(id)}`;
+            if (typeof id === "bigint") return id.toString();
+        }
+        return undefined;
+    };
+
+    const messageId = readId(["message_id", "id"]);
+    const channelId = readId(["channel_id", "channelId"]);
+    if (!messageId && !channelId) return null;
+
+    const guildId = readId(["guild_id", "guildId"]);
+    const authorId = readId(["author_id", "user_id", "authorId"]) ?? authorFromNested();
+    const content = cleanMentionContent(readString(["content", "message_content", "title", "summary"]));
+    const timestamp = readTimestamp();
+    const key = messageId ? `message-${messageId}` : `channel-${channelId}`;
+
+    return {
+        key,
+        messageId,
+        channelId,
+        guildId,
+        authorId,
+        content,
+        timestamp
+    };
+}
+
+function collectMentionEntries(): MentionEntry[] {
+    const fromInbox = NotificationsInboxStore?.getInboxMessages?.() ?? [];
+    const fromRecentSettings = RecentMentionsStore?.getSettingsFilteredMentions?.() ?? [];
+    const fromRecent = RecentMentionsStore?.getMentions?.() ?? [];
+    const merged = [
+        ...(Array.isArray(fromInbox) ? fromInbox : []),
+        ...(Array.isArray(fromRecentSettings) ? fromRecentSettings : []),
+        ...(Array.isArray(fromRecent) ? fromRecent : [])
+    ];
+    const mentionChannelIds = ReadStateStoreRef?.getMentionChannelIds?.() ?? [];
+    const readStatesByChannel = ReadStateStoreRef?.getReadStatesByChannel?.() ?? {};
+    const activeMentionChannelIds = new Set<string>();
+    const canReadMentionState = Boolean(ReadStateStoreRef?.getMentionChannelIds || ReadStateStoreRef?.getMentionCount);
+
+    for (const channelId of mentionChannelIds) {
+        if (typeof channelId !== "string" || !channelId) continue;
+        activeMentionChannelIds.add(channelId);
+    }
+
+    for (const channelId of Object.keys(readStatesByChannel)) {
+        if (!channelId) continue;
+        const mentionCount = Math.max(0, ReadStateStoreRef?.getMentionCount?.(channelId) ?? 0);
+        if (mentionCount <= 0) continue;
+        activeMentionChannelIds.add(channelId);
+    }
+
+    const seen = new Set<string>();
+    const normalized: MentionEntry[] = [];
+    const contentByChannelId = new Map<string, string>();
+
+    for (const value of merged) {
+        const entry = normalizeMentionEntry(value);
+        if (!entry) continue;
+        if (!entry.channelId) continue;
+        if (
+            canReadMentionState
+            && entry.channelId
+            && activeMentionChannelIds.size > 0
+            && !activeMentionChannelIds.has(entry.channelId)
+        ) {
+            continue;
+        }
+        if (seen.has(entry.key)) continue;
+        seen.add(entry.key);
+        normalized.push(entry);
+        if (entry.channelId && entry.content && !contentByChannelId.has(entry.channelId)) {
+            contentByChannelId.set(entry.channelId, entry.content);
+        }
+    }
+
+    const addChannelPingEntry = (channelId: string, forceMention = false) => {
+        if (!channelId || seen.has(`channel-${channelId}`)) return;
+        const channel = ChannelStore.getChannel(channelId);
+        if (!channel) {
+            if (!forceMention) return;
+            seen.add(`channel-${channelId}`);
+            normalized.push({
+                key: `channel-${channelId}`,
+                channelId,
+                content: "@ ping"
+            });
+            return;
+        }
+
+        const mentionCount = Math.max(0, ReadStateStoreRef?.getMentionCount?.(channelId) ?? 0);
+        const isDm = typeof channel.isDM === "function" ? channel.isDM() : channel.type === 1;
+        const isGroupDm = typeof channel.isGroupDM === "function" ? channel.isGroupDM() : channel.type === 3;
+        const hasPing = forceMention || mentionCount > 0;
+
+        if (!hasPing) return;
+
+        const recipientId = isDm ? channel.recipients?.[0] : undefined;
+        const recipient = recipientId ? UserStore.getUser(recipientId) : undefined;
+        const recipientName = recipient?.globalName ?? recipient?.username;
+        const fallbackContent = isDm
+            ? (recipientName ? `@ ping from ${recipientName}` : "@ ping in direct message")
+            : isGroupDm
+                ? (channel.name ? `@ ping in ${channel.name}` : "@ ping in group DM")
+                : (channel.name ? `@ ping in #${channel.name}` : "@ ping in server channel");
+        const content = contentByChannelId.get(channelId) ?? fallbackContent;
+
+        seen.add(`channel-${channelId}`);
+        normalized.push({
+            key: `channel-${channelId}`,
+            channelId,
+            guildId: channel.guild_id ?? undefined,
+            authorId: recipientId,
+            content
+        });
+    };
+
+    for (const channelId of mentionChannelIds) {
+        if (typeof channelId !== "string" || !channelId) continue;
+        addChannelPingEntry(channelId, true);
+    }
+
+    for (const channelId of Object.keys(readStatesByChannel)) {
+        if (!channelId) continue;
+        const mentionCount = Math.max(0, ReadStateStoreRef?.getMentionCount?.(channelId) ?? 0);
+        if (mentionCount <= 0) continue;
+        addChannelPingEntry(channelId, true);
+    }
+
+    normalized.sort((left, right) => (right.timestamp ?? 0) - (left.timestamp ?? 0));
+    return normalized;
+}
+
+function getMentionIcon(entry: MentionEntry) {
+    if (entry.authorId) {
+        const user = UserStore.getUser(entry.authorId);
+        const userIcon = user ? IconUtils.getUserAvatarURL(user) : undefined;
+        if (userIcon) return makeIconFromUrl(userIcon);
+    }
+
+    if (entry.guildId) {
+        const guild = GuildStore.getGuild(entry.guildId);
+        const guildIcon = guild ? IconUtils.getGuildIconURL({ id: guild.id, icon: guild.icon, size: 64 }) : undefined;
+        if (guildIcon) return makeIconFromUrl(guildIcon);
+    }
+
+    return undefined;
+}
+
+function getMentionRoute(entry: MentionEntry): string | null {
+    const { channelId, guildId, messageId } = entry;
+    if (!channelId) return null;
+
+    const channel = ChannelStore.getChannel(channelId);
+    const nextGuildId = guildId ?? channel?.guild_id ?? null;
+    const routeGuildId = nextGuildId ?? "@me";
+    if (messageId) return `/channels/${routeGuildId}/${channelId}/${messageId}`;
+    return `/channels/${routeGuildId}/${channelId}`;
+}
+
+function navigateToMention(entry: MentionEntry): boolean {
+    const { channelId, messageId } = entry;
+    if (!channelId) return false;
+
+    const channel = ChannelStore.getChannel(channelId);
+    const guildId = entry.guildId ?? channel?.guild_id ?? null;
+
+    if (guildId) {
+        if (messageId) {
+            NavigationRouter.transitionTo(`/channels/${guildId}/${channelId}/${messageId}`);
+            return true;
+        }
+
+        NavigationRouter.transitionToGuild(guildId, channelId);
+        return true;
+    }
+
+    ChannelRouter.transitionToChannel(channelId);
+    return true;
+}
+
+function getMentionSubtitle(entry: MentionEntry): string {
+    const { channelId, guildId } = entry;
+    if (!channelId) return "Mention";
+
+    const channel = ChannelStore.getChannel(channelId);
+    const channelName = channel?.name ? `#${channel.name}` : "Direct Message";
+    const guildName = GuildStore.getGuild(guildId ?? "")?.name ?? "";
+    if (!guildName || guildName === channelName) return channelName;
+    return `${channelName} • ${guildName}`;
+}
+
+function createMentionCommands(): CommandEntry[] {
+    const mentions = collectMentionEntries();
+
+    if (mentions.length === 0) {
+        return [];
+    }
+
+    return mentions.map((mention, index) => {
+        const subtitle = getMentionSubtitle(mention);
+        const { content } = mention;
+        const icon = getMentionIcon(mention);
+        const label = content ?? `Open mention ${index + 1}`;
+
+        return {
+            id: `mentions-item-${mention.key}`,
+            label,
+            description: subtitle,
+            keywords: ["mentions", "inbox", subtitle.toLowerCase()],
+            categoryId: MENTIONS_CATEGORY_ID,
+            hiddenInSearch: true,
+            icon,
+            tags: [TAG_NAVIGATION],
+            closeAfterExecute: true,
+            handler: () => {
+                if (navigateToMention(mention)) return;
+                const route = getMentionRoute(mention);
+                if (route) {
+                    NavigationRouter.transitionTo(route);
+                    return;
+                }
+                showToast("This mention is no longer available.", Toasts.Type.FAILURE);
+            }
+        } satisfies CommandEntry;
+    });
+}
+
+export function getMentionCommandsSnapshot(): CommandEntry[] {
+    return createMentionCommands();
+}
+
+function registerMentionsProvider() {
+    registerContextProvider({
+        id: MENTION_PROVIDER_ID,
+        getCommands: () => createMentionCommands(),
+        subscribe: refresh => {
+            const events = [
+                "CONNECTION_OPEN",
+                "LOAD_RECENT_MENTIONS_SUCCESS",
+                "NOTIFICATIONS_INBOX_LOAD_MORE_INBOX_SUCCESS",
+                "NOTIFICATIONS_INBOX_ITEM_ACK",
+                "RECENT_MENTION_DELETE",
+                "MESSAGE_CREATE",
+                "MESSAGE_DELETE"
+            ];
+
+            for (const event of events) {
+                FluxDispatcher.subscribe?.(event, refresh);
+            }
+
+            return () => {
+                for (const event of events) {
+                    FluxDispatcher.unsubscribe?.(event, refresh);
+                }
+            };
+        }
+    });
 }
 
 function registerPluginToggleCommands() {
@@ -1654,6 +2290,7 @@ function registerPluginSettingsCommands() {
             description: plugin.description,
             keywords,
             categoryId: "plugins-settings",
+            hiddenInSearch: true,
             handler: () => openPluginModal(plugin),
             tags: [TAG_PLUGINS, TAG_NAVIGATION],
             searchGroup: `plugin-${plugin.name.toLowerCase()}`
@@ -1678,9 +2315,8 @@ function registerUpdateCommands() {
                 } else {
                     showToast("No updates found.", Toasts.Type.MESSAGE);
                 }
-            } catch (error) {
+            } catch {
                 showToast("Failed to check for updates.", Toasts.Type.FAILURE);
-                console.error("CommandPalette", error);
             }
         }
     });
@@ -1697,32 +2333,36 @@ function registerUpdateCommands() {
 }
 
 function registerDiscordSettingsCommands() {
+    const buildSettingsKeywords = (command: typeof DISCORD_SETTINGS_COMMANDS[number]) => {
+        const routePhrases = [
+            command.route,
+            command.route.replace(/_/g, " "),
+            ...resolveSettingsRouteCandidates(command.route)
+        ];
+
+        return Array.from(new Set([
+            ...command.keywords,
+            ...routePhrases,
+            "open settings",
+            "discord settings"
+        ]));
+    };
+
     for (const command of DISCORD_SETTINGS_COMMANDS) {
         settingsCommandsById.set(command.id, command);
-        settingsCommandsByRoute.set(command.route, command);
-        if (command.id === "settings-privacy") {
-            settingsCommandsByRoute.set("Privacy & Safety", command);
+        const routeCandidates = resolveSettingsRouteCandidates(command.route);
+        for (const candidate of routeCandidates) {
+            settingsCommandsByRoute.set(candidate, command);
         }
         registerCommand({
             id: command.id,
             label: command.label,
             description: command.description,
-            keywords: command.keywords,
+            keywords: buildSettingsKeywords(command),
             categoryId: "discord-settings",
             tags: [TAG_NAVIGATION],
             handler: async () => {
-                const fallbackRoute = command.id === "settings-privacy" ? "privacy_and_safety_panel" : null;
-
-                try {
-                    await SettingsRouter.openUserSettings(command.route);
-                } catch (error) {
-                    if (fallbackRoute) {
-                        await SettingsRouter.openUserSettings(fallbackRoute);
-                    } else {
-                        console.error("CommandPalette", "Failed to open Discord settings", command.route, error);
-                        showToast(`Unable to open ${command.label}.`, Toasts.Type.FAILURE);
-                    }
-                }
+                await openDiscordSettingsRoute(command.route, command.label);
             }
         });
     }
@@ -1733,7 +2373,8 @@ export function getSettingsCommandMetaById(id: string) {
 }
 
 export function getSettingsCommandMetaByRoute(route: string) {
-    return settingsCommandsByRoute.get(route);
+    const normalized = normalizeSettingsRouteInput(route);
+    return settingsCommandsByRoute.get(normalized);
 }
 
 function getActiveChannel() {
@@ -1747,14 +2388,30 @@ function getActiveGuildId(): string | null {
     return guildId ?? null;
 }
 
-function getChannelDisplayLabel(channel: any): string {
+function buildChannelRoute(channelId: string): string {
+    const channel = ChannelStore.getChannel(channelId);
+    const guildId = channel?.guild_id ?? "@me";
+    return `/channels/${guildId}/${channelId}`;
+}
+
+function getChannelPermalink(channelId: string): string {
+    return `https://discord.com${buildChannelRoute(channelId)}`;
+}
+
+function getGuildPermalink(guildId: string): string {
+    return `https://discord.com/channels/${guildId}`;
+}
+
+function getChannelDisplayLabel(channel: ChannelLike | null): string {
     if (!channel) return "Current Channel";
     try {
         if (typeof channel.isDM === "function" && channel.isDM()) return "Direct Message";
         if (typeof channel.isGroupDM === "function" && channel.isGroupDM()) return channel.name ?? "Group DM";
         if (channel.name) return `#${channel.name}`;
         if (channel.rawRecipients?.length) return "Direct Message";
-    } catch { }
+    } catch (error) {
+        logger.error("Failed to resolve channel display label", error);
+    }
     return "Current Channel";
 }
 
@@ -1774,7 +2431,9 @@ function buildMuteConfig(durationMinutes?: number | null) {
 }
 
 function toggleChannelMuteState(channelId: string, guildId: string | null, mute: boolean, durationMinutes?: number) {
-    const actions = NotificationSettingsActionCreators as any;
+    const actions = NotificationSettingsActionCreators as {
+        updateChannelOverrideSettings?: (guildId: string | null, channelId: string, payload: Record<string, unknown>) => void;
+    } | undefined;
     if (!actions?.updateChannelOverrideSettings) {
         showToast("Channel mute controls unavailable.", Toasts.Type.FAILURE);
         return;
@@ -1788,14 +2447,15 @@ function toggleChannelMuteState(channelId: string, guildId: string | null, mute:
     try {
         actions.updateChannelOverrideSettings(guildId, channelId, payload);
         showToast(`${mute ? "Muted" : "Unmuted"} channel.`, Toasts.Type.SUCCESS);
-    } catch (error) {
-        console.error("CommandPalette", "Failed to toggle channel mute", error);
+    } catch {
         showToast("Failed to update channel mute state.", Toasts.Type.FAILURE);
     }
 }
 
 function toggleGuildMuteState(guildId: string, mute: boolean, durationMinutes?: number) {
-    const actions = NotificationSettingsActionCreators as any;
+    const actions = NotificationSettingsActionCreators as {
+        updateGuildNotificationSettings?: (guildId: string, payload: Record<string, unknown>) => void;
+    } | undefined;
     if (!actions?.updateGuildNotificationSettings) {
         showToast("Guild mute controls unavailable.", Toasts.Type.FAILURE);
         return;
@@ -1809,8 +2469,7 @@ function toggleGuildMuteState(guildId: string, mute: boolean, durationMinutes?: 
     try {
         actions.updateGuildNotificationSettings(guildId, payload);
         showToast(`${mute ? "Muted" : "Unmuted"} server.`, Toasts.Type.SUCCESS);
-    } catch (error) {
-        console.error("CommandPalette", "Failed to toggle guild mute", error);
+    } catch {
         showToast("Failed to update server mute state.", Toasts.Type.FAILURE);
     }
 }
@@ -1838,8 +2497,8 @@ function openPinsForChannel(channelId: string) {
                 });
                 dispatched = true;
                 break;
-            } catch (error) {
-                console.error("CommandPalette", `Failed to dispatch ${event} for pins`, error);
+            } catch {
+                continue;
             }
         }
     }
@@ -1848,8 +2507,7 @@ function openPinsForChannel(channelId: string) {
 
     try {
         FluxDispatcher.dispatch({ type: "CHANNEL_PINS_MODAL_OPEN", channelId });
-    } catch (error) {
-        console.error("CommandPalette", "Failed to open pins", error);
+    } catch {
         showToast("Unable to open pins panel.", Toasts.Type.FAILURE);
     }
 }
@@ -1894,8 +2552,7 @@ function createContextualCommands(): CommandEntry[] {
                     if (!ackTarget) throw new Error("Channel not found");
                     await Promise.resolve(ackChannel(ackTarget));
                     showToast(`Marked ${channelLabel} as read.`, Toasts.Type.SUCCESS);
-                } catch (error) {
-                    console.error("CommandPalette", "Failed to mark read", error);
+                } catch {
                     showToast("Failed to mark channel as read.", Toasts.Type.FAILURE);
                 }
             }
@@ -1908,6 +2565,33 @@ function createContextualCommands(): CommandEntry[] {
             categoryId: CONTEXT_PROVIDER_ID,
             tags: [TAG_CONTEXT, TAG_NAVIGATION],
             handler: () => openPinsForChannel(channelId)
+        });
+
+        commands.push({
+            id: "context-channel-copy-link",
+            label: `Copy Link to ${channelLabel}`,
+            keywords: ["context", "channel", "copy", "link"],
+            categoryId: CONTEXT_PROVIDER_ID,
+            tags: [TAG_CONTEXT, TAG_UTILITY],
+            handler: () => copyWithToast(getChannelPermalink(channelId), "Channel link copied.")
+        });
+
+        commands.push({
+            id: "context-channel-copy-id",
+            label: `Copy ${channelLabel} ID`,
+            keywords: ["context", "channel", "copy", "id"],
+            categoryId: CONTEXT_PROVIDER_ID,
+            tags: [TAG_CONTEXT, TAG_UTILITY],
+            handler: () => copyWithToast(channelId, "Channel ID copied.")
+        });
+
+        commands.push({
+            id: "context-channel-open-browser",
+            label: `Open ${channelLabel} in Browser`,
+            keywords: ["context", "channel", "open", "browser", "external"],
+            categoryId: CONTEXT_PROVIDER_ID,
+            tags: [TAG_CONTEXT, TAG_NAVIGATION],
+            handler: () => openExternalUrl(getChannelPermalink(channelId))
         });
 
         if (channel.guild_id && UserGuildSettingsStore?.isChannelMuted) {
@@ -1926,6 +2610,24 @@ function createContextualCommands(): CommandEntry[] {
     if (guildId && guildId !== "@me" && UserGuildSettingsStore?.isMuted) {
         const guildLabel = getGuildDisplayLabel(guildId);
         const isGuildMuted = UserGuildSettingsStore.isMuted(guildId);
+
+        commands.push({
+            id: "context-guild-copy-id",
+            label: `Copy ${guildLabel} ID`,
+            keywords: ["context", "guild", "copy", "id"],
+            categoryId: CONTEXT_PROVIDER_ID,
+            tags: [TAG_CONTEXT, TAG_UTILITY],
+            handler: () => copyWithToast(guildId, "Server ID copied.")
+        });
+
+        commands.push({
+            id: "context-guild-copy-link",
+            label: `Copy Link to ${guildLabel}`,
+            keywords: ["context", "guild", "copy", "link"],
+            categoryId: CONTEXT_PROVIDER_ID,
+            tags: [TAG_CONTEXT, TAG_UTILITY],
+            handler: () => copyWithToast(getGuildPermalink(guildId), "Server link copied.")
+        });
 
         commands.push({
             id: "context-guild-toggle-mute",
@@ -1966,9 +2668,32 @@ function createContextualCommands(): CommandEntry[] {
                 handler: async () => {
                     try {
                         await Promise.resolve(GuildSettingsActions.open(guildId, "OVERVIEW"));
-                    } catch (error) {
-                        console.error("CommandPalette", "Failed to open guild settings", error);
+                    } catch {
                         showToast("Unable to open guild settings.", Toasts.Type.FAILURE);
+                    }
+                }
+            });
+        }
+
+        if (GuildMembershipActions?.leaveGuild) {
+            commands.push({
+                id: "context-guild-leave",
+                label: `Leave ${guildLabel}`,
+                description: "Leaves the current server.",
+                keywords: ["context", "guild", "server", "leave", "exit"],
+                categoryId: CONTEXT_PROVIDER_ID,
+                tags: [TAG_CONTEXT, TAG_UTILITY],
+                danger: true,
+                handler: async () => {
+                    const confirmed = window.confirm(`Leave ${guildLabel}?`);
+                    if (!confirmed) return;
+
+                    try {
+                        await Promise.resolve(GuildMembershipActions.leaveGuild(guildId));
+                        NavigationRouter.transitionTo("/channels/@me");
+                        showToast(`Left ${guildLabel}.`, Toasts.Type.SUCCESS);
+                    } catch {
+                        showToast("Unable to leave this server.", Toasts.Type.FAILURE);
                     }
                 }
             });
@@ -2004,35 +2729,129 @@ async function runMacroSteps(steps: string[], visited: Set<string>) {
     }
 }
 
-async function executeCustomCommand(command: CustomCommandDefinition) {
+class CommandExecutionCanceled extends Error {
+    constructor() {
+        super("Command execution canceled");
+        this.name = "CommandExecutionCanceled";
+    }
+}
+
+function describeCustomAction(command: CustomCommandDefinition): string {
     const { action } = command;
-    try {
-        switch (action.type) {
-            case "command":
-                await runCommandById(action.commandId, new Set([command.id]));
-                break;
-            case "settings":
-                SettingsRouter.openUserSettings(action.route);
-                break;
-            case "url": {
-                const external = (window as any)?.DiscordNative?.app?.openExternalURL;
-                if (action.openExternal && typeof external === "function") {
-                    external(action.url);
-                } else {
-                    window.open(action.url, "_blank", "noopener,noreferrer");
-                }
-                break;
-            }
-            case "macro":
-                await runMacroSteps(action.steps, new Set([command.id]));
-                break;
-            default:
-                showToast("Unsupported custom command action.", Toasts.Type.FAILURE);
-                break;
+    switch (action.type) {
+        case "command": {
+            const targetId = action.commandId.trim();
+            const target = targetId ? getCommandById(targetId) : null;
+            return target
+                ? `Run “${target.label}” (${target.id}).`
+                : `Run command ID “${targetId || "not set"}”.`;
         }
+        case "settings": {
+            const route = action.route.trim();
+            const target = route ? getSettingsCommandMetaByRoute(route) : undefined;
+            return target
+                ? `Open settings page “${target.label}” (${target.route}).`
+                : `Open settings route “${route || "not set"}”.`;
+        }
+        case "url":
+            return `Open URL “${action.url.trim() || "not set"}” ${action.openExternal ? "externally" : "inside Discord when possible"}.`;
+        case "macro": {
+            if (!action.steps.length) return "Run macro with no configured steps.";
+            const steps = action.steps.map((step, index) => {
+                const target = getCommandById(step);
+                return `${index + 1}. ${target?.label ?? "Unknown command"} (${step})`;
+            }).join("\n");
+            return `Run macro steps:\n${steps}`;
+        }
+        default:
+            return "Run this custom command.";
+    }
+}
+
+function confirmCustomCommand(command: CustomCommandDefinition): Promise<boolean> {
+    return new Promise(resolve => {
+        Alerts.show({
+            title: command.label || "Confirm command",
+            body: (
+                <div style={{ whiteSpace: "pre-wrap" }}>
+                    {describeCustomAction(command)}
+                </div>
+            ),
+            confirmText: "Yes",
+            cancelText: "Cancel",
+            onConfirm: () => resolve(true),
+            onCancel: () => resolve(false)
+        });
+    });
+}
+
+async function performCustomCommand(command: CustomCommandDefinition) {
+    const { action } = command;
+    switch (action.type) {
+        case "command":
+            await runCommandById(action.commandId, new Set([command.id]));
+            break;
+        case "settings":
+            await openDiscordSettingsRoute(action.route);
+            break;
+        case "url": {
+            let parsed: URL;
+            try {
+                parsed = new URL(action.url.trim());
+            } catch {
+                showToast("Please enter a valid URL.", Toasts.Type.FAILURE);
+                return;
+            }
+
+            const isHttpProtocol = parsed.protocol === "http:" || parsed.protocol === "https:";
+
+            if (action.openExternal) {
+                if (!isHttpProtocol) {
+                    showToast("Only HTTP(S) URLs can be opened externally.", Toasts.Type.FAILURE);
+                    return;
+                }
+
+                openExternalUrl(parsed.toString());
+                return;
+            }
+
+            const route = toDiscordInternalRoute(parsed);
+            if (route) {
+                NavigationRouter.transitionTo(route);
+            } else {
+                if (!isHttpProtocol) {
+                    showToast("Only HTTP(S) URLs can be opened externally.", Toasts.Type.FAILURE);
+                    return;
+                }
+
+                openExternalUrl(parsed.toString());
+                showToast("Non-Discord links open externally.", Toasts.Type.MESSAGE);
+            }
+            return;
+        }
+        case "macro":
+            await runMacroSteps(action.steps, new Set([command.id]));
+            break;
+        default:
+            showToast("Unsupported custom command action.", Toasts.Type.FAILURE);
+            break;
+    }
+}
+
+async function executeCustomCommand(command: CustomCommandDefinition) {
+    try {
+        if (command.showConfirmation) {
+            const confirmed = await confirmCustomCommand(command);
+            if (!confirmed) {
+                throw new CommandExecutionCanceled();
+            }
+        }
+        await performCustomCommand(command);
     } catch (error) {
-        console.error("CommandPalette", "Failed to execute custom command", command, error);
-        showToast(`Failed to run ${command.label}.`, Toasts.Type.FAILURE);
+        if (error instanceof CommandExecutionCanceled) {
+            throw error;
+        }
+        throw error;
     }
 }
 
@@ -2042,9 +2861,8 @@ function createCustomCommandEntries(): CommandEntry[] {
         label: command.label || "Untitled Command",
         description: command.description,
         keywords: command.keywords,
-        tags: command.tags,
         categoryId: command.categoryId ?? CUSTOM_COMMANDS_CATEGORY_ID,
-        danger: command.danger,
+        icon: getCustomCommandIconById(command.iconId && command.iconId !== "auto" ? command.iconId : resolveCustomCommandDefaultIconId(command.action.type)),
         handler: () => executeCustomCommand(command)
     }));
 }
@@ -2058,13 +2876,13 @@ function registerCustomCommandProvider() {
 }
 
 function clearDesktopNotifications() {
-    const api = (window as any)?.DiscordNative?.notifications;
-    if (api?.clearAll) {
+    const discordNative = window as WindowWithDiscordNative;
+    const notifications = discordNative.DiscordNative?.notifications;
+    if (typeof notifications?.clearAll === "function") {
         try {
-            api.clearAll();
+            notifications.clearAll();
             showToast("Cleared desktop notifications.", Toasts.Type.SUCCESS);
-        } catch (error) {
-            console.error("CommandPalette", "Failed to clear notifications", error);
+        } catch {
             showToast("Failed to clear notifications.", Toasts.Type.FAILURE);
         }
     } else {
@@ -2173,8 +2991,8 @@ async function reopenLastClosedDm() {
                 if (typeof result === "string") {
                     reopenedId = result;
                 }
-            } catch (error) {
-                console.error("CommandPalette", "Failed to open DM via ChannelActionCreators", error);
+            } catch {
+                reopenedId = null;
             }
 
             if (!reopenedId) {
@@ -2199,8 +3017,7 @@ async function reopenLastClosedDm() {
         }
 
         showToast("The DM is no longer available.", Toasts.Type.FAILURE);
-    } catch (error) {
-        console.error("CommandPalette", "Failed to reopen DM", error);
+    } catch {
         showToast("The DM is no longer available.", Toasts.Type.FAILURE);
     } finally {
         lastClosedDm = null;
@@ -2212,28 +3029,14 @@ function registerSessionCommands() {
 
     const commands: CommandEntry[] = [
         {
-            id: "session-dnd-30",
-            label: "Set DND for 30 Minutes",
-            keywords: ["session", "status", "dnd", "30"],
+            id: "session-dnd-timer",
+            label: "Set DND Timer",
+            description: "Choose how long Do Not Disturb should stay active.",
+            keywords: ["session", "status", "dnd", "timer", "duration", "focus", "busy", "cancel"],
             categoryId: SESSION_TOOLS_CATEGORY_ID,
             tags: [TAG_SESSION, TAG_UTILITY],
-            handler: () => scheduleStatusReset(30)
-        },
-        {
-            id: "session-dnd-60",
-            label: "Set DND for 1 Hour",
-            keywords: ["session", "status", "dnd", "60"],
-            categoryId: SESSION_TOOLS_CATEGORY_ID,
-            tags: [TAG_SESSION, TAG_UTILITY],
-            handler: () => scheduleStatusReset(60)
-        },
-        {
-            id: "session-status-cancel",
-            label: "Cancel Status Timer",
-            keywords: ["session", "status", "cancel"],
-            categoryId: SESSION_TOOLS_CATEGORY_ID,
-            tags: [TAG_SESSION, TAG_UTILITY],
-            handler: () => clearScheduledStatusReset()
+            page: { id: "status-timer" },
+            handler: () => undefined
         },
         {
             id: "session-clear-notifications",
@@ -2262,41 +3065,17 @@ function registerGuildCommands() {
     const guilds = GuildStore.getGuilds?.() ?? {};
 
     Object.values(guilds).forEach((guild: Guild) => {
+        const icon = makeIconFromUrl(IconUtils.getGuildIconURL({ id: guild.id, icon: guild.icon, size: 64 }) ?? undefined);
         registerCommand({
             id: `open-guild-${guild.id}`,
             label: `Navigate to ${guild.name}`,
             keywords: ["guild", "server", guild.name.toLowerCase()],
             categoryId: GUILD_CATEGORY_ID,
+            hiddenInSearch: true,
             tags: [TAG_GUILDS, TAG_NAVIGATION],
+            icon,
             handler: () => {
                 NavigationRouter.transitionToGuild(guild.id);
-            }
-        } satisfies CommandEntry);
-    });
-}
-
-function registerFriendCommands() {
-    const friendIds = RelationshipStore.getFriendIDs();
-
-    friendIds.forEach((userId: string) => {
-        const user = UserStore.getUser(userId);
-        if (!user) return;
-
-        const displayName = RelationshipStore.getNickname(userId) || user.globalName || null;
-
-        const username = displayName
-            ? `${displayName} (@${user.username})`
-            : user.username;
-
-        registerCommand({
-            id: `open-friend-${user.id}`,
-            label: `Open DM with ${username}`,
-            keywords: ["friend", "dm", username.toLowerCase()],
-            categoryId: FRIENDS_CATEGORY_ID,
-            tags: [TAG_FRIENDS, TAG_NAVIGATION],
-            handler: () => {
-                const channelId = ChannelStore.getDMFromUserId(user.id);
-                NavigationRouter.transitionTo(`/channels/@me/${channelId}`);
             }
         } satisfies CommandEntry);
     });
@@ -2357,7 +3136,8 @@ function registerCommandPaletteUtilities() {
         label: "Open Command Palette Settings",
         description: "Configure the Command Palette plugin",
         keywords: ["command", "palette", "settings"],
-        categoryId: DEFAULT_CATEGORY_ID,
+        categoryId: "plugins-settings",
+        hiddenInSearch: true,
         tags: [TAG_NAVIGATION, TAG_DEVELOPER],
         handler: () => {
             openPluginModal(commandPalette);
@@ -2365,30 +3145,266 @@ function registerCommandPaletteUtilities() {
     });
 
     registerCommand({
-        id: "command-palette-show-recent",
-        label: "Show Recent Commands",
-        description: "Displays the last executed commands",
-        keywords: ["recent", "history"],
+        id: "command-palette-open-home",
+        label: "Go to Home",
+        description: "Opens your direct messages home.",
+        keywords: ["home", "dm", "messages", "navigate"],
         categoryId: DEFAULT_CATEGORY_ID,
-        tags: [TAG_CORE],
+        tags: [TAG_NAVIGATION, TAG_CORE],
+        handler: () => NavigationRouter.transitionTo("/channels/@me")
+    });
+
+    registerCommand({
+        id: "command-palette-open-extensions",
+        label: "Extensions",
+        description: "Browse installable command palette extensions.",
+        keywords: ["extensions", "plugins", "catalog", "install", "uninstall"],
+        categoryId: DEFAULT_CATEGORY_ID,
+        tags: [TAG_PLUGINS, TAG_UTILITY],
+        drilldownCategoryId: EXTENSIONS_CATALOG_CATEGORY_ID,
+        handler: () => undefined
+    });
+
+    registerCommand({
+        id: "command-palette-open-dm-query",
+        label: "Open DM",
+        description: "Type a username or display name to open a DM.",
+        keywords: ["open", "dm", "direct message", "message user", "friend"],
+        categoryId: DEFAULT_CATEGORY_ID,
+        tags: [TAG_NAVIGATION, TAG_CORE],
+        closeAfterExecute: true,
+        queryTemplate: "open dm ",
+        queryPlaceholder: "Username or display name",
+        handler: () => undefined
+    });
+
+    registerCommand(createCommandPageCommand({
+        id: "command-palette-send-dm",
+        label: "Send DM",
+        description: "Send a direct message to a user from separate fields.",
+        keywords: ["send", "dm", "direct message", "message", "friend", "recipient"],
+        categoryId: DEFAULT_CATEGORY_ID,
+        tags: [TAG_NAVIGATION, TAG_CORE],
+        page: { id: "send-dm" }
+    }));
+
+    registerCommand({
+        id: "command-palette-navigate-to-query",
+        label: "Navigate to",
+        description: "Type a server or channel to navigate.",
+        keywords: ["navigate", "go to", "jump", "server", "channel", "guild"],
+        categoryId: DEFAULT_CATEGORY_ID,
+        tags: [TAG_NAVIGATION, TAG_CORE],
+        closeAfterExecute: true,
+        queryTemplate: "go to ",
+        queryPlaceholder: "Server or channel",
+        handler: () => undefined
+    });
+
+    registerCommand({
+        id: "command-palette-toggle-plugin-query",
+        label: "Toggle Plugin by Name",
+        description: "Type a plugin name to enable or disable it.",
+        keywords: ["toggle", "plugin", "enable", "disable", "debug", "developer"],
+        categoryId: DEFAULT_CATEGORY_ID,
+        tags: [TAG_DEVELOPER, TAG_PLUGINS],
+        closeAfterExecute: true,
+        queryTemplate: "toggle plugin ",
+        queryPlaceholder: "Plugin name",
+        handler: () => undefined
+    });
+
+    registerCommand({
+        id: "command-palette-show-mentions",
+        label: "Show Mentions",
+        description: "Browse your recent mentions.",
+        keywords: ["mentions", "inbox", "unread", "pings"],
+        categoryId: DEFAULT_CATEGORY_ID,
+        tags: [TAG_NAVIGATION, TAG_CORE],
+        drilldownCategoryId: MENTIONS_CATEGORY_ID,
+        handler: () => undefined
+    });
+
+    registerCommand({
+        id: "command-palette-jump-mentions-inbox",
+        label: "Jump to Mentions Inbox",
+        description: "Shows your mentions inbox.",
+        keywords: ["jump", "mentions", "inbox", "unread", "pings"],
+        categoryId: DEFAULT_CATEGORY_ID,
+        tags: [TAG_NAVIGATION, TAG_CORE],
+        drilldownCategoryId: MENTIONS_CATEGORY_ID,
+        handler: () => undefined
+    });
+
+    registerCommand({
+        id: "command-palette-open-last-dm",
+        label: "Open Last DM",
+        description: "Opens your most recent DM thread.",
+        keywords: ["open", "last", "recent", "dm", "messages"],
+        categoryId: DEFAULT_CATEGORY_ID,
+        tags: [TAG_NAVIGATION, TAG_CORE],
         handler: () => {
-            const recents = getRecentCommands().slice(0, 5);
-            if (recents.length === 0) {
-                showToast("No commands have been run yet.", Toasts.Type.MESSAGE);
+            const channelId = getLastPrivateChannelId();
+            if (!channelId) {
+                showToast("No recent DM available.", Toasts.Type.MESSAGE);
+                return;
+            }
+            NavigationRouter.transitionTo(`/channels/@me/${channelId}`);
+        }
+    });
+
+    registerCommand({
+        id: "command-palette-copy-active-channel-id",
+        label: "Copy Current Channel ID",
+        description: "Copies the active channel ID.",
+        keywords: ["copy", "channel", "id", "current"],
+        categoryId: DEFAULT_CATEGORY_ID,
+        tags: [TAG_UTILITY, TAG_CORE],
+        handler: () => {
+            const channelId = SelectedChannelStore?.getChannelId?.();
+            if (!channelId) {
+                showToast("No active channel available.", Toasts.Type.MESSAGE);
+                return;
+            }
+            return copyWithToast(channelId, "Channel ID copied.");
+        }
+    });
+
+    registerCommand({
+        id: "command-palette-copy-active-channel-link",
+        label: "Copy Current Channel Link",
+        description: "Copies a link to the active channel.",
+        keywords: ["copy", "channel", "link", "current"],
+        categoryId: DEFAULT_CATEGORY_ID,
+        tags: [TAG_UTILITY, TAG_NAVIGATION],
+        handler: () => {
+            const channelId = SelectedChannelStore?.getChannelId?.();
+            if (!channelId) {
+                showToast("No active channel available.", Toasts.Type.MESSAGE);
+                return;
+            }
+            return copyWithToast(getChannelPermalink(channelId), "Channel link copied.");
+        }
+    });
+
+    registerCommand({
+        id: "command-palette-copy-last-message-link",
+        label: "Copy Last Message Link",
+        description: "Copies a link to the latest message in the current channel.",
+        keywords: ["copy", "message", "link", "latest", "last", "current"],
+        categoryId: DEFAULT_CATEGORY_ID,
+        tags: [TAG_UTILITY, TAG_NAVIGATION],
+        handler: () => {
+            const channelId = SelectedChannelStore?.getChannelId?.();
+            if (!channelId) {
+                showToast("No active channel available.", Toasts.Type.MESSAGE);
                 return;
             }
 
-            const message = recents
-                .map((entry, index) => `${index + 1}. ${entry.label}`)
-                .join("\n");
+            const message = MessageStore.getLastMessage?.(channelId) as { id?: string; } | undefined;
+            if (!message?.id) {
+                showToast("No recent message available in this channel.", Toasts.Type.MESSAGE);
+                return;
+            }
 
-            Toasts.show({
-                message,
-                type: Toasts.Type.MESSAGE,
-                id: Toasts.genId(),
-                options: { position: Toasts.Position.BOTTOM }
-            });
+            return copyWithToast(getMessagePermalink(channelId, message.id), "Message link copied.");
         }
+    });
+
+    registerCommand({
+        id: "command-palette-open-active-channel-browser",
+        label: "Open Current Channel in Browser",
+        description: "Opens the active channel link in your browser.",
+        keywords: ["open", "channel", "browser", "external", "current"],
+        categoryId: DEFAULT_CATEGORY_ID,
+        tags: [TAG_NAVIGATION, TAG_UTILITY],
+        handler: () => {
+            const channelId = SelectedChannelStore?.getChannelId?.();
+            if (!channelId) {
+                showToast("No active channel available.", Toasts.Type.MESSAGE);
+                return;
+            }
+            openExternalUrl(getChannelPermalink(channelId));
+        }
+    });
+
+    registerCommand({
+        id: "command-palette-copy-active-guild-id",
+        label: "Copy Current Server ID",
+        description: "Copies the active server ID.",
+        keywords: ["copy", "guild", "server", "id", "current"],
+        categoryId: DEFAULT_CATEGORY_ID,
+        tags: [TAG_UTILITY, TAG_CORE],
+        handler: () => {
+            const guildId = getActiveGuildId();
+            if (!guildId || guildId === "@me") {
+                showToast("No active server available.", Toasts.Type.MESSAGE);
+                return;
+            }
+            return copyWithToast(guildId, "Server ID copied.");
+        }
+    });
+
+    registerCommand({
+        id: "command-palette-copy-my-user-id",
+        label: "Copy My User ID",
+        description: "Copies your user ID.",
+        keywords: ["copy", "user", "id", "me", "account"],
+        categoryId: DEFAULT_CATEGORY_ID,
+        tags: [TAG_UTILITY, TAG_CORE],
+        handler: () => {
+            const userId = UserStore?.getCurrentUser?.()?.id;
+            if (!userId) {
+                showToast("Unable to read your user ID.", Toasts.Type.FAILURE);
+                return;
+            }
+            return copyWithToast(userId, "Your user ID was copied.");
+        }
+    });
+
+    registerCommand({
+        id: "command-palette-copy-debug-context",
+        label: "Copy Debug Context",
+        description: "Copies current guild, channel, and user IDs.",
+        keywords: ["copy", "debug", "context", "guild id", "channel id", "user id", "developer"],
+        categoryId: DEFAULT_CATEGORY_ID,
+        tags: [TAG_DEVELOPER, TAG_UTILITY],
+        handler: copyDebugContext
+    });
+
+    registerCommand({
+        id: "command-palette-open-devtools",
+        label: "Open DevTools",
+        description: "Opens Discord DevTools on desktop.",
+        keywords: ["devtools", "developer tools", "inspect", "debug", "console"],
+        categoryId: DEFAULT_CATEGORY_ID,
+        tags: [TAG_DEVELOPER, TAG_UTILITY],
+        handler: () => {
+            if (openDevToolsWindow()) return;
+            showToast("DevTools is unavailable in this environment.", Toasts.Type.FAILURE);
+        }
+    });
+
+    registerCommand({
+        id: "command-palette-show-pins",
+        label: "Pinned Commands",
+        description: "Browse and run your pinned commands.",
+        keywords: ["pinned", "pins", "favorites", "starred"],
+        categoryId: DEFAULT_CATEGORY_ID,
+        tags: [TAG_CORE, TAG_UTILITY],
+        drilldownCategoryId: PINNED_CATEGORY_ID,
+        handler: () => undefined
+    });
+
+    registerCommand({
+        id: "command-palette-show-recent",
+        label: "Recent Commands",
+        description: "Browse and run your recently used commands.",
+        keywords: ["recent", "history", "rerun", "pin"],
+        categoryId: DEFAULT_CATEGORY_ID,
+        tags: [TAG_CORE, TAG_UTILITY],
+        drilldownCategoryId: RECENTS_CATEGORY_ID,
+        handler: () => undefined
     });
 
     registerCommand({
@@ -2430,33 +3446,40 @@ function registerCommandPaletteUtilities() {
 }
 
 function registerSystemUtilityCommands() {
-    const commands: Array<{ id: string; label: string; description?: string; handler: () => void; keywords: string[]; tags: string[]; }> = [
+    const commands: Array<{ id: string; label: string; description?: string; handler: () => void; keywords: string[]; tags: string[]; icon?: CommandEntry["icon"]; }> = [
         {
             id: "set-status-online",
-            label: "Set Status: Online",
+            label: "Quick Status: Online",
             handler: () => setPresenceStatus("online"),
-            keywords: ["status", "online"],
+            keywords: ["status", "quick", "presence", "online"],
             tags: [TAG_CORE, TAG_UTILITY]
         },
         {
             id: "set-status-idle",
-            label: "Set Status: Idle",
+            label: "Quick Status: Idle",
             handler: () => setPresenceStatus("idle"),
-            keywords: ["status", "idle"],
+            keywords: ["status", "quick", "presence", "idle"],
             tags: [TAG_CORE, TAG_UTILITY]
         },
         {
             id: "set-status-dnd",
-            label: "Set Status: Do Not Disturb",
+            label: "Quick Status: Do Not Disturb",
             handler: () => setPresenceStatus("dnd"),
-            keywords: ["status", "dnd", "busy"],
+            keywords: ["status", "quick", "presence", "dnd", "busy"],
             tags: [TAG_CORE, TAG_UTILITY]
         },
         {
             id: "set-status-invisible",
-            label: "Set Status: Invisible",
+            label: "Quick Status: Invisible",
             handler: () => setPresenceStatus("invisible"),
-            keywords: ["status", "offline", "invisible"],
+            keywords: ["status", "quick", "presence", "offline", "invisible"],
+            tags: [TAG_CORE, TAG_UTILITY]
+        },
+        {
+            id: "toggle-status-dnd",
+            label: "Toggle Do Not Disturb",
+            handler: toggleDoNotDisturb,
+            keywords: ["toggle", "status", "dnd", "busy", "online"],
             tags: [TAG_CORE, TAG_UTILITY]
         },
         {
@@ -2478,7 +3501,8 @@ function registerSystemUtilityCommands() {
             label: "Toggle Self Deafen",
             handler: toggleSelfDeaf,
             keywords: ["voice", "deafen"],
-            tags: [TAG_UTILITY]
+            tags: [TAG_UTILITY],
+            icon: HeadphonesIcon
         }
     ];
 
@@ -2490,6 +3514,7 @@ function registerSystemUtilityCommands() {
             keywords: entry.keywords,
             categoryId: DEFAULT_CATEGORY_ID,
             tags: entry.tags,
+            icon: entry.icon,
             handler: entry.handler
         });
     }
@@ -2564,7 +3589,8 @@ function registerPluginChangeCommands() {
         label: "Reload All Plugins",
         description: "Attempts to hot reload every enabled plugin",
         keywords: ["plugin", "reload", "restart"],
-        categoryId: "plugins-changes",
+        categoryId: "plugins-settings",
+        hiddenInSearch: true,
         tags: [TAG_PLUGINS, TAG_DEVELOPER, TAG_UTILITY],
         handler: () => void reloadAllPlugins()
     });
@@ -2573,7 +3599,8 @@ function registerPluginChangeCommands() {
         id: "enable-all-plugins",
         label: "Enable All Plugins",
         keywords: ["plugin", "enable"],
-        categoryId: "plugins-changes",
+        categoryId: "plugins-enable",
+        hiddenInSearch: true,
         tags: [TAG_PLUGINS, TAG_UTILITY],
         handler: () => void setAllPluginsEnabled(true)
     });
@@ -2582,7 +3609,8 @@ function registerPluginChangeCommands() {
         id: "disable-all-plugins",
         label: "Disable All Non-required Plugins",
         keywords: ["plugin", "disable"],
-        categoryId: "plugins-changes",
+        categoryId: "plugins-disable",
+        hiddenInSearch: true,
         tags: [TAG_PLUGINS, TAG_UTILITY],
         handler: () => void setAllPluginsEnabled(false)
     });
@@ -2592,7 +3620,8 @@ function registerPluginChangeCommands() {
         label: "Restart Equicord",
         description: "Reloads the Discord client window",
         keywords: ["restart", "reload"],
-        categoryId: "plugins-changes",
+        categoryId: "plugins-settings",
+        hiddenInSearch: true,
         tags: [TAG_DEVELOPER, TAG_UTILITY],
         handler: () => window.location.reload()
     });
@@ -2642,6 +3671,7 @@ function createPluginToolboxCommands(): CommandEntry[] {
                 description: plugin.description,
                 keywords,
                 categoryId: TOOLBOX_ACTIONS_CATEGORY_ID,
+                hiddenInSearch: true,
                 tags: [TAG_PLUGINS, TAG_UTILITY, TAG_DEVELOPER],
                 handler: () => {
                     if (!isPluginEnabled(plugin.name)) {
@@ -2660,8 +3690,7 @@ function createPluginToolboxCommands(): CommandEntry[] {
 async function runPluginToolboxAction(plugin: Plugin, action: () => void | Promise<void>, actionLabel: string) {
     try {
         await Promise.resolve(action.call(plugin));
-    } catch (error) {
-        console.error("CommandPalette", "Toolbox action failed", plugin.name, actionLabel, error);
+    } catch {
         showToast(`Failed to run ${plugin.name}: ${actionLabel}`, Toasts.Type.FAILURE);
     }
 }
@@ -2694,6 +3723,23 @@ function registerCustomizationCommands() {
     });
 
     registerCommand({
+        id: "open-quickcss-editor",
+        label: "Open QuickCSS Editor",
+        keywords: ["quickcss", "quick css", "css", "editor", "theme"],
+        categoryId: DEFAULT_CATEGORY_ID,
+        tags: [TAG_CUSTOMIZATION, TAG_NAVIGATION],
+        handler: () => {
+            const openEditor = (window as { VencordNative?: { quickCss?: { openEditor?: () => void; }; }; })?.VencordNative?.quickCss?.openEditor;
+            if (typeof openEditor !== "function") {
+                showToast("QuickCSS editor is unavailable.", Toasts.Type.FAILURE);
+                return;
+            }
+
+            openEditor();
+        }
+    });
+
+    registerCommand({
         id: "toggle-window-transparency",
         label: "Toggle Window Transparency",
         keywords: ["window", "transparency", "appearance"],
@@ -2704,8 +3750,8 @@ function registerCustomizationCommands() {
 
     registerCommand({
         id: "open-theme-library",
-        label: "Open Theme Library",
-        keywords: ["theme", "library"],
+        label: "Open Themes",
+        keywords: ["theme", "themes", "library"],
         categoryId: DEFAULT_CATEGORY_ID,
         tags: [TAG_CUSTOMIZATION, TAG_NAVIGATION],
         handler: () => SettingsRouter.openUserSettings("equicord_themes_panel")
@@ -2727,22 +3773,29 @@ export function registerBuiltInCommands() {
     registerSystemUtilityCommands();
     registerUpdateCommands();
     registerDiscordSettingsCommands();
+    registerPluginManagerCommands();
     registerPluginToggleCommands();
     registerPluginSettingsCommands();
     registerPluginChangeCommands();
     registerPluginToolboxProvider();
+    registerExtensionProviders({
+        extensionsState,
+        registerContextProvider,
+        showToast,
+        openExternalUrl,
+        executeCommand,
+        getCommandById
+    });
+    registerMentionsProvider();
     registerCustomizationCommands();
     registerContextualCommands();
     registerCustomCommandProvider();
     registerSessionCommands();
     registerGuildCommands();
-    registerFriendCommands();
 
-    void pinsReady.then(async () => {
-        if (prunePinned()) {
-            await persistPinned();
-        }
-        emitPinned();
+    void pinsStore.ready.then(async () => {
+        await prunePinned();
+        pinsStore.emit();
     });
 
     builtInsRegistered = true;
