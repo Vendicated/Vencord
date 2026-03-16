@@ -18,7 +18,7 @@
 
 .vc-file-upload-progress-label {
     font-size: 12px;
-    color: var(--header-primary);
+    color: var(--text-default);
 }
 
 .vc-file-upload-progress-meta {
@@ -58,7 +58,7 @@
 
 .vc-file-upload-progress-file {
     font-size: 11px;
-    color: var(--header-secondary);
+    color: var(--text-default);
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
