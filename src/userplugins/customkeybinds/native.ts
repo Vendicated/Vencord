@@ -4,8 +4,9 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { ChildProcessWithoutNullStreams, spawn } from "child_process";
+import { ChildProcessByStdio, spawn } from "child_process";
 import { createInterface, Interface } from "readline";
+import { Readable } from "stream";
 
 import { IpcMainInvokeEvent, WebContents } from "electron";
 
@@ -18,7 +19,7 @@ interface ActiveBridge {
     cleanup: () => void;
     stderr: Interface;
     stdout: Interface;
-    process: ChildProcessWithoutNullStreams;
+    process: ChildProcessByStdio<null, Readable, Readable>;
     sender: WebContents;
 }
 
