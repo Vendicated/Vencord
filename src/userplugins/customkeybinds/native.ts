@@ -7,7 +7,7 @@
 import { exec } from "child_process";
 import { IpcMainInvokeEvent } from "electron";
 import { existsSync } from "fs";
-import { join, resolve } from "path";
+import { dirname, join, resolve } from "path";
 
 function runCommand(command: string) {
     return new Promise<void>((resolvePromise, reject) => {
@@ -44,6 +44,22 @@ function getCompanionScriptPath() {
     throw new Error("Could not resolve companion-bridge/index.js.");
 }
 
+function getNodePath() {
+    const candidates = [
+        process.execPath,
+        join(dirname(process.execPath), "node.exe"),
+        "node.exe"
+    ];
+
+    for (const candidate of candidates) {
+        if (candidate === "node.exe" || existsSync(candidate)) {
+            return candidate;
+        }
+    }
+
+    throw new Error("Could not resolve node.exe for the companion bridge.");
+}
+
 function buildPowerShellCommand(script: string) {
     return `powershell.exe -NoProfile -NonInteractive -ExecutionPolicy Bypass -Command "${script.replaceAll("\"", "\\\"")}"`;
 }
@@ -54,15 +70,19 @@ export async function startCompanionServer(_: IpcMainInvokeEvent) {
     }
 
     const scriptPath = escapePowerShellString(getCompanionScriptPath());
+    const workingDirectory = escapePowerShellString(dirname(getCompanionScriptPath()));
+    const nodePath = escapePowerShellString(getNodePath());
     const command = buildPowerShellCommand(
         `& {
             $scriptPath = '${scriptPath}'
+            $workingDirectory = '${workingDirectory}'
+            $nodePath = '${nodePath}'
             $existing = Get-CimInstance Win32_Process | Where-Object {
                 $_.Name -match '^node(\\.exe)?$' -and $_.CommandLine -match [Regex]::Escape($scriptPath)
             } | Select-Object -First 1
 
             if (-not $existing) {
-                Start-Process node -ArgumentList $scriptPath -Verb RunAs -WindowStyle Hidden | Out-Null
+                Start-Process -FilePath $nodePath -ArgumentList @($scriptPath) -WorkingDirectory $workingDirectory -Verb RunAs -WindowStyle Hidden | Out-Null
             }
         }`
     );

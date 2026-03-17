@@ -5,9 +5,20 @@ const { WebSocketServer } = require("ws");
 
 const PORT = 6969;
 const pressedKeys = new Set();
+const ToggleBindings = new Map([
+    ["INSERT", "TOGGLE_MUTE"],
+    ["NUMPAD0", "TOGGLE_MUTE"],
+    ["HOME", "TOGGLE_DEAFEN"],
+    ["NUMPAD7", "TOGGLE_DEAFEN"]
+]);
 
 const wss = new WebSocketServer({ host: "127.0.0.1", port: PORT });
-const keyboard = new GlobalKeyboardListener();
+const keyboard = new GlobalKeyboardListener({
+    windows: {
+        onError: errorCode => console.error("Companion bridge keyboard error:", errorCode),
+        onInfo: info => console.info("Companion bridge keyboard info:", info)
+    }
+});
 
 function broadcast(action) {
     const payload = JSON.stringify({ action });
@@ -24,10 +35,9 @@ function handleKeyDown(name) {
 
     pressedKeys.add(name);
 
-    if (name === "INSERT") {
-        broadcast("TOGGLE_MUTE");
-    } else if (name === "HOME") {
-        broadcast("TOGGLE_DEAFEN");
+    const action = ToggleBindings.get(name);
+    if (action) {
+        broadcast(action);
     }
 }
 
@@ -51,8 +61,14 @@ wss.on("listening", () => {
 });
 
 wss.on("connection", socket => {
+    console.log("Companion bridge client connected.");
+
     socket.on("error", error => {
         console.error("Companion bridge socket error:", error);
+    });
+
+    socket.on("close", () => {
+        console.log("Companion bridge client disconnected.");
     });
 });
 
