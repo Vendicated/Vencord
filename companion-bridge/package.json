@@ -9,7 +9,7 @@
         "start": "node index.js"
     },
     "dependencies": {
-        "node-global-key-listener": "^0.3.0",
+        "uiohook-napi": "^1.5.4",
         "ws": "^8.18.3"
     }
 }
