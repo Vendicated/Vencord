@@ -8,8 +8,12 @@ const pressedKeys = new Set();
 const ToggleBindings = new Map([
     ["INSERT", "TOGGLE_MUTE"],
     ["NUMPAD0", "TOGGLE_MUTE"],
+    ["VK_INSERT", "TOGGLE_MUTE"],
+    ["VK_NUMPAD0", "TOGGLE_MUTE"],
     ["HOME", "TOGGLE_DEAFEN"],
-    ["NUMPAD7", "TOGGLE_DEAFEN"]
+    ["NUMPAD7", "TOGGLE_DEAFEN"],
+    ["VK_HOME", "TOGGLE_DEAFEN"],
+    ["VK_NUMPAD7", "TOGGLE_DEAFEN"]
 ]);
 
 const wss = new WebSocketServer({ host: "127.0.0.1", port: PORT });
@@ -22,6 +26,7 @@ const keyboard = new GlobalKeyboardListener({
 
 function broadcast(action) {
     const payload = JSON.stringify({ action });
+    console.log(`Companion bridge broadcasting ${action} to ${wss.clients.size} client(s).`);
 
     for (const client of wss.clients) {
         if (client.readyState === client.OPEN) {
@@ -30,30 +35,62 @@ function broadcast(action) {
     }
 }
 
-function handleKeyDown(name) {
-    if (pressedKeys.has(name)) return;
+function getBindingKeys(event) {
+    return [
+        event.name,
+        event.rawKey?._nameRaw
+    ].filter(Boolean);
+}
 
-    pressedKeys.add(name);
+function resolveAction(event) {
+    for (const key of getBindingKeys(event)) {
+        const action = ToggleBindings.get(key);
+        if (action) return action;
+    }
 
-    const action = ToggleBindings.get(name);
+    return null;
+}
+
+function handleKeyDown(event) {
+    const bindingKeys = getBindingKeys(event);
+    const pressedKey = bindingKeys[0] ?? String(event.vKey);
+
+    if (pressedKeys.has(pressedKey)) return;
+
+    pressedKeys.add(pressedKey);
+
+    const action = resolveAction(event);
     if (action) {
         broadcast(action);
     }
 }
 
-function handleKeyUp(name) {
-    pressedKeys.delete(name);
+function handleKeyUp(event) {
+    const bindingKeys = getBindingKeys(event);
+    const pressedKey = bindingKeys[0] ?? String(event.vKey);
+    pressedKeys.delete(pressedKey);
 }
 
 keyboard.addListener(event => {
+    const keyName = event.name ?? "unknown";
+    const rawName = event.rawKey?._nameRaw ?? "unknown";
+
+    if (ToggleBindings.has(keyName) || ToggleBindings.has(rawName)) {
+        console.log(`Companion bridge key ${event.state}: name=${keyName} raw=${rawName} vKey=${event.vKey}`);
+    }
+
     if (event.state === "DOWN") {
-        handleKeyDown(event.name);
+        handleKeyDown(event);
         return;
     }
 
     if (event.state === "UP") {
-        handleKeyUp(event.name);
+        handleKeyUp(event);
     }
+}).then(() => {
+    console.log("Companion bridge keyboard listener started.");
+}).catch(error => {
+    console.error("Companion bridge failed to start keyboard listener:", error);
 });
 
 wss.on("listening", () => {
