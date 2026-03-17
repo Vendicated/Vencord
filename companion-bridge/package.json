@@ -1,0 +1,15 @@
+{
+    "name": "companion-bridge",
+    "private": true,
+    "version": "1.0.0",
+    "description": "Sidecar bridge for Vencord global mute and deafen keybinds",
+    "main": "index.js",
+    "license": "GPL-3.0-or-later",
+    "scripts": {
+        "start": "node index.js"
+    },
+    "dependencies": {
+        "node-global-key-listener": "^0.3.0",
+        "ws": "^8.18.3"
+    }
+}

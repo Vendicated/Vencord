@@ -5,32 +5,18 @@
  */
 
 import { Logger } from "@utils/Logger";
-import definePlugin, { PluginNative } from "@utils/types";
+import definePlugin from "@utils/types";
 import { findByProps } from "@webpack";
 import { FluxDispatcher, showToast, Toasts } from "@webpack/common";
-
-import type * as NativeModule from "./native";
-
-type GlobalToggleAction = "mute" | "deafen";
+type BridgeAction = "TOGGLE_MUTE" | "TOGGLE_DEAFEN";
 type SoundPlayer = { playSound: (sound: string, volume?: number) => void; };
+type BridgeMessage = { action?: unknown; };
 
 const logger = new Logger("CustomKeybinds");
-const Native = IS_DISCORD_DESKTOP || IS_VESKTOP
-    ? VencordNative.pluginHelpers.CustomKeybinds as PluginNative<typeof NativeModule>
-    : null;
-
 const SoundModule = findByProps("playSound") as Partial<SoundPlayer> | undefined;
+const BridgeUrl = "ws://localhost:6969";
 
-const ToggleEventName = "vc-custom-keybinds-global-toggle";
-const ErrorEventName = "vc-custom-keybinds-global-error";
-
-function getDesktopBridge(): PluginNative<typeof NativeModule> {
-    if (!Native) {
-        throw new Error("CustomKeybinds requires the desktop native bridge.");
-    }
-
-    return Native;
-}
+let bridgeSocket: WebSocket | null = null;
 
 function getSoundPlayer(): SoundPlayer {
     const playSound = SoundModule?.playSound;
@@ -42,53 +28,50 @@ function getSoundPlayer(): SoundPlayer {
     return { playSound };
 }
 
-function handleToggle(action: GlobalToggleAction) {
+function handleToggle(action: BridgeAction) {
     const soundPlayer = getSoundPlayer();
 
     FluxDispatcher.dispatch({
-        type: action === "mute"
+        type: action === "TOGGLE_MUTE"
             ? "AUDIO_TOGGLE_SELF_MUTE"
             : "AUDIO_TOGGLE_SELF_DEAF"
     });
 
-    soundPlayer.playSound(action, 0.5);
+    soundPlayer.playSound(action === "TOGGLE_MUTE" ? "mute" : "deafen", 0.5);
 }
 
-function onGlobalToggle(event: Event) {
-    const action = (event as CustomEvent<unknown>).detail;
+function onBridgeMessage(event: MessageEvent) {
+    if (typeof event.data !== "string") {
+        logger.error("Received non-text message from companion bridge:", event.data);
+        return;
+    }
 
-    if (action !== "mute" && action !== "deafen") {
-        const message = `Received invalid global toggle action: ${String(action)}`;
+    let payload: BridgeMessage;
+
+    try {
+        payload = JSON.parse(event.data) as BridgeMessage;
+    } catch (error) {
+        logger.error("Failed to parse companion bridge message:", error);
+        showToast("CustomKeybinds received invalid JSON from the companion bridge.", Toasts.Type.FAILURE);
+        return;
+    }
+
+    if (payload.action !== "TOGGLE_MUTE" && payload.action !== "TOGGLE_DEAFEN") {
+        const message = `Received invalid companion bridge action: ${String(payload.action)}`;
         logger.error(message);
         showToast(message, Toasts.Type.FAILURE);
         return;
     }
 
-    handleToggle(action);
-}
-
-function onNativeError(event: Event) {
-    const message = (event as CustomEvent<unknown>).detail;
-
-    if (typeof message !== "string" || !message.length) {
-        logger.error("Received invalid native bridge error payload:", message);
-        showToast("CustomKeybinds native bridge failed with an invalid error payload.", Toasts.Type.FAILURE);
-        return;
-    }
-
-    logger.error(message);
-    showToast(message, Toasts.Type.FAILURE);
+    handleToggle(payload.action);
 }
 
 export default definePlugin({
     name: "CustomKeybinds",
-    description: "Registers true global mute and deafen toggles for Vesktop/Discord desktop",
+    description: "Receives true global mute and deafen toggles from the companion bridge",
     authors: [{ name: "Jules", id: 0n }],
     start() {
-        let native: PluginNative<typeof NativeModule>;
-
         try {
-            native = getDesktopBridge();
             getSoundPlayer();
         } catch (error) {
             logger.error("Failed to initialize CustomKeybinds:", error);
@@ -96,27 +79,23 @@ export default definePlugin({
             return;
         }
 
-        window.addEventListener(ToggleEventName, onGlobalToggle as EventListener);
-        window.addEventListener(ErrorEventName, onNativeError as EventListener);
+        bridgeSocket?.close();
 
-        void native.start().catch(error => {
-            const message = error instanceof Error ? error.message : "Failed to start native global toggle bridge.";
-            logger.error("Failed to start native global toggle bridge:", error);
-            showToast(message, Toasts.Type.FAILURE);
+        bridgeSocket = new WebSocket(BridgeUrl);
+        bridgeSocket.addEventListener("message", onBridgeMessage);
+        bridgeSocket.addEventListener("error", error => {
+            logger.error("Companion bridge WebSocket error:", error);
+        });
+        bridgeSocket.addEventListener("close", event => {
+            if (event.wasClean) return;
+
+            logger.error(`Companion bridge connection closed unexpectedly (code: ${event.code}).`);
+            showToast("CustomKeybinds lost its connection to the companion bridge.", Toasts.Type.FAILURE);
         });
     },
     stop() {
-        window.removeEventListener(ToggleEventName, onGlobalToggle as EventListener);
-        window.removeEventListener(ErrorEventName, onNativeError as EventListener);
-
-        if (!Native) return;
-
-        void Native.stop().catch(error => {
-            logger.error("Failed to stop native global toggle bridge:", error);
-            showToast(
-                error instanceof Error ? error.message : "Failed to stop native global toggle bridge.",
-                Toasts.Type.FAILURE
-            );
-        });
+        bridgeSocket?.removeEventListener("message", onBridgeMessage);
+        bridgeSocket?.close();
+        bridgeSocket = null;
     }
 });

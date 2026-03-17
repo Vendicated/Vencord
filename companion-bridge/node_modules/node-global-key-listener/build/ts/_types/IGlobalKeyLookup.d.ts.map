@@ -1,0 +1,1 @@
+{"version":3,"file":"IGlobalKeyLookup.d.ts","sourceRoot":"","sources":["../../../src/ts/_types/IGlobalKeyLookup.ts"],"names":[],"mappings":"AAAA,OAAO,EAAC,UAAU,EAAC,MAAM,cAAc,CAAC;AAExC,oBAAY,gBAAgB,GAAG;IAC3B,CAAC,GAAG,EAAE,MAAM,GAAG,SAAS,GAAG;QAAC,QAAQ,EAAE,MAAM,CAAC;QAAC,IAAI,EAAE,MAAM,CAAC;QAAC,YAAY,CAAC,EAAE,UAAU,CAAA;KAAC,CAAC;CAC1F,CAAC"}

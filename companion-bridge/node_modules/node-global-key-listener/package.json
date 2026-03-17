@@ -1,0 +1,45 @@
+{
+    "name": "node-global-key-listener",
+    "version": "0.3.0",
+    "description": "A module to listen to global key events",
+    "types": "build/index.d.ts",
+    "main": "build/index.js",
+    "files": [
+        "bin/**/*",
+        "build/**/*"
+    ],
+    "scripts": {
+        "watch": "tsc -w",
+        "build": "tsc",
+        "test": "node build/test.js",
+        "compile-win": ".\\scripts\\compile-win.bat",
+        "compile-mac": "swiftc src/bin/MacKeyServer/main.swift -o bin/MacKeyServer",
+        "compile-x11": "scripts/compile-x11.sh"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/LaunchMenu/node-global-key-listener.git"
+    },
+    "keywords": [
+        "key",
+        "listener",
+        "global",
+        "node"
+    ],
+    "author": "Sancarn",
+    "license": "MIT",
+    "bugs": {
+        "url": "https://github.com/LaunchMenu/node-global-key-listener/issues"
+    },
+    "homepage": "https://github.com/LaunchMenu/node-global-key-listener#readme",
+    "devDependencies": {
+        "@types/node": "^14.14.37",
+        "typescript": "^4.2.3"
+    },
+    "publishConfig": {
+        "access": "public"
+    },
+    "dependencies": {
+        "sudo-prompt": "^9.2.1"
+    }
+}
