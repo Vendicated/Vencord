@@ -5,10 +5,9 @@
  */
 
 import { ChildProcessByStdio, spawn } from "child_process";
+import { IpcMainInvokeEvent, WebContents } from "electron";
 import { createInterface, Interface } from "readline";
 import { Readable } from "stream";
-
-import { IpcMainInvokeEvent, WebContents } from "electron";
 
 type GlobalToggleAction = "mute" | "deafen";
 
