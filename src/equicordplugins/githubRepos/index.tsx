@@ -7,7 +7,6 @@
 import "./styles.css";
 
 import { definePluginSettings } from "@api/Settings";
-import { BaseText } from "@components/BaseText";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { EquicordDevs } from "@utils/constants";
 import { classNameFactory } from "@utils/css";
@@ -16,7 +15,10 @@ import { User } from "@vencord/discord-types";
 import { findByCodeLazy } from "@webpack";
 import { React } from "@webpack/common";
 
-import { GitHubReposComponent } from "./components/GitHubReposComponent";
+import { ProfilePopoutComponent } from "./components/ProfilePopoutComponent";
+import { ProfileTabComponent } from "./components/ProfileTabComponent";
+
+const getProfileThemeProps = findByCodeLazy(".getPreviewThemeColors", "primaryColor:");
 
 export const cl = classNameFactory("vc-github-repos-");
 
@@ -31,51 +33,12 @@ export const settings = definePluginSettings({
         description: "Show repository language",
         default: true
     },
-    showInMiniProfile: {
-        type: OptionType.BOOLEAN,
-        description: "Show full ui in the mini profile instead of just a button",
-        default: true
-    },
     showRepositoryTab: {
         type: OptionType.BOOLEAN,
         description: "Show repositories tab in profile modal (hides button in connections when enabled)",
         default: true
     },
 });
-
-const getProfileThemeProps = findByCodeLazy(".getPreviewThemeColors", "primaryColor:");
-
-const ProfilePopoutComponent = ErrorBoundary.wrap(
-    (props: { user: User; displayProfile?: any; }) => {
-        return (
-            <GitHubReposComponent
-                {...props}
-                id={props.user.id}
-                theme={getProfileThemeProps(props).theme}
-            />
-        );
-    },
-    {
-        noop: true,
-        fallback: () => <BaseText size="xs" weight="semibold" className="vc-github-repos-error" style={{ color: "var(--text-feedback-critical)" }}>
-            Error, Failed to render GithubRepos
-        </BaseText>
-    }
-);
-
-const ProfileRepositoriesTab = ErrorBoundary.wrap(
-    (props: { user: User; displayProfile?: any; }) => {
-        return (
-            <GitHubReposComponent
-                {...props}
-                id={props.user.id}
-                theme={getProfileThemeProps(props).theme}
-                variant="tab"
-            />
-        );
-    },
-    { noop: true }
-);
 
 export default definePlugin({
     name: "GitHubRepos",
@@ -88,8 +51,8 @@ export default definePlugin({
         {
             find: /onOpenUserProfileModal:\i\}\),\i/,
             replacement: {
-                match: /userId:\i\.id,guild:\i.{0,15}\}\).{0,100}(?=\])/,
-                replace: "$&,$self.ProfilePopoutComponent(arguments[0])"
+                match: /user:\i,widgets:.{0,100}?\}\),/,
+                replace: "$&$self.ProfileRepositoriesPopout(arguments[0]),"
             }
         },
         // User Profile Modal v2
@@ -97,7 +60,7 @@ export default definePlugin({
             find: ".MODAL_V2,onClose:",
             replacement: {
                 match: /displayProfile:(\i).*?connections:\i.{0,25}\i.\i\}\)\}\)/,
-                replace: "$&,$self.ProfilePopoutComponent({ user: arguments[0].user, displayProfile: $1 }),",
+                replace: "$&,$self.ProfileRepositoriesPopout({ user: arguments[0].user, displayProfile: $1 }),",
                 predicate: () => !settings.store.showRepositoryTab,
             }
         },
@@ -119,6 +82,30 @@ export default definePlugin({
             }
         }
     ],
-    ProfilePopoutComponent,
-    ProfileRepositoriesTab
+    ProfileRepositoriesPopout: ErrorBoundary.wrap((props: { user: User; displayProfile?: any; }) => {
+        return (
+            <ProfilePopoutComponent
+                {...props}
+                id={props.user.id}
+                theme={getProfileThemeProps(props).theme}
+            />
+        );
+    },
+        {
+            noop: true
+        }
+    ),
+    ProfileRepositoriesTab: ErrorBoundary.wrap((props: { user: User; displayProfile?: any; }) => {
+        return (
+            <ProfileTabComponent
+                {...props}
+                id={props.user.id}
+                theme={getProfileThemeProps(props).theme}
+            />
+        );
+    },
+        {
+            noop: true
+        }
+    )
 });
