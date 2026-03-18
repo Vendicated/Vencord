@@ -1,0 +1,588 @@
+.vc-quest-btn,
+.vc-quest-icon {
+    -webkit-app-region: no-drag;
+}
+
+.vc-quest-icon {
+    color: var(--interactive-icon-default);
+    transition: color 0.2s ease, filter 0.2s ease;
+}
+
+.vc-quest-btn[class*="selected"] .vc-quest-icon {
+    color: #c77dff;
+    filter: drop-shadow(0 0 8px #b44affaa);
+}
+
+.vc-quest-btn:hover .vc-quest-icon {
+    color: #c77dff;
+    filter: drop-shadow(0 0 6px #b44aff88);
+}
+
+.vc-quest-popout {
+    width: 420px;
+    max-height: 560px;
+    background: #08060f;
+    border: 1px solid #b44aff30;
+    border-radius: 14px;
+    box-shadow:
+        0 0 40px rgb(180 74 255 / 12%),
+        0 12px 48px rgb(0 0 0 / 80%);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    animation: vc-quest-popout-in 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    transform-origin: top right;
+}
+
+@keyframes vc-quest-popout-in {
+    0% {
+        opacity: 0;
+        transform: scale(0.92) translateY(-8px);
+    }
+
+    100% {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+.vc-quest-popout::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background:
+        repeating-linear-gradient(0deg,
+            transparent,
+            transparent 3px,
+            rgb(180 74 255 / 1.2%) 3px,
+            rgb(180 74 255 / 1.2%) 4px),
+        radial-gradient(ellipse at 20% 0%, rgb(180 74 255 / 4%) 0%, transparent 60%),
+        radial-gradient(ellipse at 80% 100%, rgb(123 47 255 / 3%) 0%, transparent 60%);
+    pointer-events: none;
+    z-index: 1;
+}
+
+.vc-quest-popout::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, #7b2fff, #b44aff, #e040fb, #b44aff, #7b2fff, transparent);
+    z-index: 3;
+    animation: vc-quest-border-flow 3s linear infinite;
+    background-size: 200% 100%;
+}
+
+@keyframes vc-quest-border-flow {
+    0% {
+        background-position: 0% 0;
+    }
+
+    100% {
+        background-position: 200% 0;
+    }
+}
+
+.vc-quest-header {
+    padding: 16px 20px 14px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    border-bottom: 1px solid #b44aff15;
+    background: linear-gradient(180deg, rgb(180 74 255 / 5%) 0%, transparent 100%);
+    position: relative;
+    z-index: 2;
+}
+
+.vc-quest-header-icon {
+    width: 24px;
+    height: 24px;
+    color: #b44aff;
+    filter: drop-shadow(0 0 10px #b44aff88);
+    animation: vc-quest-icon-pulse 3s ease-in-out infinite;
+}
+
+@keyframes vc-quest-icon-pulse {
+    0%,
+    100% {
+        filter: drop-shadow(0 0 8px #b44aff66);
+    }
+
+    50% {
+        filter: drop-shadow(0 0 14px #b44affbb);
+    }
+}
+
+.vc-quest-header-title {
+    font-size: 14px;
+    font-weight: 800;
+    color: #e2daf0;
+    text-transform: uppercase;
+    letter-spacing: 4px;
+    text-shadow: 0 0 15px rgb(180 74 255 / 50%);
+}
+
+.vc-quest-header-count {
+    margin-left: auto;
+    background: rgb(180 74 255 / 15%);
+    color: #c77dff;
+    font-size: 12px;
+    font-weight: 700;
+    padding: 3px 10px;
+    border-radius: 12px;
+    border: 1px solid #b44aff30;
+    box-shadow: 0 0 10px rgb(180 74 255 / 10%);
+}
+
+.vc-quest-list {
+    padding: 10px;
+    overflow-y: auto;
+    flex: 1;
+    scrollbar-width: none;
+    position: relative;
+    z-index: 2;
+}
+
+.vc-quest-list::-webkit-scrollbar {
+    display: none;
+}
+
+.vc-quest-card {
+    background: #0d0a18;
+    border: 1px solid #1e1735;
+    border-radius: 12px;
+    margin-bottom: 10px;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+    animation: vc-quest-card-in 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.vc-quest-card:nth-child(1) {
+    animation-delay: 0.05s;
+}
+
+.vc-quest-card:nth-child(2) {
+    animation-delay: 0.1s;
+}
+
+.vc-quest-card:nth-child(3) {
+    animation-delay: 0.15s;
+}
+
+.vc-quest-card:nth-child(4) {
+    animation-delay: 0.2s;
+}
+
+.vc-quest-card:nth-child(5) {
+    animation-delay: 0.25s;
+}
+
+.vc-quest-card:nth-child(6) {
+    animation-delay: 0.3s;
+}
+
+@keyframes vc-quest-card-in {
+    0% {
+        opacity: 0;
+        transform: translateX(-12px);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.vc-quest-card:hover {
+    border-color: #b44aff40;
+    box-shadow: 0 0 25px rgb(180 74 255 / 8%);
+    transform: translateY(-2px);
+}
+
+.vc-quest-card:last-child {
+    margin-bottom: 0;
+}
+
+.vc-quest-card-hero {
+    position: relative;
+    height: 80px;
+    overflow: hidden;
+}
+
+.vc-quest-card-hero-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    filter: brightness(0.4) saturate(1.2);
+    transition: filter 0.4s ease, transform 0.4s ease;
+}
+
+.vc-quest-card:hover .vc-quest-card-hero-img {
+    filter: brightness(0.5) saturate(1.4);
+    transform: scale(1.03);
+}
+
+.vc-quest-card-hero-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg,
+            rgb(13 10 24 / 20%) 0%,
+            rgb(13 10 24 / 95%) 100%);
+}
+
+.vc-quest-card-hero-info {
+    position: absolute;
+    bottom: 10px;
+    left: 14px;
+    right: 14px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+}
+
+.vc-quest-card-name {
+    font-size: 14px;
+    font-weight: 700;
+    color: #fff;
+    text-shadow: 0 1px 8px rgb(0 0 0 / 60%);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 70%;
+}
+
+.vc-quest-card-expires {
+    font-size: 10px;
+    color: #c77dff;
+    background: rgb(180 74 255 / 15%);
+    padding: 2px 8px;
+    border-radius: 8px;
+    border: 1px solid #b44aff25;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.vc-quest-card-body {
+    padding: 12px 14px 14px;
+}
+
+.vc-quest-card-meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+}
+
+.vc-quest-card-app {
+    font-size: 11px;
+    color: #6a5d85;
+}
+
+.vc-quest-card-task {
+    font-size: 9px;
+    font-weight: 700;
+    color: #e040fb;
+    background: rgb(224 64 251 / 8%);
+    padding: 3px 8px;
+    border-radius: 4px;
+    border: 1px solid #e040fb20;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+.vc-quest-progress-wrap {
+    margin-bottom: 12px;
+}
+
+.vc-quest-progress-bar {
+    height: 6px;
+    background: #130f22;
+    border-radius: 3px;
+    overflow: hidden;
+    position: relative;
+    border: 1px solid #1e173520;
+}
+
+.vc-quest-progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #7b2fff, #b44aff, #e040fb);
+    border-radius: 3px;
+    transition: width 0.5s ease;
+    box-shadow: 0 0 12px rgb(180 74 255 / 60%);
+    position: relative;
+}
+
+.vc-quest-progress-fill::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg,
+            transparent 0%,
+            rgb(255 255 255 / 30%) 50%,
+            transparent 100%);
+    animation: vc-quest-shimmer 1.5s infinite;
+}
+
+@keyframes vc-quest-shimmer {
+    0% {
+        transform: translateX(-100%);
+    }
+
+    100% {
+        transform: translateX(100%);
+    }
+}
+
+.vc-quest-progress-text {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 11px;
+    color: #6a5d85;
+    margin-top: 6px;
+}
+
+.vc-quest-progress-pct {
+    color: #c77dff;
+    font-weight: 700;
+    font-size: 12px;
+    text-shadow: 0 0 8px rgb(180 74 255 / 30%);
+}
+
+.vc-quest-status {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 10px;
+    margin-bottom: 10px;
+    padding: 6px 10px;
+    background: rgb(224 64 251 / 4%);
+    border-radius: 6px;
+    border: 1px solid #e040fb15;
+    animation: vc-quest-status-in 0.3s ease;
+}
+
+@keyframes vc-quest-status-in {
+    0% {
+        opacity: 0;
+        transform: translateY(4px);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.vc-quest-status-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #e040fb;
+    box-shadow: 0 0 8px #e040fb;
+    animation: vc-quest-blink 1.2s infinite;
+    flex-shrink: 0;
+}
+
+@keyframes vc-quest-blink {
+    0%,
+    100% {
+        opacity: 1;
+        box-shadow: 0 0 8px #e040fb;
+    }
+
+    50% {
+        opacity: 0.3;
+        box-shadow: 0 0 2px #e040fb;
+    }
+}
+
+.vc-quest-status-text {
+    color: #c77dff;
+}
+
+.vc-quest-status-paused {
+    padding: 6px 10px;
+    background: rgb(180 74 255 / 4%);
+    border-radius: 6px;
+    border: 1px solid #b44aff15;
+    margin-bottom: 10px;
+    animation: vc-quest-status-in 0.3s ease;
+}
+
+.vc-quest-status-paused span {
+    color: #8a7da8;
+    font-size: 10px;
+}
+
+.vc-quest-status-error {
+    padding: 6px 10px;
+    background: rgb(248 81 73 / 4%);
+    border-radius: 6px;
+    border: 1px solid #f8514920;
+    margin-bottom: 10px;
+    animation: vc-quest-status-in 0.3s ease;
+}
+
+.vc-quest-status-error span {
+    color: #f85149;
+    font-size: 10px;
+}
+
+.vc-quest-complete-btn {
+    width: 100%;
+    padding: 10px 0;
+    border: 1px solid #b44aff40;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 2.5px;
+    cursor: pointer;
+    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(135deg, #7b2fff, #b44aff);
+    color: #fff;
+}
+
+.vc-quest-complete-btn::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg,
+            rgb(255 255 255 / 0%) 0%,
+            rgb(255 255 255 / 10%) 50%,
+            rgb(255 255 255 / 0%) 100%);
+    opacity: 0;
+    transition: opacity 0.25s ease;
+}
+
+.vc-quest-complete-btn:hover::before {
+    opacity: 1;
+}
+
+.vc-quest-complete-btn:hover {
+    box-shadow:
+        0 0 30px rgb(180 74 255 / 40%),
+        0 4px 20px rgb(123 47 255 / 30%);
+    transform: translateY(-2px);
+    border-color: #b44aff66;
+}
+
+.vc-quest-complete-btn:active {
+    transform: translateY(0) scale(0.97);
+    transition: transform 0.1s ease;
+}
+
+.vc-quest-complete-btn:disabled {
+    background: #130f22;
+    color: #3a2d55;
+    cursor: not-allowed;
+    box-shadow: none;
+    transform: none;
+    border-color: #1e173540;
+}
+
+.vc-quest-complete-btn:disabled::before {
+    display: none;
+}
+
+.vc-quest-complete-btn.vc-quest-running {
+    background: linear-gradient(135deg, #e040fb, #b44aff);
+    color: #fff;
+    border-color: #e040fb50;
+    animation: vc-quest-pulse 2s infinite;
+}
+
+@keyframes vc-quest-pulse {
+    0%,
+    100% {
+        box-shadow: 0 0 8px rgb(224 64 251 / 30%);
+    }
+
+    50% {
+        box-shadow: 0 0 30px rgb(224 64 251 / 50%);
+    }
+}
+
+.vc-quest-complete-btn.vc-quest-done {
+    background: linear-gradient(135deg, #1a1230, #251a40);
+    color: #7b2fff;
+    border-color: #7b2fff25;
+}
+
+.vc-quest-complete-btn.vc-quest-paused {
+    background: #0d0a18;
+    color: #8a7da8;
+    border-color: #b44aff25;
+}
+
+.vc-quest-complete-btn.vc-quest-paused:hover {
+    color: #c77dff;
+    border-color: #b44aff40;
+    box-shadow: 0 0 20px rgb(180 74 255 / 20%);
+}
+
+.vc-quest-empty {
+    padding: 50px 20px;
+    text-align: center;
+    color: #6a5d85;
+    animation: vc-quest-card-in 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.vc-quest-empty-icon {
+    margin-bottom: 16px;
+    opacity: 0.2;
+}
+
+.vc-quest-empty-icon .vc-quest-header-icon {
+    width: 40px;
+    height: 40px;
+    color: #6a5d85;
+    filter: none;
+    animation: none;
+}
+
+.vc-quest-empty-text {
+    font-size: 13px;
+    font-weight: 700;
+    color: #6a5d85;
+    margin-bottom: 6px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+}
+
+.vc-quest-empty-sub {
+    font-size: 11px;
+    color: #3a2d55;
+}
+
+.vc-quest-footer {
+    padding: 10px 20px;
+    border-top: 1px solid #b44aff10;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    position: relative;
+    z-index: 2;
+    background: rgb(8 6 15 / 80%);
+}
+
+.vc-quest-footer-link {
+    font-size: 10px;
+    color: #5a4d75;
+    text-decoration: none;
+    letter-spacing: 1px;
+    transition: color 0.3s ease, text-shadow 0.3s ease;
+}
+
+.vc-quest-footer-link:hover {
+    color: #c77dff;
+    text-shadow: 0 0 12px rgb(180 74 255 / 40%);
+    text-decoration: none;
+}
