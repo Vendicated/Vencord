@@ -168,7 +168,7 @@ export default definePlugin({
                 <Tooltip text={text} position="right">
                     {({ onMouseEnter, onMouseLeave }) => (
                         <div
-                            id={cl("-indicator-items")}
+                            id={cl("indicator-items")}
                             onMouseEnter={onMouseEnter}
                             onMouseLeave={onMouseLeave}>
                             {!!(mode & IndicatorType.FRIEND) && <FriendsIndicator />}

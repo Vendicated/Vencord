@@ -15,7 +15,7 @@ import { openPluginModal } from "@components/settings";
 import { EquicordDevs } from "@utils/constants";
 import { copyToClipboard } from "@utils/index";
 import definePlugin, { PluginNative, StartAt } from "@utils/types";
-import { onceReady } from "@webpack";
+import { findStoreLazy, onceReady } from "@webpack";
 import { ContextMenuApi, Menu, NavigationRouter, RestAPI, useEffect, useState } from "@webpack/common";
 import { JSX } from "react";
 
@@ -23,6 +23,7 @@ import { addIgnoredQuest, addRerenderCallback, autoFetchCompatible, fetchAndAler
 import { ActiveQuestIntervalsMap, ExcludedQuestMap, GuildlessServerListItem, Quest, QuestIcon, QuestMap, QuestStatus, QuestTaskType, RGB } from "./utils/components";
 import { adjustRGB, decimalToRGB, fetchAndDispatchQuests, formatLowerBadge, getFormattedNow, getIgnoredQuestIDs, getQuestProgress, getQuestStatus, getQuestTarget, getQuestTask, isDarkish, leftClick, middleClick, normalizeQuestName, q, QuestifyLogger, questPath, QuestsStore, refreshQuest, reportPlayGameQuestProgress, reportVideoQuestProgress, rightClick, setIgnoredQuestIDs, videoQuestLeeway, waitUntilEnrolled } from "./utils/misc";
 
+const AuthorizedAppsStore = findStoreLazy("AuthorizedAppsStore");
 let initialQuestDataFetched = false;
 const QuestifyNative = VencordNative.pluginHelpers.Questify as PluginNative<typeof import("./native")>;
 const patchedMobileQuests = new Set<string>();
@@ -852,7 +853,6 @@ async function startAchievementActivityProgressTracking(quest: Quest, target: { 
     if (!result.success) {
         const errorReason = result.error || "An error occurred while completing the Quest.";
         QuestifyLogger.error(`[${getFormattedNow()}] Failed to complete Quest ${questName}:`, errorReason);
-        return;
     } else {
         QuestifyLogger.info(`[${getFormattedNow()}] Quest ${questName} completed.`);
 
@@ -864,6 +864,20 @@ async function startAchievementActivityProgressTracking(quest: Quest, target: { 
                 onClick: () => NavigationRouter.transitionTo(`${questPath}#${quest.id}`),
             });
         }
+    }
+
+    try {
+        const deauthToken = AuthorizedAppsStore.getNewestTokenForApplication(appID)?.id;
+
+        if (!deauthToken) {
+            throw new Error("Deauthorization token not found.");
+        }
+
+        await RestAPI.del({
+            url: `/oauth2/tokens/${deauthToken}/`,
+        });
+    } catch (error) {
+        QuestifyLogger.error(`[${getFormattedNow()}] Failed to deauthorize application for Quest ${questName}:`, error);
     }
 }
 
