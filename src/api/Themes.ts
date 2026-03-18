@@ -21,7 +21,7 @@ import { createAndAppendStyle } from "@utils/css";
 import { ThemeStore } from "@vencord/discord-types";
 import { PopoutWindowStore } from "@webpack/common";
 
-import { userStyleRootNode, vencordRootNode } from "./Styles";
+import { coreStyleRootNode, managedStyleRootNode, userStyleRootNode, vencordRootNode } from "./Styles";
 
 let style: HTMLStyleElement;
 let themesStyle: HTMLStyleElement;
@@ -83,14 +83,23 @@ async function initThemes() {
 
 function applyToPopout(popoutWindow: Window | undefined, key: string) {
     if (!popoutWindow?.document) return;
-    // skip game overlay cuz it needs to stay transparent, themes broke it
-    if (key === "DISCORD_OutOfProcessOverlay") return;
 
     const doc = popoutWindow.document;
 
     doc.querySelector("vencord-root")?.remove();
 
-    doc.documentElement.appendChild(vencordRootNode.cloneNode(true));
+    const clonedRoot = vencordRootNode.cloneNode(false) as HTMLElement;
+
+    clonedRoot.append(
+        coreStyleRootNode.cloneNode(true),
+        managedStyleRootNode.cloneNode(true)
+    );
+
+    if (key !== "DISCORD_OutOfProcessOverlay") {
+        clonedRoot.append(userStyleRootNode.cloneNode(true));
+    }
+
+    doc.documentElement.appendChild(clonedRoot);
 }
 
 function updatePopoutWindows() {
