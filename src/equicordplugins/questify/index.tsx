@@ -1586,7 +1586,7 @@ export default definePlugin({
             // Whether preloading assets is enabled or not, the placeholders loading
             // before the assets causes a lot of element shifting, whereas if
             // the elements load immediately instead, it doesn't.
-            find: ",{rewardWithArticleHook:()",
+            find: /isVisibleInViewport:\i,onReceiveErrorHints/,
             replacement: {
                 match: /showPlaceholder:!\i/,
                 replace: "showPlaceholder:false"
