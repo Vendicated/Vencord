@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { CORS_PROXY, toProxiedUrl } from "@equicordplugins/fileUpload/constants";
 import { settings } from "@equicordplugins/fileUpload/settings";
 import { serviceLabels, ServiceType, ShareXUploaderConfig, UploadResponse } from "@equicordplugins/fileUpload/types";
 import { copyToClipboard } from "@utils/clipboard";
@@ -24,7 +25,13 @@ const Native = IS_DISCORD_DESKTOP
 
 const logger = new Logger("FileUpload", "#7cb7ff");
 
-const CORS_PROXY = "https://cors.keiran0.workers.dev"; // im hosting this on cloudflare workers so uptime and latency should be reliable
+function toProxyUrl(url: string): string {
+    if (Native || url.startsWith(`${CORS_PROXY}?url=`)) {
+        return url;
+    }
+
+    return toProxiedUrl(url);
+}
 
 let isUploading = false;
 
@@ -58,6 +65,14 @@ let uploadState: UploadProgressState = { ...defaultUploadState };
 const uploadStateListeners = new Set<() => void>();
 let activeAbortController: AbortController | null = null;
 let cancelRequested = false;
+
+function isUploadCancelledError(error: unknown): boolean {
+    if (cancelRequested) return true;
+    if (!(error instanceof Error)) return false;
+
+    const message = error.message.toLowerCase();
+    return message.includes("cancelled") || message.includes("canceled") || message.includes("aborted") || message.includes("aborterror");
+}
 
 function emitUploadState() {
     for (const listener of uploadStateListeners) {
@@ -112,9 +127,10 @@ async function fetchWithTimeout(url: string, options: RequestInit): Promise<Resp
     const controller = new AbortController();
     activeAbortController = controller;
     const timeout = setTimeout(() => controller.abort(), getUploadTimeoutMs());
+    const requestUrl = toProxyUrl(url);
 
     try {
-        return await fetch(url, {
+        return await fetch(requestUrl, {
             ...options,
             signal: controller.signal
         });
@@ -194,17 +210,7 @@ async function uploadToShareX(fileBlob: Blob, filename: string): Promise<string>
         throw new Error(`Unsupported ShareX Body type: ${config.Body || "unknown"}`);
     }
 
-    let response: Response;
-    try {
-        response = await fetchWithTimeout(requestUrl, { method, headers, body });
-    } catch (error) {
-        if (Native) {
-            throw error;
-        }
-
-        const proxiedUrl = `${CORS_PROXY}?url=${encodeURIComponent(requestUrl)}`;
-        response = await fetchWithTimeout(proxiedUrl, { method, headers, body });
-    }
+    const response = await fetchWithTimeout(requestUrl, { method, headers, body });
 
     const responseText = await response.text();
     let responseJson: unknown = null;
@@ -302,9 +308,7 @@ async function uploadToNest(fileBlob: Blob, filename: string): Promise<string> {
     const formData = new FormData();
     formData.append("file", fileBlob, filename);
 
-    const proxiedUrl = `${CORS_PROXY}?url=${encodeURIComponent("https://nest.rip/api/files/upload")}`;
-
-    const response = await fetchWithTimeout(proxiedUrl, {
+    const response = await fetchWithTimeout("https://nest.rip/api/files/upload", {
         method: "POST",
         headers: {
             "Authorization": nestToken
@@ -394,8 +398,7 @@ async function uploadToEzHost(fileBlob: Blob, filename: string): Promise<string>
 
     const headers: Record<string, string> = { key: ezHostKey };
 
-    const proxiedUrl = `${CORS_PROXY}?url=${encodeURIComponent("https://api.e-z.host/files")}`;
-    const response = await fetchWithTimeout(proxiedUrl, {
+    const response = await fetchWithTimeout("https://api.e-z.host/files", {
         method: "POST",
         headers,
         body: formData
@@ -428,7 +431,7 @@ async function uploadToCatbox(fileBlob: Blob, filename: string): Promise<string>
     if (catboxUserhash) formData.append("userhash", catboxUserhash);
     formData.append("fileToUpload", fileBlob, filename);
 
-    const response = await fetchWithTimeout(`${CORS_PROXY}?url=${encodeURIComponent("https://catbox.moe/user/api.php")}`, {
+    const response = await fetchWithTimeout("https://catbox.moe/user/api.php", {
         method: "POST",
         body: formData
     });
@@ -472,7 +475,7 @@ async function uploadToLitterbox(fileBlob: Blob, filename: string): Promise<stri
     formData.append("time", expiry);
     formData.append("fileToUpload", fileBlob, filename);
 
-    const response = await fetchWithTimeout(`${CORS_PROXY}?url=${encodeURIComponent("https://litterbox.catbox.moe/resources/internals/api.php")}`, {
+    const response = await fetchWithTimeout("https://litterbox.catbox.moe/resources/internals/api.php", {
         method: "POST",
         body: formData
     });
@@ -499,8 +502,7 @@ async function uploadToGofile(fileBlob: Blob, filename: string): Promise<string>
     formData.append("file", fileBlob, filename);
 
     const uploadUrl = "https://upload.gofile.io/uploadfile";
-    const requestUrl = Native ? uploadUrl : `${CORS_PROXY}?url=${encodeURIComponent(uploadUrl)}`;
-    const response = await fetchWithTimeout(requestUrl, {
+    const response = await fetchWithTimeout(uploadUrl, {
         method: "POST",
         body: formData
     });
@@ -535,7 +537,7 @@ async function uploadToTmpfiles(fileBlob: Blob, filename: string): Promise<strin
     formData.append("file", fileBlob, filename);
 
     const uploadUrl = "https://tmpfiles.org/api/v1/upload";
-    const response = await fetchWithTimeout(`${CORS_PROXY}?url=${encodeURIComponent(uploadUrl)}`, {
+    const response = await fetchWithTimeout(uploadUrl, {
         method: "POST",
         body: formData
     });
@@ -563,7 +565,7 @@ async function uploadToBuzzheavier(fileBlob: Blob, filename: string): Promise<st
     }
 
     const uploadUrl = `https://w.buzzheavier.com/${encodeURIComponent(filename)}`;
-    const response = await fetchWithTimeout(`${CORS_PROXY}?url=${encodeURIComponent(uploadUrl)}`, {
+    const response = await fetchWithTimeout(uploadUrl, {
         method: "PUT",
         body: fileBlob
     });
@@ -598,7 +600,7 @@ async function uploadToTempSh(fileBlob: Blob, filename: string): Promise<string>
     formData.append("file", fileBlob, filename);
 
     const uploadUrl = "https://temp.sh/upload";
-    const response = await fetchWithTimeout(`${CORS_PROXY}?url=${encodeURIComponent(uploadUrl)}`, {
+    const response = await fetchWithTimeout(uploadUrl, {
         method: "POST",
         body: formData
     });
@@ -630,7 +632,7 @@ async function uploadToFilebin(fileBlob: Blob, filename: string): Promise<string
     const formData = new FormData();
     formData.append("file", fileBlob, filename);
 
-    const response = await fetchWithTimeout(`${CORS_PROXY}?url=${encodeURIComponent(uploadUrl)}`, {
+    const response = await fetchWithTimeout(uploadUrl, {
         method: "POST",
         body: formData
     });
@@ -756,10 +758,20 @@ function finalizeUploadedUrl(url: string): string {
     }
 }
 
-function notifyUploadSuccess(finalUrl: string): void {
+async function notifyUploadSuccess(finalUrl: string): Promise<void> {
     if (settings.store.autoCopy) {
-        copyToClipboard(finalUrl);
-        showToast("Upload successful, URL copied to clipboard", Toasts.Type.SUCCESS);
+        if (!finalUrl || !finalUrl.trim()) {
+            showToast("Upload successful, but no URL was available to copy", Toasts.Type.MESSAGE);
+            return;
+        }
+
+        try {
+            await copyToClipboard(finalUrl);
+            showToast("Upload successful, URL copied to clipboard", Toasts.Type.SUCCESS);
+        } catch (error) {
+            logger.warn("Upload succeeded but clipboard copy failed", error);
+            showToast("Upload successful, but failed to copy URL", Toasts.Type.MESSAGE);
+        }
     } else {
         showToast("Upload successful", Toasts.Type.SUCCESS);
     }
@@ -789,6 +801,8 @@ async function uploadWithFallbacks(fileBlob: Blob, filename: string, primary: Se
     });
 
     for (const service of uploadOrder) {
+        if (cancelRequested) throw new Error("Upload cancelled by user");
+
         const attempt = attempted.length + 1;
         setUploadState({
             phase: attempt === 1 ? "uploading" : "retrying",
@@ -819,10 +833,11 @@ async function uploadWithFallbacks(fileBlob: Blob, filename: string, primary: Se
 
             return uploadedUrl;
         } catch (error) {
-            const message = error instanceof Error ? error.message : "Unknown error";
-            if (message === "Upload cancelled by user") {
+            if (isUploadCancelledError(error)) {
                 throw error;
             }
+
+            const message = error instanceof Error ? error.message : "Unknown error";
 
             attempted.push(serviceLabels[service]);
             lastError = message;
@@ -875,7 +890,7 @@ async function uploadPreparedBlob(blob: Blob, sourceUrl?: string): Promise<void>
     setUploadState({ fileName: filename, status: "File ready, starting upload...", percent: 4 });
     const uploadedUrl = await uploadWithFallbacks(normalizedBlob, filename, primary);
     const finalUrl = finalizeUploadedUrl(uploadedUrl);
-    notifyUploadSuccess(finalUrl);
+    await notifyUploadSuccess(finalUrl);
 }
 
 export async function uploadFile(url: string): Promise<void> {
@@ -926,7 +941,9 @@ export async function uploadFile(url: string): Promise<void> {
                 blob = await response.blob();
             }
         } else {
-            const response = await fetch(fetchUrl);
+            const response = await fetchWithTimeout(fetchUrl, {
+                method: "GET"
+            });
             if (!response.ok) {
                 throw new Error(`Failed to fetch file: ${response.status}`);
             }
@@ -941,7 +958,7 @@ export async function uploadFile(url: string): Promise<void> {
         await uploadPreparedBlob(blob, url);
     } catch (error) {
         const message = error instanceof Error ? error.message : "Unknown error";
-        if (message === "Upload cancelled by user") {
+        if (isUploadCancelledError(error)) {
             showToast("Upload cancelled", Toasts.Type.MESSAGE);
             setUploadState({ phase: "cancelled", status: "Upload cancelled.", canCancel: false, percent: 0 });
         } else {
@@ -957,6 +974,13 @@ export async function uploadFile(url: string): Promise<void> {
 }
 
 export async function uploadPickedFile(): Promise<void> {
+    const file = await chooseFile("*/*");
+    if (!file) return;
+
+    await uploadProvidedFiles([file]);
+}
+
+export async function uploadProvidedFiles(files: readonly File[]): Promise<void> {
     if (isUploading) {
         showToast("Upload already in progress", Toasts.Type.MESSAGE);
         return;
@@ -967,30 +991,37 @@ export async function uploadPickedFile(): Promise<void> {
         return;
     }
 
-    const file = await chooseFile("*/*");
-    if (!file) {
-        return;
-    }
+    if (!files.length) return;
+
+    const uploadFiles = files.filter(file => Boolean(file));
+    if (!uploadFiles.length) return;
 
     isUploading = true;
     cancelRequested = false;
-    setUploadState({
-        phase: "preparing",
-        fileName: file.name,
-        currentService: null,
-        currentServiceLabel: "",
-        attempt: 0,
-        totalAttempts: 0,
-        percent: 2,
-        status: `Preparing ${file.name}...`,
-        canCancel: true
-    });
 
     try {
-        await uploadPreparedBlob(file);
+        for (let i = 0; i < uploadFiles.length; i++) {
+            const file = uploadFiles[i];
+            const current = i + 1;
+            const suffix = uploadFiles.length > 1 ? ` (${current}/${uploadFiles.length})` : "";
+
+            setUploadState({
+                phase: "preparing",
+                fileName: file.name,
+                currentService: null,
+                currentServiceLabel: "",
+                attempt: 0,
+                totalAttempts: 0,
+                percent: 2,
+                status: `Preparing ${file.name}${suffix}...`,
+                canCancel: true
+            });
+
+            await uploadPreparedBlob(file);
+        }
     } catch (error) {
         const message = error instanceof Error ? error.message : "Unknown error";
-        if (message === "Upload cancelled by user") {
+        if (isUploadCancelledError(error)) {
             showToast("Upload cancelled", Toasts.Type.MESSAGE);
             setUploadState({ phase: "cancelled", status: "Upload cancelled.", canCancel: false, percent: 0 });
         } else {

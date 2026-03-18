@@ -47,14 +47,14 @@ async function rdbRequest(path: string, options: RequestInit = {}) {
     });
 }
 
-export async function getReviews(id: string, offset = 0): Promise<UserReviewsData> {
+export async function getReviews(id: string, offset = 0, isProfileComponent = false): Promise<UserReviewsData> {
     let flags = 0;
     if (!settings.store.showWarning) flags |= WarningFlag;
 
     const params = new URLSearchParams({
         flags: String(flags),
         offset: String(offset),
-        limit: "4"
+        ...(isProfileComponent ? { limit: "4" } : {})
     });
     const req = await fetch(`${API_URL}/users/${id}/reviews?${params}`);
 
