@@ -13,7 +13,7 @@ export default definePlugin({
     authors: [Devs.Samwich],
     patches: [
         {
-            find: "._areActivitiesExperimentallyHidden=(",
+            find: "this.updateMaxContentFeedRowSeen()",
             replacement: {
                 match: /return \i===\i\.\i\.UNKNOWN/,
                 replace: "return null;$&"
