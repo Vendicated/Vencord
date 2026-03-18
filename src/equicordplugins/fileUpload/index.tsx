@@ -12,23 +12,75 @@ import { OpenExternalIcon } from "@components/Icons";
 import { Devs, EquicordDevs } from "@utils/constants";
 import { classNameFactory } from "@utils/css";
 import definePlugin from "@utils/types";
-import { Menu, PermissionsBits, PermissionStore, React, useEffect, useState } from "@webpack/common";
+import { DraftType, FluxDispatcher, Menu, PermissionsBits, PermissionStore, React, useEffect, useState } from "@webpack/common";
 
 import { settings } from "./settings";
 import { serviceLabels, ServiceType } from "./types";
 import { getMediaUrl } from "./utils/getMediaUrl";
-import { cancelCurrentUpload, getUploadState, subscribeUploadState, uploadFile, uploadPickedFile } from "./utils/upload";
+import { cancelCurrentUpload, getUploadState, isConfigured, subscribeUploadState, uploadFile, uploadPickedFile, uploadProvidedFiles } from "./utils/upload";
 
 const cl = classNameFactory("vc-file-upload-");
+let uploadAddFilesInterceptor: ((event: unknown) => void) | null = null;
+
+type UploadAddFilesEvent = {
+    type: string;
+    files?: unknown;
+    uploads?: unknown;
+    items?: unknown;
+    draftType?: unknown;
+};
+
+function extractFilesFromValue(value: unknown): File[] {
+    if (value instanceof File) return [value];
+
+    if (!Array.isArray(value)) return [];
+
+    return value.flatMap(entry => {
+        if (entry instanceof File) return [entry];
+
+        if (!entry || typeof entry !== "object") return [];
+
+        const uploadFile = "file" in entry ? entry.file : null;
+        if (uploadFile instanceof File) return [uploadFile];
+
+        const item = "item" in entry && entry.item && typeof entry.item === "object" ? entry.item : null;
+        if (!item || !("file" in item)) return [];
+
+        return item.file instanceof File ? [item.file] : [];
+    });
+}
+
+function interceptUploadAddFiles(event: unknown): void {
+    if (!event || typeof event !== "object" || !("type" in event)) return;
+
+    const payload = event as UploadAddFilesEvent;
+    if (payload.type !== "UPLOAD_ATTACHMENT_ADD_FILES") return;
+
+    if (payload.draftType !== DraftType.ChannelMessage) return;
+
+    if (!Boolean((settings.store as { interceptDiscordUpload?: boolean; }).interceptDiscordUpload) || !isConfigured()) return;
+
+    const files = [
+        ...extractFilesFromValue(payload.files),
+        ...extractFilesFromValue(payload.uploads),
+        ...extractFilesFromValue(payload.items)
+    ];
+    const uniqueFiles = Array.from(new Set(files));
+
+    if (!uniqueFiles.length) return;
+
+    payload.files = [];
+    payload.uploads = [];
+    payload.items = [];
+    void uploadProvidedFiles(uniqueFiles);
+}
 
 const ProgressBarInner = () => {
     const [state, setState] = useState(getUploadState);
 
     useEffect(() => subscribeUploadState(() => setState(getUploadState())), []);
 
-    if (state.phase === "idle") {
-        return null;
-    }
+    if (state.phase === "idle") return null;
 
     const percentage = Math.max(0, Math.min(100, state.percent));
 
@@ -157,12 +209,43 @@ export default definePlugin({
                 match: /(textValue:.{0,50}channelId:\i\.id\}\))(?:,\i(,))?/,
                 replace: "$1,$self.renderUploadProgress()$2"
             }
-        }
+        },
+        // forces an early return on the file size limit nitro upsell modal
+        {
+            find: "#{intl::tRuxk9::raw}",
+            replacement: {
+                match: /(?<=\.limits\.fileSize.{0,50})Array\.from\(\i\)\.some/,
+                replace: "$self.shouldBypassDiscordUploadSizeCheck()?false:$&"
+            }
+        },
     ],
     contextMenus: {
         "message": messageContextMenuPatch,
         "image-context": imageContextMenuPatch,
         "channel-attach": channelAttachMenuPatch
+    },
+    start() {
+        if (uploadAddFilesInterceptor) {
+            return;
+        }
+
+        uploadAddFilesInterceptor = event => interceptUploadAddFiles(event);
+        FluxDispatcher.addInterceptor(uploadAddFilesInterceptor);
+    },
+    stop() {
+        if (!uploadAddFilesInterceptor) {
+            return;
+        }
+
+        const index = FluxDispatcher._interceptors.indexOf(uploadAddFilesInterceptor);
+        if (index > -1) {
+            FluxDispatcher._interceptors.splice(index, 1);
+        }
+
+        uploadAddFilesInterceptor = null;
+    },
+    shouldBypassDiscordUploadSizeCheck(): boolean {
+        return Boolean((settings.store as { interceptDiscordUpload?: boolean; }).interceptDiscordUpload) && isConfigured();
     },
     renderUploadProgress() {
         return <ProgressBar />;

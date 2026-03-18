@@ -166,6 +166,12 @@ export const settings = definePluginSettings({
         default: false,
         hidden: true
     },
+    interceptDiscordUpload: {
+        type: OptionType.BOOLEAN,
+        description: "Intercept Discord uploads and use FileUpload instead.",
+        default: false,
+        hidden: true
+    },
     gofileToken: {
         type: OptionType.STRING,
         description: "Optional GoFile API token",
@@ -502,6 +508,13 @@ export function SettingsComponent() {
                 <Switch
                     checked={store.autoFormat}
                     onChange={v => store.autoFormat = v}
+                />
+            </SettingsSection>
+
+            <SettingsSection tag="label" name="Intercept Discord Upload Button" description="Use FileUpload when uploading through Discord's file picker" inlineSetting>
+                <Switch
+                    checked={Boolean((store as { interceptDiscordUpload?: boolean; }).interceptDiscordUpload)}
+                    onChange={v => (store as { interceptDiscordUpload?: boolean; }).interceptDiscordUpload = v}
                 />
             </SettingsSection>
 
