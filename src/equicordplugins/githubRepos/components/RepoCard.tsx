@@ -12,7 +12,7 @@ import { React, Tooltip } from "@webpack/common";
 import { cl } from "..";
 import { Star } from "./Star";
 
-export function RepoCard({ repo, showStars, showLanguage, variant }: RepoCardProps & { variant?: "popout" | "tab"; }) {
+export function RepoCard({ repo, showStars, showLanguage }: RepoCardProps) {
     const handleClick = () => window.open(repo.html_url, "_blank");
 
     const renderStars = () => {
@@ -62,8 +62,6 @@ export function RepoCard({ repo, showStars, showLanguage, variant }: RepoCardPro
         );
     };
 
-    const cardProps = variant === "tab" ? { onClick: handleClick } : {};
-
     return (
         <>
             {repo.description ? (
@@ -72,7 +70,7 @@ export function RepoCard({ repo, showStars, showLanguage, variant }: RepoCardPro
                         <div className={cl("card")}
                             onMouseLeave={onMouseLeave}
                             onMouseEnter={onMouseEnter}
-                            {...cardProps}
+                            onClick={handleClick}
                         >
                             <div className={cl("header")}>
                                 <BaseText size="sm" weight="medium" className={cl("name")}>
@@ -85,7 +83,7 @@ export function RepoCard({ repo, showStars, showLanguage, variant }: RepoCardPro
                     )}
                 </Tooltip>
             ) : (
-                <div className={cl("card")} {...cardProps}>
+                <div className={cl("card")} onClick={handleClick}>
                     <div className={cl("header")}>
                         <BaseText size="sm" weight="medium" className={cl("name")} >
                             {repo.name}
