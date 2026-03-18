@@ -141,5 +141,10 @@ export default definePlugin({
         }
     ],
     settings,
-    applyDefaultSettings
+    applyDefaultSettings,
+    flux: {
+        GUILD_JOIN_REQUEST_UPDATE({ guildId, status }) {
+            if (status === "APPROVED") applyDefaultSettings(guildId);
+        }
+    }
 });
