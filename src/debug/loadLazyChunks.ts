@@ -202,7 +202,7 @@ export async function loadLazyChunks() {
             return !(validChunks.has(id) || invalidChunks.has(id));
         });
 
-        await promiseAllSettledBatched(chunksLeft.map(id => queue(async () => {
+        await promiseAllSettledBatched(chunksLeft.map(id => async () => queue(async () => {
             const isWorkerAsset = await fetch(wreq.p + wreq.u(id))
                 .then(r => r.text())
                 .then(t => /importScripts\(|self\.postMessage/.test(t));
