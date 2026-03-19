@@ -96,9 +96,18 @@ export async function loadLazyChunks() {
 
                     if (wreq.u(id) == null || wreq.u(id) === "undefined.js") continue;
 
-                    const isWorkerAsset = await fetch(wreq.p + wreq.u(id))
-                        .then(r => r.text())
-                        .then(t => /importScripts\(|self\.postMessage/.test(t));
+                    let isWorkerAsset = false;
+                    for (let attempt = 0; attempt < 3; attempt++) {
+                        try {
+                            isWorkerAsset = await fetch(wreq.p + wreq.u(id))
+                                .then(r => r.text())
+                                .then(t => /importScripts\(|self\.postMessage/.test(t));
+                            break;
+                        } catch (err) {
+                            if (attempt === 2) throw err;
+                            await new Promise(resolve => setTimeout(resolve, 500 * (attempt + 1)));
+                        }
+                    }
 
                     if (isWorkerAsset) {
                         invalidChunks.add(id);
@@ -195,9 +204,18 @@ export async function loadLazyChunks() {
         });
 
         await promiseAllSettledBatched(chunksLeft.map(id => async () => {
-            const isWorkerAsset = await fetch(wreq.p + wreq.u(id))
-                .then(r => r.text())
-                .then(t => /importScripts\(|self\.postMessage/.test(t));
+            let isWorkerAsset = false;
+            for (let attempt = 0; attempt < 3; attempt++) {
+                try {
+                    isWorkerAsset = await fetch(wreq.p + wreq.u(id))
+                        .then(r => r.text())
+                        .then(t => /importScripts\(|self\.postMessage/.test(t));
+                    break;
+                } catch (err) {
+                    if (attempt === 2) throw err;
+                    await new Promise(resolve => setTimeout(resolve, 500 * (attempt + 1)));
+                }
+            }
 
             // Loads the chunk. Currently this only happens with the language packs which are loaded differently
             if (!isWorkerAsset) {
