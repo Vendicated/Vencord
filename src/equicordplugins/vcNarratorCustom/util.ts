@@ -49,36 +49,15 @@ export const VOICE_OPTIONS = [
     { label: "Latin American: Spanish MX Male (es_mx_002)", value: "es_mx_002" },
 ];
 
-/**
- * In-memory TTS audio URL cache (`cacheKey` -> `blob:` object URL).
- *
- * - Cleared on restart.
- * - Persistent caching lives in IndexedDB.
- * - Call `clearTtsCache()` to clear both memory + persistent caches.
- */
 export const ttsCache = new Map<string, string>();
 
-/**
- * Maximum size for the persistent TTS cache stored in IndexedDB.
- *
- * Implemented as a rolling LRU: when writing new entries, older entries are evicted
- * (by least-recent `lastAccess`) until we're back under the limit.
- */
 export const PERSISTENT_TTS_CACHE_MAX_BYTES = 100 * 1024 * 1024;
 
-/**
- * Parses the per-user voice map from settings.
- *
- * Supported formats:
- * - Preferred: `"userId:voiceId,userId2:voiceId2"` (comma-separated)
- * - Legacy: `"userId,voiceId\nuserId2,voiceId2"` (newline-separated)
- */
 export function parseUserVoiceMap(input?: string): Map<string, string> {
     const map = new Map<string, string>();
     const trimmed = input?.trim();
     if (!trimmed) return map;
 
-    // Preferred format (comma-separated pairs)
     if (trimmed.includes(":") || trimmed.includes("=")) {
         for (const entry of trimmed.split(",").map(s => s.trim()).filter(Boolean)) {
             const [userId, voiceId] = entry.split(/[:=]/).map(s => s.trim());
@@ -87,7 +66,6 @@ export function parseUserVoiceMap(input?: string): Map<string, string> {
         return map;
     }
 
-    // Legacy format (newline-separated "userId,voiceId")
     for (const line of trimmed.split(/\n+/)) {
         const [userId, voiceId] = line.split(",").map(s => s.trim());
         if (userId && voiceId) map.set(userId, voiceId);
@@ -96,18 +74,12 @@ export function parseUserVoiceMap(input?: string): Map<string, string> {
     return map;
 }
 
-/**
- * Serializes a per-user voice map to the preferred storage format.
- */
 export function serializeUserVoiceMap(map: Map<string, string>): string {
     return Array.from(map.entries())
         .map(([userId, voiceId]) => `${userId}:${voiceId}`)
         .join(",");
 }
 
-/**
- * Gets the voice id for a given user id, falling back to the configured/default voice.
- */
 export function getVoiceForUser(
     userId: string | undefined,
     options: { userVoiceMap?: string; customVoice?: string; defaultVoice?: string; }
@@ -118,27 +90,46 @@ export function getVoiceForUser(
     return map.get(userId) ?? defaultVoice;
 }
 
-/**
- * Adds or updates a user voice mapping and returns the updated serialized map.
- */
 export function upsertUserVoiceMap(userVoiceMap: string | undefined, userId: string, voiceId: string): string {
     const map = parseUserVoiceMap(userVoiceMap ?? "");
     map.set(userId, voiceId);
     return serializeUserVoiceMap(map);
 }
 
-/**
- * Removes a user voice mapping and returns the updated serialized map.
- */
 export function removeUserVoiceFromMap(userVoiceMap: string | undefined, userId: string): string {
     const map = parseUserVoiceMap(userVoiceMap ?? "");
     map.delete(userId);
     return serializeUserVoiceMap(map);
 }
 
-/**
- * Parses the state-change filter list from a comma-separated string.
- */
+export function parseUserIdList(input?: string): Set<string> {
+    const set = new Set<string>();
+    const trimmed = input?.trim();
+    if (!trimmed) return set;
+
+    for (const entry of trimmed.split(",").map(s => s.trim()).filter(Boolean)) {
+        set.add(entry);
+    }
+
+    return set;
+}
+
+export function serializeUserIdList(list: Set<string>): string {
+    return Array.from(list).join(",");
+}
+
+export function addUserToList(input: string | undefined, userId: string): string {
+    const set = parseUserIdList(input);
+    set.add(userId);
+    return serializeUserIdList(set);
+}
+
+export function removeUserFromList(input: string | undefined, userId: string): string {
+    const set = parseUserIdList(input);
+    set.delete(userId);
+    return serializeUserIdList(set);
+}
+
 export function parseStateChangeFilterList(input?: string): Set<string> {
     const set = new Set<string>();
     const trimmed = input?.trim();
@@ -151,34 +142,22 @@ export function parseStateChangeFilterList(input?: string): Set<string> {
     return set;
 }
 
-/**
- * Serializes the state-change filter list into a comma-separated string.
- */
 export function serializeStateChangeFilterList(list: Set<string>): string {
     return Array.from(list).join(",");
 }
 
-/**
- * Adds a user id to the state-change filter list and returns the updated string.
- */
 export function addUserToStateChangeFilterList(input: string | undefined, userId: string): string {
     const set = parseStateChangeFilterList(input);
     set.add(userId);
     return serializeStateChangeFilterList(set);
 }
 
-/**
- * Removes a user id from the state-change filter list and returns the updated string.
- */
 export function removeUserFromStateChangeFilterList(input: string | undefined, userId: string): string {
     const set = parseStateChangeFilterList(input);
     set.delete(userId);
     return serializeStateChangeFilterList(set);
 }
 
-/**
- * Sanitizes a string for TTS usage (length cap + character allow list).
- */
 export function clean(str: string, latinOnly?: boolean) {
     const replacer = latinOnly
         ? /[^\p{Script=Latin}\p{Number}\p{Punctuation}\s]/gu
@@ -192,9 +171,6 @@ export function clean(str: string, latinOnly?: boolean) {
         .slice(0, 128);
 }
 
-/**
- * Expands the template string used in announcements.
- */
 export function formatText(
     str: string,
     user: string,
@@ -216,41 +192,20 @@ export function formatText(
         );
 }
 
-/**
- * IndexedDB database name used for persistent caching.
- */
 const DB_NAME = "VcNarratorDB";
 
-/**
- * IndexedDB schema version.
- *
- * v1: `voices` store only
- * v2: adds `voices_meta` for rolling size limits / LRU eviction
- */
 const DB_VERSION = 2;
 
-/**
- * Object store holding cached audio blobs (`cacheKey` -> Blob).
- */
 const VOICES_STORE = "voices";
 
-/**
- * Object store holding metadata (`cacheKey` -> { size, createdAt, lastAccess }).
- */
 const META_STORE = "voices_meta";
 
-/**
- * Metadata for an entry in the persistent cache.
- */
 type VoiceMeta = {
     size: number;
     createdAt: number;
     lastAccess: number;
 };
 
-/**
- * Opens (or creates) the IndexedDB database used for persistent TTS caching.
- */
 function openDB(): Promise<IDBDatabase> {
     return new Promise((resolve, reject) => {
         const request = indexedDB.open(DB_NAME, DB_VERSION);
@@ -265,12 +220,6 @@ function openDB(): Promise<IDBDatabase> {
                 meta.createIndex("by_lastAccess", "lastAccess");
             }
 
-            /**
-             * Migration: older DBs stored only Blobs in `voices` without metadata.
-             *
-             * On upgrade to v2, backfill `voices_meta` so size limits and LRU eviction
-             * can work immediately.
-             */
             if (upgradeTx && (event?.oldVersion ?? 0) < 2) {
                 const now = Date.now();
                 const voices = upgradeTx.objectStore(VOICES_STORE);
@@ -297,9 +246,6 @@ function openDB(): Promise<IDBDatabase> {
     });
 }
 
-/**
- * Returns the persistent cache size + entry count (based on IndexedDB metadata).
- */
 export async function getPersistentTtsCacheStats(): Promise<{ bytes: number; entries: number; }> {
     const db = await openDB();
     return new Promise((resolve, reject) => {
@@ -325,14 +271,11 @@ export async function getPersistentTtsCacheStats(): Promise<{ bytes: number; ent
     });
 }
 
-/**
- * Clears both the in-memory URL cache and the persistent IndexedDB cache.
- */
 export async function clearTtsCache(): Promise<void> {
     for (const url of ttsCache.values()) {
         try {
             URL.revokeObjectURL(url);
-        } catch { /* ignore */ }
+        } catch { }
     }
     ttsCache.clear();
 
@@ -346,9 +289,6 @@ export async function clearTtsCache(): Promise<void> {
     });
 }
 
-/**
- * Enforces the persistent cache size limit by removing least-recently-used entries.
- */
 async function trimPersistentCacheToMaxBytes(maxBytes = PERSISTENT_TTS_CACHE_MAX_BYTES): Promise<void> {
     const db = await openDB();
     return new Promise((resolve, reject) => {
@@ -376,7 +316,7 @@ async function trimPersistentCacheToMaxBytes(maxBytes = PERSISTENT_TTS_CACHE_MAX
                 if (inMemoryUrl) {
                     try {
                         URL.revokeObjectURL(inMemoryUrl);
-                    } catch { /* ignore */ }
+                    } catch { }
                     ttsCache.delete(cacheKey);
                 }
 
@@ -407,9 +347,6 @@ async function trimPersistentCacheToMaxBytes(maxBytes = PERSISTENT_TTS_CACHE_MAX
     });
 }
 
-/**
- * Retrieves a cached TTS audio blob from IndexedDB and updates its LRU `lastAccess`.
- */
 export async function getCachedVoiceFromDB(cacheKey: string): Promise<Blob | null> {
     const db = await openDB();
     return new Promise((resolve, reject) => {
@@ -439,9 +376,6 @@ export async function getCachedVoiceFromDB(cacheKey: string): Promise<Blob | nul
     });
 }
 
-/**
- * Stores a TTS audio blob in IndexedDB, updates metadata, then trims cache to max size.
- */
 export async function setCachedVoiceInDB(cacheKey: string, blob: Blob): Promise<void> {
     const db = await openDB();
     await new Promise<void>((resolve, reject) => {

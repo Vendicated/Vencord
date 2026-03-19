@@ -28,6 +28,7 @@ import {
 import { wordsToTitle } from "@utils/text";
 import definePlugin, { OptionType } from "@utils/types";
 import type { User } from "@vencord/discord-types";
+import { ChannelType } from "@vencord/discord-types/enums";
 import {
     Button as DiscordButton,
     ChannelStore,
@@ -45,6 +46,7 @@ import {
 } from "@webpack/common";
 
 import {
+    addUserToList,
     addUserToStateChangeFilterList,
     clean,
     clearTtsCache,
@@ -53,7 +55,9 @@ import {
     getPersistentTtsCacheStats,
     getVoiceForUser,
     parseStateChangeFilterList,
+    parseUserIdList,
     parseUserVoiceMap,
+    removeUserFromList,
     removeUserFromStateChangeFilterList,
     removeUserVoiceFromMap,
     setCachedVoiceInDB,
@@ -64,12 +68,6 @@ import {
 
 const cl = classNameFactory("vc-narrator-");
 
-/*
- * TTS API maintained by example-git
- * The original TikTok TTS API went offline, so I set up a new working cloudflare worker.
- * I made sure it's intentionally rate-limited to keep it feasible. Please don't abuse it
- * so it can stay available for plugins like this one. Thanks! - example-git
- */
 const API_BASE = "https://tiktok-tts-aio.exampleuser.workers.dev";
 
 type LastApiCallStatus = {
@@ -189,10 +187,6 @@ interface VoiceState {
     stream?: boolean;
 }
 
-// Two-queue system for TTS playback:
-// - mainQueue: Non-interruptable messages (user names, join/leave announcements)
-// - stateQueue: Interruptable messages (mute/deafen/stream state changes)
-// This allows rapid state changes to interrupt each other while preserving important announcements
 interface QueueItem {
     text: string;
     userId?: string;
@@ -207,8 +201,6 @@ let currentAudio: HTMLAudioElement | null = null;
 let currentInterruptKey: string | undefined;
 let currentStop: (() => void) | null = null;
 
-// Pre-cache common state action phrases on plugin start for faster playback
-// Uses phonetic spellings for muted/deafened to ensure clear pronunciation across all voices
 const COMMON_ACTIONS = ["myooted", "un-myooted", "deafind", "un-deafind", "started streaming", "stopped streaming"];
 const DEFAULT_VOICE = "en_us_001";
 let preCacheInitialized = false;
@@ -217,26 +209,21 @@ async function preCacheCommonActions() {
     if (preCacheInitialized) return;
     preCacheInitialized = true;
 
-    // Initial delay before starting pre-cache to not impact startup
     await new Promise(r => setTimeout(r, 3000));
 
-    // Pre-fetch common action words in DEFAULT voice (universal for all users)
     for (const action of COMMON_ACTIONS) {
         const cacheKey = `${DEFAULT_VOICE}_${action}`;
 
-        // 1. Check in-memory cache first
         if (ttsCache.has(cacheKey)) continue;
 
-        // 2. Check persistent IndexedDB cache - load into memory if found
         try {
             const cachedBlob = await getCachedVoiceFromDB(cacheKey);
             if (cachedBlob) {
                 ttsCache.set(cacheKey, URL.createObjectURL(cachedBlob));
                 continue;
             }
-        } catch { /* ignore */ }
+        } catch { }
 
-        // 3. Fetch from API and store in both memory and persistent DB
         try {
             const response = await fetch(`${API_BASE}/api/generate`, {
                 method: "POST",
@@ -252,18 +239,14 @@ async function preCacheCommonActions() {
                 }
                 const blob = new Blob([binaryData], { type: "audio/mpeg" });
 
-                // Store in memory cache
                 ttsCache.set(cacheKey, URL.createObjectURL(blob));
 
-                // Persist to IndexedDB for future sessions
                 await setCachedVoiceInDB(cacheKey, blob);
             }
         } catch (e) {
             recordApiError(e);
-            /* ignore pre-cache failures */
         }
 
-        // Space out API requests to avoid rate limiting (2 seconds between each)
         await new Promise(r => setTimeout(r, 2000));
     }
 }
@@ -281,8 +264,6 @@ function interruptPlayback(key: string) {
 async function processQueue() {
     if (isSpeaking) return;
 
-    // Optimization: if main queue has intro and state queue has action with no other items,
-    // and they're for the same user, combine them into single API call
     if (mainQueue.length === 1 && stateQueue.length === 1 &&
         mainQueue[0].userId === stateQueue[0].userId &&
         !mainQueue[0].interruptKey) {
@@ -291,8 +272,8 @@ async function processQueue() {
         const combined: QueueItem = {
             text: `${intro.text} ${action.text}`,
             userId: intro.userId,
-            interruptKey: action.interruptKey, // Keep action's interrupt key so rapid switches can interrupt
-            useDefaultVoice: false, // Combined uses user voice for the intro part
+            interruptKey: action.interruptKey,
+            useDefaultVoice: false,
         };
         mainQueue.push(combined);
     }
@@ -308,7 +289,6 @@ async function processQueue() {
         console.error("TTS Error:", e);
     }
 
-    // Delay between messages - longer for state changes to allow interruption
     const delay = item.interruptKey ? 800 : 500;
     setTimeout(() => {
         isSpeaking = false;
@@ -320,10 +300,8 @@ async function processQueue() {
 function queueSpeak(text: string, userId?: string, interruptKey?: string, queue: "main" | "state" = "main", useDefaultVoice?: boolean) {
     if (text.trim().length === 0) return;
 
-    // Anti-spam: cap queue size
     const targetQueue = queue === "state" ? stateQueue : mainQueue;
     if (targetQueue.length >= 5) {
-        // If queue is full, drop new to stop the spam wave
         return;
     }
 
@@ -352,13 +330,12 @@ async function speak(text: string, userId?: string, interruptKey?: string, useDe
             resolve();
         };
 
-        // Helper to play audio and resolve promise when done
         const playAudio = (url: string) => {
             const audio = new Audio(url);
             audio.volume = settings.store.volume;
             audio.playbackRate = settings.store.rate;
             audio.onended = onEnd;
-            audio.onerror = onEnd; // Resolve even on error to unblock queue
+            audio.onerror = onEnd;
             currentAudio = audio;
             currentInterruptKey = interruptKey;
             currentStop = onEnd;
@@ -366,7 +343,6 @@ async function speak(text: string, userId?: string, interruptKey?: string, useDe
         };
 
         void (async () => {
-            // Use default voice for universal actions, otherwise user-specific voice
             const voice = useDefaultVoice
                 ? DEFAULT_VOICE
                 : getVoiceForUser(userId, {
@@ -375,16 +351,13 @@ async function speak(text: string, userId?: string, interruptKey?: string, useDe
                     defaultVoice: DEFAULT_VOICE,
                 });
 
-            // Create a unique cache key using the voice and text.
             const cacheKey = `${voice}_${text}`;
 
-            // 1. Check the in-memory cache (fast check)
             if (ttsCache.has(cacheKey)) {
                 playAudio(ttsCache.get(cacheKey)!);
                 return;
             }
 
-            // 2. Check the persistent IndexedDB cache.
             try {
                 const cachedBlob = await getCachedVoiceFromDB(cacheKey);
                 if (cachedBlob) {
@@ -397,7 +370,6 @@ async function speak(text: string, userId?: string, interruptKey?: string, useDe
                 console.error("Error accessing IndexedDB:", err);
             }
 
-            // 3. Fetch from API
             try {
                 const response = await fetch(`${API_BASE}/api/generate`, {
                     method: "POST",
@@ -415,7 +387,7 @@ async function speak(text: string, userId?: string, interruptKey?: string, useDe
 
                 if (!response.ok) {
                     console.error(`TTS failed: ${response.status}`);
-                    resolve(); // Skip this message
+                    resolve();
                     return;
                 }
 
@@ -441,9 +413,6 @@ async function speak(text: string, userId?: string, interruptKey?: string, useDe
     });
 }
 
-// For every user, channelId and oldChannelId will differ when moving channel.
-// Only for the local user, channelId and oldChannelId will be the same when moving channel,
-// for some ungodly reason
 let myLastChannelId: string | undefined;
 
 type NormalizedVoiceState = {
@@ -452,6 +421,7 @@ type NormalizedVoiceState = {
     streaming: boolean;
 };
 
+const lastJoinLeaveTimestamp = new Map<string, number>();
 let trackedChannelId: string | null = null;
 let baselineReady = false;
 let baselineUpdateInProgress = false;
@@ -464,7 +434,7 @@ function normalizeState(state: VoiceState): NormalizedVoiceState {
     return {
         muted: !!(state.mute || state.selfMute),
         deaf: !!(state.deaf || state.selfDeaf),
-        streaming: !!((state as any).selfStream || (state as any).stream),
+        streaming: !!(state.selfStream || state.stream),
     };
 }
 
@@ -480,16 +450,6 @@ function shouldAnnounce(key: string): boolean {
 
 type StateActionType = "stream" | "mute" | "deaf";
 
-/**
- * Builds the intro and action segments for state change announcements.
- *
- * Format: "{USERNAME}" + "{ACTION}"
- * Examples:
- * - "JohnDoe" + "myooted" / "un-myooted" / "deafind" / "un-deafind"
- * - "JohnDoe" + "started streaming" / "stopped streaming"
- *
- * Uses phonetic spellings for muted/deafened to ensure clear pronunciation.
- */
 function buildStateSegments(
     type: StateActionType,
     isOn: boolean,
@@ -505,7 +465,6 @@ function buildStateSegments(
         };
     }
 
-    // Mute and deaf - no verb, just name + phonetic action
     const action = type === "mute"
         ? (isOn ? "myooted" : "un-myooted")
         : (isOn ? "deafind" : "un-deafind");
@@ -516,14 +475,6 @@ function buildStateSegments(
     };
 }
 
-/**
- * Queues a state change announcement as two parts:
- * - Intro (username) goes to mainQueue - won't be interrupted
- * - Action (state) goes to stateQueue - can be interrupted by rapid state changes
- *
- * Uses a shared interrupt key per user so rapid toggles (mute->unmute->mute)
- * only announce the final state.
- */
 function queueStateSplitAnnouncement(
     userId: string,
     intro: string,
@@ -536,7 +487,6 @@ function queueStateSplitAnnouncement(
         lastIntroSpokenAt.set(userId, Date.now());
     }
 
-    // Handle interrupt key for action - remove any pending actions for this user
     const interruptKey = `${userId}:state:action`;
     for (let i = stateQueue.length - 1; i >= 0; i--) {
         if (stateQueue[i].interruptKey === interruptKey) {
@@ -545,7 +495,6 @@ function queueStateSplitAnnouncement(
     }
     interruptPlayback(interruptKey);
 
-    // Add both items to queues BEFORE processing
     if (shouldQueueIntro) {
         mainQueue.push({ text: safeIntro, userId, interruptKey: undefined, useDefaultVoice: false });
     }
@@ -609,7 +558,7 @@ function playSample(tempSettings: any, type: string) {
             settingsobj[type + "Message"],
             currentUser.username,
             "general",
-            (currentUser as any).globalName ?? currentUser.username,
+            currentUser.globalName ?? currentUser.username,
             (myGuildId ? GuildMemberStore.getNick(myGuildId, currentUser.id) : null) ?? currentUser.username,
             settingsobj.latinOnly
         )
@@ -715,6 +664,18 @@ const settings = definePluginSettings({
         description: "Comma-separated user IDs for whitelist/blacklist. Right-click users to add/remove.",
         default: "",
     },
+    ignoredUsers: {
+        type: OptionType.STRING,
+        description: "Comma-separated user IDs to completely ignore (no join/leave/move/state announcements). Right-click users to add/remove.",
+        default: "",
+    },
+    joinLeaveTimeout: {
+        type: OptionType.SLIDER,
+        description: "Per-user cooldown for join/leave/move announcements (seconds). Prevents spam from rapid rejoiners.",
+        default: 0,
+        markers: [0, 5, 10, 15, 30, 60],
+        stickToMarkers: false,
+    },
     troubleshooting: {
         type: OptionType.COMPONENT,
         component: () => <TroubleshootingSettings />,
@@ -725,7 +686,6 @@ interface UserContextProps {
     user: User;
 }
 
-// Voice selection modal component
 function VoiceSelectModal({ modalProps, user }: { modalProps: ModalProps; user: User; }) {
     const DEFAULT_VALUE = "__default__";
 
@@ -744,10 +704,8 @@ function VoiceSelectModal({ modalProps, user }: { modalProps: ModalProps; user: 
         setCurrentValue(map.get(user.id) ?? DEFAULT_VALUE);
     }, [user.id, settings.store.userVoiceMap]);
 
-    // Get the display name for preview
-    const displayName = (user as any).globalName ?? user.username;
+    const displayName = user.globalName ?? user.username;
 
-    // Preview function that speaks the user's name in the selected voice
     const previewVoice = async (text: string) => {
         setBusy(true);
         const voice = currentValue === DEFAULT_VALUE
@@ -801,7 +759,6 @@ function VoiceSelectModal({ modalProps, user }: { modalProps: ModalProps; user: 
                         onChange={v => setCurrentValue(v as any)}
                     />
 
-                    {/* Preview buttons */}
                     <Forms.FormText className={cl("preview-hint")}>
                         Preview how this voice sounds with their name:
                     </Forms.FormText>
@@ -869,7 +826,6 @@ function openVoiceSelectModal(user: User) {
     ));
 }
 
-// Context menu to assign voice to user
 const UserContextMenuPatch: NavContextMenuPatchCallback = (children, { user }: UserContextProps) => {
     if (!user) return;
 
@@ -878,6 +834,9 @@ const UserContextMenuPatch: NavContextMenuPatchCallback = (children, { user }: U
     const voiceLabel = currentVoice
         ? VOICE_OPTIONS.find(v => v.value === currentVoice)?.label ?? currentVoice
         : "Default";
+
+    const ignoredSet = parseUserIdList(settings.store.ignoredUsers);
+    const isIgnored = ignoredSet.has(user.id);
 
     const filterMode = settings.store.stateChangeFilterMode ?? "off";
     const filterSet = parseStateChangeFilterList(settings.store.stateChangeFilterList);
@@ -911,6 +870,18 @@ const UserContextMenuPatch: NavContextMenuPatchCallback = (children, { user }: U
                 action={() => openVoiceSelectModal(user)}
             />
             <Menu.MenuItem
+                key="ignore"
+                id="vc-narrator-ignore"
+                label={isIgnored ? "Unignore User" : "Ignore User"}
+                action={() => {
+                    if (isIgnored) {
+                        settings.store.ignoredUsers = removeUserFromList(settings.store.ignoredUsers, user.id);
+                    } else {
+                        settings.store.ignoredUsers = addUserToList(settings.store.ignoredUsers, user.id);
+                    }
+                }}
+            />
+            <Menu.MenuItem
                 key="filter"
                 id="vc-narrator-state-filter"
                 label={filterLabel}
@@ -932,7 +903,6 @@ export default definePlugin({
     },
 
     start() {
-        // Pre-cache common action words in background for faster state change announcements
         preCacheCommonActions();
     },
 
@@ -960,7 +930,7 @@ export default definePlugin({
                 return filterMode === "whitelist" ? inList : !inList;
             };
 
-            if (myChanId && ChannelStore.getChannel(myChanId)?.type === 13 /* Stage Channel */) return;
+            if (myChanId && ChannelStore.getChannel(myChanId)?.type === ChannelType.GUILD_STAGE_VOICE) return;
 
             if (!myChanId) {
                 trackedChannelId = null;
@@ -972,10 +942,11 @@ export default definePlugin({
 
             const isBatchUpdate = voiceStates.length > 1 && voiceStates.some(s => !("oldChannelId" in (s as any)));
             if (isBatchUpdate && myChanId) {
-                // Guild-open / bulk refresh: update baseline silently to avoid spam.
                 await refreshBaseline(myChanId);
                 return;
             }
+
+            const ignoredUsers = parseUserIdList(settings.store.ignoredUsers);
 
             for (const state of voiceStates) {
                 const { userId, channelId } = state;
@@ -991,7 +962,6 @@ export default definePlugin({
                 const affectsMyChannel = channelId === myChanId || oldChannelId === myChanId;
                 if (!isMe && !affectsMyChannel) continue;
 
-                // Keep snapshots in sync for join/leave/move without announcing state changes.
                 if (myChanId) {
                     if (oldChannelId !== myChanId && channelId === myChanId) {
                         voiceStateSnapshot.set(userId, normalizeState(state));
@@ -1000,16 +970,34 @@ export default definePlugin({
                     }
                 }
 
-                // Join/leave/move announcements (existing behavior)
+                const isIgnored = ignoredUsers.has(userId);
+                const shouldSkipAnnouncement = isIgnored || (isMe && settings.store.ignoreSelf);
+
                 const [type, id] = getTypeAndChannelId({ ...state, oldChannelId }, isMe);
                 if (type) {
-                    const template = settings.store[type + "Message"];
-                    const u = isMe && !settings.store.sayOwnName ? "" : UserStore.getUser(userId).username;
-                    const displayName = u && ((UserStore.getUser(userId) as any).globalName ?? u);
-                    const nickname = u && ((myGuildId ? GuildMemberStore.getNick(myGuildId, userId) : null) ?? displayName);
-                    const channel = ChannelStore.getChannel(id)?.name ?? "channel";
+                    if (!shouldSkipAnnouncement) {
+                        const timeout = settings.store.joinLeaveTimeout ?? 0;
+                        let throttled = false;
+                        if (!isMe && timeout > 0) {
+                            const now = Date.now();
+                            const last = lastJoinLeaveTimestamp.get(userId) ?? 0;
+                            if (now - last < timeout * 1000) {
+                                throttled = true;
+                            } else {
+                                lastJoinLeaveTimestamp.set(userId, now);
+                            }
+                        }
 
-                    queueSpeak(formatText(template, u, channel, displayName, nickname, settings.store.latinOnly), userId);
+                        if (!throttled) {
+                            const template = settings.store[type + "Message"];
+                            const u = isMe && !settings.store.sayOwnName ? "" : UserStore.getUser(userId).username;
+                            const displayName = u && (UserStore.getUser(userId).globalName ?? u);
+                            const nickname = u && ((myGuildId ? GuildMemberStore.getNick(myGuildId, userId) : null) ?? displayName);
+                            const channel = ChannelStore.getChannel(id)?.name ?? "channel";
+
+                            queueSpeak(formatText(template, u, channel, displayName, nickname, settings.store.latinOnly), userId);
+                        }
+                    }
 
                     if (isMe && (type === "join" || type === "move") && id) {
                         await refreshBaseline(id);
@@ -1018,7 +1006,6 @@ export default definePlugin({
                     continue;
                 }
 
-                // State-change announcements (mute/deafen/stream), only when user is in our current VC.
                 if (channelId !== myChanId) continue;
                 if (!baselineReady) continue;
 
@@ -1027,10 +1014,11 @@ export default definePlugin({
                 voiceStateSnapshot.set(userId, next);
                 if (!prev) continue;
 
+                if (shouldSkipAnnouncement) continue;
                 if (!allowStateChange(userId, isMe)) continue;
 
                 const userObj = isMe && !settings.store.sayOwnName ? "" : UserStore.getUser(userId).username;
-                const displayName = userObj && ((UserStore.getUser(userId) as any).globalName ?? userObj);
+                const displayName = userObj && (UserStore.getUser(userId).globalName ?? userObj);
                 const nickname = userObj && ((myGuildId ? GuildMemberStore.getNick(myGuildId, userId) : null) ?? displayName);
                 const preferredName = nickname || displayName || userObj || (isMe ? "You" : "Someone");
 
@@ -1042,8 +1030,6 @@ export default definePlugin({
                     }
                 }
 
-                // Deafen takes priority over mute (you're always muted when deafened)
-                // Only announce mute if deaf state didn't change
                 if (!isMe && settings.store.announceOthersDeafen && prev.deaf !== next.deaf) {
                     const key = `${userId}:deaf`;
                     if (shouldAnnounce(key)) {
@@ -1077,7 +1063,6 @@ export default definePlugin({
 
         return (
             <>
-                {/* Author note - pinned at top */}
                 <div className={cl("author-note")}>
                     {authorAvatar && (
                         <img
@@ -1096,7 +1081,6 @@ export default definePlugin({
                     </div>
                 </div>
 
-                {/* Preview sounds section */}
                 <div className={cl("preview-section")}>
                     <Forms.FormTitle tag="h3" className={cl("preview-title")}>
                         Preview Sounds {busy && "(playing...)"}
