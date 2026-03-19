@@ -35,10 +35,10 @@ const LANGUAGE_MAP: Record<string, string> = {
 };
 
 function getLanguageIconUrl(language: string | null): string {
-    if (!language) return "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/github/github-original.svg";
+    if (!language) return "https://cdn.jsdelivr.net/gh/devicons/devicon@develop/icons/github/github-original.svg";
 
     const normalized = LANGUAGE_MAP[language.toLowerCase()] ?? language.toLowerCase().replace(/\s+/g, "");
-    return `https://cdn.jsdelivr.net/gh/devicons/devicon/icons/${normalized}/${normalized}-original.svg`;
+    return `https://cdn.jsdelivr.net/gh/devicons/devicon@develop/icons/${normalized}/${normalized}-original.svg`;
 }
 
 export function ProfilePopoutComponent({ id, theme }: { id: string, theme: string; }) {
@@ -112,10 +112,6 @@ export function ProfilePopoutComponent({ id, theme }: { id: string, theme: strin
                                                     src={getLanguageIconUrl(repo.language)}
                                                     alt={repo.language ?? "Unknown"}
                                                     className={showCount ? ProfileCardContainerClasses.displayCount : undefined}
-                                                    style={!repo.language && theme !== "light" ? { filter: "invert(1)" } : undefined}
-                                                    onError={e => {
-                                                        (e.target as HTMLImageElement).src = "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/github/github-original.svg";
-                                                    }}
                                                 />
                                                 {showCount && (
                                                     <div className={ProfileCardContainerClasses.displayCountText}>
