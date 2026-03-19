@@ -25,7 +25,7 @@ export default definePlugin({
     patches: [
         // Personal profile popout
         {
-            find: ".WIDGETS_USER_PROFILE_ACCOUNT_POPOUT_NEW_BADGE]",
+            find: '"UserProfileAccountPopout"',
             replacement: {
                 match: /user:(\i),bio:.{0,60}}\)/,
                 replace: "$&,$self.renderProfileSongs({userId:$1.id})",

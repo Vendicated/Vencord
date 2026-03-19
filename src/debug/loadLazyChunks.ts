@@ -9,6 +9,7 @@ import { canonicalizeMatch } from "@utils/patches";
 import { ModuleFactory } from "@vencord/discord-types/webpack";
 import * as Webpack from "@webpack";
 import { wreq } from "@webpack";
+import pLimit from "p-limit";
 import { AnyModuleFactory } from "webpack";
 
 function getWebpackChunkMap() {
@@ -29,20 +30,9 @@ function getWebpackChunkMap() {
     return v;
 }
 
-async function promiseAllSettledBatched<T>(tasks: (() => Promise<T>)[], batchSize = 8): Promise<T[]> {
-    const results: T[] = [];
-    for (let i = 0; i < tasks.length; i += batchSize) {
-        const batch = tasks.slice(i, i + batchSize);
-        const settled = await Promise.allSettled(batch.map(t => t()));
-        for (const r of settled) {
-            if (r.status === "fulfilled") results.push(r.value);
-        }
-    }
-    return results;
-}
-
 export async function loadLazyChunks() {
     const LazyChunkLoaderLogger = new Logger("LazyChunkLoader");
+    const queue = pLimit(50);
 
     try {
         LazyChunkLoaderLogger.log("Loading all chunks...");
@@ -71,11 +61,15 @@ export async function loadLazyChunks() {
 
             const shouldForceDefer = false;
 
-            await promiseAllSettledBatched(Array.from(lazyChunks).map(([, rawChunkIds, entryPoint]) => async () => {
-                const chunkIds = rawChunkIds ? Array.from(rawChunkIds.matchAll(Webpack.ChunkIdsRegex)).map(m => {
-                    const numChunkId = Number(m[1]);
-                    return Number.isNaN(numChunkId) ? m[1] : numChunkId;
-                }) : [];
+            await Promise.all(Array.from(lazyChunks).map(async ([, rawChunkIds, entryPoint]) => {
+                const chunkIds = rawChunkIds
+                    ?.matchAll(Webpack.ChunkIdsRegex)
+                    .map(m => {
+                        const numChunkId = Number(m[1]);
+                        return Number.isNaN(numChunkId) ? m[1] : numChunkId;
+                    })
+                    .toArray()
+                    ?? [];
 
                 if (chunkIds.length === 0) {
                     return;
@@ -96,9 +90,11 @@ export async function loadLazyChunks() {
 
                     if (wreq.u(id) == null || wreq.u(id) === "undefined.js") continue;
 
-                    const isWorkerAsset = await fetch(wreq.p + wreq.u(id))
-                        .then(r => r.text())
-                        .then(t => /importScripts\(|self\.postMessage/.test(t));
+                    const isWorkerAsset = await queue(() =>
+                        fetch(wreq.p + wreq.u(id))
+                            .then(r => r.text())
+                            .then(t => /importScripts\(|self\.postMessage/.test(t))
+                    );
 
                     if (isWorkerAsset) {
                         invalidChunks.add(id);
@@ -116,9 +112,9 @@ export async function loadLazyChunks() {
             }));
 
             // Loads all found valid chunk groups
-            await promiseAllSettledBatched(
+            await Promise.all(
                 Array.from(validChunkGroups)
-                    .map(([chunkIds]) => () =>
+                    .map(([chunkIds]) =>
                         Promise.all(chunkIds.map(id => wreq.e(id)))
                     )
             );
@@ -194,7 +190,7 @@ export async function loadLazyChunks() {
             return !(validChunks.has(id) || invalidChunks.has(id));
         });
 
-        await promiseAllSettledBatched(chunksLeft.map(id => async () => {
+        await Promise.all(chunksLeft.map(async id => queue(async () => {
             const isWorkerAsset = await fetch(wreq.p + wreq.u(id))
                 .then(r => r.text())
                 .then(t => /importScripts\(|self\.postMessage/.test(t));
@@ -203,7 +199,7 @@ export async function loadLazyChunks() {
             if (!isWorkerAsset) {
                 await wreq.e(id);
             }
-        }));
+        })));
 
         LazyChunkLoaderLogger.log("Finished loading all chunks!");
     } catch (e) {

@@ -1269,7 +1269,7 @@ export default definePlugin({
             group: true,
             replacement: [
                 {
-                    match: /(?<=resetSortingFiltering\(\)},\[\]\);)/,
+                    match: /(?<=scrollToQuest\(\i\)\}\)\},\[\]\);)/,
                     replace: "const shouldHideSponsoredQuestBanner=$self.shouldHideSponsoredQuestBanner();"
                 },
                 {

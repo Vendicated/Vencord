@@ -17,12 +17,15 @@
 */
 
 import { useSettings } from "@api/Settings";
+import { Button } from "@components/Button";
+import { Card } from "@components/Card";
 import { Divider } from "@components/Divider";
+import { Flex } from "@components/Flex";
 import { FormSwitch } from "@components/FormSwitch";
-import { Heading } from "@components/Heading";
+import { Heading, HeadingSecondary } from "@components/Heading";
 import { Link } from "@components/Link";
 import { Paragraph } from "@components/Paragraph";
-import { SettingsTab, wrapTab } from "@components/settings";
+import { SettingsTab, wrapTab } from "@components/settings/tabs/BaseTab";
 import { Margins } from "@utils/margins";
 import { useAwaiter } from "@utils/react";
 import { getRepo, isNewer, UpdateLogger } from "@utils/updater";
@@ -35,6 +38,34 @@ import { HashLink, Newer, Updatable } from "./Components";
 interface CommonProps {
     repo: string;
     repoPending: boolean;
+}
+
+function EquibopSection() {
+    if (!IS_EQUIBOP) return null;
+
+    const [isEquibopOutdated] = useAwaiter<boolean>(VesktopNative.app.isOutdated, { fallbackValue: false });
+
+    return (
+        <Flex className={Margins.bottom20} flexDirection="column" gap="1em">
+            <Card variant="brand">
+                <HeadingSecondary>Equibop & Equicord</HeadingSecondary>
+                <Paragraph>Equibop and Equicord are two separate things. This updater is for Equicord.</Paragraph>
+                <Paragraph className={Margins.top8}>
+                    You receive separate popups for Equibop updates. You can also manually update by installing the <Link href="https://equibop.org/install">latest version</Link>.
+                </Paragraph>
+            </Card>
+
+            {isEquibopOutdated && (
+                <Card variant="warning">
+                    <HeadingSecondary>Equibop Outdated</HeadingSecondary>
+                    <Flex flexDirection="column" gap="0.5em">
+                        <Paragraph>Your version of Equibop is outdated!</Paragraph>
+                        <Button variant="link" onClick={() => VesktopNative.app.openUpdater()}>Open Equibop Updater</Button>
+                    </Flex>
+                </Card>
+            )}
+        </Flex>
+    );
 }
 
 function Updater() {
@@ -54,6 +85,7 @@ function Updater() {
 
     return (
         <SettingsTab>
+            <EquibopSection />
             <Heading className={Margins.top16}>Update Preferences</Heading>
             <Paragraph className={Margins.bottom20}>
                 Control how Equicord keeps itself up to date. You can choose to update automatically in the background or be notified when new updates are available.
