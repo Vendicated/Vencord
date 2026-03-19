@@ -67,7 +67,7 @@ export default definePlugin({
 
     patches: [
         {
-            find: ".WIDGETS_RTC_UPSELL_COACHMARK)",
+            find: "handleOpenSettingsContextMenu=",
             group: true,
             replacement: [
                 {
