@@ -1,7 +1,7 @@
 {
     "name": "equicord",
     "private": "true",
-    "version": "1.14.5.1",
+    "version": "1.14.6.0",
     "description": "The other cutest Discord client mod",
     "homepage": "https://github.com/Equicord/Equicord#readme",
     "bugs": {
@@ -82,6 +82,7 @@
         "highlight.js": "11.11.1",
         "html-minifier-terser": "^7.2.0",
         "moment": "^2.22.2",
+        "p-limit": "^7.3.0",
         "puppeteer-core": "^24.30.0",
         "standalone-electron-types": "^34.2.0",
         "stylelint": "^16.25.0",
@@ -95,7 +96,7 @@
         "typescript-transform-paths": "^3.5.5",
         "zip-local": "^0.3.5"
     },
-    "packageManager": "pnpm@10.30.3",
+    "packageManager": "pnpm@10.32.1",
     "pnpm": {
         "patchedDependencies": {
             "@types/less@3.0.8": "patches/@types__less@3.0.8.patch"
