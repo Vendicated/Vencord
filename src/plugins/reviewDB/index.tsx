@@ -199,9 +199,8 @@ export default definePlugin({
                                                 })}
                                         </div>
                                     )
-                                    : (
-                                        <Paragraph size={isSideBar ? "sm" : "xs"}>{reviewData?.hasOptedOut ? "User opted out" : "No reviews yet"}</Paragraph>
-                                    )}
+                                    : <Paragraph size={isSideBar ? "sm" : "xs"}>{reviewData?.hasOptedOut ? "User opted out" : "No reviews yet"}</Paragraph>
+                                }
                             </div>
                         </Clickable>
                     </li>
