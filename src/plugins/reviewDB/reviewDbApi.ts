@@ -33,6 +33,7 @@ export interface UserReviewsData {
     updated: boolean;
     hasNextPage: boolean;
     reviewCount: number;
+    hasOptedOut: boolean;
 }
 
 const WarningFlag = 0b00000010;
@@ -65,7 +66,8 @@ export async function getReviews(id: string, offset = 0, isProfileComponent = fa
             reviews: [],
             updated: false,
             hasNextPage: false,
-            reviewCount: 0
+            reviewCount: 0,
+            hasOptedOut: false,
         };
 
     if (!req.ok) {
