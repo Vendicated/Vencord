@@ -112,7 +112,7 @@ export default definePlugin({
 
     patches: [
         {
-            find: ".DISPLAY_NAME_STYLES_COACHMARK),",
+            find: ".DISPLAY_NAME_STYLES_COACHMARK)",
             replacement: {
                 match: /children:\[(?=.{0,25}?accountContainerRef)/,
                 replace: "children:[$self.GameActivityToggleButton(arguments[0]),"
