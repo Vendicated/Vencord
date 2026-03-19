@@ -33,6 +33,7 @@ export interface UserReviewsData {
     updated: boolean;
     hasNextPage: boolean;
     reviewCount: number;
+    hasOptedOut: boolean;
 }
 
 const WarningFlag = 0b00000010;
@@ -47,15 +48,15 @@ async function rdbRequest(path: string, options: RequestInit = {}) {
     });
 }
 
-export async function getReviews(id: string, offset = 0): Promise<UserReviewsData> {
+export async function getReviews(id: string, { limit, offset = 0 }: { limit?: number; offset?: number; } = {}): Promise<UserReviewsData> {
     let flags = 0;
     if (!settings.store.showWarning) flags |= WarningFlag;
 
-    const params = new URLSearchParams({
-        flags: String(flags),
-        offset: String(offset),
-        limit: "4"
-    });
+    const params = new URLSearchParams();
+    if (flags) params.append("flags", String(flags));
+    if (offset) params.append("offset", String(offset));
+    if (limit) params.append("limit", String(limit));
+
     const req = await fetch(`${API_URL}/users/${id}/reviews?${params}`);
 
     const res = (req.ok)
@@ -65,7 +66,8 @@ export async function getReviews(id: string, offset = 0): Promise<UserReviewsDat
             reviews: [],
             updated: false,
             hasNextPage: false,
-            reviewCount: 0
+            reviewCount: 0,
+            hasOptedOut: false,
         };
 
     if (!req.ok) {
