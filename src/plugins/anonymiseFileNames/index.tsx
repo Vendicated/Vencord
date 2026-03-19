@@ -60,7 +60,7 @@ const settings = definePluginSettings({
     randomisedLength: {
         description: "Random characters length",
         type: OptionType.NUMBER,
-        default: 10,
+        default: 7,
         disabled: () => settings.store.method !== Methods.Random,
     },
     consistent: {
@@ -134,7 +134,7 @@ export default definePlugin({
         const newFilename = (() => {
             switch (settings.store.method) {
                 case Methods.Random:
-                    const chars = "ABCDEFabcdef0123456789";
+                    const chars = "0123456789bdfhjkmnpqrstvwxz";
                     const returnedName = Array.from(
                         { length: settings.store.randomisedLength },
                         () => chars[Math.floor(Math.random() * chars.length)]

@@ -29,10 +29,10 @@ export const REVIEWS_PER_PAGE = 50;
 
 export interface UserReviewsData {
     message: string;
-    hasNextPage: boolean;
-    reviewCount: number;
     reviews: Review[];
     updated: boolean;
+    hasNextPage: boolean;
+    reviewCount: number;
     hasOptedOut: boolean;
 }
 
@@ -48,15 +48,15 @@ async function rdbRequest(path: string, options: RequestInit = {}) {
     });
 }
 
-export async function getReviews(id: string, offset = 0, isProfileComponent = false): Promise<UserReviewsData> {
+export async function getReviews(id: string, { limit, offset = 0 }: { limit?: number; offset?: number; } = {}): Promise<UserReviewsData> {
     let flags = 0;
     if (!settings.store.showWarning) flags |= WarningFlag;
 
-    const params = new URLSearchParams({
-        flags: String(flags),
-        offset: String(offset),
-        ...(isProfileComponent ? { limit: "4" } : {})
-    });
+    const params = new URLSearchParams();
+    if (flags) params.append("flags", String(flags));
+    if (offset) params.append("offset", String(offset));
+    if (limit) params.append("limit", String(limit));
+
     const req = await fetch(`${API_URL}/users/${id}/reviews?${params}`);
 
     const res = (req.ok)
