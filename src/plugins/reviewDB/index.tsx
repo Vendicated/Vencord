@@ -189,7 +189,9 @@ export default definePlugin({
                                                             />
                                                             {showCount && (
                                                                 <div className={ProfileCardContainerClasses.displayCountText}>
-                                                                    <Span className={ProfileCardContainerClasses.displayCountTextColor} size="xs" weight="medium">+{reviewData.reviewCount - 3}</Span>
+                                                                    <Span className={ProfileCardContainerClasses.displayCountTextColor} size="xs" weight="medium" defaultColor={false}>
+                                                                        +{reviewData.reviewCount - 3}
+                                                                    </Span>
                                                                 </div>
                                                             )}
                                                         </div>
