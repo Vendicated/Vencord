@@ -61,7 +61,7 @@ export async function loadLazyChunks() {
 
             const shouldForceDefer = false;
 
-            await Promise.all(Array.from(lazyChunks).map(async ([, rawChunkIds, entryPoint]) => queue(async () => {
+            await Promise.all(Array.from(lazyChunks).map(async ([, rawChunkIds, entryPoint]) => {
                 const chunkIds = rawChunkIds
                     ?.matchAll(Webpack.ChunkIdsRegex)
                     .map(m => {
@@ -90,9 +90,11 @@ export async function loadLazyChunks() {
 
                     if (wreq.u(id) == null || wreq.u(id) === "undefined.js") continue;
 
-                    const isWorkerAsset = await fetch(wreq.p + wreq.u(id))
-                        .then(r => r.text())
-                        .then(t => /importScripts\(|self\.postMessage/.test(t));
+                    const isWorkerAsset = await queue(() =>
+                        fetch(wreq.p + wreq.u(id))
+                            .then(r => r.text())
+                            .then(t => /importScripts\(|self\.postMessage/.test(t))
+                    );
 
                     if (isWorkerAsset) {
                         invalidChunks.add(id);
@@ -107,13 +109,13 @@ export async function loadLazyChunks() {
                     const numEntryPoint = Number(entryPoint);
                     validChunkGroups.add([chunkIds, Number.isNaN(numEntryPoint) ? entryPoint : numEntryPoint]);
                 }
-            })));
+            }));
 
             // Loads all found valid chunk groups
             await Promise.all(
                 Array.from(validChunkGroups)
                     .map(([chunkIds]) =>
-                        Promise.all(chunkIds.map(id => queue(() => wreq.e(id))))
+                        Promise.all(chunkIds.map(id => wreq.e(id)))
                     )
             );
 
