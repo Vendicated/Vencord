@@ -29,7 +29,7 @@ import { useAwaiter } from "@utils/react";
 import definePlugin from "@utils/types";
 import { Guild, User } from "@vencord/discord-types";
 import { findCssClassesLazy } from "@webpack";
-import { Alerts, Clickable, Menu, Parser } from "@webpack/common";
+import { Alerts, Clickable, IconUtils, Menu, Parser } from "@webpack/common";
 
 import { Auth, initAuth, updateAuth } from "./auth";
 import { openReviewsModal } from "./components/ReviewModal";
@@ -181,7 +181,12 @@ export default definePlugin({
 
                                                     return (
                                                         <div className={ProfileCardContainerClasses.icon} key={review.id}>
-                                                            <img src={review.sender.profilePhoto} alt={review.sender.username} className={showCount ? ProfileCardContainerClasses.displayCount : undefined} />
+                                                            <img
+                                                                src={review.sender.profilePhoto}
+                                                                alt={review.sender.username}
+                                                                className={showCount ? ProfileCardContainerClasses.displayCount : undefined}
+                                                                onError={e => e.currentTarget.src = IconUtils.getDefaultAvatarURL(review.sender.discordID)}
+                                                            />
                                                             {showCount && (
                                                                 <div className={ProfileCardContainerClasses.displayCountText}>
                                                                     <Span className={ProfileCardContainerClasses.displayCountTextColor} size="xs" weight="medium">+{reviewData.reviewCount - 3}</Span>
