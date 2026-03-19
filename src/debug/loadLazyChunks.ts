@@ -9,7 +9,6 @@ import { canonicalizeMatch } from "@utils/patches";
 import { ModuleFactory } from "@vencord/discord-types/webpack";
 import * as Webpack from "@webpack";
 import { wreq } from "@webpack";
-import pLimit from "p-limit";
 import { AnyModuleFactory } from "webpack";
 
 function getWebpackChunkMap() {
@@ -32,7 +31,6 @@ function getWebpackChunkMap() {
 
 export async function loadLazyChunks() {
     const LazyChunkLoaderLogger = new Logger("LazyChunkLoader");
-    const queue = pLimit(50);
 
     try {
         LazyChunkLoaderLogger.log("Loading all chunks...");
@@ -61,15 +59,11 @@ export async function loadLazyChunks() {
 
             const shouldForceDefer = false;
 
-            await Promise.all(Array.from(lazyChunks).map(async ([, rawChunkIds, entryPoint]) => queue(async () => {
-                const chunkIds = rawChunkIds
-                    ?.matchAll(Webpack.ChunkIdsRegex)
-                    .map(m => {
-                        const numChunkId = Number(m[1]);
-                        return Number.isNaN(numChunkId) ? m[1] : numChunkId;
-                    })
-                    .toArray()
-                    ?? [];
+            await Promise.all(Array.from(lazyChunks).map(async ([, rawChunkIds, entryPoint]) => {
+                const chunkIds = rawChunkIds ? Array.from(rawChunkIds.matchAll(Webpack.ChunkIdsRegex)).map(m => {
+                    const numChunkId = Number(m[1]);
+                    return Number.isNaN(numChunkId) ? m[1] : numChunkId;
+                }) : [];
 
                 if (chunkIds.length === 0) {
                     return;
@@ -107,13 +101,13 @@ export async function loadLazyChunks() {
                     const numEntryPoint = Number(entryPoint);
                     validChunkGroups.add([chunkIds, Number.isNaN(numEntryPoint) ? entryPoint : numEntryPoint]);
                 }
-            })));
+            }));
 
             // Loads all found valid chunk groups
             await Promise.all(
                 Array.from(validChunkGroups)
                     .map(([chunkIds]) =>
-                        Promise.all(chunkIds.map(id => queue(() => wreq.e(id))))
+                        Promise.all(chunkIds.map(id => wreq.e(id)))
                     )
             );
 
