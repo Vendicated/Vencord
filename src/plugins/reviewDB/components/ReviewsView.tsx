@@ -68,6 +68,7 @@ export default function ReviewsView({
             if (settings.store.hideBlockedUsers)
                 data!.reviews = data!.reviews?.filter(r => !RelationshipStore.isBlocked(r.sender.discordID));
 
+            data!.reviews.reverse();
             scrollToTop?.();
             onFetchReviews(data!);
         }

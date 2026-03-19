@@ -164,7 +164,7 @@ export default definePlugin({
                 <ul className={ProfileCardClasses.cardsList} tabIndex={-1}>
                     <li className={ProfileCardClasses.firstCardContainer}>
                         <Clickable
-                            className={classes(ProfileCardContainerClasses.breadcrumb, reviewData?.hasOptedOut ? cl("profile-popout-disabled") : null)}
+                            className={classes(ProfileCardContainerClasses.breadcrumb, reviewData?.hasOptedOut && cl("profile-popout-disabled"))}
                             onClick={() => !reviewData?.hasOptedOut && openReviewsModal(user.id, user.username, ReviewType.User)}
                         >
                             <div className={classes(ProfileCardOverlayClasses.overlay, ProfileCardContainerClasses.innerContainer, ProfileCardClasses.card)}>
