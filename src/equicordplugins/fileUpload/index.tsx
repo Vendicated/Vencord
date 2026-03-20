@@ -12,14 +12,15 @@ import { OpenExternalIcon } from "@components/Icons";
 import { Devs, EquicordDevs } from "@utils/constants";
 import { classNameFactory } from "@utils/css";
 import definePlugin from "@utils/types";
-import { DraftType, FluxDispatcher, Menu, PermissionsBits, PermissionStore, React, useEffect, useState } from "@webpack/common";
+import { findByPropsLazy } from "@webpack";
+import { DraftType, FluxDispatcher, Menu, PermissionsBits, PermissionStore, React, useEffect, UserStore, useState } from "@webpack/common";
 
 import { settings } from "./settings";
 import { serviceLabels, ServiceType } from "./types";
 import { getMediaUrl } from "./utils/getMediaUrl";
 import { cancelCurrentUpload, getUploadState, isConfigured, subscribeUploadState, uploadFile, uploadPickedFile, uploadProvidedFiles } from "./utils/upload";
-
 const cl = classNameFactory("vc-file-upload-");
+const { getUserMaxFileSize } = findByPropsLazy("getUserMaxFileSize");
 let uploadAddFilesInterceptor: ((event: unknown) => void) | null = null;
 
 type UploadAddFilesEvent = {
@@ -28,8 +29,22 @@ type UploadAddFilesEvent = {
     uploads?: unknown;
     items?: unknown;
     draftType?: unknown;
+    maxFileSize?: unknown;
+    fileSizeLimit?: unknown;
+    limits?: {
+        fileSize?: unknown;
+    };
 };
 
+function shouldInterceptUploadFiles(files: readonly File[], payload: UploadAddFilesEvent): boolean {
+    if (!settings.store.interceptDiscordUploadOnlyOverLimit) return true;
+
+    const directLimit = [payload.maxFileSize, payload.fileSizeLimit, payload.limits?.fileSize].find(limit => Number.isFinite(limit)) as number | undefined;
+    const fallbackLimit = getUserMaxFileSize(UserStore.getCurrentUser());
+    const discordLimit = Math.max(0, directLimit ?? fallbackLimit);
+
+    return files.some(file => file.size > discordLimit);
+}
 function extractFilesFromValue(value: unknown): File[] {
     if (value instanceof File) return [value];
 
@@ -68,6 +83,7 @@ function interceptUploadAddFiles(event: unknown): void {
     const uniqueFiles = Array.from(new Set(files));
 
     if (!uniqueFiles.length) return;
+    if (!shouldInterceptUploadFiles(uniqueFiles, payload)) return;
 
     payload.files = [];
     payload.uploads = [];
