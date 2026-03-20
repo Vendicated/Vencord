@@ -82,26 +82,6 @@ export default definePlugin({
         "user-profile-overflow-menu": userContextPatch
     },
 
-    patches: [
-        // In the user popout. eg: when clicking the name in chat
-        {
-            // DM profile sidebar
-            find: ".SIDEBAR,disableToolbar:",
-            replacement: {
-                match: /user:(\i),widgets:.{0,100}?\}\),/,
-                replace: "$&$self.renderProfileComponent({user:$1,isSideBar:true}),"
-            }
-        },
-        {
-            // User popout
-            find: /\.POPOUT,onClose:\i}\),nicknameIcons:.+?\.isProvisional/,
-            replacement: {
-                match: /user:(\i),widgets:.{0,100}?\}\),/,
-                replace: "$&$self.renderProfileComponent({user:$1}),"
-            }
-        }
-    ],
-
     flux: {
         CONNECTION_OPEN: initAuth,
     },
@@ -156,7 +136,7 @@ export default definePlugin({
         }, 4000);
     },
 
-    renderProfileComponent: ErrorBoundary.wrap(({ user, isSideBar = false }: { user: User; isSideBar?: boolean; }) => {
+    renderProfileCollections: ErrorBoundary.wrap(({ user, isSideBar = false }: { user: User; isSideBar?: boolean; }) => {
         const [reviewData] = useAwaiter(() => getReviews(user.id, { limit: 4 }), { deps: [user.id], fallbackValue: null });
 
         // Discord are masters at using a crap ton of html elements and css classes to create a simple ui that could have
@@ -192,7 +172,7 @@ export default definePlugin({
                                                             {showCount && (
                                                                 <div className={ProfileCardContainerClasses.displayCountText}>
                                                                     <Span className={ProfileCardContainerClasses.displayCountTextColor} size="xs" weight="medium" defaultColor={false}>
-                                                                        +{reviewData.reviewCount - 3}
+                                                                        +{reviewData.reviewCount - 4}
                                                                     </Span>
                                                                 </div>
                                                             )}

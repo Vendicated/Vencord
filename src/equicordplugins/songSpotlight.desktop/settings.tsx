@@ -20,7 +20,7 @@ export default definePluginSettings({
         type: OptionType.SLIDER,
         description: "How many songs are shown when initially clicking on a user",
         default: apiConstants.songLimit,
-        markers: makeRange(1, apiConstants.songLimit),
+        markers: makeRange(1, 3),
     },
     manager: {
         type: OptionType.COMPONENT,
