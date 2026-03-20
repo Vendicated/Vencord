@@ -60,6 +60,7 @@ export default definePlugin({
             else color = "var(--red-360)";
         }
 
+        if (!length) return null;
         return (
             <div className={cl("counter")} style={{ color }}>
                 <span className={cl("count")} >{length}</span>/
