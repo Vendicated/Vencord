@@ -214,7 +214,7 @@ export default definePlugin({
         {
             find: "#{intl::tRuxk9::raw}",
             replacement: {
-                match: /(?<=\.limits\.fileSize.{0,50})Array\.from\(\i\)\.some/,
+                match: /(?<=MAX_FILE_SIZE_250_MB.{0,250})Array\.from\(\i\)\.some/,
                 replace: "$self.shouldBypassDiscordUploadSizeCheck()?false:$&"
             }
         },

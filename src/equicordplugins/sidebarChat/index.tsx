@@ -136,7 +136,7 @@ export default definePlugin({
             group: true,
             replacement: [
                 {
-                    match: /channel_renderer"\);/,
+                    match: /\.CHANNEL\(\i\.id.{0,25}\)\(\)\);/,
                     replace: "$&const vc_SidebarChat=$self.renderSidebar();"
                 },
                 {
@@ -144,7 +144,7 @@ export default definePlugin({
                     replace: "return [$1, vc_SidebarChat]}"
                 },
                 {
-                    match: /(case \i\.\i.+?return)(.+?);(?=.+?params\.messageId)(?<=channel_renderer".+?)/g,
+                    match: /(case \i\.\i.+?return)(.+?);(?=.+?params\.messageId)(?<=guild_products".+?)/g,
                     replace: "$1[$2, vc_SidebarChat];",
                     predicate: () => settings.store.patchCommunity
                 }
