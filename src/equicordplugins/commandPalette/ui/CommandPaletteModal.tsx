@@ -71,7 +71,6 @@ interface PalettePageStackItem {
 
 const MENTIONS_CATEGORY_ID = "mentions-actions";
 const RECENTS_CATEGORY_ID = "recent-actions";
-const DOOM_QUERY_TRIGGERS = new Set(["doom", "run doom", "can it run doom"]);
 let persistedCategoryId: string | null = null;
 const SINGLE_SELECT_PROMPT_COMMAND_IDS = new Set([
     "command-palette-open-dm-query",
@@ -95,10 +94,6 @@ let queryPreviewCanvasContext: CanvasRenderingContext2D | null = null;
 
 function hasPrimaryModifier(event: ReactKeyboardEvent<HTMLElement>): boolean {
     return IS_MAC ? event.metaKey && !event.ctrlKey : event.ctrlKey && !event.metaKey;
-}
-
-function matchesDoomQuery(query: string): boolean {
-    return DOOM_QUERY_TRIGGERS.has(query.trim().toLowerCase());
 }
 
 function getCommandBadge(command: CommandEntry, fallback: "Command" | "Recent" | "Pinned"): string {
@@ -563,13 +558,6 @@ export function CommandPaletteModal({ modalProps, instanceKey }: { modalProps: M
     const activePageSpec = activePage ? getPalettePageSpec(activePage.ref.id) ?? null : null;
     const activePageState = activePage?.state ?? null;
     const isPageOpen = Boolean(activePageSpec && activePageState);
-
-    useEffect(() => {
-        if (!matchesDoomQuery(trimmedQuery)) return;
-        if (activePromptCommand) return;
-        if (activePage?.ref.id === "doom") return;
-        pushPage({ id: "doom" });
-    }, [activePage?.ref.id, activePromptCommand, trimmedQuery]);
 
     const canDrillDown = !isPageOpen && isSelectable(selectedItem) && hasChildren(selectedItem.command, allCommands);
     const canGoBack = isPageOpen || navigationLevel.type !== "root";
@@ -1284,12 +1272,6 @@ export function CommandPaletteModal({ modalProps, instanceKey }: { modalProps: M
                 return;
             }
             moveSelection(-1);
-            return;
-        }
-
-        if (isMainInputTarget && event.key === "Enter" && !event.metaKey && !event.altKey && !event.ctrlKey && !event.shiftKey && matchesDoomQuery(trimmedQuery)) {
-            event.preventDefault();
-            pushPage({ id: "doom" });
             return;
         }
 

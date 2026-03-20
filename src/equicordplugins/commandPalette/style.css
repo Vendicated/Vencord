@@ -698,23 +698,6 @@
     gap: 12px;
 }
 
-.vc-command-palette-doom-page {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex: 1 1 auto;
-    min-height: 0;
-    width: 100%;
-}
-
-.vc-command-palette-doom-iframe {
-    width: min(100%, 960px);
-    min-height: 68vh;
-    border: none;
-    border-radius: 14px;
-    background: #050505;
-}
-
 .vc-command-palette-page-field {
     display: flex;
     flex-direction: column;
@@ -905,8 +888,13 @@
 }
 
 @keyframes vc-cp-actions-fade-in {
-    from { opacity: 0; }
-    to { opacity: 1; }
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
 }
 
 .vc-command-palette-actions-dropdown-header {
