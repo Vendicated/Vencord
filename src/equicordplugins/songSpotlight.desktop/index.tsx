@@ -56,6 +56,6 @@ export default definePlugin({
         useAuthorizationStore.persist.rehydrate();
     },
 
-    renderProfileCollections: ErrorBoundary.wrap(ProfileSongs, { noop: true }),
+    renderProfileCollection: ErrorBoundary.wrap(ProfileSongs, { noop: true }),
     renderWidgetSongs: ErrorBoundary.wrap(WidgetSongs, { noop: true }),
 });

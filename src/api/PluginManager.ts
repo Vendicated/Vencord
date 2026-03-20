@@ -197,7 +197,7 @@ export const startPlugin = traceFunction("startPlugin", function startPlugin(p: 
         onBeforeMessageEdit, onBeforeMessageSend, onMessageClick,
         renderChatBarButton, chatBarButton, renderMemberListDecorator, renderMessageAccessory, renderMessageDecoration, renderMessagePopoverButton, messagePopoverButton,
         // Custom
-        renderNicknameIcon, headerBarButton, audioProcessor, userAreaButton, renderProfileCollections
+        renderNicknameIcon, headerBarButton, audioProcessor, userAreaButton, renderProfileCollection
     } = p;
 
     if (p.start) {
@@ -268,7 +268,7 @@ export const startPlugin = traceFunction("startPlugin", function startPlugin(p: 
     }
     if (audioProcessor) addAudioProcessor(name, audioProcessor);
     if (userAreaButton) addUserAreaButton(name, userAreaButton.render, userAreaButton.priority);
-    if (renderProfileCollections) addProfileCollection(name, renderProfileCollections, userAreaButton?.priority);
+    if (renderProfileCollection) addProfileCollection(name, renderProfileCollection, userAreaButton?.priority);
 
     return true;
 }, p => `startPlugin ${p.name}`);
@@ -279,7 +279,7 @@ export const stopPlugin = traceFunction("stopPlugin", function stopPlugin(p: Plu
         onBeforeMessageEdit, onBeforeMessageSend, onMessageClick,
         renderChatBarButton, chatBarButton, renderMemberListDecorator, renderMessageAccessory, renderMessageDecoration, renderMessagePopoverButton, messagePopoverButton,
         // Custom
-        renderNicknameIcon, headerBarButton, audioProcessor, userAreaButton, renderProfileCollections
+        renderNicknameIcon, headerBarButton, audioProcessor, userAreaButton, renderProfileCollection
     } = p;
 
     if (p.stop) {
@@ -344,7 +344,7 @@ export const stopPlugin = traceFunction("stopPlugin", function stopPlugin(p: Plu
     }
     if (audioProcessor) removeAudioProcessor(name);
     if (userAreaButton) removeUserAreaButton(name);
-    if (renderProfileCollections) removeProfileCollection(name);
+    if (renderProfileCollection) removeProfileCollection(name);
 
     return true;
 }, p => `stopPlugin ${p.name}`);
@@ -357,7 +357,7 @@ export const initPluginManager = onlyOnce(function init() {
         "onBeforeMessageEdit", "onBeforeMessageSend", "onMessageClick",
         "renderChatBarButton", "renderMemberListDecorator", "renderMessageAccessory", "renderMessageDecoration", "renderMessagePopoverButton",
         // Custom
-        "renderNicknameIcon", "renderProfileCollections"
+        "renderNicknameIcon", "renderProfileCollection"
     ];
 
     const neededApiPlugins = new Set<string>();
@@ -399,7 +399,7 @@ export const initPluginManager = onlyOnce(function init() {
         if (p.headerBarButton) neededApiPlugins.add("HeaderBarAPI");
         if (p.audioProcessor) neededApiPlugins.add("AudioPlayerAPI");
         if (p.userAreaButton) neededApiPlugins.add("UserAreaAPI");
-        if (p.renderProfileCollections) neededApiPlugins.add("ProfileCollectionsAPI");
+        if (p.renderProfileCollection) neededApiPlugins.add("ProfileCollectionsAPI");
 
         for (const key of pluginKeysToBind) {
             p[key] &&= p[key].bind(p) as any;

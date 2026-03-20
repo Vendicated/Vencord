@@ -136,7 +136,7 @@ export default definePlugin({
         }, 4000);
     },
 
-    renderProfileCollections: ErrorBoundary.wrap(({ user, isSideBar = false }: { user: User; isSideBar?: boolean; }) => {
+    renderProfileCollection: ErrorBoundary.wrap(({ user, isSideBar = false }: { user: User; isSideBar?: boolean; }) => {
         const [reviewData] = useAwaiter(() => getReviews(user.id, { limit: 4 }), { deps: [user.id], fallbackValue: null });
 
         // Discord are masters at using a crap ton of html elements and css classes to create a simple ui that could have

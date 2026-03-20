@@ -59,7 +59,7 @@ export default definePlugin({
             }
         }
     ],
-    renderProfileCollections: ErrorBoundary.wrap((props: { user: User; displayProfile?: any; }) => {
+    renderProfileCollection: ErrorBoundary.wrap((props: { user: User; displayProfile?: any; }) => {
         return (
             <ProfilePopoutComponent
                 {...props}

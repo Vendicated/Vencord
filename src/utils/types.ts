@@ -209,7 +209,7 @@ export interface PluginDef {
     headerBarButton?: HeaderBarButtonData;
     audioProcessor?: AudioProcessor;
     userAreaButton?: UserAreaButtonData;
-    renderProfileCollections?: ProfileCollectionFactory;
+    renderProfileCollection?: ProfileCollectionFactory;
 
     // TODO: Remove eventually
     /**
