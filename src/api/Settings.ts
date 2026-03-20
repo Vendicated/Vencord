@@ -312,7 +312,6 @@ export function migrateSettingToPlugin(newName: string, oldName: string, setting
 
 export function migrateSettingsFromPlugin(newPlugin: string, oldPlugin: string, ...settings: string[]) {
     const { plugins } = SettingsStore.plain;
-
     const oldSettings = plugins[oldPlugin];
     const newSettings = plugins[newPlugin];
     if (!oldSettings || !newSettings) return;
@@ -327,6 +326,21 @@ export function migrateSettingsFromPlugin(newPlugin: string, oldPlugin: string, 
         delete oldSettings[setting];
     }
 
+    SettingsStore.markAsChanged();
+}
+
+export function migrateOldSettingToNewPlugin(newPlugin: string, newSetting: string, oldPlugin: string, oldSetting: string,) {
+    const { plugins } = SettingsStore.plain;
+    const oldSettings = plugins[oldPlugin];
+    const newSettings = plugins[newPlugin];
+    if (!oldSettings || !newSettings) return;
+
+    if (!Object.hasOwn(oldSettings, oldSetting) || Object.hasOwn(newSettings, newSetting)) return;
+
+    logger.info(`Migrating plugin setting "${oldSetting}" from ${oldPlugin} to "${newSetting}" on ${newPlugin}`);
+
+    newSettings[newSetting] = oldSettings[oldSetting];
+    delete oldSettings[oldSetting];
     SettingsStore.markAsChanged();
 }
 

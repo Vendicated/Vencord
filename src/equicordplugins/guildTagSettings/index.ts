@@ -17,22 +17,10 @@
 */
 
 import { definePluginSettings } from "@api/Settings";
-import { disableStyle, enableStyle } from "@api/Styles";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 
-import clanBadges from "./styles.css?managed";
-
 const settings = definePluginSettings({
-    hideTags: {
-        type: OptionType.BOOLEAN,
-        description: "Hide tags",
-        default: false,
-        onChange: value => {
-            if (value) enableStyle(clanBadges);
-            else disableStyle(clanBadges);
-        }
-    },
     disableAdoptTagPrompt: {
         type: OptionType.BOOLEAN,
         description: "Disable the prompt to adopt tags",
@@ -55,11 +43,5 @@ export default definePlugin({
             },
             predicate: () => settings.store.disableAdoptTagPrompt
         }
-    ],
-    start() {
-        if (settings.store.hideTags) enableStyle(clanBadges);
-    },
-    stop() {
-        if (settings.store.hideTags) disableStyle(clanBadges);
-    }
+    ]
 });
