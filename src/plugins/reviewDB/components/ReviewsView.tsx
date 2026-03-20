@@ -18,7 +18,7 @@
 
 import { Auth, authorize } from "@plugins/reviewDB/auth";
 import { Review, ReviewType } from "@plugins/reviewDB/entities";
-import { addReview, getReviews, Response, REVIEWS_PER_PAGE } from "@plugins/reviewDB/reviewDbApi";
+import { addReview, getReviews, REVIEWS_PER_PAGE, UserReviewsData } from "@plugins/reviewDB/reviewDbApi";
 import { settings } from "@plugins/reviewDB/settings";
 import { cl, showToast } from "@plugins/reviewDB/utils";
 import { useAwaiter, useForceUpdater } from "@utils/react";
@@ -39,7 +39,7 @@ interface UserProps {
 }
 
 interface Props extends UserProps {
-    onFetchReviews(data: Response): void;
+    onFetchReviews(data: UserReviewsData): void;
     refetchSignal?: unknown;
     showInput?: boolean;
     page?: number;
@@ -61,13 +61,14 @@ export default function ReviewsView({
 }: Props) {
     const [signal, refetch] = useForceUpdater(true);
 
-    const [reviewData] = useAwaiter(() => getReviews(discordId, (page - 1) * REVIEWS_PER_PAGE), {
+    const [reviewData] = useAwaiter(() => getReviews(discordId, { offset: (page - 1) * REVIEWS_PER_PAGE }), {
         fallbackValue: null,
         deps: [refetchSignal, signal, page],
         onSuccess: data => {
             if (settings.store.hideBlockedUsers)
                 data!.reviews = data!.reviews?.filter(r => !RelationshipStore.isBlocked(r.sender.discordID));
 
+            data!.reviews.reverse();
             scrollToTop?.();
             onFetchReviews(data!);
         }
