@@ -23,6 +23,7 @@ import { PluginCards } from "./pluginCards";
 
 migratePluginToSettings(true, "EquicordHelper", "NoBulletPoints", "noBulletPoints");
 migratePluginToSettings(true, "EquicordHelper", "NoModalAnimation", "noModalAnimation");
+migratePluginToSettings(true, "EquicordHelper", "GuildTagSettings", "disableAdoptTagPrompt");
 
 let clicked = false;
 
@@ -120,6 +121,12 @@ const settings = definePluginSettings({
         description: "Remove the 300ms long animation when opening or closing modals",
         restartNeeded: true,
         default: false
+    },
+    disableAdoptTagPrompt: {
+        type: OptionType.BOOLEAN,
+        description: "Disable the prompt to adopt tags",
+        default: true,
+        restartNeeded: true
     },
 });
 
@@ -257,6 +264,14 @@ export default definePlugin({
                 match: /200:300/g,
                 replace: "0:0",
             },
+        },
+        {
+            find: "GuildTagAvailableCoachmark",
+            replacement: {
+                match: /return.{0,100}shouldShow/g,
+                replace: "return null;$&"
+            },
+            predicate: () => settings.store.disableAdoptTagPrompt
         }
     ],
     renderMessageAccessory(props) {
