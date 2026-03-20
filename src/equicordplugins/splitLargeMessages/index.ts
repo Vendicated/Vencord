@@ -19,7 +19,7 @@ const canSplit: () => boolean = () => {
 };
 
 const autoMaxLength = () => {
-    const hasNitro = UserStore.getCurrentUser().premiumType === 2;
+    const hasNitro = UserStore.getCurrentUser()?.premiumType === 2;
     return hasNitro ? 4000 : 2000;
 };
 

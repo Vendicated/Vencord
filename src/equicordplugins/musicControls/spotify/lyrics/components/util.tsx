@@ -66,7 +66,7 @@ export function useLyrics({ scroll = true }: { scroll?: boolean; } = {}) {
         ]);
     const lyricsInfo = useStateFromStores([SpotifyLrcStore], () => SpotifyLrcStore.lyricsInfo);
 
-    const { LyricDelay } = settings.use(["LyricDelay"]);
+    const { lyricDelay } = settings.use(["lyricDelay"]);
 
     const [currLrcIndex, setCurrLrcIndex] = useState<number | null>(null);
     const [nextLyric, setNextLyric] = useState<number | null>(null);
@@ -83,14 +83,14 @@ export function useLyrics({ scroll = true }: { scroll?: boolean; } = {}) {
 
     useEffect(() => {
         if (currentLyrics && position != null) {
-            const [currentIndex, nextLyricIndex] = getIndexes(currentLyrics, position, LyricDelay);
+            const [currentIndex, nextLyricIndex] = getIndexes(currentLyrics, position, lyricDelay);
             setCurrLrcIndex(currentIndex);
             setNextLyric(nextLyricIndex);
         } else {
             setCurrLrcIndex(null);
             setNextLyric(null);
         }
-    }, [currentLyrics, position, LyricDelay]);
+    }, [currentLyrics, position, lyricDelay]);
 
     useEffect(() => {
         if (scroll && currLrcIndex !== null) {

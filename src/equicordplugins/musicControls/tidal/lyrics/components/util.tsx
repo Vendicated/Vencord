@@ -40,7 +40,7 @@ export function useLyrics({ scroll = true }: { scroll?: boolean; } = {}) {
         ]);
     const lyrics = useStateFromStores([TidalLrcStore], () => TidalLrcStore.lyrics);
 
-    const { LyricDelay } = settings.use(["LyricDelay"]);
+    const { lyricDelay } = settings.use(["lyricDelay"]);
 
     const [currLrcIndex, setCurrLrcIndex] = useState<number | null>(null);
     const [nextLyric, setNextLyric] = useState<number | null>(null);
@@ -57,7 +57,7 @@ export function useLyrics({ scroll = true }: { scroll?: boolean; } = {}) {
 
     useEffect(() => {
         if (currentLyrics && position) {
-            const [currentIndex, nextLyric] = calculateIndexes(currentLyrics, position, LyricDelay);
+            const [currentIndex, nextLyric] = calculateIndexes(currentLyrics, position, lyricDelay);
             setCurrLrcIndex(currentIndex);
             setNextLyric(nextLyric);
         }

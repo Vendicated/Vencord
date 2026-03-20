@@ -21,7 +21,7 @@ const nextCl = cl("next");
 const currentCl = cl("current");
 
 function LyricsDisplay({ scroll = true }: { scroll?: boolean; }) {
-    const { ShowMusicNoteOnNoLyrics } = settings.use(["ShowMusicNoteOnNoLyrics"]);
+    const { showMusicNoteOnNoLyrics } = settings.use(["showMusicNoteOnNoLyrics"]);
     const { lyricsInfo, lyricRefs, currLrcIndex } = useLyrics({ scroll });
 
     const currentLyrics = lyricsInfo?.lyricsVersions[lyricsInfo.useLyric] || null;
@@ -50,7 +50,7 @@ function LyricsDisplay({ scroll = true }: { scroll?: boolean; }) {
                         {line.text || NoteSvg()}
                     </BaseText>
                 </div>
-            )) : ShowMusicNoteOnNoLyrics ? (
+            )) : showMusicNoteOnNoLyrics ? (
                 <TooltipContainer text="No synced lyrics found">
                     <NoteSvg />
                 </TooltipContainer>
