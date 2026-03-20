@@ -16,9 +16,9 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import ErrorBoundary from "@components/ErrorBoundary";
 import { EquicordDevs } from "@utils/constants";
 import definePlugin from "@utils/types";
-import { Message } from "@vencord/discord-types";
 import { findComponentByCodeLazy } from "@webpack";
 
 const PinIcon = findComponentByCodeLazy("1-.06-.63L6.16");
@@ -31,11 +31,11 @@ export default definePlugin({
             find: "isUnsupported})",
             replacement: {
                 match: /WITH_CONTENT\}\)/,
-                replace: "$&,$self.PinnedIcon(arguments[0].message)"
+                replace: "$&,$self.renderPinIcon(arguments[0].message)"
             }
         }
     ],
-    PinnedIcon({ pinned }: Message) {
-        return pinned ? (<PinIcon size="xs" style={{ position: "absolute", right: "0", top: "0" }} />) : null;
-    }
+    renderPinIcon: ErrorBoundary.wrap(message => {
+        return message?.pinned ? (<PinIcon size="xs" style={{ position: "absolute", right: "0", top: "0" }} />) : null;
+    }, { noop: true })
 });

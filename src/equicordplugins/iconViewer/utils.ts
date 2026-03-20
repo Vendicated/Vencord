@@ -12,7 +12,7 @@ import { CssColorData, IconSize } from "./types";
 let colorKeys: string[] = [];
 
 const Colors = findByPropsLazy("colors", "layout");
-const IconsModule = findByPropsLazy("AngleBracketsIcon", "StaffBadgeIcon") as Record<string, Icon>;
+export const IconsModule = findByPropsLazy("AngleBracketsIcon", "StaffBadgeIcon") as Record<string, Icon>;
 
 export const iconSizesInPx: Record<string, number> = findByPropsLazy("md", "lg", "xxs");
 export const iconSizes: IconSize[] = ["xxs", "xs", "sm", "md", "lg"];
@@ -36,10 +36,6 @@ export const cssColors = new Proxy({} as Record<number, CssColorData>, {
         return target[idx];
     }
 });
-
-export function getIconsModule(): Record<string, Icon> {
-    return IconsModule;
-}
 
 waitFor(["colors", "layout"], m => {
     colorKeys = Object.keys(m.colors);
