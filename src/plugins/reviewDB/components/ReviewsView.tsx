@@ -62,13 +62,14 @@ export default function ReviewsView({
 }: Props) {
     const [signal, refetch] = useForceUpdater(true);
 
-    const [reviewData] = useAwaiter(() => getReviews(discordId, (page - 1) * REVIEWS_PER_PAGE), {
+    const [reviewData] = useAwaiter(() => getReviews(discordId, { offset: (page - 1) * REVIEWS_PER_PAGE }), {
         fallbackValue: null,
         deps: [refetchSignal, signal, page],
         onSuccess: data => {
             if (settings.store.hideBlockedUsers)
                 data!.reviews = data!.reviews?.filter(r => !RelationshipStore.isBlocked(r.sender.discordID));
 
+            data!.reviews.reverse();
             scrollToTop?.();
             onFetchReviews(data!);
         }

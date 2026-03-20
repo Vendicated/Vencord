@@ -96,7 +96,6 @@ export function Updatable(props: CommonProps) {
             <Flex className={classes(Margins.bottom8, Margins.top8)}>
                 {isOutdated && (
                     <Button
-                        size="small"
                         disabled={isUpdating || isChecking}
                         onClick={runWithDispatch(setIsUpdating, async () => {
                             if (await update()) {
@@ -122,7 +121,6 @@ export function Updatable(props: CommonProps) {
                     </Button>
                 )}
                 <Button
-                    size="small"
                     disabled={isUpdating || isChecking}
                     onClick={runWithDispatch(setIsChecking, async () => {
                         const outdated = await checkForUpdates();
