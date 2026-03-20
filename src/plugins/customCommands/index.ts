@@ -23,6 +23,7 @@ import { migratePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import { sendMessage } from "@utils/discord";
 import definePlugin from "@utils/types";
+import { FluxDispatcher, MessageActions, PendingReplyStore } from "@webpack/common";
 
 import { openCreateTagModal } from "./CreateTagModal";
 import { getTag, getTags, removeTag, settings, Tag } from "./settings";
@@ -67,7 +68,7 @@ export function registerTagCommand(tag: Tag) {
             }
         ],
 
-        execute: async (args, ctx) => {
+        execute: async (args, { channel }) => {
             const ephemeral = findOption(args, "ephemeral", false);
 
             const response = tag.message
@@ -78,7 +79,8 @@ export function registerTagCommand(tag: Tag) {
                 .replaceAll("\\n", "\n");
 
             const doSend = ephemeral ? sendBotMessage : sendMessage;
-            doSend(ctx.channel.id, { content: response });
+            doSend(channel.id, { content: response }, false, MessageActions.getSendMessageOptionsForReply(PendingReplyStore.getPendingReply(channel.id)));
+            FluxDispatcher.dispatch({ type: "DELETE_PENDING_REPLY", channelId: channel.id });
         },
         [CustomCommandsMarker]: true,
     }, "CustomCommands");
