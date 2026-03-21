@@ -34,6 +34,8 @@ function showDisableInvites(guildId: string) {
 
 function disableInvites(guildId: string) {
     const guild = GuildStore.getGuild(guildId);
+    if (!guild) return;
+
     const features = [...guild.features, "INVITES_DISABLED"];
     RestAPI.patch({
         url: Constants.Endpoints.GUILD(guildId),
