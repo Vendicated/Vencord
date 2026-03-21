@@ -268,7 +268,7 @@ export const startPlugin = traceFunction("startPlugin", function startPlugin(p: 
     }
     if (audioProcessor) addAudioProcessor(name, audioProcessor);
     if (userAreaButton) addUserAreaButton(name, userAreaButton.render, userAreaButton.priority);
-    if (renderProfileCollection) addProfileCollection(name, renderProfileCollection, userAreaButton?.priority);
+    if (renderProfileCollection) addProfileCollection(name, renderProfileCollection);
 
     return true;
 }, p => `startPlugin ${p.name}`);
