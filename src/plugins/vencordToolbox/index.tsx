@@ -18,15 +18,13 @@
 
 import "./styles.css";
 
+import { HeaderBarButton } from "@api/HeaderBar";
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { findComponentByCodeLazy } from "@webpack";
 import { Popout, useRef, useState } from "@webpack/common";
 
 import { renderPopout } from "./menu";
-
-const HeaderBarIcon = findComponentByCodeLazy(".HEADER_BAR_BADGE_BOTTOM,", 'position:"bottom"');
 
 export const settings = definePluginSettings({
     showPluginMenu: {
@@ -62,7 +60,7 @@ function VencordPopoutButton() {
             renderPopout={() => renderPopout(() => setShow(false))}
         >
             {(_, { isShown }) => (
-                <HeaderBarIcon
+                <HeaderBarButton
                     ref={buttonRef}
                     className="vc-toolbox-btn"
                     onClick={() => setShow(v => !v)}
