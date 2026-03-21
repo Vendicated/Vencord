@@ -22,7 +22,7 @@ import { sendMessage } from "@utils/discord";
 import definePlugin from "@utils/types";
 import { Command } from "@vencord/discord-types";
 import { findByPropsLazy } from "@webpack";
-import { FluxDispatcher, MessageActions } from "@webpack/common";
+import { FluxDispatcher, MessageActions, PendingReplyStore } from "@webpack/common";
 
 interface Album {
     id: string;
@@ -55,7 +55,6 @@ interface Track {
 }
 
 const Spotify = findByPropsLazy("getPlayerState");
-const PendingReplyStore = findByPropsLazy("getPendingReply");
 
 function makeCommand(name: string, formatUrl: (track: Track) => string): Command {
     return {
