@@ -20,13 +20,16 @@ import { addProfileBadge, removeProfileBadge } from "@api/Badges";
 import { addChatBarButton, removeChatBarButton } from "@api/ChatButtons";
 import { registerCommand, unregisterCommand } from "@api/Commands";
 import { addContextMenuPatch, removeContextMenuPatch } from "@api/ContextMenu";
+import { addChannelToolbarButton, addHeaderBarButton, removeChannelToolbarButton, removeHeaderBarButton } from "@api/HeaderBar";
 import { addMemberListDecorator, removeMemberListDecorator } from "@api/MemberListDecorators";
 import { addMessageAccessory, removeMessageAccessory } from "@api/MessageAccessories";
 import { addMessageDecoration, removeMessageDecoration } from "@api/MessageDecorations";
 import { addMessageClickListener, addMessagePreEditListener, addMessagePreSendListener, removeMessageClickListener, removeMessagePreEditListener, removeMessagePreSendListener } from "@api/MessageEvents";
 import { addMessagePopoverButton, removeMessagePopoverButton } from "@api/MessagePopover";
+import { addProfileCollection, removeProfileCollection } from "@api/ProfileCollections";
 import { Settings, SettingsStore } from "@api/Settings";
 import { disableStyle, enableStyle } from "@api/Styles";
+import { addUserAreaButton, removeUserAreaButton } from "@api/UserArea";
 import { Logger } from "@utils/Logger";
 import { onlyOnce } from "@utils/onlyOnce";
 import { canonicalizeFind, canonicalizeReplacement } from "@utils/patches";
@@ -183,7 +186,9 @@ export const startPlugin = traceFunction("startPlugin", function startPlugin(p: 
     const {
         name, commands, contextMenus, managedStyle, userProfileBadge,
         onBeforeMessageEdit, onBeforeMessageSend, onMessageClick,
-        renderChatBarButton, chatBarButton, renderMemberListDecorator, renderMessageAccessory, renderMessageDecoration, renderMessagePopoverButton, messagePopoverButton
+        renderChatBarButton, chatBarButton, renderMemberListDecorator,
+        renderMessageAccessory, renderMessageDecoration, renderMessagePopoverButton,
+        messagePopoverButton, headerBarButton, userAreaButton, renderProfileCollection
     } = p;
 
     if (p.start) {
@@ -242,6 +247,11 @@ export const startPlugin = traceFunction("startPlugin", function startPlugin(p: 
     if (messagePopoverButton) addMessagePopoverButton(name, messagePopoverButton.render, messagePopoverButton.icon);
     // @ts-expect-error: legacy code doesn't have icon
     else if (renderMessagePopoverButton) addMessagePopoverButton(name, renderMessagePopoverButton);
+    if (headerBarButton) headerBarButton.location === "channeltoolbar"
+        ? addChannelToolbarButton(name, headerBarButton.render, headerBarButton.priority)
+        : addHeaderBarButton(name, headerBarButton.render, headerBarButton.priority);
+    if (userAreaButton) addUserAreaButton(name, userAreaButton.render, userAreaButton.priority);
+    if (renderProfileCollection) addProfileCollection(name, renderProfileCollection);
 
     return true;
 }, p => `startPlugin ${p.name}`);
@@ -250,7 +260,9 @@ export const stopPlugin = traceFunction("stopPlugin", function stopPlugin(p: Plu
     const {
         name, commands, contextMenus, managedStyle, userProfileBadge,
         onBeforeMessageEdit, onBeforeMessageSend, onMessageClick,
-        renderChatBarButton, chatBarButton, renderMemberListDecorator, renderMessageAccessory, renderMessageDecoration, renderMessagePopoverButton, messagePopoverButton
+        renderChatBarButton, chatBarButton, renderMemberListDecorator,
+        renderMessageAccessory, renderMessageDecoration, renderMessagePopoverButton,
+        messagePopoverButton, headerBarButton, userAreaButton, renderProfileCollection
     } = p;
 
     if (p.stop) {
@@ -303,6 +315,9 @@ export const stopPlugin = traceFunction("stopPlugin", function stopPlugin(p: Plu
     if (renderMessageDecoration) removeMessageDecoration(name);
     if (renderMessageAccessory) removeMessageAccessory(name);
     if (messagePopoverButton || renderMessagePopoverButton) removeMessagePopoverButton(name);
+    if (headerBarButton) headerBarButton.location === "channeltoolbar" ? removeChannelToolbarButton(name) : removeHeaderBarButton(name);
+    if (userAreaButton) removeUserAreaButton(name);
+    if (renderProfileCollection) removeProfileCollection(name);
 
     return true;
 }, p => `stopPlugin ${p.name}`);
@@ -313,7 +328,8 @@ export const initPluginManager = onlyOnce(function init() {
 
     const pluginKeysToBind: Array<keyof PluginDef & `${"on" | "render"}${string}`> = [
         "onBeforeMessageEdit", "onBeforeMessageSend", "onMessageClick",
-        "renderChatBarButton", "renderMemberListDecorator", "renderMessageAccessory", "renderMessageDecoration", "renderMessagePopoverButton"
+        "renderChatBarButton", "renderMemberListDecorator", "renderMessageAccessory",
+        "renderMessageDecoration", "renderMessagePopoverButton", "renderProfileCollection"
     ];
 
     const neededApiPlugins = new Set<string>();
@@ -349,6 +365,9 @@ export const initPluginManager = onlyOnce(function init() {
         if (p.renderMessageDecoration) neededApiPlugins.add("MessageDecorationsAPI");
         if (p.messagePopoverButton || p.renderMessagePopoverButton) neededApiPlugins.add("MessagePopoverAPI");
         if (p.userProfileBadge) neededApiPlugins.add("BadgeAPI");
+        if (p.headerBarButton) neededApiPlugins.add("HeaderBarAPI");
+        if (p.userAreaButton) neededApiPlugins.add("UserAreaAPI");
+        if (p.renderProfileCollection) neededApiPlugins.add("ProfileCollectionsAPI");
 
         for (const key of pluginKeysToBind) {
             p[key] &&= p[key].bind(p) as any;

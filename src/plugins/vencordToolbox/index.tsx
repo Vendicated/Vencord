@@ -19,12 +19,10 @@
 import "./styles.css";
 
 import { definePluginSettings } from "@api/Settings";
-import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { findComponentByCodeLazy } from "@webpack";
 import { Popout, useRef, useState } from "@webpack/common";
-import type { PropsWithChildren } from "react";
 
 import { renderPopout } from "./menu";
 
@@ -81,27 +79,10 @@ export default definePlugin({
     name: "VencordToolbox",
     description: "Adds a button to the titlebar that houses Vencord quick actions",
     authors: [Devs.Ven, Devs.AutumnVN],
-
     settings,
-
-    patches: [
-        {
-            find: '?"BACK_FORWARD_NAVIGATION":',
-            replacement: {
-                match: /(?<=trailing:.{0,50})\i\.Fragment,(?=\{children:\[)/,
-                replace: "$self.TrailingWrapper,"
-            }
-        }
-    ],
-
-    TrailingWrapper({ children }: PropsWithChildren) {
-        return (
-            <>
-                {children}
-                <ErrorBoundary key="vc-toolbox" noop>
-                    <VencordPopoutButton />
-                </ErrorBoundary>
-            </>
-        );
-    },
+    headerBarButton: {
+        icon: Icon,
+        render: VencordPopoutButton,
+        priority: 1337
+    }
 });
