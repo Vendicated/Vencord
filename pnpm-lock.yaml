@@ -26,8 +26,8 @@ importers:
         specifier: ^0.1.2
         version: 0.1.2
       '@song-spotlight/api':
-        specifier: ^2.0.1
-        version: 2.0.1(typescript@5.9.3)
+        specifier: ^2.1.3
+        version: 2.1.3(typescript@5.9.3)
       '@streamparser/json':
         specifier: ^0.0.22
         version: 0.0.22
@@ -724,8 +724,8 @@ packages:
   '@rtsao/scc@1.1.0':
     resolution: {integrity: sha512-zt6OdqaDoOnJ1ZYsCYGt9YmWzDXl4vQdKTyJev62gFhRGKdx7mcT54V9KIjg+d2wi9EXsPvAPKe7i7WjfVWB8g==}
 
-  '@song-spotlight/api@2.0.1':
-    resolution: {integrity: sha512-nxBJch8cGp10NYeJSp3DCPS/LYmlpcs9VCHrHzgCHFRICTKWhlpiUZgrACP9TmQ8RQsE4B9e23BcQDaqWqPCGg==}
+  '@song-spotlight/api@2.1.3':
+    resolution: {integrity: sha512-Wai7JHd9lrHtM/lkhfWQIFjIWKtP8iD+zj4Lnwbs/ykELR0MB2k56TDnQaRAelvu8XOygt27wfDBDQSEepPqdA==}
     peerDependencies:
       typescript: ^5
 
@@ -3050,7 +3050,7 @@ snapshots:
 
   '@rtsao/scc@1.1.0': {}
 
-  '@song-spotlight/api@2.0.1(typescript@5.9.3)':
+  '@song-spotlight/api@2.1.3(typescript@5.9.3)':
     dependencies:
       typescript: 5.9.3
     optionalDependencies:

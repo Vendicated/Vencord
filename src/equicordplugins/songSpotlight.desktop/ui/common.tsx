@@ -211,6 +211,21 @@ export function SpotifyIcon(props: JSX.IntrinsicElements["svg"]) {
         </svg>
     );
 }
+export function TidalIcon(props: JSX.IntrinsicElements["svg"]) {
+    return (
+        <svg
+            width={24}
+            height={24}
+            viewBox="0 0 24 24"
+            {...props}
+        >
+            <path fill={props.fill || "currentColor"} d="M15.5003 8.49936L12.0006 11.9997L8.5001 8.49936L12.0006 5.00047L15.5003 8.49936Z" />
+            <path fill={props.fill || "currentColor"} d="M15.5003 15.4996L12.0006 19L8.5001 15.4996L12.0006 11.9997L15.5003 15.4996Z" />
+            <path fill={props.fill || "currentColor"} d="M8.5001 8.49936L4.99973 12L1.5 8.49963L4.99973 5L8.5001 8.49936Z" />
+            <path fill={props.fill || "currentColor"} d="M22.5 8.49963L19.0003 12L15.4998 8.49963L19.0003 5L22.5 8.49963Z" />
+        </svg>
+    );
+}
 export function TrashIcon(props: JSX.IntrinsicElements["svg"]) {
     return (
         <svg
