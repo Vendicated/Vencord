@@ -7,7 +7,7 @@
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Logger } from "@utils/Logger";
 import { useEffect, useState } from "@webpack/common";
-import type { JSX, ReactNode } from "react";
+import type { ReactNode } from "react";
 
 const logger = new Logger("ProfileCollectionAPI");
 
