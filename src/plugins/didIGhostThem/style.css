@@ -1,0 +1,25 @@
+.vc-ghost-sub {
+    font-size: 12px;
+    color: var(--text-muted);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.vc-ghost-you {
+    color: var(--status-positive);
+    opacity: 0.7;
+}
+
+.vc-ghost-unread {
+    color: var(--text-normal);
+}
+
+.vc-ghost-ghosting {
+    color: var(--status-danger);
+}
+
+.vc-ghost-unknown {
+    opacity: 0.4;
+    font-style: italic;
+}
