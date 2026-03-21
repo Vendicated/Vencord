@@ -25,10 +25,10 @@ export default definePlugin({
     patches: [
         // Personal profile popout
         {
-            find: ".WIDGETS_USER_PROFILE_ACCOUNT_POPOUT_NEW_BADGE]",
+            find: '"UserProfileAccountPopout"',
             replacement: {
                 match: /user:(\i),bio:.{0,60}}\)/,
-                replace: "$&,$self.renderProfileSongs({userId:$1.id})",
+                replace: "$&,$self.renderProfileSongs({user:$1})",
             },
         },
         // Message user popout
@@ -36,7 +36,7 @@ export default definePlugin({
             find: ".isProvisional?(",
             replacement: {
                 match: /user:(\i),bio:.{0,60}}\)/,
-                replace: "$&,$self.renderProfileSongs({userId:$1.id})",
+                replace: "$&,$self.renderProfileSongs({user:$1})",
             },
         },
         // DM sidebar profile
@@ -44,7 +44,7 @@ export default definePlugin({
             find: ".SIDEBAR}),nicknameIcons:",
             replacement: {
                 match: /{userId:(\i)\.id}\)}\).{0,100}]}\)(?=\]\}\))/,
-                replace: "$&,$self.renderProfileSongs({userId:$1.id,isSidebar:true})",
+                replace: "$&,$self.renderProfileSongs({user:$1,isSideBar:true})",
             },
         },
         // Full profile modal sections (lazy loaded)

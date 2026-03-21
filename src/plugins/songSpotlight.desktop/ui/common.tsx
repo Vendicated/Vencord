@@ -22,6 +22,8 @@ export const ContainerClasses = findCssClassesLazy(
 );
 export const CardClasses = findCssClassesLazy("card", "headerText", "headerContextMenu");
 export const WidgetClasses = findCssClassesLazy("tabPanelScroller", "tabListScroller");
+export const DMSideBarClasses = findCssClassesLazy("widgetPreviews");
+export const ProfileCardClasses = findCssClassesLazy("cardsList", "firstCardContainer", "card", "container");
 
 export enum SpinnerTypes {
     CHASING_DOTS = "chasingDots",
@@ -206,6 +208,21 @@ export function SpotifyIcon(props: JSX.IntrinsicElements["svg"]) {
                 fill={props.fill || "currentColor"}
                 d="M12 1a11 11 0 1 0 0 22 11 11 0 0 0 0-22Zm4.8 15.8a.7.7 0 0 1-1 .2c-2.5-1.6-5.8-2-9.6-1a.7.7 0 1 1-.3-1.4A14 14 0 0 1 16.6 16c.3.2.4.6.2.9Zm1.3-3a.9.9 0 0 1-1.1.3c-3-1.8-7.5-2.3-11-1.3a.9.9 0 0 1-.5-1.6c4-1.2 9-.6 12.4 1.4.4.3.5.8.2 1.2Zm1.5-3.5a1 1 0 0 1-1.4.4A18.1 18.1 0 0 0 5.6 9.4a1 1 0 0 1-.6-2C8.8 6.4 15.2 6.6 19.3 9c.5.3.6 1 .4 1.4Z"
             />
+        </svg>
+    );
+}
+export function TidalIcon(props: JSX.IntrinsicElements["svg"]) {
+    return (
+        <svg
+            width={24}
+            height={24}
+            viewBox="0 0 24 24"
+            {...props}
+        >
+            <path fill={props.fill || "currentColor"} d="M15.5003 8.49936L12.0006 11.9997L8.5001 8.49936L12.0006 5.00047L15.5003 8.49936Z" />
+            <path fill={props.fill || "currentColor"} d="M15.5003 15.4996L12.0006 19L8.5001 15.4996L12.0006 11.9997L15.5003 15.4996Z" />
+            <path fill={props.fill || "currentColor"} d="M8.5001 8.49936L4.99973 12L1.5 8.49963L4.99973 5L8.5001 8.49936Z" />
+            <path fill={props.fill || "currentColor"} d="M22.5 8.49963L19.0003 12L15.4998 8.49963L19.0003 5L22.5 8.49963Z" />
         </svg>
     );
 }
