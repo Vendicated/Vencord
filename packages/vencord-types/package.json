@@ -1,7 +1,7 @@
 {
     "name": "@equicord/types",
     "private": false,
-    "version": "1.14.1",
+    "version": "1.14.2",
     "description": "",
     "types": "index.d.ts",
     "scripts": {
@@ -26,7 +26,7 @@
         "type-fest": "^4.35.0"
     },
     "peerDependencies": {
-        "@types/react": "18.3.1",
-        "@types/react-dom": "18.3.1"
+        "@types/react": "^19.0.10",
+        "@types/react-dom": "19.0.4"
     }
 }

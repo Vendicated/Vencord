@@ -10,18 +10,18 @@ import { Constants, Flux, FluxDispatcher, RestAPI } from "@webpack/common";
 import { RefreshedUrlsResponse } from "./types";
 import { BatchedRequestQueue, isAllowedHost } from "./utils";
 
+export interface SignedUrlsStoreType {
+    get(url: string): string | null;
+    addSigned(url: string): void;
+}
+
 /** Used for storing and automatically refreshing signed CDN/Media proxy urls ({@link https://docs.discord.food/reference#signed-attachment-urls}). */
 export const SignedUrlsStore = proxyLazyWebpack(() => {
-    interface Store {
-        get(url: string): string | null;
-        addSigned(url: string): void;
-    }
+    class SignedUrlsStoreClass extends Flux.Store implements SignedUrlsStoreType {
+        public static readonly _expirationThreshold = 60 * 60 * 1000;
 
-    class SignedUrlsStore extends Flux.Store implements Store {
-        private static readonly _expirationThreshold = 60 * 60 * 1000;
-
-        private _urls = new Map<string, string>();
-        private _queue = new BatchedRequestQueue<string>(batch => this._handleBatch(batch), {
+        public _urls = new Map<string, string>();
+        public _queue = new BatchedRequestQueue<string>(batch => this._handleBatch(batch), {
             maxCount: 50,
             timeout: 50
         });
@@ -50,27 +50,27 @@ export const SignedUrlsStore = proxyLazyWebpack(() => {
             else this._update([[`${this._clean(parsed)}`, url]]);
         }
 
-        private _refresh(url: URL): void {
+        public _refresh(url: URL): void {
             this._queue.add(`${this._clean(url)}`);
         }
 
-        private _clean(url: URL): URL {
+        public _clean(url: URL): URL {
             const clean = new URL(url);
             clean.search = "";
             clean.hash = "";
             return clean;
         }
 
-        private _isValid(url: URL | null): url is URL {
+        public _isValid(url: URL | null): url is URL {
             return !!(url && isAllowedHost(url.hostname));
         }
 
-        private _willExpire(url: URL): boolean {
+        public _willExpire(url: URL): boolean {
             const expiryTimestamp = parseInt(url.searchParams.get("ex")!, 16) * 1000;
-            return isNaN(expiryTimestamp) || expiryTimestamp - SignedUrlsStore._expirationThreshold < Date.now();
+            return isNaN(expiryTimestamp) || expiryTimestamp - SignedUrlsStoreClass._expirationThreshold < Date.now();
         }
 
-        private _update(urls: [string, string][]): void {
+        public _update(urls: [string, string][]): void {
             let hasChanged: boolean = false;
 
             for (const [url, value] of urls) {
@@ -83,7 +83,7 @@ export const SignedUrlsStore = proxyLazyWebpack(() => {
             if (hasChanged) this.emitChange();
         }
 
-        private async _handleBatch(batch: string[]): Promise<void> {
+        public async _handleBatch(batch: string[]): Promise<void> {
             await RestAPI.post({
                 url: Constants.Endpoints.ATTACHMENTS_REFRESH_URLS,
                 body: { attachment_urls: batch },
@@ -94,5 +94,5 @@ export const SignedUrlsStore = proxyLazyWebpack(() => {
         }
     }
 
-    return new SignedUrlsStore(FluxDispatcher) as Store;
+    return new SignedUrlsStoreClass(FluxDispatcher) as SignedUrlsStoreType;
 });
