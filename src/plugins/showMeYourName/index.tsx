@@ -106,9 +106,9 @@ export default definePlugin({
                 return <>{prefix}{username} <span className="vc-smyn-suffix">{nick}</span></>;
 
             if (mode === "nick-user") {
-                const escapedNick = <>{nick.split(emojiRegex).filter(Boolean).map(
+                const formattedNick = <>{nick.split(emojiRegex).filter(Boolean).map(
                     (part, i) => emojiRegex.test(part) ? <span className="vc-smyn-emoji" key={i}>{part}</span> : part)}</>;
-                return <>{prefix}{escapedNick} <span className="vc-smyn-suffix">{username}</span></>;
+                return <>{prefix}{formattedNick} <span className="vc-smyn-suffix">{username}</span></>;
             }
 
             return <>{prefix}{username}</>;
