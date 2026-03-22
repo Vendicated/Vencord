@@ -22,7 +22,7 @@ interface UsernameProps {
     userOverride?: User;
 }
 
-const emojiRegex = /(\p{Regional_Indicator}\p{Regional_Indicator}|(?![*#\d](?!\u{FE0F}))(?!\d(?![\u{FE0F}\u{20E3}]))\p{Emoji}\p{Emoji_Modifier}?\u{FE0F}?\u{20E3}?(?:\u{200D}\p{Emoji}\p{Emoji_Modifier}?\u{FE0F}?\u{20E3}?)*)/gu;
+const emojiRegex = /(\p{Regional_Indicator}\p{Regional_Indicator}|(?![*#\d](?!\u{FE0F}))(?!\d(?![\u{FE0F}\u{20E3}]))\p{Emoji}\p{Emoji_Modifier}?\u{FE0F}?\u{20E3}?(?:\u{200D}\p{Emoji}\p{Emoji_Modifier}?\u{FE0F}?\u{20E3}?)*)/u;
 
 const settings = definePluginSettings({
     mode: {
