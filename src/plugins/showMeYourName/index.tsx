@@ -12,6 +12,7 @@ import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { Channel, Message, User } from "@vencord/discord-types";
 import { RelationshipStore, StreamerModeStore } from "@webpack/common";
+import { findByCodeLazy } from "@webpack";
 
 interface UsernameProps {
     author: { nick: string; authorId: string; };
@@ -22,7 +23,7 @@ interface UsernameProps {
     userOverride?: User;
 }
 
-const emojiRegex = /(\p{RGI_Emoji})/v;
+const wrapEmojis = findByCodeLazy("lastIndex;return");
 
 const settings = definePluginSettings({
     mode: {
@@ -106,10 +107,7 @@ export default definePlugin({
                 return <>{prefix}{username} <span className="vc-smyn-suffix">{nick}</span></>;
 
             if (mode === "nick-user") {
-                const formattedNick = <>{nick.split(emojiRegex).filter(Boolean).map(
-                    (part, i) => emojiRegex.test(part) ? <span className="vc-smyn-emoji" key={i}>{part}</span> : part
-                )}</>;
-                return <>{prefix}{formattedNick} <span className="vc-smyn-suffix">{username}</span></>;
+                return <>{prefix}{wrapEmojis(nick)} <span className="vc-smyn-suffix">{username}</span></>;
             }
 
             return <>{prefix}{username}</>;
