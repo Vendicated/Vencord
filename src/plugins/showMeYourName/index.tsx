@@ -22,6 +22,8 @@ interface UsernameProps {
     userOverride?: User;
 }
 
+const emojiRegex = /(\p{Regional_Indicator}\p{Regional_Indicator}|(?![*#\d](?!\u{FE0F}))(?!\d(?![\u{FE0F}\u{20E3}]))\p{Emoji}\p{Emoji_Modifier}?\u{FE0F}?\u{20E3}?(?:\u{200D}\p{Emoji}\p{Emoji_Modifier}?\u{FE0F}?\u{20E3}?)*)/gu;
+
 const settings = definePluginSettings({
     mode: {
         type: OptionType.SELECT,
@@ -103,8 +105,11 @@ export default definePlugin({
             if (mode === "user-nick")
                 return <>{prefix}{username} <span className="vc-smyn-suffix">{nick}</span></>;
 
-            if (mode === "nick-user")
-                return <>{prefix}{nick} <span className="vc-smyn-suffix">{username}</span></>;
+            if (mode === "nick-user") {
+                const escapedNick = <>{nick.split(emojiRegex).filter(Boolean).map(
+                    (part, i) => emojiRegex.test(part) ? <span className="vc-smyn-emoji" key={i}>{part}</span> : part)}</>;
+                return <>{prefix}{escapedNick} <span className="vc-smyn-suffix">{username}</span></>;
+            }
 
             return <>{prefix}{username}</>;
         } catch {
