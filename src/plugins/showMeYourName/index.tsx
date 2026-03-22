@@ -22,9 +22,6 @@ interface UsernameProps {
     userOverride?: User;
 }
 
-// https://v8.dev/features/regexp-v-flag#unicode-properties-of-strings
-// RGI_EMOJI matches all emojis as one, unlike \p{Emoji} which would split emojis with multiple code points into multiple parts, such as the trans flag or family emojis.
-// v flag is supported by all browsers.
 const emojiRegex = /(\p{RGI_Emoji})/v;
 
 const settings = definePluginSettings({
