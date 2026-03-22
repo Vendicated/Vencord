@@ -9,7 +9,7 @@ import definePlugin from "@utils/types";
 
 export default definePlugin({
     name: "microslop",
-    description: "Replaces any and all occurrences of \"microsoft\" to \"microslop\" (case-insensitive)",
+    description: "WARNING: Uses direct DOM manipulation. May cause other stuff to break. Replaces any and all occurrences of \"microsoft\" to \"microslop\" (case-insensitive)",
     authors: [Devs.revilo0509],
 
     start() {
