@@ -11,7 +11,3 @@
 .vc-smyn-suffix::after {
     content: ")";
 }
-
-.vc-smyn-emoji {
-    -webkit-text-fill-color: initial;
-}
