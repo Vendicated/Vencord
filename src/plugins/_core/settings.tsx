@@ -240,7 +240,7 @@ export default definePlugin({
             }),
             ...this.customEntries.map(buildEntry),
             // TODO: Remove deprecated customSections in a future update
-            ...this.customSections.map((func, i) => {
+            ...this.customSections.map((func, _) => {
                 const { section, element, label } = func(FallbackSectionTypes);
                 if (Object.values(FallbackSectionTypes).includes(section)) return null;
 
