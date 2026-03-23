@@ -13,7 +13,7 @@ import { proxyLazyWebpack } from "@webpack";
 import { Flux, FluxDispatcher } from "@webpack/common";
 
 function showNotif(title: string, body: string) {
-    if (settings.store.ShowFailedToasts) {
+    if (settings.store.showFailedToasts) {
         showNotification({
             color: "#ee2902",
             title,

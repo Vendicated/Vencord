@@ -15,6 +15,7 @@ import { Clickable, React, useEffect, UserProfileStore, useState } from "@webpac
 
 import { ReposModal } from "./ReposModal";
 
+const DMSideBarClasses = findCssClassesLazy("widgetPreviews");
 const ProfileCardClasses = findCssClassesLazy("cardsList", "firstCardContainer", "card", "container");
 const ProfileCardContainerClasses = findCssClassesLazy("innerContainer", "icons", "icon", "displayCount", "displayCountText", "displayCountTextColor", "breadcrumb");
 const ProfileCardOverlayClasses = findCssClassesLazy("overlay", "isPrivate", "outer");
@@ -41,7 +42,7 @@ function getLanguageIconUrl(language: string | null): string {
     return `https://cdn.jsdelivr.net/gh/devicons/devicon@develop/icons/${normalized}/${normalized}-original.svg`;
 }
 
-export function ProfilePopoutComponent({ id, theme }: { id: string, theme: string; }) {
+export function ProfilePopoutComponent({ id, isSideBar = false }: { id: string, isSideBar?: boolean; }) {
     const [repos, setRepos] = useState<GitHubRepo[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -92,13 +93,13 @@ export function ProfilePopoutComponent({ id, theme }: { id: string, theme: strin
 
     const topRepos = repos.slice(0, 4);
 
-    return (
+    const reposSection = (
         <section className={ProfileCardClasses.container}>
             <ul className={ProfileCardClasses.cardsList} tabIndex={-1}>
                 <li className={ProfileCardClasses.firstCardContainer}>
                     <Clickable className={ProfileCardContainerClasses.breadcrumb} onClick={openReposModal}>
                         <div className={classes(ProfileCardOverlayClasses.overlay, ProfileCardContainerClasses.innerContainer, ProfileCardClasses.card)}>
-                            <Paragraph size="xs" weight="medium">
+                            <Paragraph size={isSideBar ? "sm" : "xs"} weight="medium">
                                 GitHub Repositories
                             </Paragraph>
                             {!!repos.length && (
@@ -115,8 +116,8 @@ export function ProfilePopoutComponent({ id, theme }: { id: string, theme: strin
                                                 />
                                                 {showCount && (
                                                     <div className={ProfileCardContainerClasses.displayCountText}>
-                                                        <Span className={ProfileCardContainerClasses.displayCountTextColor} size="xs" weight="medium">
-                                                            +{repos.length - 3}
+                                                        <Span className={ProfileCardContainerClasses.displayCountTextColor} size={isSideBar ? "sm" : "xs"} weight="medium">
+                                                            +{repos.length - 4}
                                                         </Span>
                                                     </div>
                                                 )}
@@ -131,4 +132,8 @@ export function ProfilePopoutComponent({ id, theme }: { id: string, theme: strin
             </ul>
         </section>
     );
+
+    return isSideBar
+        ? <div className={DMSideBarClasses.widgetPreviews}>{reposSection}</div>
+        : reposSection;
 }

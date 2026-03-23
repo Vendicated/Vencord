@@ -41,8 +41,8 @@ export async function getLyrics(track: Track | null): Promise<LyricsData | null>
     const nullCacheEntry = nullLyricCache.get(cacheKey);
 
     if (nullCacheEntry) {
-        const provider = settings.store.LyricsProvider;
-        if (!settings.store.FallbackProvider && nullCacheEntry[provider]) {
+        const provider = settings.store.lyricsProvider;
+        if (!settings.store.fallbackProvider && nullCacheEntry[provider]) {
             return null;
         }
 
@@ -51,7 +51,7 @@ export async function getLyrics(track: Track | null): Promise<LyricsData | null>
         }
     }
 
-    const providersToTry = [settings.store.LyricsProvider, ...providers.filter(p => p !== settings.store.LyricsProvider)];
+    const providersToTry = [settings.store.lyricsProvider, ...providers.filter(p => p !== settings.store.lyricsProvider)];
 
     for (const provider of providersToTry) {
         const lyricsInfo = await lyricFetchers[provider](track);

@@ -27,6 +27,7 @@ import type { MessageDecorationFactory } from "@api/MessageDecorations";
 import type { MessageClickListener, MessageEditListener, MessageSendListener } from "@api/MessageEvents";
 import type { MessagePopoverButtonData, MessagePopoverButtonFactory } from "@api/MessagePopover";
 import type { NicknameIconFactory } from "@api/NicknameIcons";
+import { ProfileCollectionFactory } from "@api/ProfileCollections";
 import type { UserAreaButtonData } from "@api/UserArea";
 import type { Command, FluxEvents } from "@vencord/discord-types";
 import type { ReactNode } from "react";
@@ -208,6 +209,7 @@ export interface PluginDef {
     headerBarButton?: HeaderBarButtonData;
     audioProcessor?: AudioProcessor;
     userAreaButton?: UserAreaButtonData;
+    renderProfileCollection?: ProfileCollectionFactory;
 
     // TODO: Remove eventually
     /**

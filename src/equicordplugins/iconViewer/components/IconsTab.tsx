@@ -16,7 +16,7 @@ import { Icon } from "@vencord/discord-types";
 import { Clickable, TextInput, useCallback, useEffect, useMemo, useState } from "@webpack/common";
 
 import { IconsDef } from "../types";
-import { getIconsModule } from "../utils";
+import { IconsModule } from "../utils";
 import { openIconModal } from "./Modals";
 
 let cachedIcons: IconsDef | null = null;
@@ -24,9 +24,8 @@ let cachedIcons: IconsDef | null = null;
 function getIcons(): IconsDef {
     if (cachedIcons) return cachedIcons;
 
-    const iconsModule = getIconsModule();
     cachedIcons = Object.fromEntries(
-        Object.entries(iconsModule).filter(([name, fn]) =>
+        Object.entries(IconsModule).filter(([name, fn]) =>
             typeof fn === "function" && name.endsWith("Icon")
         )
     );

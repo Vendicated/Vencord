@@ -42,7 +42,7 @@
         "@ffmpeg/ffmpeg": "^0.12.10",
         "@ffmpeg/util": "^0.12.1",
         "@intrnl/xxhash64": "^0.1.2",
-        "@song-spotlight/api": "^2.0.1",
+        "@song-spotlight/api": "^2.1.3",
         "@streamparser/json": "^0.0.22",
         "@types/less": "^3.0.8",
         "@types/stylus": "^0.48.42",

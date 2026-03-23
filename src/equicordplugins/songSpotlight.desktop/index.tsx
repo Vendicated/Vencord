@@ -23,30 +23,6 @@ export default definePlugin({
     authors: [EquicordDevs.nexpid],
     settings,
     patches: [
-        // Personal profile popout
-        {
-            find: '"UserProfileAccountPopout"',
-            replacement: {
-                match: /user:(\i),bio:.{0,60}}\)/,
-                replace: "$&,$self.renderProfileSongs({userId:$1.id})",
-            },
-        },
-        // Message user popout
-        {
-            find: ".isProvisional?(",
-            replacement: {
-                match: /user:(\i),bio:.{0,60}}\)/,
-                replace: "$&,$self.renderProfileSongs({userId:$1.id})",
-            },
-        },
-        // DM sidebar profile
-        {
-            find: ".SIDEBAR}),nicknameIcons:",
-            replacement: {
-                match: /{userId:(\i)\.id}\)}\).{0,100}]}\)(?=\]\}\))/,
-                replace: "$&,$self.renderProfileSongs({userId:$1.id,isSidebar:true})",
-            },
-        },
         // Full profile modal sections (lazy loaded)
         {
             find: ".MUTUAL_GUILDS})),",
@@ -80,6 +56,6 @@ export default definePlugin({
         useAuthorizationStore.persist.rehydrate();
     },
 
-    renderProfileSongs: ErrorBoundary.wrap(ProfileSongs, { noop: true }),
+    renderProfileCollection: ProfileSongs,
     renderWidgetSongs: ErrorBoundary.wrap(WidgetSongs, { noop: true }),
 });

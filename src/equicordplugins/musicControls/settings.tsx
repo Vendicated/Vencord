@@ -43,12 +43,12 @@ export const settings = definePluginSettings({
         default: false,
         onChange: v => toggleHoverControls(v)
     },
-    ShowMusicNoteOnNoLyrics: {
+    showMusicNoteOnNoLyrics: {
         description: "Show a music note icon when no lyrics are found",
         type: OptionType.BOOLEAN,
         default: true,
     },
-    LyricsPosition: {
+    lyricsPosition: {
         description: "Position of the lyrics",
         type: OptionType.SELECT,
         options: [
@@ -56,7 +56,7 @@ export const settings = definePluginSettings({
             { value: "below", label: "Below  Player(s)", default: true },
         ],
     },
-    LyricsProvider: {
+    lyricsProvider: {
         description: "Where lyrics are fetched from",
         type: OptionType.SELECT,
         options: [
@@ -64,7 +64,7 @@ export const settings = definePluginSettings({
             { value: Provider.Lrclib, label: "LRCLIB" },
         ],
     },
-    TranslateTo: {
+    translateTo: {
         description: "Translate lyrics to - Changing this will clear existing translations",
         type: OptionType.SELECT,
         options: languages,
@@ -73,7 +73,7 @@ export const settings = definePluginSettings({
             showToast("Translations cleared", Toasts.Type.SUCCESS);
         }
     },
-    LyricsConversion: {
+    lyricsConversion: {
         description: "Automatically translate or romanize lyrics",
         type: OptionType.SELECT,
         options: [
@@ -82,23 +82,23 @@ export const settings = definePluginSettings({
             { value: Provider.Romanized, label: "Romanize" },
         ]
     },
-    FallbackProvider: {
+    fallbackProvider: {
         description: "When a lyrics provider fails, try other providers",
         type: OptionType.BOOLEAN,
         default: true,
     },
-    ShowFailedToasts: {
+    showFailedToasts: {
         description: "Hide toasts when lyrics fail to fetch",
         type: OptionType.BOOLEAN,
         default: true,
     },
-    LyricDelay: {
+    lyricDelay: {
         description: "",
         type: OptionType.SLIDER,
         default: 0,
         ...sliderOptions
     },
-    PurgeLyricsCache: {
+    purgeLyricsCache: {
         description: "Purge the lyrics cache",
         type: OptionType.COMPONENT,
         component: () => (
@@ -113,7 +113,7 @@ export const settings = definePluginSettings({
             </Button>
         ),
     },
-    SpotifySectionTitle: {
+    spotifySectionTitle: {
         type: OptionType.COMPONENT,
         component: () => (
             <section>
@@ -142,7 +142,7 @@ export const settings = definePluginSettings({
         default: true
     },
 
-    TidalSectionTitle: {
+    tdalSectionTitle: {
         type: OptionType.COMPONENT,
         component: () => (
             <section>
@@ -164,36 +164,4 @@ export const settings = definePluginSettings({
         type: OptionType.BOOLEAN,
         default: false,
     },
-
-    YtmSectionTitle: {
-        type: OptionType.COMPONENT,
-        component: () => (
-            <section>
-                <HeadingSecondary>Youtube Music</HeadingSecondary>
-                <Paragraph>
-                    Install <MaskedLink href="https://github.com/pear-devs/pear-desktop">Pear Desktop</MaskedLink> from here, then go to Plugins &rarr; API Server &rarr; Enabled
-                </Paragraph>
-            </section>
-        )
-    },
-    showYoutubeMusicControls: {
-        description: "Show Youtube Music Controls",
-        type: OptionType.BOOLEAN,
-        default: false
-    },
-    YoutubeMusicApiUrl: {
-        description: "Custom URL for the Api Server plugin",
-        type: OptionType.STRING,
-        default: "http://localhost:26538",
-        placeholder: "http://localhost:26538",
-        onChange: (value: string) => {
-            if (URL.canParse(value)) {
-                settings.store.YoutubeMusicApiUrl = value;
-            } else {
-                showToast("Invalid URL format for Custom Api Server URL: " + value, Toasts.Type.FAILURE);
-                settings.store.YoutubeMusicApiUrl = settings.def.YoutubeMusicApiUrl.default;
-            }
-        }
-    }
-
 });

@@ -17,7 +17,7 @@ import { LyricsData, Provider } from "./types";
 export const lyricsAlternative = [Provider.Translated, Provider.Romanized];
 
 function showNotif(title: string, body: string) {
-    if (settings.store.ShowFailedToasts) {
+    if (settings.store.showFailedToasts) {
         showNotification({
             color: "#ee2902",
             title,
@@ -44,12 +44,12 @@ export const SpotifyLrcStore = proxyLazyWebpack(() => {
 
             fetchingsTracks.push(e.track?.id ?? "");
             lyricsInfo = await getLyrics(e.track);
-            const { LyricsConversion } = settings.store;
-            if (LyricsConversion !== Provider.None) {
+            const { lyricsConversion } = settings.store;
+            if (lyricsConversion !== Provider.None) {
                 FluxDispatcher.dispatch({
                     // @ts-ignore
                     type: "SPOTIFY_LYRICS_PROVIDER_CHANGE",
-                    provider: LyricsConversion
+                    provider: lyricsConversion
                 });
             }
 
@@ -74,7 +74,7 @@ export const SpotifyLrcStore = proxyLazyWebpack(() => {
             }
 
             if (provider === Provider.Translated || provider === Provider.Romanized) {
-                const originalLyrics = currentInfo?.lyricsVersions[settings.store.LyricsProvider] ||
+                const originalLyrics = currentInfo?.lyricsVersions[settings.store.lyricsProvider] ||
                     providers.map(p => currentInfo?.lyricsVersions[p]).find(Boolean);
 
                 if (!originalLyrics || !currentInfo) {
@@ -87,7 +87,7 @@ export const SpotifyLrcStore = proxyLazyWebpack(() => {
                 if (provider === Provider.Romanized && !/[^\u0000-\u007F]/.test(lyricsCheckText)) {
                     lyricsInfo = {
                         ...currentInfo,
-                        useLyric: settings.store.LyricsProvider,
+                        useLyric: settings.store.lyricsProvider,
                         lyricsVersions: {
                             ...currentInfo.lyricsVersions,
                         },

@@ -6,7 +6,7 @@
 
 import "./style.css";
 
-import { definePluginSettings, migratePluginSetting, migratePluginSettings } from "@api/Settings";
+import { definePluginSettings, migrateOldSettingToNewPlugin, migratePluginSetting, migratePluginSettings } from "@api/Settings";
 import { Divider } from "@components/Divider";
 import { HeadingSecondary } from "@components/Heading";
 import { Notice } from "@components/Notice";
@@ -15,6 +15,7 @@ import { Devs, EquicordDevs } from "@utils/index";
 import definePlugin, { OptionType } from "@utils/types";
 
 migratePluginSettings("Declutter", "BetterUserArea", "Anammox");
+migrateOldSettingToNewPlugin("Declutter", "removeClanTag", "GuildTagSettings", "hideTags");
 
 const migrationsAnammox = [
     ["dms", "removeShopAboveDM"],

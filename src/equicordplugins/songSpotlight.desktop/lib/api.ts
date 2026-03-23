@@ -10,11 +10,12 @@ import { showToast, Toasts, UserStore } from "@webpack/common";
 import { useAuthorizationStore } from "./stores/AuthorizationStore";
 import { useSongStore } from "./stores/SongStore";
 
+const api = "https://dc.songspotlight.nexpid.xyz/";
 export const apiConstants = {
-    api: "https://dc.songspotlight.nexpid.xyz/",
+    api,
     oauth2: {
         clientId: "1157745434140344321",
-        redirectURL: "https://dc.songspotlight.nexpid.xyz/api/auth/authorize",
+        redirectURL: `${api}api/auth/authorize`,
     },
     songLimit: 6,
 };

@@ -23,6 +23,7 @@ import { openSettingsModal } from "@equicordplugins/songSpotlight.desktop/ui/set
 import { sid } from "@song-spotlight/api/util";
 import { copyWithToast } from "@utils/discord";
 import { classes } from "@utils/index";
+import { User } from "@vencord/discord-types";
 import {
     ContextMenuApi,
     FluxDispatcher,
@@ -39,16 +40,16 @@ import Song from ".";
 import CollapsedProfileSongs from "./CollapsedProfileSongs";
 
 export interface ProfileSongsProps {
-    userId: string;
-    isSidebar: boolean;
+    user: User;
+    isSideBar: boolean;
 }
 
-export default function ProfileSongs({ userId, isSidebar }: ProfileSongsProps) {
+export default function ProfileSongs({ user, isSideBar }: ProfileSongsProps) {
     const [failed, setFailed] = useState(false);
     const { isAuthorized } = useAuthorizationStore();
     const { users } = useSongStore();
     const { profileSongsLimit, collapseSongList } = settings.use();
-
+    const userId = user?.id;
     const data = users[userId]?.data;
     useEffect(() => {
         if (isAuthorized() && !data) listData(userId).catch(() => setFailed(true));
@@ -70,8 +71,8 @@ export default function ProfileSongs({ userId, isSidebar }: ProfileSongsProps) {
         return (
             <CollapsedProfileSongs
                 data={data}
-                userId={userId}
-                isSidebar={isSidebar}
+                user={user}
+                isSideBar={isSideBar}
             />
         );
     } else if (pending) {
@@ -81,14 +82,14 @@ export default function ProfileSongs({ userId, isSidebar }: ProfileSongsProps) {
     return (
         <div
             className={classes(
-                isSidebar && OverlayClasses.overlay,
-                isSidebar && CardClasses.card,
-                cl("songs-container", isSidebar && "songs-container-sidebar"),
+                isSideBar && OverlayClasses.overlay,
+                isSideBar && CardClasses.card,
+                cl("songs-container", isSideBar && "songs-container-sidebar"),
             )}
             key="song-spotlight-profile-songs"
         >
             <Flex justifyContent="space-between">
-                <BaseText size="xs" weight={isSidebar ? "semibold" : "medium"} className={cl("header")}>
+                <BaseText size="xs" weight={isSideBar ? "semibold" : "medium"} className={cl("header")}>
                     Song Spotlight
                 </BaseText>
                 <Tooltip text="More">
