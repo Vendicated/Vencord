@@ -1,0 +1,22 @@
+.vc-mention-highlighter {
+    display: inline-flex !important;
+    color: var(--mention-highlighter-color, #ff6100) !important;
+    background: transparent !important;
+    padding: 0 !important;
+    font-weight: bold;
+}
+
+.vc-mention-highlighter-remove-background [class*="mentioned_"]::before {
+    display: none !important;
+}
+
+.vc-mention-highlighter-remove-background [class*="mentioned_"] {
+    background-color: transparent !important;
+}
+
+.vc-mention-highlighter-glow [class*="mentioned_"] {
+    box-shadow: 0 0 10px var(--mention-highlighter-color, #ff6100);
+    border-radius: 8px;
+    margin-left: 8px;
+    margin-right: 8px;
+}
