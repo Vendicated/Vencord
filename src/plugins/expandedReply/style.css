@@ -38,7 +38,7 @@
 
 .vc-expanded-reply-content {
     position: fixed;
-    z-index: 1001;
+    z-index: 10000;
     width: min(480px, 50vw);
     max-height: 320px;
     display: flex;
@@ -79,6 +79,41 @@
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+}
+
+.vc-expanded-reply-copy-wrapper {
+    position: relative;
+    display: inline-flex;
+}
+
+.vc-expanded-reply-copy-menu {
+    position: absolute;
+    top: calc(100% + 4px);
+    right: 0;
+    z-index: 10001;
+    background: rgb(17 18 20 / 98%);
+    border: 1px solid rgb(255 255 255 / 10%);
+    border-radius: 8px;
+    box-shadow: 0 8px 24px rgb(0 0 0 / 50%);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    min-width: 140px;
+}
+
+.vc-expanded-reply-copy-menu button {
+    padding: 8px 12px;
+    background: transparent;
+    border: none;
+    color: #fff;
+    font-size: 0.85rem;
+    text-align: left;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.vc-expanded-reply-copy-menu button:hover {
+    background: rgb(255 255 255 / 6%);
 }
 
 .vc-expanded-reply-copy,
@@ -130,17 +165,160 @@
     margin: 4px 0;
 }
 
-.vc-expanded-reply-image,
-.vc-expanded-reply-video {
+.vc-expanded-reply-audio {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 8px;
+    padding: 6px 10px;
+    background: rgb(255 255 255 / 5%);
+    border-radius: 8px;
+}
+
+.vc-expanded-reply-audio-play {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    flex-shrink: 0;
+    border: none;
+    border-radius: 50%;
+    background: var(--brand-500);
+    color: #fff;
+    cursor: pointer;
+    transition: background 0.15s;
+}
+
+.vc-expanded-reply-audio-play:hover {
+    background: var(--brand-560);
+}
+
+.vc-expanded-reply-audio-bar {
+    flex: 1;
+    height: 4px;
+    appearance: none;
+    background: rgb(255 255 255 / 15%);
+    border-radius: 2px;
+    accent-color: var(--brand-500);
+    cursor: pointer;
+}
+
+.vc-expanded-reply-audio-time {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.vc-expanded-reply-image {
     max-width: 100%;
     max-height: 200px;
     border-radius: 8px;
     margin-top: 8px;
     object-fit: contain;
+    cursor: pointer;
+    display: block;
 }
 
-.vc-expanded-reply-image {
+.vc-expanded-reply-video-wrapper {
+    margin-top: 8px;
+    border-radius: 8px;
+    overflow: hidden;
+    background: #000;
+}
+
+.vc-expanded-reply-video {
+    display: block;
+    max-width: 100%;
+    max-height: 180px;
+    object-fit: contain;
     cursor: pointer;
+    width: 100%;
+}
+
+.vc-expanded-reply-video-controls {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 10px;
+    background: rgb(0 0 0 / 80%);
+}
+
+.vc-expanded-reply-video-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    flex-shrink: 0;
+    border: none;
+    border-radius: 50%;
+    background: rgb(255 255 255 / 10%);
+    color: #fff;
+    cursor: pointer;
+    transition: background 0.15s;
+    padding: 0;
+}
+
+.vc-expanded-reply-video-btn:hover {
+    background: rgb(255 255 255 / 22%);
+}
+
+.vc-expanded-reply-video-bar,
+.vc-expanded-reply-video-volume {
+    appearance: none;
+    height: 4px;
+    border-radius: 2px;
+    background: rgb(255 255 255 / 20%);
+    cursor: pointer;
+    outline: none;
+}
+
+.vc-expanded-reply-video-bar {
+    flex: 1;
+}
+
+.vc-expanded-reply-video-volume {
+    width: 60px;
+    flex-shrink: 0;
+}
+
+.vc-expanded-reply-video-bar::-webkit-slider-thumb,
+.vc-expanded-reply-video-volume::-webkit-slider-thumb {
+    appearance: none;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: #fff;
+    cursor: pointer;
+    box-shadow: 0 0 0 2px rgb(0 0 0 / 40%);
+    transition: transform 0.1s;
+}
+
+.vc-expanded-reply-video-bar::-webkit-slider-thumb:hover,
+.vc-expanded-reply-video-volume::-webkit-slider-thumb:hover {
+    transform: scale(1.2);
+}
+
+.vc-expanded-reply-video-bar::-webkit-slider-runnable-track {
+    background: linear-gradient(to right, var(--brand-500) var(--pct, 0%), rgb(255 255 255 / 20%) var(--pct, 0%));
+    border-radius: 2px;
+    height: 4px;
+}
+
+.vc-expanded-reply-video-volume::-webkit-slider-runnable-track {
+    background: rgb(255 255 255 / 20%);
+    border-radius: 2px;
+    height: 4px;
+}
+
+.vc-expanded-reply-video-time {
+    font-size: 0.72rem;
+    font-variant-numeric: tabular-nums;
+    color: rgb(255 255 255 / 75%);
+    white-space: nowrap;
+    flex-shrink: 0;
 }
 
 @keyframes vc-expanded-reply-in {
