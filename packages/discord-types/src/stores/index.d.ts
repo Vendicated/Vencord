@@ -23,6 +23,7 @@ export * from "./MediaEngineStore";
 export * from "./MessageStore";
 export * from "./NotificationSettingsStore";
 export * from "./OverridePremiumTypeStore";
+export * from "./PendingReplyStore";
 export * from "./PermissionStore";
 export * from "./PopoutWindowStore";
 export * from "./PresenceStore";

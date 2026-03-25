@@ -225,6 +225,7 @@ export const DeeplLanguages = {
     "it": "Italian",
     "ja": "Japanese",
     "jv": "Javanese",
+    "ko": "Korean",
     "pam": "Kapampangan",
     "kk": "Kazakh",
     "kmr": "Kurdish (Kurmanji)",

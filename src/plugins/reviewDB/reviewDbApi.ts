@@ -27,12 +27,13 @@ const API_URL = "https://manti.vendicated.dev/api/reviewdb";
 
 export const REVIEWS_PER_PAGE = 50;
 
-export interface Response {
+export interface UserReviewsData {
     message: string;
     reviews: Review[];
     updated: boolean;
     hasNextPage: boolean;
     reviewCount: number;
+    hasOptedOut: boolean;
 }
 
 const WarningFlag = 0b00000010;
@@ -47,24 +48,26 @@ async function rdbRequest(path: string, options: RequestInit = {}) {
     });
 }
 
-export async function getReviews(id: string, offset = 0): Promise<Response> {
+export async function getReviews(id: string, { limit, offset = 0 }: { limit?: number; offset?: number; } = {}): Promise<UserReviewsData> {
     let flags = 0;
     if (!settings.store.showWarning) flags |= WarningFlag;
 
-    const params = new URLSearchParams({
-        flags: String(flags),
-        offset: String(offset)
-    });
+    const params = new URLSearchParams();
+    if (flags) params.append("flags", String(flags));
+    if (offset) params.append("offset", String(offset));
+    if (limit) params.append("limit", String(limit));
+
     const req = await fetch(`${API_URL}/users/${id}/reviews?${params}`);
 
     const res = (req.ok)
-        ? await req.json() as Response
+        ? await req.json() as UserReviewsData
         : {
             message: req.status === 429 ? "You are sending requests too fast. Wait a few seconds and try again." : "An Error occured while fetching reviews. Please try again later.",
             reviews: [],
             updated: false,
             hasNextPage: false,
-            reviewCount: 0
+            reviewCount: 0,
+            hasOptedOut: false,
         };
 
     if (!req.ok) {
@@ -93,7 +96,7 @@ export async function getReviews(id: string, offset = 0): Promise<Response> {
     return res;
 }
 
-export async function addReview(review: any): Promise<Response | null> {
+export async function addReview(review: any): Promise<UserReviewsData | null> {
 
     const token = await getToken();
     if (!token) {
@@ -109,13 +112,13 @@ export async function addReview(review: any): Promise<Response | null> {
             "Content-Type": "application/json",
         }
     }).then(async r => {
-        const data = await r.json() as Response;
+        const data = await r.json() as UserReviewsData;
         showToast(data.message);
         return r.ok ? data : null;
     });
 }
 
-export async function deleteReview(id: number): Promise<Response | null> {
+export async function deleteReview(id: number): Promise<UserReviewsData | null> {
     return await rdbRequest(`/users/${id}/reviews`, {
         method: "DELETE",
         headers: {
@@ -126,7 +129,7 @@ export async function deleteReview(id: number): Promise<Response | null> {
             reviewid: id
         })
     }).then(async r => {
-        const data = await r.json() as Response;
+        const data = await r.json() as UserReviewsData;
         showToast(data.message);
         return r.ok ? data : null;
     });
@@ -142,7 +145,7 @@ export async function reportReview(id: number) {
         body: JSON.stringify({
             reviewid: id,
         })
-    }).then(r => r.json()) as Response;
+    }).then(r => r.json()) as UserReviewsData;
 
     showToast(res.message);
 }

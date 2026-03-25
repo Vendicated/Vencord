@@ -44,12 +44,6 @@ jobs:
               run: |
                   pnpm install --frozen-lockfile
 
-            - name: Install Google Chrome
-              id: setup-chrome
-              uses: browser-actions/setup-chrome@82b9ce628cc5595478a9ebadc480958a36457dc2
-              with:
-                  chrome-version: stable
-
             - name: Build Vencord Reporter Version
               run: pnpm buildReporter
 
@@ -57,7 +51,7 @@ jobs:
               timeout-minutes: 10
               run: |
                   export PATH="$PWD/node_modules/.bin:$PATH"
-                  export CHROMIUM_BIN=${{ steps.setup-chrome.outputs.chrome-path }}
+                  export CHROMIUM_BIN=/usr/bin/google-chrome
 
                   esbuild scripts/generateReport.ts > dist/report.mjs
 

@@ -96,14 +96,6 @@ export default definePlugin({
                 replace: (_, rest) => `${rest}onClick:()=>{}`
             }
         },
-        // Make the Favourites Server experiment allow favouriting DMs and threads
-        {
-            find: "useCanFavoriteChannel",
-            replacement: {
-                match: /\i\.isDM\(\)\|\|\i\.isThread\(\)/,
-                replace: "false",
-            }
-        },
         // Enable experiment embed on sent experiment links
         {
             find: "Clear Treatment ",

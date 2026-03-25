@@ -571,7 +571,7 @@ export function CloudUploadIcon(props: IconProps) {
     );
 }
 
-export const ClockIcon = (props?: any) => {
+export function ClockIcon(props: IconProps) {
     return (
         <Icon
             {...props}
@@ -585,4 +585,32 @@ export const ClockIcon = (props?: any) => {
             />
         </Icon>
     );
-};
+}
+
+export function DownArrow(props: IconProps) {
+    return (
+        <Icon
+            {...props}
+            viewBox="0 0 24 24"
+        >
+            <path
+                fill={props.fill || "currentColor"}
+                d="M5.3 9.3a1 1 0 0 1 1.4 0l5.3 5.29 5.3-5.3a1 1 0 1 1 1.4 1.42l-6 6a1 1 0 0 1-1.4 0l-6-6a1 1 0 0 1 0-1.42Z"
+            />
+        </Icon>
+    );
+}
+
+export function RightArrow(props: IconProps) {
+    return (
+        <Icon
+            {...props}
+            viewBox="0 0 24 24"
+        >
+            <path
+                fill={props.fill || "currentColor"}
+                d="M9.3 5.3a1 1 0 0 0 0 1.4l5.29 5.3-5.3 5.3a1 1 0 1 0 1.42 1.4l6-6a1 1 0 0 0 0-1.4l-6-6a1 1 0 0 0-1.42 0Z"
+            />
+        </Icon>
+    );
+}
