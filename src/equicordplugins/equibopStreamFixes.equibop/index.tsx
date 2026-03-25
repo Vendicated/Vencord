@@ -54,12 +54,6 @@ const settings = definePluginSettings({
         default: true,
         restartNeeded: true,
     },
-    preventLqDowngrade: {
-        type: OptionType.BOOLEAN,
-        description: "Prevent LQ simulcast downgrade during bandwidth dips",
-        default: true,
-        restartNeeded: true,
-    },
     keyframeInterval: {
         type: OptionType.NUMBER,
         description: "Keyframe interval in ms (0 = encoder default, 5000 = every 5s)",
@@ -134,6 +128,7 @@ export default definePlugin({
                 },
             ],
             predicate: () => settings.store.unlockQualityOptions && !isPluginEnabled(fakeNitro.name),
+            noWarn: true,
         },
         // remove guild premium tier restriction from stream fps options
         {
@@ -143,6 +138,7 @@ export default definePlugin({
                 replace: "",
             },
             predicate: () => settings.store.unlockQualityOptions && !isPluginEnabled(fakeNitro.name),
+            noWarn: true,
         },
         // allow resolutions above 720p at 60fps
         {
@@ -168,16 +164,6 @@ export default definePlugin({
                     replace: "keyframeInterval=$self.getKeyframeInterval()",
                 },
             ],
-        },
-
-        // prevent LQ simulcast downgrade during bandwidth dips
-        {
-            find: "Attempting to downgrade to LQ simulcast",
-            replacement: {
-                match: /"LQ"===\i&&!\i&&\i&&\(/,
-                replace: "false&&(",
-            },
-            predicate: () => settings.store.preventLqDowngrade,
         },
         // raise default desktop bitrate caps at the source
         {
