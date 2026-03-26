@@ -9,7 +9,9 @@ import { Link } from "@components/Link";
 import { settings } from "@plugins/decor/settings";
 import { cl, DecorationModalClasses, requireAvatarDecorationModal } from "@plugins/decor/ui";
 import { ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
-import { Button, Forms, Text } from "@webpack/common";
+import { Button } from "@components/Button";
+import { BaseText } from "@components/BaseText";
+import { Paragraph } from "@components/Paragraph";
 
 import { openCreateDecorationModal } from "./CreateDecorationModal";
 
@@ -20,26 +22,26 @@ function GuidelinesModal(props: ModalProps) {
         className={DecorationModalClasses.modal}
     >
         <ModalHeader separator={false} className={cl("modal-header")}>
-            <Text
-                color="text-strong"
-                variant="heading-lg/semibold"
+            <BaseText
+                size="lg"
+                weight="semibold"
                 tag="h1"
-                style={{ flexGrow: 1 }}
+                style={{ flexGrow: 1, color: "var(--text-strong)" }}
             >
                 Hold on
-            </Text>
+            </BaseText>
             <ModalCloseButton onClick={props.onClose} />
         </ModalHeader>
         <ModalContent
             scrollbarType="none"
         >
-            <Forms.FormText>
+            <Paragraph>
                 By submitting a decoration, you agree to <Link
                     href="https://github.com/decor-discord/.github/blob/main/GUIDELINES.md"
                 >
                     the guidelines
                 </Link>. Not reading these guidelines may get your account suspended from creating more decorations in the future.
-            </Forms.FormText>
+            </Paragraph>
         </ModalContent>
         <ModalFooter className={cl("modal-footer")}>
             <Flex gap="4px">
@@ -54,8 +56,7 @@ function GuidelinesModal(props: ModalProps) {
                 </Button>
                 <Button
                     onClick={props.onClose}
-                    color={Button.Colors.PRIMARY}
-                    look={Button.Looks.LINK}
+                    variant="primary"
                 >
                     Go Back
                 </Button>

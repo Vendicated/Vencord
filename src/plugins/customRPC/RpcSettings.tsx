@@ -13,7 +13,8 @@ import { resolveError } from "@components/settings/tabs/plugins/components/Commo
 import { debounce } from "@shared/debounce";
 import { classNameFactory } from "@utils/css";
 import { ActivityType } from "@vencord/discord-types/enums";
-import { Select, Text, TextInput, useState } from "@webpack/common";
+import { BaseText } from "@components/BaseText";
+import { Select, TextInput, useState } from "@webpack/common";
 
 import CustomRPCPlugin, { setRpc, settings, TimestampMode } from ".";
 
@@ -125,7 +126,7 @@ function SingleSetting<T>({ settingsKey, label, disabled, isValid, transform }: 
                 onChange={handleChange}
                 disabled={disabled}
             />
-            {error && <Text className={cl("error")} variant="text-sm/normal">{error}</Text>}
+            {error && <BaseText className={cl("error")} size="sm" weight="normal">{error}</BaseText>}
         </div>
     );
 }

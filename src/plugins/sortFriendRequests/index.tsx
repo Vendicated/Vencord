@@ -25,7 +25,8 @@ import { Devs } from "@utils/constants";
 import { classNameFactory } from "@utils/css";
 import definePlugin, { OptionType } from "@utils/types";
 import { User } from "@vencord/discord-types";
-import { DateUtils, RelationshipStore, Text } from "@webpack/common";
+import { BaseText } from "@components/BaseText";
+import { DateUtils, RelationshipStore } from "@webpack/common";
 import { PropsWithChildren } from "react";
 
 const formatter = new Intl.DateTimeFormat(undefined, {
@@ -83,7 +84,7 @@ export default definePlugin({
             {children}
             {!isNaN(since.getTime()) && (
                 <TooltipContainer text={DateUtils.dateFormat(since, "LLLL")} tooltipClassName={cl("tooltip")}>
-                    <Text variant="text-xs/normal" className={cl("date")}>{formatter.format(since)}</Text>
+                    <BaseText size="xs" weight="normal" className={cl("date")}>{formatter.format(since)}</BaseText>
                 </TooltipContainer>
             )}
         </div>;

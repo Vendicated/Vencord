@@ -31,7 +31,9 @@ import { Margins } from "@utils/margins";
 import { shouldShowContributorBadge } from "@utils/misc";
 import { closeModal, ModalContent, ModalFooter, ModalHeader, ModalRoot, openModal } from "@utils/modal";
 import definePlugin from "@utils/types";
-import { ContextMenuApi, Forms, Menu, Toasts, UserStore } from "@webpack/common";
+import { Heading } from "@components/Heading";
+import { Paragraph } from "@components/Paragraph";
+import { ContextMenuApi, Menu, Toasts, UserStore } from "@webpack/common";
 
 const CONTRIBUTOR_BADGE = "https://cdn.discordapp.com/emojis/1092089799109775453.png?size=64";
 
@@ -195,7 +197,7 @@ export default definePlugin({
                     }}>
                         <ModalRoot {...props}>
                             <ModalHeader>
-                                <Forms.FormTitle
+                                <Heading
                                     tag="h2"
                                     style={{
                                         width: "100%",
@@ -207,7 +209,7 @@ export default definePlugin({
                                         <Heart />
                                         Vencord Donor
                                     </Flex>
-                                </Forms.FormTitle>
+                                </Heading>
                             </ModalHeader>
                             <ModalContent>
                                 <Flex>
@@ -225,12 +227,12 @@ export default definePlugin({
                                     />
                                 </Flex>
                                 <div style={{ padding: "1em" }}>
-                                    <Forms.FormText>
+                                    <Paragraph>
                                         This Badge is a special perk for Vencord Donors
-                                    </Forms.FormText>
-                                    <Forms.FormText className={Margins.top20}>
+                                    </Paragraph>
+                                    <Paragraph className={Margins.top20}>
                                         Please consider supporting the development of Vencord by becoming a donor. It would mean a lot!!
-                                    </Forms.FormText>
+                                    </Paragraph>
                                 </div>
                             </ModalContent>
                             <ModalFooter>

@@ -26,7 +26,8 @@ import { classes } from "@utils/misc";
 import { formatDuration } from "@utils/text";
 import type { Channel } from "@vencord/discord-types";
 import { findByPropsLazy, findComponentByCodeLazy, findCssClassesLazy } from "@webpack";
-import { EmojiStore, FluxDispatcher, GuildMemberStore, GuildStore, Parser, PermissionsBits, PermissionStore, SnowflakeUtils, Text, Timestamp, Tooltip, useEffect, useState } from "@webpack/common";
+import { BaseText } from "@components/BaseText";
+import { EmojiStore, FluxDispatcher, GuildMemberStore, GuildStore, Parser, PermissionsBits, PermissionStore, SnowflakeUtils, Timestamp, Tooltip, useEffect, useState } from "@webpack/common";
 
 import { cl, settings } from "..";
 
@@ -175,7 +176,7 @@ function HiddenChannelLockScreen({ channel }: { channel: ExtendedChannel; }) {
                 <img className={cl("logo")} src={HiddenChannelLogo} />
 
                 <div className={cl("heading-container")}>
-                    <Text variant="heading-xxl/bold">This is a {!PermissionStore.can(PermissionsBits.VIEW_CHANNEL, channel) ? "hidden" : "locked"} {ChannelTypesToChannelNames[type]} channel</Text>
+                    <BaseText size="xxl" weight="bold">This is a {!PermissionStore.can(PermissionsBits.VIEW_CHANNEL, channel) ? "hidden" : "locked"} {ChannelTypesToChannelNames[type]} channel</BaseText>
                     {channel.isNSFW() &&
                         <Tooltip text="NSFW">
                             {({ onMouseLeave, onMouseEnter }) => (
@@ -197,10 +198,10 @@ function HiddenChannelLockScreen({ channel }: { channel: ExtendedChannel; }) {
                 </div>
 
                 {(!channel.isGuildVoice() && !channel.isGuildStageVoice()) && (
-                    <Text variant="text-lg/normal">
+                    <BaseText size="lg" weight="normal">
                         You can not see the {channel.isForumChannel() ? "posts" : "messages"} of this channel.
                         {channel.isForumChannel() && topic && topic.length > 0 && " However you may see its guidelines:"}
-                    </Text >
+                    </BaseText>
                 )}
 
                 {channel.isForumChannel() && topic && topic.length > 0 && (
@@ -210,46 +211,46 @@ function HiddenChannelLockScreen({ channel }: { channel: ExtendedChannel; }) {
                 )}
 
                 {lastMessageId &&
-                    <Text variant="text-md/normal">
+                    <BaseText size="md" weight="normal">
                         Last {channel.isForumChannel() ? "post" : "message"} created:
                         <Timestamp timestamp={new Date(SnowflakeUtils.extractTimestamp(lastMessageId))} />
-                    </Text>
+                    </BaseText>
                 }
                 {lastPinTimestamp &&
-                    <Text variant="text-md/normal">Last message pin: <Timestamp timestamp={new Date(lastPinTimestamp)} /></Text>
+                    <BaseText size="md" weight="normal">Last message pin: <Timestamp timestamp={new Date(lastPinTimestamp)} /></BaseText>
                 }
                 {(rateLimitPerUser ?? 0) > 0 &&
-                    <Text variant="text-md/normal">Slowmode: {formatDuration(rateLimitPerUser!, "seconds")}</Text>
+                    <BaseText size="md" weight="normal">Slowmode: {formatDuration(rateLimitPerUser!, "seconds")}</BaseText>
                 }
                 {(defaultThreadRateLimitPerUser ?? 0) > 0 &&
-                    <Text variant="text-md/normal">
+                    <BaseText size="md" weight="normal">
                         Default thread slowmode: {formatDuration(defaultThreadRateLimitPerUser!, "seconds")}
-                    </Text>
+                    </BaseText>
                 }
                 {((channel.isGuildVoice() || channel.isGuildStageVoice()) && bitrate != null) &&
-                    <Text variant="text-md/normal">Bitrate: {bitrate} bits</Text>
+                    <BaseText size="md" weight="normal">Bitrate: {bitrate} bits</BaseText>
                 }
                 {rtcRegion !== undefined &&
-                    <Text variant="text-md/normal">Region: {rtcRegion ?? "Automatic"}</Text>
+                    <BaseText size="md" weight="normal">Region: {rtcRegion ?? "Automatic"}</BaseText>
                 }
                 {(channel.isGuildVoice() || channel.isGuildStageVoice()) &&
-                    <Text variant="text-md/normal">Video quality mode: {VideoQualityModesToNames[videoQualityMode ?? VideoQualityModes.AUTO]}</Text>
+                    <BaseText size="md" weight="normal">Video quality mode: {VideoQualityModesToNames[videoQualityMode ?? VideoQualityModes.AUTO]}</BaseText>
                 }
                 {(defaultAutoArchiveDuration ?? 0) > 0 &&
-                    <Text variant="text-md/normal">
+                    <BaseText size="md" weight="normal">
                         Default inactivity duration before archiving {channel.isForumChannel() ? "posts" : "threads"}:
                         {" " + formatDuration(defaultAutoArchiveDuration!, "minutes")}
-                    </Text>
+                    </BaseText>
                 }
                 {defaultForumLayout != null &&
-                    <Text variant="text-md/normal">Default layout: {ForumLayoutTypesToNames[defaultForumLayout]}</Text>
+                    <BaseText size="md" weight="normal">Default layout: {ForumLayoutTypesToNames[defaultForumLayout]}</BaseText>
                 }
                 {defaultSortOrder != null &&
-                    <Text variant="text-md/normal">Default sort order: {SortOrderTypesToNames[defaultSortOrder]}</Text>
+                    <BaseText size="md" weight="normal">Default sort order: {SortOrderTypesToNames[defaultSortOrder]}</BaseText>
                 }
                 {defaultReactionEmoji != null &&
                     <div className={cl("default-emoji-container")}>
-                        <Text variant="text-md/normal">Default reaction emoji:</Text>
+                        <BaseText size="md" weight="normal">Default reaction emoji:</BaseText>
                         {Parser.defaultRules[defaultReactionEmoji.emojiName ? "emoji" : "customEmoji"].react({
                             name: defaultReactionEmoji.emojiName
                                 ? EmojiParser.convertSurrogateToName(defaultReactionEmoji.emojiName)
@@ -263,11 +264,11 @@ function HiddenChannelLockScreen({ channel }: { channel: ExtendedChannel; }) {
                     </div>
                 }
                 {channel.hasFlag(ChannelFlags.REQUIRE_TAG) &&
-                    <Text variant="text-md/normal">Posts on this forum require a tag to be set.</Text>
+                    <BaseText size="md" weight="normal">Posts on this forum require a tag to be set.</BaseText>
                 }
                 {availableTags && availableTags.length > 0 &&
                     <div className={cl("tags-container")}>
-                        <Text variant="text-lg/bold">Available tags:</Text>
+                        <BaseText size="lg" weight="bold">Available tags:</BaseText>
                         <div className={cl("tags")}>
                             {availableTags.map(tag => <TagComponent tag={tag} key={tag.id} />)}
                         </div>
@@ -295,7 +296,7 @@ function HiddenChannelLockScreen({ channel }: { channel: ExtendedChannel; }) {
                                 )}
                             </Tooltip>
                         )}
-                        <Text variant="text-lg/bold">Allowed users and roles:</Text>
+                        <BaseText size="lg" weight="bold">Allowed users and roles:</BaseText>
                         <Tooltip text={defaultAllowedUsersAndRolesDropdownState ? "Hide Allowed Users and Roles" : "View Allowed Users and Roles"}>
                             {({ onMouseLeave, onMouseEnter }) => (
                                 <button

@@ -19,9 +19,10 @@
 import "./AddonCard.css";
 
 import { AddonBadge } from "@components/settings/PluginBadge";
+import { BaseText } from "@components/BaseText";
 import { Switch } from "@components/Switch";
 import { classNameFactory } from "@utils/css";
-import { Text, useRef } from "@webpack/common";
+import { useRef } from "@webpack/common";
 import type { MouseEventHandler, ReactNode } from "react";
 
 const cl = classNameFactory("vc-addon-");
@@ -53,7 +54,7 @@ export function AddonCard({ disabled, isNew, name, infoButton, footer, author, e
         >
             <div className={cl("header")}>
                 <div className={cl("name-author")}>
-                    <Text variant="text-md/bold" className={cl("name")}>
+                    <BaseText size="md" weight="bold" className={cl("name")}>
                         <div ref={titleContainerRef} className={cl("title-container")}>
                             <div
                                 ref={titleRef}
@@ -70,12 +71,12 @@ export function AddonCard({ disabled, isNew, name, infoButton, footer, author, e
                             </div>
                         </div>
                         {isNew && <AddonBadge text="NEW" color="#ED4245" />}
-                    </Text>
+                    </BaseText>
 
                     {!!author && (
-                        <Text variant="text-md/normal" className={cl("author")}>
+                        <BaseText size="md" weight="normal" className={cl("author")}>
                             {author}
-                        </Text>
+                        </BaseText>
                     )}
                 </div>
 
@@ -88,7 +89,7 @@ export function AddonCard({ disabled, isNew, name, infoButton, footer, author, e
                 />
             </div>
 
-            <Text className={cl("note")} variant="text-sm/normal">{description}</Text>
+            <BaseText className={cl("note")} size="sm" weight="normal">{description}</BaseText>
 
             {footer}
         </div>

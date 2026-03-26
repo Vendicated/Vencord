@@ -17,24 +17,39 @@
 */
 
 import { Heart } from "@components/Heart";
-import { ButtonProps } from "@vencord/discord-types";
-import { Button } from "@webpack/common";
+import { Button, TextButton } from "@components/Button";
+import { classes } from "@utils/misc";
+import type { ComponentPropsWithRef } from "react";
 
 export default function DonateButton({
-    look = Button.Looks.LINK,
-    color = Button.Colors.TRANSPARENT,
+    className,
+    style,
+    filled = false,
     ...props
-}: Partial<ButtonProps>) {
-    return (
-        <Button
-            {...props}
-            look={look}
-            color={color}
-            onClick={() => VencordNative.native.openExternal("https://github.com/sponsors/Vendicated")}
-            className="vc-donate-button"
-        >
-            <Heart />
-            Donate
-        </Button>
-    );
+}: ComponentPropsWithRef<"button"> & { filled?: boolean; }) {
+    return filled
+        ? (
+            <Button
+                {...props}
+                variant="overlayPrimary"
+                onClick={() => VencordNative.native.openExternal("https://github.com/sponsors/Vendicated")}
+                className={classes("vc-donate-button", className)}
+                style={{ gap: "4px", ...style }}
+            >
+                <Heart />
+                Donate
+            </Button>
+        )
+        : (
+            <TextButton
+                {...props}
+                variant="secondary"
+                onClick={() => VencordNative.native.openExternal("https://github.com/sponsors/Vendicated")}
+                className={classes("vc-donate-button", className)}
+                style={{ gap: "4px", ...style }}
+            >
+                <Heart />
+                Donate
+            </TextButton>
+        );
 }

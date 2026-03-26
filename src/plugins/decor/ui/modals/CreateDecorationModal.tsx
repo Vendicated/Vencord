@@ -14,7 +14,11 @@ import { openInviteModal } from "@utils/discord";
 import { Margins } from "@utils/margins";
 import { closeAllModals, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
 import { filters, findComponentByCodeLazy, mapMangledModuleLazy } from "@webpack";
-import { Button, FluxDispatcher, Forms, GuildStore, NavigationRouter, Text, TextInput, useEffect, useMemo, UserStore, useState } from "@webpack/common";
+import { Button } from "@components/Button";
+import { BaseText } from "@components/BaseText";
+import { Heading } from "@components/Heading";
+import { Paragraph } from "@components/Paragraph";
+import { FluxDispatcher, GuildStore, NavigationRouter, TextInput, useEffect, useMemo, UserStore, useState } from "@webpack/common";
 
 const FileUpload = findComponentByCodeLazy(".currentTarget.files", "lineClamp:1");
 
@@ -63,14 +67,14 @@ function CreateDecorationModal(props: ModalProps) {
         className={DecorationModalClasses.modal}
     >
         <ModalHeader separator={false} className={cl("modal-header")}>
-            <Text
-                color="text-strong"
-                variant="heading-lg/semibold"
+            <BaseText
+                size="lg"
+                weight="semibold"
                 tag="h1"
-                style={{ flexGrow: 1 }}
+                style={{ flexGrow: 1, color: "var(--text-strong)" }}
             >
                 Create Decoration
-            </Text>
+            </BaseText>
             <ModalCloseButton onClick={props.onClose} />
         </ModalHeader>
         <ModalContent
@@ -87,9 +91,9 @@ function CreateDecorationModal(props: ModalProps) {
                 </HelpMessage>
                 <div className={cl("create-decoration-modal-form-preview-container")}>
                     <div className={cl("create-decoration-modal-form")}>
-                        {error !== null && <Text color="text-danger" variant="text-xs/normal">{error.message}</Text>}
+                        {error !== null && <BaseText size="xs" weight="normal" style={{ color: "var(--text-danger)" }}>{error.message}</BaseText>}
                         <section>
-                            <Forms.FormTitle tag="h5">File</Forms.FormTitle>
+                            <Heading tag="h5">File</Heading>
                             <FileUpload
                                 filename={file?.name}
                                 placeholder="Choose a file"
@@ -97,20 +101,20 @@ function CreateDecorationModal(props: ModalProps) {
                                 filters={[{ name: "Decoration file", extensions: ["png", "apng"] }]}
                                 onFileSelect={setFile}
                             />
-                            <Forms.FormText className={Margins.top8}>
+                            <Paragraph className={Margins.top8}>
                                 File should be APNG or PNG.
-                            </Forms.FormText>
+                            </Paragraph>
                         </section>
                         <section>
-                            <Forms.FormTitle tag="h5">Name</Forms.FormTitle>
+                            <Heading tag="h5">Name</Heading>
                             <TextInput
                                 placeholder="Companion Cube"
                                 value={name}
                                 onChange={setName}
                             />
-                            <Forms.FormText className={Margins.top8}>
+                            <Paragraph className={Margins.top8}>
                                 This name will be used when referring to this decoration.
-                            </Forms.FormText>
+                            </Paragraph>
                         </section>
                     </div>
                     <div>
@@ -147,7 +151,7 @@ function CreateDecorationModal(props: ModalProps) {
             <div className={cl("modal-footer-btn-container")}>
                 <Button
                     onClick={props.onClose}
-                    color={Button.Colors.PRIMARY}
+                    variant="secondary"
                 >
                     Cancel
                 </Button>

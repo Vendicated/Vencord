@@ -15,7 +15,9 @@ import { fetchUserProfile } from "@utils/discord";
 import { classes, pluralise } from "@utils/misc";
 import { ModalContent, ModalRoot, openModal } from "@utils/modal";
 import { User } from "@vencord/discord-types";
-import { Forms, showToast, useEffect, useMemo, UserProfileStore, useStateFromStores } from "@webpack/common";
+import { Heading } from "@components/Heading";
+import { Paragraph } from "@components/Paragraph";
+import { showToast, useEffect, useMemo, UserProfileStore, useStateFromStores } from "@webpack/common";
 
 import Plugins from "~plugins";
 
@@ -70,7 +72,7 @@ function ContributorModal({ user }: { user: User; }) {
                     src={user.getAvatarURL(void 0, 512, true)}
                     alt=""
                 />
-                <Forms.FormTitle tag="h2" className={cl("name")}>{user.username}</Forms.FormTitle>
+                <Heading tag="h2" className={cl("name")}>{user.username}</Heading>
 
                 <div className={classes("vc-settings-modal-links", cl("links"))}>
                     {website && (
@@ -89,13 +91,13 @@ function ContributorModal({ user }: { user: User; }) {
             </div>
 
             {plugins.length ? (
-                <Forms.FormText>
+                <Paragraph>
                     This person has {ContributedHyperLink} to {pluralise(plugins.length, "plugin")}!
-                </Forms.FormText>
+                </Paragraph>
             ) : (
-                <Forms.FormText>
+                <Paragraph>
                     This person has not made any plugins. They likely {ContributedHyperLink} to Vencord in other ways!
-                </Forms.FormText>
+                </Paragraph>
             )}
 
             {!!plugins.length && (

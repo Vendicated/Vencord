@@ -8,14 +8,15 @@ import { useSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Margins } from "@utils/margins";
 import { identity } from "@utils/misc";
-import { Forms, Select } from "@webpack/common";
+import { Heading } from "@components/Heading";
+import { Select } from "@webpack/common";
 
 export function VibrancySettings() {
     const settings = useSettings(["macosVibrancyStyle"]);
 
     return (
         <>
-            <Forms.FormTitle tag="h5">Window vibrancy style (requires restart)</Forms.FormTitle>
+            <Heading tag="h5">Window vibrancy style (requires restart)</Heading>
             <ErrorBoundary noop>
                 <Select
                     className={Margins.bottom20}

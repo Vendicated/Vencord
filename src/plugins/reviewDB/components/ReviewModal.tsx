@@ -23,7 +23,8 @@ import { REVIEWS_PER_PAGE, UserReviewsData } from "@plugins/reviewDB/reviewDbApi
 import { cl } from "@plugins/reviewDB/utils";
 import { ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalRoot, ModalSize, openModal } from "@utils/modal";
 import { useForceUpdater } from "@utils/react";
-import { Paginator, Text, useRef, useState } from "@webpack/common";
+import { BaseText } from "@components/BaseText";
+import { Paginator, useRef, useState } from "@webpack/common";
 
 import ReviewComponent from "./ReviewComponent";
 import ReviewsView, { ReviewsInputComponent } from "./ReviewsView";
@@ -42,10 +43,10 @@ function Modal({ modalProps, modalKey, discordId, name, type }: { modalProps: an
         <ErrorBoundary>
             <ModalRoot {...modalProps} size={ModalSize.MEDIUM}>
                 <ModalHeader>
-                    <Text variant="heading-lg/semibold" className={cl("modal-header")}>
+                    <BaseText size="lg" weight="semibold" className={cl("modal-header")}>
                         {name}'s Reviews
                         {!!reviewCount && <span> ({reviewCount} Reviews)</span>}
-                    </Text>
+                    </BaseText>
                     <ModalCloseButton onClick={modalProps.onClose} />
                 </ModalHeader>
 

@@ -16,6 +16,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { BaseText } from "@components/BaseText";
+import { Button } from "@components/Button";
 import { addMessageAccessory, removeMessageAccessory } from "@api/MessageAccessories";
 import { updateMessage } from "@api/MessageUpdater";
 import { definePluginSettings } from "@api/Settings";
@@ -26,20 +28,7 @@ import { Queue } from "@utils/Queue";
 import definePlugin, { OptionType } from "@utils/types";
 import { Channel, Message } from "@vencord/discord-types";
 import { findComponentByCodeLazy, findComponentLazy, findCssClassesLazy } from "@webpack";
-import {
-    Button,
-    ChannelStore,
-    Constants,
-    GuildStore,
-    IconUtils,
-    MessageStore,
-    Parser,
-    PermissionsBits,
-    PermissionStore,
-    RestAPI,
-    Text,
-    UserStore
-} from "@webpack/common";
+import { ChannelStore, Constants, GuildStore, IconUtils, MessageStore, Parser, PermissionsBits, PermissionStore, RestAPI, UserStore } from "@webpack/common";
 import { JSX } from "react";
 
 const messageCache = new Map<string, {
@@ -297,10 +286,10 @@ function ChannelMessageEmbedAccessory({ message, channel }: MessageEmbedProps): 
                 rawDescription: "",
                 color: "var(--background-base-lower)",
                 author: {
-                    name: <Text variant="text-xs/medium" tag="span">
+                    name: <BaseText size="xs" weight="medium" tag="span">
                         <span>{channelLabel} - </span>
                         {Parser.parse(channel.isDM() ? `<@${dmReceiver.id}>` : `<#${channel.id}>`)}
-                    </Text>,
+                    </BaseText>,
                     iconProxyURL: iconUrl
                 }
             }}
@@ -330,7 +319,7 @@ function AutomodEmbedAccessory(props: MessageEmbedProps): JSX.Element | null {
     return <AutoModEmbed
         channel={channel}
         childrenAccessories={
-            <Text color="text-muted" variant="text-xs/medium" tag="span" className={`${EmbedClasses.embedAuthor} ${EmbedClasses.embedMargin}`}>
+            <BaseText size="xs" weight="medium" tag="span" className={`${EmbedClasses.embedAuthor} ${EmbedClasses.embedMargin}`} style={{ color: "var(--text-muted)" }}>
                 {iconUrl && <img src={iconUrl} className={EmbedClasses.embedAuthorIcon} alt="" />}
                 <span>
                     <span>{channelLabel} - </span>
@@ -339,7 +328,7 @@ function AutomodEmbedAccessory(props: MessageEmbedProps): JSX.Element | null {
                         : Parser.parse(`<#${channel.id}>`)
                     }
                 </span>
-            </Text>
+            </BaseText>
         }
         compact={compact}
         content={
