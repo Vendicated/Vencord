@@ -123,7 +123,7 @@ export default definePlugin({
         const newFilename = (() => {
             switch (settings.store.method) {
                 case Methods.Random:
-                    const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+                    const chars = "0123456789bdfhjkmnpqrstvwxz";
                     return Array.from(
                         { length: settings.store.randomisedLength },
                         () => chars[Math.floor(Math.random() * chars.length)]
