@@ -59,7 +59,7 @@ function ProfileCollections({ props }: { props: any; }) {
     return Array.from(profileCollections)
         .map(([id, { render: Collection }]) => (
             <ErrorBoundary noop key={id} onError={e => logger.error(`Failed to render profile collection: ${id}`, e.error)}>
-                {Collection({ ...props, user: props.user ?? props.currentUser })}
+                <Collection {...props} user={props.user ?? props.currentUser} />
             </ErrorBoundary>
         ));
 }
