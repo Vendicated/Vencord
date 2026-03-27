@@ -1,7 +1,7 @@
 {
     "name": "vencord",
     "private": "true",
-    "version": "1.14.4",
+    "version": "1.14.6",
     "description": "The cutest Discord client mod",
     "homepage": "https://github.com/Vendicated/Vencord#readme",
     "bugs": {
@@ -65,6 +65,7 @@
         "highlight.js": "11.11.1",
         "html-minifier-terser": "^7.2.0",
         "moment": "^2.22.2",
+        "p-limit": "^7.3.0",
         "puppeteer-core": "^24.30.0",
         "standalone-electron-types": "^34.2.0",
         "stylelint": "^16.25.0",
