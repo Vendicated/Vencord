@@ -6,10 +6,12 @@
 
 import { definePluginSettings } from "@api/Settings";
 import { disableStyle, enableStyle } from "@api/Styles";
+import { ButtonCompat } from "@components/Button";
 import { HeadingSecondary } from "@components/Heading";
 import { Paragraph } from "@components/Paragraph";
+import { SettingsSection } from "@components/settings/tabs/plugins/components/Common";
 import { makeRange, OptionType } from "@utils/types";
-import { Button, MaskedLink, showToast, Toasts } from "@webpack/common";
+import { MaskedLink, Select, showToast, TextInput, Toasts } from "@webpack/common";
 
 import hoverOnlyStyle from "./hoverOnly.css?managed";
 import { clearLyricsCache, removeTranslations } from "./spotify/lyrics/api";
@@ -33,6 +35,46 @@ function InstallInstructions() {
                 Install <MaskedLink href="https://github.com/Inrixia/TidaLuna#installation">TidaLuna</MaskedLink> from here, then go to TidalLuna settings &rarr; Plugin stores &rarr; Install <code>@vmohammad/api</code>
             </Paragraph>
         </section>
+    );
+}
+
+function LyricsProviderSettings() {
+    const { store } = settings;
+
+    return (
+        <>
+            <SettingsSection name="Lyrics Provider" description="Where lyrics are fetched from.">
+                <Select
+                    options={[
+                        { value: Provider.Lrclib, label: "LRCLIB", default: true },
+                        { value: Provider.Spotify, label: "Spotify (Musixmatch)" },
+                    ]}
+                    isSelected={v => v === store.lyricsProvider}
+                    select={v => { store.lyricsProvider = v as Provider; }}
+                    serialize={v => v}
+                    placeholder="Select a lyrics provider"
+                />
+            </SettingsSection>
+
+            {store.lyricsProvider === Provider.Spotify && (
+                <SettingsSection
+                    name="Spotify Lyrics API Base URL"
+                    description="Custom instance base URL (for example: http://localhost:8080)."
+                >
+                    <TextInput
+                        type="text"
+                        value={store.spotifyLyricsApiUrl}
+                        onChange={v => {
+                            store.spotifyLyricsApiUrl = v;
+                            void clearLyricsCache();
+                            showToast("Lyrics cache purged", Toasts.Type.SUCCESS);
+                        }}
+                        placeholder="https://spotify-lyrics-api-pi.vercel.app"
+                        maxLength={null}
+                    />
+                </SettingsSection>
+            )}
+        </>
     );
 }
 
@@ -60,9 +102,24 @@ export const settings = definePluginSettings({
         description: "Where lyrics are fetched from",
         type: OptionType.SELECT,
         options: [
-            { value: Provider.Spotify, label: "Spotify (Musixmatch)", default: true },
-            { value: Provider.Lrclib, label: "LRCLIB" },
+            { value: Provider.Lrclib, label: "LRCLIB", default: true },
+            { value: Provider.Spotify, label: "Spotify (Musixmatch)" },
         ],
+        hidden: true,
+    },
+    spotifyLyricsApiUrl: {
+        type: OptionType.STRING,
+        description: "Spotify lyrics API base URL.",
+        hidden: true,
+        default: "https://spotify-lyrics-api-pi.vercel.app",
+        onChange: async () => {
+            await clearLyricsCache();
+            showToast("Lyrics cache purged", Toasts.Type.SUCCESS);
+        }
+    },
+    lyricsProviderSettings: {
+        type: OptionType.COMPONENT,
+        component: LyricsProviderSettings,
     },
     translateTo: {
         description: "Translate lyrics to - Changing this will clear existing translations",
@@ -102,15 +159,15 @@ export const settings = definePluginSettings({
         description: "Purge the lyrics cache",
         type: OptionType.COMPONENT,
         component: () => (
-            <Button
-                color={Button.Colors.RED}
+            <ButtonCompat
+                color={ButtonCompat.Colors.RED}
                 onClick={() => {
                     clearLyricsCache();
                     showToast("Lyrics cache purged", Toasts.Type.SUCCESS);
                 }}
             >
                 Purge Cache
-            </Button>
+            </ButtonCompat>
         ),
     },
     spotifySectionTitle: {
