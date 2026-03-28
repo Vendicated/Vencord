@@ -29,7 +29,7 @@ import { Logger } from "@utils/Logger";
 import { classes } from "@utils/misc";
 import definePlugin, { OptionType } from "@utils/types";
 import { Message } from "@vencord/discord-types";
-import { findByPropsLazy } from "@webpack";
+import { findCssClassesLazy } from "@webpack";
 import { ChannelStore, FluxDispatcher, Menu, MessageStore, Parser, SelectedChannelStore, Timestamp, UserStore, useStateFromStores } from "@webpack/common";
 
 import overlayStyle from "./deleteStyleOverlay.css?managed";
@@ -42,7 +42,7 @@ interface MLMessage extends Message {
     firstEditTimestamp?: Date;
 }
 
-const styles = findByPropsLazy("edited", "communicationDisabled", "isSystemMessage");
+const MessageClasses = findCssClassesLazy("edited", "communicationDisabled", "isSystemMessage");
 
 function addDeleteStyle() {
     if (Settings.plugins.MessageLogger.deleteStyle === "text") {
@@ -177,7 +177,7 @@ export default definePlugin({
                             isEdited={true}
                             isInline={false}
                         >
-                            <span className={styles.edited}>{" "}({getIntlMessage("MESSAGE_EDITED")})</span>
+                            <span className={MessageClasses.edited}>{" "}({getIntlMessage("MESSAGE_EDITED")})</span>
                         </Timestamp>
                     </div>
                 ))}
@@ -237,17 +237,20 @@ export default definePlugin({
         ignoreUsers: {
             type: OptionType.STRING,
             description: "Comma-separated list of user IDs to ignore",
-            default: ""
+            default: "",
+            multiline: true
         },
         ignoreChannels: {
             type: OptionType.STRING,
             description: "Comma-separated list of channel IDs to ignore",
-            default: ""
+            default: "",
+            multiline: true
         },
         ignoreGuilds: {
             type: OptionType.STRING,
             description: "Comma-separated list of guild IDs to ignore",
-            default: ""
+            default: "",
+            multiline: true
         },
     },
 
@@ -285,18 +288,22 @@ export default definePlugin({
     },
 
     shouldIgnore(message: any, isEdit = false) {
-        const { ignoreBots, ignoreSelf, ignoreUsers, ignoreChannels, ignoreGuilds, logEdits, logDeletes } = Settings.plugins.MessageLogger;
-        const myId = UserStore.getCurrentUser().id;
+        try {
+            const { ignoreBots, ignoreSelf, ignoreUsers, ignoreChannels, ignoreGuilds, logEdits, logDeletes } = Settings.plugins.MessageLogger;
+            const myId = UserStore.getCurrentUser().id;
 
-        return ignoreBots && message.author?.bot ||
-            ignoreSelf && message.author?.id === myId ||
-            ignoreUsers.includes(message.author?.id) ||
-            ignoreChannels.includes(message.channel_id) ||
-            ignoreChannels.includes(ChannelStore.getChannel(message.channel_id)?.parent_id) ||
-            (isEdit ? !logEdits : !logDeletes) ||
-            ignoreGuilds.includes(ChannelStore.getChannel(message.channel_id)?.guild_id) ||
-            // Ignore Venbot in the support channels
-            (message.author?.id === VENBOT_USER_ID && ChannelStore.getChannel(message.channel_id)?.parent_id === SUPPORT_CATEGORY_ID);
+            return ignoreBots && message.author?.bot ||
+                ignoreSelf && message.author?.id === myId ||
+                ignoreUsers.includes(message.author?.id) ||
+                ignoreChannels.includes(message.channel_id) ||
+                ignoreChannels.includes(ChannelStore.getChannel(message.channel_id)?.parent_id) ||
+                (isEdit ? !logEdits : !logDeletes) ||
+                ignoreGuilds.includes(ChannelStore.getChannel(message.channel_id)?.guild_id) ||
+                // Ignore Venbot in the support channels
+                (message.author?.id === VENBOT_USER_ID && ChannelStore.getChannel(message.channel_id)?.parent_id === SUPPORT_CATEGORY_ID);
+        } catch (e) {
+            return false;
+        }
     },
 
     EditMarker({ message, className, children, ...props }: any) {
@@ -401,7 +408,7 @@ export default definePlugin({
 
         {
             // Updated message transformer(?)
-            find: "THREAD_STARTER_MESSAGE?null==",
+            find: ".PREMIUM_REFERRAL&&(",
             replacement: [
                 {
                     // Pass through editHistory & deleted & original attachments to the "edited message" transformer
@@ -441,11 +448,11 @@ export default definePlugin({
 
         {
             // Attachment renderer
-            find: ".removeMosaicItemHoverButton",
+            find: "#{intl::REMOVE_ATTACHMENT_TOOLTIP_TEXT}",
             replacement: [
                 {
-                    match: /\[\i\.obscured\]:.+?,(?<=item:(\i).+?)/,
-                    replace: '$&"messagelogger-deleted-attachment":$1.originalItem?.deleted,'
+                    match: /\.SPOILER,(?=\[\i\.\i\]:)/,
+                    replace: '$&"messagelogger-deleted-attachment":arguments[0]?.item?.originalItem?.deleted,'
                 }
             ]
         },
@@ -467,7 +474,7 @@ export default definePlugin({
             find: ".SEND_FAILED,",
             replacement: {
                 // Render editHistory behind the message content
-                match: /\.isFailed]:.+?children:\[/,
+                match: /\]:\i.isUnsupported.{0,20}?,children:\[/,
                 replace: "$&arguments[0]?.message?.editHistory?.length>0&&$self.renderEdits(arguments[0]),"
             }
         },
@@ -476,8 +483,8 @@ export default definePlugin({
             find: "#{intl::MESSAGE_EDITED}",
             replacement: {
                 // Make edit marker clickable
-                match: /"span",\{(?=className:\i\.edited,)/,
-                replace: "$self.EditMarker,{message:arguments[0].message,"
+                match: /(isInline:!1,children:.{0,50}?)"span",\{(?=className:)/,
+                replace: "$1$self.EditMarker,{message:arguments[0].message,"
             }
         },
 

@@ -2,7 +2,7 @@ import { CommandOption } from './Commands';
 import { User, UserJSON } from '../User';
 import { Embed, EmbedJSON } from './Embed';
 import { DiscordRecord } from "../Record";
-import { MessageFlags, MessageType, StickerFormatType } from "../../../enums";
+import { ApplicationIntegrationType, MessageFlags, MessageType, StickerFormatType } from "../../../enums";
 
 /*
  * TODO: looks like discord has moved over to Date instead of Moment;
@@ -71,6 +71,19 @@ export class Message extends DiscordRecord {
         type: number;
         version: string;
     }[];
+    interactionMetadata?: {
+        id: string;
+        type: number;
+        name?: string;
+        command_type?: number;
+        ephemerality_reason?: number;
+        user: User;
+        authorizing_integration_owners: Record<ApplicationIntegrationType, string>;
+        original_response_message_id?: string;
+        interacted_message_id?: string;
+        target_user?: User;
+        target_message_id?: string;
+    };
     interactionError: unknown[];
     isSearchHit: boolean;
     loggingName: unknown;

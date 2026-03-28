@@ -18,11 +18,12 @@
 
 import { ILanguageRegistration } from "@vap/shiki";
 
-export const VPC_REPO = "Vap0r1ze/vapcord";
-export const VPC_REPO_COMMIT = "4d0e4b420fb1e4358852bbd18c804a6f5e54c0d7";
-export const vpcRepoAssets = `https://raw.githubusercontent.com/${VPC_REPO}/${VPC_REPO_COMMIT}/assets/shiki-codeblocks`;
-export const vpcRepoGrammar = (fileName: string) => `${vpcRepoAssets}/${fileName}`;
-export const vpcRepoLanguages = `${vpcRepoAssets}/languages.json`;
+import { SHIKI_REPO, SHIKI_REPO_COMMIT } from "./themes";
+
+export const JSON_REPO = "Vencord/ShikiPluginAssets";
+export const JSON_REPO_COMMIT = "75d69df9fdf596a31eef8b7f6f891231a6feab44";
+export const JSON_URL = `https://cdn.jsdelivr.net/gh/${JSON_REPO}@${JSON_REPO_COMMIT}/grammars.json`;
+export const shikiRepoGrammar = (name: string) => `https://cdn.jsdelivr.net/gh/${SHIKI_REPO}@${SHIKI_REPO_COMMIT}/packages/tm-grammars/grammars/${name}.json`;
 
 export interface Language {
     name: string;
@@ -36,22 +37,26 @@ export interface Language {
 }
 export interface LanguageJson {
     name: string;
-    id: string;
-    fileName: string;
-    devicon?: string;
+    displayName: string;
     scopeName: string;
+    devicon?: string;
     aliases?: string[];
 }
 
 export const languages: Record<string, Language> = {};
 
 export const loadLanguages = async () => {
-    const langsJson: LanguageJson[] = await fetch(vpcRepoLanguages).then(res => res.ok ? res.json() : []);
+    const langsJson: LanguageJson[] = await fetch(JSON_URL).then(res => res.ok ? res.json() : []);
     const loadedLanguages = Object.fromEntries(
-        langsJson.map(lang => [lang.id, {
-            ...lang,
-            grammarUrl: vpcRepoGrammar(lang.fileName),
-        }])
+        langsJson.map(lang => {
+            const { name, displayName, ...rest } = lang;
+            return [name, {
+                ...rest,
+                id: name,
+                name: displayName,
+                grammarUrl: shikiRepoGrammar(name),
+            }];
+        })
     );
     Object.assign(languages, loadedLanguages);
 };

@@ -9,6 +9,7 @@ import { canonicalizeMatch } from "@utils/patches";
 import { ModuleFactory } from "@vencord/discord-types/webpack";
 import * as Webpack from "@webpack";
 import { wreq } from "@webpack";
+import pLimit from "p-limit";
 import { AnyModuleFactory } from "webpack";
 
 function getWebpackChunkMap() {
@@ -31,6 +32,7 @@ function getWebpackChunkMap() {
 
 export async function loadLazyChunks() {
     const LazyChunkLoaderLogger = new Logger("LazyChunkLoader");
+    const queue = pLimit(50);
 
     try {
         LazyChunkLoaderLogger.log("Loading all chunks...");
@@ -44,10 +46,9 @@ export async function loadLazyChunks() {
         // True if resolved, false otherwise
         const chunksSearchPromises = [] as Array<() => boolean>;
 
-        /* This regex loads all language packs which makes webpack finds testing extremely slow, so for now, lets use one which doesnt include those
-        const LazyChunkRegex = canonicalizeMatch(/(?:(?:Promise\.all\(\[)?(\i\.e\("?[^)]+?"?\)[^\]]*?)(?:\]\))?)\.then\(\i(?:\.\i)?\.bind\(\i,"?([^)]+?)"?(?:,[^)]+?)?\)\)/g);
-        */
-        const LazyChunkRegex = canonicalizeMatch(/(?:(?:Promise\.all\(\[)?(\i\.e\("?[^)]+?"?\)[^\]]*?)(?:\]\))?)\.then\(\i\.bind\(\i,"?([^)]+?)"?\)\)/g);
+        // This regex loads all language packs which makes webpack finds testing extremely slow, so for now, we prioritize using the one which doesnt include those
+        const CompleteLazyChunkRegex = canonicalizeMatch(/(?:(?:Promise\.all\(\[)?((?:\i\.e\("?[^)]+?"?\),?)+?)(?:\]\))?)\.then\(\i(?:\.\i)?\.bind\(\i,"?([^)]+?)"?(?:,[^)]+?)?\)\)/g);
+        const PartialLazyChunkRegex = canonicalizeMatch(/(?:(?:Promise\.all\(\[)?((?:\i\.e\("?[^)]+?"?\),?)+?)(?:\]\))?)\.then\(\i\.bind\(\i,"?([^)]+?)"?\)\)/g);
 
         let foundCssDebuggingLoad = false;
 
@@ -55,16 +56,20 @@ export async function loadLazyChunks() {
             // Workaround to avoid loading the CSS debugging chunk which turns the app pink
             const hasCssDebuggingLoad = foundCssDebuggingLoad ? false : (foundCssDebuggingLoad = factoryCode.includes(".cssDebuggingEnabled&&"));
 
-            const lazyChunks = factoryCode.matchAll(LazyChunkRegex);
+            const lazyChunks = factoryCode.matchAll(hasCssDebuggingLoad ? CompleteLazyChunkRegex : PartialLazyChunkRegex);
             const validChunkGroups = new Set<[chunkIds: PropertyKey[], entryPoint: PropertyKey]>();
 
             const shouldForceDefer = false;
 
             await Promise.all(Array.from(lazyChunks).map(async ([, rawChunkIds, entryPoint]) => {
-                const chunkIds = rawChunkIds ? Array.from(rawChunkIds.matchAll(Webpack.ChunkIdsRegex)).map(m => {
-                    const numChunkId = Number(m[1]);
-                    return Number.isNaN(numChunkId) ? m[1] : numChunkId;
-                }) : [];
+                const chunkIds = rawChunkIds
+                    ?.matchAll(Webpack.ChunkIdsRegex)
+                    .map(m => {
+                        const numChunkId = Number(m[1]);
+                        return Number.isNaN(numChunkId) ? m[1] : numChunkId;
+                    })
+                    .toArray()
+                    ?? [];
 
                 if (chunkIds.length === 0) {
                     return;
@@ -85,9 +90,11 @@ export async function loadLazyChunks() {
 
                     if (wreq.u(id) == null || wreq.u(id) === "undefined.js") continue;
 
-                    const isWorkerAsset = await fetch(wreq.p + wreq.u(id))
-                        .then(r => r.text())
-                        .then(t => /importScripts\(|self\.postMessage/.test(t));
+                    const isWorkerAsset = await queue(() =>
+                        fetch(wreq.p + wreq.u(id))
+                            .then(r => r.text())
+                            .then(t => /importScripts\(|self\.postMessage/.test(t))
+                    );
 
                     if (isWorkerAsset) {
                         invalidChunks.add(id);
@@ -183,7 +190,7 @@ export async function loadLazyChunks() {
             return !(validChunks.has(id) || invalidChunks.has(id));
         });
 
-        await Promise.all(chunksLeft.map(async id => {
+        await Promise.all(chunksLeft.map(async id => queue(async () => {
             const isWorkerAsset = await fetch(wreq.p + wreq.u(id))
                 .then(r => r.text())
                 .then(t => /importScripts\(|self\.postMessage/.test(t));
@@ -192,7 +199,7 @@ export async function loadLazyChunks() {
             if (!isWorkerAsset) {
                 await wreq.e(id);
             }
-        }));
+        })));
 
         LazyChunkLoaderLogger.log("Finished loading all chunks!");
     } catch (e) {

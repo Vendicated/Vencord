@@ -16,12 +16,11 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { SessionInfo } from "@plugins/betterSessions/types";
+import { getDefaultName, savedSessionsCache, saveSessionsToDataStore } from "@plugins/betterSessions/utils";
 import { ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot } from "@utils/modal";
 import { Button, Forms, React, TextInput } from "@webpack/common";
 import { KeyboardEvent } from "react";
-
-import { SessionInfo } from "../types";
-import { getDefaultName, savedSessionsCache, saveSessionsToDataStore } from "../utils";
 
 export function RenameModal({ props, session, state }: { props: ModalProps, session: SessionInfo["session"], state: [string, React.Dispatch<React.SetStateAction<string>>]; }) {
     const [title, setTitle] = state;
@@ -75,19 +74,20 @@ export function RenameModal({ props, session, state }: { props: ModalProps, sess
             </ModalContent>
 
             <ModalFooter>
-                <Button
-                    color={Button.Colors.BRAND}
-                    onClick={onSaveClick}
-                >
-                    Save
-                </Button>
-                <Button
-                    color={Button.Colors.TRANSPARENT}
-                    look={Button.Looks.LINK}
-                    onClick={() => props.onClose()}
-                >
-                    Cancel
-                </Button>
+                <div className="vc-betterSessions-footer-buttons">
+                    <Button
+                        color={Button.Colors.PRIMARY}
+                        onClick={() => props.onClose()}
+                    >
+                        Cancel
+                    </Button>
+                    <Button
+                        color={Button.Colors.BRAND}
+                        onClick={onSaveClick}
+                    >
+                        Save
+                    </Button>
+                </div>
             </ModalFooter>
         </ModalRoot >
     );
