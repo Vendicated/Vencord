@@ -18,14 +18,14 @@
 
 import { AudioProcessor } from "@api/AudioPlayer";
 import type { ProfileBadge } from "@api/Badges";
-import type { ChatBarButtonData, ChatBarButtonFactory } from "@api/ChatButtons";
+import type { ChatBarButtonData } from "@api/ChatButtons";
 import type { NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { HeaderBarButtonData } from "@api/HeaderBar";
 import type { MemberListDecoratorFactory } from "@api/MemberListDecorators";
 import type { MessageAccessoryFactory } from "@api/MessageAccessories";
 import type { MessageDecorationFactory } from "@api/MessageDecorations";
 import type { MessageClickListener, MessageEditListener, MessageSendListener } from "@api/MessageEvents";
-import type { MessagePopoverButtonData, MessagePopoverButtonFactory } from "@api/MessagePopover";
+import type { MessagePopoverButtonData } from "@api/MessagePopover";
 import type { NicknameIconFactory } from "@api/NicknameIcons";
 import { ProfileCollectionFactory } from "@api/ProfileCollections";
 import type { UserAreaButtonData } from "@api/UserArea";
@@ -210,16 +210,6 @@ export interface PluginDef {
     audioProcessor?: AudioProcessor;
     userAreaButton?: UserAreaButtonData;
     renderProfileCollection?: ProfileCollectionFactory;
-
-    // TODO: Remove eventually
-    /**
-     * @deprecated Use {@link chatBarButton} instead
-     */
-    renderChatBarButton?: ChatBarButtonFactory;
-    /**
-     * @deprecated Use {@link messagePopoverButton} instead
-     */
-    renderMessagePopoverButton?: MessagePopoverButtonFactory;
 
     /**
      * A Vencord plugin that is modified for extra features in Equicord
