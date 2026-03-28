@@ -95,7 +95,7 @@ const settings = definePluginSettings({
         default: false,
     },
     statusName: {
-        description: "Custom status text",
+        description: "Custom status text. variables: {artist} | {name} | {title}",
         type: OptionType.STRING,
         default: "some music",
     },
@@ -308,7 +308,10 @@ export default definePlugin({
                 case NameFormat.AlbumName:
                     return trackData.album || settings.store.statusName;
                 default:
-                    return settings.store.statusName;
+                    return settings.store.statusName
+                        .replace('{artist}', trackData.artist)
+                        .replace('{album}', trackData.album)
+                        .replace('{title}', trackData.name);
             }
         })();
 
