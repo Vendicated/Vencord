@@ -47,11 +47,6 @@ export default definePlugin({
             find: "ReferencedMessageStore",
             replacement: [
                 {
-                    match: /constructor\(\)\{\i\(this,"_channelCaches",new Map\)/,
-                    replace: "$&;$self.setReplyStore(this);",
-                    noWarn: true // TODO: remove legacy compatibility code in the future
-                },
-                {
                     match: /_channelCaches=new Map;/,
                     replace: "$&_=$self.setReplyStore(this);"
                 }
