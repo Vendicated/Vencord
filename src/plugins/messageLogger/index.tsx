@@ -321,7 +321,7 @@ export function parseEditContent(content: string, message: Message, previousCont
     });
 }
 
-const settings = definePluginSettings({
+export const settings = definePluginSettings({
     deleteStyle: {
         type: OptionType.SELECT,
         description: "The style of deleted messages",
