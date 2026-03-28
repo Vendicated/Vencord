@@ -67,6 +67,8 @@
         "moment": "^2.22.2",
         "p-limit": "^7.3.0",
         "puppeteer-core": "^24.30.0",
+        "slate": "^0.123.0",
+        "slate-react": "^0.123.0",
         "standalone-electron-types": "^34.2.0",
         "stylelint": "^16.25.0",
         "stylelint-config-standard": "^39.0.1",

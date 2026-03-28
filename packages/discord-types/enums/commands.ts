@@ -30,3 +30,8 @@ export const enum ApplicationIntegrationType {
     GUILD_INSTALL = 0,
     USER_INSTALL = 1
 }
+
+export const enum CommandSectionType {
+    BUILT_IN = 0,
+    APPLICATION = 1,
+}
