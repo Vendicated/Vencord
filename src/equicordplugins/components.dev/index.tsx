@@ -33,11 +33,8 @@ export default definePlugin({
             Component: ComponentsTab,
             Icon: ComponentsIcon
         });
-
-        SettingsPlugin.settingsSectionMap.push(["EquicordDiscordComponents", "equicord_components"]);
     },
     stop() {
         removeFromArray(SettingsPlugin.customEntries, e => e.key === "equicord_components");
-        removeFromArray(SettingsPlugin.settingsSectionMap, entry => entry[1] === "equicord_components");
     },
 });

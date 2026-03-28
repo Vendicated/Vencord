@@ -31,7 +31,6 @@ export default definePlugin({
             Component: () => <DataUI usersCollection={data.usersCollection} />,
             Icon: EyeIcon
         });
-        SettingsPlugin.settingsSectionMap.push(["EquicordIRememberYou", "equicord_i_remember_you"]);
 
         const data = (this.dataManager = await new Data().withStart());
 
@@ -46,7 +45,6 @@ export default definePlugin({
 
     stop() {
         removeFromArray(SettingsPlugin.customEntries, e => e.key === "equicord_i_remember_you");
-        removeFromArray(SettingsPlugin.settingsSectionMap, entry => entry[1] === "equicord_i_remember_you");
 
         const dataManager = this.dataManager as Data;
         removeMessagePreSendListener(dataManager._onMessagePreSend_preSend);

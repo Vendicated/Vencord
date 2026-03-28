@@ -35,11 +35,8 @@ export default definePlugin({
             Component: IconsTab,
             Icon: MagnifyingGlassIcon
         });
-
-        SettingsPlugin.settingsSectionMap.push(["EquicordDiscordIcons", "equicord_icon_viewer"]);
     },
     stop() {
         removeFromArray(SettingsPlugin.customEntries, e => e.key === "equicord_icon_viewer");
-        removeFromArray(SettingsPlugin.settingsSectionMap, entry => entry[1] === "equicord_icon_viewer");
     },
 });

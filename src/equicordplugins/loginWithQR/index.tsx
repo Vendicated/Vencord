@@ -66,13 +66,11 @@ export default definePlugin({
             Component: openQrModal,
             Icon: QrCodeIcon
         });
-        SettingsPlugin.settingsSectionMap.push(["EquicordLoginWithQR", "equicord_login_with_qr"]);
         preload();
     },
 
     stop() {
         removeFromArray(SettingsPlugin.customEntries, e => e.key === "equicord_login_with_qr");
-        removeFromArray(SettingsPlugin.settingsSectionMap, entry => entry[1] === "equicord_login_with_qr");
         unload();
     },
 });

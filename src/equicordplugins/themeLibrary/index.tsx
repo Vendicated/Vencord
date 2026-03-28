@@ -31,12 +31,9 @@ export default definePlugin({
             Component: require("./components/ThemeTab").default,
             Icon: ColorPaletteIcon
         });
-
-        SettingsPlugin.settingsSectionMap.push(["EquicordThemeLibrary", "equicord_theme_library"]);
     },
 
     stop() {
         removeFromArray(SettingsPlugin.customEntries, e => e.key === "equicord_theme_library");
-        removeFromArray(SettingsPlugin.settingsSectionMap, entry => entry[1] === "equicord_theme_library");
     },
 });
