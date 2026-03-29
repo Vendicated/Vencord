@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { CORS_PROXY, toProxiedUrl } from "@equicordplugins/fileUpload/constants";
+import { normalizeCorsProxyUrl, toProxiedUrl } from "@equicordplugins/fileUpload/constants";
 import { settings } from "@equicordplugins/fileUpload/settings";
 import { serviceLabels, ServiceType, ShareXUploaderConfig, UploadResponse } from "@equicordplugins/fileUpload/types";
 import { copyToClipboard } from "@utils/clipboard";
@@ -26,11 +26,13 @@ const Native = IS_DISCORD_DESKTOP
 const logger = new Logger("FileUpload", "#7cb7ff");
 
 function toProxyUrl(url: string): string {
-    if (Native || url.startsWith(`${CORS_PROXY}?url=`)) {
+    const corsProxyUrl = normalizeCorsProxyUrl((settings.store as { corsProxyUrl?: string; }).corsProxyUrl);
+
+    if (Native || url.startsWith(`${corsProxyUrl}?url=`)) {
         return url;
     }
 
-    return toProxiedUrl(url);
+    return toProxiedUrl(url, corsProxyUrl);
 }
 
 let isUploading = false;
