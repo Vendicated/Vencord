@@ -9,24 +9,71 @@ import { UserAreaButton, UserAreaRenderProps } from "@api/UserArea";
 import { debounce } from "@shared/debounce";
 import { Devs, EquicordDevs } from "@utils/constants";
 import definePlugin, { makeRange, OptionType } from "@utils/types";
-import { findByCodeLazy, findComponentByCodeLazy } from "@webpack";
-import { ChannelActions, ChannelRouter, ChannelStore, ContextMenuApi, GuildStore, MediaEngineStore, Menu, PermissionsBits, PermissionStore, React, SelectedChannelStore, Toasts, UserStore, VoiceActions, VoiceStateStore } from "@webpack/common";
+import type { Channel, VoiceState } from "@vencord/discord-types";
+import { findByCodeLazy, findByPropsLazy } from "@webpack";
+import { ChannelActions, ChannelRouter, ChannelStore, ContextMenuApi, FluxDispatcher, GuildStore, MediaEngineStore, Menu, PermissionsBits, PermissionStore, React, RelationshipStore, SelectedChannelStore, Toasts, UserStore, VoiceActions, VoiceStateStore } from "@webpack/common";
 
-const ChatVoiceIcon = findComponentByCodeLazy("0l1.8-1.8c.17");
 const startStream = findByCodeLazy('type:"STREAM_START"');
 const getDesktopSources = findByCodeLazy("desktop sources");
+const { isVideoEnabled } = findByPropsLazy("isVideoEnabled");
+const NO_SERVERS = "__NONE__";
 
-const valueOperation = [
+type RandomVoiceOperation = "<" | ">" | "==";
+type StateFilterKey = "mute" | "deafen" | "video" | "stream";
+type SelfSettingKey = "selfMute" | "selfDeafen" | "autoCamera" | "autoStream" | "leaveEmpty" | "autoNavigate" | "avoidStages" | "avoidAfk" | "prioritizeFriends";
+type PostJoinAction = () => void | Promise<void>;
+
+interface OperationOption {
+    label: string;
+    value: RandomVoiceOperation;
+    default: boolean;
+}
+
+interface ToggleOption<K extends string> {
+    key: K;
+    label: string;
+}
+
+const operationOptions: OperationOption[] = [
     { label: "More than", value: "<", default: false },
     { label: "Less than", value: ">", default: false },
     { label: "Equal to", value: "==", default: true },
 ];
 
+const stateFilters: ToggleOption<StateFilterKey>[] = [
+    { key: "mute", label: "Muted" },
+    { key: "deafen", label: "Deafened" },
+    { key: "video", label: "Camera" },
+    { key: "stream", label: "Stream" },
+];
+
+const selfSettings: ToggleOption<SelfSettingKey>[] = [
+    { key: "selfMute", label: "Auto Mute" },
+    { key: "selfDeafen", label: "Auto Deafen" },
+    { key: "autoCamera", label: "Auto Camera" },
+    { key: "autoStream", label: "Auto Stream" },
+    { key: "leaveEmpty", label: "Leave when Empty" },
+    { key: "autoNavigate", label: "Auto Navigate" },
+    { key: "prioritizeFriends", label: "Prioritize Friends" },
+    { key: "avoidStages", label: "Avoid Stage" },
+    { key: "avoidAfk", label: "Avoid AFK" },
+];
+
+interface RandomVoiceStateLike {
+    userId?: string | null;
+    channelId?: string | null;
+    selfDeaf?: boolean | null;
+    selfMute?: boolean | null;
+    selfStream?: boolean | null;
+    selfVideo?: boolean | null;
+}
+
 const settings = definePluginSettings({
     UserAmountOperation: {
         description: "Select an operation for the amounts of users",
         type: OptionType.SELECT,
-        options: [...valueOperation],
+        options: [...operationOptions],
+        default: "<",
     },
     UserAmount: {
         description: "Select amount of users",
@@ -38,7 +85,8 @@ const settings = definePluginSettings({
     spacesLeftOperation: {
         description: "Select an operation for the maximum amounts of users",
         type: OptionType.SELECT,
-        options: [...valueOperation],
+        options: [...operationOptions],
+        default: "<",
     },
     spacesLeft: {
         description: "Select amount of max users",
@@ -50,7 +98,8 @@ const settings = definePluginSettings({
     vcLimitOperation: {
         description: "Select an operation for the voice-channel.",
         type: OptionType.SELECT,
-        options: [...valueOperation],
+        options: [...operationOptions],
+        default: "<",
     },
     vcLimit: {
         description: "Select a voice-channel limit",
@@ -92,6 +141,11 @@ const settings = definePluginSettings({
     leaveEmpty: {
         type: OptionType.BOOLEAN,
         description: "Finds a random-call, when the voice chat is empty.",
+        default: false,
+    },
+    prioritizeFriends: {
+        type: OptionType.BOOLEAN,
+        description: "Prefer channels with your friends in them when possible.",
         default: false,
     },
     avoidStages: {
@@ -136,19 +190,13 @@ const settings = definePluginSettings({
     },
 });
 
-interface VoiceState {
-    userId: string;
-    channelId?: string;
-    oldChannelId?: string;
-    deaf: boolean;
-    mute: boolean;
-    selfDeaf: boolean;
-    selfMute: boolean;
-    selfStream: boolean;
-    selfVideo: boolean;
-    sessionId: string;
-    suppress: boolean;
-    requestToSpeakTimestamp: string | null;
+function showToast(message: string, type: (typeof Toasts.Type)[keyof typeof Toasts.Type]) {
+    Toasts.show({
+        message,
+        type,
+        id: Toasts.genId(),
+        options: { position: Toasts.Position.BOTTOM },
+    });
 }
 
 function RandomVoiceIcon({ className }: { className?: string; }) {
@@ -161,41 +209,250 @@ function RandomVoiceIcon({ className }: { className?: string; }) {
     );
 }
 
-export default definePlugin({
-    name: "RandomVoice",
-    description: "Adds a Button near the Mute button to join a random voice call.",
-    authors: [EquicordDevs.xijexo, EquicordDevs.omaw, Devs.thororen],
+function getCurrentUserId() {
+    return UserStore.getCurrentUser()?.id ?? null;
+}
 
-    userAreaButton: {
-        icon: RandomVoiceIcon,
-        render: RandomVoiceButton
-    },
+function getCurrentVoiceChannelId(userId = getCurrentUserId()) {
+    if (!userId) return null;
 
-    flux: {
-        VOICE_STATE_UPDATES() {
-            const currentUserId = UserStore.getCurrentUser().id;
-            const myChannelId = VoiceStateStore.getVoiceStateForUser(currentUserId)?.channelId;
-            if (!myChannelId || !settings.store.leaveEmpty) return;
+    return VoiceStateStore.getVoiceStateForUser(userId)?.channelId
+        ?? SelectedChannelStore.getVoiceChannelId()
+        ?? null;
+}
 
-            const voiceStatesMap = VoiceStateStore.getVoiceStates() as Record<string, VoiceState>;
-            const othersInChannel = Object.values(voiceStatesMap).filter(vs =>
-                vs.channelId === myChannelId && vs.userId !== currentUserId
-            );
+function parseServerIds(store = settings.store) {
+    return store.Servers
+        .split("/")
+        .map(id => id.trim())
+        .filter(id => id && id !== NO_SERVERS);
+}
 
-            if (othersInChannel.length === 0) {
-                getChannels();
-            }
-        },
-    },
+function setServerIds(serverIds: string[]) {
+    settings.store.Servers = serverIds.length ? `/${serverIds.join("/")}` : NO_SERVERS;
+}
 
-    settings,
-});
+function getSelectedServerIds(store = settings.store) {
+    if (store.Servers === "") return null;
+    return parseServerIds(store);
+}
+
+function getRenderableGuilds() {
+    return Object.values(GuildStore.getGuilds())
+        .filter((guild): guild is NonNullable<typeof guild> =>
+            guild != null
+            && typeof guild.id === "string"
+        )
+        .sort((left, right) => left.name.localeCompare(right.name));
+}
+
+function getGuildVoiceStates() {
+    return getRenderableGuilds().flatMap(({ id }) =>
+        Object.entries(VoiceStateStore.getVoiceStates(id) as Record<string, RandomVoiceStateLike> | null ?? {})
+    );
+}
+
+function hasStateFilters(store = settings.store) {
+    return stateFilters.some(({ key }) => store[key]);
+}
+
+function matchesOperation(operation: RandomVoiceOperation, left: number, right: number) {
+    if (operation === "==") return left === right;
+    if (operation === ">") return left < right;
+    return left > right;
+}
+
+function isStageChannel(channel: Channel) {
+    return channel.type === 13 || channel.isGuildStageVoice?.() === true;
+}
+
+function isAfkChannel(channel: Channel) {
+    const guildId = channel.getGuildId();
+    if (!guildId) return false;
+    return GuildStore.getGuild(guildId)?.afkChannelId === channel.id;
+}
+
+function matchesStateFilters(state: RandomVoiceStateLike, store = settings.store) {
+    if (store.mute && !state.selfMute) return false;
+    if (store.deafen && !state.selfDeaf) return false;
+    if (store.video && !state.selfVideo) return false;
+    if (store.stream && !state.selfStream) return false;
+    return true;
+}
+
+function isJoinableChannel(channelId: string, store = settings.store) {
+    const channel = ChannelStore.getChannel(channelId);
+    if (!channel) return false;
+
+    const selectedServerIds = getSelectedServerIds(store);
+    const guildId = channel.getGuildId();
+    if (selectedServerIds != null && (!guildId || !selectedServerIds.includes(guildId))) return false;
+    if (store.avoidStages && isStageChannel(channel)) return false;
+    if (store.avoidAfk && isAfkChannel(channel)) return false;
+    if (!PermissionStore.can(PermissionsBits.CONNECT, channel)) return false;
+
+    const currentUserId = getCurrentUserId();
+    const voiceStates = VoiceStateStore.getVoiceStatesForChannel(channelId) as Record<string, RandomVoiceStateLike> | null;
+    const usersInChannel = Object.keys(voiceStates ?? {}).length;
+
+    if (channel.userLimit > 0 && usersInChannel >= channel.userLimit) return false;
+    if (currentUserId && voiceStates && Object.prototype.hasOwnProperty.call(voiceStates, currentUserId)) return false;
+
+    return true;
+}
+
+function matchesChannelFilters(channelId: string, store = settings.store) {
+    const channel = ChannelStore.getChannel(channelId);
+    if (!channel) return false;
+
+    const voiceStates = VoiceStateStore.getVoiceStatesForChannel(channelId) as Record<string, RandomVoiceStateLike> | null;
+    const usersInChannel = Object.keys(voiceStates ?? {}).length;
+    const channelLimit = channel.userLimit || 99;
+    const spacesLeft = channelLimit - usersInChannel;
+
+    if (!matchesOperation(store.spacesLeftOperation, spacesLeft, store.spacesLeft)) return false;
+    if (!matchesOperation(store.UserAmountOperation, usersInChannel, store.UserAmount)) return false;
+    if (!matchesOperation(store.vcLimitOperation, channelLimit, store.vcLimit)) return false;
+
+    if (!hasStateFilters(store) || !voiceStates) return true;
+
+    const channelStates = Object.values(voiceStates);
+    const hasMatch = channelStates.some(voiceState => matchesStateFilters(voiceState, store));
+    if (store.includeStates && !hasMatch) return false;
+    if (store.avoidStates && hasMatch) return false;
+
+    return true;
+}
+
+function getCandidateChannelIds(store = settings.store) {
+    const candidates = new Set<string>();
+
+    for (const [, state] of getGuildVoiceStates()) {
+        const { channelId } = state;
+        if (!channelId || candidates.has(channelId)) continue;
+        if (!isJoinableChannel(channelId, store)) continue;
+        if (!matchesChannelFilters(channelId, store)) continue;
+        candidates.add(channelId);
+    }
+
+    return [...candidates];
+}
+
+function getFriendChannelIds() {
+    const friendChannelIds = new Set<string>();
+
+    for (const userId of RelationshipStore.getFriendIDs()) {
+        const channelId = VoiceStateStore.getVoiceStateForUser(userId)?.channelId;
+        if (channelId != null && isJoinableChannel(channelId)) {
+            friendChannelIds.add(channelId);
+        }
+    }
+
+    return friendChannelIds;
+}
+
+function pickRandomChannel(store = settings.store) {
+    const candidates = getCandidateChannelIds(store);
+    const friendChannelIds = store.prioritizeFriends ? getFriendChannelIds() : null;
+    const friendCandidates = store.prioritizeFriends
+        ? candidates.filter(channelId => friendChannelIds?.has(channelId))
+        : [];
+
+    const pool = friendCandidates.length ? friendCandidates : candidates;
+    return pool[Math.floor(Math.random() * pool.length)] ?? null;
+}
+
+async function enableCamera() {
+    if (isVideoEnabled()) return;
+
+    FluxDispatcher.dispatch({
+        type: "MEDIA_ENGINE_SET_VIDEO_ENABLED",
+        enabled: true,
+    });
+}
+
+async function startChannelStream(channel: Channel) {
+    if (isStageChannel(channel) || !PermissionStore.can(PermissionsBits.STREAM, channel)) return;
+
+    const selectedChannelId = SelectedChannelStore.getVoiceChannelId();
+    if (!selectedChannelId) return;
+
+    const sources = await getDesktopSources(MediaEngineStore.getMediaEngine(), ["screen"], null);
+    const source = sources?.[0];
+    if (!source) return;
+
+    startStream(channel.guild_id ?? null, selectedChannelId, {
+        pid: null,
+        sourceId: source.id,
+        sourceName: source.name,
+        audioSourceId: null,
+        sound: true,
+        previewDisabled: false,
+    });
+}
+
+function runAfterVoiceJoin(channelId: string, callbacks: PostJoinAction[]) {
+    let attempts = 0;
+    const interval = setInterval(() => {
+        attempts++;
+
+        if (getCurrentVoiceChannelId() !== channelId) {
+            if (attempts < 40) return;
+            clearInterval(interval);
+            return;
+        }
+
+        clearInterval(interval);
+        for (const callback of callbacks) {
+            void callback();
+        }
+    }, 100);
+}
+
+async function joinRandomVoice() {
+    const channelId = pickRandomChannel();
+    if (!channelId) {
+        showToast("Failed to find a voice channel.", Toasts.Type.MESSAGE);
+        return;
+    }
+
+    const channel = ChannelStore.getChannel(channelId);
+    if (!channel) {
+        showToast("Voice channel is unavailable.", Toasts.Type.FAILURE);
+        return;
+    }
+
+    const { store } = settings;
+    ChannelActions.selectVoiceChannel(channelId);
+
+    if (store.autoNavigate) {
+        ChannelRouter.transitionToChannel(channelId);
+    }
+
+    const postJoinActions: PostJoinAction[] = [];
+    if (store.selfMute && !MediaEngineStore.isSelfMute()) {
+        postJoinActions.push(() => VoiceActions.toggleSelfMute());
+    }
+    if (store.selfDeafen && !MediaEngineStore.isSelfDeaf()) {
+        postJoinActions.push(() => VoiceActions.toggleSelfDeaf());
+    }
+    if (store.autoCamera) {
+        postJoinActions.push(enableCamera);
+    }
+    if (store.autoStream) {
+        postJoinActions.push(() => startChannelStream(channel));
+    }
+
+    if (postJoinActions.length) {
+        runAfterVoiceJoin(channelId, postJoinActions);
+    }
+}
 
 function RandomVoiceButton({ iconForeground, hideTooltips, nameplate }: UserAreaRenderProps) {
     return (
         <UserAreaButton
-            onContextMenu={e => ContextMenuApi.openContextMenu(e, () => <ContextMenu />)}
-            onClick={() => getChannels()}
+            onClick={() => void joinRandomVoice()}
+            onContextMenu={event => ContextMenuApi.openContextMenu(event, () => <RandomVoiceMenu onClose={ContextMenuApi.closeContextMenu} />)}
             role="switch"
             tooltipText={hideTooltips ? void 0 : "Random Voice"}
             icon={<RandomVoiceIcon className={iconForeground} />}
@@ -204,579 +461,251 @@ function RandomVoiceButton({ iconForeground, hideTooltips, nameplate }: UserArea
     );
 }
 
-function ContextMenu() {
-    let ServerList: any[] = [];
-    Object.values(UserStore.getUsers()).forEach(user => {
-        const { channelId } = VoiceStateStore.getVoiceStateForUser(user.id) ?? {};
-        if (!channelId) return;
-        const channel = ChannelStore.getChannel(channelId);
-        if (channel) ServerList.push(channel.getGuildId());
-    });
+function RandomVoiceMenu({ onClose }: { onClose(): void; }) {
+    const [, rerender] = React.useReducer(value => value + 1, 0);
+    const { store } = settings;
+    const guilds = getRenderableGuilds();
+    const allServerIds = guilds.map(guild => guild.id);
+    const selectedServerIds = getSelectedServerIds(store) ?? allServerIds;
 
-    ServerList = Array.from(new Set(ServerList));
-    const Servers = ServerList.map(server => GuildStore.getGuild(server)).filter(guild => guild && guild.id);
-    const [servers, setServers] = React.useState(settings.store.Servers);
-    const [SpacesLeftOperation, setSpacesLeftOperation] = React.useState(settings.store.spacesLeftOperation);
-    const [userAmount, setuserAmount] = React.useState(settings.store.UserAmountOperation);
-    const [vcOperation, setVcOperation] = React.useState(settings.store.vcLimitOperation);
-    const [navigate, setnavigate] = React.useState(settings.store.autoNavigate);
-    const [stage, setStage] = React.useState(settings.store.avoidStages);
-    const [afk, setAfk] = React.useState(settings.store.avoidAfk);
-    const [camera, setCamera] = React.useState(settings.store.autoCamera);
-    const [stream, setStream] = React.useState(settings.store.autoStream);
-    const [empty, setEmpty] = React.useState(settings.store.leaveEmpty);
-    const [muteself, setSelfMute] = React.useState(settings.store.selfMute);
-    const [deafenself, setSelfDeafen] = React.useState(settings.store.selfDeafen);
-    const [mute, setMute] = React.useState(settings.store.mute);
-    const [deafen, setDeafen] = React.useState(settings.store.deafen);
-    const [video, setVideo] = React.useState(settings.store.video);
-    const [state, setState] = React.useState(settings.store.includeStates);
-    const [notstate, avoidState] = React.useState(settings.store.avoidStates);
+    const update = <K extends keyof typeof store>(key: K, value: typeof store[K]) => {
+        store[key] = value;
+        rerender();
+    };
+    const toggle = <K extends SelfSettingKey | StateFilterKey | "includeStates" | "avoidStates">(key: K) => update(key, !store[key]);
+    const selectAllServers = () => {
+        setServerIds(guilds.map(guild => guild.id));
+        rerender();
+    };
+    const resetServers = () => {
+        setServerIds([]);
+        rerender();
+    };
+    const toggleServer = (guildId: string) => {
+        setServerIds(
+            selectedServerIds.includes(guildId)
+                ? selectedServerIds.filter(id => id !== guildId)
+                : [...selectedServerIds, guildId]
+        );
+        rerender();
+    };
+
+    const setSlider = <K extends "UserAmount" | "spacesLeft" | "vcLimit">(key: K) =>
+        debounce((value: number) => {
+            store[key] = Math.round(value);
+            rerender();
+        }, 50);
 
     return (
-        <Menu.Menu
-            navId="random-vc"
-            onClose={() => { }}
-            aria-label="Voice state modifier"
-        >
-
-            <Menu.MenuItem
-                id="servers"
-                label="Select Servers"
-                action={() => { }} >
+        <Menu.Menu navId="random-voice" onClose={onClose} aria-label="Random Voice">
+            <Menu.MenuItem id="random-voice-servers" label="Servers">
                 <>
-                    {Servers.map(server => (
-                        <>
-                            <Menu.MenuCheckboxItem
-                                key={String(server?.id ?? "invalid server")}
-                                id={String(server?.name ?? "invalid server")}
-                                label={server?.name ?? "invalid server"}
-                                checked={servers.includes(server?.id ?? "invalid server")}
-                                action={() => {
-                                    if (settings.store.Servers.includes(server?.id ?? "invalid server"))
-                                        settings.store.Servers = settings.store.Servers.replace(`/${server.id}`, "");
-                                    else
-                                        settings.store.Servers += `/${server?.id ?? "invalid server"}`;
-                                    setServers(settings.store.Servers);
-                                }} />
-                        </>
-                    ))}
-
-                    <Menu.MenuItem
-                        id="selectAll"
-                        label="Select List"
-                        action={() => {
-                            const allServerIds = Servers.filter(server => server?.id).map(server => server.id);
-                            settings.store.Servers = `/${allServerIds.join("/")}`;
-                            setServers(settings.store.Servers);
-                        }}
-                        disabled={servers.length === Servers.filter(server => server?.id).length}
-                        icon={() => {
-                            return (
-                                <ChatVoiceIcon
-                                    className="selectList"
-                                    role="img"
-                                    width="18"
-                                    height="18"
-                                />
-                            );
-                        }}
+                    <Menu.MenuCheckboxItem
+                        id="random-voice-select-all-servers"
+                        label="Select All"
+                        checked={selectedServerIds.length === allServerIds.length}
+                        disabled={selectedServerIds.length === allServerIds.length}
+                        action={selectAllServers}
                     />
-
-                    <Menu.MenuItem
-                        id="clear list "
-                        label="Reset List"
-                        disabled={servers.length === 0}
-                        action={() => {
-                            settings.store.Servers = "";
-                            setServers("");
-
-                        }}
-                        icon={() => {
-                            return (
-                                <svg
-                                    className={"reset-icon"}
-                                    role="img"
-                                    width={"22"}
-                                    height={"22"}
-                                    viewBox={"0 0 26 26"}
-                                >
-                                    <g fill="currentColor">
-                                        <path d="M12,2a10.032,10.032,0,0,1,7.122,3H16a1,1,0,0,0-1,1h0a1,1,0,0,0,1,1h4.143A1.858,1.858,0,0,0,22,5.143V1a1,1,0,0,0-1-1h0a1,1,0,0,0-1,1V3.078A11.981,11.981,0,0,0,.05,10.9a1.007,1.007,0,0,0,1,1.1h0a.982.982,0,0,0,.989-.878A10.014,10.014,0,0,1,12,2Z" /><path d="M22.951,12a.982.982,0,0,0-.989.878A9.986,9.986,0,0,1,4.878,19H8a1,1,0,0,0,1-1H9a1,1,0,0,0-1-1H3.857A1.856,1.856,0,0,0,2,18.857V23a1,1,0,0,0,1,1H3a1,1,0,0,0,1-1V20.922A11.981,11.981,0,0,0,23.95,13.1a1.007,1.007,0,0,0-1-1.1Z" />
-                                    </g>
-
-                                </svg>
-                            );
-                        }} />
-
+                    <Menu.MenuCheckboxItem
+                        id="random-voice-reset-servers"
+                        label="Reset"
+                        checked={selectedServerIds.length === 0}
+                        disabled={!selectedServerIds.length}
+                        action={resetServers}
+                    />
+                    <Menu.MenuSeparator />
+                    {guilds.map(guild => (
+                        <Menu.MenuCheckboxItem
+                            key={guild.id}
+                            id={`random-voice-server-${guild.id}`}
+                            label={guild.name}
+                            checked={selectedServerIds.includes(guild.id)}
+                            action={() => toggleServer(guild.id)}
+                        />
+                    ))}
                 </>
             </Menu.MenuItem>
 
-            <Menu.MenuItem
-                id="Filter states"
-                label="Select Filters"
-                action={() => { }} >
+            <Menu.MenuItem id="random-voice-state-filters" label="State Filters">
                 <>
+                    {stateFilters.map(({ key, label }) => (
+                        <Menu.MenuCheckboxItem
+                            key={key}
+                            id={`random-voice-filter-${key}`}
+                            label={label}
+                            checked={store[key]}
+                            action={() => toggle(key)}
+                        />
+                    ))}
+                    <Menu.MenuSeparator />
                     <Menu.MenuCheckboxItem
-                        key="muted"
-                        id="muted"
-                        label="Muted"
-                        action={() => {
-                            setMute(!mute);
-                            settings.store.mute = !mute;
-                        }}
-                        checked={mute} />
-                    <Menu.MenuCheckboxItem
-                        key="deafen"
-                        id="deafen"
-                        label="Deafened"
-                        action={() => {
-                            setDeafen(!deafen);
-                            settings.store.deafen = !deafen;
-                        }}
-                        checked={deafen} />
-                    <Menu.MenuCheckboxItem
-                        key="video"
-                        id="video"
-                        label="Camera"
-                        action={() => {
-                            setVideo(!video);
-                            settings.store.video = !video;
-                        }}
-                        checked={video} />
-                    <Menu.MenuCheckboxItem
-                        key="stream"
-                        id="stream"
-                        label="Stream"
-                        action={() => {
-                            setStream(!stream);
-                            settings.store.stream = !stream;
-                        }}
-                        checked={stream} />
-                    <Menu.MenuCheckboxItem
-                        key="state"
-                        id="state"
+                        id="random-voice-include-states"
                         label="Include Filters"
-                        disabled={settings.store.avoidStates || !settings.store.includeStates && !settings.store.mute && !settings.store.deafen && !settings.store.video && !settings.store.stream}
-                        action={() => {
-                            setState(!state);
-                            settings.store.includeStates = !state;
-                        }}
-                        checked={state} />
-
+                        checked={store.includeStates}
+                        disabled={store.avoidStates || !hasStateFilters(store)}
+                        action={() => toggle("includeStates")}
+                    />
                     <Menu.MenuCheckboxItem
-                        key="notstate"
-                        id="notstate"
+                        id="random-voice-avoid-states"
                         label="Avoid Filters"
-                        disabled={settings.store.includeStates || !settings.store.avoidStates && !settings.store.avoidStates && !settings.store.mute && !settings.store.deafen && !settings.store.video && !settings.store.stream}
-                        action={() => {
-                            avoidState(!notstate);
-                            settings.store.avoidStates = !notstate;
-                        }}
-                        checked={notstate} />
+                        checked={store.avoidStates}
+                        disabled={store.includeStates || !hasStateFilters(store)}
+                        action={() => toggle("avoidStates")}
+                    />
                 </>
             </Menu.MenuItem>
 
             <Menu.MenuSeparator />
 
-            <Menu.MenuGroup
-                label="USER AMOUNT"
-            >
-
-                <Menu.MenuControlItem
-                    id="min-user"
-                    label="User Amount"
-                    control={(props, ref) => (
-                        <Menu.MenuSliderControl
-                            ref={ref}
-                            {...props}
-                            minValue={1}
-                            maxValue={15}
-                            value={settings.store.UserAmount}
-                            onChange={debounce((value: number) => {
-                                settings.store.UserAmount = Number(value.toFixed(0));
-                            }, 50)}
-                            renderValue={(value: number) => `${value.toFixed(0)} user${Number(value.toFixed(0)) === 1 ? "" : "s"}`} />
-                    )} />
-
-                <Menu.MenuItem
-                    id="minParms"
-                    label="Parameters"
-                    action={() => { }} >
-                    <>
-                        <Menu.MenuRadioItem
-                            key={"More than"}
-                            group="minGroup"
-                            id={"More than"}
-                            label={"More than"}
-                            checked={userAmount === "<"}
-                            action={() => {
-                                setuserAmount("<");
-                                settings.store.UserAmountOperation = "<";
-                            }} />
-                        <Menu.MenuRadioItem
-                            key={"Less than"}
-                            group="minGroup"
-                            id={"Less than"}
-                            label={"Less than"}
-                            checked={userAmount === ">"}
-                            action={() => {
-                                setuserAmount(">");
-                                settings.store.UserAmountOperation = ">";
-                            }} />
-                        <Menu.MenuRadioItem
-                            key={"Equal to"}
-                            group="minGroup"
-                            id={"Equal to "}
-                            label={"Equal to "}
-                            checked={userAmount === "=="}
-                            action={() => {
-                                setuserAmount("==");
-                                settings.store.UserAmountOperation = "==";
-                            }} />
-                    </>
-                </Menu.MenuItem>
-
-            </Menu.MenuGroup>
+            {renderOperationGroup({
+                id: "users",
+                label: "User Amount",
+                sliderKey: "UserAmount",
+                operationKey: "UserAmountOperation",
+                sliderValue: store.UserAmount,
+                operationValue: store.UserAmountOperation,
+                onOperationChange: value => update("UserAmountOperation", value),
+                onSliderChange: setSlider("UserAmount"),
+            })}
 
             <Menu.MenuSeparator />
 
-            <Menu.MenuGroup
-                label="SPACES LEFT"
-            >
-
-                <Menu.MenuControlItem
-                    id="max-user"
-                    label="Spaces Left"
-                    control={(props, ref) => (
-                        <Menu.MenuSliderControl
-                            ref={ref}
-                            {...props}
-                            minValue={1}
-                            maxValue={15}
-                            value={settings.store.spacesLeft}
-                            onChange={debounce((value: number) => {
-                                settings.store.spacesLeft = Number(value.toFixed(0));
-                            }, 50)}
-                            renderValue={(value: number) => `${value.toFixed(0)} user${Number(value.toFixed(0)) === 1 ? "" : "s"}`} />
-                    )} />
-
-                <Menu.MenuItem
-                    id="maxGroup"
-                    label="Parameters"
-                    action={() => { }} >
-                    <>
-                        <Menu.MenuRadioItem
-                            key={"More than"}
-                            group="maxGroup"
-                            id={"More than"}
-                            label={"More than"}
-                            checked={SpacesLeftOperation === "<"}
-                            action={() => {
-                                setSpacesLeftOperation("<");
-                                settings.store.spacesLeftOperation = "<";
-                            }} />
-                        <Menu.MenuRadioItem
-                            key={"Less than"}
-                            group="maxGroup"
-                            id={"Less than"}
-                            label={"Less than"}
-                            checked={SpacesLeftOperation === ">"}
-                            action={() => {
-                                setSpacesLeftOperation(">");
-                                settings.store.spacesLeftOperation = ">";
-                            }} />
-                        <Menu.MenuRadioItem
-                            key={"Equal to"}
-                            group="maxGroup"
-                            id={"Equal to "}
-                            label={"Equal to "}
-                            checked={SpacesLeftOperation === "=="}
-                            action={() => {
-                                setSpacesLeftOperation("==");
-                                settings.store.spacesLeftOperation = "==";
-                            }} />
-                    </>
-                </Menu.MenuItem>
-
-            </Menu.MenuGroup >
+            {renderOperationGroup({
+                id: "spaces-left",
+                label: "Spaces Left",
+                sliderKey: "spacesLeft",
+                operationKey: "spacesLeftOperation",
+                sliderValue: store.spacesLeft,
+                operationValue: store.spacesLeftOperation,
+                onOperationChange: value => update("spacesLeftOperation", value),
+                onSliderChange: setSlider("spacesLeft"),
+            })}
 
             <Menu.MenuSeparator />
 
-            <Menu.MenuGroup
-                label="VOICE LIMIT"
-            >
-
-                <Menu.MenuControlItem
-                    id="vc-limit"
-                    label="Voice Limit"
-                    control={(props, ref) => (
-                        <Menu.MenuSliderControl
-                            ref={ref}
-                            {...props}
-                            minValue={1}
-                            maxValue={15}
-                            value={settings.store.vcLimit}
-                            onChange={debounce((value: number) => {
-                                settings.store.vcLimit = Number(value.toFixed(0));
-                            }, 50)}
-                            renderValue={(value: number) => `${value.toFixed(0)} user${Number(value.toFixed(0)) === 1 ? "" : "s"}`} />
-                    )} />
-
-                <Menu.MenuItem
-                    id="vcParms"
-                    label="Parameters"
-                    action={() => { }} >
-                    <>
-                        <Menu.MenuRadioItem
-                            key={"More than"}
-                            group="vcGroup"
-                            id={"More than"}
-                            label={"More than"}
-                            checked={vcOperation === "<"}
-                            action={() => {
-                                setVcOperation("<");
-                                settings.store.vcLimitOperation = "<";
-                            }} />
-                        <Menu.MenuRadioItem
-                            key={"Less than"}
-                            group="vcGroup"
-                            id={"Less than"}
-                            label={"Less than"}
-                            checked={vcOperation === ">"}
-                            action={() => {
-                                setVcOperation(">");
-                                settings.store.vcLimitOperation = ">";
-                            }} />
-                        <Menu.MenuRadioItem
-                            key={"Equal to"}
-                            group="vcGroup"
-                            id={"Equal to "}
-                            label={"Equal to "}
-                            checked={vcOperation === "=="}
-                            action={() => {
-                                setVcOperation("==");
-                                settings.store.vcLimitOperation = "==";
-                            }} />
-                    </>
-                </Menu.MenuItem>
-
-            </Menu.MenuGroup>
+            {renderOperationGroup({
+                id: "voice-limit",
+                label: "Voice Limit",
+                sliderKey: "vcLimit",
+                operationKey: "vcLimitOperation",
+                sliderValue: store.vcLimit,
+                operationValue: store.vcLimitOperation,
+                onOperationChange: value => update("vcLimitOperation", value),
+                onSliderChange: setSlider("vcLimit"),
+            })}
 
             <Menu.MenuSeparator />
-            <Menu.MenuGroup
-                label="SELF SETTINGS"
-            >
-                <Menu.MenuItem id="voiceOptions" label="Voice Options" action={() => { }} >
-                    <>
-                        <Menu.MenuCheckboxItem
-                            key="selfMute"
-                            id="selfMute"
-                            label="Auto Mute"
-                            action={() => {
-                                setSelfMute(!muteself);
-                                settings.store.selfMute = !muteself;
-                            }}
-                            checked={muteself} />
-                        <Menu.MenuCheckboxItem
-                            key="selfDeafen"
-                            id="selfDeafen"
-                            label="Auto Deafen"
-                            action={() => {
-                                setSelfDeafen(!deafenself);
-                                settings.store.selfDeafen = !deafenself;
-                            }}
-                            checked={deafenself} />
-                        <Menu.MenuCheckboxItem
-                            key="autoCamera"
-                            id="autoCamera"
-                            label="Auto Camera"
-                            action={() => {
-                                setCamera(!camera);
-                                settings.store.autoCamera = !camera;
-                            }}
-                            checked={camera} />
-                        <Menu.MenuCheckboxItem
-                            key="autoStream"
-                            id="autoStream"
-                            label="Auto Stream"
-                            action={() => {
-                                setStream(!stream);
-                                settings.store.autoStream = !stream;
-                            }}
-                            checked={stream} />
-                        <Menu.MenuCheckboxItem
-                            key="leaveEmpty"
-                            id="leaveEmpty"
-                            label="Leave when Empty"
-                            action={() => {
-                                setEmpty(!empty);
-                                settings.store.leaveEmpty = !empty;
-                            }}
-                            checked={empty} />
-                    </>
-                </Menu.MenuItem>
 
-                <Menu.MenuCheckboxItem
-                    key="autonavigate"
-                    id="autonavigate"
-                    label="Auto Navigate"
-                    action={() => {
-                        setnavigate(!navigate);
-                        settings.store.autoNavigate = !navigate;
-                    }}
-                    checked={navigate} />
-
-                <Menu.MenuCheckboxItem
-                    key="avoidStage"
-                    id="avoidStage"
-                    label="Avoid Stage"
-                    action={() => {
-                        setStage(!stage);
-                        settings.store.avoidStages = !stage;
-                    }}
-                    checked={stage} />
-
-                <Menu.MenuCheckboxItem
-                    key="avoidAfk"
-                    id="avoidAfk"
-                    label="Avoid AFK"
-                    action={() => {
-                        setAfk(!afk);
-                        settings.store.avoidAfk = !afk;
-                    }}
-                    checked={afk} />
-
-            </Menu.MenuGroup>
+            <Menu.MenuItem id="random-voice-self-settings" label="Join Settings">
+                <>
+                    {selfSettings.map(({ key, label }) => (
+                        <Menu.MenuCheckboxItem
+                            key={key}
+                            id={`random-voice-setting-${key}`}
+                            label={label}
+                            checked={store[key]}
+                            action={() => toggle(key)}
+                        />
+                    ))}
+                </>
+            </Menu.MenuItem>
         </Menu.Menu>
     );
 }
 
-function getChannels() {
-    const criteriaChannel: any[] = [];
-
-    Object.values(UserStore.getUsers()).forEach(user => {
-
-        const { channelId, selfDeaf, selfMute, selfStream, selfVideo } = VoiceStateStore.getVoiceStateForUser(user.id) ?? {};
-        if (!channelId) return;
-        if (criteriaChannel.includes(channelId)) return;
-
-        const channel = ChannelStore.getChannel(channelId);
-        if (!channel) return;
-        const channelVoiceStates = VoiceStateStore.getVoiceStatesForChannel(channelId);
-
-        if (!settings.store.Servers.split("/").includes(channel.getGuildId())) return;
-        if (settings.store.avoidStages && channel.isGuildStageVoice()) return;
-        const operations = {
-            ">": (a, b) => a < b,
-            "<": (a, b) => a > b,
-            "==": (a, b) => a === b,
-        };
-
-        const users = Object.keys(channelVoiceStates).length;
-
-        const VcLimit = channel.userLimit === 0 ? 99 : channel.userLimit;
-        const spacesLeft = VcLimit - users;
-
-        if (!operations[settings.store.spacesLeftOperation](spacesLeft, settings.store.spacesLeft)) return;
-        if (!operations[settings.store.UserAmountOperation](users, settings.store.UserAmount)) return;
-        if (!operations[settings.store.vcLimitOperation](VcLimit, settings.store.vcLimit)) return;
-        if (Object.keys(channelVoiceStates).length === channel?.userLimit) return;
-        if (Object.keys(channelVoiceStates).includes(UserStore.getCurrentUser().id)) return;
-        if (!PermissionStore.can(PermissionsBits.CONNECT, channel)) return;
-        if (settings.store.avoidAfk && !PermissionStore.can(PermissionsBits.SPEAK, channel)) return;
-        if (settings.store.avoidStates) {
-            let lowestMismatchCount = Infinity;
-            const channelVoiceStates = VoiceStateStore.getVoiceStatesForChannel(channel.id);
-            let mismatchedStates = 0;
-            let bestChannelId: string | null = null;
-            for (const state of Object.values(channelVoiceStates) as { selfMute?: boolean; selfDeaf?: boolean; selfVideo?: boolean; selfStream?: boolean; }[]) {
-                if ((settings.store.deafen && state.selfDeaf) || (!settings.store.deafen && !state.selfDeaf)) mismatchedStates++;
-                if ((settings.store.video && !state.selfVideo) || (!settings.store.video && state.selfVideo)) mismatchedStates++;
-                if ((settings.store.stream && !state.selfStream) || (!settings.store.stream && state.selfStream)) mismatchedStates++;
-
-                if (!settings.store.deafen) {
-                    if ((settings.store.mute && state.selfMute) || (!settings.store.mute && !state.selfMute)) mismatchedStates++;
-                }
-            }
-
-            if (mismatchedStates < lowestMismatchCount) {
-                lowestMismatchCount = mismatchedStates;
-                bestChannelId = channel.id;
-            }
-            if (bestChannelId) {
-                criteriaChannel.push(channelId);
-            }
-        }
-
-        if (settings.store.includeStates && !settings.store.avoidStates) {
-            if ((settings.store.deafen && !selfDeaf) || (!settings.store.deafen && selfDeaf)) return;
-            if ((settings.store.video && !selfVideo) || (!settings.store.video && selfVideo)) return;
-            if ((settings.store.stream && !selfStream) || (!settings.store.stream && selfStream)) return;
-
-            if (!settings.store.deafen)
-                if ((settings.store.mute && !selfMute) || (!settings.store.mute && selfMute)) return;
-
-        }
-
-        criteriaChannel.push(channelId);
-    });
-
-    if (criteriaChannel.length === 0) {
-        Toasts.show({
-            message: "Failed to find a Voice channel!",
-            id: "Vc-not-found",
-            type: Toasts.Type.MESSAGE,
-            options: {
-                position: Toasts.Position.BOTTOM,
-            }
-        });
-        return;
-    }
-    const randomIndex = Math.floor(Math.random() * criteriaChannel.length);
-
-    JoinVc(criteriaChannel[randomIndex]);
+function renderOperationGroup({
+    id,
+    label,
+    sliderKey,
+    operationKey,
+    sliderValue,
+    operationValue,
+    onOperationChange,
+    onSliderChange,
+}: {
+    id: string;
+    label: string;
+    sliderKey: string;
+    operationKey: string;
+    sliderValue: number;
+    operationValue: RandomVoiceOperation;
+    onOperationChange(value: RandomVoiceOperation): void;
+    onSliderChange(value: number): void;
+}) {
+    return (
+        <Menu.MenuGroup label={label.toUpperCase()}>
+            <Menu.MenuControlItem
+                id={`random-voice-slider-${sliderKey}`}
+                label={label}
+                control={(props, ref) => (
+                    <Menu.MenuSliderControl
+                        ref={ref}
+                        {...props}
+                        minValue={1}
+                        maxValue={15}
+                        value={sliderValue}
+                        onChange={onSliderChange}
+                        renderValue={value => `${Math.round(value)} user${Math.round(value) === 1 ? "" : "s"}`}
+                    />
+                )}
+            />
+            <Menu.MenuItem id={`random-voice-operation-${operationKey}`} label="Parameters">
+                <>
+                    {operationOptions.map(option => (
+                        <Menu.MenuRadioItem
+                            key={option.value}
+                            id={`random-voice-operation-${id}-${option.value}`}
+                            group={`random-voice-${id}`}
+                            label={option.label}
+                            checked={operationValue === option.value}
+                            action={() => onOperationChange(option.value)}
+                        />
+                    ))}
+                </>
+            </Menu.MenuItem>
+        </Menu.MenuGroup>
+    );
 }
 
-function JoinVc(channelID) {
-    const channel = ChannelStore.getChannel(channelID);
-    ChannelActions.selectVoiceChannel(channelID);
-    if (settings.store.autoNavigate) ChannelRouter.transitionToChannel(channel.id);
-    if (settings.store.autoCamera && PermissionStore.can(PermissionsBits.STREAM, channel)) autoCamera();
-    if (settings.store.autoStream && PermissionStore.can(PermissionsBits.STREAM, channel)) autoStream();
-    if (settings.store.selfMute && !MediaEngineStore.isSelfMute() && SelectedChannelStore.getVoiceChannelId()) VoiceActions.toggleSelfMute();
-    if (settings.store.selfDeafen && !MediaEngineStore.isSelfDeaf() && SelectedChannelStore.getVoiceChannelId()) VoiceActions.toggleSelfDeaf();
-}
+export default definePlugin({
+    name: "RandomVoice",
+    description: "Adds a button near mute to join a random voice channel.",
+    authors: [EquicordDevs.xijexo, EquicordDevs.omaw, Devs.thororen],
+    settings,
 
-async function autoStream() {
-    const mediaEngine = MediaEngineStore.getMediaEngine();
-    const selected = SelectedChannelStore.getVoiceChannelId();
-    if (!selected) return;
-    const channel = ChannelStore.getChannel(selected);
-    const sources = await getDesktopSources(mediaEngine, ["screen"], null);
-    if (!sources || sources.length === 0) return;
-    const source = sources[0];
-    if (channel.type === 13 || !PermissionStore.can(PermissionsBits.STREAM, channel)) return;
-    startStream(channel.guild_id, selected, {
-        "pid": null,
-        "sourceId": source.id,
-        "sourceName": source.name,
-        "audioSourceId": null,
-        "sound": true,
-        "previewDisabled": false
-    });
-}
+    userAreaButton: {
+        icon: RandomVoiceIcon,
+        render: RandomVoiceButton,
+    },
 
-function autoCamera() {
-    const checkExist = setInterval(() => {
-        const cameraOFF = document.querySelector('[aria-label="Turn off Camera" i]') as HTMLButtonElement;
-        if (cameraOFF) clearInterval(checkExist);
+    flux: {
+        VOICE_STATE_UPDATES({ voiceStates }: { voiceStates: VoiceState[]; }) {
+            const currentUserId = getCurrentUserId();
+            if (!currentUserId || !settings.store.leaveEmpty) return;
 
-        const camera = document.querySelector('[aria-label="Turn on Camera" i]') as HTMLButtonElement;
+            const myChannelId = getCurrentVoiceChannelId(currentUserId);
+            if (!myChannelId) return;
 
-        if (camera) {
-            clearInterval(checkExist);
-            camera.click();
-        }
-    }, 50);
-}
+            const touchedCurrentChannel = voiceStates.some(state =>
+                state.userId === currentUserId ||
+                state.channelId === myChannelId ||
+                state.oldChannelId === myChannelId
+            );
+            if (!touchedCurrentChannel) return;
+
+            const myOwnJoin = voiceStates.some(state =>
+                state.userId === currentUserId &&
+                state.channelId === myChannelId &&
+                state.oldChannelId !== myChannelId
+            );
+            if (myOwnJoin) return;
+
+            const channelStates = VoiceStateStore.getVoiceStatesForChannel(myChannelId) as Record<string, VoiceState> | null;
+            const otherUsers = Object.values(channelStates ?? {}).filter(state => state.userId !== currentUserId);
+            if (!otherUsers.length) {
+                void joinRandomVoice();
+            }
+        },
+    },
+});
