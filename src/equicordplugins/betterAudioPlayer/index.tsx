@@ -22,16 +22,15 @@ interface PlayerInstance {
 }
 
 function validateColor(value: string, key: string, fallback: string) {
-    const rgbPattern = /^\d{1,3}\s*,\s*\d{1,3}\s*,\s*\d{1,3}$/;
-    if (rgbPattern.test(value)) return;
+    if (/^\d{1,3}\s*,\s*\d{1,3}\s*,\s*\d{1,3}$/.test(value)) return;
 
-    if (value.startsWith("#")) {
-        const rgb = ColorUtils.hexToRgb(value);
+    try {
+        const rgb = ColorUtils.hexToRgb(value.replace("#", ""));
         if (rgb) {
             settings.store[key] = `${rgb.r}, ${rgb.g}, ${rgb.b}`;
             return;
         }
-    }
+    } catch { /* invalid hex */ }
 
     showToast(`Invalid color format for ${key}, use "R, G, B" or "#RRGGBB"`, Toasts.Type.FAILURE);
     settings.store[key] = fallback;
