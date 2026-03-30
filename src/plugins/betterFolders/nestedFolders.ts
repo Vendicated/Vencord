@@ -18,6 +18,11 @@
 
 export type NestedFolderMap = Record<string, string>;
 
+export interface GuildFolderLike {
+    folderId?: string | number | null;
+    guildIds?: string[];
+}
+
 export function getChildFolderIds(map: NestedFolderMap, parentId: string | number): string[] {
     return Object.entries(map)
         .filter(([, id]) => id === String(parentId))
@@ -86,4 +91,28 @@ export function sanitizeNestedFolderMap(map: NestedFolderMap, validFolderIds: Se
     }
 
     return sanitized;
+}
+
+export function getGuildFolderId(folders: GuildFolderLike[], guildId: string | null | undefined): string | undefined {
+    if (!guildId) return;
+
+    return folders
+        .find(folder => folder.guildIds?.includes(guildId))
+        ?.folderId
+        ?.toString();
+}
+
+export function getGuildNavigationExpandTargets(
+    map: NestedFolderMap,
+    folders: GuildFolderLike[],
+    guildId: string | null | undefined,
+    expandedFolderIds: Iterable<string | number>
+): string[] {
+    const folderId = getGuildFolderId(folders, guildId);
+    if (!folderId) return [];
+
+    const expandedIds = new Set(Array.from(expandedFolderIds, id => String(id)));
+    const targetFolderIds = [...getAncestorFolderIds(map, folderId).reverse(), folderId];
+
+    return targetFolderIds.filter(id => !expandedIds.has(id));
 }
