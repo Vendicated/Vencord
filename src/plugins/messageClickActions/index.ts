@@ -287,9 +287,9 @@ function normalizeEmoji(emoji: string): string | null {
     const trimmed = emoji.trim();
     if (!trimmed) return null;
 
-    const customMatch = trimmed.match(/^:?([\w-]+):(\d+)$/);
+    const customMatch = trimmed.match(/^(?:<(?:(a):)?|:)?([\w-]+?)(?:~\d+)?:([0-9]+)>?$/);
     if (customMatch) {
-        return `${customMatch[1]}:${customMatch[2]}`;
+        return `${customMatch[2]}:${customMatch[3]}`;
     }
 
     return trimmed;
