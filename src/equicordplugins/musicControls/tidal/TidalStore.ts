@@ -93,7 +93,7 @@ class TidalSocket {
     }
 
     private initWs() {
-        const url = settings.store.tidalWebSocketURL || "ws://localhost:24123";
+        const url = settings.store.websocketURL || "ws://localhost:24123";
         if (!url) {
             return;
         }
