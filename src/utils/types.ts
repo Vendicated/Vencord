@@ -204,16 +204,6 @@ export interface PluginDef {
     headerBarButton?: HeaderBarButtonData;
     userAreaButton?: UserAreaButtonData;
     renderProfileCollection?: ProfileCollectionFactory;
-
-    // TODO: Remove eventually
-    /**
-     * @deprecated Use {@link chatBarButton} instead
-     */
-    renderChatBarButton?: never;
-    /**
-     * @deprecated Use {@link messagePopoverButton} instead
-     */
-    renderMessagePopoverButton?: never;
 }
 
 export const enum StartAt {
