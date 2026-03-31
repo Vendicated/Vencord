@@ -22,17 +22,139 @@ import { definePluginSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import { classNameFactory } from "@utils/css";
+import { runtimeHashMessageKey } from "@utils/intlHash";
 import { classes } from "@utils/misc";
 import definePlugin, { OptionType } from "@utils/types";
 import type { Channel, Role } from "@vencord/discord-types";
-import { findCssClassesLazy } from "@webpack";
-import { ChannelStore, PermissionsBits, PermissionStore, Tooltip } from "@webpack/common";
+import { findCssClassesLazy, findStoreLazy } from "@webpack";
+import { ChannelStore, i18n, PermissionsBits, PermissionStore, Tooltip } from "@webpack/common";
 
 import HiddenChannelLockScreen from "./components/HiddenChannelLockScreen";
 
 export const cl = classNameFactory("vc-shc-");
 
 const ChannelListClasses = findCssClassesLazy("modeSelected", "modeMuted", "unread", "icon");
+const LiveBadgeClasses = findCssClassesLazy("live", "liveSmall", "liveShapeRound", "eyebrow");
+const TextBadgeClasses = findCssClassesLazy("textBadge", "base", "eyebrow");
+const ApplicationStreamingStore = findStoreLazy("ApplicationStreamingStore") as {
+    getState?: () => {
+        activeStreams?: Array<[string, { channelId?: string | null; ownerId?: string | null; }]>;
+        streamsByUserAndGuild?: Record<string, Record<string, { channelId?: string | null; ownerId?: string | null; }>>;
+    };
+    getAllActiveStreams?: () => unknown[];
+    getAllApplicationStreams?: () => unknown[];
+    getAnyDiscoverableStreamForUser?: (userId: string | bigint) => unknown | null;
+    getAnyStreamForUser?: (userId: string | bigint) => unknown | null;
+    getAllActiveStreamsForChannel?: (channelId: string | bigint) => unknown[];
+    getAllApplicationStreamsForChannel?: (channelId: string | bigint) => unknown[];
+};
+const VoiceStateStore = findStoreLazy("VoiceStateStore") as {
+    getAllVoiceStates?: () => Record<string, { channelId?: string | null; userId?: string | null; selfStream?: boolean; }>;
+    getDiscoverableVoiceState?: (guildId: string | null, userId: string | bigint) => unknown | null;
+    getVoiceState?: (guildId: string | null, userId: string | bigint) => unknown | null;
+    getDiscoverableVoiceStateForUser?: (userId: string | bigint) => unknown | null;
+    getVoiceStateForUser?: (userId: string | bigint) => unknown | null;
+    addChangeListener?: (callback: () => void) => void;
+    removeChangeListener?: (callback: () => void) => void;
+};
+const ApplicationStreamingFluxStore = ApplicationStreamingStore as typeof ApplicationStreamingStore & {
+    addChangeListener?: (callback: () => void) => void;
+    removeChangeListener?: (callback: () => void) => void;
+};
+
+function getChannelIdForStreamLookup(channel: Channel | { id?: string | null; channelId?: string | null; } | null) {
+    return channel == null
+        ? null
+        : "channelId" in channel
+            ? channel.channelId ?? null
+            : channel.id ?? null;
+}
+
+function getNativeLiveBadgeClassName() {
+    return document.querySelector([
+        '[class*="live"][class*="textBadge"]',
+        '[class*="live"][class*="base"][class*="eyebrow"]'
+    ].join(","))?.className ?? null;
+}
+
+function getDiscordIntlMessage(...keys: string[]) {
+    for (const key of keys) {
+        try {
+            const hashedKey = runtimeHashMessageKey(key);
+            const message = i18n.intl.string(i18n.t[hashedKey]);
+            if (message) return message;
+        } catch {
+        }
+    }
+
+    return null;
+}
+
+function getLocalizedLiveBadgeText() {
+    return getDiscordIntlMessage("LIVE", "GO_LIVE", "STREAM") ?? "Live";
+}
+
+function mergeStreamArrays(original: unknown[] = [], extra: unknown[] = []) {
+    const seen = new Set<string>();
+
+    return [...original, ...extra].filter(stream => {
+        if (stream == null || typeof stream !== "object") return false;
+
+        const key = `${(stream as { ownerId?: string | null; }).ownerId ?? ""}:${(stream as { channelId?: string | null; }).channelId ?? ""}`;
+        if (seen.has(key)) return false;
+
+        seen.add(key);
+        return true;
+    });
+}
+
+function getRawActiveStreamsForChannel(channelId: string | bigint) {
+    return mergeStreamArrays(
+        ApplicationStreamingStore.getAllActiveStreams?.()
+            ?.filter(stream => (stream as { channelId?: string | null; })?.channelId === String(channelId)) ?? [],
+        (ApplicationStreamingStore.getState?.().activeStreams ?? [])
+            .map(([, stream]) => stream)
+            .filter(stream => stream?.channelId === String(channelId))
+    );
+}
+
+function getRawApplicationStreamsForChannel(channelId: string | bigint) {
+    return mergeStreamArrays(
+        ApplicationStreamingStore.getAllApplicationStreams?.()
+            ?.filter(stream => (stream as { channelId?: string | null; })?.channelId === String(channelId)) ?? [],
+        Object.values(ApplicationStreamingStore.getState?.().streamsByUserAndGuild ?? {})
+            .flatMap(streamsByGuild => Object.values(streamsByGuild))
+            .filter(stream => stream?.channelId === String(channelId))
+    );
+}
+
+function getStreamingUserIdsForChannel(channel: Channel | { id?: string | null; channelId?: string | null; } | string | bigint | null) {
+    const channelId = typeof channel === "string" || typeof channel === "bigint"
+        ? String(channel)
+        : getChannelIdForStreamLookup(channel);
+
+    if (channelId == null) return new Set<string>();
+
+    const userIds = new Set<string>();
+
+    for (const stream of getRawApplicationStreamsForChannel(channelId)) {
+        const { ownerId } = stream as { ownerId?: string | null; };
+        if (ownerId) userIds.add(ownerId);
+    }
+
+    for (const stream of getRawActiveStreamsForChannel(channelId)) {
+        const { ownerId } = stream as { ownerId?: string | null; };
+        if (ownerId) userIds.add(ownerId);
+    }
+
+    for (const state of Object.values(VoiceStateStore.getAllVoiceStates?.() ?? {})) {
+        if (state.channelId === String(channelId) && state.selfStream && state.userId) {
+            userIds.add(state.userId);
+        }
+    }
+
+    return userIds;
+}
 
 const enum ShowMode {
     LockIcon,
@@ -71,8 +193,394 @@ function isUncategorized(objChannel: { channel: Channel; comparator: number; }) 
 export default definePlugin({
     name: "ShowHiddenChannels",
     description: "Show channels that you do not have access to view.",
-    authors: [Devs.BigDuck, Devs.AverageReactEnjoyer, Devs.D3SOX, Devs.Ven, Devs.Nuckyz, Devs.Nickyux, Devs.dzshn],
+    authors: [Devs.BigDuck, Devs.AverageReactEnjoyer, Devs.D3SOX, Devs.Ven, Devs.Nuckyz, Devs.Nickyux, Devs.dzshn, Devs.qrewy],
     settings,
+    originalGetAllActiveStreamsForChannel: null as ((channelId: string | bigint) => unknown[]) | null,
+    originalGetAllApplicationStreamsForChannel: null as ((channelId: string | bigint) => unknown[]) | null,
+    originalGetAnyDiscoverableStreamForUser: null as ((userId: string | bigint) => unknown | null) | null,
+    originalGetDiscoverableVoiceState: null as ((guildId: string | null, userId: string | bigint) => unknown | null) | null,
+    originalGetDiscoverableVoiceStateForUser: null as ((userId: string | bigint) => unknown | null) | null,
+    participantBadgeInterval: null as ReturnType<typeof setInterval> | null,
+    participantBadgeObserver: null as MutationObserver | null,
+    participantBadgeVisibilityObserver: null as IntersectionObserver | null,
+    participantBadgeRefreshFrame: null as number | null,
+    participantBadgeStoreListener: null as (() => void) | null,
+    participantBadgeRefreshTimeouts: new Set<ReturnType<typeof setTimeout>>(),
+    participantBadgeRows: new Set<HTMLElement>(),
+    participantVisibleRows: new Set<HTMLElement>(),
+    participantBadgeRowData: new WeakMap<HTMLElement, { userId: string; channelId: string; }>(),
+
+    start() {
+        this.startParticipantBadgeObserver();
+        this.startParticipantBadgeVisibilityObserver();
+        this.collectParticipantBadgeRows(document.querySelector("#channels") ?? document.body);
+        this.participantBadgeStoreListener = () => this.scheduleParticipantBadgeRefresh();
+        ApplicationStreamingFluxStore.addChangeListener?.(this.participantBadgeStoreListener);
+        VoiceStateStore.addChangeListener?.(this.participantBadgeStoreListener);
+        this.participantBadgeInterval = setInterval(() => this.scheduleParticipantBadgeRefresh(), 5000);
+        this.scheduleParticipantBadgeRefresh();
+
+        if (typeof ApplicationStreamingStore.getAllActiveStreamsForChannel === "function") {
+            this.originalGetAllActiveStreamsForChannel ??= ApplicationStreamingStore.getAllActiveStreamsForChannel.bind(ApplicationStreamingStore);
+            ApplicationStreamingStore.getAllActiveStreamsForChannel = channelId => {
+                const original = this.originalGetAllActiveStreamsForChannel!(channelId);
+                const raw = this.getRawActiveStreamsForChannel(channelId);
+                return this.mergeStreamArrays(original, raw);
+            };
+        }
+
+        if (typeof ApplicationStreamingStore.getAllApplicationStreamsForChannel === "function") {
+            this.originalGetAllApplicationStreamsForChannel ??= ApplicationStreamingStore.getAllApplicationStreamsForChannel.bind(ApplicationStreamingStore);
+            ApplicationStreamingStore.getAllApplicationStreamsForChannel = channelId => {
+                const original = this.originalGetAllApplicationStreamsForChannel!(channelId);
+                const raw = this.getRawApplicationStreamsForChannel(channelId);
+                return this.mergeStreamArrays(original, raw);
+            };
+        }
+
+        if (typeof ApplicationStreamingStore.getAnyDiscoverableStreamForUser === "function") {
+            this.originalGetAnyDiscoverableStreamForUser ??= ApplicationStreamingStore.getAnyDiscoverableStreamForUser.bind(ApplicationStreamingStore);
+            ApplicationStreamingStore.getAnyDiscoverableStreamForUser = userId => {
+                const original = this.originalGetAnyDiscoverableStreamForUser!(userId);
+                const fallback = ApplicationStreamingStore.getAnyStreamForUser?.(userId) ?? null;
+                return original ?? fallback;
+            };
+        }
+
+        if (typeof VoiceStateStore.getDiscoverableVoiceStateForUser === "function") {
+            this.originalGetDiscoverableVoiceStateForUser ??= VoiceStateStore.getDiscoverableVoiceStateForUser.bind(VoiceStateStore);
+            VoiceStateStore.getDiscoverableVoiceStateForUser = userId => {
+                const original = this.originalGetDiscoverableVoiceStateForUser!(userId);
+                const fallback = VoiceStateStore.getVoiceStateForUser?.(userId) ?? null;
+                return original ?? fallback;
+            };
+        }
+
+        if (typeof VoiceStateStore.getDiscoverableVoiceState === "function") {
+            this.originalGetDiscoverableVoiceState ??= VoiceStateStore.getDiscoverableVoiceState.bind(VoiceStateStore);
+            VoiceStateStore.getDiscoverableVoiceState = (guildId, userId) => {
+                const original = this.originalGetDiscoverableVoiceState!(guildId, userId);
+                const fallback = VoiceStateStore.getVoiceState?.(guildId, userId) ?? null;
+                return original ?? fallback;
+            };
+        }
+    },
+
+    stop() {
+        if (this.participantBadgeInterval) {
+            clearInterval(this.participantBadgeInterval);
+            this.participantBadgeInterval = null;
+        }
+
+        if (this.participantBadgeStoreListener) {
+            ApplicationStreamingFluxStore.removeChangeListener?.(this.participantBadgeStoreListener);
+            VoiceStateStore.removeChangeListener?.(this.participantBadgeStoreListener);
+            this.participantBadgeStoreListener = null;
+        }
+
+        if (this.participantBadgeObserver) {
+            this.participantBadgeObserver.disconnect();
+            this.participantBadgeObserver = null;
+        }
+
+        if (this.participantBadgeVisibilityObserver) {
+            this.participantBadgeVisibilityObserver.disconnect();
+            this.participantBadgeVisibilityObserver = null;
+        }
+
+        if (this.participantBadgeRefreshFrame != null) {
+            cancelAnimationFrame(this.participantBadgeRefreshFrame);
+            this.participantBadgeRefreshFrame = null;
+        }
+
+        for (const timeout of this.participantBadgeRefreshTimeouts) {
+            clearTimeout(timeout);
+        }
+        this.participantBadgeRefreshTimeouts.clear();
+
+        for (const badge of document.querySelectorAll(`.${cl("participant-live-slot")}`)) {
+            badge.remove();
+        }
+        this.participantBadgeRows.clear();
+        this.participantVisibleRows.clear();
+        this.participantBadgeRowData = new WeakMap();
+
+        if (this.originalGetAllActiveStreamsForChannel) {
+            ApplicationStreamingStore.getAllActiveStreamsForChannel = this.originalGetAllActiveStreamsForChannel;
+        }
+
+        if (this.originalGetAllApplicationStreamsForChannel) {
+            ApplicationStreamingStore.getAllApplicationStreamsForChannel = this.originalGetAllApplicationStreamsForChannel;
+        }
+
+        if (this.originalGetAnyDiscoverableStreamForUser) {
+            ApplicationStreamingStore.getAnyDiscoverableStreamForUser = this.originalGetAnyDiscoverableStreamForUser;
+        }
+
+        if (this.originalGetDiscoverableVoiceState) {
+            VoiceStateStore.getDiscoverableVoiceState = this.originalGetDiscoverableVoiceState;
+        }
+
+        if (this.originalGetDiscoverableVoiceStateForUser) {
+            VoiceStateStore.getDiscoverableVoiceStateForUser = this.originalGetDiscoverableVoiceStateForUser;
+        }
+    },
+
+    mergeStreamArrays,
+
+    getRawActiveStreamsForChannel,
+
+    getRawApplicationStreamsForChannel,
+
+    hasLiveStream(channel: Channel | { id?: string | null; channelId?: string | null; } | null) {
+        const channelId = getChannelIdForStreamLookup(channel);
+        if (channelId == null) return false;
+
+        return this.getRawApplicationStreamsForChannel(channelId).length > 0
+            || (ApplicationStreamingStore.getAllApplicationStreamsForChannel?.(channelId)?.length ?? 0) > 0
+            || this.getRawActiveStreamsForChannel(channelId).length > 0
+            || (ApplicationStreamingStore.getAllActiveStreamsForChannel?.(channelId)?.length ?? 0) > 0;
+    },
+
+    isLiveHiddenChannel(channel: Channel | null) {
+        return this.isHiddenChannel(channel) && this.hasLiveStream(channel);
+    },
+
+    getStreamingUserIdsForChannel,
+
+    isLiveHiddenUser(channel: Channel | { id?: string | null; channelId?: string | null; } | null, userId: string | null | undefined) {
+        if (!userId || !this.isHiddenChannel(channel)) return false;
+        return this.getStreamingUserIdsForChannel(channel).has(userId);
+    },
+
+    shouldForceVoiceUserStreaming(channel: Channel | { id?: string | null; channelId?: string | null; } | null, user: { id?: string | null; } | null | undefined) {
+        return this.isLiveHiddenUser(channel, user?.id);
+    },
+
+    scheduleParticipantBadgeRefresh() {
+        if (this.participantBadgeRefreshFrame != null) return;
+
+        this.participantBadgeRefreshFrame = requestAnimationFrame(() => {
+            this.participantBadgeRefreshFrame = null;
+            this.refreshParticipantLiveBadges();
+        });
+
+        for (const timeout of this.participantBadgeRefreshTimeouts) {
+            clearTimeout(timeout);
+        }
+        this.participantBadgeRefreshTimeouts.clear();
+
+        for (const delay of [80, 220, 500, 1000]) {
+            const timeout = setTimeout(() => {
+                this.participantBadgeRefreshTimeouts.delete(timeout);
+                this.refreshParticipantLiveBadges();
+            }, delay);
+            this.participantBadgeRefreshTimeouts.add(timeout);
+        }
+    },
+
+    startParticipantBadgeObserver() {
+        this.participantBadgeObserver?.disconnect();
+
+        const observerTarget = document.querySelector("#channels") ?? document.body;
+        if (!(observerTarget instanceof Node)) return;
+
+        this.participantBadgeObserver = new MutationObserver(mutations => {
+            for (const mutation of mutations) {
+                this.collectParticipantBadgeRows(mutation.target);
+                for (const node of mutation.addedNodes) {
+                    this.collectParticipantBadgeRows(node);
+                }
+            }
+            this.scheduleParticipantBadgeRefresh();
+        });
+
+        this.participantBadgeObserver.observe(observerTarget, {
+            childList: true,
+            subtree: true,
+            attributes: true,
+            attributeFilter: ["class", "aria-label"]
+        });
+    },
+
+    startParticipantBadgeVisibilityObserver() {
+        this.participantBadgeVisibilityObserver?.disconnect();
+        this.participantBadgeVisibilityObserver = new IntersectionObserver(entries => {
+            for (const entry of entries) {
+                if (!(entry.target instanceof HTMLElement)) continue;
+
+                if (entry.isIntersecting) {
+                    this.participantVisibleRows.add(entry.target);
+                    this.updateParticipantLiveBadgeForRow(entry.target);
+                } else {
+                    this.participantVisibleRows.delete(entry.target);
+                }
+            }
+        }, {
+            threshold: 0
+        });
+    },
+
+    collectParticipantBadgeRows(root: Node | null) {
+        if (!(root instanceof Element || root instanceof Document || root instanceof DocumentFragment)) return;
+
+        const maybeAdd = (element: Element) => {
+            if (element instanceof HTMLElement && element.className.includes("voiceUser")) {
+                this.participantBadgeRows.add(element);
+                this.participantBadgeVisibilityObserver?.observe(element);
+                if (this.isParticipantRowVisible(element)) {
+                    this.participantVisibleRows.add(element);
+                }
+            }
+        };
+
+        if (root instanceof Element) {
+            maybeAdd(root);
+        }
+
+        for (const row of root.querySelectorAll?.('[class*="voiceUser"]') ?? []) {
+            if (row instanceof HTMLElement) {
+                this.participantBadgeRows.add(row);
+            }
+        }
+    },
+
+    getParticipantBadgeRowData(row: HTMLElement) {
+        const props = this.getVoiceUserFiberPropsFromElement(row);
+        if (!props?.user?.id || !props?.channel?.id) {
+            return this.participantBadgeRowData.get(row) ?? null;
+        }
+
+        const data = {
+            userId: props.user.id,
+            channelId: props.channel.id
+        };
+        this.participantBadgeRowData.set(row, data);
+        return data;
+    },
+
+    isParticipantRowVisible(row: HTMLElement) {
+        if (!row.isConnected) return false;
+
+        const rect = row.getBoundingClientRect();
+        return rect.width > 0
+            && rect.height > 0
+            && rect.bottom > 0
+            && rect.right > 0
+            && rect.top < window.innerHeight
+            && rect.left < window.innerWidth;
+    },
+
+    updateParticipantLiveBadgeForRow(row: HTMLElement, nativeClassName = getNativeLiveBadgeClassName(), fallbackClassName = classes(
+        LiveBadgeClasses.live,
+        LiveBadgeClasses.liveSmall,
+        LiveBadgeClasses.eyebrow,
+        TextBadgeClasses.textBadge,
+        TextBadgeClasses.base,
+        TextBadgeClasses.eyebrow,
+        LiveBadgeClasses.liveShapeRound
+    ), liveText = getLocalizedLiveBadgeText()) {
+        const existing = row.querySelector(`.${cl("participant-live-slot")}`);
+        const rowData = this.getParticipantBadgeRowData(row);
+
+        if (!rowData) {
+            existing?.remove();
+            return;
+        }
+
+        const shouldShow = this.isLiveHiddenUser({ channelId: rowData.channelId }, rowData.userId);
+        if (!shouldShow) {
+            existing?.remove();
+            return;
+        }
+
+        const icons = row.querySelector('[class*="icons"]');
+        if (!(icons instanceof HTMLElement)) {
+            existing?.remove();
+            return;
+        }
+
+        const nativeBadge = Array.from(icons.children).find(child =>
+            child instanceof HTMLElement
+            && child !== existing
+            && /(^| )live_/i.test(child.className)
+            && /(^| )textBadge_/i.test(child.className)
+        );
+
+        if (nativeBadge) {
+            existing?.remove();
+            return;
+        }
+
+        const badge = existing instanceof HTMLElement ? existing : document.createElement("div");
+        badge.className = cl("participant-live-slot");
+        badge.textContent = liveText;
+        badge.setAttribute("style", "background-color: var(--red-400); flex-shrink: 0;");
+
+        const className = nativeClassName ?? fallbackClassName;
+        if (badge.className !== `${cl("participant-live-slot")} ${className}`) {
+            badge.className = `${cl("participant-live-slot")} ${className}`;
+        }
+
+        const lastIcon = icons.lastElementChild;
+        if (lastIcon && lastIcon !== badge) {
+            icons.insertBefore(badge, lastIcon);
+        } else if (badge.parentElement !== icons) {
+            icons.appendChild(badge);
+        }
+    },
+
+    getVoiceUserFiberPropsFromElement(element: Element | null) {
+        const fiber = this.getReactFiberFromElement(element);
+        if (fiber == null || typeof fiber !== "object") return null;
+
+        let current = fiber;
+        for (let depth = 0; current && depth < 25; depth++) {
+            const props = current.memoizedProps;
+            if (props?.user?.id && props?.channel?.id) {
+                return props as {
+                    user: { id: string; };
+                    channel: Channel;
+                    isStreaming?: boolean;
+                };
+            }
+            current = current.return;
+        }
+
+        return null;
+    },
+
+    refreshParticipantLiveBadges() {
+        const nativeClassName = getNativeLiveBadgeClassName();
+        const fallbackClassName = classes(
+            LiveBadgeClasses.live,
+            LiveBadgeClasses.liveSmall,
+            LiveBadgeClasses.eyebrow,
+            TextBadgeClasses.textBadge,
+            TextBadgeClasses.base,
+            TextBadgeClasses.eyebrow,
+            LiveBadgeClasses.liveShapeRound
+        );
+        const liveText = getLocalizedLiveBadgeText();
+        const activeRows = Array.from(document.querySelectorAll('[class*="voiceUser"]'))
+            .filter((row): row is HTMLElement => row instanceof HTMLElement && row.isConnected);
+
+        this.participantBadgeRows = new Set(activeRows);
+        this.participantVisibleRows = new Set(activeRows.filter(row => this.isParticipantRowVisible(row)));
+
+        for (const row of activeRows) {
+            this.updateParticipantLiveBadgeForRow(row, nativeClassName, fallbackClassName, liveText);
+        }
+    },
+
+    getReactFiberFromElement(element: Element | null) {
+        if (!(element instanceof Element)) return null;
+
+        const reactFiberKey = Object.keys(element).find(key => key.startsWith("__reactFiber$"));
+        if (!reactFiberKey) return null;
+
+        return (element as any)[reactFiberKey] ?? null;
+    },
 
     patches: [
         {
@@ -152,6 +660,14 @@ export default definePlugin({
             }
         },
         {
+            find: "#{intl::GUEST_NAME_SUFFIX})]",
+            replacement: {
+                // Force Discord's native streaming indicator for hidden voice users
+                match: /(?<=user:(\i),.+?channel:(\i),.+?isStreaming:)(\i)(?=,isWatching:\i)/,
+                replace: (_, user, channel, isStreaming) => `${isStreaming}||$self.shouldForceVoiceUserStreaming(${channel},${user})`
+            }
+        },
+        {
             find: "#{intl::CHANNEL_TOOLTIP_DIRECTORY}",
             predicate: () => settings.store.showMode === ShowMode.LockIcon,
             replacement: {
@@ -195,7 +711,7 @@ export default definePlugin({
                     predicate: () => settings.store.hideUnreads === true,
                     match: /Children\.count.+?;(?=return\(0,\i\.jsxs?\)\(\i\.\i,{focusTarget:)(?<={channel:(\i),name:\i,.+?unread:(\i).+?)/,
                     replace: (m, channel, unread) => `${m}${unread}=$self.isHiddenChannel(${channel})?false:${unread};`
-                }
+                },
             ]
         },
         {
@@ -475,6 +991,21 @@ export default definePlugin({
                 match: /(getVoiceStateForUser.{0,150}?)&&\i\.\i\.canWithPartialContext.{0,20}VIEW_CHANNEL.+?}\)(?=\?)/,
                 replace: "$1"
             }
+        },
+        {
+            find: "getAllApplicationStreams(){return",
+            replacement: [
+                {
+                    // Make ApplicationStreamingStore include streams from hidden channels
+                    match: /\.filter\(e=>null!=e&&\i\(e\.streamType,e\.channelId\)\)/,
+                    replace: ""
+                },
+                {
+                    // Make user-level stream lookup include streams from hidden channels
+                    match: /Object\.values\((\i)\)\.find\(\i=>\i\(\i\)\)\?\?null/,
+                    replace: "Object.values($1).find(e=>null!=e)??null"
+                }
+            ]
         }
     ],
 
@@ -488,15 +1019,18 @@ export default definePlugin({
         return mergedPermissions;
     },
 
-    isHiddenChannel(channel: Channel & { channelId?: string; }, checkConnect = false) {
+    isHiddenChannel(channel: Channel | { channelId?: string | null; } | null, checkConnect = false) {
         try {
-            if (channel == null || Object.hasOwn(channel, "channelId") && channel.channelId == null) return false;
+            if (channel == null) return false;
 
-            if (channel.channelId != null) channel = ChannelStore.getChannel(channel.channelId);
-            if (channel == null || channel.isDM() || channel.isGroupDM() || channel.isMultiUserDM()) return false;
-            if (["browse", "customize", "guide"].includes(channel.id)) return false;
+            const resolvedChannel: Channel | null = "channelId" in channel
+                ? (channel.channelId == null ? null : ChannelStore.getChannel(channel.channelId))
+                : channel as Channel;
 
-            return !PermissionStore.can(PermissionsBits.VIEW_CHANNEL, channel) || checkConnect && !PermissionStore.can(PermissionsBits.CONNECT, channel);
+            if (resolvedChannel == null || resolvedChannel.isDM() || resolvedChannel.isGroupDM() || resolvedChannel.isMultiUserDM()) return false;
+            if (["browse", "customize", "guide"].includes(resolvedChannel.id)) return false;
+
+            return !PermissionStore.can(PermissionsBits.VIEW_CHANNEL, resolvedChannel) || checkConnect && !PermissionStore.can(PermissionsBits.CONNECT, resolvedChannel);
         } catch (e) {
             console.error("[ViewHiddenChannels#isHiddenChannel]: ", e);
             return false;
