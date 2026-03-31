@@ -185,7 +185,7 @@ export function subscribeAllPluginsFluxEvents(fluxDispatcher: typeof FluxDispatc
 export const startPlugin = traceFunction("startPlugin", function startPlugin(p: Plugin) {
     const {
         name, commands, contextMenus, managedStyle, userProfileBadge,
-        onBeforeMessageEdit, onBeforeMessageSend, onMessageClick, chatBarButton, 
+        onBeforeMessageEdit, onBeforeMessageSend, onMessageClick, chatBarButton,
         renderMemberListDecorator, renderMessageAccessory, renderMessageDecoration,
         messagePopoverButton, headerBarButton, userAreaButton, renderProfileCollection
     } = p;
