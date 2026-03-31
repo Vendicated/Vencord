@@ -22,7 +22,7 @@ interface NullLyricCacheEntry {
 const nullLyricCache = new Map<string, NullLyricCacheEntry>();
 
 export const lyricFetchers = {
-    [Provider.Spotify]: async (track: Track) => await getLyricsSpotify(track.id),
+    [Provider.Spotify]: async (track: Track) => await getLyricsSpotify(track.id, settings.store.spotifyLyricsApiUrl),
     [Provider.Lrclib]: getLyricsLrclib,
 };
 

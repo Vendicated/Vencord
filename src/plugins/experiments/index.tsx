@@ -92,8 +92,7 @@ export default definePlugin({
             find: "Clear Treatment ",
             replacement: [
                 {
-                    // TODO: stable compat optional chaining remove once some time has passed
-                    match: /\i\??\.isStaff\(\)/,
+                    match: /\i\?\.isStaff\(\)/,
                     replace: "true"
                 },
                 // Fix some tricky experiments name causing a client crash

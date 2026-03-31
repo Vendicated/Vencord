@@ -35,12 +35,6 @@ export default definePlugin({
                 {
                     match: /(?<=,NOTICE_DISMISS:function\(\i\){)return null!=(\i)/,
                     replace: (m, notice) => `if(${notice}?.id=="EquicordNotice")return(${notice}=null,Vencord.Api.Notices.nextNotice(),true);${m}`
-                },
-                // FIXME(Bundler agressive inline): Remove the non used compability once enough time has passed
-                {
-                    match: /(?<=function (\i)\(\i\){)return null!=(\i)(?=.+?NOTICE_DISMISS:\1)/,
-                    replace: (m, _, notice) => `if(${notice}?.id=="EquicordNotice")return(${notice}=null,Vencord.Api.Notices.nextNotice(),true);${m}`,
-                    noWarn: true
                 }
             ]
         }

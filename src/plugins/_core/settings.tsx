@@ -110,18 +110,6 @@ const settings = definePluginSettings({
     }
 });
 
-const settingsSectionMap: [string, string][] = [
-    ["EquicordSettings", "equicord_main_panel"],
-    ["EquicordPlugins", "equicord_plugins_panel"],
-    ["EquicordThemes", "equicord_themes_panel"],
-    ["EquicordUpdater", "equicord_updater_panel"],
-    ["EquicordChangelog", "equicord_changelog_panel"],
-    ["EquicordCloud", "equicord_cloud_panel"],
-    ["EquicordBackupAndRestore", "equicord_backup_restore_panel"],
-    ["EquicordPatchHelper", "equicord_patch_helper_panel"],
-    ["EquibopSettings", "equicord_equibop_settings_panel"],
-];
-
 export default definePlugin({
     name: "Settings",
     description: "Adds Settings UI and debug info",
@@ -129,7 +117,6 @@ export default definePlugin({
     required: true,
 
     settings,
-    settingsSectionMap,
 
     patches: [
         {
@@ -187,10 +174,6 @@ export default definePlugin({
             icon: () => <Icon width={20} height={20} />,
             buildLayout: () => [panel]
         });
-    },
-
-    getSettingsSectionMappings() {
-        return settingsSectionMap;
     },
 
     buildLayout(originalLayoutBuilder: SettingsLayoutBuilder) {

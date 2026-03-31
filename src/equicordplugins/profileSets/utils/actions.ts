@@ -24,16 +24,7 @@ function getFreshPendingAvatar(section: PresetSection, guildId?: string): string
         ? UserProfileSettingsStore.getPendingChanges?.(guildId)
         : UserProfileSettingsStore.getPendingChanges?.()) ?? {};
     const pendingObj = pending as Record<string, unknown>;
-
-    const candidates = [
-        pendingObj.selectedAvatarRaw,
-        pendingObj.presetAvatarRaw,
-        pendingObj.pendingAvatar,
-        pendingObj.avatar,
-        pendingObj.selectedAvatarProcessed,
-        pendingObj.presetAvatarProcessed
-    ];
-    const selected = candidates.find(isImageInput);
+    const selected = [pendingObj.pendingAvatar].find(isImageInput);
     if (!selected) return null;
     return typeof selected === "string" ? selected : selected.imageUri;
 }

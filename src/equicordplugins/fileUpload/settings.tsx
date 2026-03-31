@@ -12,6 +12,7 @@ import { useForceUpdater } from "@utils/react";
 import { OptionType } from "@utils/types";
 import { React, Select, showToast, TextArea, TextInput, Toasts } from "@webpack/common";
 
+import { CORS_PROXY } from "./constants";
 import { ServiceType } from "./types";
 import { parseShareXConfig } from "./utils/sharex";
 
@@ -194,6 +195,12 @@ export const settings = definePluginSettings({
         type: OptionType.BOOLEAN,
         description: "Strip query params from uploaded URLs",
         default: false,
+        hidden: true
+    },
+    corsProxyUrl: {
+        type: OptionType.STRING,
+        description: "CORS proxy URL used for browser uploads",
+        default: CORS_PROXY,
         hidden: true
     },
     apngToGif: {
@@ -480,6 +487,18 @@ export function SettingsComponent() {
                     checked={store.stripQueryParams}
                     onChange={v => store.stripQueryParams = v}
                 />
+            </SettingsSection>
+
+            <SettingTextInput
+                name="CORS Proxy URL"
+                description="CORS proxy used for web uploads. Leave empty to use the default proxy"
+                value={store.corsProxyUrl || ""}
+                onChange={v => store.corsProxyUrl = v}
+                placeholder="https://your-cors-proxy.example.com"
+            />
+
+            <SettingsSection name="Default CORS Proxy Source" description="Source code for the default CORS proxy">
+                <a href="https://codeberg.org/key/corsproxy" target="_blank" rel="noreferrer">codeberg.org/key/corsproxy</a>
             </SettingsSection>
 
             <SettingsSection tag="label" name="Convert APNG to GIF" description="Convert APNG files to GIF format" inlineSetting>

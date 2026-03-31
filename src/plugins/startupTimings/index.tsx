@@ -35,10 +35,8 @@ export default definePlugin({
             Component: StartupTimingPage,
             Icon: ClockIcon
         });
-        SettingsPlugin.settingsSectionMap.push(["VencordStartupTimings", "vencord_startup_timings"]);
     },
     stop() {
         removeFromArray(SettingsPlugin.customEntries, e => e.key === "vencord_startup_timings");
-        removeFromArray(SettingsPlugin.settingsSectionMap, entry => entry[1] === "vencord_startup_timings");
     },
 });

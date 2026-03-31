@@ -192,7 +192,7 @@ export const IconUtils: t.IconUtils = findByPropsLazy("getGuildBannerURL", "getU
 
 export const ColorUtils = mapMangledModuleLazy("Invalid hex color format", {
     rgbToHex: filters.byCode(".toString(16).slice(1)"),
-    hexToRgba: filters.byCode("rgba(", "??"),
+    hexToRgba: filters.byCode("`rgba(${"),
     hexToRgb: filters.byCode(".rgb();return"),
     rgbToHsl: filters.byCode("saturation:", "lightness:"),
     mixColors: filters.byCode(".substring(1,3),16)"),

@@ -79,11 +79,12 @@ export async function buildOrWatchAll(buildConfigs) {
             context(cfg).then(ctx => ctx.watch())
         ));
     } else {
-        await Promise.all(buildConfigs.map(cfg => build(cfg)))
-            .catch(error => {
+        for (const cfg of buildConfigs) {
+            await build(cfg).catch(error => {
                 console.error(error.message);
-                process.exit(1); // exit immediately to skip the rest of the builds
+                process.exit(1);
             });
+        }
     }
 }
 

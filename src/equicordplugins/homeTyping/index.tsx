@@ -5,12 +5,14 @@
  */
 
 import { Devs } from "@utils/constants";
+import { classNameFactory } from "@utils/css";
 import definePlugin from "@utils/types";
 import { findComponentByCodeLazy, findStoreLazy } from "@webpack";
 import { TypingStore, UserStore, useStateFromStores } from "@webpack/common";
 
-const ThreeDots = findComponentByCodeLazy("Math.min(1,Math.max(", "dotRadius:");
+const cl = classNameFactory("vc-home-typing-");
 
+const ThreeDots = findComponentByCodeLazy("Math.min(1,Math.max(", "dotRadius:");
 const PrivateChannelSortStore = findStoreLazy("PrivateChannelSortStore") as { getPrivateChannelIds: () => string[]; };
 
 export default definePlugin({
@@ -18,7 +20,7 @@ export default definePlugin({
     description: "Changes the home button to a typing indicator if someone in your dms is typing",
     authors: [Devs.Samwich],
     TypingIcon() {
-        return <ThreeDots dotRadius={3} themed={true} />;
+        return <ThreeDots className={cl("dots")} dotRadius={3} themed={true} />;
     },
     isTyping() {
         return useStateFromStores([TypingStore], () =>

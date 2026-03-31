@@ -1,4 +1,4 @@
-.better-audio-visualizer {
+.vc-better-audio-player-canvas {
     position: absolute;
     top: 0;
     left: 0;
@@ -7,4 +7,5 @@
     pointer-events: none;
     z-index: 1;
     border: none;
+    border-radius: inherit;
 }

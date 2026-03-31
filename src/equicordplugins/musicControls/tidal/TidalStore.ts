@@ -8,6 +8,8 @@ import { Logger } from "@utils/Logger";
 import { proxyLazyWebpack } from "@webpack";
 import { Flux, FluxDispatcher } from "@webpack/common";
 
+import { settings } from "../settings";
+
 export interface Track {
     id: string;
     name: string;
@@ -91,7 +93,7 @@ class TidalSocket {
     }
 
     private initWs() {
-        const url = "ws://localhost:24123";
+        const url = settings.store.websocketURL || "ws://localhost:24123";
         if (!url) {
             return;
         }
