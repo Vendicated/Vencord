@@ -256,7 +256,7 @@ export default definePlugin({
         {
             find: "[aria-owns=folder-items-",
             replacement: {
-                match: /"data-dnd-name":(\i)\.name,(?="data-drop-hovering".{0,100}formatToPlainString\()/,
+                match: /"data-dnd-name":(\i)\.name,(?="data-drop-hovering".{0,300}"aria-selected":\i\}\)\}\))/,
                 replace: "$&draggable:!0,onDragStart:e=>$self.onGuildDragStart(e,$1.id),"
             }
         },
