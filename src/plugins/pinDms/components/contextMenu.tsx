@@ -6,7 +6,7 @@
 
 import { findGroupChildrenByChildId, NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { PinOrder, settings } from "@plugins/pinDms";
-import { addChannelToCategory, canMoveChannelInDirection, currentUserCategories, isPinned, moveChannel, removeChannelFromCategory } from "@plugins/pinDms/data";
+import { addChannelToCategory, moveChannelToCategory, canMoveChannelInDirection, currentUserCategories, isPinned, moveChannel, removeChannelFromCategory } from "@plugins/pinDms/data";
 import { Menu } from "@webpack/common";
 
 import { openCategoryModal } from "./CreateCategoryModal";
@@ -45,6 +45,34 @@ function createPinMenuItem(channelId: string) {
 
             {pinned && (
                 <>
+                    <Menu.MenuItem
+                        id="move-dm"
+                        label="Move DM"
+                    >
+                        <Menu.MenuItem
+                            id="vc-add-category"
+                            label="Add Category"
+                            color="brand"
+                            action={() => openCategoryModal(null, channelId)}
+                        />
+                        <Menu.MenuSeparator />
+                        {
+
+                            currentUserCategories.filter(c => !c.channels.includes(channelId)).
+                                map(category => (
+                                    <Menu.MenuItem
+                                        key={category.id}
+                                        id={`pin-category-${category.id}`}
+                                        label={category.name}
+                                        action={() => moveChannelToCategory(channelId, category.id)}
+                                    />
+                                ))
+                        }
+
+                    </Menu.MenuItem>
+
+                    <Menu.MenuSeparator />
+
                     <Menu.MenuItem
                         id="unpin-dm"
                         label="Unpin DM"
