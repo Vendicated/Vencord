@@ -221,7 +221,7 @@ export const settings = definePluginSettings({
         type: OptionType.BOOLEAN,
         default: false,
     },
-    WebsocketURL: {
+    websocketURL: {
         type: OptionType.STRING,
         description: "Default is ws://localhost:24123",
         default: "ws://localhost:24123",
