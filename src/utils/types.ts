@@ -197,16 +197,6 @@ export interface PluginDef {
     renderMessageDecoration?: MessageDecorationFactory;
 
     renderMemberListDecorator?: MemberListDecoratorFactory;
-
-    // TODO: Remove eventually
-    /**
-     * @deprecated Use {@link chatBarButton} instead
-     */
-    renderChatBarButton?: never;
-    /**
-     * @deprecated Use {@link messagePopoverButton} instead
-     */
-    renderMessagePopoverButton?: never;
 }
 
 export const enum StartAt {

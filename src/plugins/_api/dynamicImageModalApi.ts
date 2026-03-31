@@ -14,7 +14,6 @@ export default definePlugin({
     description: "Allows you to omit either width or height when opening an image modal",
     patches: [
         {
-            // TODO: bundler compat
             find: ".renderLinkComponent",
             replacement: {
                 // widthAndHeightPassed = w != null && w !== 0 && h == null || h === 0
