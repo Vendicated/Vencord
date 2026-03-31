@@ -105,12 +105,3 @@
     margin-left: 6px;
     z-index: 0;
 }
-
-.vc-shc-participant-live-slot {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    flex: 0 0 auto;
-    margin-left: 6px;
-    margin-right: 6px;
-}
