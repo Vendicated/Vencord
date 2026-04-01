@@ -57,6 +57,9 @@ export default definePlugin({
         },
         {
             find: '"#{intl::APP_TAG::hash}":',
+            // This matches the intl bundle, english is always loaded as a fallback bundle
+            // if the users language is not english, we need to apply to both because the load order is random
+            all: true,
             predicate: () => settings.store.noAppsAllowed,
             replacement: {
                 match: /(#{intl::APP_TAG::hash}":\[").*?("\])/,
