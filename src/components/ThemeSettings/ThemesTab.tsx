@@ -19,7 +19,7 @@
 import "./themesStyles.css";
 
 import { isPluginEnabled } from "@api/PluginManager";
-import { Settings, useSettings } from "@api/Settings";
+import { Settings, type ThemeActivationMode, useSettings } from "@api/Settings";
 import { Button } from "@components/Button";
 import { Divider } from "@components/Divider";
 import { ErrorCard } from "@components/ErrorCard";
@@ -58,6 +58,74 @@ const RefreshIcon = findComponentByCodeLazy("M21 2a1 1 0 0 1 1 1v6");
 const LinkIcon = findComponentByCodeLazy("M16.32 14.72a1 1 0 0 1 0-1.41l2.51-2.51");
 const DiscordIcon = findComponentByCodeLazy("1.6 5.64-2.87");
 const DownloadIcon = findComponentByCodeLazy("1.42l3.3 3.3V3a1");
+
+const themeActivationModeOptions: { value: ThemeActivationMode; label: string; }[] = [
+    { value: "always", label: "Always on" },
+    { value: "light", label: "Light only" },
+    { value: "dark", label: "Dark only" }
+];
+
+function getThemeActivationModeLabel(mode: ThemeActivationMode) {
+    return themeActivationModeOptions.find(option => option.value === mode)?.label ?? "Always on";
+}
+
+function inferThemeActivationMode(css: string) {
+    let text = css.replace(/^\uFEFF/, "");
+
+    while (true) {
+        const trimmed = text.trimStart();
+        if (trimmed !== text) text = trimmed;
+
+        const comment = /^\/\*[\s\S]*?\*\/\s*/.exec(text);
+        if (!comment) break;
+        text = text.slice(comment[0].length);
+    }
+
+    const match = /^@(light|dark)\b/i.exec(text);
+    return match?.[1].toLowerCase() as ThemeActivationMode | undefined;
+}
+
+function inferAndStoreThemeActivationMode(themeId: string, css: string) {
+    const activationMode = Settings.themeActivationModes?.[themeId] ?? inferThemeActivationMode(css);
+    if (!activationMode || themeId in (Settings.themeActivationModes ?? {})) return;
+
+    Settings.themeActivationModes = {
+        ...(Settings.themeActivationModes ?? {}),
+        [themeId]: activationMode,
+    };
+}
+
+function ThemeActivationMenu({ themeId, activationMode, onActivationModeChange, children }: {
+    themeId: string;
+    activationMode: ThemeActivationMode;
+    onActivationModeChange?: (mode: ThemeActivationMode) => void;
+    children?: React.ReactNode;
+}) {
+    const [selectedMode, setSelectedMode] = useState(activationMode);
+
+    return (
+        <Menu.Menu navId={`theme-card-menu-${themeId}`} onClose={ContextMenuApi.closeContextMenu}>
+            {onActivationModeChange && (
+                <Menu.MenuItem id={`theme-activation-${themeId}`} label="Theme activation">
+                    {themeActivationModeOptions.map(option => (
+                        <Menu.MenuRadioItem
+                            key={option.value}
+                            id={`theme-activation-${themeId}-${option.value}`}
+                            group={`theme-activation-${themeId}`}
+                            label={option.label}
+                            checked={selectedMode === option.value}
+                            action={() => {
+                                setSelectedMode(option.value);
+                                onActivationModeChange(option.value);
+                            }}
+                        />
+                    ))}
+                </Menu.MenuItem>
+            )}
+            {children}
+        </Menu.Menu>
+    );
+}
 
 function LocalThemeIcon({ size }: { size?: string; }) {
     const sizeVal = size === "sm" ? 16 : 24;
@@ -145,6 +213,8 @@ interface OtherThemeCardProps {
     onDownload?: () => void;
     themeLink?: string;
     isLocal?: boolean;
+    activationMode?: ThemeActivationMode;
+    onActivationModeChange?: (mode: ThemeActivationMode) => void;
 }
 
 interface UserCSSCardProps {
@@ -153,11 +223,47 @@ interface UserCSSCardProps {
     onChange: (enabled: boolean) => void;
     onDelete: () => void;
     onSettingsReset: () => void;
+    activationMode?: ThemeActivationMode;
+    onActivationModeChange?: (mode: ThemeActivationMode) => void;
 }
 
-function UserCSSThemeCard({ theme, enabled, onChange, onDelete, onSettingsReset }: UserCSSCardProps) {
+function UserCSSThemeCard({ theme, enabled, onChange, onDelete, onSettingsReset, activationMode = "always", onActivationModeChange }: UserCSSCardProps) {
     const missingPlugins = useMemo(() =>
         theme.requiredPlugins?.filter(p => !isPluginEnabled(p)), [theme]);
+
+    const openThemeMenu = (e: React.MouseEvent) => {
+        ContextMenuApi.openContextMenu(e, () => (
+            <ThemeActivationMenu
+                themeId={theme.id}
+                activationMode={activationMode}
+                onActivationModeChange={onActivationModeChange}
+            >
+                {theme.vars && (
+                    <Menu.MenuItem
+                        id="edit-theme-settings"
+                        label="Edit Settings"
+                        action={() => openModal(modalProps =>
+                            <UserCSSSettingsModal modalProps={modalProps} theme={theme} onSettingsReset={onSettingsReset} />)
+                        }
+                    />
+                )}
+                {IS_WEB && (
+                    <>
+                        <Menu.MenuSeparator />
+                        <Menu.MenuItem
+                            id="delete-theme"
+                            label="Delete"
+                            color="danger"
+                            icon={DeleteIcon}
+                            action={onDelete}
+                        />
+                    </>
+                )}
+            </ThemeActivationMenu>
+        ));
+    };
+
+    const canOpenThemeMenu = !!theme.vars || !!onActivationModeChange || IS_WEB;
 
     return (
         <AddonCard
@@ -182,17 +288,9 @@ function UserCSSThemeCard({ theme, enabled, onChange, onDelete, onSettingsReset 
                             )}
                         </Tooltip>
                     )}
-                    {theme.vars && (
-                        <div style={{ cursor: "pointer" }} onClick={
-                            () => openModal(modalProps =>
-                                <UserCSSSettingsModal modalProps={modalProps} theme={theme} onSettingsReset={onSettingsReset} />)
-                        }>
+                    {canOpenThemeMenu && (
+                        <div style={{ cursor: "pointer" }} onClick={openThemeMenu}>
                             <CogWheel />
-                        </div>
-                    )}
-                    {IS_WEB && (
-                        <div style={{ cursor: "pointer", color: "var(--status-danger" }} onClick={onDelete}>
-                            <DeleteIcon />
                         </div>
                     )}
                 </>
@@ -204,16 +302,26 @@ function UserCSSThemeCard({ theme, enabled, onChange, onDelete, onSettingsReset 
                         <span style={{ color: "var(--text-muted)" }}>•</span>
                     )}
                     {!!theme.supportURL && <Link href={theme.supportURL}>Support</Link>}
+                    {activationMode !== "always" && (
+                        <>
+                            {!!(theme.homepageURL || theme.supportURL) && <span style={{ color: "var(--text-muted)" }}>•</span>}
+                            <span style={{ color: "var(--text-muted)" }}>{getThemeActivationModeLabel(activationMode)}</span>
+                        </>
+                    )}
                 </Flex>
             }
         />
     );
 }
 
-function OtherThemeCard({ theme, enabled, onChange, onDelete, showDeleteButton, onEditName, disabled, onPin, isPinned, onRefresh, onOpenFolder, onCopyUrl, onDownload, themeLink, isLocal }: OtherThemeCardProps) {
+function OtherThemeCard({ theme, enabled, onChange, onDelete, showDeleteButton, onEditName, disabled, onPin, isPinned, onRefresh, onOpenFolder, onCopyUrl, onDownload, themeLink, isLocal, activationMode = "always", onActivationModeChange }: OtherThemeCardProps) {
     const openThemeMenu = (e: React.MouseEvent) => {
         ContextMenuApi.openContextMenu(e, () => (
-            <Menu.Menu navId="theme-card-menu" onClose={ContextMenuApi.closeContextMenu}>
+            <ThemeActivationMenu
+                themeId={themeLink ?? theme.fileName}
+                activationMode={activationMode}
+                onActivationModeChange={onActivationModeChange}
+            >
                 {onPin && (
                     <Menu.MenuItem
                         id="pin-theme"
@@ -286,7 +394,7 @@ function OtherThemeCard({ theme, enabled, onChange, onDelete, showDeleteButton, 
                         />
                     </>
                 )}
-            </Menu.Menu>
+            </ThemeActivationMenu>
         ));
     };
 
@@ -353,6 +461,12 @@ function OtherThemeCard({ theme, enabled, onChange, onDelete, showDeleteButton, 
                             Discord Server
                         </Link>
                     )}
+                    {activationMode !== "always" && (
+                        <>
+                            {!!(theme.website || theme.invite) && <span style={{ color: "var(--text-muted)" }}>•</span>}
+                            <span style={{ color: "var(--text-muted)" }}>{getThemeActivationModeLabel(activationMode)}</span>
+                        </>
+                    )}
                 </Flex>
             }
 
@@ -368,10 +482,11 @@ interface UnifiedTheme {
     enabled: boolean;
     header: UserThemeHeader | UserstyleHeader;
     link?: string;
+    activationMode: ThemeActivationMode;
 }
 
 function ThemesTab() {
-    const settings = useSettings(["themeLinks", "enabledThemeLinks", "enabledThemes", "enableOnlineThemes", "pinnedThemes"]);
+    const settings = useSettings(["themeLinks", "enabledThemeLinks", "enabledThemes", "enableOnlineThemes", "pinnedThemes", "themeActivationModes.*"]);
 
     const fileInputRef = useState<HTMLInputElement | null>(null)[1];
     const [currentThemeLink, setCurrentThemeLink] = useState("");
@@ -386,16 +501,15 @@ function ThemesTab() {
     const [filter, setFilter] = useState(ThemeFilter.All);
 
     useEffect(() => {
-        updateThemes();
+        void updateThemes();
     }, []);
 
     async function updateThemes() {
-        await changeThemeLibraryURLs();
-        refreshLocalThemes();
-        refreshOnlineThemes();
+        changeThemeLibraryURLs();
+        await Promise.allSettled([refreshLocalThemes(), refreshOnlineThemes()]);
     }
 
-    async function changeThemeLibraryURLs() {
+    function changeThemeLibraryURLs() {
         settings.themeLinks = settings.themeLinks.map(link => {
             if (link.startsWith("https://discord-themes.com/api")) {
                 return link.replace("https://discord-themes.com/api", "https://themes.equicord.org/api");
@@ -411,43 +525,49 @@ function ThemesTab() {
         for (const { fileName, content } of themes) {
             if (!fileName.endsWith(".css")) continue;
 
-            if ((!IS_WEB || "legcord" in window) && fileName.endsWith(".user.css")) {
-                const header = await usercssParse(content, fileName);
+            try {
+                inferAndStoreThemeActivationMode(fileName, content);
 
-                themeInfo.push({
-                    type: "usercss",
-                    header
-                });
+                if ((!IS_WEB || "legcord" in window) && fileName.endsWith(".user.css")) {
+                    const header = await usercssParse(content, fileName);
 
-                Settings.userCssVars[header.id] ??= {};
+                    themeInfo.push({
+                        type: "usercss",
+                        header
+                    });
 
-                for (const [name, varInfo] of Object.entries(header.vars ?? {})) {
-                    let normalizedValue = "";
+                    Settings.userCssVars[header.id] ??= {};
 
-                    switch (varInfo.type) {
-                        case "text":
-                        case "color":
-                        case "checkbox":
-                            normalizedValue = varInfo.default;
-                            break;
-                        case "select":
-                            normalizedValue = varInfo.options.find(v => v.name === varInfo.default)!.value;
-                            break;
-                        case "range":
-                            normalizedValue = `${varInfo.default}${varInfo.units}`;
-                            break;
-                        case "number":
-                            normalizedValue = String(varInfo.default);
-                            break;
+                    for (const [name, varInfo] of Object.entries(header.vars ?? {})) {
+                        let normalizedValue = "";
+
+                        switch (varInfo.type) {
+                            case "text":
+                            case "color":
+                            case "checkbox":
+                                normalizedValue = varInfo.default;
+                                break;
+                            case "select":
+                                normalizedValue = varInfo.options.find(v => v.name === varInfo.default)!.value;
+                                break;
+                            case "range":
+                                normalizedValue = `${varInfo.default}${varInfo.units}`;
+                                break;
+                            case "number":
+                                normalizedValue = String(varInfo.default);
+                                break;
+                        }
+
+                        Settings.userCssVars[header.id][name] ??= normalizedValue;
                     }
-
-                    Settings.userCssVars[header.id][name] ??= normalizedValue;
+                } else {
+                    themeInfo.push({
+                        type: "other",
+                        header: getThemeInfo(stripBOM(content), fileName)
+                    });
                 }
-            } else {
-                themeInfo.push({
-                    type: "other",
-                    header: getThemeInfo(stripBOM(content), fileName)
-                });
+            } catch {
+                continue;
             }
         }
 
@@ -504,9 +624,10 @@ function ThemesTab() {
                     const res = await fetch(link);
                     if (!res.ok) throw new Error(`Failed to fetch ${link}`);
                     const css = await res.text();
+                    inferAndStoreThemeActivationMode(link, css);
+
                     return { ...getThemeInfo(css, link), link };
-                } catch (err) {
-                    console.warn(`Theme fetch failed for ${link}:`, err);
+                } catch {
                     return null;
                 }
             })
@@ -523,10 +644,33 @@ function ThemesTab() {
         }
     }
 
+    function clearThemeState(themeId: string) {
+        settings.pinnedThemes = settings.pinnedThemes.filter(f => f !== themeId);
+        settings.enabledThemes = settings.enabledThemes.filter(f => f !== themeId);
+        settings.enabledThemeLinks = settings.enabledThemeLinks.filter(f => f !== themeId);
+        settings.themeNames = Object.fromEntries(Object.entries(settings.themeNames).filter(([key]) => key !== themeId));
+
+        const themeActivationModes = { ...(settings.themeActivationModes ?? {}) };
+        delete themeActivationModes[themeId];
+        settings.themeActivationModes = themeActivationModes;
+    }
+
     function deleteThemeLink(link: string) {
         settings.themeLinks = settings.themeLinks.filter(f => f !== link);
-        settings.pinnedThemes = settings.pinnedThemes.filter(f => f !== link);
+        clearThemeState(link);
         refreshOnlineThemes();
+    }
+
+    function setThemeActivationMode(themeId: string, mode: ThemeActivationMode) {
+        const themeActivationModes = { ...(settings.themeActivationModes ?? {}) };
+
+        if (mode === "always") {
+            delete themeActivationModes[themeId];
+        } else {
+            themeActivationModes[themeId] = mode;
+        }
+
+        settings.themeActivationModes = themeActivationModes;
     }
 
     function togglePinTheme(themeId: string) {
@@ -542,6 +686,8 @@ function ThemesTab() {
             const res = await fetch(link);
             if (!res.ok) throw new Error(`Failed to fetch ${link}`);
             const css = await res.text();
+            inferAndStoreThemeActivationMode(link, css);
+
             const updatedTheme = { ...getThemeInfo(css, link), link };
 
             setOnlineThemes(prev =>
@@ -587,7 +733,8 @@ function ThemesTab() {
                 name: customName ?? theme.name ?? theme.fileName,
                 enabled: settings.enabledThemeLinks.includes(theme.link),
                 header: { ...theme, customName },
-                link: theme.link
+                link: theme.link,
+                activationMode: settings.themeActivationModes?.[theme.link] ?? "always",
             });
         }
 
@@ -601,12 +748,13 @@ function ThemesTab() {
                 themeType: type,
                 name,
                 enabled: settings.enabledThemes.includes(header.fileName),
-                header
+                header,
+                activationMode: settings.themeActivationModes?.[header.fileName] ?? "always",
             });
         }
 
         return themes;
-    }, [onlineThemes, userThemes, themeNames, settings.enabledThemeLinks, settings.enabledThemes]);
+    }, [onlineThemes, userThemes, themeNames, settings.enabledThemeLinks, settings.enabledThemes, settings.themeActivationModes]);
 
     const filteredThemes = useMemo(() => {
         let themes = allThemes;
@@ -808,6 +956,8 @@ function ThemesTab() {
                                     onRefresh={() => refreshOnlineTheme(onlineTheme.link)}
                                     onDownload={() => downloadTheme(onlineTheme.link, onlineTheme.name ?? "theme")}
                                     isLocal={false}
+                                    activationMode={theme.activationMode}
+                                    onActivationModeChange={mode => setThemeActivationMode(onlineTheme.link, mode)}
                                     onEditName={newName => {
                                         const updatedNames = { ...themeNames, [onlineTheme.link]: newName };
                                         setThemeNames(updatedNames);
@@ -829,11 +979,14 @@ function ThemesTab() {
                                     onChange={enabled => onLocalThemeChange(usercssTheme.fileName, enabled)}
                                     onDelete={async () => {
                                         onLocalThemeChange(usercssTheme.fileName, false);
+                                        clearThemeState(usercssTheme.fileName);
                                         await VencordNative.themes.deleteTheme(usercssTheme.fileName);
                                         refreshLocalThemes();
                                     }}
                                     onSettingsReset={refreshLocalThemes}
                                     theme={usercssTheme}
+                                    activationMode={theme.activationMode}
+                                    onActivationModeChange={mode => setThemeActivationMode(usercssTheme.fileName, mode)}
                                 />
                             );
                         }
@@ -846,6 +999,7 @@ function ThemesTab() {
                                 onChange={enabled => onLocalThemeChange(localTheme.fileName, enabled)}
                                 onDelete={async () => {
                                     onLocalThemeChange(localTheme.fileName, false);
+                                    clearThemeState(localTheme.fileName);
                                     await VencordNative.themes.deleteTheme(localTheme.fileName);
                                     refreshLocalThemes();
                                 }}
@@ -856,6 +1010,8 @@ function ThemesTab() {
                                 onRefresh={refreshLocalThemes}
                                 isLocal
                                 theme={localTheme}
+                                activationMode={theme.activationMode}
+                                onActivationModeChange={mode => setThemeActivationMode(localTheme.fileName, mode)}
                             />
                         );
                     })}
