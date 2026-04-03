@@ -208,6 +208,11 @@ export const Devs = /* #__PURE__*/ Object.freeze({
         name: "rae",
         id: 1398136199503282277n
     },
+    hazesjsbn: {
+        name: "hazesjsbn",
+        id: 0n,
+        badge: false
+    },
     pointy: {
         name: "pointy",
         id: 99914384989519872n
