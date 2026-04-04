@@ -78,8 +78,8 @@ function VencordPopoverButtons(props: { Component: React.ComponentType<MessagePo
                 if (!item) return null;
 
                 return (
-                    <ErrorBoundary noop>
-                        <Component key={key} {...item} />
+                    <ErrorBoundary noop key={key}>
+                        <Component {...item} />
                     </ErrorBoundary>
                 );
             } catch (err) {
