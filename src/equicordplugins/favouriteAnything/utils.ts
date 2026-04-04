@@ -70,23 +70,27 @@ function defineItems<T extends Record<CustomItemFormat, CustomItemDef>>(def: Ite
 // Stringify returns a simple string representation used for thumbnail text and expression picker search.
 export const defs = defineItems({
     [CustomItemFormat.ATTACHMENT]: defineItem({
-        encode: ({ id, filename, size, url, content_type = "" }: MessageAttachment) => [
+        encode: ({ id, filename, size, url, content_type = "", title, description }: MessageAttachment) => [
             id,
             filename,
             size,
             new URL(url).pathname,
-            content_type
+            content_type,
+            title ?? null,
+            description ?? null
         ],
-        decode: ([id, filename, size, path, content_type]) => ({
+        decode: ([id, filename, size, path, content_type, title, description]) => ({
             id: id ?? "0",
             filename: filename ?? "UNKNOWN",
             size: +size! || 0,
             url: `${new URL(path!, `https://${window.GLOBAL_ENV.CDN_HOST}`)}`,
             proxy_url: `${new URL(path!, `https://${window.GLOBAL_ENV.MEDIA_PROXY_ENDPOINT}`)}`,
             content_type: content_type ?? "application/octet-stream",
-            spoiler: filename?.startsWith("SPOILER_") ?? false
+            spoiler: filename?.startsWith("SPOILER_") ?? false,
+            title: title ?? undefined,
+            description: description ?? undefined
         }),
-        stringify: ({ filename }) => filename
+        stringify: ({ title, filename }) => title?.trim() || filename
     })
     // This could be expanded in the future with other item types (e.g. voice messages)
 });
@@ -149,23 +153,15 @@ async function fetchAttachment(attachment: MessageAttachment): Promise<File> {
 }
 
 export async function sendAttachment(attachment: MessageAttachment, channel: Channel) {
-    const file = await fetchAttachment(attachment)
-        .catch(() =>
-            Toasts.show({
-                message: `Couldn't fetch ${attachment.filename}`,
-                id: Toasts.genId(),
-                type: Toasts.Type.FAILURE
-            })
-        );
+    const { filename, title, description } = attachment;
+    const file = await fetchAttachment(attachment).catch(() =>
+        Toasts.show({ message: `Couldn't fetch ${filename}`, id: Toasts.genId(), type: Toasts.Type.FAILURE })
+    );
     if (!file) return;
 
     // Using promptToUpload instead of addFiles directly since it has file size checks with error popups
     await UploadHandler.promptToUpload([file], channel, DraftType.ChannelMessage).catch(() =>
-        Toasts.show({
-            message: `Couldn't upload ${attachment.filename}`,
-            id: Toasts.genId(),
-            type: Toasts.Type.FAILURE
-        })
+        Toasts.show({ message: `Couldn't upload ${filename}`, id: Toasts.genId(), type: Toasts.Type.FAILURE })
     );
 
     const uploads = [...UploadAttachmentStore.getUploads(channel.id, DraftType.ChannelMessage)];
@@ -173,8 +169,13 @@ export async function sendAttachment(attachment: MessageAttachment, channel: Cha
     if (uploadIdx === -1) return;
 
     const reply = PendingReplyStore.getPendingReply(channel.id);
+
     const [upload] = uploads.splice(uploadIdx);
     UploadManager.setUploads({ uploads, channelId: channel.id, draftType: DraftType.ChannelMessage });
+    // Empty titles and descriptions are allowed
+    if (title != null) upload.filename = title;
+    if (description != null) upload.description = description;
+
     FluxDispatcher.dispatch({ type: "DELETE_PENDING_REPLY", channelId: channel.id });
 
     void sendMessage(channel.id, {}, false, {
