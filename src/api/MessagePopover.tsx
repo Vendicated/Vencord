@@ -86,7 +86,7 @@ function VencordPopoverButtons(props: { Component: React.ComponentType<MessagePo
         .filter(([key]) => messagePopoverButtons[key]?.enabled !== false)
         .map(([key, { render }]) => {
             return (
-                <ErrorBoundary noop key={key} onError={e => logger.error(`[${key}]`, e.error)}>
+                <ErrorBoundary noop key={key} message={`Failed to render message popover button ${key}`}>
                     <VencordPopoverButton Component={Component} message={message} render={render} />
                 </ErrorBoundary>
             );
