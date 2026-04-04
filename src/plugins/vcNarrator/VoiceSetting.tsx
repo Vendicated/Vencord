@@ -9,8 +9,7 @@ import { Forms, SearchableSelect, useMemo, useState } from "@webpack/common";
 import { getCurrentVoice, settings } from "./settings";
 
 // TODO: replace by [Object.groupBy](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/groupBy) once it has more maturity
-
-function groupBy<T extends object, K extends PropertyKey>(arr: T[], fn: (obj: T) => K) {
+function groupBy<T, K extends string>(arr: T[], fn: (obj: T) => K) {
     return arr.reduce((acc, obj) => {
         const value = fn(obj);
         acc[value] ??= [];
@@ -33,8 +32,6 @@ function SimplePicker({ voice, voices }: PickerProps) {
 
     return (
         <SearchableSelect
-            placeholder="Select a voice"
-            maxVisibleItems={5}
             options={options}
             value={options.find(o => o.value === voice)?.value}
             onChange={v => settings.store.voice = v}
@@ -63,15 +60,12 @@ function ComplexPicker({ voice, voices }: PickerProps) {
         return list;
     }, [groupedVoices]);
 
-    const [selectedLanguage, setSelectedLanguage] = useState(() => getCurrentVoice()?.lang ?? languageNameMapping[0].name);
+    const [selectedLanguage, setSelectedLanguage] = useState(
+        () => getCurrentVoice()?.lang ?? languageNameMapping[0].name
+    );
 
     if (languageNameMapping.length === 1) {
-        return (
-            <SimplePicker
-                voice={voice}
-                voices={groupedVoices[languageNameMapping[0].name]}
-            />
-        );
+        return <SimplePicker voice={voice} voices={voices} />;
     }
 
     const voicesForLanguage = groupedVoices[selectedLanguage];
@@ -83,24 +77,19 @@ function ComplexPicker({ voice, voices }: PickerProps) {
 
     return (
         <>
-            <Forms.FormTitle>Language</Forms.FormTitle>
+            <Forms.FormText>Language</Forms.FormText>
             <SearchableSelect
-                placeholder="Select a language"
                 options={languageOptions}
                 value={languageOptions.find(l => l.value === selectedLanguage)?.value}
                 onChange={v => setSelectedLanguage(v)}
                 maxVisibleItems={5}
                 closeOnSelect
             />
-            <Forms.FormTitle>Voice</Forms.FormTitle>
-            <SimplePicker
-                voice={voice}
-                voices={voicesForLanguage}
-            />
+            <Forms.FormText>Voice</Forms.FormText>
+            <SimplePicker voice={voice} voices={voicesForLanguage} />
         </>
     );
 }
-
 
 function VoiceSetting() {
     const voices = useMemo(() => window.speechSynthesis?.getVoices() ?? [], []);
@@ -110,7 +99,8 @@ function VoiceSetting() {
         return <Forms.FormText>No voices found.</Forms.FormText>;
 
     // espeak on Linux has a ridiculous amount of voices (26k for me).
-    // If there are more than 20 voices, we split it up into two pickers, one for language, then one with only the voices for that language.
+    // If there are more than 20 voices, we split it up into two pickers, one for language,
+    // then one with only the voices for that language.
     // This way, there are around 200-ish options per language
     const Picker = voices.length > 20 ? ComplexPicker : SimplePicker;
     return <Picker voice={voice} voices={voices} />;
@@ -118,9 +108,9 @@ function VoiceSetting() {
 
 export function VoiceSettingSection() {
     return (
-        <section>
+        <Forms.FormSection>
             <Forms.FormTitle>Voice</Forms.FormTitle>
             <VoiceSetting />
-        </section>
+        </Forms.FormSection>
     );
 }

@@ -93,5 +93,25 @@ export const settings = definePluginSettings({
         type: OptionType.STRING,
         description: "Undeafen Message (only self for now)",
         default: "{{USER}} undeafened"
+    },
+    screenShareStartMessage: {
+        type: OptionType.STRING,
+        description: "Screen Share Start Message",
+        default: "{{USER}} started sharing their screen"
+    },
+    screenShareStopMessage: {
+        type: OptionType.STRING,
+        description: "Screen Share Stop Message",
+        default: "{{USER}} stopped sharing their screen"
+    },
+    screenShareViewerJoinMessage: {
+        type: OptionType.STRING,
+        description: "Screen Share Viewer Join Message",
+        default: "{{USER}} joined your screen share"
+    },
+    screenShareViewerLeaveMessage: {
+        type: OptionType.STRING,
+        description: "Screen Share Viewer Leave Message",
+        default: "{{USER}} left your screen share"
     }
 });
