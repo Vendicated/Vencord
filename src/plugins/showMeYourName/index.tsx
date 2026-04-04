@@ -11,8 +11,8 @@ import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { Channel, Message, User } from "@vencord/discord-types";
-import { RelationshipStore, StreamerModeStore } from "@webpack/common";
 import { findByCodeLazy } from "@webpack";
+import { RelationshipStore, StreamerModeStore } from "@webpack/common";
 
 interface UsernameProps {
     author: { nick: string; authorId: string; };
