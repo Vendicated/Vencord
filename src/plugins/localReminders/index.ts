@@ -187,7 +187,7 @@ async function cancelReminder(rawId: string, channelId: string) {
 export default definePlugin({
     name: "LocalReminders",
     description: "Local-only reminders with /remind — stored on this device, survives Discord restart",
-    authors: [{ name: "LocalReminders", id: 0n }],
+    authors: [{ name: "youtsuho", id: 1393019545522012271n }],
     settings,
 
     start() {
