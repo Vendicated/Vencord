@@ -252,10 +252,24 @@ export default definePlugin({
     ],
 
     async start() {
-        const channels = ChannelStore.getSortedPrivateChannels();
-        for (const channel of channels) {
-            if (!MessageStore.getLastMessage(channel.id)) {
-                await MessageActions.fetchMessages({ channelId: channel.id, limit: 1 });
+        const channels = ChannelStore.getSortedPrivateChannels()
+            .slice(0, 25)
+            .filter(c => !MessageStore.getLastMessage(c.id));
+
+        for (let i = 0; i < channels.length; i += 5) {
+            const batch = channels.slice(i, i + 5);
+
+            await Promise.allSettled(
+                batch.map(channel =>
+                    MessageActions.fetchMessages({
+                        channelId: channel.id,
+                        limit: 1
+                    })
+                )
+            );
+
+            if (i + 5 < channels.length) {
+                await new Promise(r => setTimeout(r, 3000));
             }
         }
     },
