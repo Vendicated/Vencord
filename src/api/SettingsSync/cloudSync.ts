@@ -70,6 +70,9 @@ async function buildLocalData(): Promise<Map<string, Uint8Array>> {
     const quickCss = await VencordNative.quickCss.get();
     if (quickCss) data.set("quickCss", encoder.encode(quickCss));
 
+    const dataStoreEntries = await DataStore.entries();
+    if (dataStoreEntries) data.set("dataStore", encoder.encode(JSON.stringify(dataStoreEntries)));
+
     return data;
 }
 
@@ -265,7 +268,7 @@ async function deleteV2() {
         return;
     }
 
-    const { entries }: { entries: ManifestEntry[] } = await manifestRes.json();
+    const { entries }: { entries: ManifestEntry[]; } = await manifestRes.json();
 
     await Promise.all(entries.map(async entry => {
         const res = await fetch(new URL(`/v2/data/${encodeURIComponent(entry.key)}`, getCloudUrl()), {
