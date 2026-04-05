@@ -1,0 +1,76 @@
+/*
+ * Vencord, a Discord client mod
+ * Copyright (c) 2024 Vendicated and contributors
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
+
+.vc-ud-accessory {
+    background: var(--background-secondary-alt);
+    border: 1px solid var(--background-tertiary);
+    border-radius: 8px;
+    padding: 12px;
+    margin-top: 8px;
+    max-width: 600px;
+}
+
+.vc-ud-header {
+    font-weight: 700;
+    font-size: 14px;
+    margin-bottom: 8px;
+    color: var(--header-primary);
+}
+
+.vc-ud-dismiss {
+    background: none;
+    border: none;
+    color: var(--text-link);
+    cursor: pointer;
+    font-size: 12px;
+    padding: 0;
+    font-weight: 400;
+}
+
+.vc-ud-dismiss:hover {
+    text-decoration: underline;
+}
+
+.vc-ud-definition-container {
+    border-top: 1px solid var(--background-modifier-accent);
+    padding-top: 8px;
+    margin-top: 8px;
+}
+
+.vc-ud-definition-container:first-of-type {
+    border-top: none;
+    padding-top: 0;
+    margin-top: 0;
+}
+
+.vc-ud-word {
+    font-weight: 700;
+    color: var(--text-brand);
+    font-size: 16px;
+    margin-bottom: 4px;
+}
+
+.vc-ud-definition {
+    font-size: 14px;
+    color: var(--text-normal);
+    line-height: 1.4;
+    white-space: pre-wrap;
+}
+
+.vc-ud-example {
+    font-size: 13px;
+    color: var(--text-muted);
+    font-style: italic;
+    margin-top: 4px;
+    padding-left: 8px;
+    border-left: 2px solid var(--background-modifier-accent);
+}
+
+.vc-ud-footer {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 6px;
+}
