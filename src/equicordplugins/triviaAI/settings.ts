@@ -40,10 +40,14 @@ export const settings = definePluginSettings({
         default: "https://openrouter.ai/api/v1/chat/completions",
         placeholder: "Enter your OpenAI compatible AI endpoint here."
     },
-    autoRespond: {
-        type: OptionType.BOOLEAN,
-        description: "Automatically respond to messages on receiving a response.",
-        default: false
+    mode: {
+        type: OptionType.SELECT,
+        description: "How should answers be handled?",
+        options: [
+            { label: "Auto Reply", value: "autoreply" },
+            { label: "Replace Chatbar Text", value: "chatbar", default: true },
+            { label: "Clyde", value: "bot" }
+        ]
     },
     supportImages: {
         type: OptionType.BOOLEAN,

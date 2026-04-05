@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Settings, SettingsStore } from "@api/Settings";
+import { Settings, SettingsStore, type ThemeActivationMode } from "@api/Settings";
 import { createAndAppendStyle } from "@utils/css";
 import { ThemeStore } from "@vencord/discord-types";
 import { PopoutWindowStore } from "@webpack/common";
@@ -25,6 +25,16 @@ import { coreStyleRootNode, managedStyleRootNode, userStyleRootNode, vencordRoot
 
 let style: HTMLStyleElement;
 let themesStyle: HTMLStyleElement;
+
+function getThemeActivationMode(themeId: string) {
+    return Settings.themeActivationModes?.[themeId] ?? "always";
+}
+
+function shouldApplyTheme(mode: ThemeActivationMode, activeTheme?: "light" | "dark") {
+    if (mode === "always") return true;
+    if (!activeTheme) return false;
+    return mode === activeTheme;
+}
 
 async function toggle(isEnabled: boolean) {
     if (!style) {
@@ -55,29 +65,38 @@ async function initThemes() {
         ? undefined
         : ThemeStore.theme === "light" ? "light" : "dark";
 
-    const links = enabledThemeLinks
-        .map(rawLink => {
-            const match = /^@(light|dark) (.*)/.exec(rawLink);
-            if (!match) return rawLink;
+    const links = new Set<string>();
 
-            const [, mode, link] = match;
-            return mode === activeTheme ? link : null;
-        })
-        .filter(link => link !== null);
+    for (const rawLink of enabledThemeLinks) {
+        const match = /^@(light|dark) (.*)/.exec(rawLink);
+        const link = match?.[2] ?? rawLink;
+        const mode = getThemeActivationMode(rawLink);
+
+        if (shouldApplyTheme(mode, activeTheme)) {
+            links.add(link);
+        }
+    }
 
     if (IS_WEB) {
         for (const theme of enabledThemes) {
+            const mode = getThemeActivationMode(theme);
+            if (!shouldApplyTheme(mode, activeTheme)) continue;
+
             const themeData = await VencordNative.themes.getThemeData(theme);
             if (!themeData) continue;
             const blob = new Blob([themeData], { type: "text/css" });
-            links.push(URL.createObjectURL(blob));
+            links.add(URL.createObjectURL(blob));
         }
     } else {
-        const localThemes = enabledThemes.map(theme => `vencord:///themes/${theme}?v=${Date.now()}`);
-        links.push(...localThemes);
+        const version = Date.now();
+        for (const theme of enabledThemes) {
+            const mode = getThemeActivationMode(theme);
+            if (!shouldApplyTheme(mode, activeTheme)) continue;
+            links.add(`vencord:///themes/${theme}?v=${version}`);
+        }
     }
 
-    themesStyle.textContent = links.map(link => `@import url("${link.trim()}");`).join("\n");
+    themesStyle.textContent = Array.from(links).map(link => `@import url("${link.trim()}");`).join("\n");
     updatePopoutWindows();
 }
 
@@ -120,6 +139,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     SettingsStore.addChangeListener("enabledThemeLinks", initThemes);
     SettingsStore.addChangeListener("enabledThemes", initThemes);
+    SettingsStore.addChangeListener("themeActivationModes", initThemes);
 
     window.addEventListener("message", event => {
         const { discordPopoutEvent } = event.data || {};

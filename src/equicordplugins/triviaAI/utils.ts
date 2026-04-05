@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { sendBotMessage } from "@api/Commands";
 import { insertTextIntoChatInputBox, sendMessage } from "@utils/discord";
 import { Logger } from "@utils/Logger";
 import { Message } from "@vencord/discord-types";
@@ -102,18 +103,24 @@ export function parseMessageContent(message: Message): ContentPayload | null {
 }
 
 export async function handleResponse(message: Message, response: string): Promise<string> {
-    if (settings.store.autoRespond) {
-        sendMessage(
-            message.channel_id,
-            { content: response },
-            true,
-            { messageReference: { channel_id: message.channel_id, message_id: message.id } }
-        );
-        return response;
-    } else {
-        insertTextIntoChatInputBox(response);
-        return response;
+    switch (settings.store.mode) {
+        case "autoreply":
+            sendMessage(
+                message.channel_id,
+                { content: response },
+                true,
+                { messageReference: { channel_id: message.channel_id, message_id: message.id } }
+            );
+            break;
+        case "chatbar":
+            insertTextIntoChatInputBox(response);
+            break;
+        case "bot":
+            sendBotMessage(message.channel_id, { content: response });
+            break;
     }
+
+    return response;
 }
 
 export async function getResponse(payload: ContentPayload): Promise<string> {
@@ -155,25 +162,20 @@ export async function getResponse(payload: ContentPayload): Promise<string> {
             })
         });
 
-        if (!req.ok) {
-            const errorBody = await req.text();
-            const errorMessage = `API request failed with status ${req.status}: ${errorBody}`;
-            logger.error(errorMessage);
-            showToast(errorMessage, Toasts.Type.FAILURE);
+        const rawBody = await req.text();
+        const data: { error?: { message?: string; }, choices?: { message: { content: string; }; }[]; } = (() => {
+            try { return JSON.parse(rawBody); }
+            catch { return {}; }
+        })();
+
+        if (!req.ok || data.error) {
+            const errorMsg = data.error?.message ?? rawBody ?? `Status ${req.status}`;
+            logger.error(`API Error: ${errorMsg}`);
+            showToast(errorMsg, Toasts.Type.FAILURE);
             return "";
         }
 
-        const data = await req.json();
-
-        if (data.error) {
-            const errorMessage = data.error.message ?? "An unknown error occurred";
-            logger.error(`API Error: ${errorMessage}`);
-            showToast(errorMessage, Toasts.Type.FAILURE);
-            return "";
-        }
-
-        const response = data.choices[0].message.content;
-
+        const response = data.choices?.[0]?.message?.content;
         if (!response?.trim()) {
             logger.warn("no response from AI model");
             return "";
