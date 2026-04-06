@@ -120,6 +120,10 @@ export const Devs = /* #__PURE__*/ Object.freeze({
         name: "D3SOX",
         id: 201052085641281538n
     },
+    DG: {
+        name: "DG",
+        id: 186559931434926080n
+    },
     Nickyux: {
         name: "Nickyux",
         id: 427146305651998721n
