@@ -22,7 +22,7 @@ const Section = findComponentByCodeLazy("headingVariant:", '"section"', "heading
 export default definePlugin({
     name: "FriendsSince",
     description: "Shows when you became friends with someone in the user popout",
-    tags: ["Friends", "Appearance"],
+    tags: ["Friends"],
     authors: [Devs.Elvyra, Devs.Antti],
     patches: [
         // DM User Sidebar

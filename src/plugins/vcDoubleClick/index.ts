@@ -28,7 +28,7 @@ const timers = {} as Record<string, {
 export default definePlugin({
     name: "VoiceChatDoubleClick",
     description: "Join voice chats via double click instead of single click",
-    tags: ["Voice", "Shortcuts"],
+    tags: ["Voice"],
     authors: [Devs.Ven, Devs.D3SOX],
     patches: [
         ...[

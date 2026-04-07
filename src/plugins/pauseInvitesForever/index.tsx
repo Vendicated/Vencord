@@ -45,7 +45,7 @@ export default definePlugin({
     name: "PauseInvitesForever",
     searchTerms: ["DisableInvitesForever"],
     description: "Brings back the option to pause invites indefinitely that stupit Discord removed.",
-    tags: ["Servers", "Privacy"],
+    tags: ["Servers"],
     authors: [Devs.Dolfies, Devs.amia],
 
     patches: [
