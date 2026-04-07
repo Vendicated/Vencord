@@ -20,11 +20,8 @@ import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import { Logger } from "@utils/Logger";
 import definePlugin, { OptionType } from "@utils/types";
-import { findStoreLazy } from "@webpack";
-import { Constants, FluxDispatcher, GuildStore, RelationshipStore, SnowflakeUtils, UserStore } from "@webpack/common";
+import { Constants, FluxDispatcher, GuildStore, RelationshipStore, SnowflakeUtils, UserAffinitiesStore, UserStore } from "@webpack/common";
 import { Settings } from "Vencord";
-
-const UserAffinitiesStore = findStoreLazy("UserAffinitiesV2Store");
 
 export default definePlugin({
     name: "ImplicitRelationships",
