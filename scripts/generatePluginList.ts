@@ -33,7 +33,7 @@ interface PluginData {
     name: string;
     description: string;
     tags: string[];
-    keywords: string[];
+    searchTerms: string[];
     authors: Dev[];
     dependencies: string[];
     hasPatches: boolean;
@@ -113,7 +113,7 @@ async function parseFile(fileName: string) {
             enabledByDefault: false,
             required: false,
             tags: [] as string[],
-            keywords: [] as string[],
+            searchTerms: [] as string[],
         } as PluginData;
 
         for (const prop of pluginObj.properties) {

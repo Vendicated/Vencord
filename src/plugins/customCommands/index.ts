@@ -91,7 +91,7 @@ migratePluginSettings("CustomCommands", "MessageTags");
 export default definePlugin({
     name: "CustomCommands",
     description: "Allows you to create custom slash commands / tags",
-    tags: ["MessageTags"],
+    searchTerms: ["MessageTags"],
     authors: [Devs.Ven, Devs.Luna,],
     settings,
 

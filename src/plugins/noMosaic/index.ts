@@ -21,7 +21,7 @@ export default definePlugin({
     name: "NoMosaic",
     authors: [Devs.AutumnVN],
     description: "Removes Discord image mosaic",
-    keywords: ["image", "mosaic", "media"],
+    searchTerms: ["image", "mosaic", "media"],
 
     settings,
 
