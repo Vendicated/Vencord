@@ -102,7 +102,7 @@ function VoiceSettings() {
 export default definePlugin({
     name: "VcPanelSettings",
     description: "Control voice settings inside the voice panel",
-    authors: [Devs.RoScripter999],
+    authors: [Devs.nin0dev, Devs.RoScripter999],
     settings,
 
     VoiceSettings: ErrorBoundary.wrap(VoiceSettings, { noop: true }),
