@@ -14,7 +14,7 @@ import { UserStore } from "@webpack/common";
 export default definePlugin({
     name: "ThemeAttributes",
     description: "Adds data attributes to various elements for theming purposes",
-    tags: ["Appearance", "Developers", "Customisation"],
+    tags: ["Appearance", "Customisation"],
     authors: [Devs.Ven, Devs.Board],
 
     patches: [
