@@ -3,7 +3,7 @@
     "author": "Equicord & Vencord Contributors",
     "private": false,
     "description": "Typescript definitions for the webpack modules of the Discord Web app",
-    "version": "1.0.3",
+    "version": "1.0.4",
     "license": "LGPL-3.0-or-later",
     "types": "src/index.d.ts",
     "type": "module",

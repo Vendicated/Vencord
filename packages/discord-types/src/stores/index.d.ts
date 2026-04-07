@@ -3,6 +3,8 @@ export * from "./AccessibilityStore";
 export * from "./ActiveJoinedThreadsStore";
 export * from "./ApplicationCommandIndexStore";
 export * from "./ApplicationStore";
+export * from "./ApplicationStreamingStore";
+export * from "./ApplicationStreamPreviewStore";
 export * from "./AuthenticationStore";
 export * from "./CallStore";
 export * from "./ChannelRTCStore";
