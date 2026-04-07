@@ -45,7 +45,9 @@ export const PluginTags = [
     "Accessibility",
     "Activity",
     "Appearance",
+    "Chat",
     "Commands",
+    "Console",
     "Customisation",
     "Developers",
     "Emotes",
@@ -55,13 +57,11 @@ export const PluginTags = [
     "Notifications",
     "Organisation",
     "Privacy",
+    "Reactions",
     "Roles",
     "Servers",
     "Shortcuts",
     "Utility",
-    "Chat",
-    "Console",
-    "Reactions",
     "Voice"
 ] as const;
 

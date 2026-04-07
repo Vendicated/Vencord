@@ -301,7 +301,7 @@ function PluginSettings() {
                         options={PluginTags.map(tag => ({ label: tag, value: tag }))}
                         value={searchValue.tags}
                         onChange={tags => setSearchValue(prev => ({ ...prev, tags }))}
-                        closeOnSelect={true}
+                        closeOnSelect={false}
                         placeholder="Filter by Tags"
                         multi
                     />
