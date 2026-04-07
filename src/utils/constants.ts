@@ -453,9 +453,9 @@ export const Devs = /* #__PURE__*/ Object.freeze({
         name: "Elvyra",
         id: 708275751816003615n,
     },
-    HappyEnderman: {
-        name: "Happy enderman",
-        id: 1083437693347827764n
+    WaveDev: {
+        name: "WaveDev",
+        id: 1102694284425187418n
     },
     Vishnya: {
         name: "Vishnya",
