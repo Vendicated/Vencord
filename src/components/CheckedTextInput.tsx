@@ -39,7 +39,7 @@ interface TextInputProps {
  * A very simple wrapper around Discord's TextInput that validates input and shows
  * the user an error message and only calls your onChange when the input is valid
  */
-export function CheckedTextInput({ initialValue: initialValue, onChange, validate }: TextInputProps) {
+export function CheckedTextInput({ initialValue, onChange, validate }: TextInputProps) {
     const [value, setValue] = useState(initialValue);
     const [error, setError] = useState<string>();
 
