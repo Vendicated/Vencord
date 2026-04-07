@@ -11,7 +11,7 @@ export default definePlugin({
     name: "NoDefaultHangStatus",
     description: "Disable the default hang status when joining voice channels",
     authors: [Devs.D3SOX],
-
+    tags: ["Activity", "Utility"],
     patches: [
         {
             find: ".CHILLING)",
