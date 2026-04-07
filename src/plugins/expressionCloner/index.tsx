@@ -409,6 +409,7 @@ migratePluginSettings("ExpressionCloner", "EmoteCloner");
 export default definePlugin({
     name: "ExpressionCloner",
     description: "Allows you to clone Emotes & Stickers to your own server (right click them)",
+    tags: ["Emotes", "Servers"],
     searchTerms: ["StickerCloner", "EmoteCloner", "EmojiCloner"],
     authors: [Devs.Ven, Devs.Nuckyz],
     contextMenus: {

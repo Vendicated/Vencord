@@ -59,8 +59,10 @@ export const PluginTags = [
     "Servers",
     "Shortcuts",
     "Utility",
+    "Chat",
     "Console",
-    "Reactions"
+    "Reactions",
+    "Voice"
 ] as const;
 
 export type PluginTag = typeof PluginTags[number];
