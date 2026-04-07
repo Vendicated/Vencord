@@ -142,7 +142,7 @@ async function parseFile(fileName: string) {
                     });
                     break;
                 case "tags":
-                case "keywords":
+                case "searchTerms":
                     if (!isArrayLiteralExpression(value)) throw fail(`${key} is not an array literal`);
                     data[key] = value.elements.map(e => {
                         if (!isStringLiteral(e)) throw fail(`${key} array contains non-string literals`);
