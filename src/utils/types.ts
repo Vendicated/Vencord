@@ -17,13 +17,13 @@
 */
 
 import { ProfileBadge } from "@api/Badges";
-import { ChatBarButtonFactory } from "@api/ChatButtons";
+import { ChatBarButtonData } from "@api/ChatButtons";
 import { NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { MemberListDecoratorFactory } from "@api/MemberListDecorators";
 import { MessageAccessoryFactory } from "@api/MessageAccessories";
 import { MessageDecorationFactory } from "@api/MessageDecorations";
 import { MessageClickListener, MessageEditListener, MessageSendListener } from "@api/MessageEvents";
-import { MessagePopoverButtonFactory } from "@api/MessagePopover";
+import { MessagePopoverButtonData } from "@api/MessagePopover";
 import { Command, FluxEvents } from "@vencord/discord-types";
 import { ReactNode } from "react";
 import { LiteralUnion } from "type-fest";
@@ -117,6 +117,8 @@ export interface Plugin extends PluginDef {
     isDependency?: boolean;
 }
 
+export type IconComponent = (props: IconProps & Record<string, any>) => ReactNode;
+export type IconProps = { height?: number | string; width?: number | string; className?: string; };
 export interface PluginDef {
     name: string;
     description: string;
@@ -148,6 +150,10 @@ export interface PluginDef {
      * Whether this plugin should be enabled by default, but can be disabled
      */
     enabledByDefault?: boolean;
+    /**
+     * Whether enabling or disabling this plugin requires a restart. Defaults to true if the plugin has patches.
+     */
+    requiresRestart?: boolean;
     /**
      * When to call the start() method
      * @default StartAt.WebpackReady
@@ -184,9 +190,16 @@ export interface PluginDef {
     contextMenus?: Record<string, NavContextMenuPatchCallback>;
     /**
      * Allows you to add custom actions to the Vencord Toolbox.
-     * The key will be used as text for the button
+     *
+     * Can either be an object mapping labels to action functions or a Function returning Menu components.
+     * Please note that you can only use Menu components.
+     *
+     * @example
+     * toolboxActions: {
+     *   "Click Me": () => alert("Hi")
+     * }
      */
-    toolboxActions?: Record<string, () => void>;
+    toolboxActions?: Record<string, () => void> | (() => ReactNode);
 
     /**
      * Managed style to automatically enable and disable when the plugin is enabled or disabled
@@ -195,17 +208,17 @@ export interface PluginDef {
 
     userProfileBadge?: ProfileBadge;
 
+    messagePopoverButton?: MessagePopoverButtonData;
+    chatBarButton?: ChatBarButtonData;
+
     onMessageClick?: MessageClickListener;
     onBeforeMessageSend?: MessageSendListener;
     onBeforeMessageEdit?: MessageEditListener;
 
-    renderMessagePopoverButton?: MessagePopoverButtonFactory;
     renderMessageAccessory?: MessageAccessoryFactory;
     renderMessageDecoration?: MessageDecorationFactory;
 
     renderMemberListDecorator?: MemberListDecoratorFactory;
-
-    renderChatBarButton?: ChatBarButtonFactory;
 }
 
 export const enum StartAt {
@@ -292,6 +305,8 @@ interface IsValid<T, D = unknown> {
 export interface PluginSettingStringDef {
     type: OptionType.STRING;
     default?: string;
+    /** Whether to use a multiline text area */
+    multiline?: boolean;
 }
 export interface PluginSettingNumberDef {
     type: OptionType.NUMBER;
@@ -435,3 +450,5 @@ export type PluginNative<PluginExports extends Record<string, (event: Electron.I
     ? (...args: Args) => Return extends Promise<any> ? Return : Promise<Return>
     : never;
 };
+
+export type AllOrNothing<T> = T | { [K in keyof T]?: never; };

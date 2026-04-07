@@ -30,7 +30,7 @@ import { Forms, React } from "@webpack/common";
 import hideBugReport from "./hideBugReport.css?managed";
 
 const KbdStyles = findByPropsLazy("key", "combo");
-const BugReporterExperiment = findLazy(m => m?.definition?.id === "2024-09_bug_reporter");
+const BugReporterExperiment = findLazy(m => m?.definition?.name === "2026-01-bug-reporter");
 
 const modKey = IS_MAC ? "cmd" : "ctrl";
 const altKey = IS_MAC ? "opt" : "alt";
@@ -96,34 +96,17 @@ export default definePlugin({
                 replace: (_, rest) => `${rest}onClick:()=>{}`
             }
         },
-        // Make the Favourites Server experiment allow favouriting DMs and threads
-        {
-            find: "useCanFavoriteChannel",
-            replacement: {
-                match: /\i\.isDM\(\)\|\|\i\.isThread\(\)/,
-                replace: "false",
-            }
-        },
-        // Enable option to always record clips even if you are not streaming
-        {
-            find: "isDecoupledGameClippingEnabled(){",
-            replacement: {
-                match: /\i\.isStaff\(\)/,
-                replace: "true"
-            }
-        },
-
         // Enable experiment embed on sent experiment links
         {
-            find: "dev://experiment/",
+            find: "Clear Treatment ",
             replacement: [
                 {
-                    match: /\i\.isStaff\(\)/,
+                    match: /\i\?\.isStaff\(\)/,
                     replace: "true"
                 },
                 // Fix some tricky experiments name causing a client crash
                 {
-                    match: /.getExperimentBucketName.+?if\(null==(\i)\|\|null==\i(?=\)return null;)/,
+                    match: /\.isStaffPersonal\(\).+?if\(null==(\i)\|\|null==\i(?=\)return null;)/,
                     replace: "$&||({})[$1]!=null"
                 }
             ]
@@ -138,7 +121,7 @@ export default definePlugin({
         }
     ],
 
-    start: () => !BugReporterExperiment.getCurrentConfig().hasBugReporterAccess && enableStyle(hideBugReport),
+    start: () => !BugReporterExperiment.getConfig().hasBugReporterAccess && enableStyle(hideBugReport),
     stop: () => disableStyle(hideBugReport),
 
     settingsAboutComponent: () => {

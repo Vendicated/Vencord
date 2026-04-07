@@ -30,6 +30,9 @@ const platform = navigator.platform.toLowerCase();
 export const IS_WINDOWS = platform.startsWith("win");
 export const IS_MAC = platform.startsWith("mac");
 export const IS_LINUX = platform.startsWith("linux");
+// https://developer.mozilla.org/en-US/docs/Web/HTTP/Browser_detection_using_the_user_agent#mobile_tablet_or_desktop
+// "In summary, we recommend looking for the string Mobi anywhere in the User Agent to detect a mobile device."
+export const IS_MOBILE = navigator.userAgent.includes("Mobi");
 
 export interface Dev {
     name: string;
@@ -444,7 +447,7 @@ export const Devs = /* #__PURE__*/ Object.freeze({
     },
     nin0dev: {
         name: "nin0dev",
-        id: 886685857560539176n
+        id: 1395533040914141235n
     },
     Elvyra: {
         name: "Elvyra",
@@ -474,9 +477,9 @@ export const Devs = /* #__PURE__*/ Object.freeze({
         name: "puv",
         id: 469441552251355137n
     },
-    Kodarru: {
-        name: "Kodarru",
-        id: 785227396218748949n
+    IcedMarina: {
+        name: "icedmarina",
+        id: 594406131670188042n
     },
     nakoyasha: {
         name: "nakoyasha",
@@ -485,6 +488,10 @@ export const Devs = /* #__PURE__*/ Object.freeze({
     Sqaaakoi: {
         name: "Sqaaakoi",
         id: 259558259491340288n
+    },
+    iamme: {
+        name: "i am me",
+        id: 984392761929256980n
     },
     Byeoon: {
         name: "byeoon",
@@ -605,6 +612,22 @@ export const Devs = /* #__PURE__*/ Object.freeze({
     thororen: {
         name: "thororen",
         id: 848339671629299742n
+    },
+    alfred: {
+        name: "alfred",
+        id: 1038466644353232967n
+    },
+    vv: {
+        name: "VV",
+        id: 254866377087778816n
+    },
+    u32: {
+        name: "u32",
+        id: 1063237286818488351n,
+    },
+    prism: {
+        name: "prism",
+        id: 390884143749136386n,
     },
 } satisfies Record<string, Dev>);
 
