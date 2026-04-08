@@ -50,7 +50,7 @@ export default definePlugin({
             find: "80,onlyAnimateOnHoverOrFocus:!",
             replacement: [
                 {
-                    match: /(?<==)\i=>{let{children.{20,200}isSelected:\i=!1.{0,5}\}=\i/,
+                    match: /(?<==)\i=>{let{children.{20,200}isSelected:\i.{0,5}\}=\i/,
                     replace: "$self.DecorationGridItem=$&",
                 },
                 {
