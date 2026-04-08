@@ -123,8 +123,7 @@
 }
 
 .vc-channeltabs-tab-scroller-following {
-    width: fit-content;
-    flex: unset;
+    max-width: 100%;
 }
 
 .vc-channeltabs-tab-scroller::-webkit-scrollbar {

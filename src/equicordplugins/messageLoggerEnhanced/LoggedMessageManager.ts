@@ -17,7 +17,7 @@
 */
 
 import { Flogger, settings } from ".";
-import { addMessageIDB, db, DBMessageStatus, deleteMessagesBulkIDB, getOlderThanTimestampForGuildsIDB, getOldestMessagesIDB } from "./db";
+import { addMessageIDB, countMessagesIDB, DBMessageStatus, deleteMessagesBulkIDB, getOlderThanTimestampForGuildsIDB, getOldestMessagesIDB } from "./db";
 import { LoggedMessage, LoggedMessageJSON } from "./types";
 import { cleanupMessage } from "./utils";
 import { cacheMessageImages } from "./utils/saveImage";
@@ -47,7 +47,7 @@ export const addMessage = async (message: LoggedMessage | LoggedMessageJSON, sta
     }
 
     if (settings.store.messageLimit > 0) {
-        const currentMessageCount = await db.count("messages");
+        const currentMessageCount = await countMessagesIDB();
         if (currentMessageCount > settings.store.messageLimit) {
             const messagesToDelete = currentMessageCount - settings.store.messageLimit;
             if (messagesToDelete <= 0 || messagesToDelete >= settings.store.messageLimit) return;

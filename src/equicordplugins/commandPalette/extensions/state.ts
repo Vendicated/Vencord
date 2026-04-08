@@ -6,17 +6,7 @@
 
 import { DataStore } from "@api/index";
 
-import {
-    DEFAULT_EXTENSION_KEYBINDS,
-    EXTENSION_KEYBINDS_KEY,
-    extensionDefinitionsById,
-    EXTENSIONS_CATALOG,
-    EXTENSIONS_DETAIL_PROVIDER_ID,
-    EXTENSIONS_PACK_PROVIDER_ID,
-    getExtensionReadmePaths,
-    INSTALLED_EXTENSIONS_KEY,
-    toRepositoryRawUrl
-} from "./catalog";
+import { DEFAULT_EXTENSION_KEYBINDS, EXTENSION_KEYBINDS_KEY, extensionDefinitionsById, EXTENSIONS_CATALOG, EXTENSIONS_DETAIL_PROVIDER_ID, EXTENSIONS_PACK_PROVIDER_ID, INSTALLED_EXTENSIONS_KEY } from "./catalog";
 import type { ExtensionKeybindMap } from "./types";
 
 export interface ExtensionsState {
@@ -27,8 +17,6 @@ export interface ExtensionsState {
     isInstalled(extensionId: string): boolean;
     install(extensionId: string): Promise<boolean>;
     uninstall(extensionId: string): Promise<boolean>;
-    getAvailableReadmePath(extensionId: string): string | null;
-    ensureAllFileChecks(): void;
 }
 
 function toExtensionKeybindRecord(extensionKeybinds: Map<string, ExtensionKeybindMap>) {
@@ -39,24 +27,12 @@ function toExtensionKeybindRecord(extensionKeybinds: Map<string, ExtensionKeybin
     return record;
 }
 
-async function checkExtensionFileExists(path: string): Promise<boolean> {
-    const rawUrl = toRepositoryRawUrl(path);
-    const headResponse = await fetch(rawUrl, { method: "HEAD" }).catch(() => null);
-    if (headResponse?.ok) return true;
-    if (headResponse?.status === 404) return false;
-
-    const getResponse = await fetch(rawUrl).catch(() => null);
-    return getResponse?.ok ?? false;
-}
-
 export function createExtensionsState(
     refreshContextProvider: (id: string) => void,
     bumpRegistryVersion: () => void
 ): ExtensionsState {
     const installedExtensionIds = new Set<string>();
     const extensionKeybinds = new Map<string, ExtensionKeybindMap>();
-    const extensionFileAvailability = new Map<string, boolean>();
-    const extensionFileCheckInflight = new Set<string>();
 
     const persistInstalledExtensions = async () => {
         try {
@@ -71,31 +47,6 @@ export function createExtensionsState(
             await DataStore.set(EXTENSION_KEYBINDS_KEY, toExtensionKeybindRecord(extensionKeybinds));
         } catch {
             return;
-        }
-    };
-
-    const ensureExtensionFileCheck = (path?: string) => {
-        if (!path) return;
-
-        if (extensionFileAvailability.has(path)) return;
-        if (extensionFileCheckInflight.has(path)) return;
-
-        extensionFileCheckInflight.add(path);
-        void checkExtensionFileExists(path)
-            .then(exists => {
-                extensionFileAvailability.set(path, exists);
-                refreshContextProvider(EXTENSIONS_DETAIL_PROVIDER_ID);
-            })
-            .finally(() => {
-                extensionFileCheckInflight.delete(path);
-            });
-    };
-
-    const ensureAllFileChecks = () => {
-        for (const extension of EXTENSIONS_CATALOG) {
-            for (const path of getExtensionReadmePaths(extension)) {
-                ensureExtensionFileCheck(path);
-            }
         }
     };
 
@@ -129,7 +80,6 @@ export function createExtensionsState(
         } catch {
             return;
         } finally {
-            ensureAllFileChecks();
             refreshContextProvider(EXTENSIONS_PACK_PROVIDER_ID);
             refreshContextProvider(EXTENSIONS_DETAIL_PROVIDER_ID);
             bumpRegistryVersion();
@@ -179,15 +129,6 @@ export function createExtensionsState(
             refreshContextProvider(EXTENSIONS_DETAIL_PROVIDER_ID);
             bumpRegistryVersion();
             return true;
-        },
-        getAvailableReadmePath: extensionId => {
-            const extension = extensionDefinitionsById.get(extensionId);
-            if (!extension) return null;
-            for (const path of getExtensionReadmePaths(extension)) {
-                if (extensionFileAvailability.get(path) === true) return path;
-            }
-            return null;
-        },
-        ensureAllFileChecks
+        }
     };
 }

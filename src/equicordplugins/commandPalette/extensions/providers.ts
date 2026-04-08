@@ -137,20 +137,6 @@ function createExtensionDetailCommands(deps: ExtensionsProviderDeps): CommandEnt
             });
         }
 
-        const availableReadmePath = extensionsState.getAvailableReadmePath(extension.id);
-        if (availableReadmePath) {
-            commands.push({
-                id: `extension-detail-${extension.id}-readme`,
-                label: "Open Readme",
-                description: "Open extension documentation.",
-                keywords: ["readme", "docs", "documentation", "extension"],
-                categoryId: extension.detailCategoryId,
-                hiddenInSearch: true,
-                tags: [TAG_NAVIGATION, TAG_PLUGINS],
-                handler: () => deps.openExternalUrl(toRepositoryBlobUrl(availableReadmePath))
-            });
-        }
-
         if (extension.sourcePath) {
             commands.push({
                 id: `extension-detail-${extension.id}-source`,
@@ -173,10 +159,7 @@ export function registerExtensionProviders(deps: ExtensionsProviderDeps) {
         id: EXTENSIONS_CATALOG_CATEGORY_ID,
         getCommands: () => createExtensionCatalogCommands(deps.extensionsState.listExtensions()),
         subscribe: refresh => {
-            void deps.extensionsState.ready.finally(() => {
-                deps.extensionsState.ensureAllFileChecks();
-                refresh();
-            });
+            void deps.extensionsState.ready.finally(refresh);
             return () => undefined;
         }
     });
@@ -185,10 +168,7 @@ export function registerExtensionProviders(deps: ExtensionsProviderDeps) {
         id: EXTENSIONS_DETAIL_PROVIDER_ID,
         getCommands: () => createExtensionDetailCommands(deps),
         subscribe: refresh => {
-            void deps.extensionsState.ready.finally(() => {
-                deps.extensionsState.ensureAllFileChecks();
-                refresh();
-            });
+            void deps.extensionsState.ready.finally(refresh);
             return () => undefined;
         }
     });

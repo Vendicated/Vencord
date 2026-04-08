@@ -13,7 +13,7 @@ import { getGuildAcronym, getIntlMessage, getUniqueUsername } from "@utils/disco
 import { classes } from "@utils/misc";
 import { Channel, Guild, User } from "@vencord/discord-types";
 import { findComponentByCodeLazy, findCssClassesLazy } from "@webpack";
-import { ActiveJoinedThreadsStore, Avatar, ChannelStore, ContextMenuApi, GuildStore, PresenceStore, ReadStateStore, ThemeStore, TypingStore, useDrag, useDrop, useEffect, useRef, UserStore, useState, useStateFromStores } from "@webpack/common";
+import { ActiveJoinedThreadsStore, Avatar, ChannelStore, ContextMenuApi, GuildStore, PresenceStore, ReadStateStore, TypingStore, useDrag, useDrop, useEffect, useRef, UserStore, useState, useStateFromStores } from "@webpack/common";
 import { JSX } from "react";
 
 import { TabContextMenu } from "./ContextMenus";
@@ -469,11 +469,8 @@ export default function ChannelTab(props: ChannelTabsProps & { index: number; })
 
     // check if quests running (questify momentLet)
     const hasActiveQuests = activeQuestIntervals.size > 0;
-    console.log(ThemeStore.theme);
     return <div
-        className={cl("tab",
-            ThemeStore.theme === "light" ? "light-theme" : "dark-theme",
-            {
+        className={cl("tab", {
                 "tab-compact": compact,
                 "tab-selected": isTabSelected(id),
                 "tab-entering": isEntering,
