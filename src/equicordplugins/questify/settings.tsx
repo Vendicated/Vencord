@@ -828,8 +828,11 @@ function DisableQuestsSetting(): JSX.Element {
                         For Video Quests, subsequent clicks will open the video modal as normal. For Activity Quests, subsequent clicks
                         will open the activity as normal. To abort the Quests, you can open the context menu on the Quest tile and
                         select <span className={q("inline-code-block")}>Stop Auto-Complete</span>.
-                        <br /><br />
-                        Using any of the Auto-Complete options is against Discord's TOS. Use at your own risk.
+                    </Paragraph>
+                    <Paragraph className={q("form-warning")}>
+                        Using any of the Auto-Complete options is against <a href="https://discord.com/safety/platform-manipulation-policy-explainer" target="_blank" rel="noreferrer">Discord's TOS</a>. Discord has been known to warn users
+                        that automate Quest completion with threat of loss of access to Quests. There has been no reports of account
+                        limitations or bans, but Discord may change their stance at any time. Use at your own risk.
                     </Paragraph>
                     <DynamicDropdown
                         placeholder="Select which Quest features to modify."

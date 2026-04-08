@@ -50,6 +50,14 @@
     font-size: 14px;
 }
 
+.questify-form-warning {
+    margin: 12px 0 8px;
+    padding: 10px 12px;
+    border-left: 3px solid var(--status-danger);
+    border-radius: 4px;
+    background-color: color-mix(in srgb, var(--status-danger) 12%, transparent);
+}
+
 .questify-select > div {
     border-radius: 3px;
     min-height: 43px;
