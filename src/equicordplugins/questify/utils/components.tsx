@@ -22,13 +22,28 @@ export const QuestTile = findComponentByCodeLazy(".rowIndex,trackGuildAndChannel
 
 export class ActiveQuestIntervalsMap extends Map<string, { progressTimeout: NodeJS.Timeout; rerenderTimeout: NodeJS.Timeout; progress: number; type: string; }> {
     set(key: string, value: { progressTimeout: NodeJS.Timeout; rerenderTimeout: NodeJS.Timeout; progress: number; type: string; }): this {
+        const { resumeQuestIDs } = settings.store;
+
+        settings.store.resumeQuestIDs = {
+            watch: resumeQuestIDs.watch.filter((id: string) => id !== key),
+            play: resumeQuestIDs.play.filter((id: string) => id !== key),
+            achievement: resumeQuestIDs.achievement.filter((id: string) => id !== key),
+        };
+
         settings.store.resumeQuestIDs[value.type].push(key);
+
         return super.set(key, value);
     }
 
     delete(key: string): boolean {
-        const types = Object.keys(settings.def.resumeQuestIDs.default);
-        for (const type of types) { settings.store.resumeQuestIDs[type] = settings.store.resumeQuestIDs[type].filter((id: string) => id !== key); }
+        const { resumeQuestIDs } = settings.store;
+
+        settings.store.resumeQuestIDs = {
+            watch: resumeQuestIDs.watch.filter((id: string) => id !== key),
+            play: resumeQuestIDs.play.filter((id: string) => id !== key),
+            achievement: resumeQuestIDs.achievement.filter((id: string) => id !== key),
+        };
+
         return super.delete(key);
     }
 }
