@@ -168,7 +168,7 @@ export default definePlugin({
         {
             find: '"system:click_outside","user:escape"',
             replacement: {
-                match: /(?<=GuildChannelUserContextMenu.{0,100})"data-dnd-name":(\i)\.name,/,
+                match: /(?<=GuildChannelUserContextMenu.{0,150})"data-dnd-name":\i,/,
                 replace: "$&\"data-dragify-user\":!0,\"data-user-id\":arguments[0].user?.id,draggable:!0,onDragStart:e=>$self.onUserDragStart(e,arguments[0].user),"
             }
         },
@@ -182,7 +182,7 @@ export default definePlugin({
                 },
                 // Voice channel rows (guild sidebar fallback - li wrapper)
                 {
-                    match: /(?<=getModeClass\(\),.{0,50})"data-dnd-name":(\i)\.name,children:\[/,
+                    match: /(?<=getModeClass\(\),.{0,50})"data-dnd-name":.{0,25},children:\[/,
                     replace: "draggable:!0,onDragStart:e=>$self.onChannelDragStart(e,{id:this?.props?.channel?.id,guild_id:this?.props?.channel?.guild_id}),$&"
                 }
             ]
@@ -191,8 +191,8 @@ export default definePlugin({
         {
             find: "handleClickChat",
             replacement: {
-                match: /(?<=getModeClass\(\),.{0,50})"data-dnd-name":(\i)\.name,/,
-                replace: "$&draggable:!0,onDragStart:t=>$self.onChannelDragStart(t,{id:this?.props?.channel?.id,guild_id:this?.props?.channel?.guild_id}),"
+                match: /(?<=getModeClass\(\),.{0,50})"data-dnd-name":.{0,25},children:\[/,
+                replace: "draggable:!0,onDragStart:e=>$self.onChannelDragStart(e,{id:this?.props?.channel?.id,guild_id:this?.props?.channel?.guild_id}),$&"
             }
         },
         // Thread rows in channel list (sidebar thread items)
@@ -209,8 +209,8 @@ export default definePlugin({
         {
             find: "shouldShowThreadsPopout",
             replacement: {
-                match: /(?<=getClassName\(\).{0,50})"data-dnd-name":(\i)\.name,/,
-                replace: "$&draggable:!0,onDragStart:e=>$self.onChannelDragStart(e,{id:this?.props?.channel?.id,guild_id:this?.props?.channel?.guild_id}),"
+                match: /(?<=getClassName\(\).{0,50})"data-dnd-name":.{0,25},onMouseEnter:/,
+                replace: "draggable:!0,onDragStart:e=>$self.onChannelDragStart(e,{id:this?.props?.channel?.id,guild_id:this?.props?.channel?.guild_id}),$&"
             }
         },
         // Thread rows (active threads popout)
