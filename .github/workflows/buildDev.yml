@@ -1,13 +1,13 @@
-name: Release
+name: Build Dev
 on:
     push:
         branches:
-            - main
+            - dev
 
 env:
     FORCE_COLOR: true
     GITHUB_TOKEN: ${{ secrets.ETOKEN }}
-    REPO: Equicord/Equibored
+    REPO: Equicord/Equibuilds
     USERNAME: GitHub-Actions
 
 permissions:
@@ -45,40 +45,22 @@ jobs:
                   pnpm generateVencordPluginJson dist/vencordplugins.json
                   pnpm generateDevsList dist/devs.json
 
-            - name: Collect files to be released
-              run: |
-                  cd dist
-                  mkdir release
-
-                  cp browser/browser.* release
-                  cp Equicord.user.{js,js.LEGAL.txt} release
-
-                  # copy the plugin data jsons, the extension zips and the desktop/equibop asars
-                  cp *.{json,zip,asar} release
-
-                  # legacy un-asared files
-                  cp desktop/* release
-                  for file in equibop/*; do
-                    filename=$(basename "$file")
-                    cp "$file" "release/equibop${filename^}"
-                  done
-
-                  find release -size 0 -delete
-                  rm release/package.json
-                  rm release/*.map
-
-            - name: Upload Equicord Stable
-              run: |
-                  gh release upload latest --clobber dist/release/*
-
-            - name: Upload Plugin JSONs to Equibored repo
+            - name: Upload to Equibuilds repo
               run: |
                   git config --global user.name "GitHub-Actions"
                   git config --global user.email actions@github.com
-                  git clone https://$USERNAME:$GITHUB_TOKEN@github.com/$REPO.git plugins
-                  cd plugins
+                  git clone https://$USERNAME:$GITHUB_TOKEN@github.com/$REPO.git equibuilds
+                  cd equibuilds
 
-                  cp ../dist/release/*.json .
+                  cp -r ../dist/* .
+                  find . -size 0 -delete
+
+                  mkdir -p userscript
+                  mv Equicord.user.* userscript/
+                  mv desktop.asar desktop/
+                  mv equibop.asar equibop/
+                  mv extension-*.zip browser/
+
                   git add -A
 
                   git commit -m "Plugins for https://github.com/$GITHUB_REPOSITORY/commit/$GITHUB_SHA"
