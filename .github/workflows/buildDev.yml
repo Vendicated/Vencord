@@ -7,8 +7,12 @@ on:
     workflow_dispatch:
         inputs:
             branch:
+                type: choice
                 description: "Branch to build and upload"
-                required: true
+                options:
+                    - main
+                    - dev
+                    - translation
                 default: "dev"
 
 env:
