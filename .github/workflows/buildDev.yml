@@ -56,7 +56,7 @@ jobs:
 
             - name: Upload to Equibuilds repo
               run: |
-                  BRANCH="${{ github.event.inputs.branch || env.GITHUB_REF_NAME }}"
+                  BRANCH="${{ github.event.inputs.branch || github.ref_name }}"
                   COMMIT_SHA=$(git rev-parse --short HEAD)
 
                   git config --global user.name "GitHub-Actions"
