@@ -675,7 +675,7 @@ export interface MediaEngineConnection {
     /** whether QoS is enabled. */
     qos: boolean;
     /** current input mode. */
-    inputMode: string;
+    inputMode: VoiceMode;
     /** VAD threshold in dB, default -60. */
     vadThreshold: number;
     /** whether VAD auto threshold is enabled, default true. */
