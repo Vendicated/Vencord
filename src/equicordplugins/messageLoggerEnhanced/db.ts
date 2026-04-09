@@ -89,9 +89,11 @@ async function withDb<T>(fallback: T, callback: (database: IDBPDatabase<MLIDB>) 
     }
 }
 
-async function cacheRecords(records: DBMessageRecord[]) {
+async function cacheRecords(records: DBMessageRecord[], cacheAttachmentBlobs = true) {
     for (const r of records) {
         cacheRecord(r);
+
+        if (!cacheAttachmentBlobs) continue;
 
         for (const att of r.message.attachments) {
             const blobUrl = await getAttachmentBlobUrl(att);
@@ -194,7 +196,7 @@ export async function getOlderThanTimestampIDB(timestamp: string) {
             messages.push(c.value);
         }
 
-        return cacheRecords(messages);
+        return cacheRecords(messages, false);
     });
 }
 
@@ -245,7 +247,7 @@ export async function getMessagesByChannelAndAfterTimestampIDB(channel_id: strin
             messages.push(c.value);
         }
 
-        return cacheRecords(messages);
+        return cacheRecords(messages, false);
     });
 }
 
