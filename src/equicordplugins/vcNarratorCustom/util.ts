@@ -278,7 +278,7 @@ async function withDb<T>(fallback: T, callback: (db: IDBDatabase) => Promise<T>)
 }
 
 export async function getPersistentTtsCacheStats(): Promise<{ bytes: number; entries: number; }> {
-    return withDb<{ bytes: number; entries: number }>({ bytes: 0, entries: 0 }, db => new Promise<{ bytes: number; entries: number }>((resolve, reject) => {
+    return withDb<{ bytes: number; entries: number; }>({ bytes: 0, entries: 0 }, db => new Promise<{ bytes: number; entries: number; }>((resolve, reject) => {
         const tx = db.transaction(META_STORE, "readonly");
         const store = tx.objectStore(META_STORE);
 

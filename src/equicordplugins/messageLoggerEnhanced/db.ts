@@ -4,8 +4,8 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { ChannelStore, Toasts } from "@webpack/common";
 import { Logger } from "@utils/Logger";
+import { ChannelStore, Toasts } from "@webpack/common";
 import { DBSchema, IDBPDatabase, openDB } from "idb";
 
 import { LoggedMessageJSON } from "./types";
