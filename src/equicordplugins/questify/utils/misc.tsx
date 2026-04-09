@@ -6,7 +6,7 @@
 
 import { classNameFactory } from "@utils/css";
 import { Logger } from "@utils/Logger";
-import { findByPropsLazy } from "@webpack";
+import { findByCodeLazy, findByPropsLazy } from "@webpack";
 import { FluxDispatcher, RestAPI, UserStore } from "@webpack/common";
 
 import { activeQuestIntervals } from "..";
@@ -16,11 +16,18 @@ import { Quest, QuestStatus, QuestTask, QuestTaskType, RGB } from "./components"
 export const q = classNameFactory("questify-");
 export const QuestifyLogger = new Logger("Questify");
 export const QuestsStore = findByPropsLazy("getQuest");
+export const reportProgress = findByCodeLazy(".QUESTS_VIDEO_PROGRESS(");
+export const sendHeartbeat = findByCodeLazy(".QUESTS_HEARTBEAT(");
 export const questPath = "/quest-home";
 export const videoQuestLeeway = 24;
 export const leftClick = 0;
 export const middleClick = 1;
 export const rightClick = 2;
+
+type HeartbeatDispatchResult =
+    | { type: "success"; userStatus: Quest["userStatus"]; }
+    | { type: "failure"; error: unknown; }
+    | { type: "timeout"; };
 
 export function setIgnoredQuestIDs(questIDs: string[], userId?: string): void {
     const currentUserID = userId ?? UserStore.getCurrentUser()?.id;
@@ -76,8 +83,9 @@ export function getQuestProgress(quest: Quest, task: QuestTask) {
 
 export function getQuestTarget(task: QuestTask) {
     const isWatch = task.type === QuestTaskType.WATCH_VIDEO || task.type === QuestTaskType.WATCH_VIDEO_ON_MOBILE;
+    const { completeVideoQuestsQuicker } = settings.store;
     const raw = task.target;
-    const adjusted = Math.max(0, raw - (isWatch ? videoQuestLeeway : 0));
+    const adjusted = Math.max(0, raw - (isWatch && completeVideoQuestsQuicker ? videoQuestLeeway : 0));
     return { raw, adjusted };
 }
 
@@ -262,22 +270,9 @@ export async function reportVideoQuestProgress(quest: Quest, currentProgress: nu
 
     for (let attempt = 1; attempt <= maxAttempts; attempt++) {
         try {
-            const response = await RestAPI.post({
-                url: `/quests/${quest.id}/video-progress`,
-                body: { timestamp: currentProgress }
-            });
+            await reportProgress(quest.id, currentProgress);
 
-            if (!response || !response.body) {
-                logger?.warn(`[${getFormattedNow()}] No response body received while reporting video progress for Quest ${questName} on attempt ${attempt}/${maxAttempts}.`);
-
-                if (attempt < maxAttempts) {
-                    await new Promise(resolve => setTimeout(resolve, delay));
-                }
-
-                continue;
-            }
-
-            logger?.info(`[${getFormattedNow()}] Quest ${questName} progress reported: ${currentProgress} seconds.`);
+            logger?.info(`[${getFormattedNow()}] Quest ${questName} progress reported: ${currentProgress.toFixed(6)} seconds.`);
             return true;
         } catch (error) {
             logger?.error(`[${getFormattedNow()}] Failed to report progress for Quest ${questName} on attempt ${attempt}/${maxAttempts}:`, error);
@@ -292,31 +287,96 @@ export async function reportVideoQuestProgress(quest: Quest, currentProgress: nu
     return false;
 }
 
-export async function reportPlayGameQuestProgress(quest: Quest, terminal: boolean, logger?: Logger, options?: { attempts?: number, delay?: number; }): Promise<{ progress: number | null; }> {
+function getPlayGameProgressValue(userStatus: Quest["userStatus"]): number | null {
+    const progressMap = userStatus?.progress;
+
+    if (!progressMap) {
+        return null;
+    }
+
+    const progressPlayType = progressMap.PLAY_ON_DESKTOP?.value
+        ?? progressMap.PLAY_ON_XBOX?.value
+        ?? progressMap.PLAY_ON_PLAYSTATION?.value
+        ?? progressMap.PLAY_ACTIVITY?.value;
+
+    return progressPlayType ?? null;
+}
+
+function waitForHeartbeatDispatchResult(questId: string, timeoutMs: number): Promise<HeartbeatDispatchResult> {
+    return new Promise(resolve => {
+        const successEvent = "QUESTS_SEND_HEARTBEAT_SUCCESS";
+        const failureEvent = "QUESTS_SEND_HEARTBEAT_FAILURE";
+        const timeoutId = setTimeout(() => {
+            cleanup();
+            resolve({ type: "timeout" });
+        }, timeoutMs);
+
+        function cleanup() {
+            clearTimeout(timeoutId);
+            FluxDispatcher.unsubscribe(successEvent, onSuccess);
+            FluxDispatcher.unsubscribe(failureEvent, onFailure);
+        }
+
+        function onSuccess(data: { questId?: string; userStatus?: Quest["userStatus"]; }) {
+            if (data.questId !== questId) {
+                return;
+            }
+
+            cleanup();
+            resolve({ type: "success", userStatus: data.userStatus ?? null });
+        }
+
+        function onFailure(data: { questId?: string; error?: unknown; }) {
+            if (data.questId !== questId) {
+                return;
+            }
+
+            cleanup();
+            resolve({ type: "failure", error: data.error });
+        }
+
+        FluxDispatcher.subscribe(successEvent, onSuccess);
+        FluxDispatcher.subscribe(failureEvent, onFailure);
+    });
+}
+
+export async function reportPlayGameQuestProgress(quest: Quest, terminal: boolean, logger?: Logger, options?: { attempts?: number, delay?: number; timeout?: number; applicationId?: string; streamKey?: string; }): Promise<{ progress: number | null; completed: boolean; }> {
     const questName = normalizeQuestName(quest.config.messages.questName);
 
     if (!quest.userStatus?.enrolledAt) {
         logger?.warn(`[${getFormattedNow()}] Cannot send heartbeat for unenrolled Quest ${questName}.`);
-        return { progress: null };
+        return { progress: null, completed: false };
     } else if (quest.userStatus?.completedAt) {
-        return { progress: null };
+        return { progress: null, completed: true };
     }
 
     const maxAttempts = options?.attempts ?? 1;
     const delay = options?.delay ?? 2500;
+    const timeout = options?.timeout ?? 10000;
+    const streamKey = options?.streamKey ?? `call:${quest.id}:1`;
+    const applicationId = options?.applicationId ?? quest.config.application.id;
+    const questPlayType = quest.config.taskConfigV2?.tasks.PLAY_ON_DESKTOP || quest.config.taskConfigV2?.tasks.PLAY_ON_XBOX || quest.config.taskConfigV2?.tasks.PLAY_ON_PLAYSTATION || quest.config.taskConfigV2?.tasks.PLAY_ACTIVITY;
+
+    if (!questPlayType) {
+        logger?.warn(`[${getFormattedNow()}] Could not recognize the Quest type for Quest ${questName}.`);
+        return { progress: null, completed: false };
+    }
 
     for (let attempt = 1; attempt <= maxAttempts; attempt++) {
         try {
-            const response = await RestAPI.post({
-                url: `/quests/${quest.id}/heartbeat`,
-                body: {
-                    stream_key: `call:${quest.id}:1`,
-                    terminal
-                }
+            const dispatchResultPromise = waitForHeartbeatDispatchResult(quest.id, timeout);
+
+            await sendHeartbeat({
+                questId: quest.id,
+                streamKey,
+                applicationId,
+                terminal,
             });
 
-            if (!response || !response.body) {
-                logger?.warn(`[${getFormattedNow()}] No response body received while sending heartbeat for Quest ${questName} on attempt ${attempt}/${maxAttempts}.`);
+            const dispatchResult = await dispatchResultPromise;
+
+            if (dispatchResult.type === "failure") {
+                logger?.error(`[${getFormattedNow()}] Failed to send heartbeat for Quest ${questName} on attempt ${attempt}/${maxAttempts}:`, dispatchResult.error);
 
                 if (attempt < maxAttempts) {
                     await new Promise(resolve => setTimeout(resolve, delay));
@@ -325,18 +385,22 @@ export async function reportPlayGameQuestProgress(quest: Quest, terminal: boolea
                 continue;
             }
 
-            const { body } = snakeToCamel(response);
-            const progressPlayType = body.progress.PLAY_ON_DESKTOP || body.progress.PLAY_ON_XBOX || body.progress.PLAY_ON_PLAYSTATION || body.progress.PLAY_ACTIVITY;
-            const questPlayType = quest.config.taskConfigV2?.tasks.PLAY_ON_DESKTOP || quest.config.taskConfigV2?.tasks.PLAY_ON_XBOX || quest.config.taskConfigV2?.tasks.PLAY_ON_PLAYSTATION || quest.config.taskConfigV2?.tasks.PLAY_ACTIVITY;
-            const progress = progressPlayType?.value || 1;
+            if (dispatchResult.type === "timeout") {
+                logger?.warn(`[${getFormattedNow()}] Timed out waiting for heartbeat dispatch for Quest ${questName} on attempt ${attempt}/${maxAttempts}.`);
 
-            if (!questPlayType) {
-                logger?.warn(`[${getFormattedNow()}] Could not recognize the Quest type for Quest ${questName}.`);
-                return { progress: null };
+                if (attempt < maxAttempts) {
+                    await new Promise(resolve => setTimeout(resolve, delay));
+                }
+
+                continue;
             }
 
+            const updatedQuest = refreshQuest(quest);
+            const progress = getPlayGameProgressValue(dispatchResult.userStatus) ?? getQuestProgress(updatedQuest, questPlayType) ?? 0;
+            const completed = !!dispatchResult.userStatus?.completedAt || !!updatedQuest.userStatus?.completedAt;
+
             logger?.info(`[${getFormattedNow()}] Heartbeat sent for Quest ${questName} with progress: ${progress}/${questPlayType.target}.`);
-            return { progress };
+            return { progress, completed };
         } catch (error) {
             logger?.error(`[${getFormattedNow()}] Failed to send heartbeat for Quest ${questName} on attempt ${attempt}/${maxAttempts}:`, error);
 
@@ -347,7 +411,7 @@ export async function reportPlayGameQuestProgress(quest: Quest, terminal: boolea
     }
 
     logger?.warn(`[${getFormattedNow()}] Exhausted all ${maxAttempts} attempts to send heartbeat for Quest ${questName}.`);
-    return { progress: null };
+    return { progress: null, completed: false };
 }
 
 export function getBadgeSize(value: string, negative: boolean): number {

@@ -20,7 +20,7 @@ export type DropEntity =
     | { kind: "channel"; id: string; guildId?: string; }
     | { kind: "guild"; id: string; };
 
-interface DragifyPayload {
+export interface DragifyPayload {
     id?: string;
     userId?: string;
     channelId?: string;
@@ -92,55 +92,98 @@ export async function collectPayloadStrings(dataTransfer: DataTransfer): Promise
     return Array.from(new Set([...sync, ...asyncValues]));
 }
 
+export function serializeDragEntity(entity: DropEntity) {
+    return JSON.stringify(entity);
+}
+
+export function parseDragifyPayload(value: string): DropEntity | null {
+    const parsed = tryParseJson<DragifyPayload>(value);
+    if (!parsed?.kind || !parsed.id) return null;
+
+    switch (parsed.kind) {
+        case "user":
+            return { kind: "user", id: parsed.id };
+        case "channel":
+            return { kind: "channel", id: parsed.id, guildId: parsed.guildId };
+        case "guild":
+            return { kind: "guild", id: parsed.id };
+        default:
+            return null;
+    }
+}
+
+function parseJsonPayload(payload: DragifyPayload): DropEntity | null {
+    const id = payload.id ?? payload.userId ?? payload.channelId ?? payload.guildId;
+    if (!id) return null;
+
+    const type = (payload.type ?? payload.kind ?? payload.itemType ?? "").toLowerCase();
+    if (type.includes("user")) return { kind: "user", id };
+    if (type.includes("channel")) return { kind: "channel", id, guildId: payload.guildId };
+    if (type.includes("guild") || type.includes("server")) return { kind: "guild", id };
+    return null;
+}
+
+function parseUserString(value: string): DropEntity | null {
+    const userFromMention = userMentionRegex.exec(value);
+    if (userFromMention) return { kind: "user", id: userFromMention[1] };
+
+    const userFromProfile = userProfileUrlRegex.exec(value);
+    if (userFromProfile) return { kind: "user", id: userFromProfile[1] };
+
+    const guildUserAvatar = guildUserAvatarRegex.exec(value);
+    if (guildUserAvatar) return { kind: "user", id: guildUserAvatar[1] };
+
+    const userFromAvatar = userAvatarRegex.exec(value);
+    return userFromAvatar ? { kind: "user", id: userFromAvatar[1] } : null;
+}
+
+function parseChannelString(value: string): DropEntity | null {
+    const channelFromMention = channelMentionRegex.exec(value);
+    if (channelFromMention) return { kind: "channel", id: channelFromMention[1] };
+
+    const channelFromUrl = channelUrlRegex.exec(value);
+    if (!channelFromUrl) return null;
+
+    const guildId = channelFromUrl[1] === "@me" ? "@me" : channelFromUrl[2];
+    return { kind: "channel", id: channelFromUrl[3], guildId: guildId ?? undefined };
+}
+
+function parseGuildString(value: string): DropEntity | null {
+    const guildFromIcon = guildIconRegex.exec(value);
+    return guildFromIcon ? { kind: "guild", id: guildFromIcon[1] } : null;
+}
+
 export function parseFromStrings(payloads: string[], stores: StoreSet): DropEntity | null {
     if (payloads.length === 0) return null;
 
-    for (const value of payloads) {
+    const values = payloads
+        .map(value => value.trim())
+        .filter(Boolean);
+
+    for (const value of values) {
         const parsed = tryParseJson<DragifyPayload>(value);
-        if (parsed) {
-            const id = parsed.id ?? parsed.userId ?? parsed.channelId ?? parsed.guildId;
-            const type = (parsed.type ?? parsed.kind ?? parsed.itemType ?? "").toLowerCase();
-            if (id) {
-                if (type.includes("user")) return { kind: "user", id };
-                if (type.includes("channel")) return { kind: "channel", id, guildId: parsed.guildId };
-                if (type.includes("guild") || type.includes("server")) return { kind: "guild", id };
-            }
-        }
+        if (!parsed) continue;
+
+        const jsonEntity = parseJsonPayload(parsed);
+        if (jsonEntity) return jsonEntity;
     }
 
-    for (const value of payloads) {
-        const trimmed = value.trim();
-        if (!trimmed) continue;
-        const userFromMention = userMentionRegex.exec(trimmed);
-        if (userFromMention) return { kind: "user", id: userFromMention[1] };
-        const userFromProfile = userProfileUrlRegex.exec(trimmed);
-        if (userFromProfile) return { kind: "user", id: userFromProfile[1] };
-        const guildUserAvatar = guildUserAvatarRegex.exec(trimmed);
-        if (guildUserAvatar) return { kind: "user", id: guildUserAvatar[1] };
-        const userFromAvatar = userAvatarRegex.exec(trimmed);
-        if (userFromAvatar) return { kind: "user", id: userFromAvatar[1] };
+    for (const value of values) {
+        const userEntity = parseUserString(value);
+        if (userEntity) return userEntity;
     }
 
-    for (const value of payloads) {
-        const trimmed = value.trim();
-        if (!trimmed) continue;
-        const channelFromMention = channelMentionRegex.exec(trimmed);
-        if (channelFromMention) return { kind: "channel", id: channelFromMention[1] };
-        const channelFromUrl = channelUrlRegex.exec(trimmed);
-        if (channelFromUrl) {
-            const guildId = channelFromUrl[1] === "@me" ? "@me" : channelFromUrl[2];
-            return { kind: "channel", id: channelFromUrl[3], guildId: guildId ?? undefined };
-        }
+    for (const value of values) {
+        const channelEntity = parseChannelString(value);
+        if (channelEntity) return channelEntity;
     }
 
-    for (const value of payloads) {
-        const trimmed = value.trim();
-        if (!trimmed) continue;
-        const guildFromIcon = guildIconRegex.exec(trimmed);
-        if (guildFromIcon) return { kind: "guild", id: guildFromIcon[1] };
+    for (const value of values) {
+        const guildEntity = parseGuildString(value);
+        if (guildEntity) return guildEntity;
     }
 
-    const candidates = extractSnowflakes(payloads);
+    const candidates = extractSnowflakes(values);
     for (const candidate of candidates) {
         if (stores.ChannelStore.getChannel(candidate)) return { kind: "channel", id: candidate };
         if (stores.GuildStore.getGuild(candidate)) return { kind: "guild", id: candidate };

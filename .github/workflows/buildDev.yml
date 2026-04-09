@@ -1,0 +1,89 @@
+name: Build
+
+on:
+    push:
+        branches:
+            - "**"
+    workflow_dispatch:
+        inputs:
+            branch:
+                type: choice
+                description: "Branch to build and upload"
+                options:
+                    - main
+                    - dev
+                    - translation
+                default: "dev"
+
+env:
+    FORCE_COLOR: true
+    GITHUB_TOKEN: ${{ secrets.ETOKEN }}
+    REPO: Equicord/Equibuilds
+    USERNAME: GitHub-Actions
+
+permissions:
+    contents: write
+
+jobs:
+    Build:
+        name: Build Equicord
+        runs-on: ubuntu-latest
+
+        steps:
+            - uses: actions/checkout@v4
+              with:
+                  ref: ${{ github.event.inputs.branch || github.ref }}
+
+            - uses: pnpm/action-setup@v3
+
+            - name: Use Node.js 20
+              uses: actions/setup-node@v4
+              with:
+                  node-version: 20
+                  cache: "pnpm"
+
+            - name: Install dependencies
+              run: pnpm install --frozen-lockfile
+
+            - name: Build web
+              run: pnpm buildWebStandalone
+
+            - name: Build
+              run: pnpm buildStandalone
+
+            - name: Generate plugin lists
+              run: |
+                  pnpm generatePluginJson dist/plugins.json
+                  pnpm generateEquicordPluginJson dist/equicordplugins.json
+                  pnpm generateVencordPluginJson dist/vencordplugins.json
+                  pnpm generateDevsList dist/devs.json
+
+            - name: Upload to Equibuilds repo
+              run: |
+                  BRANCH="${{ github.event.inputs.branch || github.ref_name }}"
+                  COMMIT_SHA=$(git rev-parse --short HEAD)
+
+                  git config --global user.name "GitHub-Actions"
+                  git config --global user.email actions@github.com
+                  git clone https://$USERNAME:$GITHUB_TOKEN@github.com/$REPO.git equibuilds
+                  cd equibuilds
+
+                  if git ls-remote --exit-code --heads origin "$BRANCH" > /dev/null 2>&1; then
+                      git checkout "$BRANCH"
+                  else
+                      git checkout --orphan "$BRANCH"
+                  fi
+
+                  cp -r ../dist/* .
+                  find . -size 0 -delete
+
+                  mkdir -p userscript
+                  mv Equicord.user.* userscript/
+                  mv desktop.asar desktop/
+                  mv equibop.asar equibop/
+                  mv extension-*.zip browser/
+
+                  git add -A
+
+                  git commit -m "Builds for https://github.com/$GITHUB_REPOSITORY/commit/$COMMIT_SHA"
+                  git push --force https://$USERNAME:$GITHUB_TOKEN@github.com/$REPO.git "$BRANCH"

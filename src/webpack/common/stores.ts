@@ -85,6 +85,8 @@ export let EditMessageStore: t.EditMessageStore;
 export let QuestStore: t.QuestStore;
 export let ExperimentStore: t.ExperimentStore;
 export let UserAffinitiesStore: t.UserAffinitiesStore;
+export let ApplicationStreamingStore: t.ApplicationStreamingStore;
+export let ApplicationStreamPreviewStore: t.ApplicationStreamPreviewStore;
 
 /**
  * @see jsdoc of {@link t.useStateFromStores}
@@ -142,6 +144,8 @@ waitForStore("EditMessageStore", m => EditMessageStore = m);
 waitForStore("ExperimentStore", m => ExperimentStore = m);
 waitForStore("QuestStore", m => QuestStore = m);
 waitForStore("UserAffinitiesV2Store", m => UserAffinitiesStore = m);
+waitForStore("ApplicationStreamingStore", m => ApplicationStreamingStore = m);
+waitForStore("ApplicationStreamPreviewStore", m => ApplicationStreamPreviewStore = m);
 waitForStore("ThemeStore", m => {
     ThemeStore = m;
     // Importing this directly causes all webpack commons to be imported, which can easily cause circular dependencies.

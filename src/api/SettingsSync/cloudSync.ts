@@ -20,16 +20,17 @@ import { ManifestEntry, SyncRequest, SyncResponse } from "./types";
 const logger = new Logger("SettingsSync:Cloud", "#39b7e0");
 
 const MANIFEST_STORE_KEY = "Vencord_cloudManifest";
-const API_VERSION_KEY = "Vencord_cloudApiVersion";
 
 type ApiVersion = "v2" | "v1";
 
+let apiVersion: ApiVersion = "v2";
+
 async function getApiVersion(): Promise<ApiVersion> {
-    return await DataStore.get<ApiVersion>(API_VERSION_KEY) ?? "v2";
+    return apiVersion;
 }
 
 async function setApiVersion(version: ApiVersion) {
-    await DataStore.set(API_VERSION_KEY, version);
+    apiVersion = version;
 }
 
 function toBase64(data: Uint8Array): string {
@@ -129,9 +130,8 @@ async function doSyncV2(uploads: SyncRequest["uploads"], clientManifest: Manifes
             },
             body: JSON.stringify({ client_manifest: clientManifest, uploads } satisfies SyncRequest),
         });
-    } catch {
-        logger.info("Server does not support v2, falling back to v1");
-        await setApiVersion("v1");
+    } catch (e) {
+        logger.error("v2 sync network error, will retry next sync", e);
         return null;
     }
 

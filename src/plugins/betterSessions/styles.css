@@ -7,4 +7,13 @@
 .vc-betterSessions-rename-btn {
     margin-left: 4px;
     translate: 0 -2px;
+    width: fit-content;
+}
+
+.vc-betterSessions-new-btn {
+    margin-left: 4px;
+    translate: 0 -2px;
+    width: fit-content;
+    pointer-events: none;
+    padding: 1px 4px;
 }

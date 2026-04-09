@@ -198,6 +198,9 @@ const DB_VERSION = 2;
 
 const VOICES_STORE = "voices";
 
+import { Logger } from "@utils/Logger";
+
+const logger = new Logger("VcNarratorCustom");
 const META_STORE = "voices_meta";
 
 type VoiceMeta = {
@@ -206,49 +209,76 @@ type VoiceMeta = {
     lastAccess: number;
 };
 
-function openDB(): Promise<IDBDatabase> {
-    return new Promise((resolve, reject) => {
-        const request = indexedDB.open(DB_NAME, DB_VERSION);
-        request.onupgradeneeded = event => {
-            const db = request.result;
-            const upgradeTx = request.transaction;
-            if (!db.objectStoreNames.contains(VOICES_STORE)) {
-                db.createObjectStore(VOICES_STORE);
-            }
-            if (!db.objectStoreNames.contains(META_STORE)) {
-                const meta = db.createObjectStore(META_STORE);
-                meta.createIndex("by_lastAccess", "lastAccess");
-            }
+let openDbPromise: Promise<IDBDatabase | null> | undefined;
+let loggedFailure = false;
 
-            if (upgradeTx && (event?.oldVersion ?? 0) < 2) {
-                const now = Date.now();
-                const voices = upgradeTx.objectStore(VOICES_STORE);
-                const meta = upgradeTx.objectStore(META_STORE);
-                const cursorReq = voices.openCursor();
-                cursorReq.onsuccess = () => {
-                    const cursor = cursorReq.result;
-                    if (!cursor) return;
-                    const blob = cursor.value as Blob | undefined;
-                    meta.put(
-                        {
-                            size: blob?.size ?? 0,
-                            createdAt: now,
-                            lastAccess: now,
-                        } satisfies VoiceMeta,
-                        String(cursor.key)
-                    );
-                    cursor.continue();
-                };
-            }
-        };
-        request.onsuccess = () => resolve(request.result);
-        request.onerror = () => reject(request.error);
-    });
+function handleDbFailure(error: unknown) {
+    if (loggedFailure) return;
+    loggedFailure = true;
+    logger.error("Voice cache storage unavailable, falling back to memory.", error);
+}
+
+function openDB(): Promise<IDBDatabase | null> {
+    if (!openDbPromise) {
+        openDbPromise = new Promise<IDBDatabase>((resolve, reject) => {
+            const request = indexedDB.open(DB_NAME, DB_VERSION);
+            request.onupgradeneeded = event => {
+                const db = request.result;
+                const upgradeTx = request.transaction;
+                if (!db.objectStoreNames.contains(VOICES_STORE)) {
+                    db.createObjectStore(VOICES_STORE);
+                }
+                if (!db.objectStoreNames.contains(META_STORE)) {
+                    const meta = db.createObjectStore(META_STORE);
+                    meta.createIndex("by_lastAccess", "lastAccess");
+                }
+
+                if (upgradeTx && (event?.oldVersion ?? 0) < 2) {
+                    const now = Date.now();
+                    const voices = upgradeTx.objectStore(VOICES_STORE);
+                    const meta = upgradeTx.objectStore(META_STORE);
+                    const cursorReq = voices.openCursor();
+                    cursorReq.onsuccess = () => {
+                        const cursor = cursorReq.result;
+                        if (!cursor) return;
+                        const blob = cursor.value as Blob | undefined;
+                        meta.put(
+                            {
+                                size: blob?.size ?? 0,
+                                createdAt: now,
+                                lastAccess: now,
+                            } satisfies VoiceMeta,
+                            String(cursor.key)
+                        );
+                        cursor.continue();
+                    };
+                }
+            };
+            request.onsuccess = () => resolve(request.result);
+            request.onerror = () => reject(request.error);
+        }).then(db => db).catch(error => {
+            handleDbFailure(error);
+            return null;
+        });
+    }
+
+    return openDbPromise;
+}
+
+async function withDb<T>(fallback: T, callback: (db: IDBDatabase) => Promise<T>): Promise<T> {
+    const db = await openDB();
+    if (!db) return fallback;
+
+    try {
+        return await callback(db);
+    } catch (error) {
+        handleDbFailure(error);
+        return fallback;
+    }
 }
 
 export async function getPersistentTtsCacheStats(): Promise<{ bytes: number; entries: number; }> {
-    const db = await openDB();
-    return new Promise((resolve, reject) => {
+    return withDb<{ bytes: number; entries: number; }>({ bytes: 0, entries: 0 }, db => new Promise<{ bytes: number; entries: number; }>((resolve, reject) => {
         const tx = db.transaction(META_STORE, "readonly");
         const store = tx.objectStore(META_STORE);
 
@@ -268,7 +298,7 @@ export async function getPersistentTtsCacheStats(): Promise<{ bytes: number; ent
             cursor.continue();
         };
         cursorReq.onerror = () => reject(cursorReq.error);
-    });
+    }));
 }
 
 export async function clearTtsCache(): Promise<void> {
@@ -279,19 +309,17 @@ export async function clearTtsCache(): Promise<void> {
     }
     ttsCache.clear();
 
-    const db = await openDB();
-    return new Promise((resolve, reject) => {
+    await withDb<void>(void 0, db => new Promise<void>((resolve, reject) => {
         const tx = db.transaction([VOICES_STORE, META_STORE], "readwrite");
         tx.objectStore(VOICES_STORE).clear();
         tx.objectStore(META_STORE).clear();
         tx.oncomplete = () => resolve();
         tx.onerror = () => reject(tx.error);
-    });
+    }));
 }
 
 async function trimPersistentCacheToMaxBytes(maxBytes = PERSISTENT_TTS_CACHE_MAX_BYTES): Promise<void> {
-    const db = await openDB();
-    return new Promise((resolve, reject) => {
+    await withDb<void>(void 0, db => new Promise<void>((resolve, reject) => {
         const tx = db.transaction([VOICES_STORE, META_STORE], "readwrite");
         const voicesStore = tx.objectStore(VOICES_STORE);
         const metaStore = tx.objectStore(META_STORE);
@@ -344,12 +372,11 @@ async function trimPersistentCacheToMaxBytes(maxBytes = PERSISTENT_TTS_CACHE_MAX
 
         tx.oncomplete = () => resolve();
         tx.onerror = () => reject(tx.error);
-    });
+    }));
 }
 
 export async function getCachedVoiceFromDB(cacheKey: string): Promise<Blob | null> {
-    const db = await openDB();
-    return new Promise((resolve, reject) => {
+    return withDb<Blob | null>(null, db => new Promise<Blob | null>((resolve, reject) => {
         const tx = db.transaction([VOICES_STORE, META_STORE], "readwrite");
         const voicesStore = tx.objectStore(VOICES_STORE);
         const metaStore = tx.objectStore(META_STORE);
@@ -373,12 +400,11 @@ export async function getCachedVoiceFromDB(cacheKey: string): Promise<Blob | nul
             resolve(blob);
         };
         request.onerror = () => reject(request.error);
-    });
+    }));
 }
 
 export async function setCachedVoiceInDB(cacheKey: string, blob: Blob): Promise<void> {
-    const db = await openDB();
-    await new Promise<void>((resolve, reject) => {
+    await withDb<void>(void 0, db => new Promise<void>((resolve, reject) => {
         const tx = db.transaction([VOICES_STORE, META_STORE], "readwrite");
         const voicesStore = tx.objectStore(VOICES_STORE);
         const metaStore = tx.objectStore(META_STORE);
@@ -392,7 +418,7 @@ export async function setCachedVoiceInDB(cacheKey: string, blob: Blob): Promise<
 
         tx.oncomplete = () => resolve();
         tx.onerror = () => reject(tx.error);
-    });
+    }));
 
     await trimPersistentCacheToMaxBytes();
 }

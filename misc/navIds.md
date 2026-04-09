@@ -1,7 +1,8 @@
 # NavIDs
 
 If you have `ConsoleShortcuts` enabled you can run loadLazyChunks()
-to get every navId after it loads everything with the section below
+after it says Finished loading all chunks! in console
+you can run the snippet below to list and copy all the navIds currently available
 
 ```js
 const wp = webpackChunkdiscord_app.push([[Symbol()], {}, r => r]);
@@ -16,7 +17,7 @@ console.log(navIds);
 copy(navIds);
 ```
 
-Updated: 3/1/2026
+Updated: 4/7/2026
 
 ```md
 ChannelNotificationCustomSettingsItems
@@ -38,6 +39,7 @@ channel-summaries-context-menu
 clips-context
 clips-filters-context
 clips-more-options
+collectibles-game-shops-menu
 collectibles-index-page-menu
 collectibles-shop-tabs-overflow-menu
 command-list-sort
@@ -51,11 +53,13 @@ edit-profile-popout
 emoji-studio-context-menu
 exit-options
 expression-picker
-favorite-server-context
+favorite-guild-header-add-context
+favorites-channel-list-context
 favorites-header-popout
 forum-tag
 friend-row
 game-context
+game-profile-add-to-profile
 game-profile-context
 game-shop-context
 game_server-popout-context-menu
@@ -116,6 +120,7 @@ overlay-video-widget-context-menu
 overlay-voice-widget-context-menu
 pip-menu
 plaintext-preview-overflow-menu
+play-on-distributor-menu
 playground-settings-menu
 poll-media-edit-menu
 progress-bar-context
@@ -134,6 +139,8 @@ set-image-for-action
 set-status-submenu
 set-status-submenu-mobile-web
 settings-footer-more-menu
+settings-menu
+social-layer-storefront-card-context
 sort-and-view
 sound-button-context
 staff-help-popout
@@ -142,11 +149,10 @@ stream-context
 stream-options
 subscription-context
 switch-accounts-submenu
-test-skus
-test-store-listing
 text-context
 textarea-context
 thread-context
+unapplied-boost-actions
 unknown-user-context
 user-bot-profile-add-app
 user-bot-profile-overflow-menu
@@ -155,7 +161,6 @@ user-profile-friend-request-buttons
 user-profile-overflow-menu
 user-profile-widget-context-menu
 user-settings-change-avatar
-user-settings-cog
 video-background-context
 video-device-context
 webauthn-credential-actions
