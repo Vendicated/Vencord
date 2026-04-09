@@ -26,11 +26,12 @@ import { TooltipContainer } from "@components/TooltipContainer";
 import { Devs } from "@utils/constants";
 import { classes } from "@utils/misc";
 import definePlugin, { OptionType } from "@utils/types";
-import type { Guild } from "@vencord/discord-types";
+import type { Guild, RoleOrUserPermission } from "@vencord/discord-types";
+import { PermissionOverwriteType } from "@vencord/discord-types/enums";
 import { findCssClassesLazy } from "@webpack";
 import { Button, ChannelStore, Dialog, GuildMemberStore, GuildRoleStore, GuildStore, match, Menu, PermissionsBits, Popout, useRef, UserStore } from "@webpack/common";
 
-import openRolesAndUsersPermissionsModal, { PermissionType, RoleOrUserPermission } from "./components/RolesAndUsersPermissions";
+import openRolesAndUsersPermissionsModal from "./components/RolesAndUsersPermissions";
 import UserPermissions from "./components/UserPermissions";
 import { getSortedRolesForMember, sortPermissionOverwrites } from "./utils";
 
@@ -75,13 +76,13 @@ function MenuItem(guildId: string, id?: string, type?: MenuItemParentType) {
 
                         const permissions: RoleOrUserPermission[] = getSortedRolesForMember(guild, member)
                             .map(role => ({
-                                type: PermissionType.Role,
+                                type: PermissionOverwriteType.ROLE,
                                 ...role
                             }));
 
                         if (guild.ownerId === id) {
                             permissions.push({
-                                type: PermissionType.Owner,
+                                type: PermissionOverwriteType.OWNER,
                                 permissions: Object.values(PermissionsBits).reduce((prev, curr) => prev | curr, 0n)
                             });
                         }
@@ -95,7 +96,7 @@ function MenuItem(guildId: string, id?: string, type?: MenuItemParentType) {
                         const channel = ChannelStore.getChannel(id!);
 
                         const permissions = sortPermissionOverwrites(Object.values(channel.permissionOverwrites).map(({ id, allow, deny, type }) => ({
-                            type: type as PermissionType,
+                            type,
                             id,
                             overwriteAllow: allow,
                             overwriteDeny: deny
@@ -108,7 +109,7 @@ function MenuItem(guildId: string, id?: string, type?: MenuItemParentType) {
                     })
                     .otherwise(() => {
                         const permissions = GuildRoleStore.getSortedRoles(guild.id).map(role => ({
-                            type: PermissionType.Role,
+                            type: PermissionOverwriteType.ROLE,
                             ...role
                         }));
 
@@ -142,7 +143,6 @@ function makeContextMenuPatch(childId: string | string[], type?: MenuItemParentT
             .with(MenuItemParentType.Channel, () => MenuItem(props.guild.id, props.channel.id, type))
             .with(MenuItemParentType.Guild, () => MenuItem(props.guild.id))
             .otherwise(() => null);
-
 
         if (item == null) return;
 
