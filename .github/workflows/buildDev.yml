@@ -1,8 +1,15 @@
-name: Build Dev
+name: Build
+
 on:
     push:
         branches:
-            - dev
+            - "**"
+    workflow_dispatch:
+        inputs:
+            branch:
+                description: "Branch to build and upload"
+                required: true
+                default: "dev"
 
 env:
     FORCE_COLOR: true
@@ -20,6 +27,8 @@ jobs:
 
         steps:
             - uses: actions/checkout@v4
+              with:
+                  ref: ${{ github.event.inputs.branch || github.ref }}
 
             - uses: pnpm/action-setup@v3
 
@@ -47,10 +56,19 @@ jobs:
 
             - name: Upload to Equibuilds repo
               run: |
+                  BRANCH="${{ github.event.inputs.branch || env.GITHUB_REF_NAME }}"
+                  COMMIT_SHA=$(git rev-parse --short HEAD)
+
                   git config --global user.name "GitHub-Actions"
                   git config --global user.email actions@github.com
                   git clone https://$USERNAME:$GITHUB_TOKEN@github.com/$REPO.git equibuilds
                   cd equibuilds
+
+                  if git ls-remote --exit-code --heads origin "$BRANCH" > /dev/null 2>&1; then
+                      git checkout "$BRANCH"
+                  else
+                      git checkout --orphan "$BRANCH"
+                  fi
 
                   cp -r ../dist/* .
                   find . -size 0 -delete
@@ -63,5 +81,5 @@ jobs:
 
                   git add -A
 
-                  git commit -m "Plugins for https://github.com/$GITHUB_REPOSITORY/commit/$GITHUB_SHA"
-                  git push --force https://$USERNAME:$GITHUB_TOKEN@github.com/$REPO.git
+                  git commit -m "Builds for https://github.com/$GITHUB_REPOSITORY/commit/$COMMIT_SHA"
+                  git push --force https://$USERNAME:$GITHUB_TOKEN@github.com/$REPO.git "$BRANCH"
