@@ -35,28 +35,59 @@ jobs:
                   ref: ${{ github.event.inputs.branch || github.ref }}
 
             - uses: pnpm/action-setup@v3
+              if: github.ref_name != 'bun'
 
             - name: Use Node.js 20
+              if: github.ref_name != 'bun'
               uses: actions/setup-node@v4
               with:
                   node-version: 20
                   cache: "pnpm"
 
             - name: Install dependencies
+              if: github.ref_name != 'bun'
               run: pnpm install --frozen-lockfile
 
             - name: Build web
+              if: github.ref_name != 'bun'
               run: pnpm buildWebStandalone
 
             - name: Build
+              if: github.ref_name != 'bun'
               run: pnpm buildStandalone
 
             - name: Generate plugin lists
+              if: github.ref_name != 'bun'
               run: |
                   pnpm generatePluginJson dist/plugins.json
                   pnpm generateEquicordPluginJson dist/equicordplugins.json
                   pnpm generateVencordPluginJson dist/vencordplugins.json
                   pnpm generateDevsList dist/devs.json
+
+            - uses: actions/checkout@v4
+              if: github.ref_name == 'bun'
+            - uses: oven-sh/setup-bun@v2
+              with:
+                  bun-version: latest
+            - name: Install dependencies
+              if: github.ref_name == 'bun'
+              run: bun install
+
+            - name: Build web
+              if: github.ref_name == 'bun'
+              run: bun run buildWebStandalone
+
+            - name: Build
+              if: github.ref_name == 'bun'
+              run: bun run buildStandalone
+
+            - name: Generate plugin lists
+              if: github.ref_name == 'bun'
+              run: |
+                  bun run generatePluginJson dist/plugins.json
+                  bun run generateEquicordPluginJson dist/equicordplugins.json
+                  bun run generateVencordPluginJson dist/vencordplugins.json
+                  bun run generateDevsList dist/devs.json
 
             - name: Upload to Equibuilds repo
               run: |
