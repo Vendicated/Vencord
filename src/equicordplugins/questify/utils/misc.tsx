@@ -346,14 +346,14 @@ export async function reportPlayGameQuestProgress(quest: Quest, terminal: boolea
     if (!quest.userStatus?.enrolledAt) {
         logger?.warn(`[${getFormattedNow()}] Cannot send heartbeat for unenrolled Quest ${questName}.`);
         return { progress: null, completed: false };
-    } else if (quest.userStatus?.completedAt) {
+    } else if (quest.userStatus?.completedAt && !terminal) {
         return { progress: null, completed: true };
     }
 
     const maxAttempts = options?.attempts ?? 1;
     const delay = options?.delay ?? 2500;
     const timeout = options?.timeout ?? 10000;
-    const streamKey = options?.streamKey ?? `call:${quest.id}:1`;
+    const streamKey = options?.streamKey;
     const applicationId = options?.applicationId ?? quest.config.application.id;
     const questPlayType = quest.config.taskConfigV2?.tasks.PLAY_ON_DESKTOP || quest.config.taskConfigV2?.tasks.PLAY_ON_XBOX || quest.config.taskConfigV2?.tasks.PLAY_ON_PLAYSTATION || quest.config.taskConfigV2?.tasks.PLAY_ACTIVITY;
 
