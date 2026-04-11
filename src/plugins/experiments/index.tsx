@@ -71,7 +71,7 @@ export default definePlugin({
                     replace: "$self.WarningCard(),"
                 },
                 {
-                    match: /(?<=marginBottom:16)(?=\},)/,
+                    match: /(?<=,marginBottom:16)(?=\},children:\[)/,
                     replace: ',flexDirection:"row",alignItems:"center"'
                 }
             ]
