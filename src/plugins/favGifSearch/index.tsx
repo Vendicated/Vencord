@@ -18,9 +18,13 @@
 
 import { definePluginSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
+import { Flex } from "@components/Flex";
 import { Devs } from "@utils/constants";
+import { identity } from "@utils/misc";
 import definePlugin, { OptionType } from "@utils/types";
-import { useCallback, useEffect, useRef, useState } from "@webpack/common";
+import { Select, useCallback, useEffect, useRef, useState } from "@webpack/common";
+
+import "./style.css";
 
 interface SearchBarComponentProps {
     ref?: React.RefObject<any>;
@@ -134,6 +138,24 @@ function SearchBar({ instance, SearchBarComponent }: { instance: Instance; Searc
     const [query, setQuery] = useState("");
     const ref = useRef<HTMLElement>(null);
 
+    const gifProvider = (window as any).GifProvider as {
+        setProvider?: (provider: string) => string;
+        getProviderLabel?: () => string;
+        settings?: {
+            provider?: string;
+        };
+    } | undefined;
+    const provider = gifProvider?.settings?.provider ?? "tenor";
+    const providerLabel = gifProvider?.getProviderLabel?.() ?? "GIF";
+
+    const providerOptions = [
+        { label: "Tenor", value: "tenor" },
+        { label: "Giphy", value: "giphy" },
+        { label: "Serika", value: "serika" },
+        { label: "Imgur", value: "imgur" },
+        { label: "Klipy", value: "klipy" },
+    ] as const;
+
     const onChange = useCallback((searchQuery: string) => {
         setQuery(searchQuery);
         const { props } = instance;
@@ -174,22 +196,38 @@ function SearchBar({ instance, SearchBarComponent }: { instance: Instance; Searc
     }, []);
 
     return (
-        <SearchBarComponent
-            ref={ref}
-            autoFocus={true}
-            size="md"
-            className=""
-            onChange={onChange}
-            onClear={() => {
-                setQuery("");
-                if (instance.props.favCopy != null) {
-                    instance.props.favorites = instance.props.favCopy;
+        <Flex alignItems="center" gap="8px" className="vc-favGifSearch-header">
+            <SearchBarComponent
+                ref={ref}
+                autoFocus={true}
+                size="md"
+                className="vc-favGifSearch-search"
+                onChange={onChange}
+                onClear={() => {
+                    setQuery("");
+                    if (instance.props.favCopy != null) {
+                        instance.props.favorites = instance.props.favCopy;
+                        instance.forceUpdate();
+                    }
+                }}
+                query={query}
+                placeholder={`Search ${providerLabel}`}
+            />
+
+            <Select
+                className="vc-favGifSearch-provider"
+                placeholder={providerLabel}
+                options={providerOptions}
+                closeOnSelect={true}
+                select={selectedProvider => {
+                    gifProvider?.setProvider?.(selectedProvider);
                     instance.forceUpdate();
-                }
-            }}
-            query={query}
-            placeholder="Search Favorite Gifs"
-        />
+                }}
+                isSelected={selectedProvider => selectedProvider === provider}
+                serialize={identity}
+            >
+            </Select>
+        </Flex>
     );
 }
 

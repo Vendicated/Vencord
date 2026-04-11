@@ -1,0 +1,12 @@
+.vc-favGifSearch-header {
+  width: 100%;
+}
+
+.vc-favGifSearch-search {
+  flex: 1;
+  min-width: 0;
+}
+
+.vc-favGifSearch-provider {
+  flex: 0 0 9.5rem;
+}
