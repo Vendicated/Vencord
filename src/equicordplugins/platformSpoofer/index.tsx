@@ -62,18 +62,17 @@ export default definePlugin({
     patches: [
         {
             find: "_doIdentify(){",
-            replacement: {
-                match: /(\[IDENTIFY\].*let.{0,5}=\{.*properties:)(.*),presence/,
-                replace: "$1{...$2,...$self.getPlatform(true)},presence"
-            }
+            replacement: [
+                {
+                    match: /window._ws=null,null!=\i/,
+                    replace: "false"
+                },
+                {
+                    match: /(?<="GatewaySocket"\)\}\),properties:)(\i)/,
+                    replace: "{...$1,...$self.getPlatform(true)}"
+                },
+            ]
         },
-        {
-            find: '("AppSkeleton");',
-            replacement: {
-                match: /(?<=\.isPlatformEmbedded.{0,50}\i\)\)\}.{0,30})\i\?\i\.\i\.set\(.{0,10}:/,
-                replace: ""
-            }
-        }
     ],
     getPlatform(bypass, userId?: any) {
         const platform = settings.store.platform ?? "desktop";
