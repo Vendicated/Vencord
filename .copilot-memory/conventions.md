@@ -1,0 +1,3 @@
+- Repo-local learnings go here.
+- Keep entries short, actionable, and specific.
+- Prefer one convention per bullet.

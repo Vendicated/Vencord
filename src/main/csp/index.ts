@@ -41,6 +41,7 @@ export const CspPolicies: PolicyMap = {
     "i.ibb.co": ImageSrc, // ImgBB, used by some themes
     "i.pinimg.com": ImageSrc, // Pinterest, used by some themes
     "*.tenor.com": ImageSrc, // Tenor, used by some themes
+    "*.giphy.com": ImageSrc, // Giphy media CDN, used by GifProvider
     "files.catbox.moe": ImageAndCssSrc, // Catbox, used by some themes
 
     "cdn.discordapp.com": ImageAndCssSrc, // Discord CDN, used by Vencord and some themes to load media
@@ -55,6 +56,7 @@ export const CspPolicies: PolicyMap = {
     "api.github.com": ConnectSrc, // used for updating Vencord itself
     "ws.audioscrobbler.com": ConnectSrc, // Last.fm API
     "translate-pa.googleapis.com": ConnectSrc, // Google Translate API
+    "api.giphy.com": ConnectSrc, // Giphy API, used by GifProvider
     "*.vencord.dev": ImageSrc, // VenCloud (api.vencord.dev) and Badges (badges.vencord.dev)
     "manti.vendicated.dev": ImageSrc, // ReviewDB API
     "decor.fieryflames.dev": ConnectSrc, // Decor API

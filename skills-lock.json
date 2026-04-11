@@ -1,0 +1,25 @@
+{
+  "version": 1,
+  "skills": {
+    "caveman": {
+      "source": "JuliusBrussee/caveman",
+      "sourceType": "github",
+      "computedHash": "9b512c9575fe0c66dcd64c0097072b52437335b80bed5c3f2128c66e906f2eaa"
+    },
+    "compress": {
+      "source": "JuliusBrussee/caveman",
+      "sourceType": "github",
+      "computedHash": "bbd7d8b1d76fbd6f09f4ca15cd8ae314c856353e4415d1d56a845c8f315e6b3e"
+    },
+    "continual-learning": {
+      "source": "microsoft/skills",
+      "sourceType": "github",
+      "computedHash": "7e6eef17feb93dfbbb3d2d2caca76ddc7da65f7ae41f7cdd6d4478c24c278044"
+    },
+    "typescript-expert": {
+      "source": "sickn33/antigravity-awesome-skills",
+      "sourceType": "github",
+      "computedHash": "3e45cb0773354ceeefcdf18fac14c8f6f476e7af7d83af57fcde9839d18ea39c"
+    }
+  }
+}
