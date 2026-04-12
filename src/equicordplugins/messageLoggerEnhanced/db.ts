@@ -304,14 +304,15 @@ export async function deleteMessagesBulkIDB(message_ids: string[]) {
     });
 }
 
-export async function clearMessagesIDB() {
+export async function clearMessagesIDB(showToast = true) {
     cachedMessages.clear();
+    await withDb(void 0, database => database.clear("messages"));
 
-    return withDb(void 0, database => database.clear("messages")).then(() => {
-        Toasts.show({
-            type: Toasts.Type.MESSAGE,
-            message: "Cleared message log database and cache.",
-            id: Toasts.genId()
-        });
+    if (!showToast) return;
+
+    Toasts.show({
+        type: Toasts.Type.MESSAGE,
+        message: "Cleared message log database and cache.",
+        id: Toasts.genId()
     });
 }
