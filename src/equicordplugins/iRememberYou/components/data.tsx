@@ -6,7 +6,7 @@
 
 import { DataStore } from "@api/index";
 import { Guild, User } from "@vencord/discord-types";
-import { ChannelStore, GuildMemberStore, GuildStore, InviteActions, MessageStore, PermissionsBits, PermissionStore, UserStore, } from "@webpack/common";
+import { ChannelStore, GuildMemberStore, GuildStore, MessageStore, UserStore, } from "@webpack/common";
 
 export interface IUserExtra {
     isOwner?: boolean;
@@ -104,9 +104,7 @@ export class Data {
                 extra: { ...previouExtra, ...extra },
                 iconURL: user.getAvatarURL(),
             };
-
-            if (source && !processedGuilds.has(source.id) && this.hasInvitePermissions(source.id)) {
-                this.collectInviteLink(source.id);
+            if (source && !processedGuilds.has(source.id)) {
                 processedGuilds.add(source.id);
             }
         }
@@ -148,10 +146,6 @@ export class Data {
             }
 
             this.processUsersToCollection([...target]);
-
-            if (guild && this.hasInvitePermissions(guild.id)) {
-                this.collectInviteLink(guild.id);
-            }
         }
     }
 
@@ -174,38 +168,6 @@ export class Data {
         }
 
         this.processUsersToCollection([...target]);
-    }
-
-    hasInvitePermissions(guildId: string): boolean {
-        const guild = GuildStore.getGuild(guildId);
-        if (!guild) return false;
-
-        const currentUser = UserStore.getCurrentUser();
-        if (!currentUser) return false;
-
-        if (guild.ownerId === currentUser.id) return true;
-
-        const member = GuildMemberStore.getMember(guildId, currentUser.id);
-        if (!member) return false;
-
-        return PermissionStore.can(PermissionsBits.CREATE_INSTANT_INVITE, guild);
-    }
-
-    async collectInviteLink(guildId: string) {
-        try {
-            const invites = await InviteActions.getInvites(guildId);
-            if (invites && invites.length > 0) {
-                const invite = invites[0];
-                const inviteCode = invite.code;
-                const inviteLink = `https://discord.gg/${inviteCode}`;
-
-                if (this.usersCollection[guildId]) {
-                    this.usersCollection[guildId].inviteLink = inviteLink;
-                }
-            }
-        } catch (error) {
-            console.warn("Failed to collect invite link for guild:", guildId, error);
-        }
     }
 
     storageAutoSaveProtocol() {
