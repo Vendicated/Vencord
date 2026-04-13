@@ -1,0 +1,7 @@
+{
+  "name": "clean-channel-names",
+  "version": "1.0.0",
+  "description": "Vencord plugin that formats Discord channel names into readable text.",
+  "author": "Gh0sTyNZ",
+  "license": "MIT"
+}
