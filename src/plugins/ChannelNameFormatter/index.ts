@@ -4,8 +4,8 @@ import { Devs } from "@utils/constants";
 
 let originalGetChannel: typeof ChannelStore.getChannel | null = null;
 
-function format(name: string) {
-    if (!name) return name;
+function formatChannelName(name: string) {
+    if (name.length === 0) return name;
 
     return name
         .replace(/[-_]/g, " ")
@@ -19,13 +19,14 @@ export default definePlugin({
 
     start() {
         if (originalGetChannel) return;
+
         originalGetChannel = ChannelStore.getChannel;
 
         ChannelStore.getChannel = function (channelId: string) {
             const channel = originalGetChannel!.call(this, channelId);
 
             if (channel?.name) {
-                channel.name = format(channel.name);
+                channel.name = formatChannelName(channel.name);
             }
 
             return channel;
@@ -33,9 +34,9 @@ export default definePlugin({
     },
 
     stop() {
-        if (originalGetChannel) {
-            ChannelStore.getChannel = originalGetChannel;
-            originalGetChannel = null;
-        }
+        if (!originalGetChannel) return;
+
+        ChannelStore.getChannel = originalGetChannel;
+        originalGetChannel = null;
     }
 });
