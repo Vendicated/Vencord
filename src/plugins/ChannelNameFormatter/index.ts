@@ -25,11 +25,12 @@ export default definePlugin({
         ChannelStore.getChannel = function (channelId: string) {
             const channel = originalGetChannel!.call(this, channelId);
 
-            if (channel?.name) {
-                channel.name = formatChannelName(channel.name);
-            }
+            if (!channel?.name) return channel;
 
-            return channel;
+            return {
+                ...channel,
+                name: formatChannelName(channel.name)
+            };
         };
     },
 
