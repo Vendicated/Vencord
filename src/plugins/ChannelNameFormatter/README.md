@@ -1,8 +1,24 @@
-# ChannelNameFormatter
+# Channel Name Formatter (Vencord Plugin)
 
-Formats Discord channel names into a more readable form by replacing dashes and underscores with spaces and capitalizing words.
+Formats Discord channel names into readable text.
 
-## Examples
+### ✨ What It Does
 
-- `ingame-chat` → `Ingame Chat`
-- `clips_and_media` → `Clips & Media`
+- Replaces `-` and `_` with spaces  
+- Capitalizes each word  
+
+#### Example
+```
+ingame-chat  →  Ingame Chat
+clips_and_media  →  Clips And Media
+```
+
+## 📜 License
+
+MIT License
+
+---
+
+## 👤 Author
+
+[Gh0sTyNZ](https://github.com/Gh0sTyNZ)
