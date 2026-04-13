@@ -68,6 +68,7 @@ async function cacheRecord(record?: DBMessageRecord | null) {
 }
 
 export async function initIDB() {
+    if (db) return;
     db = await openDB<MLIDB>(DB_NAME, DB_VERSION, {
         upgrade(db) {
             const messageStore = db.createObjectStore("messages", { keyPath: "message_id" });
@@ -211,6 +212,7 @@ export async function getMessagesByChannelAndAfterTimestampIDB(channel_id: strin
 export async function addMessageIDB(message: LoggedMessageJSON, status: DBMessageStatus) {
     stripTransientRenderState(message);
 
+    if (!db) await initIDB();
     await db.put("messages", {
         channel_id: message.channel_id,
         message_id: message.id,
