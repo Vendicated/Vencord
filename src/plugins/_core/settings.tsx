@@ -32,9 +32,10 @@ let LayoutTypes = {
     SECTION: 1,
     SIDEBAR_ITEM: 2,
     PANEL: 3,
-    PANE: 4
+    CATEGORY: 5,
+    CUSTOM: 19,
 };
-waitFor(["SECTION", "SIDEBAR_ITEM", "PANEL"], v => LayoutTypes = v);
+waitFor(["SECTION", "SIDEBAR_ITEM", "PANEL", "CUSTOM"], v => LayoutTypes = v);
 
 const FallbackSectionTypes = {
     HEADER: "HEADER",
@@ -91,16 +92,6 @@ const settings = definePluginSettings({
     }
 });
 
-const settingsSectionMap: [string, string][] = [
-    ["VencordSettings", "vencord_main_panel"],
-    ["VencordPlugins", "vencord_plugins_panel"],
-    ["VencordThemes", "vencord_themes_panel"],
-    ["VencordUpdater", "vencord_updater_panel"],
-    ["VencordCloud", "vencord_cloud_panel"],
-    ["VencordBackupAndRestore", "vencord_backup_restore_panel"],
-    ["VencordPatchHelper", "vencord_patch_helper_panel"]
-];
-
 export default definePlugin({
     name: "Settings",
     description: "Adds Settings UI and debug info",
@@ -108,7 +99,6 @@ export default definePlugin({
     required: true,
 
     settings,
-    settingsSectionMap,
 
     patches: [
         {
@@ -122,38 +112,16 @@ export default definePlugin({
                     }
                 },
                 {
-                    match: /"text-xs\/normal".{0,300}?\[\(0,\i\.jsxs?\)\((.{1,10}),(\{[^{}}]+\{.{0,20}className:\i.\i,.+?\})\)," "/,
-                    replace: (m, component, props) => {
-                        props = props.replace(/children:\[.+\]/, "");
-                        return `${m},$self.makeInfoElements(${component},${props})`;
-                    }
-                },
-                {
                     match: /copyValue:\i\.join\(" "\)/g,
                     replace: "$& + $self.getInfoString()"
                 }
             ]
         },
         {
-            find: "#{intl::USER_SETTINGS_ACTIONS_MENU_LABEL}",
-            replacement: {
-                // Skip the check Discord performs to make sure the section being selected in the user settings context menu is valid
-                match: /null!=\(\i=Object.values\(\i\.\i\).{0,50}?&&(?=\(0,\i\.openUserSettings\)\(\i,\{section:\i)/,
-                replace: ""
-            }
-        },
-        {
             find: ".buildLayout().map",
             replacement: {
                 match: /(\i)\.buildLayout\(\)(?=\.map)/,
                 replace: "$self.buildLayout($1)"
-            }
-        },
-        {
-            find: "getWebUserSettingFromSection",
-            replacement: {
-                match: /new Map\(\[(?=\[.{0,10}\.ACCOUNT,.{0,10}\.ACCOUNT_PANEL)/,
-                replace: "new Map([...$self.getSettingsSectionMappings(),"
             }
         }
     ],
@@ -165,44 +133,25 @@ export default definePlugin({
             key: key + "_panel",
             type: LayoutTypes.PANEL,
             useTitle: () => panelTitle,
+            buildLayout: () => [{
+                type: LayoutTypes.CATEGORY,
+                key: key + "_category",
+                buildLayout: () => [{
+                    type: LayoutTypes.CUSTOM,
+                    key: key + "_custom",
+                    Component: Component,
+                    useSearchTerms: () => [title]
+                }]
+            }]
         };
-
-        const render = {
-            // FIXME
-            StronglyDiscouragedCustomComponent: () => <Component />,
-            render: () => <Component />,
-        };
-
-        // FIXME
-        if (LayoutTypes.PANE) {
-            panel.buildLayout = () => [
-                {
-                    key: key + "_pane",
-                    type: LayoutTypes.PANE,
-                    useTitle: () => panelTitle,
-                    buildLayout: () => [],
-                    ...render
-                }
-            ];
-        } else {
-            Object.assign(panel, render);
-            panel.buildLayout = () => [];
-        }
 
         return ({
             key,
             type: LayoutTypes.SIDEBAR_ITEM,
-            // FIXME
-            legacySearchKey: title.toUpperCase(),
-            getLegacySearchKey: () => title.toUpperCase(),
             useTitle: () => title,
             icon: () => <Icon width={20} height={20} />,
             buildLayout: () => [panel]
         });
-    },
-
-    getSettingsSectionMappings() {
-        return settingsSectionMap;
     },
 
     buildLayout(originalLayoutBuilder: SettingsLayoutBuilder) {

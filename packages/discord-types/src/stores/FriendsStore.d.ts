@@ -5,11 +5,13 @@ export type FriendsSection = "ADD_FRIEND" | "ALL" | "ONLINE" | "PENDING" | "PEND
 
 export type StatusType = "online" | "offline" | "idle" | "dnd" | "invisible" | "streaming" | "unknown";
 
+export type StreamType = "call" | "guild";
+
 export interface ApplicationStream {
     channelId: string;
     guildId: string | null;
     ownerId: string;
-    streamType: string;
+    streamType: StreamType;
 }
 
 export interface FriendsRow {
