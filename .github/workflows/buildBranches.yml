@@ -1,4 +1,4 @@
-name: Build
+name: Build Branches
 
 on:
     push:
@@ -65,9 +65,8 @@ jobs:
                   pnpm generateVencordPluginJson dist/vencordplugins.json
                   pnpm generateDevsList dist/devs.json
 
-            - uses: actions/checkout@v4
-              if: github.ref_name == 'bun'
             - uses: oven-sh/setup-bun@v2
+              if: github.ref_name == 'bun'
               with:
                   bun-version: latest
             - name: Install dependencies
