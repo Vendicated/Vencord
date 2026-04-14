@@ -38,11 +38,11 @@ jobs:
             - uses: pnpm/action-setup@v3
               if: github.ref_name != 'bun'
 
-            - name: Use Node.js 20
+            - name: Use Node.js 22
               if: github.ref_name != 'bun'
               uses: actions/setup-node@v4
               with:
-                  node-version: 20
+                  node-version: 22
                   cache: "pnpm"
 
             - name: Install dependencies

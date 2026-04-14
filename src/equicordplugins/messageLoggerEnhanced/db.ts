@@ -256,9 +256,11 @@ export async function deleteMessagesBulkIDB(message_ids: string[]) {
     message_ids.forEach(id => cachedMessages.delete(id));
 }
 
-export async function clearMessagesIDB() {
-    await db.clear("messages");
+export async function clearMessagesIDB(showToast = true) {
     cachedMessages.clear();
+    await db.clear("messages");
+    if (!showToast) return;
+
     Toasts.show({
         type: Toasts.Type.MESSAGE,
         message: "Cleared message log database and cache.",

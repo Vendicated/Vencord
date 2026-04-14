@@ -22,8 +22,8 @@ export default definePlugin({
             find: ".DISPLAY_NAME_STYLES_COACHMARK)",
             replacement: [
                 {
-                    match: /(?<=className:(\i)\.\i,style:\i,)children:\[/,
-                    replace: "children:[...$self.renderButtons(arguments[0],$1),"
+                    match: /children:\[(?=.{0,50}accountContainerRef:\i)/,
+                    replace: "children:[...$self.renderButtons(arguments[0]),"
                 },
                 // fix discord weird shrink with extra buttons
                 {

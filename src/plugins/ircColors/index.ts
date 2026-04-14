@@ -21,8 +21,7 @@ import { getCustomColorString } from "@equicordplugins/customUserColors";
 import { hash as h64 } from "@intrnl/xxhash64";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { useMemo } from "@webpack/common";
-import { UserStore } from "@webpack/common";
+import { useMemo, UserStore } from "@webpack/common";
 
 // Calculate a CSS color string based on the user ID
 function calculateNameColorForUser(id?: string) {
@@ -139,7 +138,7 @@ export default definePlugin({
                 }
             }
         }
-        
+
         return dmColor;
     },
 
