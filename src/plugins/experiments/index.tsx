@@ -74,10 +74,18 @@ export default definePlugin({
         },
         {
             find: 'placeholder:"Search experiments"',
-            replacement: {
-                match: /(?<=children:\[)(?=\(0,\i\.jsx?\)\(\i\.\i,{placeholder:"Search experiments")/,
-                replace: "$self.WarningCard(),"
-            }
+            replacement: [
+                {
+                    match: /(?<=children:\[)(?=null!=.{0,150}"Installation ID:)/,
+                    replace: "$self.WarningCard(),"
+                },
+                // for some reason the installation id and copy buttons are on
+                // different lines so it looks stupid when the card above is added
+                {
+                    match: /(?<=,marginBottom:16)(?=\},children:\[)/,
+                    replace: ',flexDirection:"row",alignItems:"center"'
+                }
+            ]
         },
         // Change top right toolbar button from the help one to the dev one
         {
@@ -101,8 +109,7 @@ export default definePlugin({
             find: "Clear Treatment ",
             replacement: [
                 {
-                    // TODO: stable compat optional chaining remove once some time has passed
-                    match: /\i\??\.isStaff\(\)/,
+                    match: /\i\?\.isStaff\(\)/,
                     replace: "true"
                 },
                 // Fix some tricky experiments name causing a client crash
