@@ -41,12 +41,30 @@ export default definePlugin({
 
     patches: [
         {
-            find: "AnalyticsActionHandlers.handle",
+            find: "AnalyticsActionHandlers.handleConnectionOpen",
             predicate: () => settings.store.disableAnalytics,
-            replacement: {
-                match: /^.+$/,
-                replace: "()=>{}",
-            },
+            replacement: [
+                {
+                    match: /\i\.AnalyticsActionHandlers\.handleConnectionOpen\(\i\)/g,
+                    replace: "false"
+                },
+                {
+                    match: /\i\.AnalyticsActionHandlers\.handleConnectionClosed\(\)/g,
+                    replace: "false"
+                },
+                {
+                    match: /\i\.AnalyticsActionHandlers\.handleFingerprint\(\)/g,
+                    replace: "false"
+                },
+                {
+                    match: /\i\.AnalyticsActionHandlers\.handleTrack\((\i)\)/g,
+                    replace: "$self.handleTrack($1)"
+                },
+                {
+                    match: /\i\.AnalyticsActionHandlers\.handleSetAnalyticsToken\(\i\)/g,
+                    replace: "false"
+                }
+            ],
         },
         {
             find: ".METRICS_V2",
@@ -73,11 +91,10 @@ export default definePlugin({
 
     // The TRACK event takes an optional `resolve` property that is called when the tracking event was submitted to the server.
     // A few spots in Discord await this callback before continuing (most notably the Voice Debug Logging toggle).
-    // Since we NOOP the AnalyticsActionHandlers module, there is no handler for the TRACK event, so we have to handle it ourselves
-    flux: {
-        TRACK(event) {
-            event?.resolve?.();
-        }
+    // Since we now keep the analytics module alive and only neutralize its handlers, we resolve the callback in the TRACK handler replacement.
+    handleTrack(event) {
+        event?.resolve?.();
+        return false;
     },
 
     startAt: StartAt.Init,
