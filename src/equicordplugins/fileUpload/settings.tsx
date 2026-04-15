@@ -209,6 +209,12 @@ export const settings = definePluginSettings({
         default: false,
         hidden: true
     },
+    preserveOriginalFilename: {
+        type: OptionType.BOOLEAN,
+        description: "Preserve the original filename when uploading.",
+        default: true,
+        hidden: true
+    },
     autoCopy: {
         type: OptionType.BOOLEAN,
         description: "Auto copy upload URL",
@@ -505,6 +511,13 @@ export function SettingsComponent() {
                 <Switch
                     checked={store.apngToGif}
                     onChange={v => store.apngToGif = v}
+                />
+            </SettingsSection>
+
+            <SettingsSection tag="label" name="Preserve Original Filename" description="Use the original filename instead of naming uploads as upload.ext" inlineSetting>
+                <Switch
+                    checked={Boolean((store as { preserveOriginalFilename?: boolean; }).preserveOriginalFilename)}
+                    onChange={v => (store as { preserveOriginalFilename?: boolean; }).preserveOriginalFilename = v}
                 />
             </SettingsSection>
 
