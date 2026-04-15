@@ -45,7 +45,7 @@ export default definePlugin({
             // Show all activities in the user popout/sidebar
             find: /onOpenUserProfileModal:\i,onClose:\i\}\),null/,
             replacement: {
-                match: /((\i)=.{0,10}(\i)\.id\).*?,onInteraction:\i\}\),).{0,250}onClose:\i\}\)/,
+                match: /((\i)=.{0,10}(\i)\.id\).*?,onOpenUserProfileModal:\i\}\),).{0,250}onClose:\i\}\)/,
                 replace: "$1$self.showAllActivitiesComponent({ activity: $2, user: $3 })"
             },
             predicate: () => settings.store.userPopout

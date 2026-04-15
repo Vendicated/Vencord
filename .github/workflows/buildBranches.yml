@@ -1,4 +1,4 @@
-name: Build
+name: Build Branches
 
 on:
     push:
@@ -28,6 +28,7 @@ jobs:
     Build:
         name: Build Equicord
         runs-on: ubuntu-latest
+        if: github.repository == 'Equicord/Equicord'
 
         steps:
             - uses: actions/checkout@v4
@@ -37,11 +38,11 @@ jobs:
             - uses: pnpm/action-setup@v3
               if: github.ref_name != 'bun'
 
-            - name: Use Node.js 20
+            - name: Use Node.js 24
               if: github.ref_name != 'bun'
               uses: actions/setup-node@v4
               with:
-                  node-version: 20
+                  node-version: 24
                   cache: "pnpm"
 
             - name: Install dependencies
@@ -64,9 +65,8 @@ jobs:
                   pnpm generateVencordPluginJson dist/vencordplugins.json
                   pnpm generateDevsList dist/devs.json
 
-            - uses: actions/checkout@v4
-              if: github.ref_name == 'bun'
             - uses: oven-sh/setup-bun@v2
+              if: github.ref_name == 'bun'
               with:
                   bun-version: latest
             - name: Install dependencies

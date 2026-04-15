@@ -20,10 +20,10 @@ jobs:
 
             - uses: pnpm/action-setup@v3
 
-            - name: Use Node.js 20
+            - name: Use Node.js 24
               uses: actions/setup-node@v4
               with:
-                  node-version: 20
+                  node-version: 24
                   cache: "pnpm"
 
             - name: Install dependencies
@@ -50,7 +50,7 @@ jobs:
                   cp browser/browser.* release
                   cp Equicord.user.{js,js.LEGAL.txt} release
 
-                  # copy the plugin data jsons, the extension zips and the desktop/vesktop asars
+                  # copy the plugin data jsons, the extension zips and the desktop/equibop asars
                   cp *.{json,zip,asar} release
 
                   # legacy un-asared files

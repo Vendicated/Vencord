@@ -1,0 +1,9 @@
+.mt-indicator {
+    color: var(--text-muted);
+    font-style: italic;
+    font-weight: 400;
+    font-size: 0.7rem;
+    line-height: 1;
+    margin-top: 0.15em;
+    opacity: 0.75;
+}

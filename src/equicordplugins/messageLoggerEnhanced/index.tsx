@@ -36,7 +36,14 @@ export const Flogger = new Logger("MessageLoggerEnhanced", "#f26c6c");
 export const cacheSentMessages = new LimitedMap<string, LoggedMessageJSON>();
 export const cl = classNameFactory("vc-msg-logger-enhanced-");
 
+let didClearLogsOnStartup = false;
+
 const cacheThing = findByPropsLazy("commit", "getOrCreate");
+
+export async function clearLogs(showToast = true) {
+    await idb.clearMessagesIDB(showToast);
+    cacheSentMessages.clear();
+}
 
 let oldGetMessage: typeof MessageStore.getMessage;
 
@@ -395,6 +402,15 @@ export default definePlugin({
         };
 
         Native.init();
+
+        if (settings.store.clearLogsOnRestart && !didClearLogsOnStartup) {
+            try {
+                await clearLogs(false);
+                didClearLogsOnStartup = true;
+            } catch (e) {
+                Flogger.error("Failed to clear logs on restart", e);
+            }
+        }
 
         const { imageCacheDir, logsDir } = await Native.getSettings();
         settings.store.imageCacheDir = imageCacheDir;

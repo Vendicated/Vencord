@@ -21,8 +21,8 @@ import { chooseFile as chooseFileWeb } from "@utils/web";
 import { Toasts } from "@webpack/common";
 import { showSaveFilePicker } from "native-file-system-adapter";
 
-import { Native } from "..";
-import { addMessagesBulkIDB, clearMessagesIDB, iterateAllMessagesIDB } from "../db";
+import { Native, clearLogs } from "..";
+import { addMessagesBulkIDB, iterateAllMessagesIDB } from "../db";
 import { LoggedMessageJSON } from "../types";
 
 export async function importLogs() {
@@ -34,7 +34,7 @@ export async function importLogs() {
 
         for await (const logItems of iterateLogItems()) {
             if (!cleared) {
-                await clearMessagesIDB();
+                await clearLogs(false);
                 cleared = true;
             }
 

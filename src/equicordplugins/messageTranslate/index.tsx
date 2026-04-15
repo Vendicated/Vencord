@@ -4,64 +4,111 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { definePluginSettings } from "@api/Settings";
-import { Devs } from "@utils/constants";
-import definePlugin, { OptionType } from "@utils/types";
+import "./styles.css";
 
-const settings = definePluginSettings(
-    {
-        targetLanguage: {
-            type: OptionType.STRING,
-            description: "The language messages should be translated to",
-            default: "en",
-            restartNeeded: true
-        },
-        confidenceRequirement: {
-            type: OptionType.STRING,
-            description: "The confidence required to translated the message. Best not to edit unless you know what you're doing",
-            default: "0.8",
-            restartNeeded: true
-        },
-    });
+import { EquicordDevs } from "@utils/constants";
+import { classNameFactory } from "@utils/css";
+import definePlugin from "@utils/types";
+import { ChannelStore, FluxDispatcher, MessageStore, UserStore } from "@webpack/common";
 
-async function translateAPI(sourceLang: string, targetLang: string, text: string): Promise<any> {
+import { getIgnoredChannels, getIgnoredGuilds, getIgnoredUsers, settings } from "./settings";
+import { MessageWithContent } from "./types";
+import { clearCache, getCached, hasFailed, isInProgress, translate } from "./utils/translate";
 
-    const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=${sourceLang}&tl=${targetLang}&dt=t&dj=1&q=${encodeURIComponent(text)}`;
-    const response = await fetch(url);
-    if (!response.ok) {
-        throw new Error(`Failed to translate "${text}" from ${sourceLang} to ${targetLang}: ${response.status} ${response.statusText}`);
+const cl = classNameFactory("mt-");
+const translatedMessages = new Map<string, string>();
+
+function shouldTranslate(message: MessageWithContent): boolean {
+    if (!message.content || typeof message.content !== "string") return false;
+    if (hasFailed(message.id, message.content)) return false;
+
+    if (settings.store.skipOwnMessages) {
+        const currentUserId = UserStore.getCurrentUser()?.id;
+        if (currentUserId && message.author?.id === currentUserId) return false;
     }
 
-    return await response.json();
+    if (settings.store.skipBotMessages && message.author?.bot) return false;
+
+    if (message.author && getIgnoredUsers().has(message.author.id)) return false;
+    if (message.channel_id && getIgnoredChannels().has(message.channel_id)) return false;
+
+    const guildId = message.channel_id ? ChannelStore.getChannel(message.channel_id)?.guild_id : null;
+    if (guildId && getIgnoredGuilds().has(guildId)) return false;
+
+    return true;
 }
 
-async function TranslateMessage(string) {
-    // there may be a better way to do this lmao
-    if (string.includes("(Translated)")) return string;
+function triggerReRender(message: MessageWithContent) {
+    const current = MessageStore.getMessage(message.channel_id, message.id);
+    if (!current) return;
 
-    const response = await translateAPI("auto", settings.store.targetLanguage, string);
-
-    if (response.src === settings.store.targetLanguage || response.confidence < settings.store.confidenceRequirement) return string;
-
-    const { sentences }: { sentences: { trans?: string; }[]; } = await response;
-    const translatedText = sentences.map(s => s?.trans).filter(Boolean).join("");
-
-    return `${translatedText} *(Translated)*`;
+    FluxDispatcher.dispatch({
+        type: "MESSAGE_UPDATE",
+        message: current,
+    });
 }
 
 export default definePlugin({
     name: "MessageTranslate",
-    description: "Auto translate messages to your language",
-    authors: [Devs.Samwich],
+    description: "Auto translate messages to your language with caching, per-channel toggles, and more options.",
+    authors: [EquicordDevs.creations],
     settings,
-    TranslateMessage: TranslateMessage,
+
     patches: [
         {
             find: '.CUSTOM_GIFT?""',
-            replacement: {
-                match: /renderContentOnly:\i}=\i;/,
-                replace: "$&$self.TranslateMessage(arguments[0].message.content).then(response => arguments[0].message.content = response);"
-            }
+            replacement: [
+                {
+                    match: /message:(\i),message:\{id:\i\}.{0,200}renderContentOnly:\i\}=\i;/,
+                    replace: "$&$1=$self.transformMessage($1);",
+                },
+                {
+                    match: /childrenMessageContent:(\i),/g,
+                    replace: "childrenMessageContent:$self.wrapContent($1,arguments[0].message.id),",
+                },
+            ],
         },
-    ]
+    ],
+
+    transformMessage(message: MessageWithContent): MessageWithContent {
+        if (!settings.store.autoTranslate || !shouldTranslate(message)) {
+            translatedMessages.delete(message.id);
+            return message;
+        }
+
+        const cached = getCached(message.id);
+        if (cached) {
+            if (cached.original !== message.content) {
+                clearCache(message.id);
+                translatedMessages.delete(message.id);
+                return message;
+            }
+            translatedMessages.set(message.id, cached.sourceLang);
+            return Object.assign(Object.create(Object.getPrototypeOf(message)), message, {
+                content: cached.translated,
+            }) as MessageWithContent;
+        }
+
+        translatedMessages.delete(message.id);
+        if (!isInProgress(message.id)) {
+            translate(message.id, message.content).then(result => {
+                if (result) triggerReRender(message);
+            });
+        }
+
+        return message;
+    },
+
+    wrapContent(content: any, messageId: string) {
+        const sourceLang = translatedMessages.get(messageId);
+        if (!sourceLang) return content;
+        return (
+            <>
+                {content}
+                {settings.store.showIndicator && (
+                    <div className={cl("indicator")}>translated from {sourceLang}</div>
+                )}
+            </>
+        );
+    },
 });

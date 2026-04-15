@@ -33,4 +33,8 @@ export class LimitedMap<K, V> {
     get(key: K) {
         return this.map.get(key);
     }
+
+    clear() {
+        this.map.clear();
+    }
 }
