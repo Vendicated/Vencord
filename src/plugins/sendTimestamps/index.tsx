@@ -34,18 +34,46 @@ const settings = definePluginSettings({
         type: OptionType.BOOLEAN,
         default: true,
     },
+    usDateMode: {
+        description: "Use US Date Format (MM.DD instead of DD.MM) in quick format",
+        type: OptionType.BOOLEAN,
+        default: false,
+    }
 });
 
-function parseTime(time: string) {
-    const cleanTime = time.slice(1, -1).replace(/(\d)(AM|PM)$/i, "$1 $2");
+function parseTime(matchOrTime: string, dateTimeString?: string, formatLetter?: string) {
+    let actualTime = dateTimeString;
+    if (!actualTime) {
+        actualTime = matchOrTime.slice(1, -1);
+    }
+    const match = actualTime.match(
+        /^(?:(\d{1,2})(?:\.(\d{1,2})(?:\.(\d{4}))?)?\s+)?(\d{1,2}:\d{2}\s?(?:AM|PM)?)$/i,
+    );
+    if (!match) return matchOrTime;
 
-    let ms = new Date(`${new Date().toDateString()} ${cleanTime}`).getTime() / 1000;
-    if (isNaN(ms)) return time;
+    const [_, first, second, y, timePart] = match;
 
-    // add 24h if time is in the past
-    if (Date.now() / 1000 > ms) ms += 86400;
+    const isUS = settings.store.usDateMode && second;
 
-    return `<t:${Math.round(ms)}:t>`;
+    const d = isUS ? second : first;
+    const m = isUS ? first : second;
+
+    const cleanTime = timePart.replace(/(\d)(AM|PM)$/i, "$1 $2");
+
+    const now = new Date();
+
+    const year = y ? parseInt(y) : now.getFullYear();
+    const month = m ? parseInt(m) - 1 : now.getMonth();
+    const day = d ? parseInt(d) : now.getDate();
+
+    const safeDateString = `${year}/${month + 1}/${day} ${cleanTime}`;
+    let ms = new Date(safeDateString).getTime() / 1000;
+    if (isNaN(ms)) return matchOrTime;
+    if (!d && Date.now() / 1000 > ms) ms += 86400;
+
+    const format = formatLetter || "t";
+
+    return `<t:${Math.round(ms)}:${format}>`;
 }
 
 const Formats = ["", "t", "T", "d", "D", "f", "F", "s", "S", "R"] as const;
@@ -178,35 +206,49 @@ export default definePlugin({
 
     onBeforeMessageSend(_, msg) {
         if (settings.store.replaceMessageContents) {
-            msg.content = msg.content.replace(/`\d{1,2}:\d{2} ?(?:AM|PM)?`/gi, parseTime);
+            msg.content = msg.content.replace(
+                /`((?:\d{1,2}(?:\.\d{1,2}(?:\.\d{4})?)?\s+)?\d{1,2}:\d{2}\s?(?:AM|PM)?)(?:\s+([tTdDfFsSR]))?`/gi,
+                parseTime,
+            );
         }
     },
 
     settingsAboutComponent() {
+        const dateExample1 = settings.store.usDateMode
+            ? "04.21 20:00 R"
+            : "21.04 20:00 R";
+        const dateExample2 = settings.store.usDateMode
+            ? "05.21.2027 19:00 D"
+            : "21.05.2027 19:00 D";
+
         const samples = [
             "12:00",
-            "3:51",
-            "17:59",
-            "24:00",
-            "12:00 AM",
-            "0:13PM"
+            "17:59 R",
+            "24 19:00",
+            dateExample1,
+            dateExample2,
+            "12:00 AM f",
         ].map(s => `\`${s}\``);
-
+        const parseRegex = /`((?:\d{1,2}(?:\.\d{1,2}(?:\.\d{4})?)?\s+)?\d{1,2}:\d{2}\s?(?:AM|PM)?)(?:\s+([tTdDfFsSR]))?`/gi;
         return (
             <>
                 <Forms.FormText>
-                    To quickly send send time only timestamps, include timestamps formatted as `HH:MM` (including the backticks!) in your message
+                    To quickly send timestamps, include them formated as `HH:MM`
+                    (including the backticks!) with an optional date (`DD HH:MM`, `DD.MM
+                    HH:MM`, `DD.MM.YYYY HH:MM`, or `MM.DD HH:MM` depending on settings),
+                    and an optional format letter in your message ( t, T, d, D, f, F, s,
+                    S, R )
                 </Forms.FormText>
                 <Forms.FormText>
                     See below for examples.
-                    If you need anything more specific, use the Date button in the chat bar!
+                    You can also use Date button in the chat bar!
                 </Forms.FormText>
                 <Forms.FormText>
                     Examples:
                     <ul>
                         {samples.map(s => (
                             <li key={s}>
-                                <code>{s}</code> {"->"} {Parser.parse(parseTime(s))}
+                                <code>{s}</code> {"->"} {Parser.parse(s.replace(parseRegex, parseTime))}
                             </li>
                         ))}
                     </ul>
