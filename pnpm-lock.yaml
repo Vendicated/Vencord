@@ -73,6 +73,9 @@ importers:
       virtual-merge:
         specifier: ^1.0.1
         version: 1.0.2
+      yaml-js:
+        specifier: ^0.3.1
+        version: 0.3.1
     devDependencies:
       '@electron/asar':
         specifier: ^4.2.0
@@ -2885,6 +2888,10 @@ packages:
   y18n@5.0.8:
     resolution: {integrity: sha512-0pfFzegeDWJHJIAmTLRP2DwHjdF5s7jo9tuztdQxAhINCdvS+3nGINqPd00AphqJR/0LhANUS6/+7SCb98YOfA==}
     engines: {node: '>=10'}
+
+  yaml-js@0.3.1:
+    resolution: {integrity: sha512-LjoIFHCtSfkGzPsmYmfDsW+TShtQBcY7lwH1yLQ5brJHXRhjteUnVE2ThCbz1madq8JUZIAjFiavfnIFeTO8CQ==}
+    engines: {node: '>=8'}
 
   yargs-parser@21.1.1:
     resolution: {integrity: sha512-tVpsJW7DdjecAiFpbIB1e3qxIQsE6NoPc5/eTdrbbIC4h0LVsWhnoa3g+m2HclBIujHzsxZ4VJVA+GUuc2/LBw==}
@@ -5771,6 +5778,8 @@ snapshots:
   ws@8.20.0: {}
 
   y18n@5.0.8: {}
+
+  yaml-js@0.3.1: {}
 
   yargs-parser@21.1.1: {}
 

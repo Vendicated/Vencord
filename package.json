@@ -58,7 +58,8 @@
         "nanoid": "^5.1.6",
         "native-file-system-adapter": "^3.0.1",
         "usercss-meta": "^0.12.0",
-        "virtual-merge": "^1.0.1"
+        "virtual-merge": "^1.0.1",
+        "yaml-js": "^0.3.1"
     },
     "devDependencies": {
         "@electron/asar": "^4.2.0",

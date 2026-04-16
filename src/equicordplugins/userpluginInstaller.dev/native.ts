@@ -10,6 +10,7 @@ import { BrowserWindow, dialog, shell, WebContentsView } from "electron";
 import { existsSync, readdirSync, readFileSync } from "fs";
 import { readdir, readFile, rm } from "fs/promises";
 import { basename, join } from "path";
+import yaml from "yaml-js";
 
 // @ts-ignore fuck off
 import pluginValidateContent from "./misc/pluginValidate.txt"; // i would use HTML but esbuild is being whiny
@@ -17,7 +18,6 @@ import pluginValidateContent from "./misc/pluginValidate.txt"; // i would use HT
 import setGitPathContent from "./misc/setGitPath.txt";
 // @ts-ignore fuck off
 import updateValidateContent from "./misc/updateValidate.txt"; // see above
-import YAML from "./yaml.js";
 
 const PLUGIN_META_REGEX = /export default definePlugin\((?:\s|\/(?:\/|\*).*)*{\s*(?:\s|\/(?:\/|\*).*)*name:\s*(?:"|'|`)(.*)(?:"|'|`)(?:\s|\/(?:\/|\*).*)*,(?:\s|\/(?:\/|\*).*)*(?:\s|\/(?:\/|\*).*)*description:\s*(?:"|'|`)(.*)(?:"|'|`)(?:\s|\/(?:\/|\*).*)*/;
 // if edited, also edit in misc/constants.ts!!!
@@ -206,7 +206,7 @@ async function getPluginMeta(path: string, extra: object = {}): Promise<{
         try {
             const meta = readFileSync(join(path, "meta.yml"), "utf8");
             console.log(meta);
-            const parsed = YAML.load(meta);
+            const parsed = yaml.load(meta);
             if (parsed.thread && typeof parsed.thread === "string" && /^\d+$/.test(parsed.thread)) {
                 supportChannelID = parsed.thread;
             }
@@ -448,7 +448,7 @@ export async function openGitPathModal(_: any) {
                         });
                     }
                 });
-            } catch(e) {
+            } catch (e) {
                 dialog.showMessageBox({
                     title: "Error",
                     message: "Git error",
@@ -464,7 +464,7 @@ export async function openGitPathModal(_: any) {
         win.webContents.executeJavaScript(`document.querySelector("input").value = ${JSON.stringify(gitPathSet)};`);
     }
 
-    console.log(YAML.load(`
+    console.log(yaml.load(`
     name: test
     items:
       - a
