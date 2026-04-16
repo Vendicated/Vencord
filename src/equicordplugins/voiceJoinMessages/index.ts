@@ -111,6 +111,7 @@ let clientOldChannelId: string | undefined;
 export default definePlugin({
     name: "VoiceJoinMessages",
     description: "Recieve client-side ephemeral messages when your friends join voice channels",
+    tags: ["Servers", "Utility", "Voice"],
     authors: [Devs.Sqaaakoi, Devs.thororen],
     settings,
     flux: {

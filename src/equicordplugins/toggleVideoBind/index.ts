@@ -59,6 +59,7 @@ function handleKeydown({ code, ctrlKey, shiftKey, altKey }: KeyboardEvent) {
 export default definePlugin({
     name: "ToggleVideoBind",
     description: "Adds a customizable bind to toggle webcam.",
+    tags: ["Utility", "Voice"],
     authors: [EquicordDevs.mochienya],
     settings,
     start() {

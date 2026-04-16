@@ -107,6 +107,7 @@ const settings = definePluginSettings({
 export default definePlugin({
     name: "DecodeBase64",
     description: "Decode base64 content of any message and copy the decoded content.",
+    tags: ["Appearance", "Customisation", "Chat"],
     authors: [EquicordDevs.ThePirateStoner],
     settings,
     messagePopoverButton: {

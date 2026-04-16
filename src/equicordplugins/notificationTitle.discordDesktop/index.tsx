@@ -20,6 +20,7 @@ const MessageTypes = findByPropsLazy("REPLY", "STAGE_RAISE_HAND", "CHANNEL_NAME_
 export default definePlugin({
     name: "NotificationTitle",
     description: "Makes desktop notifications more informative",
+    tags: ["Appearance", "Notifications"],
     authors: [Devs.Kyuuhachi],
 
     patches: [

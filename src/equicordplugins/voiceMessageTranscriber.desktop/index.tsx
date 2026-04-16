@@ -314,6 +314,7 @@ export default definePlugin({
     name: "VoiceMessageTranscriber",
     authors: [Devs.TheSun],
     description: "On-device transcriptions for voice messages powered by Whisper v3",
+    tags: ["Chat", "Media", "Utility", "Voice"],
     patches: [
         {
             find: ".VOICE_MESSAGE)),",

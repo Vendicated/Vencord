@@ -115,6 +115,7 @@ const settings = definePluginSettings({
 export default definePlugin({
     name: "SaveFavoriteGIFs",
     description: "Export favorited GIF urls",
+    tags: ["Emotes", "Utility"],
     authors: [Devs.thororen],
     settings,
     commands: [

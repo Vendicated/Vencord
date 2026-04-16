@@ -54,6 +54,7 @@ const settings = definePluginSettings({
 export default definePlugin({
     name: "CustomStatusTimeouts",
     description: "Adds configurable timeout presets to the status (presence) menu.",
+    tags: ["Activity", "Utility"],
     authors: [EquicordDevs.Kiri, EquicordDevs.thororen],
     settings,
     patches: [

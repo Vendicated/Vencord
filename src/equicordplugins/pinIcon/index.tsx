@@ -25,6 +25,7 @@ const PinIcon = findComponentByCodeLazy("1-.06-.63L6.16");
 export default definePlugin({
     name: "PinIcon",
     description: "Adds a pin icon to pinned messages",
+    tags: ["Appearance", "Chat"],
     authors: [EquicordDevs.iamme],
     patches: [
         {

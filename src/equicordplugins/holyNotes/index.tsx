@@ -72,6 +72,7 @@ function ToolBarHeader() {
 export default definePlugin({
     name: "HolyNotes",
     description: "Save messages as notes to revisit later",
+    tags: ["Chat", "Organisation"],
     authors: [EquicordDevs.Wolfie],
 
     toolboxActions: {

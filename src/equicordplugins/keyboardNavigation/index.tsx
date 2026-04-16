@@ -87,6 +87,7 @@ export const settings = definePluginSettings({
 export default definePlugin({
     name: "KeyboardNavigation",
     description: "Allows you to navigate the UI with a keyboard.",
+    tags: ["Accessibility", "Shortcuts"],
     authors: [Devs.Ethan],
     settings,
 

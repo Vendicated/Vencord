@@ -108,6 +108,7 @@ const ChatButtonsRow = ErrorBoundary.wrap(({ buttons }: { buttons: ReactNode[]; 
 export default definePlugin({
     name: "CollapsibleUI",
     description: "Native collapsible channel, member, chat button, and user area surfaces.",
+    tags: ["Appearance", "Customisation", "Chat", "Servers"],
     authors: [EquicordDevs.benjii],
     searchTerms: ["ui", "sidebar", "layout"],
     managedStyle,

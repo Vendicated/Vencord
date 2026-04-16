@@ -51,6 +51,7 @@ export const Native = VencordNative.pluginHelpers.SongLink as PluginNative<typeo
 export default definePlugin({
     name: "SongLink",
     description: "Adds streaming service buttons below song links",
+    tags: ["Media", "Utility"],
     authors: [Devs.nin0dev],
     settings,
     Providers,

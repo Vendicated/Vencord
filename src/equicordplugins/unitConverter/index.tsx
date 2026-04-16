@@ -48,6 +48,7 @@ export const settings = definePluginSettings({
 export default definePlugin({
     name: "UnitConverter",
     description: "Converts metric units to Imperal units and vice versa",
+    tags: ["Utility"],
     authors: [Devs.sadan],
     messagePopoverButton: {
         icon: ConvertIcon,

@@ -209,6 +209,7 @@ const userPatch: NavContextMenuPatchCallback = (children, { user }) => {
 export default definePlugin({
     name: "FriendTags",
     description: "Allows you to filter by custom tags in the quick switcher by starting a search with &",
+    tags: ["Shortcuts"],
     authors: [Devs.Samwich],
     settings,
     contextMenus: {

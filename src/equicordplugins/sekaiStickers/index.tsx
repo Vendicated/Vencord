@@ -33,6 +33,7 @@ let IS_FONTS_LOADED = false;
 export default definePlugin({
     name: "SekaiStickers",
     description: "Sekai Stickers built in discord originally from github.com/TheOriginalAyaka",
+    tags: ["Chat", "Emotes"],
     authors: [Devs.MaiKokain],
     settings,
     chatBarButton: {

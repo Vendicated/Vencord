@@ -142,6 +142,7 @@ export default definePlugin({
     name: "ShowBadgesInChat",
     authors: [Devs.Inbestigator, EquicordDevs.KrystalSkull],
     description: "Shows the message author's badges beside their name in chat.",
+    tags: ["Appearance", "Chat"],
     settings,
     renderMessageDecoration(props) {
         return props.message?.author ? <ChatBadges author={props.message.author} /> : null;
