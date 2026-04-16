@@ -144,7 +144,7 @@ export const Packs = () => {
                             flexGrow: 1
                         }}>
                             <CheckedTextInput
-                                value={addStickerUrl}
+                                initialValue={addStickerUrl}
                                 onChange={setAddStickerUrl}
                                 validate={(v: string) => {
                                     try {

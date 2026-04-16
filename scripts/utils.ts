@@ -38,6 +38,7 @@ export interface PluginData {
     name: string;
     description: string;
     tags: string[];
+    searchTerms: string[];
     authors: Dev[];
     dependencies: string[];
     hasPatches: boolean;

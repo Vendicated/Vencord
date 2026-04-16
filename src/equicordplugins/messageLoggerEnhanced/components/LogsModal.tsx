@@ -17,7 +17,7 @@ import { find, findByCode, findByCodeLazy } from "@webpack";
 import { Alerts, ChannelStore, ContextMenuApi, FluxDispatcher, GuildStore, Menu, NavigationRouter, React, TabBar, TextInput, Tooltip, useMemo, useRef, useState } from "@webpack/common";
 
 import { DBMessageRecord, deleteMessageIDB, deleteMessagesBulkIDB } from "../db";
-import { clearLogs, cl, settings } from "../index";
+import { cl, clearLogs, settings } from "../index";
 import { LoggedMessage, LoggedMessageJSON } from "../types";
 import { messageJsonToMessageClass } from "../utils";
 import { importLogs } from "../utils/settingsUtils";
