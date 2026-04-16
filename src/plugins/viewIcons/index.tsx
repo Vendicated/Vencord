@@ -197,7 +197,7 @@ export default definePlugin({
     patches: [
         // Avatar component used in User DMs "User Profile" popup in the right and User Profile Modal pfp
         {
-            find: ".AVATAR),{trackUserProfileAction:",
+            find: "return{avatarProps:{",
             replacement: {
                 match: /(?<=avatarProps:(\i),eventHandlers:(\i).{0,50}?)return null==/,
                 replace: 'Object.assign($2,{style:{cursor:"pointer"},onClick:()=>$self.openAvatar($1.src)});$&',
