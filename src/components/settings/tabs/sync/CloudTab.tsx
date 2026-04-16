@@ -137,7 +137,7 @@ function CloudTab() {
                 <div style={{ flex: 1 }}>
                     <CheckedTextInput
                         key={`backendUrl-${inputKey}`}
-                        initialValue={cloud.url}
+                        value={cloud.url}
                         onChange={async v => {
                             cloud.url = v;
                             cloud.authenticated = false;

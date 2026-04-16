@@ -211,7 +211,6 @@ async function processQueue() {
 export default definePlugin({
     name: "TiktokTTS",
     description: "Adds a context menu option to read out chat messages with the good ol' Tiktok TTS voice :sob:",
-    tags: ["Accessibility", "Chat", "Voice"],
     authors: [EquicordDevs.VillainsRule, EquicordDevs.examplegit],
     dependencies: ["AudioPlayerAPI"],
     settings,

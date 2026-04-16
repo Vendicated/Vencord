@@ -90,7 +90,6 @@ export default definePlugin({
     name: "NoBlockedMessages",
     description: "Hide all blocked/ignored messages from chat completely.",
     authors: [Devs.rushii, Devs.Samu, Devs.jamesbt365, Devs.Elvyra, EquicordDevs.Etorix],
-    tags: ["Accessibility", "Chat"],
     isModified: true,
     settings,
     patches: [

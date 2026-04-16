@@ -29,7 +29,6 @@ export default definePlugin({
     name: "FixFileExtensions",
     authors: [Devs.thororen],
     description: "Fixes file extensions by renaming them to a compatible supported format if possible",
-    tags: ["Media", "Utility"],
     reporterTestable: ReporterTestable.None,
     patches: [
         // Taken from AnonymiseFileNames

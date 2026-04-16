@@ -98,9 +98,8 @@ function GameActivityToggleButton({ iconForeground, hideTooltips, nameplate }: U
 export default definePlugin({
     name: "GameActivityToggle",
     description: "Adds a button next to the mic and deafen button to toggle game activity.",
-    tags: ["Activity", "Shortcuts"],
     authors: [Devs.Nuckyz, Devs.RuukuLada],
-    dependencies: ["UserSettingsAPI", "UserAreaAPI"],
+    dependencies: ["UserSettingsAPI"],
     settings,
 
     userAreaButton: {

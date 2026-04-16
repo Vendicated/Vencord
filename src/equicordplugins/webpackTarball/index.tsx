@@ -31,7 +31,6 @@ export const settings = definePluginSettings({
 export default definePlugin({
     name: "WebpackTarball",
     description: "Converts Discord's webpack sources into a tarball.",
-    tags: ["Developers", "Utility"],
     authors: [Devs.Kyuuhachi],
     settings,
 

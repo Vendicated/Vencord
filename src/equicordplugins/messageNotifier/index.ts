@@ -38,7 +38,6 @@ export default definePlugin({
     authors: [EquicordDevs.cassie, EquicordDevs.mochienya],
     name: "MessageNotifier",
     description: "Get toasts for when chosen users send a message",
-    tags: ["Chat", "Notifications"],
     settings,
     flux: {
         MESSAGE_CREATE({ message, channelId, guildId }: MessageCreatePayload) {

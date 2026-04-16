@@ -89,7 +89,6 @@ const settings = definePluginSettings({
 export default definePlugin({
     name: "EquibopStreamFixes",
     description: "Tries to fix stream quality on Equibop by patching Discord's encoder and quality restrictions.",
-    tags: ["Voice"],
     authors: [EquicordDevs.creations],
     settings,
 

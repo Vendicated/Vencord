@@ -24,7 +24,6 @@ migratePluginSettings("IloveSpam", "iLoveSpam");
 export default definePlugin({
     name: "ILoveSpam",
     description: "Do not hide messages from 'likely spammers'",
-    tags: ["Utility", "Chat"],
     authors: [Devs.botato, Devs.Nyako],
     patches: [
         {

@@ -303,10 +303,9 @@ const TEXT_REPLACE_RULES_EXEMPT_CHANNEL_IDS = [
 
 export default definePlugin({
     name: "TextReplace",
-    description: "Replace text in your messages. You can find pre-made rules in the #textreplace-rules channel in Vencord's Server",
-    dependencies: ["MessagePopoverAPI"],
-    tags: ["Chat", "Customisation", "Utility"],
+    description: "Replace text in your or others' messages. You can find pre-made rules in the #textreplace-rules channel in Vencord's Server.",
     authors: [Devs.AutumnVN, Devs.TheKodeToad, EquicordDevs.Etorix],
+    isModified: true,
 
     settings,
     modifyIncomingMessage,

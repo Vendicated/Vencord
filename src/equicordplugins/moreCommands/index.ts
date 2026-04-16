@@ -52,8 +52,6 @@ migratePluginSettings("MoreCommands", "FriendCloud", "GifRoulette", "ImgToGif", 
 export default definePlugin({
     name: "MoreCommands",
     description: "Adds various fun and useful commands",
-    dependencies: ["CommandsAPI"],
-    tags: ["Commands", "Fun", "Shortcuts"],
     authors: [
         Devs.Arjix,
         Devs.amy,

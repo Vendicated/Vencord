@@ -26,7 +26,6 @@ let oldTrendingCat: Category[] | null = null;
 export default definePlugin({
     name: "GifCollections",
     description: "Allows you to create collections of gifs.",
-    tags: ["Chat", "Emotes"],
     authors: [EquicordDevs.creations],
     settings,
     contextMenus: {

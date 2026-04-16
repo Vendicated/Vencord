@@ -72,8 +72,6 @@ function ToolBarHeader() {
 export default definePlugin({
     name: "HolyNotes",
     description: "Save messages as notes to revisit later",
-    dependencies: ["MessagePopoverAPI", "HeaderBarAPI"],
-    tags: ["Chat", "Organisation"],
     authors: [EquicordDevs.Wolfie],
 
     toolboxActions: {

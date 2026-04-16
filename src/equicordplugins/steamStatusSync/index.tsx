@@ -85,7 +85,6 @@ export const settings = definePluginSettings({
 export default definePlugin({
     name: "SteamStatusSync",
     description: "Sync your status to Steam! (Online, Away, Invisible, or Offline.)",
-    tags: ["Activity", "Appearance", "Customisation"],
     authors: [EquicordDevs.niko],
 
     settings,
