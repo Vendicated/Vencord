@@ -35,7 +35,7 @@ import { isTruthy } from "@utils/guards";
 import { Logger } from "@utils/Logger";
 import { Margins } from "@utils/margins";
 import { classes } from "@utils/misc";
-import { useAwaiter, useCleanupEffect, useIntersection } from "@utils/react";
+import { useAwaiter, useIntersection } from "@utils/react";
 import { PluginTag, PluginTags } from "@utils/types";
 import { Alerts, lodash, Parser, React, SearchableSelect, Select, TextInput, Toasts, Tooltip, useCallback, useMemo, useRef, useState } from "@webpack/common";
 import { JSX } from "react";
@@ -405,7 +405,7 @@ export default function PluginSettings() {
 
             <HeadingTertiary className={classes(Margins.top20, Margins.bottom8)}>
                 Filters
-            </HeadingTertiary>;
+            </HeadingTertiary>
 
             <ErrorBoundary noop>
                 <TextInput

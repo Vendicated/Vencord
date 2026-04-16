@@ -152,7 +152,8 @@ export async function parseFile(fileName: string) {
             enabledByDefault: false,
             required: false,
             isModified: false,
-            tags: [] as string[]
+            tags: [] as string[],
+            searchTerms: [] as string[],
         } as PluginData;
 
         for (const prop of pluginObj.properties) {
@@ -208,9 +209,10 @@ export async function parseFile(fileName: string) {
                     });
                     break;
                 case "tags":
-                    if (!isArrayLiteralExpression(value)) throw fail("tags is not an array literal");
-                    data.tags = value.elements.map(e => {
-                        if (!isStringLiteral(e)) throw fail("tags array contains non-string literals");
+                case "searchTerms":
+                    if (!isArrayLiteralExpression(value)) throw fail(`${key} is not an array literal`);
+                    data[key] = value.elements.map(e => {
+                        if (!isStringLiteral(e)) throw fail(`${key} array contains non-string literals`);
                         return e.text;
                     });
                     break;

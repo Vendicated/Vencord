@@ -26,7 +26,7 @@ export default definePlugin({
     name: "FavouriteAnything",
     description: "Favourite any image, video, or file attachment",
     authors: [Devs.nin0dev, EquicordDevs.davri],
-    tags: ["favorite"],
+    searchTerms: ["favorite"],
     managedStyle,
     patches: [
         // EMBEDS

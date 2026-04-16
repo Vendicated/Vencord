@@ -1070,6 +1070,7 @@ export default definePlugin({
     description: "Display any permutation of custom nicknames, friend nicknames, server nicknames, display names, and usernames in chat.",
     authors: [EquicordDevs.Etorix, Devs.Rini, Devs.TheKodeToad, Devs.sadan, Devs.prism],
     tags: ["Appearance", "Customisation"],
+    searchTerms: ["SMYN", "Nicknames", "Custom Nicknames"],
     isModified: true,
     settings,
 

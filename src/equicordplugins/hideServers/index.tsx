@@ -77,7 +77,7 @@ export default definePlugin({
     name: "HideServers",
     description: "Allows you to hide servers from the guild list and quick switcher by right clicking them",
     authors: [EquicordDevs.bep],
-    tags: ["guild", "server", "hide", "folder"],
+    searchTerms: ["guild", "server", "hide", "folder"],
 
     dependencies: ["ServerListAPI"],
     contextMenus: {

@@ -236,7 +236,7 @@ export default definePlugin({
     name: "CursorBuddy",
     description: "Adds a sprite that follows your cursor.",
     authors: [Devs.Ven, Devs.adryd, EquicordDevs.nexpid, EquicordDevs.ZcraftElite],
-    tags: ["Oneko", "FatassHorse", "Pet"],
+    searchTerms: ["Oneko", "FatassHorse", "Pet"],
     settings,
     isModified: true,
 

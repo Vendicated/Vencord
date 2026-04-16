@@ -10,8 +10,7 @@ import { addServerListElement, removeServerListElement, ServerListRenderPosition
 import ErrorBoundary from "@components/ErrorBoundary";
 import { EquicordDevs } from "@utils/constants";
 import definePlugin from "@utils/types";
-import { FluxDispatcher } from "@webpack/common";
-import { Tooltip } from "webpack/common/components";
+import { FluxDispatcher, Tooltip } from "@webpack/common";
 
 function SearchIcon() {
     return (
