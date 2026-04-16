@@ -21,7 +21,6 @@ import "./PluginModal.css";
 import { generateId } from "@api/Commands";
 import { useSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
-import { Flex } from "@components/Flex";
 import { debounce } from "@shared/debounce";
 import { gitRemote } from "@shared/vencordUserAgent";
 import { classNameFactory } from "@utils/css";
@@ -171,8 +170,11 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
 
             <ModalContent className={"vc-settings-modal-content"}>
                 <section>
-                    <Flex className={cl("info")}>
-                        <Forms.FormText className={cl("description")}>{plugin.description}</Forms.FormText>
+                    <div className={cl("info")}>
+                        <div>
+                            <Forms.FormText>{plugin.description}</Forms.FormText>
+                            {!!plugin.tags?.length && <PluginTags tags={plugin.tags} />}
+                        </div>
                         {!pluginMeta.userPlugin && (
                             <div className="vc-settings-modal-links">
                                 <WebsiteButton
@@ -185,8 +187,7 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
                                 />
                             </div>
                         )}
-                    </Flex>
-                    {!!plugin.tags?.length && <PluginTags tags={plugin.tags} />}
+                    </div>
                     <Text variant="heading-lg/semibold" className={classes(Margins.top8, Margins.bottom8)}>Authors</Text>
                     <div style={{ width: "fit-content" }}>
                         <ErrorBoundary noop>

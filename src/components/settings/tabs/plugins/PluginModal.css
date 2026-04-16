@@ -3,11 +3,10 @@
 }
 
 .vc-plugin-modal-info {
-    align-items: center;
-}
-
-.vc-plugin-modal-description {
-    flex-grow: 1;
+    display: flex;
+    gap: 1em;
+    justify-content: space-between;
+    align-items: start;
 }
 
 .vc-plugin-modal-tags {
