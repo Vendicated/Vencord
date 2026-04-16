@@ -46,17 +46,6 @@ export default definePlugin({
                     // if (inlinedCalculatePlayingCount(a,b) >= limit) return;
                     match: /(BURST_REACTION_EFFECT_PLAY:\i=>{.+?if\()(\(\(\i,\i\)=>.+?\(\i,\i\))>=5+?(?=\))/,
                     replace: (_, rest, playingCount) => `${rest}!$self.shouldPlayBurstReaction(${playingCount})`
-                },
-                // FIXME(Bundler agressive inline): Remove the non used compability once enough time has passed
-                {
-                    /*
-                     * var limit = 5
-                     * ...
-                     * if (calculatePlayingCount(a,b) >= limit) return;
-                     */
-                    match: /((\i)=5.+?)if\((.{0,20}?)>=\2\)return;/,
-                    replace: (_, rest, playingCount) => `${rest}if(!$self.shouldPlayBurstReaction(${playingCount}))return;`,
-                    noWarn: true
                 }
             ]
         },
