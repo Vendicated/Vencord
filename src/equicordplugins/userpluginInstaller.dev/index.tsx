@@ -9,6 +9,7 @@ import "./misc/style.css";
 import { showNotification } from "@api/Notifications";
 import { definePluginSettings } from "@api/Settings";
 import { Button } from "@components/Button";
+import { Notice } from "@components/Notice";
 import plSettings from "@plugins/_core/settings";
 import { Devs } from "@utils/constants";
 import { relaunch } from "@utils/native";
@@ -53,6 +54,12 @@ export const settings = definePluginSettings({
 export default definePlugin({
     name: "UserpluginInstaller",
     description: "Install userplugins with a simple button click",
+    settingsAboutComponent: () => (
+        <Notice.Warning>
+            Equicord does not moderate userplugins and takes no responsibility for anything that may result from installing them.
+            Only install userplugins from developers you trust. Doing so is entirely at your own risk.
+        </Notice.Warning>
+    ),
     async checkPluginUpdates() {
         for (const p of this.plugins.value()) {
             if (await Native.isUpdateAvailableForPlugin(p.directory!)) {
