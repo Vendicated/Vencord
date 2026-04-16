@@ -307,7 +307,7 @@ export default definePlugin({
     dependencies: ["MessagePopoverAPI"],
     tags: ["Chat", "Customisation", "Utility"],
     authors: [Devs.AutumnVN, Devs.TheKodeToad, EquicordDevs.Etorix],
-
+    isModified: true,
     settings,
     modifyIncomingMessage,
 
