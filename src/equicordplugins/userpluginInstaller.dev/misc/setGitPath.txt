@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Git Path</title>
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            document.title
+            document.querySelector("#abort").addEventListener("click", () => {document.title = "abort";})
+            document.querySelector("#check").addEventListener("click", () => {document.title = `check-${document.querySelector("input").value.trim()}`; setTimeout(() => {document.title = "git";}, 1000)})
+            document.querySelector("#install").addEventListener("click", () => {document.title = `ok-${document.querySelector("input").value.trim()}`;})
+        });
+    </script>
+    <style>
+        * {
+            font-family: sans-serif;
+            color: #cdd6f4;
+        }
+
+        body {
+            background-color: #1e1e2e;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #btn-row {
+            display: flex;
+            flex: 1;
+        }
+
+        #btn-row * {
+            flex: 1;
+            margin: 5px;
+            padding: 10px 5px;
+            border: 1px solid #cdd6f4;
+            border-radius: 5px;
+        }
+
+        #abort {
+            border-color: #f38ba8;
+            color: #f38ba8;
+            background-color: #00000000;
+        }
+
+        #install {
+            color: #a6e3a1;
+            border-color: #a6e3a1;
+            background-color: #00000000;
+        }
+
+        #check {
+            color: #a1afe3;
+            border-color: #a1afe3;
+            background-color: #00000000;
+        }
+
+        #abort:hover {
+            background-color: #504040;
+            font-weight: bold;
+        }
+
+        #check:hover {
+            background-color: #404550;
+            font-weight: bold;
+        }
+
+        #install:hover {
+            background-color: #425040;
+            font-weight: bold;
+        }
+
+        input {
+            background-color: #313244;
+            color: #cdd6f4;
+            padding: 5px 10px;
+            margin-bottom: 15px;
+            border: 1px solid #6c7086;
+            border-radius: 5px;
+
+            &:focus {
+                outline: none;
+                border: 2px solid #cdd6f4;
+                padding: 4px 9px;
+            }
+
+            &::placeholder {
+                color: #6c7086;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <h2>Git path</h2>
+    <p>
+        If you're having issues downloading userplugins because Git isn't properly detected, you can manually set a Git
+        path
+        that'll be used instead of
+        simply looking in PATH.
+        <br />
+        If you do not specify anything, Git will be called from the PATH variable. Do not set this setting unless you
+        have issues.
+        <br />
+        <br />
+        On Linux, Flatpak still isn't supported.
+    </p>
+    <input type="text" id="git-path" placeholder="Full, absolute path to Git" />
+    <div id="btn-row">
+        <button id="abort">Cancel</button>
+        <button id="check">Check</button>
+        <button id="install">Set</button>
+    </div>
+</body>
+
+</html>

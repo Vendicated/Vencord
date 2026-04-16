@@ -1,0 +1,78 @@
+.vc-userplugininstaller-info-card {
+    padding: 15px 20px;
+    margin-bottom: 20px;
+}
+
+.vc-userplugininstaller-install-desc {
+    margin-top: 5px;
+}
+
+.vc-userplugininstaller-install-field,
+.vc-userplugininstaller-button-container {
+    margin-top: 10px;
+}
+
+.vc-userplugininstaller-install-button {
+    margin-left: auto;
+}
+
+.vc-userplugininstaller-update-check-container {
+    margin-top: 10px;
+}
+
+.vc-userplugininstaller-plugins-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    align-items: start;
+}
+
+.vc-userplugininstaller-info-button {
+    height: 24px;
+    width: 24px;
+    padding: 0;
+    background: transparent;
+    color: var(--icon-secondary);
+    transition: background-color 0.2s ease;
+
+    &:hover {
+        color: var(--interactive-hover);
+    }
+}
+
+.vc-userplugininstaller-settings-button:hover {
+    color: var(--interactive-hover);
+}
+
+.vc-userplugininstaller-plugin-footer {
+    margin-top: 10px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+
+    div {
+        flex-basis: 100%;
+        margin-top: 5px;
+        font-size: 0.9rem;
+    }
+}
+
+.vc-userplugininstaller-outdated-list {
+    padding-left: 30px;
+    margin: 3px 0;
+    list-style-type: disc;
+}
+
+.vc-userplugininstaller-delete-button {
+    height: 24px;
+    width: 24px;
+    padding: 0;
+    background: transparent;
+    margin-right: 8px;
+    color: var(--icon-muted);
+    transition: background-color .2s ease;
+
+    &:hover {
+        color: var(--red-new-46)
+    }
+}

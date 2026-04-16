@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Review userplugin</title>
+        <script>
+            document.addEventListener("DOMContentLoaded", () => {
+                document
+                    .querySelector("#abort")
+                    .addEventListener("click", () => {
+                        document.title = "abortInstall";
+                    });
+                document
+                    .querySelector("#install")
+                    .addEventListener("click", () => {
+                        if (
+                            !document
+                                .querySelector("style")
+                                .innerHTML.includes(
+                                    "#native-ts-warning { display: none !important; }"
+                                ) &&
+                            !document.querySelector("input[type='checkbox']")
+                                .checked
+                        )
+                            return alert(
+                                "Make sure to acknowledge all warnings before installing."
+                            );
+                        document.title = "install";
+                    });
+
+                document.querySelector("style").innerHTML +=
+                    document.querySelector("addAtRuntimeStyle").innerHTML;
+            });
+        </script>
+        <style>
+            addAtRuntimeStyle {
+                display: none !important;
+            }
+            * {
+                font-family: sans-serif;
+                color: #cdd6f4;
+            }
+            body {
+                background-color: #1e1e2e;
+                padding: 10px;
+                display: flex;
+                flex-direction: column;
+            }
+            .card {
+                padding: 10px 12px;
+                border: 1px solid #9399b2;
+                border-radius: 10px;
+                margin-bottom: 10px; /* Added margin for better spacing */
+            }
+            .warn-card {
+                border-color: #f38ba8;
+                background-color: #313244;
+            }
+            .danger-card {
+                border-color: #f38ba8;
+                background-color: #313244;
+                h3 {
+                    color: #cdd6f4;
+                }
+            }
+            .card * {
+                margin: 0;
+            }
+            .card h3 {
+                margin-bottom: 5px;
+            }
+            input[type="checkbox"] {
+                margin-right: 5px;
+            }
+            #validate {
+                color: #f38ba8;
+            }
+            #btn-row {
+                display: flex;
+                flex: 1;
+            }
+            #btn-row * {
+                flex: 1;
+                margin: 5px;
+                padding: 10px 5px;
+                border: 1px solid #cdd6f4;
+                border-radius: 5px;
+            }
+            #abort {
+                background-color: #f38ba8;
+                color: #11111b;
+            }
+            #install {
+                color: #a6e3a1;
+                border-color: #a6e3a1;
+                background-color: #00000000;
+            }
+            #abort:hover {
+                background-color: #ec9393;
+                font-weight: bold;
+            }
+            #install:hover {
+                background-color: #425040;
+                font-weight: bold;
+            }
+        </style>
+        <addAtRuntimeStyle>
+            %WARNINGHIDER% %NATIVETSHIDER% %PRESENDHIDER%
+        </addAtRuntimeStyle>
+    </head>
+    <body>
+        <h2>Plugin info</h2>
+        <div class="card" id="plugin-info-card">
+            <h3>%PLUGINNAME%</h3>
+            <p>%PLUGINDESC%</p>
+        </div>
+
+        <h2 data-useless="warning">Warnings</h2>
+        <div
+            data-useless="warning"
+            class="card danger-card"
+            id="native-ts-warning"
+        >
+            <h3>Uses a native.ts file</h3>
+            <p>
+                Use of this file allows the plugin to escape the browser sandbox
+                and potentially do anything to your system and data.
+                <b
+                    >ONLY INSTALL THIS PLUGIN AFTER REVIEWING THE CODE AND BEING
+                    100% SURE THAT NOTHING BAD CAN BE DONE!</b
+                >
+            </p>
+            <br />
+            <input type="checkbox" /> Acknowledge warning (required to allow
+            install)
+        </div>
+        <div
+            data-useless="warning"
+            class="card warn-card"
+            id="pre-send-warning"
+        >
+            <h3>Has pre-send listeners</h3>
+            <p>
+                This allows the plugin to edit your messages before they are
+                sent.
+            </p>
+        </div>
+        <p id="validate">
+            Reminder: installing a userplugin can be a destructive action. Make
+            sure that you know and trust the developer before installing any.
+        </p>
+        <div id="btn-row">
+            <button id="abort">Cancel installation</button>
+            <button id="install">Install plugin</button>
+        </div>
+    </body>
+</html>
