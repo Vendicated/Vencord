@@ -243,6 +243,7 @@ export default definePlugin({
     name: "ConsoleShortcuts",
     description: "Adds shorter Aliases for many things on the window. Run `shortcutList` for a list.",
     authors: [Devs.Ven],
+    tags: ["Developers", "Console", "Shortcuts", "Utility"],
     startAt: StartAt.Init,
 
     patches: [

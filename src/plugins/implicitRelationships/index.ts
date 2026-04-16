@@ -26,6 +26,7 @@ import { Settings } from "Vencord";
 export default definePlugin({
     name: "ImplicitRelationships",
     description: "Shows your implicit relationships in the Friends tab.",
+    tags: ["Friends", "Servers"],
     authors: [Devs.Dolfies],
     patches: [
         // Counts header
