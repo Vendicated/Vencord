@@ -116,8 +116,6 @@ const settings = definePluginSettings({
 export default definePlugin({
     name: "SplitLargeMessages",
     description: "Splits large messages into multiple to fit Discord's message limit.",
-    dependencies: ["MessageEventsAPI"],
-    tags: ["Appearance", "Customisation", "Chat"],
     authors: [EquicordDevs.Reycko],
     settings,
     onBeforeMessageSend: listener,

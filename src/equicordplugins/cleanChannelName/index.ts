@@ -12,7 +12,6 @@ export default definePlugin({
     name: "CleanChannelName",
     authors: [Devs.AutumnVN],
     description: "remove all emoji and decor shit from channel names",
-    tags: ["Appearance", "Customisation", "Chat", "Emotes", "Servers"],
     patches: [
         {
             find: "loadAllGuildAndPrivateChannelsFromDisk(){",

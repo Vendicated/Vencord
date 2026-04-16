@@ -94,7 +94,7 @@ export function ReplaceSettings({ appIds, update, save }: SettingsProps) {
                         }
                         <Heading className={`${Margins.top8} ${Margins.bottom8}`}>Application ID</Heading>
                         <CheckedTextInput
-                            initialValue={setting.appId}
+                            value={setting.appId}
                             onChange={async v => {
                                 onChange(v, i, "appId");
                             }}
@@ -125,7 +125,7 @@ export function ReplaceSettings({ appIds, update, save }: SettingsProps) {
                                     <>
                                         <Heading className={`${Margins.top8} ${Margins.bottom8}`}>Stream URL (must be YouTube or Twitch)</Heading>
                                         <CheckedTextInput
-                                            initialValue={setting.newStreamUrl}
+                                            value={setting.newStreamUrl}
                                             onChange={async v => {
                                                 onChange(v, i, "newStreamUrl");
                                             }}

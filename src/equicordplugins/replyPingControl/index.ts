@@ -27,7 +27,6 @@ export const settings = definePluginSettings({
 export default definePlugin({
     name: "ReplyPingControl",
     description: "Control whether to always or never get pinged on message replies, with a whitelist feature",
-    tags: ["Chat", "Notifications"],
     authors: [Devs.ant0n, EquicordDevs.MrDiamond],
     settings,
 

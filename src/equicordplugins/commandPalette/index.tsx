@@ -201,7 +201,6 @@ function hotkeyUsesModifiers() {
 export default definePlugin({
     name: "CommandPalette",
     description: "Quickly run actions through a searchable command palette",
-    tags: ["Appearance", "Customisation", "Commands", "Shortcuts"],
     authors: [EquicordDevs.justjxke],
     settings,
     patches: [

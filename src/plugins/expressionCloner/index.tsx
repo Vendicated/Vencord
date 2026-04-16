@@ -232,7 +232,7 @@ function CloneModal({ data }: { data: Sticker | Emoji; }) {
         <>
             <Heading className={Margins.top20}>Custom Name</Heading>
             <CheckedTextInput
-                initialValue={name}
+                value={name}
                 onChange={v => {
                     data.name = v;
                     setName(v);
@@ -411,8 +411,7 @@ migratePluginSettings("ExpressionCloner", "EmoteCloner");
 export default definePlugin({
     name: "ExpressionCloner",
     description: "Allows you to clone Emotes & Stickers to your own server (right click them)",
-    tags: ["Emotes", "Servers"],
-    searchTerms: ["StickerCloner", "EmoteCloner", "EmojiCloner"],
+    tags: ["StickerCloner", "EmoteCloner", "EmojiCloner"],
     authors: [Devs.Ven, Devs.Nuckyz],
     contextMenus: {
         "message": messageContextMenuPatch,

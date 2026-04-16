@@ -450,8 +450,7 @@ let container: HTMLDivElement | null = null;
 
 export default definePlugin({
     name: "Snowfall",
-    description: "Let it snow on Discord",
-    tags: ["Appearance"],
+    description: "Let it snow on Discord! Ported from the BetterDiscord plugin by square.",
     authors: [EquicordDevs.ZcraftElite, EquicordDevs.square],
 
     settingsAboutComponent: () => (

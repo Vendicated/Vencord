@@ -21,7 +21,7 @@ import { chooseFile as chooseFileWeb } from "@utils/web";
 import { Toasts } from "@webpack/common";
 import { showSaveFilePicker } from "native-file-system-adapter";
 
-import { clearLogs,Native } from "..";
+import { Native, clearLogs } from "..";
 import { addMessagesBulkIDB, iterateAllMessagesIDB } from "../db";
 import { LoggedMessageJSON } from "../types";
 

@@ -257,7 +257,6 @@ export default definePlugin({
     name: "Timezones",
     authors: [Devs.Aria, EquicordDevs.creations],
     description: "Shows the local time of users in profiles and message headers",
-    tags: ["Appearance", "Chat", "Utility"],
     contextMenus: {
         "user-context": userContextMenuPatch
     },

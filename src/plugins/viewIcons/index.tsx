@@ -179,8 +179,7 @@ export default definePlugin({
     name: "ViewIcons",
     authors: [Devs.Ven, Devs.TheKodeToad, Devs.Nuckyz, Devs.nyx],
     description: "Makes avatars and banners in user profiles clickable, adds View Icon/Banner entries in the user, server and group channel context menu.",
-    tags: ["Media", "Servers", "Appearance"],
-    searchTerms: ["ImageUtilities"],
+    tags: ["ImageUtilities"],
     dependencies: ["DynamicImageModalAPI"],
 
     settings,
@@ -197,10 +196,10 @@ export default definePlugin({
     patches: [
         // Avatar component used in User DMs "User Profile" popup in the right and User Profile Modal pfp
         {
-            find: "return{avatarProps:{",
+            find: ".AVATAR),{trackUserProfileAction:",
             replacement: {
-                match: /(?<=avatarProps:(\i),eventHandlers:(\i).{0,50}?)return null==/,
-                replace: 'Object.assign($2,{style:{cursor:"pointer"},onClick:()=>$self.openAvatar($1.src)});$&',
+                match: /avatarSrc:(\i),eventHandlers:(\i).+?"div",.{0,100}className:\i,/,
+                replace: "$&style:{cursor:\"pointer\"},onClick:()=>{$self.openAvatar($1)},",
             }
         },
         // Banners

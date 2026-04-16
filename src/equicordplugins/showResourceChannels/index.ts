@@ -10,7 +10,6 @@ import definePlugin from "@utils/types";
 export default definePlugin({
     name: "ShowResourceChannels",
     description: "shows the channels hidden behind the server resources in the channel list",
-    tags: ["Servers"],
     authors: [EquicordDevs.VillainsRule],
     patches: [
         {

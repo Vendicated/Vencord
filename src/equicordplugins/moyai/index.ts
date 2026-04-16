@@ -91,7 +91,6 @@ export default definePlugin({
     name: "Moyai",
     authors: [Devs.Megu, Devs.Nuckyz],
     description: "Plays a 🗿 sound effect whenever a moyai emoji is sent, reacted, or used as a voice effect in your current channel.",
-    tags: ["Fun"],
     settings,
 
     flux: {

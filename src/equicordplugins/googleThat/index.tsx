@@ -75,10 +75,8 @@ const settings = definePluginSettings({
 export default definePlugin({
     name: "GoogleThat",
     description: "Adds a command to send a internet search link",
-    dependencies: ["CommandsAPI"],
-    tags: ["Commands", "Utility"],
     authors: [Devs.Samwich, EquicordDevs.KrystalSkull],
-    searchTerms: ["search", "google", "query", "duckduckgo", "command"],
+    tags: ["search", "google", "query", "duckduckgo", "command"],
     settings,
     commands: [
         {

@@ -235,9 +235,8 @@ migratePluginSettings("CursorBuddy", "Oneko", "oneko");
 export default definePlugin({
     name: "CursorBuddy",
     description: "Adds a sprite that follows your cursor.",
-    tags: ["Appearance", "Customisation", "Fun"],
     authors: [Devs.Ven, Devs.adryd, EquicordDevs.nexpid, EquicordDevs.ZcraftElite],
-    searchTerms: ["Oneko", "FatassHorse", "Pet"],
+    tags: ["Oneko", "FatassHorse", "Pet"],
     settings,
     isModified: true,
 

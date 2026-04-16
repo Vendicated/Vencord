@@ -40,7 +40,6 @@ export default definePlugin({
     name: "BetterNotesBox",
     description: "Hide notes or disable spellcheck (Configure in settings!!)",
     authors: [Devs.Ven],
-    tags: ["Customisation", "Utility"],
     settings,
 
     patches: [

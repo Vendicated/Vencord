@@ -172,7 +172,6 @@ async function updateData() {
 export default definePlugin({
     name: "RPCStats",
     description: "Displays stats about your activity as an rpc",
-    tags: ["Utility"],
     authors: [Devs.Samwich],
     async start() {
         updateData();
