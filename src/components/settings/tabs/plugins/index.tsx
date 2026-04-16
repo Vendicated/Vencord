@@ -197,18 +197,9 @@ export default function PluginSettings() {
     const hasUserPlugins = useMemo(() => !IS_STANDALONE && Object.values(PluginMeta).some(m => m.userPlugin), []);
 
     const [searchValue, setSearchValue] = useState({ value: "", tags: [] as PluginTag[], status: SearchStatus.ALL });
-    const [searchInput, setSearchInput] = useState("");
-
-    const debouncedSetSearch = useMemo(
-        () => debounce((query: string) => setSearchValue(prev => ({ ...prev, value: query })), 150),
-        []
-    );
 
     const search = searchValue.value.toLowerCase();
-    const onSearch = useCallback((query: string) => {
-        setSearchInput(query);
-        debouncedSetSearch(query);
-    }, [debouncedSetSearch]);
+    const onSearch = (query: string) => setSearchValue(prev => ({ ...prev, value: query }));
 
     const pluginFilter = useCallback((plugin: typeof Plugins[keyof typeof Plugins], newPluginsSet: Set<string> | null) => {
         const { status, tags } = searchValue;

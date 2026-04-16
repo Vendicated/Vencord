@@ -80,7 +80,7 @@ export default definePlugin({
     async start() {
         if (!VencordNative.pluginHelpers.UserpluginInstaller) return void Alerts.show({
             title: "UserpluginInstaller not fully loaded",
-            body: "This usually happens if you didn't fully restart your client after installing the plugin, which prevents the native helpers from loading. Restart your client to fix the issue.",
+            body: "You need to restart to allow the native to be loaded :)",
             confirmText: "Restart now",
             onConfirm() {
                 relaunch();
