@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { definePluginSettings, migratePluginToSettings, migrateSettingsFromPlugin } from "@api/Settings";
+import { definePluginSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs, EquicordDevs } from "@utils/constants";
 import { useTimer } from "@utils/react";
@@ -106,8 +106,6 @@ let myLastChannelId: string | undefined;
 // Allow user updates on discord first load
 let runOneTime = true;
 
-migratePluginToSettings(false, "CallTimer", "AllCallTimers", "allCallTimers");
-migrateSettingsFromPlugin("CallTimer", "AllCallTimers", "showWithoutHover", "showRoleColor", "trackSelf", "showSeconds", "watchLargeGuilds");
 export default definePlugin({
     name: "CallTimer",
     description: "Add call timers for all users in voice channels and in the connection status.",
