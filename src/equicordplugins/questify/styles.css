@@ -363,3 +363,8 @@
     border-bottom-left-radius: 8px;
     border-bottom-right-radius: 8px;
 }
+
+/* Prevent completion confetti from covering quest buttons */
+div[id^="quest-tile-"] div[class^="confetti__"] {
+    pointer-events: none;
+}
