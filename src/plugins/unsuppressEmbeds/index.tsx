@@ -62,6 +62,7 @@ export default definePlugin({
     name: "UnsuppressEmbeds",
     authors: [Devs.rad, Devs.HypedDomi],
     description: "Allows you to unsuppress embeds in messages",
+    tags: ["Chat", "Utility"],
     contextMenus: {
         "message": messageContextMenuPatch
     }

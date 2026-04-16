@@ -9,6 +9,7 @@ import "./colorStyles.css";
 import { classNameFactory } from "@utils/css";
 import { findByCodeLazy } from "@webpack";
 import { ColorPicker, useMemo } from "@webpack/common";
+import type tinycolor from "tinycolor2";
 
 // TinyColor is completely unmangled and it's duplicated in two modules! Fun!
 const TinyColor: tinycolor.Constructor = findByCodeLazy("this._gradientType=");

@@ -132,6 +132,8 @@ migratePluginSettings("RepeatMessages", "RepeatMessage");
 export default definePlugin({
     name: "RepeatMessages",
     description: "Allows you to repeat messages quickly. If you hold shift while clicking the Repeat option, it will reply to the message.",
+    dependencies: ["MessagePopoverAPI"],
+    tags: ["Chat"],
     authors: [EquicordDevs.Tolgchu, Devs.thororen],
     contextMenus: {
         "message": messageCtxPatch

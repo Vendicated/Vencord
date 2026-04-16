@@ -318,6 +318,7 @@ export default definePlugin({
     name: "KeywordNotify",
     authors: [EquicordDevs.camila314, EquicordDevs.x3rt],
     description: "Sends a notification if a given message matches certain keywords or regexes",
+    tags: ["Chat", "Notifications"],
     settings,
     patches: [
         {

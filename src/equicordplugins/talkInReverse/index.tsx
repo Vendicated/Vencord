@@ -66,7 +66,8 @@ export default definePlugin({
     name: "TalkInReverse",
     authors: [EquicordDevs.Tolgchu],
     description: "Reverses the message content before sending it.",
-    dependencies: ["MessageEventsAPI"],
+    tags: ["Chat", "Fun"],
+    dependencies: ["MessageEventsAPI", "ChatInputButtonAPI"],
     chatBarButton: {
         icon: ReverseMessageIcon,
         render: ReverseMessageToggle

@@ -4,12 +4,11 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { definePluginSettings } from "@api/Settings";
+import { definePluginSettings, Settings } from "@api/Settings";
 import { Button } from "@components/Button";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { OptionType } from "@utils/types";
 import { Alerts, useState } from "@webpack/common";
-import { Settings } from "Vencord";
 
 import { clearLogs, Native } from ".";
 import { ImageCacheDir, LogsDir } from "./components/FolderSelectInput";

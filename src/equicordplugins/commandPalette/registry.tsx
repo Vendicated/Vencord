@@ -6,7 +6,7 @@
 
 import { DataStore } from "@api/index";
 import { isPluginEnabled, plugins, startPlugin, stopPlugin } from "@api/PluginManager";
-import { SettingsStore } from "@api/Settings";
+import { Settings, SettingsStore } from "@api/Settings";
 import { getUserSettingLazy } from "@api/UserSettings";
 import { openPluginModal } from "@components/settings/tabs";
 import { toggleEnabled } from "@equicordplugins/equicordHelper/utils";
@@ -18,7 +18,6 @@ import { Guild } from "@vencord/discord-types";
 import { findByPropsLazy, findExportedComponentLazy, findStoreLazy } from "@webpack";
 import { Alerts, ChannelActionCreators, ChannelRouter, ChannelStore, ComponentDispatch, FluxDispatcher, GuildStore, IconUtils, MediaEngineStore, MessageStore, NavigationRouter, React, ReadStateStore, ReadStateUtils, SelectedChannelStore, SelectedGuildStore, SettingsRouter, StreamerModeStore, Toasts, useEffect, UserStore, VoiceActions } from "@webpack/common";
 import type { FC, ReactElement, ReactNode } from "react";
-import { Settings } from "Vencord";
 
 import commandPalette from ".";
 import {

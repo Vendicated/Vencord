@@ -137,9 +137,10 @@ const settings = definePluginSettings({
 export default definePlugin({
     name: "Soggy",
     description: "Adds a soggy button to the toolbox",
+    tags: ["Fun"],
     authors: [EquicordDevs.sliwka],
     settings,
-    dependencies: ["AudioPlayerAPI"],
+    dependencies: ["AudioPlayerAPI", "HeaderBarAPI"],
 
     headerBarButton: {
         icon: () => (

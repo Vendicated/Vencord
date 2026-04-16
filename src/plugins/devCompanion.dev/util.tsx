@@ -10,8 +10,8 @@ import { Settings } from "@api/Settings";
 import { canonicalizeMatch } from "@utils/patches";
 import { CodeFilter, stringMatches, wreq } from "@webpack";
 import { Toasts } from "@webpack/common";
-import { WebpackPatcher } from "Vencord";
 
+import { WebpackPatcher } from "../../Vencord";
 import { logger, settings as companionSettings } from ".";
 import { FindNode } from "./types/recieve";
 

@@ -70,6 +70,7 @@ export function containsBlockedKeywords(message: Message) {
 export default definePlugin({
     name: "BlockKeywords",
     description: "Blocks messages containing specific user-defined keywords, as if the user sending them was blocked.",
+    tags: ["Appearance", "Customisation", "Privacy"],
     authors: [EquicordDevs.catcraft],
     patches: [
         {

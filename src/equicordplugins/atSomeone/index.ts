@@ -13,6 +13,7 @@ export default definePlugin({
     name: "AtSomeone",
     authors: [Devs.Joona],
     description: "Mention someone randomly",
+    tags: ["Chat", "Fun"],
     patches: [
         {
             find: ".LAUNCHABLE_APPLICATIONS;",

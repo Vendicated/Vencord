@@ -18,6 +18,7 @@ import ComponentsTab from "./components/ComponentsTab";
 export default definePlugin({
     name: "Components",
     description: "Adds a new tab to settings to browse Discord components.",
+    tags: ["Appearance", "Customisation", "Console", "Developers", "Organisation"],
     authors: [Devs.prism],
     dependencies: ["Settings"],
     startAt: StartAt.WebpackReady,

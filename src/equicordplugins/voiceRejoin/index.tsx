@@ -51,6 +51,7 @@ const settings = definePluginSettings({
 export default definePlugin({
     name: "VoiceRejoin",
     description: "Rejoins DM/Server call automatically when restarting Discord.",
+    tags: ["Servers", "Utility", "Voice"],
     authors: [EquicordDevs.omaw, EquicordDevs.keircn],
     settings,
 

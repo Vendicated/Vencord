@@ -64,6 +64,8 @@ const settings = definePluginSettings({
 export default definePlugin({
     name: "PolishWording",
     description: "Tweaks your messages to make them look nicer and have better grammar. See settings",
+    dependencies: ["MessageEventsAPI"],
+    tags: ["Chat"],
     authors: [Devs.Samwich, EquicordDevs.WKoA],
     onBeforeMessageSend: presendObject,
     settings,

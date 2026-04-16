@@ -25,8 +25,9 @@ export const AttachmentContext = proxyLazyWebpack(() => React.createContext<null
 export default definePlugin({
     name: "FavouriteAnything",
     description: "Favourite any image, video, or file attachment",
+    tags: ["Chat", "Media"],
     authors: [Devs.nin0dev, EquicordDevs.davri],
-    tags: ["favorite"],
+    searchTerms: ["favorite"],
     managedStyle,
     patches: [
         // EMBEDS

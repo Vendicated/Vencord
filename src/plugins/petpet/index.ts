@@ -110,6 +110,8 @@ migratePluginSettings("PetPet", "petpet");
 export default definePlugin({
     name: "PetPet",
     description: "Adds a /petpet slash command to create headpet gifs from any image",
+    dependencies: ["CommandsAPI"],
+    tags: ["Fun", "Commands"],
     authors: [Devs.Ven, Devs.u32],
     commands: [
         {

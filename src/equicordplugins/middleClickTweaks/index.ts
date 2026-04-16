@@ -98,10 +98,11 @@ migrate();
 export default definePlugin({
     name: "MiddleClickTweaks",
     description: "Various middle click tweaks, such as with pasting and link opening.",
+    tags: ["Utility"],
     authors: [EquicordDevs.Etorix, EquicordDevs.korzi],
     settings,
 
-    tags: ["LimitMiddleClickPaste"],
+    searchTerms: ["LimitMiddleClickPaste"],
 
     isPastingDisabled(isInput: boolean) {
         const pasteBlocked = Date.now() - lastMiddleClickUp < Math.max(settings.store.pasteThreshold, 1);

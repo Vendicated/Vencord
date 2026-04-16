@@ -18,8 +18,8 @@ import { FluxDispatcher, MessageStore, SelectedChannelStore, UserStore } from "@
 import { LogsIcon, OpenLogsButton } from "./components/LogsButton";
 import { openLogModal } from "./components/LogsModal";
 import * as idb from "./db";
-import { addMessage } from "./LoggedMessageManager";
 import * as LoggedMessageManager from "./LoggedMessageManager";
+import { addMessage } from "./LoggedMessageManager";
 import { settings } from "./settings";
 import { FetchMessagesResponse, LoadMessagePayload, LoggedMessage, LoggedMessageJSON, MessageCreatePayload, MessageDeleteBulkPayload, MessageDeletePayload, MessageUpdatePayload } from "./types";
 import { cleanUpCachedMessage, cleanupUserObject, getNative, isGhostPinged, mapTimestamp, messageJsonToMessageClass, reAddDeletedMessages } from "./utils";
@@ -258,7 +258,8 @@ export default definePlugin({
     name: "MessageLoggerEnhanced",
     authors: [Devs.Aria, EquicordDevs.keircn],
     description: "Improves MessageLogger with edited message history, ghost ping detection and more",
-    dependencies: ["MessageLogger"],
+    tags: ["Chat", "Servers"],
+    dependencies: ["MessageLogger", "HeaderBarAPI"],
 
     patches: [
         {

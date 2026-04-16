@@ -45,7 +45,12 @@
     display: grid;
     height: 40px;
     gap: 10px;
-    grid-template-columns: 1fr 150px;
+    grid-template-columns: 1fr 1fr;
+    align-items: center;
+}
+
+.vc-plugins-filter-control {
+    height: 40px;
 }
 
 .vc-plugins-dep-name {

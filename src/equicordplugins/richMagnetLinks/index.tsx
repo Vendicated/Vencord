@@ -13,6 +13,7 @@ export default definePlugin({
     authors: [EquicordDevs.cassie, EquicordDevs.mochienya, EquicordDevs.secp192k1],
     name: "RichMagnetLinks",
     description: "Renders magnet links like message links",
+    tags: ["Appearance", "Chat"],
     patches: [
         {
             find: "AUTO_MODERATION_SYSTEM_MESSAGE_RULES:",
