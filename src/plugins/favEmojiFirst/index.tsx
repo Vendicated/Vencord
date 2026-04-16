@@ -1103,6 +1103,7 @@ export default definePlugin({
     authors: [Devs.Aria, Devs.Ven, EquicordDevs.justjxke],
     tags: ["Emotes", "Customisation"],
     description: "Puts your favorite emoji first in the emoji autocomplete and also has emoji alias.",
+    dependencies: ["MessagePopoverAPI"],
     settings,
     contextMenus: {
         "expression-picker": expressionPickerPatch,

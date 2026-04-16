@@ -36,7 +36,7 @@ export default definePlugin({
     description: "Know who is in a role with the role context menu or /inrole command (read plugin info!)",
     tags: ["Commands", "Roles"],
     authors: [Devs.nin0dev],
-    dependencies: ["UserSettingsAPI"],
+    dependencies: ["UserSettingsAPI", "CommandsAPI"],
     start() {
         // DeveloperMode needs to be enabled for the context menu to be shown
         DeveloperMode.updateSetting(true);

@@ -58,7 +58,7 @@ export default definePlugin({
     description: "Hide attachments and embeds for individual messages via hover button",
     tags: ["Chat", "Appearance"],
     authors: [Devs.Ven],
-    dependencies: ["MessageUpdaterAPI"],
+    dependencies: ["MessageUpdaterAPI", "MessageAccessoriesAPI", "MessagePopoverAPI"],
 
     patches: [{
         find: "this.renderAttachments(",

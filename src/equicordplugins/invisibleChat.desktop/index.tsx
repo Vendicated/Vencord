@@ -151,7 +151,7 @@ export default definePlugin({
     description: "Encrypt your Messages in a non-suspicious way!",
     tags: ["Chat"],
     authors: [Devs.SammCheese],
-    dependencies: ["MessageUpdaterAPI"],
+    dependencies: ["MessageUpdaterAPI", "ChatInputButtonAPI", "MessagePopoverAPI"],
     reporterTestable: ReporterTestable.Patches,
     settings,
 

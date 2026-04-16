@@ -259,7 +259,7 @@ export default definePlugin({
     authors: [Devs.Aria, EquicordDevs.keircn],
     description: "Improves MessageLogger with edited message history, ghost ping detection and more",
     tags: ["Chat", "Servers"],
-    dependencies: ["MessageLogger"],
+    dependencies: ["MessageLogger", "HeaderBarAPI"],
 
     patches: [
         {
