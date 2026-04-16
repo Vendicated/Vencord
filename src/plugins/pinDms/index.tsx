@@ -67,6 +67,7 @@ export const settings = definePluginSettings({
 export default definePlugin({
     name: "PinDMs",
     description: "Allows you to pin private channels to the top of your DM list. To pin/unpin or re-order pins, right click DMs",
+    tags: ["Friends", "Organisation"],
     authors: [Devs.Ven, Devs.Aria],
     settings,
     contextMenus,

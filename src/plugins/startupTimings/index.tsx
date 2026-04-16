@@ -27,6 +27,7 @@ import StartupTimingPage from "./StartupTimingPage";
 export default definePlugin({
     name: "StartupTimings",
     description: "Adds Startup Timings to the Settings menu",
+    tags: ["Developers"],
     authors: [Devs.Megu],
     start() {
         SettingsPlugin.customEntries.push({

@@ -26,7 +26,7 @@ import { Microphone } from "@components/Icons";
 import { Link } from "@components/Link";
 import { Paragraph } from "@components/Paragraph";
 import { lastState as silentMessageEnabled } from "@plugins/silentMessageToggle";
-import { Devs, EquicordDevs } from "@utils/constants";
+import { Devs } from "@utils/constants";
 import { classNameFactory } from "@utils/css";
 import { Margins } from "@utils/margins";
 import { ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, openModal } from "@utils/modal";
@@ -271,10 +271,10 @@ export const settings = definePluginSettings({
 
 export default definePlugin({
     name: "VoiceMessages",
-    description: "Allows you to send voice messages like on mobile. To do so, right click the upload button and click Send Voice Message.",
-    authors: [Devs.Ven, Devs.Vap, Devs.Nickyux, EquicordDevs.Z1xus, Devs.prism],
+    description: "Allows you to send voice messages like on mobile. To do so, right click the upload button and click Send Voice Message",
+    tags: ["Voice"],
+    authors: [Devs.Ven, Devs.Vap, Devs.Nickyux],
     settings,
-
     contextMenus: {
         "channel-attach": ctxMenuPatch
     }

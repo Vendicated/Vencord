@@ -75,6 +75,7 @@ export default definePlugin({
     name: "AnonymiseFileNames",
     authors: [Devs.fawn],
     description: "Anonymise uploaded file names",
+    tags: ["Privacy", "Utility"],
     isModified: true,
     settings,
 

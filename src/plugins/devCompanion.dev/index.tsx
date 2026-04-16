@@ -48,6 +48,7 @@ export const settings = definePluginSettings({
 export default definePlugin({
     name: "DevCompanion",
     description: "Dev Companion Plugin. Please report anything not working or being weird (most likely its a bug) to sadan, either ping or dm, thanks!",
+    tags: ["Developers", "Utility"],
     authors: [Devs.Ven, Devs.sadan],
     reporterTestable: ReporterTestable.None,
     isModified: true,
