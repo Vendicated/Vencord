@@ -24,6 +24,7 @@ migratePluginSettings("AlwaysExpandRoles", "ShowAllRoles");
 export default definePlugin({
     name: "AlwaysExpandRoles",
     description: "Always expands the role list in profile popouts",
+    tags: ["Appearance", "Roles"],
     authors: [Devs.surgedevs],
     patches: [
         {

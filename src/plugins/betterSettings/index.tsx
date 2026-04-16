@@ -78,6 +78,7 @@ export default definePlugin({
     name: "BetterSettings",
     description: "Enhances your settings-menu-opening experience",
     authors: [Devs.Kyuuhachi],
+    tags: ["Appearance", "Customisation", "Organisation"],
     settings,
 
     start() {

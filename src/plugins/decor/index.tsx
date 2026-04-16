@@ -27,6 +27,7 @@ export interface AvatarDecoration {
 export default definePlugin({
     name: "Decor",
     description: "Create and use your own custom avatar decorations, or pick your favorite from the presets.",
+    tags: ["Appearance", "Customisation"],
     authors: [Devs.FieryFlames],
     patches: [
         // Patch MediaResolver to return correct URL for Decor avatar decorations

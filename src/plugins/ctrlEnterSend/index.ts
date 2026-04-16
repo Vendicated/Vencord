@@ -12,6 +12,7 @@ export default definePlugin({
     name: "CtrlEnterSend",
     authors: [Devs.UlyssesZhan],
     description: "Use Ctrl+Enter to send messages (customizable)",
+    tags: ["Shortcuts", "Chat"],
     settings: definePluginSettings({
         submitRule: {
             description: "The way to send a message",
