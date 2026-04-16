@@ -10,6 +10,7 @@ import definePlugin from "@utils/types";
 export default definePlugin({
     name: "SelfForward",
     description: "Adds the current channel to the forward list popup",
+    tags: ["Utility"],
     authors: [EquicordDevs.VillainsRule],
     patches: [
         {

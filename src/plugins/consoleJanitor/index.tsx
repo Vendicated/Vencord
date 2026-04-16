@@ -109,6 +109,7 @@ export default definePlugin({
     name: "ConsoleJanitor",
     description: "Disables annoying console messages/errors",
     authors: [Devs.Nuckyz, Devs.sadan],
+    tags: ["Developers", "Console", "Utility"],
     settings,
 
     startAt: StartAt.Init,

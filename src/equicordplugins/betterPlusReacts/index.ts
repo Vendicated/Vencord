@@ -12,6 +12,7 @@ export default definePlugin({
     name: "BetterPlusReacts",
     authors: [Devs.Joona],
     description: "The amount of plus before :emoji: is the message to add it to",
+    tags: ["Chat", "Emotes"],
     patches: [
         {
             find: ".SLASH_COMMAND_USED,",

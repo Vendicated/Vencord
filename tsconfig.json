@@ -19,43 +19,48 @@
         "noImplicitAny": false,
         "target": "ESNEXT",
         "jsx": "preserve",
-        "baseUrl": "./src/",
         "paths": {
             "@main/*": [
-                "./main/*"
+                "./src/main/*"
             ],
             "@api/*": [
-                "./api/*"
+                "./src/api/*"
             ],
             "@components/*": [
-                "./components/*"
+                "./src/components/*"
+            ],
+            "@debug/*": [
+                "./src/debug/*"
             ],
             "@utils/*": [
-                "./utils/*"
+                "./src/utils/*"
             ],
             "@plugins/*": [
-                "./plugins/*"
+                "./src/plugins/*"
             ],
             "@shared/*": [
-                "./shared/*"
+                "./src/shared/*"
             ],
             "@webpack/common": [
-                "./webpack/common"
+                "./src/webpack/common"
             ],
             "@webpack/common/*": [
-                "./webpack/common/*"
+                "./src/webpack/common/*"
             ],
             "@webpack": [
-                "./webpack/webpack"
+                "./src/webpack/webpack"
             ],
             "@webpack/patcher": [
-                "./webpack/patchWebpack"
+                "./src/webpack/patchWebpack"
             ],
             "@webpack/wreq.d": [
-                "./webpack/wreq.d"
+                "./src/webpack/wreq.d"
+            ],
+            "@webpack/types": [
+                "./src/webpack/types"
             ],
             "@equicordplugins/*": [
-                "./equicordplugins/*"
+                "./src/equicordplugins/*"
             ]
         },
         "plugins": [

@@ -65,6 +65,7 @@ const settings = definePluginSettings({
 export default definePlugin({
     name: "UserPFP",
     description: "Allows you to use an animated avatar without Nitro",
+    tags: ["Appearance", "Customisation", "Servers"],
     authors: [EquicordDevs.nexpid, Devs.thororen, EquicordDevs.soapphia],
     settings,
     data,

@@ -10,8 +10,7 @@ import { addServerListElement, removeServerListElement, ServerListRenderPosition
 import ErrorBoundary from "@components/ErrorBoundary";
 import { EquicordDevs } from "@utils/constants";
 import definePlugin from "@utils/types";
-import { FluxDispatcher } from "@webpack/common";
-import { Tooltip } from "webpack/common/components";
+import { FluxDispatcher, Tooltip } from "@webpack/common";
 
 function SearchIcon() {
     return (
@@ -29,6 +28,7 @@ export default definePlugin({
     name: "ServerSearch",
     authors: [EquicordDevs.camila314],
     description: "Navigate your servers better with a quick search button",
+    tags: ["Shortcuts", "Servers"],
 
     renderButton() {
         return <ErrorBoundary noop>

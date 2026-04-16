@@ -38,6 +38,8 @@ export const settings = definePluginSettings({
 export default definePlugin({
     name: "GitHubRepos",
     description: "Displays a user's public GitHub repositories in their profile",
+    dependencies: ["ProfileCollectionsAPI"],
+    tags: ["Appearance"],
     authors: [EquicordDevs.talhakf, EquicordDevs.Panniku, EquicordDevs.benjii],
     settings,
 

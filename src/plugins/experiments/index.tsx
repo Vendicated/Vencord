@@ -37,6 +37,7 @@ const settings = definePluginSettings({
 export default definePlugin({
     name: "Experiments",
     description: "Enable Access to Experiments & other dev-only features in Discord!",
+    tags: ["Developers", "Utility"],
     authors: [
         Devs.Megu,
         Devs.Ven,
@@ -70,6 +71,8 @@ export default definePlugin({
                     match: /(?<=children:\[)(?=null!=.{0,150}"Installation ID:)/,
                     replace: "$self.WarningCard(),"
                 },
+                // for some reason the installation id and copy buttons are on
+                // different lines so it looks stupid when the card above is added
                 {
                     match: /(?<=,marginBottom:16)(?=\},children:\[)/,
                     replace: ',flexDirection:"row",alignItems:"center"'

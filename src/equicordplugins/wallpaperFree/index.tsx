@@ -33,6 +33,7 @@ export default definePlugin({
     name: "WallpaperFree",
     authors: [Devs.Joona],
     description: "Recreation of the old DM wallpaper experiment; Set a background image for any channel, user or server.",
+    tags: ["Appearance", "Chat", "Customisation"],
     patches: [
         {
             find: ".handleSendMessage,onResize",

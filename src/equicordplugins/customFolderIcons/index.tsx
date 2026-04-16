@@ -14,6 +14,7 @@ import { folderProp, int2rgba } from "./util";
 export default definePlugin({
     name: "CustomFolderIcons",
     description: "Customize folder icons with any png",
+    tags: ["Appearance", "Customisation", "Organisation"],
     authors: [EquicordDevs.sadan],
     settings,
     patches: [

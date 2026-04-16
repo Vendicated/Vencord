@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { ReporterData } from "debug/reporterData";
+import { ReporterData } from "@debug/reporterData";
 
 export type OutgoingMessage = Base<DiffModule | ExtractModule | ModuleList | RawId | I18nValue | VersionResponse>;
 export type FullOutgoingMessage = OutgoingMessage & Nonce;

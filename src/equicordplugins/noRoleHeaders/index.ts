@@ -10,6 +10,7 @@ import definePlugin from "@utils/types";
 export default definePlugin({
     name: "NoRoleHeaders",
     description: "We are all equal!! Removes the role headers in the member list.",
+    tags: ["Appearance", "Fun", "Roles"],
     authors: [Devs.Samwich],
     patches: [
         {

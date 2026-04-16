@@ -33,6 +33,8 @@ function fetchIndex(target: object) {
 export default definePlugin({
     name: "BetterCommands",
     description: "Enhances the command system with miscellaneous improvements.",
+    dependencies: ["CommandsAPI"],
+    tags: ["Appearance", "Commands", "Shortcuts"],
     authors: [Devs.thororen],
     settings,
     patches: [

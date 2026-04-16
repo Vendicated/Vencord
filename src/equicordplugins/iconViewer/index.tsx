@@ -19,6 +19,7 @@ import { SettingsAbout } from "./components/Modals";
 export default definePlugin({
     name: "IconViewer",
     description: "Adds a new tab to settings to preview all icons.",
+    tags: ["Developers"],
     authors: [EquicordDevs.iamme],
     dependencies: ["Settings"],
     startAt: StartAt.WebpackReady,

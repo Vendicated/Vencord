@@ -43,6 +43,7 @@ const settings = definePluginSettings({
 export default definePlugin({
     name: "BlurNSFW",
     description: "Blur attachments in NSFW channels until hovered",
+    tags: ["Privacy", "Appearance"],
     authors: [Devs.Ven],
     isModified: true,
     settings,

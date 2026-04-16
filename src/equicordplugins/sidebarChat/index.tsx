@@ -130,6 +130,7 @@ export default definePlugin({
     name: "SidebarChat",
     authors: [Devs.Joona],
     description: "Open a another channel or a DM as a sidebar or as a popout",
+    tags: ["Appearance", "Chat", "Servers"],
     patches: [
         {
             find: 'case"pendingFriends":',

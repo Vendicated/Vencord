@@ -44,7 +44,7 @@ interface Uint8ArrayConstructorExtended extends Uint8ArrayConstructor {
     ): Uint8ArrayExtended<ArrayBuffer>;
 }
 
-function supportsToBase64(array: Uint8Array<ArrayBufferLike>): array is Uint8ArrayExtended<ArrayBufferLike> {
+function supportsToBase64(array: Uint8Array<ArrayBufferLike>): boolean {
     return "toBase64" in array && typeof array.toBase64 === "function";
 }
 

@@ -180,7 +180,6 @@ export function toInlineCode(s: string) {
     return "``" + ZWSP + s.replaceAll("`", ZWSP + "`" + ZWSP) + ZWSP + "``";
 }
 
-// @ts-expect-error Missing RegExp.escape
 export const escapeRegExp: (s: string) => string = RegExp.escape ?? function (s: string) {
     return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 };

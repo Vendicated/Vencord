@@ -71,6 +71,7 @@ export function sendRemix(blob: Blob) {
 export default definePlugin({
     name: "RemixRevived",
     description: "Revives Remix and breings it to Desktop",
+    tags: ["Customisation", "Fun"],
     authors: [EquicordDevs.MrDiamond, EquicordDevs.meowabyte],
     contextMenus: {
         "channel-attach": UploadContextMenuPatch,

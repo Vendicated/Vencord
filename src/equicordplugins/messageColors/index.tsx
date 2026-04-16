@@ -27,6 +27,7 @@ export default definePlugin({
     authors: [EquicordDevs.Hen],
     name: "MessageColors",
     description: "Displays color codes like #FF0042 inside of messages",
+    tags: ["Appearance", "Chat"],
     settings,
     patches: [
         // Create a new markdown rule, so it parses just like any other features

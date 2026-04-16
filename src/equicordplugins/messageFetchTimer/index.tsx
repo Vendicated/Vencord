@@ -147,6 +147,8 @@ function handleMessageLoad(data: any) {
 export default definePlugin({
     name: "MessageFetchTimer",
     description: "Shows how long it took to fetch messages for the current channel",
+    dependencies: ["ChatInputButtonAPI"],
+    tags: ["Chat", "Utility"],
     authors: [EquicordDevs.GroupXyz],
     settings,
 

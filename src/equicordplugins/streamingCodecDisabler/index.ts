@@ -56,6 +56,7 @@ const settings = definePluginSettings({
 export default definePlugin({
     name: "StreamingCodecDisabler",
     description: "Disable codecs for streaming of your choice",
+    tags: ["Utility", "Voice"],
     authors: [EquicordDevs.davidkra230],
     settings,
 
