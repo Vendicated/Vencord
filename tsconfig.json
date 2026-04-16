@@ -24,7 +24,7 @@
                 "./src/main/*"
             ],
             "@api/*": [
-                "./sr/capi/*"
+                "./src/capi/*"
             ],
             "@components/*": [
                 "./src/components/*"
