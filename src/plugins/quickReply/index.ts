@@ -60,6 +60,7 @@ export default definePlugin({
     name: "QuickReply",
     authors: [Devs.fawn, Devs.Ven, Devs.pylix],
     description: "Reply to (ctrl + up/down) and edit (ctrl + shift + up/down) messages via keybinds",
+    tags: ["Chat", "Shortcuts"],
     settings,
 
     start() {

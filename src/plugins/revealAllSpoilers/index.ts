@@ -27,7 +27,7 @@ export default definePlugin({
     name: "RevealAllSpoilers",
     description: "Reveal all spoilers in a message by Ctrl-clicking a spoiler, or in the chat with Ctrl+Shift-click",
     authors: [Devs.whqwert],
-
+    tags: ["Accessibility", "Chat", "Shortcuts", "Utility"],
     patches: [
         {
             find: ".removeObscurity,",
