@@ -58,12 +58,14 @@ const REMOVE_HISTORY_ID = "ml-remove-history";
 const TOGGLE_DELETE_STYLE_ID = "ml-toggle-style";
 const patchMessageContextMenu: NavContextMenuPatchCallback = (children, props) => {
     const { message } = props;
-    const { deleted, editHistory, id, channel_id } = message;
+    const { deleted, editHistory, attachments, id, channel_id } = message;
 
-    if (!deleted && !editHistory?.length) return;
+    const hasDeletedAttachments = attachments.some(a => a.deleted);
+
+    if (!deleted && !hasDeletedAttachments && !editHistory?.length) return;
 
     toggle: {
-        if (!deleted) break toggle;
+        if (!deleted && !hasDeletedAttachments) break toggle;
 
         const domElement = document.getElementById(`chat-messages-${channel_id}-${id}`);
         if (!domElement) break toggle;
@@ -73,7 +75,17 @@ const patchMessageContextMenu: NavContextMenuPatchCallback = (children, props) =
                 id={TOGGLE_DELETE_STYLE_ID}
                 key={TOGGLE_DELETE_STYLE_ID}
                 label="Toggle Deleted Highlight"
-                action={() => domElement.classList.toggle("messagelogger-deleted")}
+                action={() => {
+                    const hasClass = domElement.classList.toggle("messagelogger-highlight-bypass");
+
+                    for (const attachment of domElement.querySelectorAll(".messagelogger-deleted-attachment")) {
+                        if (hasClass) {
+                            attachment.classList.add("messagelogger-highlight-bypass");
+                        } else {
+                            attachment.classList.remove("messagelogger-highlight-bypass");
+                        }
+                    }
+                }}
             />
         ));
     }
@@ -93,7 +105,10 @@ const patchMessageContextMenu: NavContextMenuPatchCallback = (children, props) =
                         mlDeleted: true
                     });
                 } else {
-                    updateMessage(channel_id, id, { editHistory: [] });
+                    updateMessage(channel_id, id, {
+                        editHistory: [],
+                        attachments: message.attachments.filter(a => !a.deleted)
+                    });
                 }
             }}
         />
@@ -121,7 +136,8 @@ const patchChannelContextMenu: NavContextMenuPatchCallback = (children, { channe
                         });
                     else
                         updateMessage(channel.id, msg.id, {
-                            editHistory: []
+                            editHistory: [],
+                            attachments: msg.attachments.filter((a: any) => !a.deleted)
                         });
                 });
             }}
@@ -156,8 +172,19 @@ export default definePlugin({
         "gdm-context": patchChannelContextMenu
     },
 
+    onMessageDeleteCallback({ channelId, id }) {
+        document.getElementById(`chat-messages-${channelId}-${id}`)
+            ?.querySelectorAll(".messagelogger-highlight-bypass")
+            .forEach(el => el.classList.remove("messagelogger-highlight-bypass"));
+    },
+
     start() {
         addDeleteStyle();
+        FluxDispatcher.subscribe("MESSAGE_DELETE", this.onMessageDeleteCallback);
+    },
+
+    stop() {
+        FluxDispatcher.unsubscribe("MESSAGE_DELETE", this.onMessageDeleteCallback);
     },
 
     renderEdits: ErrorBoundary.wrap(({ message: { id: messageId, channel_id: channelId } }: { message: Message; }) => {
@@ -170,7 +197,7 @@ export default definePlugin({
 
         return Settings.plugins.MessageLogger.inlineEdits && (
             <>
-                {message.editHistory?.map((edit, idx) => (
+                {message.editHistory?.map((edit, idx) => !edit.attachmentsEdited && (
                     <div key={idx} className="messagelogger-edited">
                         {parseEditContent(edit.content, message)}
                         <Timestamp
