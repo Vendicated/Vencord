@@ -125,14 +125,14 @@ const settings = definePluginSettings({
     disableAdoptTagPrompt: {
         type: OptionType.BOOLEAN,
         description: "Disable the prompt to adopt tags",
-        default: true,
-        restartNeeded: true
+        restartNeeded: true,
+        default: false,
     },
     jsonGateway: {
         type: OptionType.BOOLEAN,
         description: "Forces JSON on gateway reconnect",
-        default: true,
-        restartNeeded: true
+        restartNeeded: true,
+        default: false,
     }
 });
 
