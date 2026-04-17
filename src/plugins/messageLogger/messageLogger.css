@@ -2,24 +2,6 @@
     display: none;
 }
 
-.messagelogger-deleted:not(.messagelogger-highlight-bypass):is(.messagelogger-deleted-attachment,
-    .emoji,
-    [data-type="sticker"],
-    [class*="embedIframe"],
-    [class*="embedSpotify"],
-    [class*="imageContainer"]) {
-    filter: grayscale(1) !important;
-    transition: 150ms filter ease-in-out;
-
-    &[class*="hiddenMosaicItem"] {
-        filter: grayscale(1) blur(var(--custom-message-attachment-spoiler-blur-radius, 44px)) !important;
-    }
-
-    &:hover {
-        filter: grayscale(0) !important;
-    }
-}
-
 .messagelogger-deleted:not(.messagelogger-highlight-bypass) [class*="spoilerWarning"] {
     color: var(--status-danger);
 }
