@@ -27,7 +27,7 @@ import { classNameFactory } from "@utils/css";
 import { Margins } from "@utils/margins";
 import { identity, isAnyPluginDev } from "@utils/misc";
 import { relaunch } from "@utils/native";
-import { GuildMemberStore, React, Select, UserStore } from "@webpack/common";
+import { Alerts, GuildMemberStore, React, Select, UserStore } from "@webpack/common";
 
 import { DonateButtonComponent } from "./DonateButton";
 import { openNotificationSettingsModal } from "./NotificationSettings";
@@ -249,7 +249,19 @@ function EquicordSettings() {
                     <FormSwitch
                         key={s.key}
                         value={settings[s.key]}
-                        onChange={v => (settings[s.key] = v)}
+                        onChange={v => {
+                            settings[s.key] = v;
+
+                            if (s.restartRequired) {
+                                Alerts.show({
+                                    title: "Restart Required",
+                                    body: "A restart is required to apply this change",
+                                    confirmText: "Restart now",
+                                    cancelText: "Later!",
+                                    onConfirm: relaunch
+                                });
+                            }
+                        }}
                         title={s.title}
                         description={
                             s.warning.enabled ? (
