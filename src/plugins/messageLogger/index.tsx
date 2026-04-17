@@ -38,7 +38,7 @@ import { openHistoryModal } from "./HistoryModal";
 
 interface MLMessage extends Message {
     deleted?: boolean;
-    editHistory?: { timestamp: Date; content: string; }[];
+    editHistory?: { timestamp: Date; content: string; attachmentsEdited: boolean; }[];
     firstEditTimestamp?: Date;
 }
 
@@ -189,7 +189,8 @@ export default definePlugin({
     makeEdit(newMessage: any, oldMessage: any): any {
         return {
             timestamp: new Date(newMessage.edited_timestamp),
-            content: oldMessage.content
+            content: oldMessage.content,
+            attachmentsEdited: (oldMessage.attachments?.filter(a => !a.deleted)?.length || 0) !== (newMessage.attachments?.filter(a => !a.deleted)?.length || 0)
         };
     },
 
@@ -307,6 +308,10 @@ export default definePlugin({
         }
     },
 
+    isMessageModified(oldMessage: any, newMessage: any) {
+        return oldMessage.content !== newMessage.content || oldMessage.attachments.length !== newMessage.attachments.length;
+    },
+
     EditMarker({ message, className, children, ...props }: any) {
         return (
             <span
@@ -374,16 +379,25 @@ export default definePlugin({
                         "}"
                 },
                 {
-                    // Add current cached content + new edit time to cached message's editHistory
-                    match: /(function (\i)\((\i)\).+?)\.update\((\i)(?=.*MESSAGE_UPDATE:\2)/,
-                    replace: "$1" +
-                        ".update($4,m =>" +
+                    // Add current cached content + new edit time to cached message's editHistory + deleted attachments
+                    match: /(function (\i)\((\i)\).+?)(\i)\.update\((\i)(?=.*MESSAGE_UPDATE:\2)/,
+                    replace: "$1$4" +
+                        ".update($5,m =>" +
                         "   (($3.message.flags & 64) === 64 || $self.shouldIgnore($3.message, true)) ? m :" +
-                        "   $3.message.edited_timestamp && $3.message.content !== m.content ?" +
-                        "       m.set('editHistory',[...(m.editHistory || []), $self.makeEdit($3.message, m)]) :" +
-                        "       m" +
+                        "   $3.message.edited_timestamp && $self.isMessageModified(m, $3.message) ? (() => {" +
+                        "       if (m.attachments && m.attachments.length > 0) {" +
+                        "           const newAttachmentIds = new Set($3.message.attachments.map(a => a.id));" +
+                        "           const updatedAttachments = m.attachments.map(a =>" +
+                        "               newAttachmentIds.has(a.id) ? a : { ...a, deleted: true }" +
+                        "           );" +
+                        "           $3.message.attachments = updatedAttachments;" +
+                        "           $4 = $4.update(m.id, m => m.set('attachments', updatedAttachments));" +
+                        "       }" +
+                        "       return m.set('editHistory',[...(m.editHistory || []), $self.makeEdit($3.message, m)]);" +
+                        "   })()" +
+                        "   : m" +
                         ")" +
-                        ".update($4"
+                        ".update($5"
                 },
                 {
                     // fix up key (edit last message) attempting to edit a deleted message
@@ -441,7 +455,7 @@ export default definePlugin({
                     // Preserve deleted attribute on attachments
                     match: /(\((\i)\){return null==\2\.attachments.+?)spoiler:/,
                     replace:
-                        "$1deleted: arguments[0]?.deleted," +
+                        "$1deleted: arguments[0]?.deleted || e?.deleted," +
                         "spoiler:"
                 }
             ]
@@ -453,7 +467,7 @@ export default definePlugin({
             replacement: [
                 {
                     match: /\.SPOILER,(?=\[\i\.\i\]:)/,
-                    replace: '$&"messagelogger-deleted-attachment":arguments[0]?.item?.originalItem?.deleted,'
+                    replace: '$&"messagelogger-deleted-attachment":n?.originalItem?.deleted,"messagelogger-deleted-attachment-overlay":n?.originalItem?.deleted,'
                 }
             ]
         },
