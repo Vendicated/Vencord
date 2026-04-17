@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { NavContextMenuPatchCallback } from "@api/ContextMenu";
+import { findGroupChildrenByChildId, NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { definePluginSettings } from "@api/Settings";
 import { CodeBlock } from "@components/CodeBlock";
 import { Divider } from "@components/Divider";
@@ -140,21 +140,16 @@ function MakeContextCallback(name: "Guild" | "Role" | "User" | "Channel" | "Mess
         const isMessage = name === "Message";
         if (isMessage && !settings.store.messageContextMenu) return;
 
-        const lastChild = children.at(-1);
-        if (lastChild?.key === "developer-actions") {
-            const p = lastChild.props;
-            if (!Array.isArray(p.children))
-                p.children = [p.children];
-
-            children = p.children;
-        }
 
         // typescript parser goes crazy if this is inline
         const id = `vc-view-${name.toLowerCase()}-raw`;
         const action = isMessage
             ? () => openViewRawModalMessage(value)
             : () => openViewRawModal(JSON.stringify(value, null, 4), name);
-        children.splice(-1, 0,
+
+        const devContainer = findGroupChildrenByChildId(`devmode-copy-id-${value.id}`, children);
+
+        (devContainer ?? children).splice(-1, 0,
             <Menu.MenuItem
                 id={id}
                 label="View Raw"
