@@ -47,8 +47,8 @@
 }
 
 .vc-cloud-erase-data-danger-btn {
-    color: var(--white-500);
-    background-color: var(--redesign-button-danger-background);
+    color: var(--control-critical-primary-text-default);
+    background-color: var(--control-critical-primary-background-default);
 }
 
 .vc-cloud-icon-with-button {

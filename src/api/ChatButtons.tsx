@@ -11,15 +11,15 @@ import { Logger } from "@utils/Logger";
 import { classes } from "@utils/misc";
 import { IconComponent } from "@utils/types";
 import { Channel } from "@vencord/discord-types";
-import { waitFor } from "@webpack";
-import { ButtonWrapperClasses, Clickable, Menu, Tooltip } from "@webpack/common";
+import { findCssClassesLazy } from "@webpack";
+import { Clickable, Menu, Tooltip } from "@webpack/common";
 import { HTMLProps, JSX, MouseEventHandler, ReactNode } from "react";
 
 import { addContextMenuPatch, findGroupChildrenByChildId } from "./ContextMenu";
 import { useSettings } from "./Settings";
 
-let ChannelTextAreaClasses: Record<"button" | "buttonContainer", string>;
-waitFor(["buttonContainer", "channelTextArea"], m => ChannelTextAreaClasses = m);
+const ButtonWrapperClasses = findCssClassesLazy("button", "buttonWrapper", "notificationDot");
+const ChannelTextAreaClasses = findCssClassesLazy("buttonContainer", "channelTextArea", "button");
 
 export interface ChatBarProps {
     channel: Channel;
@@ -113,11 +113,9 @@ function VencordChatBarButtons(props: ChatBarProps) {
 }
 
 export function _injectButtons(buttons: ReactNode[], props: ChatBarProps) {
-    if (props.disabled) return;
+    if (props.disabled || buttons.length === 0) return;
 
     buttons.unshift(<VencordChatBarButtons key="vencord-chat-buttons" {...props} />);
-
-    return buttons;
 }
 
 /**
@@ -145,13 +143,13 @@ export const ChatBarButton = ErrorBoundary.wrap((props: ChatBarButtonProps) => {
                         aria-label={props.tooltip}
                         onMouseEnter={onMouseEnter}
                         onMouseLeave={onMouseLeave}
-                        className={classes(ButtonWrapperClasses?.button, ChannelTextAreaClasses?.button)}
+                        className={classes(ButtonWrapperClasses.button, ChannelTextAreaClasses?.button)}
                         onClick={props.onClick}
                         onContextMenu={props.onContextMenu}
                         onAuxClick={props.onAuxClick}
                         {...props.buttonProps}
                     >
-                        <div className={ButtonWrapperClasses?.buttonWrapper}>
+                        <div className={ButtonWrapperClasses.buttonWrapper}>
                             {props.children}
                         </div>
                     </Clickable>

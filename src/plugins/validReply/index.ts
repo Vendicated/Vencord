@@ -36,6 +36,7 @@ export default definePlugin({
     authors: [Devs.newwares],
     patches: [
         {
+            // Same find as in ReplyTimestamp
             find: "#{intl::REPLY_QUOTE_MESSAGE_NOT_LOADED}",
             replacement: {
                 match: /#{intl::REPLY_QUOTE_MESSAGE_NOT_LOADED}\)/,
@@ -44,10 +45,12 @@ export default definePlugin({
         },
         {
             find: "ReferencedMessageStore",
-            replacement: {
-                match: /constructor\(\)\{\i\(this,"_channelCaches",new Map\)/,
-                replace: "$&;$self.setReplyStore(this);"
-            }
+            replacement: [
+                {
+                    match: /_channelCaches=new Map;/,
+                    replace: "$&_=$self.setReplyStore(this);"
+                }
+            ]
         }
     ],
 

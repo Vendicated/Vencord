@@ -27,10 +27,10 @@ export default definePlugin({
 
     patches: [
         {
-            find: '=>"IMAGE"===',
+            find: '"PLAINTEXT_PREVIEW":"OTHER"',
             replacement: {
-                match: /=>"IMAGE"===\i\|\|"VIDEO"===\i(?:\|\|("VISUAL_PLACEHOLDER"===\i))?;/,
-                replace: (_, visualPlaceholderPred) => visualPlaceholderPred != null ? `=>${visualPlaceholderPred};` : "=>false;"
+                match: /return"IMAGE"===\i\|\|"VIDEO"===\i(?:\|\|("VISUAL_PLACEHOLDER"===\i)\|\|\i&&"CLIP"===\i)?/,
+                replace: (_, visualPlaceholderPred) => visualPlaceholderPred != null ? `return ${visualPlaceholderPred}` : "return false"
             }
         },
         {

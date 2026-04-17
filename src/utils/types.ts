@@ -197,16 +197,6 @@ export interface PluginDef {
     renderMessageDecoration?: MessageDecorationFactory;
 
     renderMemberListDecorator?: MemberListDecoratorFactory;
-
-    // TODO: Remove eventually
-    /**
-     * @deprecated Use {@link chatBarButton} instead
-     */
-    renderChatBarButton?: never;
-    /**
-     * @deprecated Use {@link messagePopoverButton} instead
-     */
-    renderMessagePopoverButton?: never;
 }
 
 export const enum StartAt {
@@ -293,6 +283,8 @@ interface IsValid<T, D = unknown> {
 export interface PluginSettingStringDef {
     type: OptionType.STRING;
     default?: string;
+    /** Whether to use a multiline text area */
+    multiline?: boolean;
 }
 export interface PluginSettingNumberDef {
     type: OptionType.NUMBER;

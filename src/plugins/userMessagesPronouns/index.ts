@@ -44,7 +44,7 @@ export default definePlugin({
             replacement: [
                 {
                     // Add next to username (compact mode)
-                    match: /className:\i\(\)\(\i\.className(?:,\i\.clickable)?,\i\)}\)\),(?=\i)/g,
+                    match: /className:\i\(\)\(\i\.className(?:,\i\.\i)?,\i\)\}\)(?:\))?,(?=\i)/g,
                     replace: "$&$self.CompactPronounsChatComponentWrapper(arguments[0]),",
                 },
             ]

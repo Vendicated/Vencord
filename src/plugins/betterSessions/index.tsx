@@ -23,18 +23,17 @@ import { definePluginSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { findByPropsLazy, findComponentByCodeLazy, findStoreLazy } from "@webpack";
-import { Constants, React, RestAPI, Tooltip } from "@webpack/common";
+import { findComponentByCodeLazy, findCssClassesLazy, findStoreLazy } from "@webpack";
+import { Constants, React, RestAPI, SettingsRouter, Tooltip } from "@webpack/common";
 
-import { RenameButton } from "./components/RenameButton";
+import { NewButton, RenameButton } from "./components/RenameButton";
 import { Session, SessionInfo } from "./types";
 import { fetchNamesFromDataStore, getDefaultName, GetOsColor, GetPlatformIcon, savedSessionsCache, saveSessionsToDataStore } from "./utils";
 
 const AuthSessionsStore = findStoreLazy("AuthSessionsStore");
-const UserSettingsModal = findByPropsLazy("saveAccountChanges", "open");
 
-const TimestampClasses = findByPropsLazy("timestamp", "blockquoteContainer");
-const SessionIconClasses = findByPropsLazy("sessionIcon");
+const TimestampClasses = findCssClassesLazy("timestamp", "blockquoteContainer");
+const SessionIconClasses = findCssClassesLazy("sessionIcon");
 
 const BlobMask = findComponentByCodeLazy("!1,lowerBadgeSize:");
 
@@ -66,17 +65,17 @@ export default definePlugin({
             replacement: [
                 // Replace children with a single label with state
                 {
-                    match: /({variant:"eyebrow",className:\i\.sessionInfoRow,children:).{70,110}{children:"\\xb7"}\),\(0,\i\.\i\)\("span",{children:\i\[\d+\]}\)\]}\)\]/,
+                    match: /({variant:"eyebrow",className:\i\.\i,children:).{70,110}{children:"\\xb7"}\),\(0,\i\.\i\)\("span",{children:\i\[\d+\]}\)\]}\)\]/,
                     replace: "$1$self.renderName(arguments[0])"
                 },
                 {
-                    match: /({variant:"text-sm\/medium",className:\i\.sessionInfoRow,children:.{70,110}{children:"\\xb7"}\),\(0,\i\.\i\)\("span",{children:)(\i\[\d+\])}/,
-                    replace: "$1$self.renderTimestamp({ ...arguments[0], timeLabel: $2 })}"
+                    match: /({variant:"text-sm\/medium",className:\i\.\i,children:.{70,110}{children:"\\xb7"}\),\(0,\i\.\i\)\("span",{children:)(\i\[\d+\])}/,
+                    replace: "$1$self.renderTimestamp({...arguments[0],timeLabel:$2})}"
                 },
                 // Replace the icon
                 {
-                    match: /\.legacySession\),children:\[(?<=,icon:(\i)\}.+?)/,
-                    replace: "$& $self.renderIcon({ ...arguments[0], DeviceIcon: $1 }), false &&"
+                    match: /(?<=Icon:(\i).{0,250}className:\i\.\i,children:\[)/,
+                    replace: "$self.renderIcon({...arguments[0],DeviceIcon:$1}),false&&"
                 }
             ]
         }
@@ -93,15 +92,7 @@ export default definePlugin({
             <>
                 <span>{title}</span>
                 {(savedSession == null || savedSession.isNew) && (
-                    <div
-                        className="vc-addon-badge"
-                        style={{
-                            backgroundColor: "#ED4245",
-                            marginLeft: "2px"
-                        }}
-                    >
-                        NEW
-                    </div>
+                    <NewButton />
                 )}
                 <RenameButton session={session} state={state} />
             </>
@@ -175,7 +166,7 @@ export default definePlugin({
                 title: "BetterSessions",
                 body: `New session:\n${session.client_info.os} · ${session.client_info.platform} · ${session.client_info.location}`,
                 permanent: true,
-                onClick: () => UserSettingsModal.open("Sessions")
+                onClick: () => SettingsRouter.openUserSettings("sessions_panel")
             });
         }
 

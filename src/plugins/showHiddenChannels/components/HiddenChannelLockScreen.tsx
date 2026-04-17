@@ -20,12 +20,12 @@ import { isPluginEnabled } from "@api/PluginManager";
 import { Settings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import PermissionsViewerPlugin from "@plugins/permissionsViewer";
-import openRolesAndUsersPermissionsModal, { PermissionType, RoleOrUserPermission } from "@plugins/permissionsViewer/components/RolesAndUsersPermissions";
+import openRolesAndUsersPermissionsModal from "@plugins/permissionsViewer/components/RolesAndUsersPermissions";
 import { sortPermissionOverwrites } from "@plugins/permissionsViewer/utils";
 import { classes } from "@utils/misc";
 import { formatDuration } from "@utils/text";
-import type { Channel } from "@vencord/discord-types";
-import { findByPropsLazy, findComponentByCodeLazy } from "@webpack";
+import type { Channel, RoleOrUserPermission } from "@vencord/discord-types";
+import { findByPropsLazy, findComponentByCodeLazy, findCssClassesLazy } from "@webpack";
 import { EmojiStore, FluxDispatcher, GuildMemberStore, GuildStore, Parser, PermissionsBits, PermissionStore, SnowflakeUtils, Text, Timestamp, Tooltip, useEffect, useState } from "@webpack/common";
 
 import { cl, settings } from "..";
@@ -46,22 +46,6 @@ interface DefaultReaction {
     emojiName: string | null;
 }
 
-interface Tag {
-    id: string;
-    name: string;
-    emojiId: string | null;
-    emojiName: string | null;
-    moderated: boolean;
-}
-
-interface ExtendedChannel extends Channel {
-    defaultThreadRateLimitPerUser?: number;
-    defaultSortOrder?: SortOrderTypes | null;
-    defaultForumLayout?: ForumLayoutTypes;
-    defaultReactionEmoji?: DefaultReaction | null;
-    availableTags?: Array<Tag>;
-}
-
 const enum ChannelTypes {
     GUILD_TEXT = 0,
     GUILD_VOICE = 2,
@@ -80,9 +64,7 @@ const enum ChannelFlags {
     REQUIRE_TAG = 1 << 4
 }
 
-
-const ChatScrollClasses = findByPropsLazy("auto", "managedReactiveScroller");
-const ChatClasses = findByPropsLazy("chat", "content", "noChat", "chatContent");
+const ChatScrollClasses = findCssClassesLazy("auto", "managedReactiveScroller", "customTheme");
 const ChannelBeginHeader = findComponentByCodeLazy("#{intl::ROLE_REQUIRED_SINGLE_USER_MESSAGE}");
 const TagComponent = findComponentByCodeLazy("#{intl::FORUM_TAG_A11Y_FILTER_BY_TAG}");
 
@@ -116,7 +98,7 @@ const VideoQualityModesToNames = {
 // Icon from the modal when clicking a message link you don't have access to view
 const HiddenChannelLogo = "/assets/433e3ec4319a9d11b0cbe39342614982.svg";
 
-function HiddenChannelLockScreen({ channel }: { channel: ExtendedChannel; }) {
+function HiddenChannelLockScreen({ channel }: { channel: Channel; }) {
     const { defaultAllowedUsersAndRolesDropdownState } = settings.use(["defaultAllowedUsersAndRolesDropdownState"]);
     const [permissions, setPermissions] = useState<RoleOrUserPermission[]>([]);
 
@@ -143,7 +125,7 @@ function HiddenChannelLockScreen({ channel }: { channel: ExtendedChannel; }) {
     useEffect(() => {
         const membersToFetch: Array<string> = [];
 
-        const guildOwnerId = GuildStore.getGuild(guild_id).ownerId;
+        const guildOwnerId = GuildStore.getGuild(guild_id)?.ownerId;
         if (!GuildMemberStore.getMember(guild_id, guildOwnerId)) membersToFetch.push(guildOwnerId);
 
         Object.values(permissionOverwrites).forEach(({ type, id: userId }) => {
@@ -162,7 +144,7 @@ function HiddenChannelLockScreen({ channel }: { channel: ExtendedChannel; }) {
 
         if (Settings.plugins.PermissionsViewer.enabled) {
             setPermissions(sortPermissionOverwrites(Object.values(permissionOverwrites).map(overwrite => ({
-                type: overwrite.type as PermissionType,
+                type: overwrite.type,
                 id: overwrite.id,
                 overwriteAllow: overwrite.allow,
                 overwriteDeny: overwrite.deny
