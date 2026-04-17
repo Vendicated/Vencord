@@ -128,6 +128,12 @@ const settings = definePluginSettings({
         default: true,
         restartNeeded: true
     },
+    jsonGateway: {
+        type: OptionType.BOOLEAN,
+        description: "Forces JSON on gateway reconnect",
+        default: true,
+        restartNeeded: true
+    }
 });
 
 export default definePlugin({
@@ -274,6 +280,14 @@ export default definePlugin({
                 replace: "return null;$&"
             },
             predicate: () => settings.store.disableAdoptTagPrompt
+        },
+        {
+            find: "JSONEncoding",
+            replacement: {
+                match: /void 0!==\i\?\i:/,
+                replace: ""
+            },
+            predicate: () => settings.store.jsonGateway
         }
     ],
     renderMessageAccessory(props) {
