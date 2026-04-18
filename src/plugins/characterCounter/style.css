@@ -1,0 +1,15 @@
+.vc-charCounter-counter {
+    font-size: 12px;
+    color: var(--text-muted);
+    position: absolute;
+    bottom: 4px;
+    right: 11px;
+    pointer-events: none;
+    z-index: 2;
+    background: transparent;
+    transition: color 0.3s ease;
+}
+
+.vc-charCounter-count {
+    transition: color 0.3s ease;
+}

@@ -36,7 +36,8 @@ export interface VoiceStateStats {
 }
 
 export interface SecureFramesState {
-    state: string;
+    version: number;
+    epochAuthenticator: string;
 }
 
 export interface SecureFramesRosterMapEntry {

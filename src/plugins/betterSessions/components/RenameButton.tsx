@@ -30,3 +30,15 @@ export function RenameButton({ session, state }: { session: SessionInfo["session
         </Button>
     );
 }
+
+export function NewButton() {
+    return (
+        <Button
+            variant="dangerPrimary"
+            size="min"
+            className="vc-betterSessions-new-btn"
+        >
+            NEW
+        </Button>
+    );
+}

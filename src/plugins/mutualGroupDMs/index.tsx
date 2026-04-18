@@ -35,7 +35,7 @@ const UserUtils = findByPropsLazy("getGlobalName");
 const ProfileListClasses = findCssClassesLazy("empty", "textContainer", "connectionIcon");
 const TabBarClasses = findCssClassesLazy("tabPanelScroller", "tabBarPanel");
 const MutualsListClasses = findCssClassesLazy("row", "icon", "name", "details");
-const ExpandableList = findComponentByCodeLazy('action:"PRESS_SECTION"', "section");
+const ExpandableList = findComponentByCodeLazy('action:"PRESS_SECTION"', '"section"');
 
 function getGroupDMName(channel: Channel) {
     return channel.name ||
@@ -86,6 +86,7 @@ const IS_PATCHED = Symbol("MutualGroupDMs.Patched");
 export default definePlugin({
     name: "MutualGroupDMs",
     description: "Shows mutual group dms in profiles",
+    tags: ["Friends", "Appearance"],
     authors: [Devs.amia],
 
     patches: [
