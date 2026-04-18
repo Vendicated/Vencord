@@ -147,10 +147,10 @@ export default definePlugin({
     patches: [
         {
             // Nameplate
-            find: "#{intl::AVATAR_MALLOW}",
+            find: ".MINI_PREVIEW,[",
             replacement: {
-                match: /function \i\(\i\)\{(?=.{0,25}skuId:)/,
-                replace: "$&return null;"
+                match: /function \i\((\i)\)\{(?=let\{nameplate:\i,hovered:\i,selected:\i,content:\i,placement:\i\}=)/,
+                replace: '$&if($1.placement!=="preview"&&$1.placement!=="mini_preview")return null;'
             },
             predicate: () => settings.store.removeNameplate,
         },
@@ -158,8 +158,8 @@ export default definePlugin({
             // Profile banner animation effect
             find: "bannerAdjustment,isHovering",
             replacement: {
-                match: /\i=\i=>\{(?=.{0,50}\.useReducedMotion\))/,
-                replace: "$&return null;"
+                match: /\i=(\i)=>\{(?=.{0,50}\.useReducedMotion\))/,
+                replace: "$&if(!$1.shopPreview)return null;"
             },
             predicate: () => settings.store.removeProfileEffect,
         },
