@@ -17,6 +17,7 @@ export interface Stream {
     guildId: string | null;
     ownerId: string;
     streamType: StreamType;
+    state: string;
 }
 
 export interface BaseParticipant {
