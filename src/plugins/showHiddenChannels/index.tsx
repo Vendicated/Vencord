@@ -26,7 +26,7 @@ import { classes } from "@utils/misc";
 import definePlugin, { OptionType } from "@utils/types";
 import type { Channel, Role } from "@vencord/discord-types";
 import { findCssClassesLazy } from "@webpack";
-import { ChannelStore, PermissionsBits, PermissionStore, Tooltip } from "@webpack/common";
+import { ChannelStore, GuildChannelStore, PermissionsBits, PermissionStore, Tooltip, UserGuildSettingsStore } from "@webpack/common";
 
 import HiddenChannelLockScreen from "./components/HiddenChannelLockScreen";
 
@@ -68,12 +68,142 @@ function isUncategorized(objChannel: { channel: Channel; comparator: number; }) 
     return objChannel.channel.id === "null" && objChannel.channel.name === "Uncategorized" && objChannel.comparator === -1;
 }
 
+type OptInStoreMethod = "getOptedInChannels" | "isChannelOptedIn" | "isChannelOrParentOptedIn" | "isChannelRecordOrParentOptedIn";
+type GuildChannels = ReturnType<typeof GuildChannelStore.getChannels>;
+type GuildChannelsWithHidden = Record<string | number, Array<{ channel: Channel; comparator: number; }> | string | number>;
+type OptedInChannels = string[] | Set<string> | Record<string, unknown> | null | undefined;
+
+const originalOptInStoreMethods = {} as Partial<Record<OptInStoreMethod, (...args: any[]) => any>>;
+
+function getGuildChannels(guildId: string, shouldIncludeHidden?: boolean) {
+    return (GuildChannelStore.getChannels as unknown as (guildId: string, shouldIncludeHidden?: boolean) => GuildChannels)
+        .call(GuildChannelStore, guildId, shouldIncludeHidden);
+}
+
+function isGuildChannel(channel: Channel | null | undefined): channel is Channel {
+    return channel != null
+        && !channel.isDM()
+        && !channel.isGroupDM()
+        && !channel.isMultiUserDM()
+        && !["browse", "customize", "guide"].includes(channel.id);
+}
+
+function shouldBypassChannelOptIn(channel: Channel | null | undefined) {
+    return isGuildChannel(channel)
+        && channel.guild_id != null
+        && UserGuildSettingsStore.isOptInEnabled(channel.guild_id);
+}
+
+function getGuildChannel(channelId: string) {
+    const channel = ChannelStore.getChannel(channelId);
+    return isGuildChannel(channel) ? channel : null;
+}
+
+function getOptInChannelIds(guildId: string) {
+    const optedInChannels = new Set<string>();
+    const guildChannels = getGuildChannels(guildId, true) as unknown as GuildChannelsWithHidden;
+
+    for (const maybeObjChannels of Object.values(guildChannels)) {
+        if (!Array.isArray(maybeObjChannels)) continue;
+
+        for (const objChannel of maybeObjChannels) {
+            if (isUncategorized(objChannel) || !shouldBypassChannelOptIn(objChannel.channel)) continue;
+
+            optedInChannels.add(objChannel.channel.id);
+        }
+    }
+
+    return [...optedInChannels];
+}
+
+function mergeOptedInChannels(optedInChannels: OptedInChannels, extraChannelIds: string[]) {
+    if (Array.isArray(optedInChannels)) {
+        return [...new Set(optedInChannels.concat(extraChannelIds))];
+    }
+
+    if (optedInChannels instanceof Set) {
+        const merged = new Set(optedInChannels);
+        for (const channelId of extraChannelIds) {
+            merged.add(channelId);
+        }
+
+        return merged;
+    }
+
+    if (optedInChannels == null) {
+        return extraChannelIds;
+    }
+
+    return Object.assign(
+        {},
+        optedInChannels,
+        Object.fromEntries(extraChannelIds.map(channelId => [channelId, true]))
+    );
+}
+
+function patchOptInStoreMethods() {
+    if (originalOptInStoreMethods.getOptedInChannels != null) return;
+
+    originalOptInStoreMethods.getOptedInChannels = UserGuildSettingsStore.getOptedInChannels;
+    originalOptInStoreMethods.isChannelOptedIn = UserGuildSettingsStore.isChannelOptedIn;
+    originalOptInStoreMethods.isChannelOrParentOptedIn = UserGuildSettingsStore.isChannelOrParentOptedIn;
+    originalOptInStoreMethods.isChannelRecordOrParentOptedIn = UserGuildSettingsStore.isChannelRecordOrParentOptedIn;
+
+    UserGuildSettingsStore.getOptedInChannels = function (this: typeof UserGuildSettingsStore, guildId: string) {
+        const optedInChannels = originalOptInStoreMethods.getOptedInChannels?.call(this, guildId) as OptedInChannels;
+        return mergeOptedInChannels(optedInChannels, getOptInChannelIds(guildId));
+    } as typeof UserGuildSettingsStore.getOptedInChannels;
+
+    UserGuildSettingsStore.isChannelOptedIn = function (guildId: string, channelId: string, usePending?: boolean) {
+        return originalOptInStoreMethods.isChannelOptedIn?.call(this, guildId, channelId, usePending)
+            || shouldBypassChannelOptIn(getGuildChannel(channelId));
+    };
+
+    UserGuildSettingsStore.isChannelOrParentOptedIn = function (guildId: string, channelId: string, usePending?: boolean) {
+        return originalOptInStoreMethods.isChannelOrParentOptedIn?.call(this, guildId, channelId, usePending)
+            || shouldBypassChannelOptIn(getGuildChannel(channelId));
+    };
+
+    UserGuildSettingsStore.isChannelRecordOrParentOptedIn = function (channel: Channel, usePending?: boolean) {
+        return originalOptInStoreMethods.isChannelRecordOrParentOptedIn?.call(this, channel, usePending)
+            || shouldBypassChannelOptIn(channel);
+    };
+
+    UserGuildSettingsStore.emitChange();
+    GuildChannelStore.emitChange();
+}
+
+function restoreOptInStoreMethods() {
+    if (originalOptInStoreMethods.getOptedInChannels == null) return;
+
+    UserGuildSettingsStore.getOptedInChannels = originalOptInStoreMethods.getOptedInChannels;
+    UserGuildSettingsStore.isChannelOptedIn = originalOptInStoreMethods.isChannelOptedIn!;
+    UserGuildSettingsStore.isChannelOrParentOptedIn = originalOptInStoreMethods.isChannelOrParentOptedIn!;
+    UserGuildSettingsStore.isChannelRecordOrParentOptedIn = originalOptInStoreMethods.isChannelRecordOrParentOptedIn!;
+
+    delete originalOptInStoreMethods.getOptedInChannels;
+    delete originalOptInStoreMethods.isChannelOptedIn;
+    delete originalOptInStoreMethods.isChannelOrParentOptedIn;
+    delete originalOptInStoreMethods.isChannelRecordOrParentOptedIn;
+
+    UserGuildSettingsStore.emitChange();
+    GuildChannelStore.emitChange();
+}
+
 export default definePlugin({
     name: "ShowHiddenChannels",
     description: "Show channels that you do not have access to view.",
     tags: ["Servers", "Utility"],
     authors: [Devs.BigDuck, Devs.AverageReactEnjoyer, Devs.D3SOX, Devs.Ven, Devs.Nuckyz, Devs.Nickyux, Devs.dzshn],
     settings,
+
+    start() {
+        patchOptInStoreMethods();
+    },
+
+    stop() {
+        restoreOptInStoreMethods();
+    },
 
     patches: [
         {
