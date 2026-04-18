@@ -13,3 +13,7 @@
 .vc-charCounter-count {
     transition: color 0.3s ease;
 }
+
+.vc-charCounter-selected {
+    color: #4285F4
+}
