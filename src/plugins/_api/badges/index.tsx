@@ -36,7 +36,7 @@ import { ContextMenuApi, Forms, Menu, Toasts, UserStore } from "@webpack/common"
 const CONTRIBUTOR_BADGE = "https://cdn.discordapp.com/emojis/1092089799109775453.png?size=64";
 
 const ContributorBadge: ProfileBadge = {
-    description: "Vencord Contributor",
+    description: "Hobocord Contributor",
     iconSrc: CONTRIBUTOR_BADGE,
     position: BadgePosition.START,
     shouldShow: ({ userId }) => shouldShowContributorBadge(userId),
@@ -205,7 +205,7 @@ export default definePlugin({
                                 >
                                     <Flex justifyContent="center" alignItems="center" gap="0.5em">
                                         <Heart />
-                                        Vencord Donor
+                                        Hobocord Donor
                                     </Flex>
                                 </Forms.FormTitle>
                             </ModalHeader>
@@ -226,10 +226,10 @@ export default definePlugin({
                                 </Flex>
                                 <div style={{ padding: "1em" }}>
                                     <Forms.FormText>
-                                        This Badge is a special perk for Vencord Donors
+                                        This Badge is a special perk for Hobocord Donors
                                     </Forms.FormText>
                                     <Forms.FormText className={Margins.top20}>
-                                        Please consider supporting the development of Vencord by becoming a donor. It would mean a lot!!
+                                        Please consider supporting the development of Hobocord by becoming a donor. It would mean a lot!!
                                     </Forms.FormText>
                                 </div>
                             </ModalContent>

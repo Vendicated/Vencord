@@ -1,5 +1,5 @@
 // ==UserScript==
-// @name            Vencord
+// @name            Hobocord
 // @description     A Discord client mod - Web version
 // @version         %version%
 // @author          Vendicated (https://github.com/Vendicated)

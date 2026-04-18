@@ -57,7 +57,7 @@ export const TranslateChatBarIcon: ChatBarButtonFactory = ({ isMainChat }) => {
         settings.store.autoTranslate = newState;
         if (newState && settings.store.showAutoTranslateAlert !== false)
             Alerts.show({
-                title: "Vencord Auto-Translate Enabled",
+                title: "Hobocord Auto-Translate Enabled",
                 body: <>
                     <Forms.FormText>
                         You just enabled Auto Translate! Any message <b>will automatically be translated</b> before being sent.

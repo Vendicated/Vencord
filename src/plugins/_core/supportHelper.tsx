@@ -85,7 +85,7 @@ async function generateDebugInfoMessage() {
     })();
 
     const info = {
-        Vencord:
+        Hobocord:
             `v${VERSION} • [${gitHash}](<https://github.com/Vendicated/Vencord/commit/${gitHash}>)` +
             `${SettingsPlugin.additionalInfo} - ${Intl.DateTimeFormat("en-GB", { dateStyle: "medium" }).format(BUILD_TIMESTAMP)}`,
         Client: `${RELEASE_CHANNEL} ~ ${client}`,
@@ -98,7 +98,7 @@ async function generateDebugInfoMessage() {
 
     const commonIssues = {
         "Activity Sharing disabled": tryOrElse(() => !ShowCurrentGame.getSetting(), false),
-        "Vencord DevBuild": !IS_STANDALONE,
+        "Hobocord DevBuild": !IS_STANDALONE,
         "Has UserPlugins": Object.values(PluginMeta).some(m => m.userPlugin),
         "More than two weeks out of date": BUILD_TIMESTAMP < Date.now() - 12096e5,
     };
@@ -156,13 +156,13 @@ export default definePlugin({
     commands: [
         {
             name: "vencord-debug",
-            description: "Send Vencord debug info",
+            description: "Send Hobocord debug info",
             predicate: ctx => isPluginDev(UserStore.getCurrentUser()?.id) || isSupportAllowedChannel(ctx.channel),
             execute: async () => ({ content: await generateDebugInfoMessage() })
         },
         {
             name: "vencord-plugins",
-            description: "Send Vencord plugin list",
+            description: "Send Hobocord plugin list",
             predicate: ctx => isPluginDev(UserStore.getCurrentUser()?.id) || isSupportAllowedChannel(ctx.channel),
             execute: () => ({ content: generatePluginList() })
         }
@@ -183,7 +183,7 @@ export default definePlugin({
                     return Alerts.show({
                         title: "Hold on!",
                         body: <div>
-                            <Forms.FormText>You are using an outdated version of Vencord! Chances are, your issue is already fixed.</Forms.FormText>
+                            <Forms.FormText>You are using an outdated version of Hobocord! Chances are, your issue is already fixed.</Forms.FormText>
                             <Forms.FormText className={Margins.top8}>
                                 Please first update before asking for support!
                             </Forms.FormText>
@@ -204,9 +204,9 @@ export default definePlugin({
                 return Alerts.show({
                     title: "Hold on!",
                     body: <div>
-                        <Forms.FormText>You are using an externally updated Vencord version, which we do not provide support for!</Forms.FormText>
+                        <Forms.FormText>You are using an externally updated Hobocord version, which we do not provide support for!</Forms.FormText>
                         <Forms.FormText className={Margins.top8}>
-                            Please either switch to an <Link href="https://vencord.dev/download">officially supported version of Vencord</Link>, or
+                            Please either switch to an <Link href="https://vencord.dev/download">officially supported version of Hobocord</Link>, or
                             contact your package maintainer for support instead.
                         </Forms.FormText>
                     </div>
@@ -217,7 +217,7 @@ export default definePlugin({
                 return Alerts.show({
                     title: "Hold on!",
                     body: <div>
-                        <Forms.FormText>You are using a custom build of Vencord, which we do not provide support for!</Forms.FormText>
+                        <Forms.FormText>You are using a custom build of Hobocord, which we do not provide support for!</Forms.FormText>
 
                         <Forms.FormText className={Margins.top8}>
                             We only provide support for <Link href="https://vencord.dev/download">official builds</Link>.
@@ -322,9 +322,9 @@ export default definePlugin({
 
         return (
             <Card variant="warning" className={Margins.top8} defaultPadding>
-                Please do not private message Vencord plugin developers for support!
+                Please do not private message Hobocord plugin developers for support!
                 <br />
-                Instead, use the Vencord support channel: {Parser.parse("https://discord.com/channels/1015060230222131221/1026515880080842772")}
+                Instead, use the Hobocord support channel: {Parser.parse("https://discord.com/channels/1015060230222131221/1026515880080842772")}
                 {!ChannelStore.getChannel(SUPPORT_CHANNEL_ID) && " (Click the link to join)"}
             </Card>
         );

@@ -2,7 +2,7 @@
     "manifest_version": 3,
     "minimum_chrome_version": "111",
 
-    "name": "Vencord Web",
+    "name": "Hobocord Web",
     "description": "The cutest Discord mod now in your browser",
     "author": "Vendicated",
     "homepage_url": "https://github.com/Vendicated/Vencord",
