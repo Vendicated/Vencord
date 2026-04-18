@@ -997,7 +997,7 @@ export const EquicordDevs = Object.freeze({
         id: 984392761929256980n
     },
     creations: {
-        name: "Creation's",
+        name: "creations",
         id: 209830981060788225n
     },
     Leko: {
