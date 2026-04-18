@@ -11,7 +11,8 @@ import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import { classNameFactory } from "@utils/css";
 import definePlugin, { OptionType } from "@utils/types";
-import { UserStore } from "@webpack/common";
+import { useEffect, UserStore, useState } from "@webpack/common";
+import EventEmitter from "events";
 
 const cl = classNameFactory("vc-charCounter-");
 
@@ -20,7 +21,12 @@ const settings = definePluginSettings({
         type: OptionType.BOOLEAN,
         description: "Enable yellow/red colouring as you get closer to the character limit",
         default: true,
-    }
+    },
+    selectedText: {
+        type: OptionType.BOOLEAN,
+        description: "Show the character count of your current text selection",
+        default: false,
+    },
 });
 
 function getCounterColor(percentage: number) {
@@ -42,8 +48,8 @@ export default definePlugin({
             find: ".CREATE_FORUM_POST||",
             replacement: [
                 {
-                    match: /(?<=textValue:(\i),editorHeight:\i,channelId:\i\.id\}\)),\i/,
-                    replace: ",$self.renderCharCounter({text:$1})"
+                    match: /(?<=(\i)\.emit\("submit-failure".*?textValue:(\i),editorHeight:\i,channelId:\i\.id\}\)),\i/,
+                    replace: ",$self.renderCharCounter({text:$2,eventEmitter:$1})"
                 }
             ]
         },
@@ -56,16 +62,37 @@ export default definePlugin({
         }
     ],
 
-    renderCharCounter: ErrorBoundary.wrap(({ text }: { text: string; }) => {
+    renderCharCounter: ErrorBoundary.wrap(({ text, eventEmitter }: { text: string; eventEmitter: EventEmitter; }) => {
         if (!text.length) return null;
 
+        const [selectedCount, setSelectedCount] = useState(0);
+        const showSelected = selectedCount > 0;
         const premiumType = UserStore.getCurrentUser().premiumType ?? 0;
         const charMax = premiumType === 2 ? 4000 : 2000;
-
         const color = getCounterColor((text.length / charMax) * 100);
+
+        useEffect(() => {
+            function onSelectionChange() {
+                const selection = window.getSelection();
+                if (!selection || selection.isCollapsed) {
+                    setSelectedCount(0);
+                    return;
+                }
+                setSelectedCount(selection.toString().length);
+            }
+
+            eventEmitter.on("selection-changed", onSelectionChange);
+            return () => void eventEmitter.off("selection-changed", onSelectionChange);
+        }, [eventEmitter]);
 
         return (
             <div className={cl("counter")} style={{ color }}>
+                {showSelected && (
+                    <>
+                        <span className={cl("selected")}>{selectedCount}</span>
+                        /
+                    </>
+                )}
                 <span className={cl("count")}>{text.length}</span>
                 /
                 <span className={cl("max")}>{charMax}</span>
