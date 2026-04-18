@@ -11,22 +11,18 @@ import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import { classNameFactory } from "@utils/css";
 import definePlugin, { OptionType } from "@utils/types";
+import { findByPropsLazy } from "@webpack";
 import { useEffect, UserStore, useState } from "@webpack/common";
-import EventEmitter from "events";
 
 const cl = classNameFactory("vc-charCounter-");
+const SlateUtils = findByPropsLazy("getSelectedText");
 
 const settings = definePluginSettings({
     colorEffects: {
         type: OptionType.BOOLEAN,
         description: "Enable yellow/red colouring as you get closer to the character limit",
         default: true,
-    },
-    selectedText: {
-        type: OptionType.BOOLEAN,
-        description: "Show the character count of your current text selection",
-        default: false,
-    },
+    }
 });
 
 function getCounterColor(percentage: number) {
@@ -48,8 +44,8 @@ export default definePlugin({
             find: ".CREATE_FORUM_POST||",
             replacement: [
                 {
-                    match: /(?<=(\i)\.emit\("submit-failure".*?textValue:(\i),editorHeight:\i,channelId:\i\.id\}\)),\i/,
-                    replace: ",$self.renderCharCounter({text:$2,eventEmitter:$1})"
+                    match: /(?<=,editorRef:(\i),.{0,200}textValue:(\i),editorHeight:\i,channelId:\i\.id\}\)),\i/,
+                    replace: ",$self.renderCharCounter({editorRef:$1,text:$2})"
                 }
             ]
         },
@@ -62,28 +58,27 @@ export default definePlugin({
         }
     ],
 
-    renderCharCounter: ErrorBoundary.wrap(({ text, eventEmitter }: { text: string; eventEmitter: EventEmitter; }) => {
-        if (!text.length) return null;
-
+    renderCharCounter: ErrorBoundary.wrap(({ editorRef, text }: { text: string; editorRef: any; }) => {
         const [selectedCount, setSelectedCount] = useState(0);
-        const showSelected = selectedCount > 0;
-        const premiumType = UserStore.getCurrentUser().premiumType ?? 0;
-        const charMax = premiumType === 2 ? 4000 : 2000;
-        const color = getCounterColor((text.length / charMax) * 100);
+        const showSelected = selectedCount > 0 && (editorRef?.current?.state?.focused ?? false);
 
         useEffect(() => {
-            function onSelectionChange() {
-                const selection = window.getSelection();
-                if (!selection || selection.isCollapsed) {
-                    setSelectedCount(0);
-                    return;
-                }
-                setSelectedCount(selection.toString().length);
-            }
+            const listener = () => {
+                if (!editorRef?.current) return setSelectedCount(0);
 
-            eventEmitter.on("selection-changed", onSelectionChange);
-            return () => void eventEmitter.off("selection-changed", onSelectionChange);
-        }, [eventEmitter]);
+                setTimeout(() => setSelectedCount(SlateUtils.getSelectedText(editorRef.current.getSlateEditor())?.length ?? 0), 50);
+            };
+
+            document.addEventListener("selectionchange", listener);
+            return () => document.removeEventListener("selectionchange", listener);
+        }, []);
+
+        if (!text.length) return null;
+
+        const premiumType = UserStore.getCurrentUser().premiumType ?? 0;
+        const charMax = premiumType === 2 ? 4000 : 2000;
+
+        const color = getCounterColor((text.length / charMax) * 100);
 
         return (
             <div className={cl("counter")} style={{ color }}>
