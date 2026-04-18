@@ -24,6 +24,7 @@ export default definePlugin({
     authors: [Devs.Ven],
     description:
         "Change GIF alt text from simply being 'GIF' to containing the gif tags / filename",
+    tags: ["Media", "Accessibility", "Customisation"],
     patches: [
         {
             find: ".modalContext})};",
