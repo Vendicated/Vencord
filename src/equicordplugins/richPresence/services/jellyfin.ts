@@ -5,6 +5,7 @@
  */
 
 import { Logger } from "@utils/Logger";
+import { formatDurationMs } from "@utils/text";
 import { Activity } from "@vencord/discord-types";
 import { ApplicationAssetUtils, FluxDispatcher, showToast } from "@webpack/common";
 
@@ -152,13 +153,18 @@ async function getActivity(): Promise<Activity | null> {
     };
 
     const getDetails = () => {
+        let details: string;
         if (mediaData.type === "Episode" && mediaData.seriesName)
-            return store.jf_privacyMode ? "Watching a TV Show" : mediaData.seriesName;
-        return store.jf_privacyMode ? "Watching Something" : mediaData.name;
+            details = store.jf_privacyMode ? "Watching a TV Show" : mediaData.seriesName;
+        else
+            details = store.jf_privacyMode ? "Watching Something" : mediaData.name;
+        if (mediaData.isPaused) details += " - Paused";
+        return details;
     };
 
     const getState = () => {
-        if (mediaData.isPaused) return "Paused";
+        let state: string | undefined;
+
         if (mediaData.type === "Episode" && mediaData.seriesName) {
             let episodeFormat = "";
             const season = mediaData.seasonNumber;
@@ -183,13 +189,23 @@ async function getActivity(): Promise<Activity | null> {
                 episodeFormat = format === "fulltext" ? `Episode ${episode}` : `E${episode.toString().padStart(2, "0")}`;
             }
 
-            if (store.jf_showEpisodeName && mediaData.name && !store.jf_privacyMode)
-                return `${episodeFormat} - ${mediaData.name}`;
-            return episodeFormat;
+            state = (store.jf_showEpisodeName && mediaData.name && !store.jf_privacyMode)
+                ? `${episodeFormat} - ${mediaData.name}`
+                : episodeFormat;
+        } else if (store.jf_privacyMode) {
+            state = mediaData.type === "Audio" ? "Listening to music" : (mediaData.year ? "(????)" : undefined);
+        } else {
+            state = mediaData.artist || (mediaData.year ? `(${mediaData.year})` : undefined);
         }
-        if (store.jf_privacyMode)
-            return mediaData.type === "Audio" ? "Listening to music" : (mediaData.year ? "(????)" : undefined);
-        return mediaData.artist || (mediaData.year ? `(${mediaData.year})` : undefined);
+
+        if (mediaData.isPaused) {
+            const time = mediaData.position != null && mediaData.duration != null
+                ? `${formatDurationMs(mediaData.position * 1000)} / ${formatDurationMs(mediaData.duration * 1000)}`
+                : undefined;
+            const parts = [state, time].filter(Boolean);
+            return parts.join(" - ") || "Paused";
+        }
+        return state;
     };
 
     const timestamps = (!mediaData.isPaused && mediaData.position != null && mediaData.duration != null) ? {
