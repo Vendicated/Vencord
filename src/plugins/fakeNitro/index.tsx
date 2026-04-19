@@ -68,9 +68,9 @@ const enum FakeNoticeType {
     Emoji
 }
 
-const fakeNitroEmojiRegex = /(<)?https?:\/\/\S+?\/emojis\/(\d+?)\.(?:png|webp|gif)(>?)/;
-const fakeNitroStickerRegex = /(<)?https?:\/\/\S+?\/stickers\/(\d+?)\.(>?)/;
-const fakeNitroGifStickerRegex = /(<)?https?:\/\/\S+?\/attachments\/\d+?\/\d+?\/(\d+?)\.gif(>?)/;
+const fakeNitroEmojiRegex = /^(<)?(https?:\/\/\S*?\/emojis\/(\d+?)\.(?:png|webp|gif)\S*?)(>?)$/;
+const fakeNitroStickerRegex = /^(<)?(https?:\/\/\S*?\/stickers\/(\d+?)\.\S*?)(>?)$/;
+const fakeNitroGifStickerRegex = /^(<)?(https?:\/\/\S*?\/attachments\/\d+?\/\d+?\/(\d+?)\.gif\S*?)(>?)$/;
 const hyperLinkRegex = /\[.+?\]\((https?:\/\/.+?)\)/;
 
 const settings = definePluginSettings({
@@ -596,11 +596,12 @@ export default definePlugin({
 
             const imgMatch = item.match(fakeNitroStickerRegex);
             if (imgMatch) {
-                if (imgMatch[1] && imgMatch[3]) continue;
-                const stickerId = imgMatch[2];
+                if (imgMatch[1] && imgMatch[4]) continue;
+                const stickerId = imgMatch[3];
+                const cleanUrl = imgMatch[2];
                 let url: URL | null = null;
                 try {
-                    url = new URL(item.replace(/^<|>$/g, ""));
+                    url = new URL(cleanUrl);
                 } catch { }
 
                 const stickerName = StickersStore.getStickerById(stickerId)?.name ?? url?.searchParams.get("name") ?? "FakeNitroSticker";
@@ -616,8 +617,8 @@ export default definePlugin({
 
             const gifMatch = item.match(fakeNitroGifStickerRegex);
             if (gifMatch) {
-                if (gifMatch[1] && gifMatch[3]) continue;
-                const stickerId = gifMatch[2];
+                if (gifMatch[1] && gifMatch[4]) continue;
+                const stickerId = gifMatch[3];
                 if (!StickersStore.getStickerById(stickerId)) continue;
 
                 const stickerName = StickersStore.getStickerById(stickerId)?.name ?? "FakeNitroSticker";
