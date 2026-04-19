@@ -23,4 +23,9 @@ src/userplugins
 
 ExtensionCache/
 /settings
+
+# TypeScript output
 who-fucking-cares-dude/
+
+# Vesktop files
+vencordDesktop*
