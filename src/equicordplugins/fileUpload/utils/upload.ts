@@ -38,6 +38,7 @@ function toProxyUrl(url: string): string {
 let isUploading = false;
 
 type UploadPhase = "idle" | "preparing" | "uploading" | "retrying" | "success" | "failed" | "cancelled";
+type EmbedProxyService = "x266" | "nfp" | "embeddr";
 
 export interface UploadProgressState {
     phase: UploadPhase;
@@ -696,6 +697,42 @@ const EXE_BLOCKED_SERVICES = new Set<ServiceType>([
     ServiceType.ZEROX0
 ]);
 
+function getEmbedProxyService(): EmbedProxyService {
+    const service = settings.store.embedProxyService;
+    return service === "nfp" || service === "embeddr" ? service : "x266"
+
+}
+
+function shouldProxyEmbedUrl(url: string): boolean {
+    const ext = getUrlExtension(url)?.toLowerCase();
+    if (!ext) {
+        return false;
+    }
+
+    return getMimeFromExtension(ext).startsWith("video/");
+}
+
+function applyEmbedProxy(url: string): string {
+    if (!settings.store.embedProxyEnabled) {
+        return url;
+    }
+
+    const service = getEmbedProxyService();
+    if (!shouldProxyEmbedUrl(url)) {
+        return url;
+    }
+
+    switch (service) {
+        case "x266":
+            return `https://x266.mov/e/${url}`;
+        case "nfp":
+            return `https://discord.nfp.is/?v=${encodeURIComponent(url)}`;
+        case "embeddr":
+        default:
+            return `https://embeddr.top/${url}`;
+    }
+}
+
 function isExeFileName(fileName: string): boolean {
     return fileName.toLowerCase().endsWith(".exe");
 }
@@ -906,7 +943,7 @@ async function uploadPreparedBlob(blob: Blob, sourceUrl?: string): Promise<void>
     const { blob: normalizedBlob, filename } = await normalizeUploadBlob(blob, sourceUrl);
     setUploadState({ fileName: filename, status: "File ready, starting upload...", percent: 4 });
     const uploadedUrl = await uploadWithFallbacks(normalizedBlob, filename, primary);
-    const finalUrl = finalizeUploadedUrl(uploadedUrl);
+    const finalUrl = applyEmbedProxy(finalizeUploadedUrl(uploadedUrl));
     await notifyUploadSuccess(finalUrl);
 }
 
