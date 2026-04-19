@@ -505,7 +505,7 @@ export default definePlugin({
             }
 
             if (settings.store.transformStickers) {
-                if (fakeNitroStickerRegex.test(child.props.href)) return null;
+                if (fakeNitroStickerRegex.test(child.props.href)) return child;
 
                 const gifMatch = child.props.href.match(fakeNitroGifStickerRegex);
                 if (gifMatch) {
