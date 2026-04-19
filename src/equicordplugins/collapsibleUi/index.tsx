@@ -29,7 +29,7 @@ function PanelsIcon(props: SVGProps<SVGSVGElement>) {
 }
 
 function getStateClasses(store: StateStore) {
-    const classNames = [cl("state"), cl(`transition-${store.transitionMs}`)];
+    const classNames = [cl("state"), cl(`collapsed-size-${store.collapsedSize}`), cl(`transition-${store.transitionMs}`)];
 
     for (const panelId of toolbarPanelOrder) {
         const panel = panelRegistry[panelId];
