@@ -68,9 +68,9 @@ const enum FakeNoticeType {
     Emoji
 }
 
-const fakeNitroEmojiRegex = /\/emojis\/(\d+?)\.(png|webp|gif)/;
-const fakeNitroStickerRegex = /\/stickers\/(\d+?)\./;
-const fakeNitroGifStickerRegex = /\/attachments\/\d+?\/\d+?\/(\d+?)\.gif/;
+const fakeNitroEmojiRegex = /(<)?https?:\/\/\S+?\/emojis\/(\d+?)\.(?:png|webp|gif)(>?)/;
+const fakeNitroStickerRegex = /(<)?https?:\/\/\S+?\/stickers\/(\d+?)\.(>?)/;
+const fakeNitroGifStickerRegex = /(<)?https?:\/\/\S+?\/attachments\/\d+?\/\d+?\/(\d+?)\.gif(>?)/;
 const hyperLinkRegex = /\[.+?\]\((https?:\/\/.+?)\)/;
 
 const settings = definePluginSettings({
@@ -505,12 +505,15 @@ export default definePlugin({
             }
 
             if (settings.store.transformStickers) {
-                if (fakeNitroStickerRegex.test(child.props.href)) return child;
+                if (fakeNitroStickerRegex.test(child.props.href)) {
+                    if (message?.content.includes(`<${child.props.href}>`)) return child;
+                    return null;
+                }
 
                 const gifMatch = child.props.href.match(fakeNitroGifStickerRegex);
-                if (gifMatch) {
-                    // There is no way to differentiate a regular gif attachment from a fake nitro animated sticker, so we check if the StickersStore contains the id of the fake sticker
-                    if (StickersStore.getStickerById(gifMatch[1])) return null;
+                if (gifMatch && StickersStore.getStickerById(gifMatch[1])) {
+                    if (message?.content.includes(`<${gifMatch[0]}>`)) return child;
+                    return null;
                 }
             }
 
@@ -593,15 +596,17 @@ export default definePlugin({
 
             const imgMatch = item.match(fakeNitroStickerRegex);
             if (imgMatch) {
+                if (imgMatch[1] && imgMatch[3]) continue;
+                const stickerId = imgMatch[2];
                 let url: URL | null = null;
                 try {
-                    url = new URL(item);
+                    url = new URL(item.replace(/^<|>$/g, ""));
                 } catch { }
 
-                const stickerName = StickersStore.getStickerById(imgMatch[1])?.name ?? url?.searchParams.get("name") ?? "FakeNitroSticker";
+                const stickerName = StickersStore.getStickerById(stickerId)?.name ?? url?.searchParams.get("name") ?? "FakeNitroSticker";
                 stickers.push({
                     format_type: 1,
-                    id: imgMatch[1],
+                    id: stickerId,
                     name: stickerName,
                     fake: true
                 });
@@ -611,12 +616,14 @@ export default definePlugin({
 
             const gifMatch = item.match(fakeNitroGifStickerRegex);
             if (gifMatch) {
-                if (!StickersStore.getStickerById(gifMatch[1])) continue;
+                if (gifMatch[1] && gifMatch[3]) continue;
+                const stickerId = gifMatch[2];
+                if (!StickersStore.getStickerById(stickerId)) continue;
 
-                const stickerName = StickersStore.getStickerById(gifMatch[1])?.name ?? "FakeNitroSticker";
+                const stickerName = StickersStore.getStickerById(stickerId)?.name ?? "FakeNitroSticker";
                 stickers.push({
                     format_type: 2,
-                    id: gifMatch[1],
+                    id: stickerId,
                     name: stickerName,
                     fake: true
                 });
@@ -628,6 +635,9 @@ export default definePlugin({
 
     shouldIgnoreEmbed(embed: Message["embeds"][number], message: Message) {
         try {
+            const url = embed.url || embed.video?.url || embed.thumbnail?.url;
+            if (url && (fakeNitroStickerRegex.test(url) || fakeNitroGifStickerRegex.test(url))) return true;
+
             const contentItems = message.content.split(/\s/);
             if (contentItems.length > 1 && !settings.store.transformCompoundSentence) return false;
 
