@@ -8,7 +8,7 @@ import { sendBotMessage } from "@api/Commands";
 import { insertTextIntoChatInputBox, sendMessage } from "@utils/discord";
 import { Logger } from "@utils/Logger";
 import { Message } from "@vencord/discord-types";
-import { showToast, Toasts } from "@webpack/common";
+import { MessageStore, showToast, Toasts, UserStore } from "@webpack/common";
 
 import { settings } from "./settings";
 
@@ -28,6 +28,66 @@ type ImagePart = {
 };
 
 export type ContentPayload = string | (TextPart | ImagePart)[];
+
+export type ApiMessage = {
+    role: "user" | "assistant";
+    content: ContentPayload;
+};
+
+export function getPayload(message: Message): ApiMessage[] | null {
+    const prevMessages = getPreviousMessages(message, settings.store.context);
+    const allMessages = [...prevMessages, message];
+
+    const currentUserId = UserStore.getCurrentUser().id;
+
+    const payload: ApiMessage[] = [];
+
+    for (const msg of allMessages) {
+        const parsed = parseMessageContent(msg);
+        if (!parsed) continue;
+
+        const isOwn = msg.author?.id === currentUserId;
+        const isTargetMessage = msg.id === message.id;
+        const role = (isOwn && !isTargetMessage && settings.store.treatSelfAsAssistant) ? "assistant" : "user";
+
+        let content = parsed;
+
+        if (!isOwn && settings.store.passMessageAuthorName) {
+            const username = msg.author?.username ?? "Unknown";
+            const prefix = `${username}: `;
+
+            if (typeof parsed === "string") {
+                content = prefix + parsed;
+            } else if (Array.isArray(parsed)) {
+                content = [...parsed];
+                const firstTextIdx = content.findIndex(p => p.type === "text");
+
+                if (firstTextIdx !== -1) {
+                    content[firstTextIdx] = {
+                        type: "text",
+                        text: prefix + (content[firstTextIdx] as TextPart).text
+                    };
+                } else {
+                    content.unshift({
+                        type: "text",
+                        text: prefix
+                    });
+                }
+            }
+        }
+
+        payload.push({ role, content });
+    }
+
+    return payload.length > 0 ? payload : null;
+}
+
+export function getPreviousMessages(message: Message, count: number): Message[] {
+    const allMessages: Message[] = MessageStore.getMessages(message.channel_id)._array;
+    const idx = allMessages.findIndex(m => m.id === message.id);
+    if (idx <= 0 || count === 0) return [];
+    return allMessages.slice(Math.max(0, idx - count), idx);
+}
 
 export function parseMessageContent(message: Message): ContentPayload | null {
     const textParts: string[] = [];
@@ -123,19 +183,18 @@ export async function handleResponse(message: Message, response: string): Promis
     return response;
 }
 
-export async function getResponse(payload: ContentPayload): Promise<string> {
-    if (!settings.store.apiKey) {
-        showToast("TriviaAI: API Key is not set.", Toasts.Type.FAILURE);
-        return "";
-    }
+function getSystemPrompt() {
+    const currentUser = UserStore.getCurrentUser();
+    const currentTime = new Date().toString();
 
-    if (!settings.store.endpoint) {
-        showToast("TriviaAI: Endpoint is not set.", Toasts.Type.FAILURE);
-        return "";
-    }
+    return settings.store.systemPrompt
+        .replace(/{current_user}/g, currentUser?.username ?? "Unknown User")
+        .replace(/{current_time}/g, currentTime);
+}
 
-    if (!settings.store.model) {
-        showToast("TriviaAI: Model is not set.", Toasts.Type.FAILURE);
+export async function getResponse(payload: ApiMessage[]): Promise<string> {
+    if (!settings.store.apiKey || !settings.store.endpoint || !settings.store.model) {
+        showToast("TriviaAI: API settings are incomplete.", Toasts.Type.FAILURE);
         return "";
     }
 
@@ -151,12 +210,9 @@ export async function getResponse(payload: ContentPayload): Promise<string> {
                 messages: [
                     {
                         role: "system",
-                        content: settings.store.systemPrompt
+                        content: getSystemPrompt()
                     },
-                    {
-                        role: "user",
-                        content: payload
-                    }
+                    ...payload
                 ],
                 max_tokens: settings.store.maxTokens,
             })
