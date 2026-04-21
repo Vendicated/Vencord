@@ -6,7 +6,7 @@
 
 import "./styles.css";
 
-import { BadgePosition, BadgeUserArgs, ProfileBadge } from "@api/Badges";
+import { BadgePosition, BadgeUserArgs } from "@api/Badges";
 import { Badges } from "@api/index";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Flex } from "@components/Flex";
@@ -121,8 +121,9 @@ function shouldShowBadge(userId: string, requirement: number, index: number) {
 }
 
 function getBadgesToApply() {
-    const badgesToApply: ProfileBadge[] = ranks.map((rank, index) => {
+    return ranks.map((rank, index) => {
         return ({
+            id: `friendship_ranks_badge_${index}`,
             description: rank.title,
             iconSrc: rank.iconSrc,
             position: BadgePosition.END,
@@ -136,8 +137,6 @@ function getBadgesToApply() {
             },
         });
     });
-
-    return badgesToApply;
 }
 
 export default definePlugin({
