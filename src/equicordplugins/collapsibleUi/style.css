@@ -1,103 +1,126 @@
+@property --vc-cui-collapsed-size {
+    syntax: "<length>";
+    inherits: true;
+    initial-value: 12px;
+}
+
+@property --vc-cui-transition {
+    syntax: "<time>";
+    inherits: true;
+    initial-value: 160ms;
+}
+
 body:has(.vc-collapsible-ui-state) {
     --vc-cui-chat-buttons-width: min(320px, 36vw);
-    --vc-cui-collapsed-size: 12px;
     --vc-cui-hover-peek: var(--vc-cui-collapsed-size);
     --vc-cui-hover-delay: 120ms;
     --vc-cui-user-area-collapsed-width: 52px;
-    --vc-cui-transition: 160ms;
     --vc-cui-ease: cubic-bezier(.2, 0, 0, 1);
 }
 
 body:has(.vc-collapsible-ui-collapsed-size-8) {
-    --vc-cui-collapsed-size: 8px;
+    --vc-cui-collapsed-size: 8px
 }
 
 body:has(.vc-collapsible-ui-collapsed-size-12) {
-    --vc-cui-collapsed-size: 12px;
+    --vc-cui-collapsed-size: 12px
 }
 
 body:has(.vc-collapsible-ui-collapsed-size-16) {
-    --vc-cui-collapsed-size: 16px;
+    --vc-cui-collapsed-size: 16px
 }
 
 body:has(.vc-collapsible-ui-collapsed-size-20) {
-    --vc-cui-collapsed-size: 20px;
+    --vc-cui-collapsed-size: 20px
 }
 
 body:has(.vc-collapsible-ui-collapsed-size-24) {
-    --vc-cui-collapsed-size: 24px;
+    --vc-cui-collapsed-size: 24px
 }
 
 body:has(.vc-collapsible-ui-collapsed-size-28) {
-    --vc-cui-collapsed-size: 28px;
+    --vc-cui-collapsed-size: 28px
 }
 
 body:has(.vc-collapsible-ui-collapsed-size-32) {
-    --vc-cui-collapsed-size: 32px;
+    --vc-cui-collapsed-size: 32px
 }
 
 body:has(.vc-collapsible-ui-collapsed-size-40) {
-    --vc-cui-collapsed-size: 40px;
+    --vc-cui-collapsed-size: 40px
 }
 
 body:has(.vc-collapsible-ui-collapsed-size-48) {
-    --vc-cui-collapsed-size: 48px;
+    --vc-cui-collapsed-size: 48px
 }
 
 body:has(.vc-collapsible-ui-transition-0) {
-    --vc-cui-transition: 0ms;
+    --vc-cui-transition: 0ms
 }
 
 body:has(.vc-collapsible-ui-transition-80) {
-    --vc-cui-transition: 80ms;
+    --vc-cui-transition: 80ms
 }
 
 body:has(.vc-collapsible-ui-transition-120) {
-    --vc-cui-transition: 120ms;
+    --vc-cui-transition: 120ms
 }
 
 body:has(.vc-collapsible-ui-transition-160) {
-    --vc-cui-transition: 160ms;
+    --vc-cui-transition: 160ms
 }
 
 body:has(.vc-collapsible-ui-transition-200) {
-    --vc-cui-transition: 200ms;
+    --vc-cui-transition: 200ms
 }
 
 body:has(.vc-collapsible-ui-transition-260) {
-    --vc-cui-transition: 260ms;
+    --vc-cui-transition: 260ms
 }
 
 body:has(.vc-collapsible-ui-transition-320) {
-    --vc-cui-transition: 320ms;
+    --vc-cui-transition: 320ms
 }
 
-body:has(.vc-collapsible-ui-guild-bar-collapsed) nav[class*="guilds_"] {
-    overflow: hidden !important;
-    transition:
+:root {
+    --vc-cui-inline-transition:
         width var(--vc-cui-transition) var(--vc-cui-ease),
         inline-size var(--vc-cui-transition) var(--vc-cui-ease),
         min-width var(--vc-cui-transition) var(--vc-cui-ease),
         min-inline-size var(--vc-cui-transition) var(--vc-cui-ease),
         max-width var(--vc-cui-transition) var(--vc-cui-ease),
         max-inline-size var(--vc-cui-transition) var(--vc-cui-ease),
-        flex-basis var(--vc-cui-transition) var(--vc-cui-ease) !important;
+        flex-basis var(--vc-cui-transition) var(--vc-cui-ease);
+    --vc-cui-block-transition:
+        height var(--vc-cui-transition) var(--vc-cui-ease),
+        block-size var(--vc-cui-transition) var(--vc-cui-ease),
+        min-height var(--vc-cui-transition) var(--vc-cui-ease),
+        min-block-size var(--vc-cui-transition) var(--vc-cui-ease),
+        max-height var(--vc-cui-transition) var(--vc-cui-ease),
+        max-block-size var(--vc-cui-transition) var(--vc-cui-ease),
+        padding var(--vc-cui-transition) var(--vc-cui-ease);
 }
 
-body:has(.vc-collapsible-ui-guild-bar-collapsed):has(nav[class*="guilds_"]:hover) nav[class*="guilds_"],
-body:has(.vc-collapsible-ui-guild-bar-collapsed):has(nav[class*="guilds_"]:focus-within) nav[class*="guilds_"] {
-    transition-delay: var(--vc-cui-hover-delay);
+body:has(.vc-collapsible-ui-guild-bar-collapsed) nav[class*="guilds_"] {
+    overflow: hidden !important;
+    transition: var(--vc-cui-inline-transition) !important;
 }
 
-body:has(.vc-collapsible-ui-guild-bar-collapsed):has(nav[class*="guilds_"]:hover) nav[class*="guilds_"] > :where(*),
-body:has(.vc-collapsible-ui-guild-bar-collapsed):has(nav[class*="guilds_"]:focus-within) nav[class*="guilds_"] > :where(*) {
+body:has(.vc-collapsible-ui-guild-bar-collapsed):is( :has(nav[class*="guilds_"]:hover),
+    :has(nav[class*="guilds_"]:focus-within)) nav[class*="guilds_"] {
+    transition-delay: var(--vc-cui-hover-delay)
+}
+
+body:has(.vc-collapsible-ui-guild-bar-collapsed):is( :has(nav[class*="guilds_"]:hover),
+    :has(nav[class*="guilds_"]:focus-within)) nav[class*="guilds_"] > :where(*) {
     opacity: 1;
     pointer-events: auto;
     transition: opacity var(--vc-cui-transition) var(--vc-cui-ease);
     transition-delay: var(--vc-cui-hover-delay);
 }
 
-body:has(.vc-collapsible-ui-guild-bar-collapsed):not(:has(nav[class*="guilds_"]:hover), :has(nav[class*="guilds_"]:focus-within)) nav[class*="guilds_"] {
+body:has(.vc-collapsible-ui-guild-bar-collapsed):not( :has(nav[class*="guilds_"]:hover),
+    :has(nav[class*="guilds_"]:focus-within)) nav[class*="guilds_"] {
     width: var(--vc-cui-collapsed-size) !important;
     inline-size: var(--vc-cui-collapsed-size) !important;
     min-width: var(--vc-cui-collapsed-size) !important;
@@ -107,14 +130,15 @@ body:has(.vc-collapsible-ui-guild-bar-collapsed):not(:has(nav[class*="guilds_"]:
     flex: 0 0 var(--vc-cui-collapsed-size) !important;
 }
 
-body:has(.vc-collapsible-ui-guild-bar-collapsed):not(:has(nav[class*="guilds_"]:hover), :has(nav[class*="guilds_"]:focus-within)) nav[class*="guilds_"] > :where(*) {
+body:has(.vc-collapsible-ui-guild-bar-collapsed):not( :has(nav[class*="guilds_"]:hover),
+    :has(nav[class*="guilds_"]:focus-within)) nav[class*="guilds_"] > :where(*) {
     opacity: 0;
     pointer-events: none;
     transition: opacity var(--vc-cui-transition) var(--vc-cui-ease);
 }
 
 body:has(.vc-collapsible-ui-channel-list-collapsed):has([class*="sidebarList_"]:hover) [class*="sidebarList_"] {
-    transition-delay: var(--vc-cui-hover-delay);
+    transition-delay: var(--vc-cui-hover-delay)
 }
 
 body:has(.vc-collapsible-ui-channel-list-collapsed):has([class*="sidebarList_"]:hover) [class*="sidebarList_"] > * {
@@ -124,7 +148,8 @@ body:has(.vc-collapsible-ui-channel-list-collapsed):has([class*="sidebarList_"]:
     transition-delay: var(--vc-cui-hover-delay);
 }
 
-body:has(.vc-collapsible-ui-channel-list-collapsed):not(:has([class*="sidebarList_"]:hover), :has([class*="sidebar_"] > [class*="panels_"]:hover)) [class*="sidebarList_"] {
+body:has(.vc-collapsible-ui-channel-list-collapsed):not( :has([class*="sidebarList_"]:hover),
+    :has([class*="sidebar_"] > [class*="panels_"]:hover)) [class*="sidebarList_"] {
     width: var(--vc-cui-collapsed-size) !important;
     inline-size: var(--vc-cui-collapsed-size) !important;
     min-width: var(--vc-cui-collapsed-size) !important;
@@ -133,23 +158,17 @@ body:has(.vc-collapsible-ui-channel-list-collapsed):not(:has([class*="sidebarLis
     max-inline-size: var(--vc-cui-collapsed-size) !important;
     flex: 0 0 var(--vc-cui-collapsed-size) !important;
     overflow: hidden !important;
-    transition:
-        width var(--vc-cui-transition) var(--vc-cui-ease),
-        inline-size var(--vc-cui-transition) var(--vc-cui-ease),
-        min-width var(--vc-cui-transition) var(--vc-cui-ease),
-        min-inline-size var(--vc-cui-transition) var(--vc-cui-ease),
-        max-width var(--vc-cui-transition) var(--vc-cui-ease),
-        max-inline-size var(--vc-cui-transition) var(--vc-cui-ease),
-        flex-basis var(--vc-cui-transition) var(--vc-cui-ease) !important;
+    transition: var(--vc-cui-inline-transition) !important;
 }
 
-body:has(.vc-collapsible-ui-channel-list-collapsed):not(:has([class*="sidebarList_"]:hover), :has([class*="sidebar_"] > [class*="panels_"]:hover)) [class*="sidebarList_"] > * {
+body:has(.vc-collapsible-ui-channel-list-collapsed):not( :has([class*="sidebarList_"]:hover),
+    :has([class*="sidebar_"] > [class*="panels_"]:hover)) [class*="sidebarList_"] > * {
     opacity: 0;
     pointer-events: none;
     transition: opacity var(--vc-cui-transition) var(--vc-cui-ease);
 }
 
-body:has(.vc-collapsible-ui-channel-list-collapsed):not(:has([class*="sidebar_"] > [class*="panels_"]:hover)) [class*="sidebar_"] > [class*="panels_"] {
+body:has(.vc-collapsible-ui-channel-list-collapsed):not( :has([class*="sidebar_"] > [class*="panels_"]:hover)) [class*="sidebar_"] > [class*="panels_"] {
     width: var(--vc-cui-user-area-collapsed-width) !important;
     inline-size: var(--vc-cui-user-area-collapsed-width) !important;
     min-width: var(--vc-cui-user-area-collapsed-width) !important;
@@ -157,16 +176,10 @@ body:has(.vc-collapsible-ui-channel-list-collapsed):not(:has([class*="sidebar_"]
     max-width: var(--vc-cui-user-area-collapsed-width) !important;
     max-inline-size: var(--vc-cui-user-area-collapsed-width) !important;
     overflow: hidden !important;
-    transition:
-        width var(--vc-cui-transition) var(--vc-cui-ease),
-        inline-size var(--vc-cui-transition) var(--vc-cui-ease),
-        min-width var(--vc-cui-transition) var(--vc-cui-ease),
-        min-inline-size var(--vc-cui-transition) var(--vc-cui-ease),
-        max-width var(--vc-cui-transition) var(--vc-cui-ease),
-        max-inline-size var(--vc-cui-transition) var(--vc-cui-ease) !important;
+    transition: var(--vc-cui-inline-transition) !important;
 }
 
-body:has(.vc-collapsible-ui-channel-list-collapsed):not(:has([class*="sidebar_"] > [class*="panels_"]:hover)) .vc-collapsible-ui-user-area-controls {
+body:has(.vc-collapsible-ui-channel-list-collapsed):not( :has([class*="sidebar_"] > [class*="panels_"]:hover)) .vc-collapsible-ui-user-area-controls {
     max-width: 0 !important;
     min-width: 0 !important;
     overflow: hidden !important;
@@ -190,39 +203,42 @@ body:has(.vc-collapsible-ui-members-list-collapsed) [class*="membersWrap"] {
         max-width var(--vc-cui-transition) var(--vc-cui-ease) !important;
 }
 
-body:has(.vc-collapsible-ui-members-list-collapsed):has([class*="membersWrap"]:hover) [class*="membersWrap"],
-body:has(.vc-collapsible-ui-members-list-collapsed):has([class*="membersWrap"]:focus-within) [class*="membersWrap"] {
-    transition-delay: var(--vc-cui-hover-delay);
+body:has(.vc-collapsible-ui-members-list-collapsed):is( :has([class*="membersWrap"]:hover),
+    :has([class*="membersWrap"]:focus-within)) [class*="membersWrap"] {
+    transition-delay: var(--vc-cui-hover-delay)
 }
 
-body:has(.vc-collapsible-ui-members-list-collapsed):has([class*="membersWrap"]:hover) [class*="membersWrap"] > :where(*),
-body:has(.vc-collapsible-ui-members-list-collapsed):has([class*="membersWrap"]:focus-within) [class*="membersWrap"] > :where(*) {
+body:has(.vc-collapsible-ui-members-list-collapsed):is( :has([class*="membersWrap"]:hover),
+    :has([class*="membersWrap"]:focus-within)) [class*="membersWrap"] > :where(*) {
     opacity: 1;
     pointer-events: auto;
     transition: opacity var(--vc-cui-transition) var(--vc-cui-ease);
     transition-delay: var(--vc-cui-hover-delay);
 }
 
-body:has(.vc-collapsible-ui-members-list-collapsed):not(:has([class*="membersWrap"]:hover), :has([class*="membersWrap"]:focus-within)) [class*="membersWrap"] {
+body:has(.vc-collapsible-ui-members-list-collapsed):not( :has([class*="membersWrap"]:hover),
+    :has([class*="membersWrap"]:focus-within)) [class*="membersWrap"] {
     width: var(--vc-cui-collapsed-size) !important;
     min-width: var(--vc-cui-collapsed-size) !important;
     max-width: var(--vc-cui-collapsed-size) !important;
 }
 
-body:has(.vc-collapsible-ui-members-list-collapsed):not(:has([class*="membersWrap"]:hover), :has([class*="membersWrap"]:focus-within)) [class*="membersWrap"] > :where(*) {
+body:has(.vc-collapsible-ui-members-list-collapsed):not( :has([class*="membersWrap"]:hover),
+    :has([class*="membersWrap"]:focus-within)) [class*="membersWrap"] > :where(*) {
     opacity: 0;
     pointer-events: none;
     transition: opacity var(--vc-cui-transition) var(--vc-cui-ease);
 }
 
-body:has(.vc-collapsible-ui-user-area-collapsed):has([class*="sidebar_"] > [class*="panels_"]:hover) [class*="sidebar_"] > [class*="panels_"] > :where(*),
-body:has(.vc-collapsible-ui-user-area-collapsed):has([class*="sidebar_"] > [class*="panels_"]:focus-within) [class*="sidebar_"] > [class*="panels_"] > :where(*) {
+body:has(.vc-collapsible-ui-user-area-collapsed):is( :has([class*="sidebar_"] > [class*="panels_"]:hover),
+    :has([class*="sidebar_"] > [class*="panels_"]:focus-within)) [class*="sidebar_"] > [class*="panels_"] > :where(*) {
     opacity: 1;
     pointer-events: auto;
     transition: opacity var(--vc-cui-transition) var(--vc-cui-ease);
 }
 
-body:has(.vc-collapsible-ui-user-area-collapsed):not(:has([class*="sidebar_"] > [class*="panels_"]:hover), :has([class*="sidebar_"] > [class*="panels_"]:focus-within)) [class*="sidebar_"] > [class*="panels_"] {
+body:has(.vc-collapsible-ui-user-area-collapsed):not( :has([class*="sidebar_"] > [class*="panels_"]:hover),
+    :has([class*="sidebar_"] > [class*="panels_"]:focus-within)) [class*="sidebar_"] > [class*="panels_"] {
     height: var(--vc-cui-hover-peek) !important;
     block-size: var(--vc-cui-hover-peek) !important;
     min-height: var(--vc-cui-hover-peek) !important;
@@ -232,23 +248,17 @@ body:has(.vc-collapsible-ui-user-area-collapsed):not(:has([class*="sidebar_"] > 
     overflow: hidden !important;
     border-top-width: 0 !important;
     padding-block: 0 !important;
-    transition:
-        height var(--vc-cui-transition) var(--vc-cui-ease),
-        block-size var(--vc-cui-transition) var(--vc-cui-ease),
-        min-height var(--vc-cui-transition) var(--vc-cui-ease),
-        min-block-size var(--vc-cui-transition) var(--vc-cui-ease),
-        max-height var(--vc-cui-transition) var(--vc-cui-ease),
-        max-block-size var(--vc-cui-transition) var(--vc-cui-ease),
-        padding var(--vc-cui-transition) var(--vc-cui-ease) !important;
+    transition: var(--vc-cui-block-transition) !important;
 }
 
-body:has(.vc-collapsible-ui-user-area-collapsed):not(:has([class*="sidebar_"] > [class*="panels_"]:hover), :has([class*="sidebar_"] > [class*="panels_"]:focus-within)) [class*="sidebar_"] > [class*="panels_"] > :where(*) {
+body:has(.vc-collapsible-ui-user-area-collapsed):not( :has([class*="sidebar_"] > [class*="panels_"]:hover),
+    :has([class*="sidebar_"] > [class*="panels_"]:focus-within)) [class*="sidebar_"] > [class*="panels_"] > :where(*) {
     opacity: 0;
     pointer-events: none;
     transition: opacity var(--vc-cui-transition) var(--vc-cui-ease);
 }
 
-body:has(.vc-collapsible-ui-guild-bar-collapsed):has(.vc-collapsible-ui-channel-list-collapsed):not(:has([class*="sidebar_"] > [class*="panels_"]:hover)) [class*="sidebar_"] > [class*="panels_"] {
+body:has(.vc-collapsible-ui-guild-bar-collapsed):has(.vc-collapsible-ui-channel-list-collapsed):not( :has([class*="sidebar_"] > [class*="panels_"]:hover)) [class*="sidebar_"] > [class*="panels_"] {
     width: calc(var(--vc-cui-hover-peek) + 4px) !important;
     inline-size: calc(var(--vc-cui-hover-peek) + 4px) !important;
     min-width: calc(var(--vc-cui-hover-peek) + 4px) !important;
@@ -259,30 +269,24 @@ body:has(.vc-collapsible-ui-guild-bar-collapsed):has(.vc-collapsible-ui-channel-
 
 body:has(.vc-collapsible-ui-title-bar-collapsed) section[class*="title_"][class*="container__"] {
     overflow: hidden !important;
-    transition:
-        height var(--vc-cui-transition) var(--vc-cui-ease),
-        block-size var(--vc-cui-transition) var(--vc-cui-ease),
-        min-height var(--vc-cui-transition) var(--vc-cui-ease),
-        min-block-size var(--vc-cui-transition) var(--vc-cui-ease),
-        max-height var(--vc-cui-transition) var(--vc-cui-ease),
-        max-block-size var(--vc-cui-transition) var(--vc-cui-ease),
-        padding var(--vc-cui-transition) var(--vc-cui-ease) !important;
+    transition: var(--vc-cui-block-transition) !important;
 }
 
-body:has(.vc-collapsible-ui-title-bar-collapsed):has(section[class*="title_"][class*="container__"]:hover) section[class*="title_"][class*="container__"],
-body:has(.vc-collapsible-ui-title-bar-collapsed):has(section[class*="title_"][class*="container__"]:focus-within) section[class*="title_"][class*="container__"] {
-    transition-delay: var(--vc-cui-hover-delay);
+body:has(.vc-collapsible-ui-title-bar-collapsed):is( :has(section[class*="title_"][class*="container__"]:hover),
+    :has(section[class*="title_"][class*="container__"]:focus-within)) section[class*="title_"][class*="container__"] {
+    transition-delay: var(--vc-cui-hover-delay)
 }
 
-body:has(.vc-collapsible-ui-title-bar-collapsed):has(section[class*="title_"][class*="container__"]:hover) section[class*="title_"][class*="container__"] > :where(*),
-body:has(.vc-collapsible-ui-title-bar-collapsed):has(section[class*="title_"][class*="container__"]:focus-within) section[class*="title_"][class*="container__"] > :where(*) {
+body:has(.vc-collapsible-ui-title-bar-collapsed):is( :has(section[class*="title_"][class*="container__"]:hover),
+    :has(section[class*="title_"][class*="container__"]:focus-within)) section[class*="title_"][class*="container__"] > :where(*) {
     opacity: 1;
     pointer-events: auto;
     transition: opacity var(--vc-cui-transition) var(--vc-cui-ease);
     transition-delay: var(--vc-cui-hover-delay);
 }
 
-body:has(.vc-collapsible-ui-title-bar-collapsed):not(:has(section[class*="title_"][class*="container__"]:hover), :has(section[class*="title_"][class*="container__"]:focus-within)) section[class*="title_"][class*="container__"] {
+body:has(.vc-collapsible-ui-title-bar-collapsed):not( :has(section[class*="title_"][class*="container__"]:hover),
+    :has(section[class*="title_"][class*="container__"]:focus-within)) section[class*="title_"][class*="container__"] {
     height: var(--vc-cui-hover-peek) !important;
     block-size: var(--vc-cui-hover-peek) !important;
     min-height: var(--vc-cui-hover-peek) !important;
@@ -292,7 +296,8 @@ body:has(.vc-collapsible-ui-title-bar-collapsed):not(:has(section[class*="title_
     padding-block: 0 !important;
 }
 
-body:has(.vc-collapsible-ui-title-bar-collapsed):not(:has(section[class*="title_"][class*="container__"]:hover), :has(section[class*="title_"][class*="container__"]:focus-within)) section[class*="title_"][class*="container__"] > :where(*) {
+body:has(.vc-collapsible-ui-title-bar-collapsed):not( :has(section[class*="title_"][class*="container__"]:hover),
+    :has(section[class*="title_"][class*="container__"]:focus-within)) section[class*="title_"][class*="container__"] > :where(*) {
     opacity: 0;
     pointer-events: none;
     transition: opacity var(--vc-cui-transition) var(--vc-cui-ease);
@@ -305,7 +310,7 @@ body:has(.vc-collapsible-ui-title-bar-collapsed):not(:has(section[class*="title_
 }
 
 .vc-collapsible-ui-chat-buttons-collapsed {
-    min-inline-size: var(--vc-cui-hover-peek);
+    min-inline-size: var(--vc-cui-hover-peek)
 }
 
 .vc-collapsible-ui-chat-buttons-items {
@@ -335,6 +340,6 @@ body:has(.vc-collapsible-ui-title-bar-collapsed):not(:has(section[class*="title_
 
 @media (prefers-reduced-motion: reduce) {
     body:has(.vc-collapsible-ui-state) {
-        --vc-cui-transition: 0ms;
+        --vc-cui-transition: 0ms
     }
 }
