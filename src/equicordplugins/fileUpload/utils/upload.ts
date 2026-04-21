@@ -38,7 +38,7 @@ function toProxyUrl(url: string): string {
 let isUploading = false;
 
 type UploadPhase = "idle" | "preparing" | "uploading" | "retrying" | "success" | "failed" | "cancelled";
-type EmbedProxyService = "x266" | "nfp" | "embeddr";
+type EmbedProxyService = "cors" | "nfp";
 
 export interface UploadProgressState {
     phase: UploadPhase;
@@ -699,7 +699,7 @@ const EXE_BLOCKED_SERVICES = new Set<ServiceType>([
 
 function getEmbedProxyService(): EmbedProxyService {
     const service = settings.store.embedProxyService;
-    return service === "nfp" || service === "embeddr" ? service : "x266"
+    return service === "nfp" ? service : "cors";
 
 }
 
@@ -723,13 +723,12 @@ function applyEmbedProxy(url: string): string {
     }
 
     switch (service) {
-        case "x266":
-            return `https://x266.mov/e/${url}`;
+        case "cors":
+            return toProxyUrl(url);
         case "nfp":
             return `https://discord.nfp.is/?v=${encodeURIComponent(url)}`;
-        case "embeddr":
         default:
-            return `https://embeddr.top/${url}`;
+            return toProxyUrl(url);
     }
 }
 

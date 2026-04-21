@@ -40,9 +40,8 @@ const litterboxOptions = [
 ];
 
 const embedProxyOptions = [
-    { label: "x266.mov", value: "x266", default: true },
-    { label: "discord.nfp.is", value: "nfp" },
-    { label: "embeddr.top", value: "embeddr" }
+    { label: "CORS Proxy", value: "cors", default: true },
+    { label: "discord.nfp.is", value: "nfp" }
 ];
 
 export const settings = definePluginSettings({
@@ -213,7 +212,7 @@ export const settings = definePluginSettings({
         type: OptionType.SELECT,
         description: "Embed helper service to wrap uploaded video links.",
         options: embedProxyOptions,
-        default: "x266",
+        default: "cors",
         hidden: true
     },
     corsProxyUrl: {
