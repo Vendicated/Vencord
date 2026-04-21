@@ -44,7 +44,7 @@ const ContributorBadge: ProfileBadge = {
     onClick: (_, { userId }) => openContributorModal(UserStore.getUser(userId))
 };
 
-let DonorBadges = {} as Record<string, Array<Record<"tooltip" | "badge", string>>>;
+let DonorBadges = {} as Record<string, Array<Record<"tooltip" | "badge", string>> | undefined>;
 
 async function loadBadges(noCache = false) {
     const init = {} as RequestInit;
@@ -174,7 +174,7 @@ export default definePlugin({
         return handlers;
     },
 
-    getDonorBadges(userId: string): ProfileBadge[] | null | undefined {
+    getDonorBadges(userId: string): ProfileBadge[] | undefined {
         return DonorBadges[userId]?.map((badge, idx) => ({
             id: `vencord_donor_badge_${idx}`,
             iconSrc: badge.badge,
