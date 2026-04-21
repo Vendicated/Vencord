@@ -95,7 +95,7 @@ const settings = definePluginSettings({
         default: false,
     },
     statusName: {
-        description: "Custom status text. variables: {artist} | {name} | {title}",
+        description: "Custom status text. You can use the following variables: {artist} | {album} | {title}",
         type: OptionType.STRING,
         default: "some music",
     },
