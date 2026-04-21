@@ -9,7 +9,7 @@ import "./styles.css";
 import { NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { HeaderBarButton } from "@api/HeaderBar";
 import ErrorBoundary from "@components/ErrorBoundary";
-import { Devs } from "@utils/constants";
+import { Devs, EquicordDevs } from "@utils/constants";
 import { classNameFactory } from "@utils/css";
 import { getCurrentChannel } from "@utils/discord";
 import definePlugin from "@utils/types";
@@ -23,6 +23,7 @@ import {
     findStoreLazy
 } from "@webpack";
 import {
+    ChannelActionCreators,
     ChannelRouter,
     ChannelStore,
     FluxDispatcher,
@@ -33,6 +34,7 @@ import {
     PermissionsBits,
     PermissionStore,
     PopoutActions,
+    PopoutWindowStore,
     RelationshipStore,
     SelectedChannelStore,
     SelectedGuildStore,
@@ -44,7 +46,15 @@ import {
     useStateFromStores
 } from "@webpack/common";
 
-import { settings, SidebarStore } from "./store";
+import {
+    getOpenPopoutWindowKeys,
+    getPersistedPopoutChannelIds,
+    getPopoutWindowKey,
+    isPopoutWindowOpen,
+    settings,
+    SidebarStore,
+    syncPersistedPopoutWindows
+} from "./store";
 
 const cl = classNameFactory("vc-sidebar-chat-");
 
@@ -80,17 +90,159 @@ const ChatClasses = findCssClassesLazy("threadSidebarOpen", "loader");
 
 const ChannelSectionStore = findStoreLazy("ChannelSectionStore");
 
-const requireChannelContextMenu = extractAndLoadChunksLazy(
-    ["&&this.handleActivitiesPopoutClose(),"],
-    new RegExp(DefaultExtractAndLoadChunksRegex.source + ".{1,250}hasActiveThread")
-);
-
 const requireForumView = extractAndLoadChunksLazy(
     ["Missing channel in Channel.renderHeaderToolbar"],
     new RegExp(DefaultExtractAndLoadChunksRegex.source + '.{1,150}name:"ForumChannel"')
 );
 
-const MakeContextMenu = (id: string, guildId: string | null) => {
+function getChannelTitle(channel: Channel | null | undefined) {
+    if (!channel) return "Chat";
+
+    if (channel.isPrivate()) {
+        const recipientId = channel.getRecipientId?.();
+        if (!channel.name && recipientId) {
+            const user = UserStore.getUser(recipientId);
+            if (user) {
+                return RelationshipStore.getNickname(recipientId) || user.globalName || user.username || "DM";
+            }
+        }
+
+        return channel.name || "DM";
+    }
+
+    return channel.name || "Chat";
+}
+
+function canOpenPopout(channel: Channel) {
+    if (channel.isPrivate()) return true;
+    return !channel.isCategory() && !channel.isDirectory() && !channel.isVocal();
+}
+
+function getPopoutMenuLabel(channelId: string) {
+    return isPopoutWindowOpen(channelId) ? "Close popout chat" : "Popout chat";
+}
+
+let restorePersistedPopoutsInterval: number | null = null;
+let restoringPersistedPopouts = false;
+
+function clearPersistedPopoutRestoreLoop() {
+    restoringPersistedPopouts = false;
+    if (restorePersistedPopoutsInterval !== null) {
+        window.clearInterval(restorePersistedPopoutsInterval);
+        restorePersistedPopoutsInterval = null;
+    }
+}
+
+async function waitForChannel(channelId: string, timeoutMs = 2500) {
+    const startedAt = Date.now();
+    while (Date.now() - startedAt <= timeoutMs) {
+        const channel = ChannelStore.getChannel(channelId);
+        if (channel) return channel;
+
+        await new Promise(resolve => setTimeout(resolve, 80));
+    }
+
+    return null;
+}
+
+async function waitForDmChannel(userId: string, timeoutMs = 2500) {
+    const startedAt = Date.now();
+    while (Date.now() - startedAt <= timeoutMs) {
+        const channelId = ChannelStore.getDMFromUserId?.(userId);
+        if (channelId) return channelId;
+
+        await new Promise(resolve => setTimeout(resolve, 80));
+    }
+
+    return null;
+}
+
+async function openPopoutFromUserMenu(userId: string) {
+    try {
+        const channelId = await Promise.resolve(ChannelActionCreators.getOrEnsurePrivateChannel(userId));
+        if (!channelId) return;
+
+        const channel = await waitForChannel(channelId);
+        if (channel) openPopout(channel.id);
+        return;
+    } catch {
+        const fallbackChannelId = await waitForDmChannel(userId);
+        if (!fallbackChannelId) return;
+
+        const channel = await waitForChannel(fallbackChannelId);
+        if (channel) openPopout(channel.id);
+    }
+}
+
+function closePopout(channelId: string, syncPersistence = true) {
+    const windowKey = getPopoutWindowKey(channelId);
+    PopoutActions.close(windowKey);
+    if (syncPersistence && !restoringPersistedPopouts) {
+        syncPersistedPopoutWindows();
+    }
+}
+
+function openPopout(channelId: string, syncPersistence = true) {
+    const channel = ChannelStore.getChannel(channelId);
+    if (!channel || !canOpenPopout(channel)) return;
+
+    const windowKey = getPopoutWindowKey(channelId);
+
+    if (isPopoutWindowOpen(channelId)) {
+        closePopout(channelId, syncPersistence);
+        return;
+    }
+
+    const title = getChannelTitle(channel);
+
+    PopoutActions.open(
+        windowKey,
+        () => <RenderPopout channel={channel} name={title} windowKey={windowKey} />,
+        {
+            defaultWidth: 854,
+            defaultHeight: 480,
+        }
+    );
+
+    PopoutActions.setAlwaysOnTop(windowKey, settings.store.popoutAlwaysOnTop);
+    if (syncPersistence && !restoringPersistedPopouts) {
+        syncPersistedPopoutWindows();
+    }
+}
+
+function restorePersistedPopouts() {
+    if (!settings.store.persistPopoutWindows) return;
+
+    clearPersistedPopoutRestoreLoop();
+
+    const pendingRestoreIds = new Set(getPersistedPopoutChannelIds());
+    if (pendingRestoreIds.size === 0) return;
+
+    restoringPersistedPopouts = true;
+
+    const attemptRestore = () => {
+        for (const channelId of pendingRestoreIds) {
+            const channel = ChannelStore.getChannel(channelId);
+            if (!channel || !canOpenPopout(channel)) continue;
+
+            pendingRestoreIds.delete(channelId);
+            openPopout(channelId, false);
+        }
+
+        if (pendingRestoreIds.size === 0) {
+            clearPersistedPopoutRestoreLoop();
+            syncPersistedPopoutWindows();
+        }
+    };
+
+    attemptRestore();
+
+    if (pendingRestoreIds.size > 0) {
+        restorePersistedPopoutsInterval = window.setInterval(attemptRestore, 250);
+    }
+}
+
+const createSidebarChatContextMenuItem = (id: string, guildId: string | null) => {
     return (
         <Menu.MenuItem
             id={`vc-sidebar-chat-${id}`}
@@ -107,13 +259,40 @@ const MakeContextMenu = (id: string, guildId: string | null) => {
     );
 };
 
+const createPopoutChatContextMenuItem = (id: string, label: string, action: () => void | Promise<void>) => {
+    return (
+        <Menu.MenuItem
+            id={`vc-sidebar-chat-popout-${id}`}
+            label={label}
+            action={() => {
+                void action();
+            }}
+        />
+    );
+};
+
 const UserContextPatch: NavContextMenuPatchCallback = (children, args: { user: User; }) => {
     const checks = [
         args.user,
         args.user.id !== UserStore.getCurrentUser().id,
     ];
     if (checks.some(check => !check)) return;
-    children.push(MakeContextMenu(args.user.id, null));
+    const channelId = ChannelStore.getDMFromUserId?.(args.user.id) ?? null;
+    const isOpen = channelId ? isPopoutWindowOpen(channelId) : false;
+
+    children.push(createSidebarChatContextMenuItem(args.user.id, null));
+    children.push(createPopoutChatContextMenuItem(
+        args.user.id,
+        isOpen ? "Close popout chat" : "Popout chat",
+        () => {
+            if (channelId && isOpen) {
+                closePopout(channelId);
+                return;
+            }
+
+            return openPopoutFromUserMenu(args.user.id);
+        }
+    ));
 };
 
 const ChannelContextPatch: NavContextMenuPatchCallback = (children, args: { channel: Channel; }) => {
@@ -123,14 +302,20 @@ const ChannelContextPatch: NavContextMenuPatchCallback = (children, args: { chan
         PermissionStore.can(PermissionsBits.VIEW_CHANNEL, args.channel),
     ];
     if (checks.some(check => !check)) return;
-    children.push(MakeContextMenu(args.channel.id, args.channel.guild_id));
+    children.push(createSidebarChatContextMenuItem(args.channel.id, args.channel.guild_id));
+    children.push(createPopoutChatContextMenuItem(
+        args.channel.id,
+        getPopoutMenuLabel(args.channel.id),
+        () => openPopout(args.channel.id)
+    ));
 };
 
 export default definePlugin({
     name: "SidebarChat",
-    authors: [Devs.Joona],
-    description: "Open a another channel or a DM as a sidebar or as a popout",
+    authors: [Devs.Joona, EquicordDevs.justjxke],
+    description: "Open a channel or DM as a sidebar or a popout.",
     tags: ["Appearance", "Chat", "Servers"],
+    dependencies: ["HeaderBarAPI"],
     patches: [
         {
             find: 'case"pendingFriends":',
@@ -256,17 +441,29 @@ export default definePlugin({
             </ErrorBoundary>
         );
     },
+    headerBarButton: {
+        icon: WindowLaunchIcon,
+        render: () => (
+            <>
+                <PopoutPersistenceSync />
+                <WrappedPopoutHeaderButton />
+            </>
+        )
+    },
+    stop() {
+        clearPersistedPopoutRestoreLoop();
+        syncPersistedPopoutWindows();
+        for (const windowKey of getOpenPopoutWindowKeys()) {
+            PopoutActions.close(windowKey);
+        }
+    },
+    async start() {
+        restorePersistedPopouts();
+    }
 });
 
 const Header = ({ guild, channel }: { guild: Guild; channel: Channel; }) => {
-    const recipientId = channel.isPrivate() ? channel.getRecipientId() as string : null;
-
-    const name = useStateFromStores([UserStore, RelationshipStore], () => {
-        if (!recipientId || channel.name) return channel.name;
-
-        const user = UserStore.getUser(recipientId);
-        return RelationshipStore.getNickname(recipientId) || user?.globalName || user?.username;
-    }, [recipientId, channel.name]);
+    const name = useStateFromStores([UserStore, RelationshipStore], () => getChannelTitle(channel), [channel.id, channel.name]);
 
     const parentChannel = useStateFromStores(
         [ChannelStore], () => ChannelStore.getChannel(channel?.parent_id),
@@ -276,17 +473,12 @@ const Header = ({ guild, channel }: { guild: Guild; channel: Channel; }) => {
     // @ts-ignore
     const closeSidebar = () => FluxDispatcher.dispatch({ type: "VC_SIDEBAR_CHAT_CLOSE", });
 
-    const openPopout = useCallback(async () => {
-        await requireChannelContextMenu();
-        PopoutActions.open(
-            `DISCORD_VC_SC-${channel.id}`,
-            () => <RenderPopout channel={channel} name={name} />,
-            {
-                defaultWidth: 854,
-                defaultHeight: 480,
-            }
-        );
-    }, [channel, name]);
+    const isPopoutOpen = useStateFromStores(
+        [PopoutWindowStore], () => isPopoutWindowOpen(channel.id),
+        [channel.id]
+    );
+
+    const openPopoutClick = useCallback(() => openPopout(channel.id), [channel.id]);
 
     const switchChannels = useCallback(() => {
         const mainChannel = getCurrentChannel()!;
@@ -304,7 +496,13 @@ const Header = ({ guild, channel }: { guild: Guild; channel: Channel; }) => {
             toolbar={
                 <>
                     <HeaderBarButton icon={ArrowsLeftRightIcon} tooltip="Switch channels" onClick={switchChannels} />
-                    <HeaderBarButton icon={WindowLaunchIcon} tooltip="Popout Chat" onClick={openPopout} />
+                    <HeaderBarButton
+                        key={`${channel.id}-${isPopoutOpen ? "open" : "closed"}`}
+                        icon={isPopoutOpen ? XSmallIcon : WindowLaunchIcon}
+                        tooltip={isPopoutOpen ? "Close popout chat" : "Popout chat"}
+                        selected={isPopoutOpen}
+                        onClick={openPopoutClick}
+                    />
                     <HeaderBarButton icon={XSmallIcon} tooltip="Close Sidebar Chat" onClick={closeSidebar} />
                 </>
             }
@@ -319,18 +517,78 @@ const Header = ({ guild, channel }: { guild: Guild; channel: Channel; }) => {
     );
 };
 
-const RenderPopout = ErrorBoundary.wrap(({ channel, name }: { channel: Channel; name: string; }) => {
+const RenderPopout = ErrorBoundary.wrap(({ channel, name, windowKey }: { channel: Channel; name: string; windowKey: string; }) => {
     // Copy from an unexported function of the one they use in the experiment
     // right click a channel and search withTitleBar:!0,windowKey
+    useEffect(() => {
+        if (!channel?.id || MessageStore.getLastMessage(channel.id)) return;
+
+        MessageActions.fetchMessages({
+            channelId: channel.id,
+            limit: 50,
+        });
+    }, [channel?.id]);
+
     return (
         <PopoutWindow
             withTitleBar
-            windowKey={`DISCORD_VC_SC-${channel.id}`}
+            windowKey={windowKey}
             title={name || "Equicord"}
             channelId={channel.id}
             contentClassName={cl("popout")}
         >
-            <FullChannelView providedChannel={channel} />
+            <div className={cl("window")}>
+                <FullChannelView providedChannel={channel} />
+            </div>
         </PopoutWindow>
     );
 });
+
+function PopoutHeaderButton() {
+    const channelState = useStateFromStores(
+        [SelectedChannelStore, ChannelStore, PopoutWindowStore],
+        () => {
+            const channelId = SelectedChannelStore.getChannelId();
+            const channel = channelId ? ChannelStore.getChannel(channelId) : null;
+
+            return {
+                channel,
+                isOpen: channel ? isPopoutWindowOpen(channel.id) : false,
+                label: getChannelTitle(channel)
+            };
+        },
+        []
+    );
+
+    if (!channelState.channel || !canOpenPopout(channelState.channel)) return null;
+
+    const { channel, isOpen, label } = channelState;
+
+    return (
+        <HeaderBarButton
+            key={`${channel.id}-${isOpen ? "open" : "closed"}`}
+            icon={isOpen ? XSmallIcon : WindowLaunchIcon}
+            tooltip={isOpen ? "Close popout chat" : `Popout chat for ${label}`}
+            aria-label="Popout chat"
+            selected={isOpen}
+            onClick={() => openPopout(channel.id)}
+        />
+    );
+}
+
+const WrappedPopoutHeaderButton = ErrorBoundary.wrap(PopoutHeaderButton, { noop: true });
+
+function PopoutPersistenceSync() {
+    const openWindowKeySignature = useStateFromStores(
+        [PopoutWindowStore],
+        () => getOpenPopoutWindowKeys().join("|"),
+        []
+    );
+
+    useEffect(() => {
+        if (restoringPersistedPopouts) return;
+        syncPersistedPopoutWindows();
+    }, [openWindowKeySignature]);
+
+    return null;
+}

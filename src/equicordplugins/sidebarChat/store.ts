@@ -8,7 +8,7 @@ import { definePluginSettings } from "@api/Settings";
 import { proxyLazy } from "@utils/lazy";
 import { OptionType } from "@utils/types";
 import { Flux as TFlux } from "@vencord/discord-types";
-import { ChannelActionCreators, Flux as FluxWP, FluxDispatcher } from "@webpack/common";
+import { ChannelActionCreators, Flux as FluxWP, FluxDispatcher, PopoutActions, PopoutWindowStore } from "@webpack/common";
 
 interface IFlux extends TFlux {
     PersistedStore: TFlux["Store"];
@@ -19,6 +19,33 @@ export const settings = definePluginSettings({
         type: OptionType.BOOLEAN,
         description: "Keep the sidebar chat open across Discord restarts",
         default: true,
+    },
+    persistPopoutWindows: {
+        type: OptionType.BOOLEAN,
+        description: "Restore open popout chats after Discord restarts.",
+        default: true,
+        onChange: value => {
+            if (!value) {
+                settings.store.persistedPopoutWindowIds = [];
+                return;
+            }
+
+            syncPersistedPopoutWindows();
+        }
+    },
+    persistedPopoutWindowIds: {
+        type: OptionType.CUSTOM,
+        description: "Persisted popout chat channel IDs.",
+        default: [] as string[],
+        hidden: true
+    },
+    popoutAlwaysOnTop: {
+        type: OptionType.BOOLEAN,
+        description: "Keep popout chat windows above all others.",
+        default: true,
+        onChange: value => {
+            setAlwaysOnTopForOpenPopouts(value);
+        }
     },
     patchCommunity: {
         type: OptionType.BOOLEAN,
@@ -89,3 +116,40 @@ export const SidebarStore = proxyLazy(() => {
 
     return store;
 });
+
+const WINDOW_PREFIX = "DISCORD_VC_SC-";
+
+export function getPopoutWindowKey(channelId: string) {
+    return `${WINDOW_PREFIX}${channelId}`;
+}
+
+export function getOpenPopoutWindowKeys() {
+    return PopoutWindowStore.getWindowKeys().filter(key => key.startsWith(WINDOW_PREFIX));
+}
+
+export function isPopoutWindowOpen(channelId: string) {
+    return PopoutWindowStore.getWindowOpen(getPopoutWindowKey(channelId));
+}
+
+export function getPersistedPopoutChannelIds() {
+    return settings.store.persistedPopoutWindowIds ?? [];
+}
+
+export function getOpenPopoutChannelIds() {
+    return getOpenPopoutWindowKeys().map(key => key.slice(WINDOW_PREFIX.length));
+}
+
+export function syncPersistedPopoutWindows() {
+    if (!settings.store.persistPopoutWindows) {
+        settings.store.persistedPopoutWindowIds = [];
+        return;
+    }
+
+    settings.store.persistedPopoutWindowIds = getOpenPopoutChannelIds();
+}
+
+export function setAlwaysOnTopForOpenPopouts(value: boolean) {
+    for (const windowKey of getOpenPopoutWindowKeys()) {
+        PopoutActions.setAlwaysOnTop(windowKey, value);
+    }
+}
