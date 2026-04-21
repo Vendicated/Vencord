@@ -36,7 +36,6 @@ import { ContextMenuApi, Forms, Menu, Toasts, UserStore } from "@webpack/common"
 const CONTRIBUTOR_BADGE = "https://cdn.discordapp.com/emojis/1092089799109775453.png?size=64";
 
 const ContributorBadge: ProfileBadge = {
-    id: "vencord_contributor_badge",
     description: "Vencord Contributor",
     iconSrc: CONTRIBUTOR_BADGE,
     position: BadgePosition.START,
@@ -44,7 +43,7 @@ const ContributorBadge: ProfileBadge = {
     onClick: (_, { userId }) => openContributorModal(UserStore.getUser(userId))
 };
 
-let DonorBadges = {} as Record<string, Array<Record<"tooltip" | "badge", string>> | undefined>;
+let DonorBadges = {} as Record<string, Array<Record<"tooltip" | "badge", string>>>;
 
 async function loadBadges(noCache = false) {
     const init = {} as RequestInit;
@@ -57,7 +56,7 @@ async function loadBadges(noCache = false) {
 
 let intervalId: any;
 
-function BadgeContextMenu({ badge }: { badge: Omit<ProfileBadge, "id"> & BadgeUserArgs; }) {
+function BadgeContextMenu({ badge }: { badge: ProfileBadge & BadgeUserArgs; }) {
     return (
         <Menu.Menu
             navId="vc-badge-context"
@@ -174,9 +173,8 @@ export default definePlugin({
         return handlers;
     },
 
-    getDonorBadges(userId: string): ProfileBadge[] | undefined {
-        return DonorBadges[userId]?.map((badge, idx) => ({
-            id: `vencord_donor_badge_${idx}`,
+    getDonorBadges(userId: string) {
+        return DonorBadges[userId]?.map(badge => ({
             iconSrc: badge.badge,
             description: badge.tooltip,
             position: BadgePosition.START,
