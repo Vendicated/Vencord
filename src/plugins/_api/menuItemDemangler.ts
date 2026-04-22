@@ -7,6 +7,7 @@
 import { Devs } from "@utils/constants";
 import { canonicalizeMatch } from "@utils/patches";
 import definePlugin from "@utils/types";
+import { Menu } from "@webpack/common";
 
 // duplicate values have multiple branches with different types. Just include all to be safe
 const nameMap = {
@@ -53,10 +54,11 @@ export default definePlugin({
                         if (type && type in nameMap) {
                             const name = nameMap[type];
                             nameAssignments.push(`Object.defineProperty(${item},"name",{value:"${name}"})`);
+                            nameAssignments.push(`$self.registerMenuItem("${name}",${item})`);
                         }
                     }
-                    if (nameAssignments.length < 6) {
-                        console.warn("[MenuItemDemanglerAPI] Expected to at least remap 6 items, only remapped", nameAssignments.length);
+                    if (nameAssignments.length / 2 !== 6) {
+                        console.warn("[MenuItemDemanglerAPI] Expected to remap 6 items, only remapped", nameAssignments.length);
                     }
 
                     // Merge all our redefines with the actual module
@@ -65,4 +67,7 @@ export default definePlugin({
             },
         },
     ],
+    registerMenuItem(name: string, item: any) {
+        Menu[name] = item;
+    }
 });
