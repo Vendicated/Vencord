@@ -31,7 +31,7 @@ export default definePlugin({
         {
             find: "Menu API only allows Items",
             replacement: {
-                match: /function.{0,80}type===(\i\.\i)\).{0,50}navigable:.+?Menu API/s,
+                match: /function.{0,200}return\(function.{0,200}\i\.type===(\i\.\i)\).{0,100}?navigable:.+?Menu API/s,
                 replace: (m, mod) => {
                     const nameAssignments = [] as string[];
 
