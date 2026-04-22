@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { filters, findByCodeLazy, mapMangledModuleLazy } from "@webpack";
+import { FilterFn, filters, findByCodeLazy, mapMangledModuleLazy } from "@webpack";
 import type { ComponentType, PropsWithChildren, ReactNode, Ref } from "react";
 
 import { LazyComponent } from "./react";
@@ -48,6 +48,11 @@ export interface ModalOptions {
 }
 
 type RenderFunction = (props: ModalProps) => ReactNode | Promise<ReactNode>;
+
+const anyCode = (...filtersToTry: FilterFn[]): FilterFn => m => filtersToTry.some(filter => filter(m));
+
+const findModalModule = /MODAL_ROOT(?:_LEGACY)?|headerIdIsManaged:/;
+const findModalApiModule = /\.modalKey\?|headerIdIsManaged:|key==|onCloseCallback\(\)/;
 
 interface Modals {
     ModalRoot: ComponentType<PropsWithChildren<{
@@ -101,13 +106,29 @@ interface Modals {
     }>;
 }
 
-// TODO: move to new modal api
-export const Modals: Modals = mapMangledModuleLazy(".MODAL_ROOT_LEGACY,", {
-    ModalRoot: filters.componentByCode('.MODAL,"aria-labelledby":'),
-    ModalHeader: filters.componentByCode(",id:"),
-    ModalContent: filters.componentByCode("scrollbarType:"),
-    ModalFooter: filters.componentByCode(".HORIZONTAL_REVERSE,"),
-    ModalCloseButton: filters.componentByCode(".withCircleBackground")
+export const Modals: Modals = mapMangledModuleLazy(findModalModule, {
+    ModalRoot: anyCode(
+        filters.componentByCode('.MODAL,"aria-labelledby":'),
+        filters.componentByCode("headerId:void 0,headerIdIsManaged:!1"),
+        filters.componentByCode("headerIdIsManaged:")
+    ),
+    ModalHeader: anyCode(
+        filters.componentByCode(",id:"),
+        filters.componentByCode("separator:", ",id:")
+    ),
+    ModalContent: anyCode(
+        filters.componentByCode("scrollbarType:"),
+        filters.componentByCode("scrollerRef:")
+    ),
+    ModalFooter: anyCode(
+        filters.componentByCode(".HORIZONTAL_REVERSE,"),
+        filters.componentByCode("separator:", ".HORIZONTAL_REVERSE,")
+    ),
+    ModalCloseButton: anyCode(
+        filters.componentByCode(".withCircleBackground"),
+        filters.componentByCode("hideOnFullscreen"),
+        filters.componentByCode("focusProps:", "onClick:")
+    )
 });
 
 export const ModalRoot = LazyComponent(() => Modals.ModalRoot);
@@ -166,11 +187,25 @@ interface ModalAPI {
     closeAllModals: () => void;
 }
 
-export const ModalAPI: ModalAPI = mapMangledModuleLazy(".modalKey?", {
-    openModalLazy: filters.byCode(".modalKey?"),
-    openModal: filters.byCode(",instant:"),
-    closeModal: filters.byCode(".onCloseCallback()"),
-    closeAllModals: filters.byCode(".getState();for")
+export const ModalAPI: ModalAPI = mapMangledModuleLazy(findModalApiModule, {
+    openModalLazy: anyCode(
+        filters.byCode(".modalKey?"),
+        filters.byCode("modalKey:"),
+        filters.byCode("contextKey:")
+    ),
+    openModal: anyCode(
+        filters.byCode(",instant:"),
+        filters.byCode("headerIdIsManaged:"),
+        filters.byCode("onCloseRequest:")
+    ),
+    closeModal: anyCode(
+        filters.byCode(".onCloseCallback()"),
+        filters.byCode("key==")
+    ),
+    closeAllModals: anyCode(
+        filters.byCode(".getState();for"),
+        filters.byCode("for(const", ".getState()")
+    )
 });
 
 export const { openModalLazy, openModal, closeModal, closeAllModals } = ModalAPI;
