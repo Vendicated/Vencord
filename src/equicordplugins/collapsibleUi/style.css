@@ -10,12 +10,29 @@
     initial-value: 160ms;
 }
 
-body:has(.vc-collapsible-ui-state) {
+:root {
     --vc-cui-chat-buttons-width: min(320px, 36vw);
     --vc-cui-hover-peek: var(--vc-cui-collapsed-size);
     --vc-cui-hover-delay: 120ms;
     --vc-cui-user-area-collapsed-width: 52px;
     --vc-cui-ease: cubic-bezier(.2, 0, 0, 1);
+    --vc-cui-fade-transition: opacity var(--vc-cui-transition) var(--vc-cui-ease);
+    --vc-cui-inline-transition:
+        width var(--vc-cui-transition) var(--vc-cui-ease),
+        inline-size var(--vc-cui-transition) var(--vc-cui-ease),
+        min-width var(--vc-cui-transition) var(--vc-cui-ease),
+        min-inline-size var(--vc-cui-transition) var(--vc-cui-ease),
+        max-width var(--vc-cui-transition) var(--vc-cui-ease),
+        max-inline-size var(--vc-cui-transition) var(--vc-cui-ease),
+        flex-basis var(--vc-cui-transition) var(--vc-cui-ease);
+    --vc-cui-block-transition:
+        height var(--vc-cui-transition) var(--vc-cui-ease),
+        block-size var(--vc-cui-transition) var(--vc-cui-ease),
+        min-height var(--vc-cui-transition) var(--vc-cui-ease),
+        min-block-size var(--vc-cui-transition) var(--vc-cui-ease),
+        max-height var(--vc-cui-transition) var(--vc-cui-ease),
+        max-block-size var(--vc-cui-transition) var(--vc-cui-ease),
+        padding var(--vc-cui-transition) var(--vc-cui-ease)
 }
 
 body:has(.vc-collapsible-ui-collapsed-size-8) {
@@ -82,104 +99,69 @@ body:has(.vc-collapsible-ui-transition-320) {
     --vc-cui-transition: 320ms
 }
 
-:root {
-    --vc-cui-inline-transition:
-        width var(--vc-cui-transition) var(--vc-cui-ease),
-        inline-size var(--vc-cui-transition) var(--vc-cui-ease),
-        min-width var(--vc-cui-transition) var(--vc-cui-ease),
-        min-inline-size var(--vc-cui-transition) var(--vc-cui-ease),
-        max-width var(--vc-cui-transition) var(--vc-cui-ease),
-        max-inline-size var(--vc-cui-transition) var(--vc-cui-ease),
-        flex-basis var(--vc-cui-transition) var(--vc-cui-ease);
-    --vc-cui-block-transition:
-        height var(--vc-cui-transition) var(--vc-cui-ease),
-        block-size var(--vc-cui-transition) var(--vc-cui-ease),
-        min-height var(--vc-cui-transition) var(--vc-cui-ease),
-        min-block-size var(--vc-cui-transition) var(--vc-cui-ease),
-        max-height var(--vc-cui-transition) var(--vc-cui-ease),
-        max-block-size var(--vc-cui-transition) var(--vc-cui-ease),
-        padding var(--vc-cui-transition) var(--vc-cui-ease);
-}
-
 body:has(.vc-collapsible-ui-guild-bar-collapsed) nav[class*="guilds_"] {
+    position: relative;
+    z-index: 1;
     overflow: hidden !important;
-    transition: var(--vc-cui-inline-transition) !important;
+    transition: var(--vc-cui-inline-transition) !important
 }
 
-body:has(.vc-collapsible-ui-guild-bar-collapsed):is( :has(nav[class*="guilds_"]:hover),
-    :has(nav[class*="guilds_"]:focus-within)) nav[class*="guilds_"] {
+body:has(.vc-collapsible-ui-guild-bar-collapsed) nav[class*="guilds_"]:is(:hover, :focus-within) {
+    z-index: 3;
     transition-delay: var(--vc-cui-hover-delay)
 }
 
-body:has(.vc-collapsible-ui-guild-bar-collapsed):is( :has(nav[class*="guilds_"]:hover),
-    :has(nav[class*="guilds_"]:focus-within)) nav[class*="guilds_"] > :where(*) {
-    opacity: 1;
-    pointer-events: auto;
-    transition: opacity var(--vc-cui-transition) var(--vc-cui-ease);
-    transition-delay: var(--vc-cui-hover-delay);
-}
-
-body:has(.vc-collapsible-ui-guild-bar-collapsed):not( :has(nav[class*="guilds_"]:hover),
-    :has(nav[class*="guilds_"]:focus-within)) nav[class*="guilds_"] {
+body:has(.vc-collapsible-ui-guild-bar-collapsed) nav[class*="guilds_"]:not(:is(:hover, :focus-within)) {
     width: var(--vc-cui-collapsed-size) !important;
     inline-size: var(--vc-cui-collapsed-size) !important;
     min-width: var(--vc-cui-collapsed-size) !important;
     min-inline-size: var(--vc-cui-collapsed-size) !important;
     max-width: var(--vc-cui-collapsed-size) !important;
     max-inline-size: var(--vc-cui-collapsed-size) !important;
-    flex: 0 0 var(--vc-cui-collapsed-size) !important;
+    flex: 0 0 var(--vc-cui-collapsed-size) !important
 }
 
-body:has(.vc-collapsible-ui-guild-bar-collapsed):not( :has(nav[class*="guilds_"]:hover),
-    :has(nav[class*="guilds_"]:focus-within)) nav[class*="guilds_"] > :where(*) {
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity var(--vc-cui-transition) var(--vc-cui-ease);
+body:has(.vc-collapsible-ui-channel-list-collapsed) [class*="sidebarList_"] {
+    overflow: hidden !important;
+    transition: var(--vc-cui-inline-transition) !important
 }
 
-body:has(.vc-collapsible-ui-channel-list-collapsed):has([class*="sidebarList_"]:hover) [class*="sidebarList_"] {
+body:has(.vc-collapsible-ui-channel-list-collapsed) [class*="sidebarList_"]:is(:hover, :focus-within) {
     transition-delay: var(--vc-cui-hover-delay)
 }
 
-body:has(.vc-collapsible-ui-channel-list-collapsed):has([class*="sidebarList_"]:hover) [class*="sidebarList_"] > * {
+body:has(.vc-collapsible-ui-channel-list-collapsed) [class*="sidebarList_"]:is(:hover, :focus-within) > * {
     opacity: 1;
     pointer-events: auto;
-    transition: opacity var(--vc-cui-transition) var(--vc-cui-ease);
-    transition-delay: var(--vc-cui-hover-delay);
+    transition: var(--vc-cui-fade-transition);
+    transition-delay: var(--vc-cui-hover-delay)
 }
 
-body:has(.vc-collapsible-ui-channel-list-collapsed):not( :has([class*="sidebarList_"]:hover),
-    :has([class*="sidebar_"] > [class*="panels_"]:hover)) [class*="sidebarList_"] {
+body:has(.vc-collapsible-ui-channel-list-collapsed):not(:has([class*="sidebar_"] > [class*="panels_"]:is(:hover, :focus-within))) [class*="sidebarList_"]:not(:is(:hover, :focus-within)) {
     width: var(--vc-cui-collapsed-size) !important;
     inline-size: var(--vc-cui-collapsed-size) !important;
     min-width: var(--vc-cui-collapsed-size) !important;
     min-inline-size: var(--vc-cui-collapsed-size) !important;
     max-width: var(--vc-cui-collapsed-size) !important;
     max-inline-size: var(--vc-cui-collapsed-size) !important;
-    flex: 0 0 var(--vc-cui-collapsed-size) !important;
+    flex: 0 0 var(--vc-cui-collapsed-size) !important
+}
+
+body:has(.vc-collapsible-ui-channel-list-collapsed) [class*="sidebar_"] > [class*="panels_"] {
     overflow: hidden !important;
-    transition: var(--vc-cui-inline-transition) !important;
+    transition: var(--vc-cui-inline-transition) !important
 }
 
-body:has(.vc-collapsible-ui-channel-list-collapsed):not( :has([class*="sidebarList_"]:hover),
-    :has([class*="sidebar_"] > [class*="panels_"]:hover)) [class*="sidebarList_"] > * {
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity var(--vc-cui-transition) var(--vc-cui-ease);
-}
-
-body:has(.vc-collapsible-ui-channel-list-collapsed):not( :has([class*="sidebar_"] > [class*="panels_"]:hover)) [class*="sidebar_"] > [class*="panels_"] {
+body:has(.vc-collapsible-ui-channel-list-collapsed) [class*="sidebar_"] > [class*="panels_"]:not(:is(:hover, :focus-within)) {
     width: var(--vc-cui-user-area-collapsed-width) !important;
     inline-size: var(--vc-cui-user-area-collapsed-width) !important;
     min-width: var(--vc-cui-user-area-collapsed-width) !important;
     min-inline-size: var(--vc-cui-user-area-collapsed-width) !important;
     max-width: var(--vc-cui-user-area-collapsed-width) !important;
-    max-inline-size: var(--vc-cui-user-area-collapsed-width) !important;
-    overflow: hidden !important;
-    transition: var(--vc-cui-inline-transition) !important;
+    max-inline-size: var(--vc-cui-user-area-collapsed-width) !important
 }
 
-body:has(.vc-collapsible-ui-channel-list-collapsed):not( :has([class*="sidebar_"] > [class*="panels_"]:hover)) .vc-collapsible-ui-user-area-controls {
+body:has(.vc-collapsible-ui-channel-list-collapsed) [class*="sidebar_"] > [class*="panels_"]:not(:is(:hover, :focus-within)) .vc-collapsible-ui-user-area-controls {
     max-width: 0 !important;
     min-width: 0 !important;
     overflow: hidden !important;
@@ -187,58 +169,60 @@ body:has(.vc-collapsible-ui-channel-list-collapsed):not( :has([class*="sidebar_"
     pointer-events: none;
     transition:
         max-width var(--vc-cui-transition) var(--vc-cui-ease),
-        opacity var(--vc-cui-transition) var(--vc-cui-ease) !important;
+        opacity var(--vc-cui-transition) var(--vc-cui-ease) !important
 }
 
-body:has(.vc-collapsible-ui-channel-list-collapsed):has([class*="sidebar_"] > [class*="panels_"]:hover) .vc-collapsible-ui-user-area-controls {
+body:has(.vc-collapsible-ui-channel-list-collapsed) [class*="sidebar_"] > [class*="panels_"]:is(:hover, :focus-within) .vc-collapsible-ui-user-area-controls {
     opacity: 1;
-    pointer-events: auto;
+    pointer-events: auto
 }
 
 body:has(.vc-collapsible-ui-members-list-collapsed) [class*="membersWrap"] {
     overflow: hidden !important;
-    transition:
-        width var(--vc-cui-transition) var(--vc-cui-ease),
-        min-width var(--vc-cui-transition) var(--vc-cui-ease),
-        max-width var(--vc-cui-transition) var(--vc-cui-ease) !important;
+    transition: var(--vc-cui-inline-transition) !important
 }
 
-body:has(.vc-collapsible-ui-members-list-collapsed):is( :has([class*="membersWrap"]:hover),
-    :has([class*="membersWrap"]:focus-within)) [class*="membersWrap"] {
+body:has(.vc-collapsible-ui-members-list-collapsed) [class*="membersWrap"]:is(:hover, :focus-within) {
     transition-delay: var(--vc-cui-hover-delay)
 }
 
-body:has(.vc-collapsible-ui-members-list-collapsed):is( :has([class*="membersWrap"]:hover),
-    :has([class*="membersWrap"]:focus-within)) [class*="membersWrap"] > :where(*) {
+body:has(.vc-collapsible-ui-members-list-collapsed) [class*="membersWrap"]:is(:hover, :focus-within) > * {
     opacity: 1;
     pointer-events: auto;
-    transition: opacity var(--vc-cui-transition) var(--vc-cui-ease);
-    transition-delay: var(--vc-cui-hover-delay);
+    transition: var(--vc-cui-fade-transition);
+    transition-delay: var(--vc-cui-hover-delay)
 }
 
-body:has(.vc-collapsible-ui-members-list-collapsed):not( :has([class*="membersWrap"]:hover),
-    :has([class*="membersWrap"]:focus-within)) [class*="membersWrap"] {
+body:has(.vc-collapsible-ui-members-list-collapsed) [class*="membersWrap"]:not(:is(:hover, :focus-within)) {
     width: var(--vc-cui-collapsed-size) !important;
     min-width: var(--vc-cui-collapsed-size) !important;
-    max-width: var(--vc-cui-collapsed-size) !important;
+    max-width: var(--vc-cui-collapsed-size) !important
 }
 
-body:has(.vc-collapsible-ui-members-list-collapsed):not( :has([class*="membersWrap"]:hover),
-    :has([class*="membersWrap"]:focus-within)) [class*="membersWrap"] > :where(*) {
+body:has(.vc-collapsible-ui-members-list-collapsed) [class*="membersWrap"]:not(:is(:hover, :focus-within)) > * {
     opacity: 0;
     pointer-events: none;
-    transition: opacity var(--vc-cui-transition) var(--vc-cui-ease);
+    transition: var(--vc-cui-fade-transition)
 }
 
-body:has(.vc-collapsible-ui-user-area-collapsed):is( :has([class*="sidebar_"] > [class*="panels_"]:hover),
-    :has([class*="sidebar_"] > [class*="panels_"]:focus-within)) [class*="sidebar_"] > [class*="panels_"] > :where(*) {
+body:has(.vc-collapsible-ui-guild-bar-collapsed) nav[class*="guilds_"]:is(:hover, :focus-within) > * {
+    opacity: 1;
+    transition: var(--vc-cui-fade-transition);
+    transition-delay: var(--vc-cui-hover-delay)
+}
+
+body:has(.vc-collapsible-ui-guild-bar-collapsed) nav[class*="guilds_"]:not(:is(:hover, :focus-within)) > * {
+    opacity: 0;
+    transition: var(--vc-cui-fade-transition)
+}
+
+body:has(.vc-collapsible-ui-user-area-collapsed) [class*="sidebar_"] > [class*="panels_"]:is(:hover, :focus-within) > * {
     opacity: 1;
     pointer-events: auto;
-    transition: opacity var(--vc-cui-transition) var(--vc-cui-ease);
+    transition: var(--vc-cui-fade-transition)
 }
 
-body:has(.vc-collapsible-ui-user-area-collapsed):not( :has([class*="sidebar_"] > [class*="panels_"]:hover),
-    :has([class*="sidebar_"] > [class*="panels_"]:focus-within)) [class*="sidebar_"] > [class*="panels_"] {
+body:has(.vc-collapsible-ui-user-area-collapsed) [class*="sidebar_"] > [class*="panels_"]:not(:is(:hover, :focus-within)) {
     height: var(--vc-cui-hover-peek) !important;
     block-size: var(--vc-cui-hover-peek) !important;
     min-height: var(--vc-cui-hover-peek) !important;
@@ -248,65 +232,66 @@ body:has(.vc-collapsible-ui-user-area-collapsed):not( :has([class*="sidebar_"] >
     overflow: hidden !important;
     border-top-width: 0 !important;
     padding-block: 0 !important;
-    transition: var(--vc-cui-block-transition) !important;
+    transition: var(--vc-cui-block-transition) !important
 }
 
-body:has(.vc-collapsible-ui-user-area-collapsed):not( :has([class*="sidebar_"] > [class*="panels_"]:hover),
-    :has([class*="sidebar_"] > [class*="panels_"]:focus-within)) [class*="sidebar_"] > [class*="panels_"] > :where(*) {
+body:has(.vc-collapsible-ui-user-area-collapsed) [class*="sidebar_"] > [class*="panels_"]:not(:is(:hover, :focus-within)) > * {
     opacity: 0;
     pointer-events: none;
-    transition: opacity var(--vc-cui-transition) var(--vc-cui-ease);
+    transition: var(--vc-cui-fade-transition)
 }
 
-body:has(.vc-collapsible-ui-guild-bar-collapsed):has(.vc-collapsible-ui-channel-list-collapsed):not( :has([class*="sidebar_"] > [class*="panels_"]:hover)) [class*="sidebar_"] > [class*="panels_"] {
+body:has(.vc-collapsible-ui-guild-bar-collapsed):has(.vc-collapsible-ui-channel-list-collapsed) [class*="sidebar_"] > [class*="panels_"]:not(:is(:hover, :focus-within)) {
     width: calc(var(--vc-cui-hover-peek) + 4px) !important;
     inline-size: calc(var(--vc-cui-hover-peek) + 4px) !important;
     min-width: calc(var(--vc-cui-hover-peek) + 4px) !important;
     min-inline-size: calc(var(--vc-cui-hover-peek) + 4px) !important;
     max-width: calc(var(--vc-cui-hover-peek) + 4px) !important;
-    max-inline-size: calc(var(--vc-cui-hover-peek) + 4px) !important;
+    max-inline-size: calc(var(--vc-cui-hover-peek) + 4px) !important
 }
 
 body:has(.vc-collapsible-ui-title-bar-collapsed) section[class*="title_"][class*="container__"] {
     overflow: hidden !important;
-    transition: var(--vc-cui-block-transition) !important;
+    transition: var(--vc-cui-block-transition) !important
 }
 
-body:has(.vc-collapsible-ui-title-bar-collapsed):is( :has(section[class*="title_"][class*="container__"]:hover),
-    :has(section[class*="title_"][class*="container__"]:focus-within)) section[class*="title_"][class*="container__"] {
+body:has(.vc-collapsible-ui-title-bar-collapsed) section[class*="title_"][class*="container__"]:is(:hover, :focus-within) {
     transition-delay: var(--vc-cui-hover-delay)
 }
 
-body:has(.vc-collapsible-ui-title-bar-collapsed):is( :has(section[class*="title_"][class*="container__"]:hover),
-    :has(section[class*="title_"][class*="container__"]:focus-within)) section[class*="title_"][class*="container__"] > :where(*) {
+body:has(.vc-collapsible-ui-title-bar-collapsed) section[class*="title_"][class*="container__"]:is(:hover, :focus-within) > * {
     opacity: 1;
     pointer-events: auto;
-    transition: opacity var(--vc-cui-transition) var(--vc-cui-ease);
-    transition-delay: var(--vc-cui-hover-delay);
+    transition: var(--vc-cui-fade-transition);
+    transition-delay: var(--vc-cui-hover-delay)
 }
 
-body:has(.vc-collapsible-ui-title-bar-collapsed):not( :has(section[class*="title_"][class*="container__"]:hover),
-    :has(section[class*="title_"][class*="container__"]:focus-within)) section[class*="title_"][class*="container__"] {
+body:has(.vc-collapsible-ui-title-bar-collapsed) section[class*="title_"][class*="container__"]:not(:is(:hover, :focus-within)) {
     height: var(--vc-cui-hover-peek) !important;
     block-size: var(--vc-cui-hover-peek) !important;
     min-height: var(--vc-cui-hover-peek) !important;
     min-block-size: var(--vc-cui-hover-peek) !important;
     max-height: var(--vc-cui-hover-peek) !important;
     max-block-size: var(--vc-cui-hover-peek) !important;
-    padding-block: 0 !important;
+    padding-block: 0 !important
 }
 
-body:has(.vc-collapsible-ui-title-bar-collapsed):not( :has(section[class*="title_"][class*="container__"]:hover),
-    :has(section[class*="title_"][class*="container__"]:focus-within)) section[class*="title_"][class*="container__"] > :where(*) {
+body:has(.vc-collapsible-ui-title-bar-collapsed) section[class*="title_"][class*="container__"]:not(:is(:hover, :focus-within)) > * {
     opacity: 0;
     pointer-events: none;
-    transition: opacity var(--vc-cui-transition) var(--vc-cui-ease);
+    transition: var(--vc-cui-fade-transition)
+}
+
+body:has(.vc-collapsible-ui-channel-list-collapsed):not(:has([class*="sidebar_"] > [class*="panels_"]:is(:hover, :focus-within))) [class*="sidebarList_"]:not(:is(:hover, :focus-within)) > * {
+    opacity: 0;
+    pointer-events: none;
+    transition: var(--vc-cui-fade-transition)
 }
 
 .vc-collapsible-ui-chat-buttons {
     display: flex;
     align-items: center;
-    min-inline-size: 0;
+    min-inline-size: 0
 }
 
 .vc-collapsible-ui-chat-buttons-collapsed {
@@ -322,20 +307,20 @@ body:has(.vc-collapsible-ui-title-bar-collapsed):not( :has(section[class*="title
     transition:
         max-inline-size var(--vc-cui-transition) var(--vc-cui-ease),
         opacity var(--vc-cui-transition) var(--vc-cui-ease),
-        margin var(--vc-cui-transition) var(--vc-cui-ease);
+        margin var(--vc-cui-transition) var(--vc-cui-ease)
 }
 
 .vc-collapsible-ui-chat-buttons-collapsed .vc-collapsible-ui-chat-buttons-items {
     max-inline-size: 0;
     opacity: 0;
-    pointer-events: none;
+    pointer-events: none
 }
 
-.vc-collapsible-ui-chat-buttons-collapsed:hover .vc-collapsible-ui-chat-buttons-items {
+.vc-collapsible-ui-chat-buttons-collapsed:is(:hover, :focus-within) .vc-collapsible-ui-chat-buttons-items {
     max-inline-size: var(--vc-cui-chat-buttons-width);
     opacity: 1;
     pointer-events: auto;
-    transition-delay: var(--vc-cui-hover-delay);
+    transition-delay: var(--vc-cui-hover-delay)
 }
 
 @media (prefers-reduced-motion: reduce) {
