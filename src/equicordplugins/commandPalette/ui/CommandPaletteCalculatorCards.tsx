@@ -229,8 +229,15 @@ function GraphView({ result }: { result: CalculatorResult; }) {
                         onMouseMove={event => {
                             const bounds = svgRef.current?.getBoundingClientRect();
                             if (!bounds) return;
-                            const scaleX = bounds.width / GRAPH_WIDTH;
-                            const localX = (event.clientX - bounds.left) / scaleX;
+
+                            const viewAspect = GRAPH_WIDTH / GRAPH_HEIGHT;
+                            const boundsAspect = bounds.width / bounds.height;
+                            const renderedWidth = boundsAspect > viewAspect
+                                ? bounds.height * viewAspect
+                                : bounds.width;
+                            const renderedLeft = bounds.left + (bounds.width - renderedWidth) / 2;
+                            const scaleX = renderedWidth / GRAPH_WIDTH;
+                            const localX = (event.clientX - renderedLeft) / scaleX;
                             const innerX = clamp(localX - GRAPH_PADDING_X, 0, GRAPH_INNER_WIDTH);
                             const clampedRatio = innerX / GRAPH_INNER_WIDTH;
                             const nextX = graph.domain[0] + (graph.domain[1] - graph.domain[0]) * clampedRatio;
