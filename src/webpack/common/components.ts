@@ -78,7 +78,7 @@ export function registerColorPicker(component: t.ColorPicker) {
 
 export const UserSummaryItem = waitForComponent("UserSummaryItem", filters.componentByCode("defaultRenderUser", "showDefaultAvatarsForNullUsers"));
 
-export let createScroller: (scrollbarClassName: string, fadeClassName: string, customThemeClassName: string) => t.ScrollerThin;
+export let createScroller: undefined | ((scrollbarClassName: string, fadeClassName: string, customThemeClassName: string) => t.ScrollerThin);
 export let createListScroller: (scrollBarClassName: string, fadeClassName: string, someOtherClassIdkMan: string, resizeObserverClass: typeof ResizeObserver) => t.ListScrollerThin;
 
 const listScrollerClassnames = ["thin", "auto", "fade"] as const;
@@ -93,12 +93,15 @@ export const listScrollerClasses = proxyLazyWebpack(() => {
     return mapMangledCssClasses(mod, listScrollerClassnames);
 });
 
-waitFor(filters.byCode('="ltr",orientation:', "customTheme:", "forwardRef"), m => createScroller = m);
+export function registerCreateScroller(cs: typeof createScroller & {}) {
+    createScroller = cs;
+}
+
 waitFor(filters.byCode("getScrollerNode:", "resizeObserver:", "sectionHeight:"), m => createListScroller = m);
 
-export const ScrollerNone = LazyComponent(() => createScroller(scrollerClasses.none, scrollerClasses.fade, scrollerClasses.customTheme));
-export const ScrollerThin = LazyComponent(() => createScroller(scrollerClasses.thin, scrollerClasses.fade, scrollerClasses.customTheme));
-export const ScrollerAuto = LazyComponent(() => createScroller(scrollerClasses.auto, scrollerClasses.fade, scrollerClasses.customTheme));
+export const ScrollerNone = LazyComponent(() => createScroller?.(scrollerClasses.none, scrollerClasses.fade, scrollerClasses.customTheme)!);
+export const ScrollerThin = LazyComponent(() => createScroller?.(scrollerClasses.thin, scrollerClasses.fade, scrollerClasses.customTheme)!);
+export const ScrollerAuto = LazyComponent(() => createScroller?.(scrollerClasses.auto, scrollerClasses.fade, scrollerClasses.customTheme)!);
 
 export const ListScrollerThin = LazyComponent(() => createListScroller(listScrollerClasses.thin, listScrollerClasses.fade, "", ResizeObserver));
 export const ListScrollerAuto = LazyComponent(() => createListScroller(listScrollerClasses.auto, listScrollerClasses.fade, "", ResizeObserver));
