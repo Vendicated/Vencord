@@ -37,7 +37,7 @@ export const getBuildNumber = makeLazy(() => {
             return Number(buildNumberMatch[1]);
         }
 
-        const hardcodedFactoryStr = String(wreq.m[446023]);
+        const hardcodedFactoryStr = String(wreq.m[927815]);
         if (hardcodedFactoryStr.includes("Trying to open a changelog for an invalid build number")) {
             const hardcodedBuildNumber = matchBuildNumber(hardcodedFactoryStr);
 
