@@ -34,7 +34,7 @@ export default definePlugin({
                     // patch simpler
 
                     // textCommands = builtInCommands.filter(...)
-                    match: /(?<=\w=)(\w)(\.filter\(.{0,60}tenor)/,
+                    match: /(?<=\w=)(\w)(\.filter\(.{0,60}"gif")/,
                     replace: "Vencord.Api.Commands._init($1)$2",
                 }
             ],
