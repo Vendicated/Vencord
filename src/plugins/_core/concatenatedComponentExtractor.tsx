@@ -6,6 +6,7 @@
 
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
+import { registerColorPicker } from "@webpack/common";
 
 export default definePlugin({
     name: "ConcatenatedComponentExtractor",
@@ -24,7 +25,5 @@ export default definePlugin({
         }
     ],
 
-    registerColorPicker(component: any) {
-        // ???
-    }
+    registerColorPicker,
 });
