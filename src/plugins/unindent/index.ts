@@ -23,6 +23,7 @@ import definePlugin from "@utils/types";
 export default definePlugin({
     name: "Unindent",
     description: "Trims leading indentation from codeblocks",
+    tags: ["Chat", "Utility"],
     authors: [Devs.Ven],
 
     patches: [

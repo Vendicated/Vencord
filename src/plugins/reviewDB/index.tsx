@@ -69,6 +69,7 @@ const userContextPatch: NavContextMenuPatchCallback = (children, { user }: { use
 export default definePlugin({
     name: "ReviewDB",
     description: "Review other users (Adds a new settings to profiles)",
+    tags: ["Friends", "Servers"],
     authors: [Devs.mantikafasi, Devs.Ven],
     dependencies: ["ProfileCollectionsAPI"],
 

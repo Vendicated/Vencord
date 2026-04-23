@@ -30,6 +30,7 @@ import { addProfileCollection, removeProfileCollection } from "@api/ProfileColle
 import { Settings, SettingsStore } from "@api/Settings";
 import { disableStyle, enableStyle } from "@api/Styles";
 import { addUserAreaButton, removeUserAreaButton } from "@api/UserArea";
+import { traceFunction } from "@debug/Tracer";
 import { Logger } from "@utils/Logger";
 import { onlyOnce } from "@utils/onlyOnce";
 import { canonicalizeFind, canonicalizeReplacement } from "@utils/patches";
@@ -40,9 +41,6 @@ import { patches } from "@webpack/patcher";
 
 import Plugins from "~plugins";
 export { Plugins as plugins };
-
-import { traceFunction } from "../debug/Tracer";
-
 const logger = new Logger("PluginManager", "#a6d189");
 
 export const PMLogger = logger;

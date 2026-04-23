@@ -97,7 +97,7 @@ function CloudSetupSection() {
             </Paragraph>
             <CheckedTextInput
                 key="backendUrl"
-                value={cloud.url}
+                initialValue={cloud.url}
                 onChange={async v => {
                     cloud.url = v;
                     cloud.authenticated = false;

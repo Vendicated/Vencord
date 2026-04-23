@@ -53,6 +53,7 @@ export default definePlugin({
     name: "SortFriendRequests",
     authors: [Devs.Megu],
     description: "Sorts friend requests by date of receipt",
+    tags: ["Friends", "Organisation"],
     settings,
 
     patches: [{
