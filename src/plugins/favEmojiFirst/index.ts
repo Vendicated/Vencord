@@ -37,6 +37,7 @@ export default definePlugin({
     name: "FavoriteEmojiFirst",
     authors: [Devs.Aria, Devs.Ven],
     description: "Puts your favorite emoji first in the emoji autocomplete.",
+    tags: ["Emotes", "Customisation"],
     patches: [
         {
             find: "renderResults({results:",

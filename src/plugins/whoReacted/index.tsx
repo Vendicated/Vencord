@@ -27,7 +27,7 @@ import { ChannelStore, Constants, FluxDispatcher, React, RestAPI, useEffect, use
 
 let Scroll: any = null;
 const queue = new Queue();
-let reactions: Record<string, ReactionCacheEntry>;
+let reactions: Record<string, ReactionCacheEntry> = {};
 
 function fetchReactions(msg: Message, emoji: ReactionEmoji, type: number) {
     const key = emoji.name + (emoji.id ? `:${emoji.id}` : "");
@@ -78,6 +78,7 @@ function handleClickAvatar(event: React.UIEvent<HTMLElement, Event>) {
 export default definePlugin({
     name: "WhoReacted",
     description: "Renders the avatars of users who reacted to a message",
+    tags: ["Reactions", "Chat", "Appearance"],
     authors: [Devs.Ven, Devs.KannaDev, Devs.newwares],
 
     patches: [

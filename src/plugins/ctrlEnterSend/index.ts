@@ -12,6 +12,7 @@ export default definePlugin({
     name: "CtrlEnterSend",
     authors: [Devs.UlyssesZhan],
     description: "Use Ctrl+Enter to send messages (customizable)",
+    tags: ["Shortcuts", "Chat"],
     settings: definePluginSettings({
         submitRule: {
             description: "The way to send a message",
@@ -44,7 +45,7 @@ export default definePlugin({
         {
             find: ".selectPreviousCommandOption(",
             replacement: {
-                match: /(?<=(\i)\.which!==\i\.\i.ENTER\|\|).{0,100}(\(0,\i\.\i\)\(\i\)).{0,100}(?=\|\|\(\i\.preventDefault)/,
+                match: /(?<=(\i)\.key!==\i\.\i.ENTER\|\|).{0,100}(\(0,\i\.\i\)\(\i\)).{0,100}(?=\|\|\(\i\.preventDefault)/,
                 replace: "!$self.shouldSubmit($1,$2)"
             }
         },
