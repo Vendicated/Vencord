@@ -30,7 +30,12 @@ export default definePlugin({
             find: '"ActivityStatus"),',
             replacement: [
                 {
-                    match: /(?<=className:\i,children:\[).*?(?=\i\(\),\i&&)/g,
+                    match: /(?<=className:\i,children:\[).*?(?=\i\(\),\i&&)/,
+                    replace: "",
+                    predicate: () => settings.store.removeGameActivityStatus,
+                },
+                {
+                    match: /(?<=className:\i,children:\[\i\(\),)null.*?tooltipClassName:\i\}\),/,
                     replace: "",
                     predicate: () => settings.store.removeGameActivityStatus,
                 },
