@@ -50,8 +50,8 @@ export default definePlugin({
         {
             find: "#{intl::PREMIUM_MESSAGE_LENGTH_UPSELL_TOOLTIP}",
             replacement: {
-                match: /return .+?,\i\?\(0,\i\.jsxs?.+?:\(0,\i\.jsxs?.+?#{intl::PREMIUM_MESSAGE_LENGTH_UPSELL_TOOLTIP}.+?\}\)\]\}\)(?=\})/,
-                replace: "$&,null"
+                match: /return \i\?\i\(\):\i\(\)(?<=#{intl::PREMIUM_MESSAGE_LENGTH_UPSELL_TOOLTIP_WITHOUT_LINK}.{0,200}?)/,
+                replace: "return null"
             }
         }
     ],
