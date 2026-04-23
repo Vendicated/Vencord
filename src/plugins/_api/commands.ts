@@ -26,7 +26,7 @@ export default definePlugin({
     patches: [
         // obtain BUILT_IN_COMMANDS instance
         {
-            find: ',"tenor"',
+            find: '"tableflip","unflip"',
             replacement: [
                 {
                     // Matches BUILT_IN_COMMANDS. This is not exported so this is
