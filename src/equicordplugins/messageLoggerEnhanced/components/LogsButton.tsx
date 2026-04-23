@@ -17,12 +17,10 @@
 */
 
 import { HeaderBarButton } from "@api/HeaderBar";
+import { LogsIcon } from "@components/Icons";
 import { cl } from "@equicordplugins/messageLoggerEnhanced/index";
-import { findComponentByCodeLazy } from "@webpack";
 
 import { openLogModal } from "./LogsModal";
-
-const Icon = findComponentByCodeLazy("0-1.27-.97l-2.5.7a3");
 
 export function OpenLogsButton() {
     return (
@@ -30,9 +28,7 @@ export function OpenLogsButton() {
             className={cl("toolbox-btn")}
             onClick={() => openLogModal()}
             tooltip={"Open Logs"}
-            icon={Icon}
+            icon={LogsIcon}
         />
     );
 }
-
-export { Icon as LogsIcon };
