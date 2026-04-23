@@ -1143,7 +1143,7 @@ export default definePlugin({
                     replace: "$1Infinity"
                 },
                 {
-                    match: /(\i)\.slice\(0,(Math\.max\(\i,\i(?:-\i\.length){2}\))\)/,
+                    match: /(\i)\.slice\(0,(Math\.max\(\d+?,\i(?:-\i\.length){2}\))\)/,
                     replace: "($1.sliceTo = $2, $1)"
                 }
             ]

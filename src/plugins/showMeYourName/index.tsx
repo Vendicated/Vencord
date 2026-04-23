@@ -26,7 +26,7 @@ import { JSX } from "react";
 const SMYNC = classNameFactory();
 const UserStore = findStoreLazy("UserStore");
 const wrapEmojis = findByCodeLazy("lastIndex;return");
-const adjustColor = findByCodeLazy("light1", "dark1", "toonStroke");
+const adjustColor = findByCodeLazy("light1", '.get("hsl.s"))');
 const AccessibilityStore = findStoreLazy("AccessibilityStore");
 
 const roleColorPattern = /^role((?:\+|-)\d{0,4})?$/iu;

@@ -94,18 +94,24 @@ export default definePlugin({
     isModified: true,
     settings,
     patches: [
-        ...[
-            '"MessageStore"',
-            '"ReadStateStore"'
-        ].map(find => ({
-            find,
+        {
+            find: '"MessageStore"',
             replacement: [
                 {
-                    match: /(?<=function (\i)\((\i)\){)(?=.*MESSAGE_CREATE:\1)/,
-                    replace: (_, _funcName, props) => `if($self.disableNotification(${props}.message)){return;};`
+                    match: /(?<=MESSAGE_CREATE:function\((\i)\){)/,
+                    replace: (_, props) => `if($self.disableNotification(${props}.message))return;`
                 }
             ]
-        })),
+        },
+        {
+            find: '"ReadStateStore"',
+            replacement: [
+                {
+                    match: /(?<=MESSAGE_CREATE:function\((\i)\){)/,
+                    replace: (_, props) => `if($self.disableNotification(${props}.message))return;`
+                }
+            ]
+        },
         {
             find: "`forum-post-action-bar-",
             replacement: [
