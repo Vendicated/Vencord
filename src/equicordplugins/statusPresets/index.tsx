@@ -160,7 +160,7 @@ export default definePlugin({
         {
             find: "#{intl::STATUS_MENU_LABEL}",
             replacement: {
-                match: /(:void 0\}\))\]/,
+                match: /(,\{onClose:\i\}\))\]/,
                 replace: "$1,$self.render()]"
             }
         }

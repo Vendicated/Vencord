@@ -52,8 +52,8 @@ export default definePlugin({
         {
             find: "#{intl::PREMIUM_MESSAGE_LENGTH_UPSELL_TOOLTIP}",
             replacement: {
-                match: /return \i\?\i\(\):\i\(\)(?<=#{intl::PREMIUM_MESSAGE_LENGTH_UPSELL_TOOLTIP_WITHOUT_LINK}.{0,200}?)/,
-                replace: "return null"
+                match: /(?<=\.CHANNEL_TEXT_AREA.{0,50}\i\]\)),\i\?.*?\}\)\]\}\)/,
+                replace: ""
             }
         }
     ],

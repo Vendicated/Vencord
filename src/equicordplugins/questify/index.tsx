@@ -1674,8 +1674,8 @@ export default definePlugin({
             // Adds the "Questify" sort option to the sort enum.
             find: "SUGGESTED=\"suggested\",",
             replacement: {
-                match: /return ((\i).SUGGESTED="suggested",)/,
-                replace: "return $2.QUESTIFY=\"questify\",$1"
+                match: /(\(\((\i)=\{\}\))(.SUGGESTED="suggested",)/,
+                replace: "$1.QUESTIFY=\"questify\",$2$3"
             }
         },
         {
@@ -1694,8 +1694,8 @@ export default definePlugin({
                     // Run Questify's sort function every time due to hook requirements but return
                     // early if not applicable. If the sort method is set to "Questify", replace the
                     // Quests with the sorted ones. Also, setup a trigger to rerender the memo.
-                    match: /(return \i.useMemo\(\(\)=>{)(?=if\(0===(\i).length\))/,
-                    replace: "const questRerenderTrigger=$self.useQuestRerender();const questifySorted=$self.sortQuests($2,arguments[1].sortMethod!==\"questify\");$1if(arguments[1].sortMethod===\"questify\"){$2=questifySorted;};"
+                    match: /(?<=userStatus\?.claimedAt.{0,50})(\i.useMemo\(\(\)=>{)(?=if\(0===(\i).length\))/,
+                    replace: "questRerenderTrigger=$self.useQuestRerender(),questifySorted=$self.sortQuests($2,arguments[1].sortMethod!==\"questify\"),$1if(arguments[1].sortMethod===\"questify\"){$2=questifySorted;};"
                 },
                 {
                     // Account for Quest status changes.
@@ -1704,7 +1704,7 @@ export default definePlugin({
                 },
                 {
                     // If we already applied Questify's sort, skip further sorting.
-                    match: /(?<=sortMethod:(\i).{0,115}?return )((\i).sort)/,
+                    match: /(?<=\{sortMethod:(\i).*?return )((\i).sort)/,
                     replace: "$1===\"questify\"?$3:$2"
                 },
                 {

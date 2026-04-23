@@ -325,8 +325,8 @@ export default definePlugin({
             find: "#{intl::UNREADS_TAB_LABEL})}",
             replacement: [
                 {
-                    match: /,(\i\?\(0,\i\.jsxs?\)\(\i\.\i\i\.Item)/,
-                    replace: ",$self.keywordTabBar()$&"
+                    match: /#{intl::Fn6Odn::raw}\)\}\):null/,
+                    replace: "$&,$self.keywordTabBar()"
                 },
                 {
                     match: /:(\i)===\i\.\i\.MENTIONS\?/,
@@ -335,7 +335,7 @@ export default definePlugin({
             ]
         },
         {
-            find: ".MENTIONS)});",
+            find: /.FOR_YOU\?.{0,30}\.MENTIONS\?/,
             replacement: {
                 match: /:(\i)===\i\.\i\.MENTIONS\?\(0,.+?onJump:(\i)}\)/,
                 replace: ": $1 === 8 ? $self.tryKeywordMenu($2) $&"

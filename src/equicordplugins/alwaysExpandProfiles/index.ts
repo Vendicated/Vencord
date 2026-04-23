@@ -17,7 +17,7 @@ export default definePlugin({
         {
             find: '"view-profile"',
             replacement: {
-                match: /("PRESS_VIEW_PROFILE".{0,200})return(?<=userId:(\i\.id).*?)/,
+                match: /(\.POPOUT_CLOSE.{0,200})return(?<=userId:(\i\.id).*?)/,
                 replace: "$1return $self.openUserModal($2);"
             },
             all: true

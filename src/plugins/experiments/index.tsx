@@ -125,7 +125,7 @@ export default definePlugin({
         {
             find: "{PlaygroundEmbed:()=>",
             replacement: {
-                match: /PotionIcon.{0,250}getCurrentUser\(\);return/,
+                match: /"Revenue".{0,250}getCurrentUser\(\);return/,
                 replace: "$& true||"
             }
         },
