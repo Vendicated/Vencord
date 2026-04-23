@@ -17,6 +17,7 @@ import { _blacklistBadModules, _initWebpack, factoryListeners, findModuleFactory
 
 export const patches = [] as Patch[];
 
+export const SYM_ORIGINAL_MODULE_FACTORIES = Symbol("WebpackPatcher.originalModuleFactories");
 export const SYM_IS_PROXIED_FACTORY = Symbol("WebpackPatcher.isProxiedFactory");
 export const SYM_ORIGINAL_FACTORY = Symbol("WebpackPatcher.originalFactory");
 export const SYM_PATCHED_SOURCE = Symbol("WebpackPatcher.patchedSource");
@@ -111,7 +112,7 @@ define(Function.prototype, "m", {
         // Currently, sentry and libdiscore Webpack instances are not meant to be patched.
         // As an extra measure, take advatange of the fact their files include the names and return early if it's one of them.
         // Later down we also include other measures to avoid patching them.
-        if (["sentry", "libdiscore"].some(name => fileName?.toLowerCase()?.includes(name))) {
+        if (["sentry", "libdiscore", "fast-connect"].some(name => fileName?.toLowerCase()?.includes(name))) {
             return;
         }
 
@@ -128,7 +129,7 @@ define(Function.prototype, "m", {
                 // libdiscore init Webpack instance always returns a constant string for the js filename of a chunk.
                 // In that case, avoid patching this instance,
                 // as it runs before the main Webpack instance and will make the WebpackRequire fallback not work properly, or init an wrongful main WebpackRequire.
-                if (bundlePath !== "/assets/" || /(?:=>|{return)"[^"]/.exec(String(this.u))) {
+                if (bundlePath !== "/assets/" || /(?:=>|{return)"[^"]+?"[^=]/.exec(String(this.u))) {
                     return;
                 }
 
@@ -235,6 +236,14 @@ const moduleFactoriesHandler: ProxyHandler<AnyWebpackRequire["m"]> = {
     },
     */
 
+    get(target, p, receiver) {
+        if (p === SYM_ORIGINAL_MODULE_FACTORIES) {
+            return target;
+        }
+
+        return Reflect.get(target, p, receiver);
+    },
+
     set: updateExistingOrProxyFactory
 };
 
@@ -291,11 +300,11 @@ function updateExistingOrProxyFactory(moduleFactories: AnyWebpackRequire["m"], m
  * @param ignoreExistingInTarget Whether to ignore checking if the factory already exists in the moduleFactories where it is being set
  * @returns Whether the original factory was updated, or false if it doesn't exist in any of the tracked Webpack instances
  */
-function updateExistingFactory(moduleFactories: AnyWebpackRequire["m"], moduleId: PropertyKey, newFactory: AnyModuleFactory, receiver: any, ignoreExistingInTarget) {
+function updateExistingFactory(moduleFactories: AnyWebpackRequire["m"], moduleId: PropertyKey, newFactory: AnyModuleFactory, receiver: any, ignoreExistingInTarget: boolean) {
     let existingFactory: AnyModuleFactory | undefined;
     let moduleFactoriesWithFactory: AnyWebpackRequire["m"] | undefined;
     for (const wreq of allWebpackInstances) {
-        if (ignoreExistingInTarget && wreq.m === moduleFactories) {
+        if (ignoreExistingInTarget && wreq.m[SYM_ORIGINAL_MODULE_FACTORIES] === moduleFactories) {
             continue;
         }
 
@@ -309,7 +318,7 @@ function updateExistingFactory(moduleFactories: AnyWebpackRequire["m"], moduleId
     if (existingFactory != null) {
         // If existingFactory exists in any of the Webpack instances we track, it's either wrapped in our proxy, or it has already been required.
         // In the case it is wrapped in our proxy, and the instance we are setting does not already have it, we need to make sure the instance contains our proxy too.
-        if (moduleFactoriesWithFactory !== moduleFactories && existingFactory[SYM_IS_PROXIED_FACTORY]) {
+        if (moduleFactoriesWithFactory?.[SYM_ORIGINAL_MODULE_FACTORIES] !== moduleFactories && existingFactory[SYM_IS_PROXIED_FACTORY]) {
             Reflect.set(moduleFactories, moduleId, existingFactory, receiver);
         }
         // Else, if it is not wrapped in our proxy, set this new original factory in all the instances
