@@ -109,7 +109,6 @@ export default definePlugin({
                 {
                     match: /(?<=MESSAGE_CREATE:function\((\i)\){)/,
                     replace: (_, props) => `if($self.disableNotification(${props}.message))return;`
-
                 }
             ]
         },
