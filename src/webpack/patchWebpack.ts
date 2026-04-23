@@ -319,11 +319,13 @@ function updateExistingFactory(moduleFactories: AnyWebpackRequire["m"], moduleId
 
     if (existingFactory != null) {
         // If existingFactory exists in any of the Webpack instances we track, it's either wrapped in our proxy, or it has already been required.
-        // In the case it is wrapped in our proxy, and the instance we are setting does not already have it, we need to make sure the instance contains our proxy too.
-        if (moduleFactoriesWithFactory !== moduleFactories && existingFactory[SYM_IS_PROXIED_FACTORY]) {
-            Reflect.set(moduleFactories, moduleId, existingFactory, receiver);
+        // In the case it is wrapped in our proxy, and the instance we are setting it does not already have it, we need to make sure the instance contains our proxy too.
+        if (existingFactory[SYM_IS_PROXIED_FACTORY]) {
+            if (moduleFactoriesWithFactory !== moduleFactories) {
+                Reflect.set(moduleFactories, moduleId, existingFactory, receiver);
+            }
         }
-        // Else, if it is not wrapped in our proxy, set this new original factory in all the instances
+        // else, if it is not wrapped in our proxy, set this new original factory in all the instances
         else {
             defineInWebpackInstances(moduleId, newFactory);
         }

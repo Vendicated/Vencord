@@ -16,18 +16,22 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { proxyLazy } from "@utils/lazy";
-import { findByCodeLazy, findByProps, findByPropsLazy } from "@webpack";
+import { findByCodeLazy, findByPropsLazy, waitFor } from "@webpack";
 
-export const React: typeof import("react") = proxyLazy(() => findByProps("useState", "createElement"));
-export const useState: typeof React.useState = proxyLazy(() => React.useState);
-export const useEffect: typeof React.useEffect = proxyLazy(() => React.useEffect);
-export const useLayoutEffect: typeof React.useLayoutEffect = proxyLazy(() => React.useLayoutEffect);
-export const useMemo: typeof React.useMemo = proxyLazy(() => React.useMemo);
-export const useRef: typeof React.useRef = proxyLazy(() => React.useRef);
-export const useReducer: typeof React.useReducer = proxyLazy(() => React.useReducer);
-export const useCallback: typeof React.useCallback = proxyLazy(() => React.useCallback);
+export let React: typeof import("react");
+export let useState: typeof React.useState;
+export let useEffect: typeof React.useEffect;
+export let useLayoutEffect: typeof React.useLayoutEffect;
+export let useMemo: typeof React.useMemo;
+export let useRef: typeof React.useRef;
+export let useReducer: typeof React.useReducer;
+export let useCallback: typeof React.useCallback;
 
 export const ReactDOM: typeof import("react-dom") = findByPropsLazy("createPortal");
 // 299 is an error code used in createRoot and createPortal
 export const createRoot: typeof import("react-dom/client").createRoot = findByCodeLazy("(299));", ".onRecoverableError");
+
+waitFor(["createElement", "useEffect"], m => {
+    React = m;
+    ({ useEffect, useState, useLayoutEffect, useMemo, useRef, useReducer, useCallback } = React);
+});
