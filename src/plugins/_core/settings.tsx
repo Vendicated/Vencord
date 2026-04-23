@@ -105,7 +105,7 @@ export default definePlugin({
             find: "#{intl::COPY_VERSION}",
             replacement: [
                 {
-                    match: /"text-xxs\/normal".{0,300}?(?=null!=(\i)&&(.{0,20}\i\.Text.{0,200}?,children:).{0,15}?("span"),({className:\i\.\i,children:\["Build Override: ",\1\.id\]\})\)\}\))/,
+                    match: /"text-xxs\/normal".{0,300}?(?=null!=(\i)&&(.{0,20}\i\.\i.{0,200}?,children:).{0,15}?("span"),({className:\i\.\i,children:\["Build Override: ",\1\.id\]\})\)\}\))/,
                     replace: (m, _buildOverride, makeRow, component, props) => {
                         props = props.replace(/children:\[.+\]/, "");
                         return `${m},$self.makeInfoElements(${component},${props}).map(e=>${makeRow}e})),`;

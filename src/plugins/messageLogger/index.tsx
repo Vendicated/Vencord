@@ -350,11 +350,20 @@ export default definePlugin({
 
     patches: [
         {
-            // MessageStore
             find: '"MessageStore"',
             replacement: [
                 {
                     // Add deleted=true to all target messages in the MESSAGE_DELETE event
+                    match: /(?<=MESSAGE_DELETE:function\((\i)\)\{)(?=let.{0,100}(\i\.\i)\.getOrCreate)/,
+                    replace: `
+                        let cache = $2.getOrCreate($1.channelId);
+                        cache = $self.handleDelete(cache, $1, false);
+                        $2.commit(cache);
+                        return;
+                    `
+                },
+                {
+                    noWarn: true,
                     match: /function (?=.+?MESSAGE_DELETE:(\i))\1\((\i)\){let.+?((?:\i\.){2})getOrCreate.+?}(?=function)/,
                     replace:
                         "function $1($2){" +
@@ -365,7 +374,17 @@ export default definePlugin({
                 },
                 {
                     // Add deleted=true to all target messages in the MESSAGE_DELETE_BULK event
+                    match: /(?<=MESSAGE_DELETE_BULK:function\((\i)\){)(?=let.{0,100}(\i\.\i)\.getOrCreate)/,
+                    replace: `
+                        let cache = $2.getOrCreate($1.channelId);
+                        cache = $self.handleDelete(cache, $1, true);
+                        $2.commit(cache);
+                        return;
+                    `
+                },
+                {
                     match: /function (?=.+?MESSAGE_DELETE_BULK:(\i))\1\((\i)\){let.+?((?:\i\.){2})getOrCreate.+?}(?=function)/,
+                    noWarn: true,
                     replace:
                         "function $1($2){" +
                         "   var cache = $3getOrCreate($2.channelId);" +
@@ -375,6 +394,20 @@ export default definePlugin({
                 },
                 {
                     // Add current cached content + new edit time to cached message's editHistory
+                    match: /(MESSAGE_UPDATE:function\((\i)\).+?)\.update\((\i)/,
+                    replace: `
+                        $1
+                        .update($3, m =>
+                            (($2.message.flags & 64) === 64 || $self.shouldIgnore($2.message, true)) ? m :
+                            $2.message.edited_timestamp && $2.message.content !== m.content ?
+                                m.set('editHistory',[...(m.editHistory || []), $self.makeEdit($2.message, m)]) :
+                                m
+                        )
+                        .update($3
+                    `
+                },
+                {
+                    noWarn: true,
                     match: /(function (\i)\((\i)\).+?)\.update\((\i)(?=.*MESSAGE_UPDATE:\2)/,
                     replace: "$1" +
                         ".update($4,m =>" +
@@ -494,12 +527,22 @@ export default definePlugin({
             find: '"ReferencedMessageStore"',
             replacement: [
                 {
+                    match: /(?<=MESSAGE_DELETE:function\(\i\)\{)/,
+                    replace: "return;"
+                },
+                {
+                    match: /(?<=MESSAGE_DELETE_BULK:function\(\i\)\{)/,
+                    replace: "return;"
+                },
+                {
                     match: /MESSAGE_DELETE:\i,/,
-                    replace: "MESSAGE_DELETE:()=>{},"
+                    replace: "MESSAGE_DELETE:()=>{},",
+                    noWarn: true
                 },
                 {
                     match: /MESSAGE_DELETE_BULK:\i,/,
-                    replace: "MESSAGE_DELETE_BULK:()=>{},"
+                    replace: "MESSAGE_DELETE_BULK:()=>{},",
+                    noWarn: true
                 }
             ]
         },
