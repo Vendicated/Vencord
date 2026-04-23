@@ -16,9 +16,11 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { BaseText } from "@components/BaseText";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Flex } from "@components/Flex";
 import { InfoIcon, OwnerCrownIcon } from "@components/Icons";
+import { Paragraph } from "@components/Paragraph";
 import { cl, getGuildPermissionSpecMap } from "@plugins/permissionsViewer/utils";
 import { copyToClipboard } from "@utils/clipboard";
 import { getIntlMessage, getUniqueUsername } from "@utils/discord";
@@ -26,7 +28,7 @@ import { ModalCloseButton, ModalContent, ModalHeader, ModalProps, ModalRoot, Mod
 import { Guild, Role, RoleOrUserPermission, UnicodeEmoji, User } from "@vencord/discord-types";
 import { PermissionOverwriteType } from "@vencord/discord-types/enums";
 import { findByCodeLazy } from "@webpack";
-import { ContextMenuApi, FluxDispatcher, GuildMemberStore, GuildRoleStore, i18n, Menu, PermissionsBits, ScrollerThin, Text, Tooltip, useEffect, useMemo, UserStore, useState, useStateFromStores } from "@webpack/common";
+import { ContextMenuApi, FluxDispatcher, GuildMemberStore, GuildRoleStore, i18n, Menu, PermissionsBits, ScrollerThin, Tooltip, useEffect, useMemo, UserStore, useState, useStateFromStores } from "@webpack/common";
 
 import { settings } from "..";
 import { PermissionAllowedIcon, PermissionDefaultIcon, PermissionDeniedIcon } from "./icons";
@@ -79,14 +81,14 @@ function RolesAndUsersPermissionsComponent({ permissions, guild, modalProps, hea
             size={ModalSize.LARGE}
         >
             <ModalHeader>
-                <Text className={cl("modal-title")} variant="heading-lg/semibold">{header} Permissions</Text>
+                <BaseText size="lg" weight="semibold" className={cl("modal-title")}>{header} Permissions</BaseText>
                 <ModalCloseButton onClick={modalProps.onClose} />
             </ModalHeader>
 
             <ModalContent className={cl("modal-content")}>
                 {!selectedItem && (
                     <div className={cl("modal-no-perms")}>
-                        <Text variant="heading-lg/normal">No permissions to display!</Text>
+                        <BaseText size="lg">No permissions to display!</BaseText>
                     </div>
                 )}
 
@@ -144,7 +146,7 @@ function RolesAndUsersPermissionsComponent({ permissions, guild, modalProps, hea
                                                     src={user.getAvatarURL(void 0, void 0, false)}
                                                 />
                                             )}
-                                            <Text variant="text-md/normal" className={cl("modal-list-item-text")}>
+                                            <Paragraph className={cl("modal-list-item-text")}>
                                                 {
                                                     permission.type === PermissionOverwriteType.ROLE
                                                         ? role?.name ?? "Unknown Role"
@@ -157,7 +159,7 @@ function RolesAndUsersPermissionsComponent({ permissions, guild, modalProps, hea
                                                                 </Flex>
                                                             )
                                                 }
-                                            </Text>
+                                            </Paragraph>
                                         </div>
                                     </div>
                                 );
@@ -184,7 +186,7 @@ function RolesAndUsersPermissionsComponent({ permissions, guild, modalProps, hea
                                             return PermissionDefaultIcon();
                                         })()}
                                     </div>
-                                    <Text variant="text-md/normal">{guildPermissionSpecMap[String(bit)].title}</Text>
+                                    <Paragraph>{guildPermissionSpecMap[String(bit)].title}</Paragraph>
 
                                     <Tooltip text={
                                         (() => {
