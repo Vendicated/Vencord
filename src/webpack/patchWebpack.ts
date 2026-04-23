@@ -186,7 +186,7 @@ define(Function.prototype, "m", {
 
             // Proxy (and maybe patch) pre-populated factories
             for (const moduleId in originalModules) {
-                updateExistingOrProxyFactory(originalModules, moduleId, originalModules[moduleId], originalModules, true);
+                proxyFactoryAndUpdateExisting(originalModules, moduleId, originalModules[moduleId], originalModules, true);
             }
 
             define(originalModules, Symbol.toStringTag, {
@@ -244,20 +244,22 @@ const moduleFactoriesHandler: ProxyHandler<AnyWebpackRequire["m"]> = {
         return Reflect.get(target, p, receiver);
     },
 
-    set: updateExistingOrProxyFactory
+    set: proxyFactoryAndUpdateExisting
 };
 
 // The proxy for patching lazily and/or running factories with our wrapper.
 const moduleFactoryHandler: ProxyHandler<MaybePatchedModuleFactory> = {
     apply(target, thisArg: unknown, argArray: Parameters<AnyModuleFactory>) {
-        // SYM_ORIGINAL_FACTORY means the factory has already been patched
+        // If SYM_ORIGINAL_FACTORY exists in the proxy target, it means the proxy target is already a patched factory.
+        // In that case, just run it.
         if (target[SYM_ORIGINAL_FACTORY] != null) {
             return runFactoryWithWrap(target as PatchedModuleFactory, thisArg, argArray);
         }
 
-        // SAFETY: Factories have `name` as their key in the module factories object, and that is always their module id
+        // SAFETY: Factories have `name` as their key in the module factories object, and that is always their module id.
         const moduleId: string = target.name;
 
+        // Patch the proxy target, which is the original factory.
         const patchedFactory = patchFactory(moduleId, target);
         return runFactoryWithWrap(patchedFactory, thisArg, argArray);
     },
@@ -267,9 +269,10 @@ const moduleFactoryHandler: ProxyHandler<MaybePatchedModuleFactory> = {
             return true;
         }
 
+        // If the proxy target is a patched factory, SYM_ORIGINAL_FACTORY will have the original factory. Otherwise the target itself will be it.
         const originalFactory: AnyModuleFactory = target[SYM_ORIGINAL_FACTORY] ?? target;
 
-        // Redirect these properties to the original factory, including making `toString` return the original factory `toString`
+        // Redirect getting these properties from the original factory, including making `toString` return the original factory `toString`
         if (p === "toString" || p === SYM_PATCHED_SOURCE || p === SYM_PATCHED_BY) {
             const v = Reflect.get(originalFactory, p, originalFactory);
             return p === "toString" ? v.bind(originalFactory) : v;
@@ -279,28 +282,29 @@ const moduleFactoryHandler: ProxyHandler<MaybePatchedModuleFactory> = {
     }
 };
 
-function updateExistingOrProxyFactory(moduleFactories: AnyWebpackRequire["m"], moduleId: PropertyKey, newFactory: AnyModuleFactory, receiver: any, ignoreExistingInTarget = false) {
-    if (updateExistingFactory(moduleFactories, moduleId, newFactory, receiver, ignoreExistingInTarget)) {
+function proxyFactoryAndUpdateExisting(moduleFactories: AnyWebpackRequire["m"], moduleId: PropertyKey, newFactory: AnyModuleFactory, receiver: any, ignoreExistingInTarget = false) {
+    notifyFactoryListeners(moduleId, newFactory);
+    const proxiedFactory = new Proxy(Settings.eagerPatches ? patchFactory(moduleId, newFactory) : newFactory, moduleFactoryHandler);
+
+    if (updateExistingFactory(moduleFactories, moduleId, newFactory, proxiedFactory, ignoreExistingInTarget)) {
         return true;
     }
 
-    notifyFactoryListeners(moduleId, newFactory);
-
-    const proxiedFactory = new Proxy(Settings.eagerPatches ? patchFactory(moduleId, newFactory) : newFactory, moduleFactoryHandler);
     return Reflect.set(moduleFactories, moduleId, proxiedFactory, receiver);
 }
 
 /**
- * Update a duplicated factory that exists in any of the Webpack instances we track with a new original factory.
+ * Update a duplicated factory that exists in any of the Webpack instances we track with a new original and proxied factory.
  *
  * @param moduleFactories The module factories where this new original factory is being set
  * @param moduleId The id of the module
  * @param newFactory The new original factory
+ * @param newProxiedFactory The new original and proxied factory
  * @param receiver The receiver of the factory
  * @param ignoreExistingInTarget Whether to ignore checking if the factory already exists in the moduleFactories where it is being set
  * @returns Whether the original factory was updated, or false if it doesn't exist in any of the tracked Webpack instances
  */
-function updateExistingFactory(moduleFactories: AnyWebpackRequire["m"], moduleId: PropertyKey, newFactory: AnyModuleFactory, receiver: any, ignoreExistingInTarget: boolean) {
+function updateExistingFactory(moduleFactories: AnyWebpackRequire["m"], moduleId: PropertyKey, newFactory: AnyModuleFactory, newProxiedFactory: AnyModuleFactory, ignoreExistingInTarget: boolean) {
     let existingFactory: AnyModuleFactory | undefined;
     let moduleFactoriesWithFactory: AnyWebpackRequire["m"] | undefined;
     for (const wreq of allWebpackInstances) {
@@ -318,27 +322,17 @@ function updateExistingFactory(moduleFactories: AnyWebpackRequire["m"], moduleId
     }
 
     if (existingFactory != null) {
-        // If existingFactory exists in any of the Webpack instances we track, it's either wrapped in our proxy, or it has already been required.
-        // In the case it is wrapped in our proxy, and the instance we are setting it does not already have it, we need to make sure the instance contains our proxy too.
-        if (existingFactory[SYM_IS_PROXIED_FACTORY]) {
-            if (moduleFactoriesWithFactory !== moduleFactories) {
-                Reflect.set(moduleFactories, moduleId, existingFactory, receiver);
-            }
-        }
-        // else, if it is not wrapped in our proxy, set this new original factory in all the instances
-        else {
-            defineInWebpackInstances(moduleId, newFactory);
-        }
-
-        // Update existingFactory with the new original, if it does have a current original factory
+        // SYM_ORIGINAL_FACTORY means the factory has already been patched. In this case, only update existingFactory original factory to the new one.
         if (existingFactory[SYM_ORIGINAL_FACTORY] != null) {
             existingFactory[SYM_ORIGINAL_FACTORY] = newFactory;
-        }
 
-        // Persist patched source and patched by in the new original factory
-        if (IS_DEV) {
-            newFactory[SYM_PATCHED_SOURCE] = existingFactory[SYM_PATCHED_SOURCE];
-            newFactory[SYM_PATCHED_BY] = existingFactory[SYM_PATCHED_BY];
+            // Persist patched source and patched by in the new original factory
+            if (IS_DEV) {
+                newFactory[SYM_PATCHED_SOURCE] = existingFactory[SYM_PATCHED_SOURCE];
+                newFactory[SYM_PATCHED_BY] = existingFactory[SYM_PATCHED_BY];
+            }
+        } else {
+            defineInWebpackInstances(moduleId, newProxiedFactory);
         }
 
         return true;
