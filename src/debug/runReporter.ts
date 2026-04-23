@@ -23,8 +23,8 @@ async function runReporter() {
         addPatch({
             find: '"Could not find app-mount"',
             replacement: {
-                match: /(?<="use strict";)/,
-                replace: "Vencord.Webpack._initReporter();"
+                match: /"Could not find app-mount"/,
+                replace: "(Vencord.Webpack._initReporter(),$&)"
             }
         }, "Vencord Reporter");
 

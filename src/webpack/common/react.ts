@@ -31,7 +31,7 @@ export const ReactDOM: typeof import("react-dom") = findByPropsLazy("createPorta
 // 299 is an error code used in createRoot and createPortal
 export const createRoot: typeof import("react-dom/client").createRoot = findByCodeLazy("(299));", ".onRecoverableError");
 
-waitFor("useState", m => {
+waitFor(["createElement", "useEffect"], m => {
     React = m;
     ({ useEffect, useState, useLayoutEffect, useMemo, useRef, useReducer, useCallback } = React);
 });
