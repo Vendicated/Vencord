@@ -363,16 +363,6 @@ export default definePlugin({
                     `
                 },
                 {
-                    noWarn: true,
-                    match: /function (?=.+?MESSAGE_DELETE:(\i))\1\((\i)\){let.+?((?:\i\.){2})getOrCreate.+?}(?=function)/,
-                    replace:
-                        "function $1($2){" +
-                        "   var cache = $3getOrCreate($2.channelId);" +
-                        "   cache = $self.handleDelete(cache, $2, false);" +
-                        "   $3commit(cache);" +
-                        "}"
-                },
-                {
                     // Add deleted=true to all target messages in the MESSAGE_DELETE_BULK event
                     match: /(?<=MESSAGE_DELETE_BULK:function\((\i)\){)(?=let.{0,100}(\i\.\i)\.getOrCreate)/,
                     replace: `
@@ -381,16 +371,6 @@ export default definePlugin({
                         $2.commit(cache);
                         return;
                     `
-                },
-                {
-                    match: /function (?=.+?MESSAGE_DELETE_BULK:(\i))\1\((\i)\){let.+?((?:\i\.){2})getOrCreate.+?}(?=function)/,
-                    noWarn: true,
-                    replace:
-                        "function $1($2){" +
-                        "   var cache = $3getOrCreate($2.channelId);" +
-                        "   cache = $self.handleDelete(cache, $2, true);" +
-                        "   $3commit(cache);" +
-                        "}"
                 },
                 {
                     // Add current cached content + new edit time to cached message's editHistory
@@ -405,18 +385,6 @@ export default definePlugin({
                         )
                         .update($3
                     `
-                },
-                {
-                    noWarn: true,
-                    match: /(function (\i)\((\i)\).+?)\.update\((\i)(?=.*MESSAGE_UPDATE:\2)/,
-                    replace: "$1" +
-                        ".update($4,m =>" +
-                        "   (($3.message.flags & 64) === 64 || $self.shouldIgnore($3.message, true)) ? m :" +
-                        "   $3.message.edited_timestamp && $3.message.content !== m.content ?" +
-                        "       m.set('editHistory',[...(m.editHistory || []), $self.makeEdit($3.message, m)]) :" +
-                        "       m" +
-                        ")" +
-                        ".update($4"
                 },
                 {
                     // fix up key (edit last message) attempting to edit a deleted message
@@ -533,16 +501,6 @@ export default definePlugin({
                 {
                     match: /(?<=MESSAGE_DELETE_BULK:function\(\i\)\{)/,
                     replace: "return;"
-                },
-                {
-                    match: /MESSAGE_DELETE:\i,/,
-                    replace: "MESSAGE_DELETE:()=>{},",
-                    noWarn: true
-                },
-                {
-                    match: /MESSAGE_DELETE_BULK:\i,/,
-                    replace: "MESSAGE_DELETE_BULK:()=>{},",
-                    noWarn: true
                 }
             ]
         },
