@@ -27,7 +27,7 @@ import { ChannelStore, Constants, FluxDispatcher, React, RestAPI, useEffect, use
 
 let Scroll: any = null;
 const queue = new Queue();
-let reactions: Record<string, ReactionCacheEntry>;
+let reactions: Record<string, ReactionCacheEntry> = {};
 
 function fetchReactions(msg: Message, emoji: ReactionEmoji, type: number) {
     const key = emoji.name + (emoji.id ? `:${emoji.id}` : "");
