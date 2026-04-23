@@ -32,8 +32,8 @@ export default definePlugin({
         {
             find: "Menu API only allows Items",
             replacement: {
-                match: /function.{0,200}return\(function.{0,200}\i\.type===(\i\.\i)\).{0,100}?navigable:.+?Menu API/s,
-                replace: (m, mod) => {
+                match: /(?<=(\(\i\.type===(\i\.\i)\).{0,50}?navigable:.+Menu API).+?)}$/s,
+                replace: (_, m) => {
                     const nameAssignments = [] as string[];
 
                     // if (t.type === m.MenuItem)
@@ -53,21 +53,22 @@ export default definePlugin({
                         const type = pushTypeRe.exec(m)?.[1];
                         if (type && type in nameMap) {
                             const name = nameMap[type];
-                            nameAssignments.push(`Object.defineProperty(${item},"name",{value:"${name}"})`);
                             nameAssignments.push(`$self.registerMenuItem("${name}",${item})`);
                         }
                     }
-                    if (nameAssignments.length / 2 !== 6) {
+                    if (nameAssignments.length < 6) {
                         console.warn("[MenuItemDemanglerAPI] Expected to remap 6 items, only remapped", nameAssignments.length);
                     }
 
                     // Merge all our redefines with the actual module
-                    return `${nameAssignments.join(";")};${m}`;
+                    return `${nameAssignments.join(";")};}`;
                 },
             },
         },
     ],
+
     registerMenuItem(name: string, item: any) {
         Menu[name] = item;
+        Object.defineProperty(item, "name", { value: name });
     }
 });
