@@ -57,7 +57,7 @@ export const Tooltip = waitForComponent<t.Tooltip>("Tooltip", m => m.prototype?.
 export const TooltipContainer = TooltipContainerComponent as never;
 
 export const TextInput = waitForComponent<t.TextInput>("TextInput", filters.componentByCode("#{intl::MAXIMUM_LENGTH_ERROR}", '"input"'));
-export const ManaTextArea = waitForComponent("ManaTextArea", filters.componentByCode('"data-mana-component":"text-area"'));=
+export const ManaTextArea = waitForComponent("ManaTextArea", filters.componentByCode('"data-mana-component":"text-area"'));
 export const TextArea = ManaTextArea;
 export const Select = waitForComponent<t.Select>("Select", filters.componentByCode('selectionMode:"single",onSelectionChange:', "isSelected:"));
 export const SearchableSelect = waitForComponent<t.SearchableSelect>("SearchableSelect", filters.componentByCode('?"multiple":"single",required:'));
