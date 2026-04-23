@@ -171,6 +171,7 @@ function makeBypassPatches(): Omit<Patch, "plugin"> {
         replacement: mapping.map(({ func, predicate }) => ({
             match: new RegExp(String.raw`(?<=${func}:)\i`),
             replace: "() => true",
+            noWarn: true,
             predicate
         }))
     };
@@ -186,8 +187,36 @@ export default definePlugin({
     settings,
 
     patches: [
-        // General bypass patches
+        // TODO: remove
         makeBypassPatches(),
+        {
+            find: "canUseCustomStickersEverywhere:",
+            replacement: [
+                {
+                    match: /(?<=canUseCustomStickersEverywhere:function\(\i\)\{)/,
+                    replace: "return true;",
+                    predicate: () => settings.store.enableStickerBypass
+                },
+                {
+                    match: /(?<=canUseHighVideoUploadQuality:function\(\i\)\{)/,
+                    replace: "return true;",
+                    predicate: () => settings.store.enableStreamQualityBypass
+                },
+                {
+                    match: /(?<=canStreamQuality:function\(\i,\i\)\{)/,
+                    replace: "return true;",
+                    predicate: () => settings.store.enableStreamQualityBypass
+                },
+                {
+                    match: /(?<=canUseClientThemes:function\(\i\)\{)/,
+                    replace: "return true;"
+                },
+                {
+                    match: /(?<=canUsePremiumAppIcons:function\(\i\)\{)/,
+                    replace: "return true;"
+                }
+            ],
+        },
         // Patch the emoji picker in voice calls to not be bypassed by fake nitro
         {
             find: '.getByName("fork_and_knife")',
@@ -260,8 +289,13 @@ export default definePlugin({
             replacement: [
                 {
                     // Overwrite incoming connection settings proto with our local settings
+                    match: /(?<=CONNECTION_OPEN:function\((\i)\){)/,
+                    replace: (_, props) => `$self.handleProtoChange(${props}.userSettingsProto,${props}.user);`
+                },
+                {
                     match: /function (\i)\((\i)\){(?=.*CONNECTION_OPEN:\1)/,
-                    replace: (m, funcName, props) => `${m}$self.handleProtoChange(${props}.userSettingsProto,${props}.user);`
+                    replace: (m, funcName, props) => `${m}$self.handleProtoChange(${props}.userSettingsProto,${props}.user);`,
+                    noWarn: true
                 },
                 {
                     // Overwrite non local proto changes with our local settings
@@ -358,7 +392,7 @@ export default definePlugin({
             predicate: () => settings.store.transformEmojis,
             replacement: {
                 // Add the fake nitro emoji notice
-                match: /(?<=emojiDescription:)(\i)(?<=\1=\i\((\i)\).+?)/,
+                match: /(?<=emojiDescription:)(\i)(?<=\1=\(\i=>\{.+?\}\)\((\i)\)[,;].+?)/,
                 replace: (_, reactNode, props) => `$self.addFakeNotice(${FakeNoticeType.Emoji},${reactNode},!!${props}?.fakeNitroNode?.fake)`
             }
         },
