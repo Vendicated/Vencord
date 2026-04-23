@@ -112,6 +112,7 @@ export default definePlugin({
     name: "SilentTyping",
     authors: [Devs.Ven, Devs.Rini, Devs.ImBanana],
     description: "Hide that you are typing",
+    tags: ["Chat", "Privacy"],
     settings,
 
     contextMenus: {
