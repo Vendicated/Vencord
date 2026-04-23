@@ -13,7 +13,7 @@ import { fetchUserProfile, getCurrentChannel } from "@utils/discord";
 import definePlugin, { OptionType } from "@utils/types";
 import { User } from "@vencord/discord-types";
 import { findComponentByCodeLazy } from "@webpack";
-import { ContextMenuApi, Menu, UserStore } from "@webpack/common";
+import { ContextMenuApi, Menu, useEffect, UserStore } from "@webpack/common";
 
 interface UserProfileProps {
     popoutProps: Record<string, any>;
@@ -125,6 +125,10 @@ export default definePlugin({
             return originalRenderPopout();
         }
 
+        if (isPluginEnabled(alwaysExpandProfiles.name)) {
+            return <ServerProfileLauncher popoutProps={popoutProps} userId={currentUser.id} guildId={currentChannel.getGuildId()!} />;
+        }
+
         return (
             <UserProfile
                 {...popoutProps}
@@ -136,3 +140,14 @@ export default definePlugin({
         );
     }, { noop: true })
 });
+
+function ServerProfileLauncher({ popoutProps, userId, guildId }: { popoutProps: Record<string, any>; userId: string; guildId: string; }) {
+    useEffect(() => {
+        popoutProps.closePopout?.();
+        popoutProps.onRequestClose?.();
+        fetchUserProfile(userId, { guild_id: guildId }, false).then(user => {
+            if (user) alwaysExpandProfiles.openUserModal(user.userId);
+        });
+    }, []);
+    return null;
+}

@@ -10,7 +10,7 @@ import { humanFriendlyJoin } from "@utils/text";
 import definePlugin, { OptionType } from "@utils/types";
 import { Message, User } from "@vencord/discord-types";
 import { findByCodeLazy } from "@webpack";
-import { ChannelStore, FluxDispatcher, MessageActions, MessageStore, RelationshipStore, SelectedChannelStore, UserStore } from "@webpack/common";
+import { ChannelStore, FluxDispatcher, MessageActions, MessageStore, PermissionsBits, PermissionStore, RelationshipStore, SelectedChannelStore, UserStore } from "@webpack/common";
 
 const createBotMessage = findByCodeLazy('username:"Clyde"');
 
@@ -125,12 +125,15 @@ export default definePlugin({
                     oldChannelId = clientOldChannelId;
                     clientOldChannelId = channelId;
                 }
-                if (settings.store.ignoreBlockedUsers && RelationshipStore.isBlocked(userId)) return;
+                if (settings.store.ignoreBlockedUsers && RelationshipStore.isBlocked(userId)) continue;
                 // Ignore events from same channel
-                if (oldChannelId === channelId) return;
+                if (oldChannelId === channelId) continue;
 
                 // Friend joined a voice channel
                 if (settings.store.friendDirectMessages && (!oldChannelId && channelId) && userId !== clientUserId && isFriendAllowlisted(userId)) {
+                    const channel = ChannelStore.getChannel(channelId);
+                    if (!channel || !PermissionStore.can(PermissionsBits.VIEW_CHANNEL, channel)) continue;
+
                     const selfInChannel = SelectedChannelStore.getVoiceChannelId() === channelId;
                     let memberListContent = "";
                     if (settings.store.friendDirectMessagesShowMembers || settings.store.friendDirectMessagesShowMemberCount) {

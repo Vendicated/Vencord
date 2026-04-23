@@ -4,6 +4,7 @@
 
 .vc-sidebar-chat-popout {
     align-items: stretch;
+    background-color: var(--background-primary);
 }
 
 .vc-sidebar-chat-window {
@@ -13,4 +14,6 @@
     min-width: 0;
     overflow: hidden;
     width: 100%;
+    background-color: var(--background-primary);
+    color: var(--text-default);
 }
