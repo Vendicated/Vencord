@@ -22,7 +22,6 @@ import { generateId } from "@api/Commands";
 import { useSettings } from "@api/Settings";
 import { BaseText } from "@components/BaseText";
 import ErrorBoundary from "@components/ErrorBoundary";
-import { Flex } from "@components/Flex";
 import { HeadingSecondary } from "@components/Heading";
 import { Paragraph } from "@components/Paragraph";
 import { debounce } from "@shared/debounce";
@@ -32,7 +31,7 @@ import { proxyLazy } from "@utils/lazy";
 import { Margins } from "@utils/margins";
 import { classes, isObjectEmpty } from "@utils/misc";
 import { ModalCloseButton, ModalContent, ModalHeader, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
-import { OptionType, Plugin } from "@utils/types";
+import { OptionType, Plugin, PluginTag } from "@utils/types";
 import { User } from "@vencord/discord-types";
 import { findCssClassesLazy } from "@webpack";
 import { Clickable, FluxDispatcher, React, Tooltip, useEffect, useMemo, UserStore, UserSummaryItem, UserUtils, useState } from "@webpack/common";
@@ -69,6 +68,16 @@ function makeDummyUser(user: { username: string; id?: string; avatar?: string; }
     });
 
     return newUser;
+}
+
+function PluginTags({ tags }: { tags: PluginTag[]; }) {
+    return (
+        <div className={cl("tags")}>
+            {tags.map(tag => (
+                <div key={tag} className={cl("tag")}>{tag}</div>
+            ))}
+        </div>
+    );
 }
 
 export default function PluginModal({ plugin, onRestartNeeded, onClose, transitionState }: PluginModalProps) {
@@ -164,8 +173,11 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
 
             <ModalContent className={"vc-settings-modal-content"}>
                 <section>
-                    <Flex className={cl("info")}>
-                        <Paragraph className={cl("description")}>{plugin.description}</Paragraph>
+                    <div className={cl("info")}>
+                        <div>
+                            <Paragraph className={cl("description")}>{plugin.description}</Paragraph>
+                            {!!plugin.tags?.length && <PluginTags tags={plugin.tags} />}
+                        </div>
                         {!pluginMeta.userPlugin && (
                             <div className="vc-settings-modal-links">
                                 <WebsiteButton
@@ -178,7 +190,7 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
                                 />
                             </div>
                         )}
-                    </Flex>
+                    </div>
                     <BaseText size="lg" weight="semibold" className={classes(Margins.top8, Margins.bottom8)}>Authors</BaseText>
                     <div style={{ width: "fit-content" }}>
                         <ErrorBoundary noop>
