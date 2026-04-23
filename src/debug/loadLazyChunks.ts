@@ -201,7 +201,7 @@ export async function loadLazyChunks() {
             }
         })));
 
-        // Manually require all modules to make sure all lazily required modules are patched.
+        // Manually require all modules to make sure all lazily required modules are patched
         for (const moduleId of Object.keys(wreq.m)) {
             try {
                 wreq(moduleId);
