@@ -34,41 +34,38 @@ export default definePlugin({
             replacement: {
                 match: /(?<=(\(\i\.type===(\i\.\i)\).{0,50}?navigable:.+Menu API).+?)}$/s,
                 replace: (_, m) => {
-                    const nameAssignments = [] as string[];
+                    const registerCalls = [] as string[];
 
-                    // if (t.type === m.MenuItem)
-                    const typeCheckRe = canonicalizeMatch(/\(\i\.type===(\i\.\i)\)/g);
-                    // push({type:"item"})
-                    const pushTypeRe = /type:"(\w+)"/g;
+                    const typeCheckRe = canonicalizeMatch(/\(\i\.type===(\i\.\i)\)/g); // if (t.type === m.MenuItem)
+                    const pushTypeRe = /type:"(\w+)"/g; // push({type:"item"})
 
                     let typeMatch: RegExpExecArray | null;
-                    // for each if (t.type === ...)
                     while ((typeMatch = typeCheckRe.exec(m)) !== null) {
-                        // extract the current menu item
-                        const item = typeMatch[1];
+                        const component = typeMatch[1];
                         // Set the starting index of the second regex to that of the first to start
                         // matching from after the if
                         pushTypeRe.lastIndex = typeCheckRe.lastIndex;
+
                         // extract the first type: "..."
                         const type = pushTypeRe.exec(m)?.[1];
                         if (type && type in nameMap) {
                             const name = nameMap[type];
-                            nameAssignments.push(`$self.registerMenuItem("${name}",${item})`);
+                            registerCalls.push(`$self.registerMenuItem("${name}",${component})`);
                         }
                     }
-                    if (nameAssignments.length < 6) {
-                        console.warn("[MenuItemDemanglerAPI] Expected to remap 6 items, only remapped", nameAssignments.length);
+
+                    if (registerCalls.length < 6) {
+                        console.warn("[MenuItemDemanglerAPI] Expected to remap 6 items, only remapped", registerCalls.length);
                     }
 
-                    // Merge all our redefines with the actual module
-                    return `${nameAssignments.join(";")};}`;
+                    return `${registerCalls.join(";")};}`;
                 },
             },
         },
     ],
 
-    registerMenuItem(name: string, item: any) {
-        Menu[name] = item;
-        Object.defineProperty(item, "name", { value: name });
+    registerMenuItem(name: string, component: any) {
+        Object.defineProperty(component, "name", { value: name });
+        Menu[name] = component;
     }
 });
