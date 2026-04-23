@@ -122,12 +122,56 @@ export const Toasts = {
     }
 };
 
-// This is the same module but this is easier
-waitFor("showToast", m => {
-    Toasts.show = m.showToast;
-    Toasts.pop = m.popToast;
-    Toasts.create = m.createToast;
+// seems like discord killed off toasts mostly so merged them into notifications
+// waiting on vencords team to look into it further
+// this code is terrible
+
+const ToastTypeToNotificationColor: Record<string, string> = {
+    [ToastType.SUCCESS]: "#3ba55d",
+    [ToastType.FAILURE]: "#ed4245",
+    [ToastType.MESSAGE]: "#5865f2",
+    [ToastType.CUSTOM]: "#5865f2",
+    [ToastType.CLIP]: "#5865f2",
+    [ToastType.LINK]: "#00b0f4",
+    [ToastType.FORWARD]: "#5865f2",
+    [ToastType.BOOKMARK]: "#faa61a",
+    [ToastType.CLOCK]: "#faa61a",
+};
+
+const ToastTypeToNotificationTitle: Record<string, string> = {
+    [ToastType.MESSAGE]: "Notice",
+    [ToastType.SUCCESS]: "Success",
+    [ToastType.FAILURE]: "Error",
+    [ToastType.CUSTOM]: "Notice",
+    [ToastType.CLIP]: "Copied to Clipboard",
+    [ToastType.LINK]: "Link",
+    [ToastType.FORWARD]: "Forwarded",
+    [ToastType.BOOKMARK]: "Saved",
+    [ToastType.CLOCK]: "Reminder",
+};
+
+Toasts.create = (message: string, type: string, options?: ToastOptions): ToastData => ({
+    id: Toasts.genId(),
+    message,
+    type,
+    options,
 });
+
+Toasts.show = ({ message, type = ToastType.MESSAGE, options }: ToastData) => {
+    const { showNotification } = require("../../api/Notifications");
+
+    showNotification({
+        title: ToastTypeToNotificationTitle[type] ?? "Notice",
+        body: message,
+        color: ToastTypeToNotificationColor[type] ?? "#5865f2",
+        permanent: options?.duration === 0,
+        richBody: options?.component ?? undefined,
+        noPersist: true,
+        dismissOnClick: true,
+    });
+};
+
+Toasts.pop = () => { };
 
 /**
  * Show a simple toast. If you need more options, use Toasts.show manually
