@@ -13,7 +13,7 @@ import { Paragraph } from "@components/Paragraph";
 import { Devs } from "@utils/constants";
 import { Margins } from "@utils/margins";
 import definePlugin, { OptionType } from "@utils/types";
-import { Button, RunningGameStore, showToast, TextArea, Toasts, Tooltip, useEffect, useState } from "@webpack/common";
+import { Button, ManaTextArea, RunningGameStore, showToast, Toasts, Tooltip, useEffect, useState } from "@webpack/common";
 
 const enum ActivitiesTypes {
     Game,
@@ -133,8 +133,7 @@ function IdsListComponent(props: { setValue: (value: string) => void; }) {
         <section>
             <HeadingSecondary>Filter List</HeadingSecondary>
             <Paragraph className={Margins.bottom8}>Comma separated list of activity IDs to filter (Useful for filtering specific RPC activities and CustomRPC</Paragraph>
-            <TextArea
-                type="text"
+            <ManaTextArea
                 value={idsList}
                 onChange={handleChange}
                 placeholder="235834946571337729, 343383572805058560"

@@ -17,7 +17,7 @@
 */
 
 import { PluginOptionString } from "@utils/types";
-import { React, TextArea, TextInput, useState } from "@webpack/common";
+import { ManaTextArea, React, TextInput, useState } from "@webpack/common";
 
 import { resolveError, SettingProps, SettingsSection } from "./Common";
 
@@ -39,7 +39,7 @@ export function TextSetting({ option, pluginSettings, definedSettings, id, onCha
     return (
         <SettingsSection name={id} description={option.description} error={error}>
             {option.multiline
-                ? <TextArea
+                ? <ManaTextArea
                     placeholder={option.placeholder ?? "Enter a value"}
                     value={state}
                     onChange={handleChange}

@@ -6,7 +6,7 @@
 
 import { Paragraph } from "@components/Paragraph";
 import { Patch, ReplaceFn } from "@utils/types";
-import { TextArea, useEffect, useRef, useState } from "@webpack/common";
+import { ManaTextArea, useEffect, useRef, useState } from "@webpack/common";
 
 export interface FullPatchInputProps {
     setFind(v: string): void;
@@ -68,7 +68,7 @@ export function FullPatchInput({ setFind, setParsedFind, setMatch, setReplacemen
 
     return (
         <>
-            <TextArea
+            <ManaTextArea
                 inputRef={textAreaRef}
                 value={patch}
                 onChange={setPatch}
