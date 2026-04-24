@@ -27,7 +27,7 @@ export default definePlugin({
     patches: [
         // DM User Sidebar
         {
-            find: ".SIDEBAR}),nicknameIcons",
+            find: /\?.popularApplicationCommandIds!=null&&.+?#{intl::USER_PROFILE_MEMBER_SINCE}\),headingColor/,
             replacement: {
                 match: /#{intl::USER_PROFILE_MEMBER_SINCE}\),.{0,100}userId:(\i\.id)}\)}\)/,
                 replace: "$&,$self.FriendsSinceComponent({userId:$1,isSidebar:true})"
