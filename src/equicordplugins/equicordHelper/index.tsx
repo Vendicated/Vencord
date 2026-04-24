@@ -206,7 +206,7 @@ export default definePlugin({
             find: ".MEMBERLIST_CONTENT_FEED_TOGGLED,",
             predicate: () => settings.store.removeActivitySection,
             replacement: {
-                match: /null==\i\|\|/,
+                match: /null==\i\|\|.{0,100}VIEW_CHANNEL\)&&/,
                 replace: "true||$&"
             },
         },
@@ -291,15 +291,14 @@ export default definePlugin({
         },
         {
             find: ".USE_OSX_NATIVE_TRAFFIC_LIGHTS",
-            predicate: () => Settings.winNativeTitleBar,
             replacement: {
                 match: /case \i\.\i\.WINDOWS:/,
                 replace: 'case "WEB":'
             },
+            predicate: () => Settings.winNativeTitleBar,
         },
         {
             find: '"refresh-title-bar-small"',
-            predicate: () => Settings.winNativeTitleBar,
             replacement: [
                 {
                     match: /\i===\i\.PlatformTypes\.WINDOWS/g,
@@ -309,7 +308,8 @@ export default definePlugin({
                     match: /\i===\i\.PlatformTypes\.WEB/g,
                     replace: "true"
                 }
-            ]
+            ],
+            predicate: () => Settings.winNativeTitleBar,
         }
     ],
     renderMessageAccessory(props) {
