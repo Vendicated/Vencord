@@ -6,7 +6,7 @@
 
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
-import { registerColorPicker, registerCreateScroller } from "@webpack/common";
+import { setColorPicker, setCreateScroller } from "@webpack/common";
 
 export default definePlugin({
     name: "ConcatenatedComponentExtractor",
@@ -20,18 +20,18 @@ export default definePlugin({
             find: "#{intl::USER_SETTINGS_PROFILE_COLOR_SELECT_COLOR}),focusProps:",
             replacement: {
                 match: /(?=function (\i)\(\i\)\{let\{[^}]+?showEyeDropper:)/,
-                replace: "$self.registerColorPicker($1);"
+                replace: "$self.setColorPicker($1);"
             }
         },
         {
             find: /="ltr",orientation:\i="vertical"[^}]+?customTheme:/,
             replacement: {
                 match: /(?=function (\i)\(\i,\i,\i\)\{.{0,20}return \i\.forwardRef\(function\(\i,\i\)\{let\{[^}]+?="ltr",orientation:)/,
-                replace: "$self.registerCreateScroller($1);"
+                replace: "$self.setCreateScroller($1);"
             }
         }
     ],
 
-    registerCreateScroller,
-    registerColorPicker,
+    setCreateScroller,
+    setColorPicker,
 });

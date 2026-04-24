@@ -71,7 +71,7 @@ export const Avatar = waitForComponent<t.Avatar>("Avatar", filters.componentByCo
 
 export let ColorPicker: LazyComponentWrapper<t.ColorPicker> = LazyComponent(() => null!);
 
-export function registerColorPicker(component: t.ColorPicker) {
+export function setColorPicker(component: t.ColorPicker) {
     ColorPicker = LazyComponent(() => component);
 }
 
@@ -93,7 +93,7 @@ export const listScrollerClasses = proxyLazyWebpack(() => {
     return mapMangledCssClasses(mod, listScrollerClassnames);
 });
 
-export function registerCreateScroller(cs: typeof createScroller & {}) {
+export function setCreateScroller(cs: typeof createScroller & {}) {
     createScroller = cs;
 }
 
