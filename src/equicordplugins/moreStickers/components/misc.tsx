@@ -17,7 +17,7 @@ import { isV1, migrate } from "@equicordplugins/moreStickers/migrate-v1";
 import { deleteStickerPack, getStickerPack, getStickerPackMetas, saveStickerPack } from "@equicordplugins/moreStickers/stickers";
 import { SettingsTabsKey, Sticker, StickerPack, StickerPackMeta } from "@equicordplugins/moreStickers/types";
 import { cl, clPicker, Mutex } from "@equicordplugins/moreStickers/utils";
-import { Button, ManaTextArea, React, TabBar, Toasts } from "@webpack/common";
+import { Button, React, TabBar, TextArea, Toasts } from "@webpack/common";
 import { JSX } from "react";
 
 const mutex = new Mutex();
@@ -251,7 +251,7 @@ export const Packs = () => {
                         <span style={{
                             flexGrow: 1
                         }}>
-                            <ManaTextArea
+                            <TextArea
                                 value={addStickerHtml}
                                 onChange={setAddStickerHtml}
                                 placeholder="Paste HTML here"

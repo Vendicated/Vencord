@@ -10,7 +10,7 @@ import { SettingsSection } from "@components/settings/tabs/plugins/components/Co
 import { Switch } from "@components/Switch";
 import { useForceUpdater } from "@utils/react";
 import { OptionType } from "@utils/types";
-import { ManaTextArea, React, Select, showToast, TextInput, Toasts } from "@webpack/common";
+import { React, Select, showToast, TextArea, TextInput, Toasts } from "@webpack/common";
 
 import { CORS_PROXY } from "./constants";
 import { ServiceType } from "./types";
@@ -483,7 +483,7 @@ export function SettingsComponent() {
                         name="ShareX Custom Uploader Config"
                         description="Paste your ShareX custom uploader JSON (.sxcu/.json). DestinationType must include FileUploader or ImageUploader."
                     >
-                        <ManaTextArea
+                        <TextArea
                             value={store.sharexConfig}
                             rows={10}
                             placeholder='{"RequestMethod":"POST","RequestURL":"https://example.com/api/upload","Body":"MultipartFormData"}'

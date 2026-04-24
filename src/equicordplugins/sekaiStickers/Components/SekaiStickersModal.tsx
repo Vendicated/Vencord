@@ -10,7 +10,7 @@ import { FormSwitch } from "@components/FormSwitch";
 import { Heading } from "@components/Heading";
 import { characters } from "@equicordplugins/sekaiStickers/characters.json";
 import { ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
-import { Button, ChannelStore, ManaTextArea, React, SelectedChannelStore, Slider, UploadHandler } from "@webpack/common";
+import { Button, ChannelStore, React, SelectedChannelStore, Slider, TextArea, UploadHandler } from "@webpack/common";
 
 import Canvas from "./Canvas";
 import CharSelectModal from "./Picker";
@@ -113,7 +113,7 @@ export default function SekaiStickersModal({ modalProps, settings }: { modalProp
                     </div>
                     <div style={{ marginRight: 10, width: "30vw" }}>
                         <Heading>Text</Heading>
-                        <ManaTextArea onChange={setText} placeholder={text} rows={4} />
+                        <TextArea onChange={setText} placeholder={text} rows={4} />
                         <Heading>Rotation</Heading>
                         <Slider markers={[-10, -5, 0, 5, 10]} stickToMarkers={false} minValue={-10} maxValue={10} asValueChanges={val => setRotate(val)} initialValue={rotate} keyboardStep={0.2} orientation={"horizontal"} onValueRender={(v: number) => String(v.toFixed(2))} />
                         <Heading>Font Size</Heading>

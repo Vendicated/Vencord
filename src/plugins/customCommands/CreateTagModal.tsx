@@ -15,7 +15,7 @@ import { InfoIcon } from "@components/Icons";
 import { Margins } from "@components/margins";
 import { Paragraph } from "@components/Paragraph";
 import { ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
-import { ManaTextArea, TextInput, useState } from "@webpack/common";
+import { TextArea, TextInput, useState } from "@webpack/common";
 
 import { parseTagArguments } from ".";
 import { addTag, getTag, Tag } from "./settings";
@@ -54,7 +54,7 @@ function Modal({ initialValue, modalProps }: { initialValue: Tag; modalProps: Mo
 
                     <section>
                         <HeadingSecondary>Response</HeadingSecondary>
-                        <ManaTextArea value={message} onChange={setMessage} placeholder={EXAMPLE_RESPONSE} />
+                        <TextArea value={message} onChange={setMessage} placeholder={EXAMPLE_RESPONSE} />
                     </section>
 
                     {detectedArguments.length > 0 && (
