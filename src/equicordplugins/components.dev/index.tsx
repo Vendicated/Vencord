@@ -25,7 +25,11 @@ export let ManaDatePicker: React.ComponentType<ManaDatePickerProps>;
 export let ManaCalendar: React.ComponentType<ManaCalendarProps>;
 export let ManaSwitch: React.ComponentType<ManaSwitchProps>;
 export let SimpleErrorBoundary: React.ComponentType<SimpleErrorBoundaryProps>;
-export let ColorPicker: React.ComponentType<ColorPickerProps>;
+
+export let ColorPicker: React.ComponentType<ColorPickerProps> = () => null;
+export function setColorPicker(component: React.ComponentType<ColorPickerProps>) {
+    ColorPicker = component;
+}
 
 export default definePlugin({
     name: "Components",
@@ -100,7 +104,7 @@ export default definePlugin({
         {
             find: "#{intl::zksHZO::raw}",
             replacement: {
-                match: /(?=class (\i).{0,90}getDerivedStateFromError)/,
+                match: /(?<=class (\i).{0,90}getDerivedStateFromError.*?this.props.children\}\})/,
                 replace: "$self.SimpleErrorBoundary=$1;"
             }
         },
@@ -139,9 +143,7 @@ export default definePlugin({
     set SimpleErrorBoundary(value: any) {
         SimpleErrorBoundary = value;
     },
-    set ColorPicker(value: any) {
-        ColorPicker = value;
-    },
+    setColorPicker,
     startAt: StartAt.WebpackReady,
     toolboxActions: {
         "Open Components Tab"() {
