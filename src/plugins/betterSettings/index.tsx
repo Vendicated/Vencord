@@ -155,7 +155,7 @@ export default definePlugin({
             predicate: () => settings.store.organizeMenu,
             replacement: [
                 {
-                    match: /children:\[(\i),(?<=\1=function.+?)/,
+                    match: /children:\[(\i),(?<=\1=(?:function|.{0,30}\.openUserSettings).+?)/, // TODO .{0,30}\.openUserSettings is stable compat
                     replace: "children:[$self.transformSettingsEntries($1),",
                 },
             ]
