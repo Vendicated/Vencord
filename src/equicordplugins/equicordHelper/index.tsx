@@ -206,7 +206,7 @@ export default definePlugin({
             find: ".MEMBERLIST_CONTENT_FEED_TOGGLED,",
             predicate: () => settings.store.removeActivitySection,
             replacement: {
-                match: /null==\i\|\|.{0,100}VIEW_CHANNEL\)&&/,
+                match: /null==\i\|\|0.{0,100}VIEW_CHANNEL\)&&/,
                 replace: "true||$&"
             },
         },
