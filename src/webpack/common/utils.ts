@@ -46,8 +46,6 @@ export const Constants: t.Constants = mapMangledModuleLazy('ME:"/users/@me"', {
 export const RestAPI: t.RestAPI = findLazy(m => typeof m === "object" && m.del && m.put);
 export const moment: typeof import("moment") = findByPropsLazy("parseTwoDigitYear");
 
-export const hljs: typeof import("highlight.js").default = findLazy(m => m.default?.highlight && m.default?.registerLanguage)?.default;
-
 export const useDrag = findByCodeLazy("useDrag::spec.begin was deprecated");
 // you cant make a better finder i love that they remove display names sm
 export const useDrop = findByCodeLazy(".disconnectDropTarget()", ".dropTargetOptions=");
