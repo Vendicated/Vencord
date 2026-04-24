@@ -27,7 +27,6 @@ import { TooltipFallback } from "@components/TooltipFallback";
 import { LazyComponent } from "@utils/lazyReact";
 import * as t from "@vencord/discord-types";
 import { filters, find, findCssClassesLazy, mapMangledCssClasses, mapMangledModuleLazy, proxyLazyWebpack, waitFor } from "@webpack";
-import { ComponentType } from "react";
 
 import { waitForComponent } from "./internal";
 
@@ -70,8 +69,8 @@ export const Paginator = waitForComponent<t.Paginator>("Paginator", filters.comp
 export const Clickable = waitForComponent<t.Clickable>("Clickable", filters.componentByCode("this.context?this.renderNonInteractive():"));
 export const Avatar = waitForComponent<t.Avatar>("Avatar", filters.componentByCode(".size-1.375*"));
 
-export let ColorPicker: ComponentType<t.ColorPicker> = () => null;
-export function setColorPicker(component: ComponentType<t.ColorPicker>) {
+export let ColorPicker: t.ColorPicker = () => null;
+export function setColorPicker(component: t.ColorPicker) {
     ColorPicker = component;
 }
 
