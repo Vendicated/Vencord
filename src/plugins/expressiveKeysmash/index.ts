@@ -17,7 +17,6 @@ type KeyPressData = {
 };
 
 let history: KeyPressData[] = [];
-const keepFor = 250;
 let intervalID: number;
 let lastOutburst: number = 0;
 
@@ -31,6 +30,11 @@ const settings = definePluginSettings({
     cooldownSec: {
         description: "How many seconds you have to wait for an outburst to occur again (must be at least 5 seconds! this plugin will not work otherwise!)",
         default: 10,
+        type: OptionType.NUMBER,
+    },
+    smashWindow: {
+        description: "How many milliseconds each key is kept as a window",
+        default: 250,
         type: OptionType.NUMBER,
     },
     extraMessages: {
@@ -99,7 +103,7 @@ export default definePlugin({
         window.document.addEventListener("keydown", this.keyDownHandler);
 
         intervalID = setInterval(e => {
-            history = history.filter(val => Date.now() < val.date + keepFor);
+            history = history.filter(val => Date.now() < val.date + settings.store.smashWindow);
         }, 100);
     },
 
