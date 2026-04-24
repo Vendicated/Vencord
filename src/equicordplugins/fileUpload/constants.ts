@@ -11,5 +11,8 @@ export function normalizeCorsProxyUrl(url?: string): string {
 }
 
 export function toProxiedUrl(url: string, corsProxyUrl = CORS_PROXY): string {
+    if (corsProxyUrl == "none") {
+        return url;
+    }
     return `${normalizeCorsProxyUrl(corsProxyUrl)}?url=${encodeURIComponent(url)}`;
 }
