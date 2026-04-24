@@ -29,6 +29,7 @@ import deviconStyle from "./devicon.css?managed";
 import { settings } from "./settings";
 import { DeviconSetting } from "./types";
 import { clearStyles } from "./utils/createStyle";
+import { requireHljs } from "./utils/misc";
 
 export default definePlugin({
     name: "ShikiCodeblocks",
@@ -74,6 +75,7 @@ export default definePlugin({
     shiki,
     createHighlighter,
     renderHighlighter: ({ lang, content }: { lang: string; content: string; }) => {
+        requireHljs();
         return createHighlighter({
             lang: lang?.toLowerCase(),
             content,
