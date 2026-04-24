@@ -9,6 +9,7 @@ import "./style.css";
 import { DecoratorProps } from "@api/MemberListDecorators";
 import { isPluginEnabled } from "@api/PluginManager";
 import { definePluginSettings } from "@api/Settings";
+import { ImageIcon, Microphone } from "@components/Icons";
 import betterActivities from "@equicordplugins/betterActivities";
 import showMeYourName from "@plugins/showMeYourName";
 import { Devs, EquicordDevs } from "@utils/constants";
@@ -17,7 +18,7 @@ import { classes } from "@utils/misc";
 import definePlugin, { OptionType } from "@utils/types";
 import { Activity, ApplicationStream, Channel, Message, OnlineStatus, User } from "@vencord/discord-types";
 import { MessageFlags } from "@vencord/discord-types/enums";
-import { findByCodeLazy, findByPropsLazy, findComponentByCodeLazy, findCssClassesLazy, findExportedComponentLazy } from "@webpack";
+import { findByCodeLazy, findByPropsLazy, findComponentByCodeLazy, findCssClassesLazy } from "@webpack";
 import { ChannelStore, ExperimentStore, MessageStore, Parser, RelationshipStore, SnowflakeUtils, UserGuildSettingsStore, UserStore, useStateFromStores } from "@webpack/common";
 
 const cl = classNameFactory("vc-message-peek-");
@@ -43,12 +44,12 @@ type AttachmentType = "image" | "gif" | "video" | "file";
 type IconType = AttachmentType | "voice" | "sticker";
 
 const Icons: Record<IconType, React.ComponentType<{ size: string; className: string; }>> = {
-    image: findExportedComponentLazy("ImageIcon"),
-    file: findExportedComponentLazy("AttachmentIcon"),
-    voice: findExportedComponentLazy("MicrophoneIcon"),
-    sticker: findExportedComponentLazy("StickerIcon"),
-    gif: findExportedComponentLazy("GifIcon"),
-    video: findExportedComponentLazy("VideoIcon"),
+    image: ImageIcon,
+    file: findComponentByCodeLazy("9.86 0l.54.55a6.99 6.99"),
+    voice: Microphone,
+    sticker: findComponentByCodeLazy("1-.5.5H6a4 4 0 0 1-4-4V6a4 4 0 0 1 4-4Zm.5 8a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3ZM19"),
+    gif: findComponentByCodeLazy("3.18 0 0 1-1.12-1.35A4.88 4.8"),
+    video: findComponentByCodeLazy(" 3-3v-2.12a1"),
 };
 
 const ATTACHMENT_LABELS: Record<AttachmentType, string> = {

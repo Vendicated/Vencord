@@ -15,7 +15,7 @@ import { Logger } from "@utils/Logger";
 import type { Plugin } from "@utils/types";
 import { changes, checkForUpdates } from "@utils/updater";
 import { Guild } from "@vencord/discord-types";
-import { findByPropsLazy, findExportedComponentLazy, findStoreLazy } from "@webpack";
+import { findByPropsLazy, findComponentByCodeLazy, findStoreLazy } from "@webpack";
 import { Alerts, ChannelActionCreators, ChannelRouter, ChannelStore, ComponentDispatch, FluxDispatcher, GuildStore, IconUtils, MediaEngineStore, MessageStore, NavigationRouter, React, ReadStateStore, ReadStateUtils, SelectedChannelStore, SelectedGuildStore, SettingsRouter, StreamerModeStore, Toasts, useEffect, UserStore, VoiceActions } from "@webpack/common";
 import type { FC, ReactElement, ReactNode } from "react";
 
@@ -800,7 +800,7 @@ const runtimeCleanupCallbacks: Array<() => void> = [];
 const NotificationSettingsActionCreators = findByPropsLazy("updateGuildNotificationSettings", "updateChannelOverrideSettings");
 const GuildSettingsActions = findByPropsLazy("open", "selectRole", "updateGuild");
 const GuildMembershipActions = findByPropsLazy("leaveGuild");
-const HeadphonesIcon = findExportedComponentLazy("HeadphonesIcon");
+const HeadphonesIcon = findComponentByCodeLazy("4.1-2.13h1.86A9");
 const UserGuildSettingsStore = findStoreLazy("UserGuildSettingsStore");
 const NotificationsInboxStore = findStoreLazy("NotificationsInboxStore") as NotificationsInboxStoreLike;
 const RecentMentionsStore = findStoreLazy("RecentMentionsStore") as RecentMentionsStoreLike;

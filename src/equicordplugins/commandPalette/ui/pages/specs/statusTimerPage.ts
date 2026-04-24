@@ -4,12 +4,11 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { findExportedComponentLazy } from "@webpack";
+import { TimerIcon } from "@plugins/callTimer/TimerIcon";
 
 import { cancelScheduledStatusReset, setStatusDndForDuration } from "../../../registry";
 import type { PalettePageSpec, PaletteSuggestion } from "../types";
 
-const TimerIcon = findExportedComponentLazy("TimerIcon");
 const DURATION_CHOICES = [
     { id: "15", label: "15 minutes", icon: TimerIcon },
     { id: "30", label: "30 minutes", icon: TimerIcon },

@@ -27,7 +27,7 @@ import { classNameFactory } from "@utils/css";
 import { openModal } from "@utils/modal";
 import definePlugin from "@utils/types";
 import { Message } from "@vencord/discord-types";
-import { findByCodeLazy, findCssClassesLazy, findExportedComponentLazy } from "@webpack";
+import { findByCodeLazy, findComponentByCodeLazy, findCssClassesLazy } from "@webpack";
 import { ChannelStore, Menu } from "@webpack/common";
 
 import { NoteModal } from "./components/modals/Notebook";
@@ -35,7 +35,7 @@ import { noteHandler, noteHandlerCache } from "./NoteHandler";
 import { DataStoreToCache, HolyNoteStore } from "./utils";
 
 export const cl = classNameFactory("vc-notebook-");
-export const CircleQuestionIcon = findExportedComponentLazy("CircleQuestionIcon");
+export const CircleQuestionIcon = findComponentByCodeLazy("10.58l-3.3-3.3a1");
 export const MessageRecord = findByCodeLazy("isEdited(){");
 export const messageClasses = findCssClassesLazy("message", "groupStart", "cozyMessage");
 export const resultsClasses = findCssClassesLazy("emptyResultsWrap", "emptyResultsContent", "errorImage", "emptyResultsText", "noResultsImage", "alt");
