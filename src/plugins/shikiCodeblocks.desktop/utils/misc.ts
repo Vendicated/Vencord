@@ -25,7 +25,7 @@ import { DefaultExtractAndLoadChunksRegex, extractAndLoadChunks, findByPropsLazy
 export const cl = classNameFactory("vc-shiki-");
 
 export const hljs: typeof import("highlight.js").default = proxyLazyWebpack(() => {
-    extractAndLoadChunks(["codeBlock:{react("], new RegExp(`*hljs*.+?${DefaultExtractAndLoadChunksRegex.source}`));
+    extractAndLoadChunks(["codeBlock:{react("], new RegExp(`"hljs".+?${DefaultExtractAndLoadChunksRegex.source}`));
     return findByPropsLazy("highlight", "registerLanguage");
 });
 
