@@ -276,7 +276,7 @@ export default definePlugin({
         {
             find: "GuildTagAvailableCoachmark",
             replacement: {
-                match: /return.{0,100}shouldShow/g,
+                match: /return.{0,200}GUILD_TAG_COACHMARK_ASSET/g,
                 replace: "return null;$&"
             },
             predicate: () => settings.store.disableAdoptTagPrompt
