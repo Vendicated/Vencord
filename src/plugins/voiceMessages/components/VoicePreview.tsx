@@ -17,10 +17,8 @@
 */
 
 import { useTimer } from "@utils/react";
-import { ComponentType } from "react";
 
-
-import { cl } from "..";
+import { cl, VoiceMessage } from "..";
 
 const PREVIEW_IDLE_LABEL = "----";
 const PREVIEW_RECORDING_LABEL = "RECORDING";
@@ -29,7 +27,6 @@ export interface VoiceMessageProps {
     src: string;
     waveform: string;
 }
-export let VoiceMessage: ComponentType<VoiceMessageProps> = () => null;
 
 export type VoicePreviewOptions = {
     src?: string;

@@ -157,19 +157,7 @@ Toasts.create = (message: string, type: string, options?: ToastOptions): ToastDa
     options,
 });
 
-Toasts.show = ({ message, type = ToastType.MESSAGE, options }: ToastData) => {
-    const { showNotification } = require("../../api/Notifications");
-
-    showNotification({
-        title: ToastTypeToNotificationTitle[type] ?? "Notice",
-        body: message,
-        color: ToastTypeToNotificationColor[type] ?? "#5865f2",
-        permanent: options?.duration === 0,
-        richBody: options?.component ?? undefined,
-        noPersist: true,
-        dismissOnClick: true,
-    });
-};
+Toasts.show = () => { };
 
 Toasts.pop = () => { };
 
