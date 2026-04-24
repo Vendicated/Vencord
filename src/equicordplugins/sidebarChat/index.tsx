@@ -334,7 +334,7 @@ export default definePlugin({
                     replace: "const vc_SidebarChat=$self.renderSidebar();$&"
                 },
                 {
-                    match: /return(\(0,\i\.jsxs?\)\(\i\.\i,{}\))}/,
+                    match: /return(\(0,\i\.jsxs?\)\(\i,{}\))}/,
                     replace: "return [$1, vc_SidebarChat]}"
                 },
                 {

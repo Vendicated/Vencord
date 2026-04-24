@@ -203,7 +203,7 @@ export default definePlugin({
         },
         // Remove Activity Section above Member List
         {
-            find: ".MEMBERLIST_CONTENT_FEED_TOGGLED,",
+            find: ".GLOBAL_FEED});",
             predicate: () => settings.store.removeActivitySection,
             replacement: {
                 match: /null==\i\|\|0.{0,100}VIEW_CHANNEL\)&&/,
