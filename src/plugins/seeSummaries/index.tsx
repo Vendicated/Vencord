@@ -60,7 +60,7 @@ export default definePlugin({
             find: /\.people\)\),startId:.{0,100}\.type\}/,
             replacement: {
                 match: /(?<=[};])(?=function (\i)\(\i,\i\)\{.{0,100}\.people\)\),startId:.{0,100}\.type\}\})/,
-                replace: "$self.createSummaryFromServer = $1;"
+                replace: "$self.createSummaryFromServer=$1;"
             }
         },
         {
@@ -79,8 +79,8 @@ export default definePlugin({
         }
     ],
 
-    set createSummaryFromServer(func: any) {
-        createSummaryFromServer = func;
+    set createSummaryFromServer(value: any) {
+        createSummaryFromServer = value;
     },
 
     flux: {
