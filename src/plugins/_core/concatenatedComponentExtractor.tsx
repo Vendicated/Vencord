@@ -10,7 +10,7 @@ import { setColorPicker, setCreateScroller } from "@webpack/common";
 
 export default definePlugin({
     name: "ConcatenatedComponentExtractor",
-    description: "Extract components that have been concatenated by rspack",
+    description: "Extract components that have been concatenated by the bundler",
     authors: [Devs.sadan],
 
     required: true,
