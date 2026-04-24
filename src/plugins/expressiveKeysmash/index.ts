@@ -1,11 +1,16 @@
+/*
+ * Vencord, a Discord client mod
+ * Copyright (c) 2026 Vendicated and contributors
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
+
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import { getCurrentChannel, sendMessage } from "@utils/discord";
 import definePlugin, { OptionType } from "@utils/types";
-import { findByPropsLazy } from "@webpack";
 import rawMessages from "file://messages.txt";
 
-const msg = rawMessages.split("\n").filter((v) => v !== "");
+const msg = rawMessages.split("\n").filter(v => v !== "");
 type KeyPressData = {
     date: number,
     isCapital: boolean,
@@ -83,7 +88,7 @@ export default definePlugin({
             const now = Date.now();
             history.push({
                 date: now,
-                isCapital: e.getModifierState('CapsLock') || e.getModifierState('Shift')
+                isCapital: e.getModifierState("CapsLock") || e.getModifierState("Shift")
             });
 
             if (history.length >= settings.store.keysmashCount) {
@@ -93,8 +98,8 @@ export default definePlugin({
 
         window.document.addEventListener("keydown", this.keyDownHandler);
 
-        intervalID = setInterval((e) => {
-            history = history.filter((val) => Date.now() < val.date + keepFor);
+        intervalID = setInterval(e => {
+            history = history.filter(val => Date.now() < val.date + keepFor);
         }, 100);
     },
 
