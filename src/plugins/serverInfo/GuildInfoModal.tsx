@@ -16,7 +16,7 @@ import { findComponentByCodeLazy, findCssClassesLazy } from "@webpack";
 import { FluxDispatcher, Forms, GuildChannelStore, GuildMemberStore, GuildRoleStore, IconUtils, Parser, PresenceStore, RelationshipStore, ScrollerThin, SnowflakeUtils, TabBar, Timestamp, useEffect, UserStore, UserUtils, useState, useStateFromStores } from "@webpack/common";
 
 const IconClasses = findCssClassesLazy("icon", "acronym", "childWrapper");
-const FriendRow = findComponentByCodeLazy("discriminatorClass:", ".isMobileOnline");
+const FriendRow = findComponentByCodeLazy("discriminatorClass:", ".isMobileOnline", "avatarSrc:");
 
 const cl = classNameFactory("vc-gp-");
 
