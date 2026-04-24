@@ -28,7 +28,7 @@ export default definePlugin({
                     replace: ",$1.listType==='blocked'?$self.renderSearchInput():null"
                 },
                 {
-                    match: /(?<=userId:(\i).*?\}\)\]\}\),)(\(.*?loading:\i\}\))/,
+                    match: /(?<=\{userId:(\i).*?\.globalName.{0,25}\}\)\]\}\),)(\(.*?loading:\i\}\))/,
                     replace: "$self.renderUser($1,$2)",
                 },
                 {

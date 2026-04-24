@@ -80,7 +80,7 @@ export default definePlugin({
             replacement: [
                 {
                     // Append messagelogger-deleted to classNames if deleted
-                    match: /(?<=let (\i)=\i\.memo\(function\(\i\)\{.{0,200}\.THREAD_STARTER_MESSAGE.*?bg-flash-.{0,10}:\i\}\);)/,
+                    match: /(?<=(\i)=\i\.memo\(function\(\i\)\{.{0,200}\.THREAD_STARTER_MESSAGE.*?bg-flash-.{0,10}:\i\}\);)/,
                     replace: "ChannelMessage=$1;"
                 },
             ],

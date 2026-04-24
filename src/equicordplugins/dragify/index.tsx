@@ -177,14 +177,6 @@ export default definePlugin({
                 }
             ]
         },
-        // Voice channel rows (alternate voice list implementation)
-        {
-            find: "handleClickChat",
-            replacement: {
-                match: /(?<=getModeClass\(\),.{0,50})"data-dnd-name":.{0,49},children:\[/,
-                replace: "draggable:!0,onDragStart:e=>$self.onChannelDragStart(e,{id:this?.props?.channel?.id,guild_id:this?.props?.channel?.guild_id}),$&"
-            }
-        },
         // Thread rows in channel list (sidebar thread items)
         {
             find: "__invalid_threadMainContent",

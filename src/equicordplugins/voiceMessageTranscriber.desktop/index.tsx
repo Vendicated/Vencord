@@ -25,8 +25,8 @@ import { lodash, ScrollerAuto, SearchableSelect, useEffect, useRef, useState } f
 import { cl, decodeAudio, LANGUAGES, TranscriptionWorker } from "./utils";
 const Native = VencordNative.pluginHelpers.VoiceMessageTranscriber as PluginNative<typeof import("./native")>;
 
-const ManaBaseRadioGroup = findComponentByCodeLazy('"data-mana-component":"BaseRadioGroup"') as React.ComponentType<ManaBaseRadioGroupProps>;
 const ChannelListIcon = findComponentByCodeLazy("1-1-1ZM2 8a1");
+let ManaBaseRadioGroup: React.ComponentType<ManaBaseRadioGroupProps>;
 
 const settings = definePluginSettings({
     selectedModel: {
@@ -322,8 +322,18 @@ export default definePlugin({
                 match: /"source",{src:(\i).{0,700}duration:\i}\),/,
                 replace: "$&$self.button($1),"
             }
-        }
+        },
+        {
+            find: '"data-mana-component":"BaseRadioGroup"',
+            replacement: {
+                match: /(?=function (\i)\(\i\)\{.{0,400}"data-mana-component":"BaseRadioGroup")/,
+                replace: "$self.ManaBaseRadioGroup=$1;"
+            }
+        },
     ],
+    set ManaBaseRadioGroup(value: any) {
+        ManaBaseRadioGroup = value;
+    },
     settings,
 
     button(src: string) {
