@@ -71,7 +71,6 @@ export const Clickable = waitForComponent<t.Clickable>("Clickable", filters.comp
 export const Avatar = waitForComponent<t.Avatar>("Avatar", filters.componentByCode(".size-1.375*"));
 
 export let ColorPicker: ComponentType<t.ColorPicker> = () => null;
-
 export function setColorPicker(component: ComponentType<t.ColorPicker>) {
     ColorPicker = component;
 }
