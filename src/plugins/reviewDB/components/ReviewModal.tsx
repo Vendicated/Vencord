@@ -22,16 +22,15 @@ import { ReviewType } from "@plugins/reviewDB/entities";
 import { REVIEWS_PER_PAGE, UserReviewsData } from "@plugins/reviewDB/reviewDbApi";
 import { cl } from "@plugins/reviewDB/utils";
 import { ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalRoot, ModalSize, openModalLazy } from "@utils/modal";
-import { useForceUpdater } from "@utils/react";
+import { LazyComponentWrapper, useForceUpdater } from "@utils/react";
 import * as t from "@vencord/discord-types";
-import { DefaultExtractAndLoadChunksRegex, extractAndLoadChunksLazy, filters } from "@webpack";
+import { DefaultExtractAndLoadChunksRegex, extractAndLoadChunksLazy, findComponentByCodeLazy } from "@webpack";
 import { Text, useRef, useState } from "@webpack/common";
-import { waitForComponent } from "@webpack/common/internal";
 
 import ReviewComponent from "./ReviewComponent";
 import ReviewsView, { ReviewsInputComponent } from "./ReviewsView";
 
-const Paginator = waitForComponent<t.Paginator>("Paginator", filters.componentByCode('rel:"prev",children:'));
+const Paginator = findComponentByCodeLazy('rel:"prev",children:') as LazyComponentWrapper<t.Paginator>;
 
 const requirePaginator = extractAndLoadChunksLazy(['name:"SearchResults"'], new RegExp(`${DefaultExtractAndLoadChunksRegex.source}.{0,30}?name:"SearchResults"`));
 
