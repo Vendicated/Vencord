@@ -17,7 +17,7 @@
 */
 
 import type * as t from "@vencord/discord-types";
-import { _resolveReady, DefaultExtractAndLoadChunksRegex, extractAndLoadChunks, filters, findByCodeLazy, findByPropsLazy, findLazy, mapMangledModuleLazy, proxyLazyWebpack, waitFor } from "@webpack";
+import { _resolveReady, filters, findByCodeLazy, findByPropsLazy, findLazy, mapMangledModuleLazy, waitFor } from "@webpack";
 import type * as TSPattern from "ts-pattern";
 
 export let FluxDispatcher: t.FluxDispatcher;
@@ -45,11 +45,6 @@ export const Constants: t.Constants = mapMangledModuleLazy('ME:"/users/@me"', {
 
 export const RestAPI: t.RestAPI = findLazy(m => typeof m === "object" && m.del && m.put);
 export const moment: typeof import("moment") = findByPropsLazy("parseTwoDigitYear");
-
-export const hljs: typeof import("highlight.js").default = proxyLazyWebpack(() => {
-    extractAndLoadChunks(["codeBlock:{react("], new RegExp(`"hljs".+?${DefaultExtractAndLoadChunksRegex.source}`));
-    return findByPropsLazy("highlight", "registerLanguage");
-});
 
 export const { match, P }: { match: typeof TSPattern["match"], P: typeof TSPattern["P"]; } = mapMangledModuleLazy("@ts-pattern/matcher", {
     match: filters.byCode("return new"),
