@@ -31,11 +31,9 @@ export default definePlugin({
     tags: ["Voice"],
     authors: [Devs.Ven, Devs.D3SOX],
     patches: [
-        ...[
-            ".handleVoiceStatusClick", // voice channels
-            ".handleClickChat" // stage channels
-        ].map(find => ({
-            find,
+        // Stage Channels
+        {
+            find: ".handleClickChat",
             // hack: these are not React onClick, it is a custom prop handled by Discord
             // thus, replacing this with onDoubleClick won't work, and you also cannot check
             // e.detail since instead of the event they pass the channel.
@@ -46,7 +44,21 @@ export default definePlugin({
                     replace: "onClick:()=>{$self.schedule(()=>{this.handleClick()},this)",
                 },
             ]
-        })),
+        },
+        // Voice Channels
+        {
+            find: ".handleVoiceStatusClick",
+            // hack: these are not React onClick, it is a custom prop handled by Discord
+            // thus, replacing this with onDoubleClick won't work, and you also cannot check
+            // e.detail since instead of the event they pass the channel.
+            // do this timer workaround instead
+            replacement: [
+                {
+                    match: /onClick:\(\)=>\{this.handleClick\(\)/g,
+                    replace: "onClick:()=>{$self.schedule(()=>{this.handleClick()},this)",
+                },
+            ]
+        },
         {
             // channel mentions
             find: 'className:"channelMention",children',
