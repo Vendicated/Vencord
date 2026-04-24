@@ -9,11 +9,11 @@ import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import { hasGuildFeature } from "@utils/discord";
 import definePlugin, { OptionType } from "@utils/types";
-import { findByCodeLazy, findByPropsLazy } from "@webpack";
+import { findByPropsLazy } from "@webpack";
 import { ChannelStore, GuildStore } from "@webpack/common";
 
 const SummaryStore = findByPropsLazy("allSummaries", "findSummary");
-const createSummaryFromServer = findByCodeLazy(".people)),startId:", ".type}");
+let createSummaryFromServer: (a: any, channelId?: string) => any;
 
 const settings = definePluginSettings({
     summaryExpiryThresholdDays: {
@@ -57,6 +57,14 @@ export default definePlugin({
     settings,
     patches: [
         {
+            find: /\.people\)\),startId:.{0,100}\.type\}/,
+            replacement: {
+                match: /(?<=[};])(?=function (\i)\(\i,\i\)\{.{0,100}\.people\)\),startId:.{0,100}\.type\}\})/,
+                replace: "$self.registerCreateSummaryFromServer($1);"
+            }
+        },
+
+        {
             find: "SUMMARIZEABLE.has",
             replacement: {
                 match: /\i\.features\.has\(\i\.\i\.SUMMARIES_ENABLED\w+?\)/g,
@@ -71,6 +79,11 @@ export default definePlugin({
             }
         }
     ],
+
+    registerCreateSummaryFromServer(func: any) {
+        createSummaryFromServer = func;
+    },
+
     flux: {
         CONVERSATION_SUMMARY_UPDATE(data) {
             const incomingSummaries: ChannelSummaries[] = data.summaries.map((summary: any) => ({ ...createSummaryFromServer(summary), time: Date.now() }));
