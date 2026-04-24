@@ -1832,7 +1832,7 @@ export default definePlugin({
             find: ".ACCEPT_QUEST),",
             replacement: [
                 {
-                    match: /(?=let{quest:)/,
+                    match: /(?=let{quest:)/g,
                     replace: "const questifyText=$self.getQuestUnacceptedButtonText(arguments[0].quest)??$self.getQuestAcceptedButtonText(arguments[0].quest);"
                 },
                 {
