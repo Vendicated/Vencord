@@ -143,7 +143,7 @@ export default definePlugin({
                         `${m},$self.renderDMPageList({user:arguments[0].user,hasDivider:${hasMutualGuilds}||${hasMutualFriends},Divider:${Divider},listStyle:${classes}.list})`
                 },
                 {
-                    match: /(?=function (\i)\(\i\){let{section:\i,header:\i.{0,100}?onExpand:)/,
+                    match: /(?=function (\i)\(\i\){let{section:\i,header:\i[^}]+?onExpand:)/,
                     replace: "$self.ExpandableList=$1;"
                 }
             ]

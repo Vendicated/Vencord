@@ -377,7 +377,7 @@ export default definePlugin({
         {
             find: "!1,withFooter:",
             replacement: {
-                match: /(?=function (\i)\(\i\){let{message:\i,channel:\i,.{0,100}?withFooter:)/,
+                match: /(?=function (\i)\(\i\){let{message:\i,channel:\i,[^}]+?withFooter:)/,
                 replace: "$self.AutoModEmbed=$1;"
             }
         }
