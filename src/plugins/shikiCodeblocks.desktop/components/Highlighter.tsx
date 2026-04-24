@@ -22,9 +22,9 @@ import { shiki } from "@plugins/shikiCodeblocks.desktop/api/shiki";
 import { useShikiSettings } from "@plugins/shikiCodeblocks.desktop/hooks/useShikiSettings";
 import { useTheme } from "@plugins/shikiCodeblocks.desktop/hooks/useTheme";
 import { hex2Rgb } from "@plugins/shikiCodeblocks.desktop/utils/color";
-import { cl, shouldUseHljs } from "@plugins/shikiCodeblocks.desktop/utils/misc";
+import { cl, hljs, shouldUseHljs } from "@plugins/shikiCodeblocks.desktop/utils/misc";
 import { useAwaiter, useIntersection } from "@utils/react";
-import { hljs, React } from "@webpack/common";
+import { React } from "@webpack/common";
 
 import { ButtonRow } from "./ButtonRow";
 import { Code } from "./Code";
