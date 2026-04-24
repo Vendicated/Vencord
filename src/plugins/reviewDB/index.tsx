@@ -94,7 +94,7 @@ export default definePlugin({
         {
             // User popout
             // same find as ShowConnections
-            find: /usernameIcon:.{0,200}?\.POPOUT,onClose:\i}\).+?\.isProvisional/,
+            find: /usernameIcon:.{0,200}?\.POPOUT,onClose:/,
             replacement: {
                 match: /user:(\i),widgets:.{0,100}?\}\),/,
                 replace: "$&$self.renderProfileComponent({user:$1}),"

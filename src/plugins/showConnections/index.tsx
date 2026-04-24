@@ -162,7 +162,7 @@ export default definePlugin({
     patches: [
         {
             // Same find as ReviewDB
-            find: /usernameIcon:.{0,200}?\.POPOUT,onClose:\i}\).+?\.isProvisional/,
+            find: /usernameIcon:.{0,200}?\.POPOUT,onClose:/,
             replacement: {
                 match: /userId:\i\.id,guild:\i\}\)(?=])/,
                 replace: "$&,$self.profilePopoutComponent(arguments[0])"
