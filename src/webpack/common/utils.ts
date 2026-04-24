@@ -106,58 +106,34 @@ export interface ToastOptions {
     duration?: number;
 }
 
+interface ToastsExports {
+    showToast: (data: ToastData) => void;
+    popToast(): void;
+}
+
+const ToastsExports = mapMangledModuleLazy(".currentToastMap.has(", {
+    showToast: filters.byCode(".currentToastMap.has("),
+    popToast: filters.byCode(".delete(")
+});
+
+export function createToast(message: string, type: string, options?: ToastOptions): ToastData {
+    return {
+        message,
+        id: Toasts.genId(),
+        type,
+        options
+    };
+}
+
 export const Toasts = {
     Type: ToastType,
     Position: ToastPosition,
-    // what's less likely than getting 0 from Math.random()? Getting it twice in a row
     genId: () => (Math.random() || Math.random()).toString(36).slice(2),
 
-    // hack to merge with the following interface, dunno if there's a better way
-    ...{} as {
-        show(data: ToastData): void;
-        pop(): void;
-        create(message: string, type: string, options?: ToastOptions): ToastData;
-    }
+    show: ToastsExports.showToast,
+    pop: ToastsExports.popToast,
+    create: createToast,
 };
-
-// seems like discord killed off toasts mostly so merged them into notifications
-// waiting on vencords team to look into it further
-// this code is terrible
-
-const ToastTypeToNotificationColor: Record<string, string> = {
-    [ToastType.SUCCESS]: "#3ba55d",
-    [ToastType.FAILURE]: "#ed4245",
-    [ToastType.MESSAGE]: "#5865f2",
-    [ToastType.CUSTOM]: "#5865f2",
-    [ToastType.CLIP]: "#5865f2",
-    [ToastType.LINK]: "#00b0f4",
-    [ToastType.FORWARD]: "#5865f2",
-    [ToastType.BOOKMARK]: "#faa61a",
-    [ToastType.CLOCK]: "#faa61a",
-};
-
-const ToastTypeToNotificationTitle: Record<string, string> = {
-    [ToastType.MESSAGE]: "Notice",
-    [ToastType.SUCCESS]: "Success",
-    [ToastType.FAILURE]: "Error",
-    [ToastType.CUSTOM]: "Notice",
-    [ToastType.CLIP]: "Copied to Clipboard",
-    [ToastType.LINK]: "Link",
-    [ToastType.FORWARD]: "Forwarded",
-    [ToastType.BOOKMARK]: "Saved",
-    [ToastType.CLOCK]: "Reminder",
-};
-
-Toasts.create = (message: string, type: string, options?: ToastOptions): ToastData => ({
-    id: Toasts.genId(),
-    message,
-    type,
-    options,
-});
-
-Toasts.show = () => { };
-
-Toasts.pop = () => { };
 
 /**
  * Show a simple toast. If you need more options, use Toasts.show manually
