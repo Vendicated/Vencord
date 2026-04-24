@@ -15,7 +15,7 @@ type DecorationGridItemComponent = ComponentType<PropsWithChildren<HTMLProps<HTM
 export let DecorationGridItem: DecorationGridItemComponent;
 export const setDecorationGridItem = v => DecorationGridItem = v;
 
-export let AvatarDecorationModalPreview: ComponentType<any> | null = null;
+export let AvatarDecorationModalPreview: ComponentType<any> = () => null;
 export const setAvatarDecorationModalPreview = v => AvatarDecorationModalPreview = v;
 
 type DecorationGridDecorationComponent = React.ComponentType<HTMLProps<HTMLDivElement> & {
