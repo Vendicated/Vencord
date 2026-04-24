@@ -481,7 +481,7 @@ export default definePlugin({
             find: "#{intl::ROLE_REQUIRED_SINGLE_USER_MESSAGE}",
             replacement: {
                 match: /(?=function (\i)\(\i\){let{channel:.{0,200}?getSortedRoles\()/,
-                replace: "$self.setChannelBeginHeader=$1;"
+                replace: "$self.ChannelBeginHeader=$1;"
             }
         }
     ],
