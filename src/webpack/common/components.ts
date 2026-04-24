@@ -78,8 +78,13 @@ export function setColorPicker(component: t.ColorPicker) {
 
 export const UserSummaryItem = waitForComponent("UserSummaryItem", filters.componentByCode("defaultRenderUser", "showDefaultAvatarsForNullUsers"));
 
-export let createScroller: undefined | ((scrollbarClassName: string, fadeClassName: string, customThemeClassName: string) => t.ScrollerThin);
+export let createScroller: ((scrollbarClassName: string, fadeClassName: string, customThemeClassName: string) => t.ScrollerThin) | undefined;
+export function setCreateScroller(cs: NonNullable<typeof createScroller>) {
+    createScroller = cs;
+}
+
 export let createListScroller: (scrollBarClassName: string, fadeClassName: string, someOtherClassIdkMan: string, resizeObserverClass: typeof ResizeObserver) => t.ListScrollerThin;
+waitFor(filters.byCode("getScrollerNode:", "resizeObserver:", "sectionHeight:"), m => createListScroller = m);
 
 const listScrollerClassnames = ["thin", "auto", "fade"] as const;
 export const scrollerClasses = findCssClassesLazy("thin", "auto", "fade", "customTheme", "none");
@@ -92,12 +97,6 @@ export const listScrollerClasses = proxyLazyWebpack(() => {
 
     return mapMangledCssClasses(mod, listScrollerClassnames);
 });
-
-export function setCreateScroller(cs: typeof createScroller & {}) {
-    createScroller = cs;
-}
-
-waitFor(filters.byCode("getScrollerNode:", "resizeObserver:", "sectionHeight:"), m => createListScroller = m);
 
 export const ScrollerNone = LazyComponent(() => createScroller?.(scrollerClasses.none, scrollerClasses.fade, scrollerClasses.customTheme)!);
 export const ScrollerThin = LazyComponent(() => createScroller?.(scrollerClasses.thin, scrollerClasses.fade, scrollerClasses.customTheme)!);
