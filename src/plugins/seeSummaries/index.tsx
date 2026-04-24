@@ -60,10 +60,9 @@ export default definePlugin({
             find: /\.people\)\),startId:.{0,100}\.type\}/,
             replacement: {
                 match: /(?<=[};])(?=function (\i)\(\i,\i\)\{.{0,100}\.people\)\),startId:.{0,100}\.type\}\})/,
-                replace: "$self.registerCreateSummaryFromServer($1);"
+                replace: "$self.createSummaryFromServer = $1;"
             }
         },
-
         {
             find: "SUMMARIZEABLE.has",
             replacement: {
@@ -80,7 +79,7 @@ export default definePlugin({
         }
     ],
 
-    registerCreateSummaryFromServer(func: any) {
+    set createSummaryFromServer(func: any) {
         createSummaryFromServer = func;
     },
 
