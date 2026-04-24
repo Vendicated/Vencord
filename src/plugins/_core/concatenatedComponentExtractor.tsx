@@ -19,7 +19,7 @@ export default definePlugin({
         {
             find: "#{intl::USER_SETTINGS_PROFILE_COLOR_SELECT_COLOR}),focusProps:",
             replacement: {
-                match: /(?=function (\i)\(\i\)\{let\{[^}]+?showEyeDropper:)/,
+                match: /(?=function (\i)\(\i\)\{let\{onChange:\i,onClose:\i,[^}]+?showEyeDropper:)/,
                 replace: "$self.setColorPicker($1);"
             }
         },
