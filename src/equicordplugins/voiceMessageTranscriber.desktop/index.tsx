@@ -14,7 +14,6 @@ import { Flex } from "@components/Flex";
 import { FormSwitch } from "@components/FormSwitch";
 import { Heading } from "@components/Heading";
 import { Span } from "@components/Span";
-import { ManaBaseRadioGroupProps } from "@equicordplugins/components.dev/types";
 import { copyToClipboard } from "@utils/clipboard";
 import { Devs } from "@utils/constants";
 import { ModalCloseButton, ModalContent, ModalHeader, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
@@ -26,7 +25,7 @@ import { cl, decodeAudio, LANGUAGES, TranscriptionWorker } from "./utils";
 const Native = VencordNative.pluginHelpers.VoiceMessageTranscriber as PluginNative<typeof import("./native")>;
 
 const ChannelListIcon = findComponentByCodeLazy("1-1-1ZM2 8a1");
-let ManaBaseRadioGroup: React.ComponentType<ManaBaseRadioGroupProps>;
+let ManaBaseRadioGroup;
 
 const settings = definePluginSettings({
     selectedModel: {

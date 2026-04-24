@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { EquicordIcon } from "@equicordplugins/components.dev/components/icons/EquicordIcon";
+import { EquicordIcon } from "@equicordplugins/discordDevBanner/components";
 import { IS_MAC } from "@utils/constants";
 import { classNameFactory } from "@utils/css";
 import { classes } from "@utils/misc";
