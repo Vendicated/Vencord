@@ -67,7 +67,7 @@ function ToolBarHeader() {
     );
 }
 
-let ChannelMessage;
+export let ChannelMessage;
 
 export default definePlugin({
     name: "HolyNotes",
