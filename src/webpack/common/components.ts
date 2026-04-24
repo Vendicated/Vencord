@@ -58,7 +58,7 @@ export const TooltipContainer = TooltipContainerComponent as never;
 
 // FIXME: t.TextInput was for the old void components, and is not 100% correct for the mana component
 export const TextInput = waitForComponent<t.TextInput>("TextInput", filters.componentByCode('setHasValue?.(""!=='));
-export const TextArea = waitForComponent<t.TextArea>("TextArea", filters.componentByCode('"data-mana-component":"text-area"'));
+export const TextArea = waitForComponent<t.TextArea>("TextArea", filters.componentByCode("!0,rows:", "showRemainingCharacterCount:"));
 export const Select = waitForComponent<t.Select>("Select", filters.componentByCode('selectionMode:"single",onSelectionChange:', "isSelected:"));
 export const SearchableSelect = waitForComponent<t.SearchableSelect>("SearchableSelect", filters.componentByCode('?"multiple":"single",required:'));
 export const Slider = waitForComponent<t.Slider>("Slider", filters.componentByCode("markDash", "this.renderMark("));
