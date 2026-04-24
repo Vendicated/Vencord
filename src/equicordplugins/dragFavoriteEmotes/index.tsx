@@ -51,7 +51,7 @@ export default definePlugin({
             find: "#{intl::EMOJI_FAVORITE_TOOLTIP}",
             replacement: [
                 {
-                    match: /(ref:\i,children:)(\(0,\i.jsx\)\(\i.\i)/,
+                    match: /(ref:\i,children:)(\(0,\i.jsxs?\)\(\i)/,
                     replace: "$1arguments[0]?.collected?.isDragging?$self.dragItem():$2",
                 },
                 {

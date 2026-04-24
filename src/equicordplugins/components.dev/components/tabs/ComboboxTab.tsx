@@ -4,7 +4,9 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { ManaCombobox, Paragraph, useState } from "..";
+import { ManaCombobox } from "@equicordplugins/components.dev";
+
+import { Paragraph, useState } from "..";
 import { DocPage, type PropDef } from "../DocPage";
 
 const COMBOBOX_PROPS: PropDef[] = [

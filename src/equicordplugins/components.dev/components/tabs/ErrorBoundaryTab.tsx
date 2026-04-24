@@ -4,7 +4,9 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { Button, ErrorBoundary, LocalErrorBoundary, Paragraph, SimpleErrorBoundary, useState } from "..";
+import { SimpleErrorBoundary } from "@equicordplugins/components.dev";
+
+import { Button, ErrorBoundary, LocalErrorBoundary, Paragraph, useState } from "..";
 import { DocPage, type PropDef, type PropGroup } from "../DocPage";
 
 function ThrowError(): never {

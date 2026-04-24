@@ -41,7 +41,7 @@ export default definePlugin({
             find: "#{intl::xdCLeM::raw}",
             replacement: [
                 {
-                    match: /profile:\i\}\),.{0,15}profile:\i/,
+                    match: /profile:\i\}\),.{0,20}profile:\i(?=.{0,20}profile:\i)/,
                     replace: "$&,invite:arguments[0].invite"
                 }
             ]

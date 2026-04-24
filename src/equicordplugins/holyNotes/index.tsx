@@ -27,7 +27,7 @@ import { classNameFactory } from "@utils/css";
 import { openModal } from "@utils/modal";
 import definePlugin from "@utils/types";
 import { Message } from "@vencord/discord-types";
-import { findByCodeLazy, findComponentByCodeLazy, findCssClassesLazy, findExportedComponentLazy } from "@webpack";
+import { findByCodeLazy, findCssClassesLazy, findExportedComponentLazy } from "@webpack";
 import { ChannelStore, Menu } from "@webpack/common";
 
 import { NoteModal } from "./components/modals/Notebook";
@@ -40,7 +40,6 @@ export const MessageRecord = findByCodeLazy("isEdited(){");
 export const messageClasses = findCssClassesLazy("message", "groupStart", "cozyMessage");
 export const resultsClasses = findCssClassesLazy("emptyResultsWrap", "emptyResultsContent", "errorImage", "emptyResultsText", "noResultsImage", "alt");
 export const ChannelRecord = findByCodeLazy("computeLurkerPermissionsAllowList(){");
-export const ChannelMessage = findComponentByCodeLazy("Message must not be a thread");
 
 const messageContextMenuPatch: NavContextMenuPatchCallback = (children, { message }: { message: Message; }) => {
     children.push(
@@ -68,12 +67,29 @@ function ToolBarHeader() {
     );
 }
 
+let ChannelMessage;
+
 export default definePlugin({
     name: "HolyNotes",
     description: "Save messages as notes to revisit later",
     dependencies: ["MessagePopoverAPI", "HeaderBarAPI"],
     tags: ["Chat", "Organisation"],
     authors: [EquicordDevs.Wolfie],
+    patches: [
+        {
+            find: "Message must not be a thread starter message",
+            replacement: [
+                {
+                    // Append messagelogger-deleted to classNames if deleted
+                    match: /(?=let (\i)=\i\.memo\(function\(\i\)\{.{0,200}\.THREAD_STARTER_MESSAGE)/,
+                    replace: "ChannelMessage=$1;"
+                },
+            ],
+        }
+    ],
+    set ChannelMessage(value: any) {
+        ChannelMessage = value;
+    },
 
     toolboxActions: {
         "Open Notes"() {

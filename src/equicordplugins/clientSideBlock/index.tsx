@@ -225,7 +225,7 @@ export default definePlugin({
         {
             find: "ACTIVE_NOW_COLUMN)",
             replacement: {
-                match: /(\i\.\i),\{(?=\}\)\])/,
+                match: /(\i),\{(?=\}\)\])/,
                 replace: '"div",{children:$self.activeNowView($1())'
             }
         },

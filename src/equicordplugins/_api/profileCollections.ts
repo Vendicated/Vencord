@@ -13,7 +13,7 @@ export default definePlugin({
     authors: [Devs.thororen],
     patches: [
         {
-            find: /\.POPOUT,onClose:\i}\),nicknameIcons:.+?\.isProvisional/,
+            find: "#{intl::XcTHmQ::raw}",
             replacement: {
                 match: /user:\i,widgets:.{0,100}?\}\),/,
                 replace: "$&Vencord.Api.ProfileCollections.renderProfileCollections(arguments[0]),",

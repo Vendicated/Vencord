@@ -4,7 +4,9 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { ManaCalendar, ManaDatePicker, useState } from "..";
+import { ManaCalendar, ManaDatePicker } from "@equicordplugins/components.dev";
+
+import { useState } from "..";
 import { DocPage, type PropDef } from "../DocPage";
 
 const CALENDAR_PROPS: PropDef[] = [

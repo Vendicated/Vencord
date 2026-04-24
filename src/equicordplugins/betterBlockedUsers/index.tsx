@@ -24,7 +24,7 @@ export default definePlugin({
             find: '"],{numberOfBlockedUsers:',
             replacement: [
                 {
-                    match: /(?<=\}=(\i).*?\]\}\))/,
+                    match: /(?<=listType:\i,numberOfUsers:\i\}=(\i).*?\]\}\))/,
                     replace: ",$1.listType==='blocked'?$self.renderSearchInput():null"
                 },
                 {

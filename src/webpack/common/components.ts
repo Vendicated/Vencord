@@ -74,7 +74,6 @@ export function setColorPicker(component: t.ColorPicker) {
     ColorPicker = component;
 }
 
-
 export const UserSummaryItem = waitForComponent("UserSummaryItem", filters.componentByCode("defaultRenderUser", "showDefaultAvatarsForNullUsers"));
 
 export let createScroller: ((scrollbarClassName: string, fadeClassName: string, customThemeClassName: string) => t.ScrollerThin) | undefined;

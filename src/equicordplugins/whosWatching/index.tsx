@@ -94,9 +94,9 @@ export default definePlugin({
             }
         },
         {
-            find: "this.renderEmbeddedActivity()",
+            find: ",setIsForceShowSharingPopout:",
             replacement: {
-                match: /"div"(?=.{0,40}?,this.renderActions\(\))/,
+                match: /"div"(?=.{0,50}stream:\i,canGoLive:\i)/,
                 replace: "$self.WrapperComponent"
             }
         }

@@ -338,7 +338,12 @@ export default definePlugin({
                     replace: "return [$1, vc_SidebarChat]}"
                 },
                 {
-                    match: /(case \i\.\i.+?return)(.+?);(?=.+?params\.messageId)(?<=guild_products".+?)/g,
+                    match: /(?<=guild_products".+?)(case \i\.\i.+?return)(.+?\}\));(?=.+?params\.messageId)/g,
+                    replace: "$1[$2, vc_SidebarChat];",
+                    predicate: () => settings.store.patchCommunity
+                },
+                {
+                    match: /(case \i\.\i\.GAME_SERVERS:.*?\.CHANNEL.*?return)(.*?);/,
                     replace: "$1[$2, vc_SidebarChat];",
                     predicate: () => settings.store.patchCommunity
                 }

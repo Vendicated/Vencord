@@ -34,10 +34,8 @@ import type {
     AnchorProps,
     AvatarProps,
     BadgeShapesType,
-    ChipProps,
     CircleBadgeProps,
     ClickableProps,
-    ColorPickerProps,
     ColorPickerWithSwatchesProps,
     ColorSwatchProps,
     ConfirmModalProps,
@@ -52,18 +50,13 @@ import type {
     GuildIconProps,
     IconBadgeProps,
     LocalErrorBoundaryProps,
-    ManaBaseRadioGroupProps,
     ManaButtonProps,
-    ManaCalendarProps,
     ManaCheckboxGroupProps,
     ManaCheckboxProps,
-    ManaComboboxProps,
-    ManaDatePickerProps,
     ManaListboxProps,
     ManaPopoverProps,
     ManaRichTooltipProps,
     ManaSelectProps,
-    ManaSwitchProps,
     ManaTextAreaProps,
     ManaTextButtonProps,
     ManaTextInputProps,
@@ -78,11 +71,8 @@ import type {
     PremiumBadgeProps,
     ProgressBarProps,
     SearchBarProps,
-    SimpleErrorBoundaryProps,
-    SkeletonProps,
     SliderProps,
     SpinnerComponent,
-    StandaloneRadioIndicatorProps,
     TextBadgeProps,
     TimestampProps,
     ToastData,
@@ -121,21 +111,15 @@ export const Clickable = findByCodeLazy("ignoreKeyPress", "renderNonInteractive"
 
 export const ManaButton = findComponentByCodeLazy('"data-mana-component":"button"') as React.ComponentType<ManaButtonProps>;
 export const ManaTextButton = findComponentByCodeLazy('"data-mana-component":"text-button"') as React.ComponentType<ManaTextButtonProps>;
-export const ManaSwitch = findComponentByCodeLazy('"data-mana-component":"switch"') as React.ComponentType<ManaSwitchProps>;
 export const ManaTextInput = findComponentByCodeLazy('"data-mana-component":"text-input"') as React.ComponentType<ManaTextInputProps>;
 export const ManaTextArea = findComponentByCodeLazy('"data-mana-component":"text-area"') as React.ComponentType<ManaTextAreaProps>;
 export const ManaCheckbox = findComponentByCodeLazy('"data-mana-component":"checkbox"') as React.ComponentType<ManaCheckboxProps>;
 export const ManaSelect = findComponentByCodeLazy('"data-mana-component":"select"') as React.ComponentType<ManaSelectProps>;
-export const ManaCalendar = findComponentByCodeLazy('"data-mana-component":"calendar"') as React.ComponentType<ManaCalendarProps>;
-export const ManaDatePicker = findComponentByCodeLazy('"data-mana-component":"date-picker"') as React.ComponentType<ManaDatePickerProps>;
 export const ManaListbox = findComponentByCodeLazy('"data-mana-component":"listbox"') as React.ComponentType<ManaListboxProps>;
 export const ManaCheckboxGroup = findComponentByCodeLazy('"data-mana-component":"checkbox-group"') as React.ComponentType<ManaCheckboxGroupProps>;
-export const ManaBaseRadioGroup = findComponentByCodeLazy('"data-mana-component":"BaseRadioGroup"') as React.ComponentType<ManaBaseRadioGroupProps>;
-export const ManaCombobox = findComponentByCodeLazy("itemToString", "multiSelect", "maxVisibleItems") as React.ComponentType<ManaComboboxProps>;
 export const ManaTooltip = findComponentByCodeLazy("VoidTooltip cannot find DOM node") as React.ComponentType<ManaTooltipProps>;
 export const ManaRichTooltip = findComponentByCodeLazy('"data-mana-component":"rich-tooltip"') as React.ComponentType<ManaRichTooltipProps>;
 export const ManaPopover = findByCodeLazy("title", "body", "badge", "graphic", "actions", "textLink", "gradientColor", "popoverRef") as React.ComponentType<ManaPopoverProps>;
-export const StandaloneRadioIndicator = findComponentByCodeLazy("standaloneRadioIndicator", "animateIn", "animateOut") as React.ComponentType<StandaloneRadioIndicatorProps>;
 
 export const Slider = findComponentByCodeLazy("stickToMarkers", "onMarkerRender", "grabberClassName") as React.ComponentType<SliderProps>;
 export const Avatar = findComponentByCodeLazy("statusTooltip", "statusBackdropColor", "isSpeaking") as React.ComponentType<AvatarProps>;
@@ -144,12 +128,9 @@ export const Spinner = findComponentByCodeLazy("spinningCircleSimple", "pulsingE
 export const SearchBar = findComponentByCodeLazy("#{intl::SEARCH}", "clearable", "autoComplete") as React.ComponentType<SearchBarProps>;
 export const Paginator = findComponentByCodeLazy("#{intl::BACK}", "#{intl::NEXT}", "renderPageWrapper") as React.ComponentType<PaginatorProps>;
 export const Notice = findComponentByCodeLazy("messageType", '="text-default"', '="text-sm/medium"') as React.ComponentType<NoticeProps>;
-export const Chip = findComponentByCodeLazy('variant:"eyebrow"', "chip,") as React.ComponentType<ChipProps>;
-export const Skeleton = findComponentByCodeLazy("withHeader:t=!0,size:") as React.ComponentType<SkeletonProps>;
 export const Accordion = findComponentByCodeLazy("scrollHeight)}", "onExpandedChange", "defaultExpanded") as React.ComponentType<AccordionProps>;
 export const Timestamp = findComponentByCodeLazy("#{intl::MESSAGE_EDITED_TIMESTAMP_A11Y_LABEL}", "isVisibleOnlyOnHover") as React.ComponentType<TimestampProps>;
 export const GuildIcon = findComponentByCodeLazy("Masks.CLAN_ICON,width", "acronymClassName") as React.ComponentType<GuildIconProps>;
-export const ColorPicker = findComponentByCodeLazy("#{intl::USER_SETTINGS_PROFILE_COLOR_SELECT_COLOR}", "showEyeDropper") as React.ComponentType<ColorPickerProps>;
 export const FocusLock = findComponentByCodeLazy(".containerRef,{keyboardModeEnabled:") as React.ComponentType<FocusLockProps>;
 export const UserSummaryItem = findComponentByCodeLazy("popoutUserId") as React.ComponentType<UserSummaryItemProps>;
 
@@ -366,5 +347,4 @@ export const ContextMenuApi: ContextMenuApiType = mapMangledModuleLazy('type:"CO
 });
 
 export const ErrorBoundary = findComponentByCodeLazy("this.resetErrorBoundary", "onReset", "FallbackComponent") as React.ComponentType<ErrorBoundaryProps>;
-export const SimpleErrorBoundary = findComponentByCodeLazy("getDerivedStateFromError", "this.props.fallback") as React.ComponentType<SimpleErrorBoundaryProps>;
 export const LocalErrorBoundary = findComponentByCodeLazy("LocalErrorBoundary", "text-feedback-critical") as React.ComponentType<LocalErrorBoundaryProps>;

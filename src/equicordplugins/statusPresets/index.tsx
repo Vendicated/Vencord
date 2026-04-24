@@ -57,7 +57,7 @@ interface DiscordStatus {
 }
 
 // TODO: find clearCustomStatusHint original css/svg or replace
-const PMenu = findComponentByCodeLazy("#{intl::MORE_OPTIONS}", ",renderSubmenu:");
+let PMenu;
 const EmojiComponent = findComponentByCodeLazy(/\.translateSurrogatesToInlineEmoji\(\i\.name\);/);
 
 const CustomStatusSettings = getUserSettingLazy("status", "customStatus")!;
@@ -163,8 +163,18 @@ export default definePlugin({
                 match: /(,\{onClose:\i\}\))\]/,
                 replace: "$1,$self.render()]"
             }
-        }
+        },
+        {
+            find: "#{intl::MORE_OPTIONS}),...",
+            replacement: {
+                match: /(?<=targetElementRef:\i,spacing:.{0,150}className:\i\.\i,children:(\i)\(\)\}\)\})/,
+                replace: "$self.PMenu=$1;"
+            }
+        },
     ],
+    set PMenu(value: any) {
+        PMenu = value;
+    },
     render() {
         const status = CustomStatusSettings.getSetting();
         return (

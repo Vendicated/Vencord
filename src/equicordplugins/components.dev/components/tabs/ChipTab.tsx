@@ -4,7 +4,9 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { Chip, Paragraph } from "..";
+import { Chip } from "@equicordplugins/components.dev";
+
+import { Paragraph } from "..";
 import { DocPage, type PropDef } from "../DocPage";
 
 const CHIP_COLORS = ["blurple", "purple", "green", "orange", "yellow", "pink", "red", "gray"] as const;

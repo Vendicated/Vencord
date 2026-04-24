@@ -143,10 +143,10 @@ export default definePlugin({
         },
         // allow resolutions above 720p at 60fps
         {
-            find: ".RESOLUTION_720&&",
+            find: ",setIsForceShowSharingPopout:",
             replacement: {
-                match: /\i===\i\.\i\.RESOLUTION_720&&\i!==\i\.\i\.FPS_60/,
-                replace: "false",
+                match: /\i!==\i\.\i\.RESOLUTION_720\|\|\i===\i\.\i\.FPS_60/,
+                replace: "true",
             },
             predicate: () => settings.store.removeResolutionCap,
         },

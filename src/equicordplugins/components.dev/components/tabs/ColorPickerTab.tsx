@@ -4,7 +4,9 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { ColorPicker, ColorPickerWithSwatches, ColorSwatch, DefaultColorButton, Paragraph, PresetColors, useState } from "..";
+import { ColorPicker } from "@webpack/common";
+
+import { ColorPickerWithSwatches, ColorSwatch, DefaultColorButton, Paragraph, PresetColors, useState } from "..";
 import { DocPage, type PropDef } from "../DocPage";
 
 const DEFAULT_COLOR = 0x5865F2;
@@ -58,29 +60,28 @@ const SWATCHES_PROPS: PropDef[] = [
 ];
 
 function BasicPickerDemo() {
-    const [color, setColor] = useState(DEFAULT_COLOR);
+    const [color, setColor] = useState<number | null>(DEFAULT_COLOR);
 
     return (
         <>
-            <Paragraph color="text-muted" style={{ marginBottom: 8 }}>Selected: {intToHex(color)}</Paragraph>
+            <Paragraph color="text-muted" style={{ marginBottom: 8 }}>Selected: {color !== null ? intToHex(color) : DEFAULT_COLOR}</Paragraph>
             <ColorPicker color={color} onChange={setColor} showEyeDropper={false} />
         </>
     );
 }
 
 function EyeDropperDemo() {
-    const [color, setColor] = useState(DEFAULT_COLOR);
+    const [color, setColor] = useState<number | null>(DEFAULT_COLOR);
 
     return <ColorPicker color={color} onChange={setColor} showEyeDropper />;
 }
 
 function SuggestedDemo() {
-    const [color, setColor] = useState(0xE74C3C);
+    const [color, setColor] = useState<number | null>(0xE74C3C);
 
     return (
         <>
-            <Paragraph color="text-muted" style={{ marginBottom: 8 }}>Selected: {intToHex(color)}</Paragraph>
-            <ColorPicker
+            <Paragraph color="text-muted" style={{ marginBottom: 8 }}>Selected: {color !== null ? intToHex(color) : 0xE74C3C}</Paragraph>            <ColorPicker
                 color={color}
                 onChange={setColor}
                 showEyeDropper={false}
@@ -121,16 +122,16 @@ function SwatchesGridDemo() {
 }
 
 function FullPickerDemo() {
-    const [color, setColor] = useState(0x9B59B6);
+    const [color, setColor] = useState<number | null>(0x9B59B6);
 
     return (
         <>
-            <Paragraph color="text-muted" style={{ marginBottom: 8 }}>Selected: {intToHex(color)}</Paragraph>
+            <Paragraph color="text-muted" style={{ marginBottom: 8 }}>Selected: {color !== null ? intToHex(color) : 0x9B59B6}</Paragraph>
             <ColorPickerWithSwatches
                 defaultColor={DEFAULT_COLOR}
-                customColor={color}
+                customColor={color !== null ? color : 0x9B59B6}
                 colors={[...PresetColors]}
-                value={color}
+                value={color !== null ? color : 0x9B59B6}
                 onChange={setColor}
                 renderDefaultButton={props => <DefaultColorButton {...props} />}
                 renderCustomButton={() => (

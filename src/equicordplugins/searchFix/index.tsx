@@ -49,7 +49,7 @@ export default definePlugin({
                 match: /\i\.searchResultsQuery=(\i)/,
                 replace: "$&,$self.main($1)"
             }
-        }
+        },
     ],
     main(query) {
         if (query.offset > 5000) {

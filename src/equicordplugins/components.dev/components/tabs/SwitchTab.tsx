@@ -4,9 +4,10 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { ManaSwitch } from "@equicordplugins/components.dev";
 import { findComponentByCodeLazy } from "@webpack";
 
-import { ManaSwitch, useState } from "..";
+import { useState } from "..";
 import { DocPage, type PropDef, type PropGroup } from "../DocPage";
 
 interface SwitchWithLabelProps {

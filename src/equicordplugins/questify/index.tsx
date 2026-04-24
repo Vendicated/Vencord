@@ -14,7 +14,7 @@ import ErrorBoundary from "@components/ErrorBoundary";
 import { openPluginModal } from "@components/settings";
 import { EquicordDevs } from "@utils/constants";
 import { copyToClipboard } from "@utils/index";
-import definePlugin, { PluginNative, ReporterTestable, StartAt } from "@utils/types";
+import definePlugin, { PluginNative, StartAt } from "@utils/types";
 import { findStoreLazy, onceReady } from "@webpack";
 import { ContextMenuApi, Menu, NavigationRouter, RestAPI, useEffect, useState } from "@webpack/common";
 import { JSX } from "react";

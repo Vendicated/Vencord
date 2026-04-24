@@ -40,7 +40,7 @@ export default definePlugin({
             group: true,
             replacement: [
                 {
-                    match: /return.{1,200},(?=keyboardModeEnabled)/,
+                    match: /(?<=#{intl::CHANNEL_A11Y_LABEL};).{1,400},(?=keyboardModeEnabled:)/,
                     replace: "const vcWallpaperFreeUrl=$self.WallpaperState(arguments[0].channel);$&vcWallpaperFreeUrl,"
                 },
                 {

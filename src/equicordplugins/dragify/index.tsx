@@ -172,7 +172,7 @@ export default definePlugin({
                 },
                 // Voice channel rows (guild sidebar fallback - li wrapper)
                 {
-                    match: /(?<=getModeClass\(\),.{0,50})"data-dnd-name":.{0,25},children:\[/,
+                    match: /(?<=this\.getModeClass\(\),.{0,50})"data-dnd-name":.{0,40},children:\[/g,
                     replace: "draggable:!0,onDragStart:e=>$self.onChannelDragStart(e,{id:this?.props?.channel?.id,guild_id:this?.props?.channel?.guild_id}),$&"
                 }
             ]
@@ -181,7 +181,7 @@ export default definePlugin({
         {
             find: "handleClickChat",
             replacement: {
-                match: /(?<=getModeClass\(\),.{0,50})"data-dnd-name":.{0,25},children:\[/,
+                match: /(?<=getModeClass\(\),.{0,50})"data-dnd-name":.{0,49},children:\[/,
                 replace: "draggable:!0,onDragStart:e=>$self.onChannelDragStart(e,{id:this?.props?.channel?.id,guild_id:this?.props?.channel?.guild_id}),$&"
             }
         },
@@ -199,7 +199,7 @@ export default definePlugin({
         {
             find: "shouldShowThreadsPopout",
             replacement: {
-                match: /(?<=getClassName\(\).{0,50})"data-dnd-name":.{0,25},onMouseEnter:/,
+                match: /(?<=getClassName\(\).{0,50})"data-dnd-name":.{0,40},onMouseEnter:/,
                 replace: "draggable:!0,onDragStart:e=>$self.onChannelDragStart(e,{id:this?.props?.channel?.id,guild_id:this?.props?.channel?.guild_id}),$&"
             }
         },

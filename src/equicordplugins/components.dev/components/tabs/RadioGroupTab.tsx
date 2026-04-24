@@ -4,7 +4,9 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { ManaBaseRadioGroup, RadioOption, StandaloneRadioIndicator, useState } from "..";
+import { ManaBaseRadioGroup, StandaloneRadioIndicator } from "@equicordplugins/components.dev";
+
+import { RadioOption, useState } from "..";
 import { DocPage, type PropDef, type PropGroup } from "../DocPage";
 import { EquicordIcon } from "../icons/EquicordIcon";
 

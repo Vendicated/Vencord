@@ -536,4 +536,5 @@ export type ColorPicker = ComponentType<{
     suggestedColors?: string[];
     label?: ReactNode;
     onChange(value: number | null): void;
+    disabled?: boolean;
 }>;

@@ -36,7 +36,7 @@ export default definePlugin({
             replacement:
                 [
                     {
-                        match: /(\(0,\i.jsx\)\(\i.\i,{}\))/,
+                        match: /(\(0,\i.jsxs?\)\(\i,{}\))/,
                         replace: "arguments[0].user == null ? null : (vcIsTyping ? $self.TypingIcon() : $1)"
                     },
                     // define isTyping earlier in the function so i dont bReAk ThE rUlEs Of HoOkS

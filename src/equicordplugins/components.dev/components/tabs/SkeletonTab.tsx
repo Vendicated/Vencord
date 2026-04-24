@@ -4,7 +4,9 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { ManaButton, Skeleton, useState } from "..";
+import { Skeleton } from "@equicordplugins/components.dev";
+
+import { ManaButton, useState } from "..";
 import { DocPage, type PropDef } from "../DocPage";
 
 const SKELETON_PROPS: PropDef[] = [
