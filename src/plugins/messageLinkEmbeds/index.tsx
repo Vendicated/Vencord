@@ -49,7 +49,7 @@ const messageCache = new Map<string, {
 
 const Embed = findComponentLazy(m => m.prototype?.renderSuppressButton);
 const ChannelMessage = findComponentByCodeLazy("childrenExecutedCommand:", ".hideAccessories");
-let AutoModEmbed: ComponentType<any>;
+let AutoModEmbed: ComponentType<any> = () => null;
 
 const SearchResultClasses = findCssClassesLazy("message", "searchResult");
 const EmbedClasses = findCssClassesLazy("embedAuthorIcon", "embedAuthor", "embedAuthor", "embedMargin");
@@ -377,7 +377,7 @@ export default definePlugin({
         {
             find: "!1,withFooter:",
             replacement: {
-                match: /(?=function (\i)\(\i\){let{message:\i,channel:\i,.{0,100}withFooter:)/,
+                match: /(?=function (\i)\(\i\){let{message:\i,channel:\i,.{0,100}?withFooter:)/,
                 replace: "$self.AutoModEmbed=$1;"
             }
         }
