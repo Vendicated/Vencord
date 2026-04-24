@@ -54,7 +54,10 @@ export async function loadLazyChunks() {
 
         async function searchAndLoadLazyChunks(factoryCode: string) {
             // Workaround to avoid loading the CSS debugging chunk which turns the app pink
-            const hasCssDebuggingLoad = foundCssDebuggingLoad ? false : (foundCssDebuggingLoad = factoryCode.includes(".cssDebuggingEnabled&&"));
+            // const hasCssDebuggingLoad = foundCssDebuggingLoad ? false : (foundCssDebuggingLoad = factoryCode.includes(".cssDebuggingEnabled&&"));
+
+            // Disabled for now since this causes lots of chunks concatenated into the same module get marked as invalid, and thus not loaded.
+            const hasCssDebuggingLoad = foundCssDebuggingLoad = false;
 
             const lazyChunks = factoryCode.matchAll(hasCssDebuggingLoad ? CompleteLazyChunkRegex : PartialLazyChunkRegex);
             const validChunkGroups = new Set<[chunkIds: PropertyKey[], entryPoint: PropertyKey]>();
@@ -200,13 +203,6 @@ export async function loadLazyChunks() {
                 await wreq.e(id);
             }
         })));
-
-        // Manually require all modules to make sure all lazily required modules are patched
-        for (const moduleId of Object.keys(wreq.m)) {
-            try {
-                wreq(moduleId);
-            } catch { }
-        }
 
         LazyChunkLoaderLogger.log("Finished loading all chunks!");
     } catch (e) {

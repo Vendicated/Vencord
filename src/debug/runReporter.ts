@@ -37,6 +37,13 @@ async function runReporter() {
 
         await loadLazyChunksDone;
 
+        // Manually require all modules to make sure all lazily required modules are patched
+        for (const moduleId of Object.keys(Webpack.wreq.m)) {
+            try {
+                Webpack.wreq(moduleId);
+            } catch { }
+        }
+
         if (IS_REPORTER && IS_WEB && !IS_VESKTOP) {
             console.log("[REPORTER_META]", {
                 buildNumber: getBuildNumber(),
