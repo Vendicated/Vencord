@@ -32,9 +32,7 @@ import ReviewComponent from "./ReviewComponent";
 import ReviewsView, { ReviewsInputComponent } from "./ReviewsView";
 
 const Paginator = findComponentByCodeLazy<ComponentProps<t.Paginator>>('rel:"prev",children:');
-
 const requirePaginator = extractAndLoadChunksLazy(['name:"SearchResults"'], new RegExp(`${DefaultExtractAndLoadChunksRegex.source}.{0,30}?name:"SearchResults"`));
-
 
 function Modal({ modalProps, modalKey, discordId, name, type }: { modalProps: any; modalKey: string, discordId: string; name: string; type: ReviewType; }) {
     const [data, setData] = useState<UserReviewsData>();
