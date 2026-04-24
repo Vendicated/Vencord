@@ -40,7 +40,7 @@ import {
     RestAPI,
     UserStore
 } from "@webpack/common";
-import { JSX } from "react";
+import { ComponentType, JSX } from "react";
 
 const messageCache = new Map<string, {
     message?: Message;
@@ -48,8 +48,8 @@ const messageCache = new Map<string, {
 }>();
 
 const Embed = findComponentLazy(m => m.prototype?.renderSuppressButton);
-const AutoModEmbed = findComponentByCodeLazy("withFooter", "childrenMessageContent:");
 const ChannelMessage = findComponentByCodeLazy("childrenExecutedCommand:", ".hideAccessories");
+let AutoModEmbed: ComponentType<any> = () => null;
 
 const SearchResultClasses = findCssClassesLazy("message", "searchResult");
 const EmbedClasses = findCssClassesLazy("embedAuthorIcon", "embedAuthor", "embedAuthor", "embedMargin");
@@ -369,6 +369,20 @@ export default definePlugin({
     dependencies: ["MessageAccessoriesAPI", "MessageUpdaterAPI", "UserSettingsAPI"],
 
     settings,
+
+    patches: [
+        {
+            find: "!1,withFooter:",
+            replacement: {
+                match: /(?=function (\i)\(\i\){let{message:\i,channel:\i,[^}]+?withFooter:)/,
+                replace: "$self.AutoModEmbed=$1;"
+            }
+        }
+    ],
+
+    set AutoModEmbed(value: any) {
+        AutoModEmbed = value;
+    },
 
     start() {
         addMessageAccessory("MessageLinkEmbeds", props => {

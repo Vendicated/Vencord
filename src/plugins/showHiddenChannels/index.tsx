@@ -27,7 +27,7 @@ import definePlugin, { OptionType } from "@utils/types";
 import type { Channel, Role } from "@vencord/discord-types";
 import { ChannelStore, PermissionsBits, PermissionStore, Tooltip } from "@webpack/common";
 
-import HiddenChannelLockScreen from "./components/HiddenChannelLockScreen";
+import HiddenChannelLockScreen, { setChannelBeginHeader } from "./components/HiddenChannelLockScreen";
 
 export const cl = classNameFactory("vc-shc-");
 
@@ -499,8 +499,19 @@ export default definePlugin({
                 match: /(getVoiceStateForUser.{0,150}?)&&\i\.\i\.canWithPartialContext.{0,20}VIEW_CHANNEL.+?}\)(?=\?)/,
                 replace: "$1"
             }
+        },
+        {
+            find: "#{intl::ROLE_REQUIRED_SINGLE_USER_MESSAGE}",
+            replacement: {
+                match: /(?=function (\i)\(\i\){let{channel:.{0,200}?getSortedRoles\()/,
+                replace: "$self.ChannelBeginHeader=$1;"
+            }
         }
     ],
+
+    set ChannelBeginHeader(value: any) {
+        setChannelBeginHeader(value);
+    },
 
     swapViewChannelWithConnectPermission(mergedPermissions: bigint, channel: Channel) {
         if (!PermissionStore.can(PermissionsBits.CONNECT, channel)) {

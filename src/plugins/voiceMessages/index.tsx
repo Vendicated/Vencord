@@ -275,6 +275,19 @@ export default definePlugin({
     tags: ["Voice"],
     authors: [Devs.Ven, Devs.Vap, Devs.Nickyux],
     settings,
+    patches: [
+        {
+            find: "#{intl::3XohGn::raw}",
+            replacement: {
+                match: /(?<=\i=)(?=\i\.memo\(.{0,50}?=1,onVolumeChange:[^}]+?waveform:[^}]+?playbackCacheKey:)/,
+                replace: "$self.VoiceMessage=",
+            }
+        }
+    ],
+
+    set VoiceMessage(value) {
+        VoiceMessage = value;
+    },
     contextMenus: {
         "channel-attach": ctxMenuPatch
     }
