@@ -155,7 +155,6 @@ export default definePlugin({
             predicate: () => settings.store.organizeMenu,
             replacement: [
                 {
-                    // inlined iife after module concatenation
                     match: /children:\[(\i),(?<=\1=function.+?)/,
                     replace: "children:[$self.transformSettingsEntries($1),",
                 },
