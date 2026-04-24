@@ -144,7 +144,7 @@ export default definePlugin({
                 },
                 {
                     match: /(?=function (\i)\(\i\){let{section:\i,header:\i.{0,100}?onExpand:)/,
-                    replace: "$self.renderDMPageList=$1;"
+                    replace: "$self.ExpandableList =$1;"
                 }
             ]
         }
