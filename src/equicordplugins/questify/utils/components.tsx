@@ -12,6 +12,7 @@ import { JSX } from "react";
 import { settings } from "../settings";
 import { formatLowerBadge } from "./misc";
 
+// Requires GuildlessServerListItemComponent export patch in index.tsx
 // GuildlessServerListItem's built-in pill does not support unread state.
 export const GuildlessServerListItemComponent = findComponentByCodeLazy("tooltip:", "lowerBadgeSize:");
 export const GuildedServerListItemPillComponent = findComponentByCodeLazy('"pill":"empty"');

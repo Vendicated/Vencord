@@ -1399,6 +1399,14 @@ export default definePlugin({
 
     patches: [
         {
+            // Needed for GuildlessServerListItemComponent component in components.tsx
+            find: "=\"DOWNLOAD_APPS\";function",
+            replacement: {
+                match: /(?<=function\(\i,\i,\i\){\i.\i\(\i,{)(?=.{0,25000}?ariaHidden:!0,asContainer:!\i,children:\i}\)}var \i=\i\(\d+\);let (\i)=\i.forwardRef\(function)/,
+                replace: "GuildlessServerListItemComponent:()=>$1,"
+            }
+        },
+        {
             // Hides Quests tab in the Discovery page.
             find: "GLOBAL_DISCOVERY_SIDEBAR},",
             replacement: [
@@ -1649,8 +1657,13 @@ export default definePlugin({
                 },
                 {
                     // Encourages banners to load quicker if the setting is enabled.
-                    match: /(warningHints:\i,)isVisibleInViewport:(\i)/,
-                    replace: "$1isVisibleInViewport:$self.shouldPreloadQuestAssets()?true:$2"
+                    match: /(hideAssets:)(!\i)/,
+                    replace: "$1$self.shouldPreloadQuestAssets()?!1:$2"
+                },
+                {
+                    // Encourages banners to load quicker if the setting is enabled.
+                    match: /(showPlaceholder:)(!\i)/,
+                    replace: "$1$self.shouldPreloadQuestAssets()?!1:$2"
                 },
                 {
                     // Encourages reward icons to load quicker if the setting is enabled.
