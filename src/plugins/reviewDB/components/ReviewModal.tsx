@@ -26,11 +26,13 @@ import { useForceUpdater } from "@utils/react";
 import * as t from "@vencord/discord-types";
 import { DefaultExtractAndLoadChunksRegex, extractAndLoadChunksLazy, findComponentByCodeLazy } from "@webpack";
 import { Text, useRef, useState } from "@webpack/common";
+import { ComponentProps } from "react";
 
 import ReviewComponent from "./ReviewComponent";
 import ReviewsView, { ReviewsInputComponent } from "./ReviewsView";
 
-const Paginator = findComponentByCodeLazy<t.Paginator>('rel:"prev",children:');
+const Paginator = findComponentByCodeLazy<ComponentProps<t.Paginator>>('rel:"prev",children:');
+
 const requirePaginator = extractAndLoadChunksLazy(['name:"SearchResults"'], new RegExp(`${DefaultExtractAndLoadChunksRegex.source}.{0,30}?name:"SearchResults"`));
 
 
