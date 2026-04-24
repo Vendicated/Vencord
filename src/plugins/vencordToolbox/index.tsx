@@ -18,17 +18,13 @@
 
 import "./styles.css";
 
+import { HeaderBarButton } from "@api/HeaderBar";
 import { definePluginSettings } from "@api/Settings";
-import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { findComponentByCodeLazy } from "@webpack";
 import { Popout, useRef, useState } from "@webpack/common";
-import type { PropsWithChildren } from "react";
 
 import { renderPopout } from "./menu";
-
-const HeaderBarIcon = findComponentByCodeLazy(".HEADER_BAR_BADGE_BOTTOM,", 'position:"bottom"');
 
 export const settings = definePluginSettings({
     showPluginMenu: {
@@ -64,7 +60,7 @@ function VencordPopoutButton() {
             renderPopout={() => renderPopout(() => setShow(false))}
         >
             {(_, { isShown }) => (
-                <HeaderBarIcon
+                <HeaderBarButton
                     ref={buttonRef}
                     className="vc-toolbox-btn"
                     onClick={() => setShow(v => !v)}
@@ -82,27 +78,11 @@ export default definePlugin({
     description: "Adds a button to the titlebar that houses Vencord quick actions",
     tags: ["Utility", "Developers"],
     authors: [Devs.Ven, Devs.AutumnVN],
-
+    dependencies: ["HeaderBarAPI"],
     settings,
-
-    patches: [
-        {
-            find: '?"BACK_FORWARD_NAVIGATION":',
-            replacement: {
-                match: /(?<=trailing:.{0,50})\i\.Fragment,(?=\{children:\[)/,
-                replace: "$self.TrailingWrapper,"
-            }
-        }
-    ],
-
-    TrailingWrapper({ children }: PropsWithChildren) {
-        return (
-            <>
-                {children}
-                <ErrorBoundary key="vc-toolbox" noop>
-                    <VencordPopoutButton />
-                </ErrorBoundary>
-            </>
-        );
-    },
+    headerBarButton: {
+        icon: Icon,
+        render: VencordPopoutButton,
+        priority: 1337
+    }
 });
