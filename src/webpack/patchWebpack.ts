@@ -306,7 +306,6 @@ function proxyFactoryAndUpdateExisting(moduleFactories: AnyWebpackRequire["m"], 
  */
 function updateExistingFactory(moduleFactories: AnyWebpackRequire["m"], moduleId: PropertyKey, newFactory: AnyModuleFactory, newProxiedFactory: AnyModuleFactory, ignoreExistingInTarget: boolean) {
     let existingFactory: AnyModuleFactory | undefined;
-    let moduleFactoriesWithFactory: AnyWebpackRequire["m"] | undefined;
     for (const wreq of allWebpackInstances) {
         const instanceModuleFactories = wreq.m[SYM_ORIGINAL_MODULE_FACTORIES] ?? wreq.m;
 
@@ -316,7 +315,6 @@ function updateExistingFactory(moduleFactories: AnyWebpackRequire["m"], moduleId
 
         if (Object.hasOwn(wreq.m, moduleId)) {
             existingFactory = wreq.m[moduleId]; // Must use wreq.m here instead of instanceModuleFactories to use our proxy in case the module factories are already proxied.
-            moduleFactoriesWithFactory = instanceModuleFactories;
             break;
         }
     }
