@@ -52,7 +52,7 @@ export default definePlugin({
         {
             find: ".clipboardData&&(",
             replacement: {
-                match: /handleGlobalPaste:(\i)/,
+                match: /handleGlobalPaste:(\i)(?=\}\))/,
                 replace: "handleGlobalPaste:(...args)=>!$self.qrModalOpen&&$1(...args)",
             },
         },

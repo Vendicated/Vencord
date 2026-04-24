@@ -275,8 +275,8 @@ export default definePlugin({
             find: "#{intl::GUILD_COMMUNICATION_DISABLED_ICON_TOOLTIP_BODY}",
             replacement: {
                 // thanks https://github.com/Syncxv/vc-timezones/pull/4
-                match: /(?<=isVisibleOnlyOnHover.+?)id:.{1,11},timestamp.{1,50}}\),/,
-                replace: "$&,$self.renderMessageTimezone(arguments[0]),"
+                match: /(?<=isVisibleOnlyOnHover.+?)id:.{0,15},timestamp.{1,50}}\),/,
+                replace: "$&$self.renderMessageTimezone(arguments[0]),"
             }
         }
     ],
