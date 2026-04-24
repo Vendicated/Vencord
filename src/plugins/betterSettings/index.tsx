@@ -156,7 +156,7 @@ export default definePlugin({
             replacement: [
                 {
                     // inlined iife after module concatenation
-                    match: /children:\[(\i),(?<=\1=function\(\i,\i\).{0,500}?\}\(\i\.\i,\i=>\(0,\i\.openUserSettings\)\(\i\)\)[,;].+?)/,
+                    match: /children:\[(\i),(?<=\1=function.{0,500}?\}\(.{0,20}\i\.openUserSettings\)\(\i\)\)[,;].+?)/,
                     replace: "children:[$self.transformSettingsEntries($1),",
                 },
             ]
