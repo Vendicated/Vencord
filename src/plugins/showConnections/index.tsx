@@ -162,7 +162,7 @@ export default definePlugin({
     patches: [
         {
             // Same find as ReviewDB
-            find: /\.POPOUT,onClose:\i}\)}\).+?\.isProvisional/,
+            find: "#{intl::XcTHmQ::raw}",
             replacement: {
                 match: /userId:\i\.id,guild:\i\}\)(?=])/,
                 replace: "$&,$self.profilePopoutComponent(arguments[0])"
