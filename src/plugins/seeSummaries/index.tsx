@@ -13,7 +13,6 @@ import { findByPropsLazy } from "@webpack";
 import { ChannelStore, GuildStore } from "@webpack/common";
 
 const SummaryStore = findByPropsLazy("allSummaries", "findSummary");
-let createSummaryFromServer: (a: any, channelId?: string) => any;
 
 const settings = definePluginSettings({
     summaryExpiryThresholdDays: {
@@ -39,7 +38,7 @@ interface Summary {
     unsafe: boolean;
 }
 
-interface ChannelSummaries {
+interface ChannelSummary {
     type: string;
     channel_id: string;
     guild_id: string;
@@ -47,6 +46,21 @@ interface ChannelSummaries {
 
     // custom property
     time?: number;
+}
+// TODO: these types are wrong and evil and incorrect
+function createChannelSummaryFromServer(s: Summary, channelId: string): ChannelSummary {
+    return {
+        id: s.id,
+        topic: s.topic,
+        summShort: s.summ_short,
+        people: Array.from(new Set(s.people)),
+        startId: s.start_id,
+        endId: s.end_id,
+        count: s.count,
+        channelId,
+        source: s.source,
+        type: s.type as any,
+    } as any as ChannelSummary;
 }
 
 export default definePlugin({
@@ -56,13 +70,6 @@ export default definePlugin({
     authors: [Devs.mantikafasi],
     settings,
     patches: [
-        {
-            find: /\.people\)\),startId:.{0,100}\.type\}/,
-            replacement: {
-                match: /(?<=[};])(?=function (\i)\(\i,\i\)\{.{0,100}\.people\)\),startId:.{0,100}\.type\}\})/,
-                replace: "$self.createSummaryFromServer=$1;"
-            }
-        },
         {
             find: "SUMMARIZEABLE.has",
             replacement: {
@@ -79,13 +86,12 @@ export default definePlugin({
         }
     ],
 
-    set createSummaryFromServer(value: any) {
-        createSummaryFromServer = value;
-    },
-
     flux: {
         CONVERSATION_SUMMARY_UPDATE(data) {
-            const incomingSummaries: ChannelSummaries[] = data.summaries.map((summary: any) => ({ ...createSummaryFromServer(summary), time: Date.now() }));
+            const incomingSummaries: ChannelSummary[] = data.summaries.map((summary: any) => ({
+                ...createChannelSummaryFromServer(summary, undefined!),
+                time: Date.now()
+            }));
 
             // idk if this is good for performance but it doesnt seem to be a problem in my experience
             DataStore.update("summaries-data", summaries => {
