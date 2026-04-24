@@ -9,7 +9,6 @@ import { Toasts } from "@webpack/common";
 
 import { TAG_DEVELOPER, TAG_NAVIGATION, TAG_PLUGINS, TAG_UTILITY } from "../metadata/tags";
 import type { CommandEntry, ExtensionDefinition } from "../registry";
-import { createHolyNotesExtensionCommands } from "./actions/holyNotes";
 import { createRandomVoiceExtensionCommand } from "./actions/randomVoice";
 import { createScheduledMessagesExtensionCommands } from "./actions/scheduledMessages";
 import { createSilentMessageToggleExtensionCommand } from "./actions/silentMessageToggle";
@@ -19,7 +18,6 @@ import {
     EXTENSIONS_CATALOG_CATEGORY_ID,
     EXTENSIONS_DETAIL_PROVIDER_ID,
     EXTENSIONS_PACK_PROVIDER_ID,
-    HOLY_NOTES_EXTENSION_ID,
     RANDOM_VOICE_EXTENSION_ID,
     SCHEDULED_MESSAGES_EXTENSION_ID,
     SILENT_MESSAGE_TOGGLE_EXTENSION_ID,
@@ -53,10 +51,6 @@ function createInstalledExtensionCommands(extensionsState: ExtensionsState): Com
 
     if (extensionsState.installedExtensionIds.has(RANDOM_VOICE_EXTENSION_ID)) {
         entries.push(createRandomVoiceExtensionCommand(extensionsState.extensionKeybinds));
-    }
-
-    if (extensionsState.installedExtensionIds.has(HOLY_NOTES_EXTENSION_ID)) {
-        entries.push(...createHolyNotesExtensionCommands());
     }
 
     if (extensionsState.installedExtensionIds.has(SILENT_MESSAGE_TOGGLE_EXTENSION_ID)) {

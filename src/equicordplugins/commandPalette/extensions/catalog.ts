@@ -70,18 +70,6 @@ export const EXTENSIONS_CATALOG: ExtensionDefinition[] = [
         keywords: ["extension", "plugin", "random", "voice", "join", "channel", "vc"]
     },
     {
-        id: HOLY_NOTES_EXTENSION_ID,
-        label: "HolyNotes",
-        description: "Control HolyNotes from the command palette.",
-        detailCategoryId: HOLY_NOTES_EXTENSION_DETAIL_CATEGORY_ID,
-        commandId: "extension-holy-notes-open",
-        commandLabel: "Open Notes",
-        commandDescription: "Open the HolyNotes notebook modal.",
-        sourcePath: "src/equicordplugins/holyNotes",
-        tags: [TAG_PLUGINS, TAG_UTILITY],
-        keywords: ["extension", "plugin", "holy", "notes", "notebook", "bookmark"]
-    },
-    {
         id: SILENT_MESSAGE_TOGGLE_EXTENSION_ID,
         label: "SilentMessageToggle",
         description: "Control SilentMessageToggle from the command palette.",

@@ -25,8 +25,8 @@ export default definePlugin({
         {
             find: "krisp_browser_models",
             replacement: {
-                match: /(\i,\{\i:\(\)=>)\i/,
-                replace: "$1null"
+                match: /if\(this._noiseCancellation\)/,
+                replace: "if(false)"
             }
         },
         // Set Krisp to not supported

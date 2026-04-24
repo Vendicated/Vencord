@@ -7,8 +7,6 @@
 import { isPluginEnabled, plugins } from "@api/PluginManager";
 import { NotesIcon } from "@components/Icons";
 import { toggleEnabled } from "@equicordplugins/equicordHelper/utils";
-import { noteHandler } from "@equicordplugins/holyNotes/NoteHandler";
-import type { Note } from "@equicordplugins/holyNotes/types";
 import type { ScheduledMessage } from "@equicordplugins/scheduledMessages/types";
 import { addScheduledMessage, getChannelDisplayInfo, getScheduledMessages, removeScheduledMessage, sendScheduledMessageNow, updateScheduledMessageTime } from "@equicordplugins/scheduledMessages/utils";
 import { sleep } from "@utils/misc";
@@ -21,17 +19,11 @@ import { DISCORD_INTERNAL_HOSTS, executeCommand, getCommandById } from "../regis
 import { makeIconFromUrl } from "../ui/iconFromUrl";
 import { sendMessageToChannel, sendMessageToUser } from "./sendMessageAction";
 
-interface ResolvedHolyNote {
-    notebook: string;
-    note: Note;
-}
-
 interface StagedRescheduledMessage {
     id: string;
     label: string;
 }
 
-let stagedMoveNote: ResolvedHolyNote | null = null;
 let stagedRescheduleMessage: StagedRescheduledMessage | null = null;
 let pendingCancelScheduledMessageId: string | null = null;
 
@@ -559,198 +551,6 @@ function filterScheduledMessages(target: string): ScheduledMessage[] {
     });
 }
 
-function getNotebookNames(): string[] {
-    return Object.keys(noteHandler.getAllNotes());
-}
-
-function filterNotebookNames(target: string, includeMain: boolean): string[] {
-    const normalizedTarget = normalizeText(target);
-    return getNotebookNames()
-        .filter(notebook => includeMain || notebook !== "Main")
-        .filter(notebook => !normalizedTarget || notebook.toLowerCase().includes(normalizedTarget))
-        .sort((left, right) => left.localeCompare(right));
-}
-
-function getResolvedNotes(target: string): ResolvedHolyNote[] {
-    const normalizedTarget = normalizeText(target);
-    const notebooks = noteHandler.getAllNotes();
-    const resolved: ResolvedHolyNote[] = [];
-
-    for (const [notebook, notes] of Object.entries(notebooks)) {
-        for (const note of Object.values(notes)) {
-            const content = note.content?.trim() ?? "";
-            if (normalizedTarget && !content.toLowerCase().includes(normalizedTarget)) continue;
-            resolved.push({ notebook, note });
-        }
-    }
-
-    return resolved;
-}
-
-function toNoteSnippet(note: Note): string {
-    const content = note.content?.replace(/\s+/g, " ").trim();
-    if (!content) return "(No text)";
-    if (content.length <= 56) return content;
-    return `${content.slice(0, 53)}...`;
-}
-
-function buildCreateNotebookCandidates(target: string): QueryActionCandidate[] {
-    const notebookName = target.trim();
-    if (!notebookName) {
-        return [{
-            id: "query-create-notebook-invalid",
-            label: "Create notebook",
-            description: "Notebook name is required.",
-            badge: "Query",
-            icon: NotesIcon,
-            run: () => {
-                showToast("Notebook name is required.", Toasts.Type.FAILURE);
-                return false;
-            }
-        }];
-    }
-
-    return [{
-        id: `query-create-notebook-${notebookName.toLowerCase()}`,
-        label: `Create notebook ${notebookName}`,
-        badge: "Query",
-        icon: NotesIcon,
-        run: async () => {
-            if (!await ensureHolyNotesEnabled()) return false;
-            if (noteHandler.getNotes(notebookName)) {
-                showToast(`Notebook ${notebookName} already exists`, Toasts.Type.FAILURE);
-                return false;
-            }
-            noteHandler.newNoteBook(notebookName);
-        }
-    }];
-}
-
-function buildDeleteNotebookCandidates(target: string): QueryActionCandidate[] {
-    const notebooks = filterNotebookNames(target, false);
-    if (notebooks.length === 0) {
-        return [{
-            id: "query-delete-notebook-none",
-            label: "Delete notebook",
-            description: "No deletable notebook found.",
-            badge: "Query",
-            icon: NotesIcon,
-            run: () => {
-                showToast("No deletable notebook found.", Toasts.Type.MESSAGE);
-                return false;
-            }
-        }];
-    }
-
-    return notebooks.slice(0, 8).map(notebook => ({
-        id: `query-delete-notebook-${notebook.toLowerCase()}`,
-        label: notebook,
-        description: "Notebook",
-        badge: "Query",
-        icon: NotesIcon,
-        run: async () => {
-            if (!await ensureHolyNotesEnabled()) return false;
-            noteHandler.deleteNotebook(notebook);
-        }
-    }));
-}
-
-function buildJumpNoteCandidates(target: string): QueryActionCandidate[] {
-    const notes = getResolvedNotes(target).slice(0, 10);
-    if (notes.length === 0) {
-        return [{
-            id: "query-jump-note-none",
-            label: "Jump to note",
-            description: "No matching note found.",
-            badge: "Query",
-            icon: NotesIcon,
-            run: () => {
-                showToast("No matching note found.", Toasts.Type.FAILURE);
-                return false;
-            }
-        }];
-    }
-
-    return notes.map(({ notebook, note }) => ({
-        id: `query-jump-note-${notebook}-${note.id}`,
-        label: `[${notebook}] ${toNoteSnippet(note)}`,
-        description: "Open original message.",
-        badge: "Query",
-        icon: NotesIcon,
-        run: async () => {
-            if (!await ensureHolyNotesEnabled()) return false;
-            NavigationRouter.transitionTo(`/channels/${note.guild_id || "@me"}/${note.channel_id}/${note.id}`);
-        }
-    }));
-}
-
-function buildMoveNoteCandidates(target: string): QueryActionCandidate[] {
-    if (stagedMoveNote) {
-        const destinationNotebooks = filterNotebookNames(target, true)
-            .filter(notebook => notebook !== stagedMoveNote?.notebook);
-
-        if (destinationNotebooks.length === 0) {
-            return [{
-                id: "query-move-note-no-destination",
-                label: "Move note",
-                description: "No destination notebook found.",
-                badge: "Query",
-                icon: NotesIcon,
-                run: () => {
-                    showToast("No destination notebook found.", Toasts.Type.FAILURE);
-                    return false;
-                }
-            }];
-        }
-
-        return destinationNotebooks.slice(0, 8).map(destinationNotebook => ({
-            id: `query-move-note-destination-${destinationNotebook.toLowerCase()}`,
-            label: `[${stagedMoveNote!.notebook}] ${toNoteSnippet(stagedMoveNote!.note)} -> Move to ${destinationNotebook}`,
-            description: "Move note",
-            badge: "Query",
-            icon: NotesIcon,
-            run: async () => {
-                if (!stagedMoveNote) return;
-                if (!await ensureHolyNotesEnabled()) return false;
-                if (!stagedMoveNote) return;
-                noteHandler.moveNote(stagedMoveNote.note, stagedMoveNote.notebook, destinationNotebook);
-                stagedMoveNote = null;
-            }
-        }));
-    }
-
-    const notes = getResolvedNotes(target).slice(0, 10);
-    if (notes.length === 0) {
-        return [{
-            id: "query-move-note-none",
-            label: "Move note",
-            description: "No matching note found.",
-            badge: "Query",
-            icon: NotesIcon,
-            run: () => {
-                showToast("No matching note found.", Toasts.Type.FAILURE);
-                return false;
-            }
-        }];
-    }
-
-    return notes.map(({ notebook, note }) => ({
-        id: `query-move-note-select-${notebook}-${note.id}`,
-        label: `[${notebook}] ${toNoteSnippet(note)}`,
-        description: "Select destination notebook.",
-        badge: "Query",
-        icon: NotesIcon,
-        run: () => {
-            return ensureHolyNotesEnabled().then(enabled => {
-                if (!enabled) return false;
-                stagedMoveNote = { notebook, note };
-                showToast("Note selected. Choose destination notebook.", Toasts.Type.MESSAGE);
-                return false;
-            });
-        }
-    }));
-}
-
 function buildQuickScheduleMessageCandidates(target: string): QueryActionCandidate[] {
     const parsed = parseQuickScheduleTarget(target);
     if (!parsed) return [];
@@ -926,15 +726,11 @@ function buildCancelScheduledMessageCandidates(target: string): QueryActionCandi
 export function buildQueryResolution(query: string): QueryResolution {
     const parsed = parseQuery(query);
     if (!parsed) {
-        stagedMoveNote = null;
         stagedRescheduleMessage = null;
         pendingCancelScheduledMessageId = null;
         return { type: "none" };
     }
 
-    if (parsed.intent !== "move_note") {
-        stagedMoveNote = null;
-    }
     if (parsed.intent !== "reschedule_message") {
         stagedRescheduleMessage = null;
     }
@@ -971,14 +767,6 @@ export function buildQueryResolution(query: string): QueryResolution {
             return { type: "candidates", candidates: buildTogglePluginCandidates(parsed.target) };
         case "open_url":
             return { type: "candidates", candidates: buildOpenUrlCandidates(parsed.target) };
-        case "create_notebook":
-            return { type: "candidates", candidates: buildCreateNotebookCandidates(parsed.target) };
-        case "delete_notebook":
-            return { type: "candidates", candidates: buildDeleteNotebookCandidates(parsed.target) };
-        case "move_note":
-            return { type: "candidates", candidates: buildMoveNoteCandidates(parsed.target) };
-        case "jump_note":
-            return { type: "candidates", candidates: buildJumpNoteCandidates(parsed.target) };
         case "schedule_message":
             return { type: "candidates", candidates: buildQuickScheduleMessageCandidates(parsed.target) };
         case "reschedule_message":
