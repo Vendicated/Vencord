@@ -42,6 +42,7 @@ export default function ReplyNavigator({ replies }: { replies: Message[]; }) {
             document.removeEventListener("mousedown", onMouseDown);
         };
     }, [ref]);
+    requirePaginator();
     return (
         <ErrorBoundary>
             <div ref={ref} className={containerStyles.containerBottom + " vc-findreply-div"} style={{
