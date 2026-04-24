@@ -50,7 +50,7 @@ export default definePlugin({
         },
         {
             // channel mentions
-            find: /className:"channelMention",children:\[null!=\i\.inContent/,
+            find: 'className:"channelMention",children:[null!=',
             replacement: {
                 match: /onClick:(\i)(?=,.{0,30}className:"channelMention".+?(\i)\.inContent)/,
                 replace: (_, onClick, props) => ""
