@@ -11,36 +11,36 @@ import { DataStore } from "@api/index";
 import { definePluginSettings } from "@api/Settings";
 import { EquicordDevs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
+import { chooseFile, saveFile } from "@utils/web";
 import { CustomEmoji, UnicodeEmoji } from "@vencord/discord-types";
-import { Alerts, Button, EmojiStore, GuildStore, Menu, Toasts, useEffect, useState } from "@webpack/common";
+import { Alerts, Button, EmojiStore, GuildStore, IconUtils, Menu, Toasts, useEffect, useState } from "@webpack/common";
 import { JSX } from "react";
 
-interface ContextMenuEmoji {
-    type: string;
-    id: string;
-    name: string;
-    surrogates?: string;
-}
-
-interface Target {
-    dataset: ContextMenuEmoji;
-    firstChild: HTMLImageElement;
-}
-
-interface customSaveEmoji {
-    type: string;
-    id: string;
-    guildId?: string;
-    name: string;
-    surrogates?: string;
-    url?: string;
-    animated?: boolean;
-}
+import { ContextMenuEmoji, SavedEmoji, Target } from "./types";
 
 const DATA_COLLECTION_NAME = "whitelisted-emojis";
 
 let cache_allowedList: ContextMenuEmoji[] = [];
+const cacheListeners = new Set<() => void>();
+let writeChain: Promise<unknown> = Promise.resolve();
+
 const getAllowedList = async (): Promise<ContextMenuEmoji[]> => (await DataStore.get<ContextMenuEmoji[]>(DATA_COLLECTION_NAME)) ?? [];
+
+function notifyCacheChange() {
+    for (const listener of cacheListeners) listener();
+}
+
+function withWriteLock<T>(fn: () => T | Promise<T>): Promise<T> {
+    const next = writeChain.catch(() => undefined).then(fn);
+    writeChain = next;
+    return next;
+}
+
+async function setAllowedList(newList: ContextMenuEmoji[]) {
+    await DataStore.set(DATA_COLLECTION_NAME, newList);
+    cache_allowedList = newList;
+    notifyCacheChange();
+}
 
 function isItemAllowed(item: (CustomEmoji | UnicodeEmoji)) {
     if ("uniqueName" in item) {
@@ -53,155 +53,76 @@ function itemAlreadyInList(item: ContextMenuEmoji) {
     return cache_allowedList.some(emoji => emoji.name === item.name);
 }
 
-async function addBulkToAllowedList(items: ContextMenuEmoji[]) {
-    const itemsToAdd = await Promise.all(items.map(async item => {
-        if (!itemAlreadyInList(item)) {
-            let emojiData: CustomEmoji | undefined = undefined;
+function buildSaveData(item: ContextMenuEmoji): SavedEmoji {
+    const saveData: SavedEmoji = {
+        type: "emoji",
+        id: item.id,
+        name: item.name,
+        surrogates: item.surrogates,
+    };
 
-            if (!item.surrogates) {
-                emojiData = EmojiStore.getCustomEmojiById(item.id);
-            }
-
-            const saveData: customSaveEmoji = {
-                type: "emoji",
-                id: item.id,
-                name: item.name,
-                surrogates: item.surrogates,
-            };
-
-            if (emojiData && emojiData.guildId) {
-                saveData.url = `https://cdn.discordapp.com/emojis/${emojiData.id}.${emojiData.animated ? "gif" : "png"}`;
-                saveData.guildId = emojiData.guildId;
-                saveData.animated = emojiData.animated;
-            }
-
-            return saveData;
-        }
-        return null;
-    }));
-
-    const validItemsToAdd = itemsToAdd.filter(item => item !== null);
-    await DataStore.set(DATA_COLLECTION_NAME, [...cache_allowedList, ...validItemsToAdd]);
-
-    if (!settings.store.disableToasts) {
-        Toasts.show({
-            message: `Added ${validItemsToAdd.length} emojis to the list, ${items.length - validItemsToAdd.length} already in the list`,
-            type: Toasts.Type.SUCCESS,
-            id: Toasts.genId(),
-            options: {
-                duration: 3000,
-                position: Toasts.Position.BOTTOM
-            }
-        });
-    }
-
-    cache_allowedList = await getAllowedList();
-}
-
-async function removeBulkFromAllowedList(items: ContextMenuEmoji[]) {
-    const itemsToRemove = items.filter(item => itemAlreadyInList(item));
-    await DataStore.set(DATA_COLLECTION_NAME, cache_allowedList.filter(emoji => {
-        return !itemsToRemove.some(item => item.name === emoji.name);
-    }));
-
-    if (!settings.store.disableToasts) {
-        Toasts.show({
-            message: `Removed ${itemsToRemove.length} emojis from the list`,
-            type: Toasts.Type.SUCCESS,
-            id: Toasts.genId(),
-            options: {
-                duration: 3000,
-                position: Toasts.Position.BOTTOM
-            }
-        });
-    }
-
-    cache_allowedList = await getAllowedList();
-}
-
-async function addToAllowedList(item: ContextMenuEmoji) {
-    if (!itemAlreadyInList(item)) {
-        let emojiData: CustomEmoji | undefined = undefined;
-
-        if (!item.surrogates) {
-            emojiData = EmojiStore.getCustomEmojiById(item.id);
-        }
-
-        const saveData: customSaveEmoji = {
-            type: "emoji",
-            id: item.id,
-            name: item.name,
-            surrogates: item.surrogates,
-        };
-
-        if (emojiData && emojiData.guildId) {
-            saveData.url = `https://cdn.discordapp.com/emojis/${emojiData.id}.${emojiData.animated ? "gif" : "png"}`;
+    if (!item.surrogates) {
+        const emojiData = EmojiStore.getCustomEmojiById(item.id);
+        if (emojiData?.guildId) {
+            saveData.url = IconUtils.getEmojiURL({ id: emojiData.id, animated: !!emojiData.animated, size: 64 });
             saveData.guildId = emojiData.guildId;
             saveData.animated = emojiData.animated;
         }
-
-        await DataStore.set(DATA_COLLECTION_NAME, [...cache_allowedList, { ...saveData }]);
-
-        if (!settings.store.disableToasts) {
-            Toasts.show({
-                message: `Added "${item.name}" to the list`,
-                type: Toasts.Type.SUCCESS,
-                id: Toasts.genId(),
-                options: {
-                    duration: 3000,
-                    position: Toasts.Position.BOTTOM
-                }
-            });
-        }
-    } else {
-        if (!settings.store.disableToasts) {
-            Toasts.show({
-                message: `"${item.name}" is already in the list`,
-                type: Toasts.Type.FAILURE,
-                id: Toasts.genId(),
-                options: {
-                    duration: 3000,
-                    position: Toasts.Position.BOTTOM
-                }
-            });
-        }
     }
 
-    cache_allowedList = await getAllowedList();
+    return saveData;
 }
 
-async function removeFromAllowedList(item: ContextMenuEmoji) {
-    if (itemAlreadyInList(item)) {
-        await DataStore.set(DATA_COLLECTION_NAME, cache_allowedList.filter(emoji => {
-            return emoji.name !== item.name;
-        }));
+function showToast(message: string, type = Toasts.Type.SUCCESS) {
+    if (settings.store.disableToasts) return;
+    Toasts.show({
+        message,
+        type,
+        id: Toasts.genId(),
+        options: { duration: 3000, position: Toasts.Position.BOTTOM }
+    });
+}
 
-        if (!settings.store.disableToasts) {
-            Toasts.show({
-                message: `Removed "${item.name}" from the list`,
-                type: Toasts.Type.SUCCESS,
-                id: Toasts.genId(),
-                options: {
-                    duration: 3000,
-                    position: Toasts.Position.BOTTOM
-                }
-            });
-        }
-    } else {
-        if (!settings.store.disableToasts) {
-            Toasts.show({
-                message: `"${item.name}" is not in the list`,
-                type: Toasts.Type.FAILURE,
-                id: Toasts.genId(),
-                options: {
-                    duration: 3000,
-                    position: Toasts.Position.BOTTOM
-                }
-            });
-        }
-    }
+function addBulkToAllowedList(items: ContextMenuEmoji[]) {
+    return withWriteLock(async () => {
+        const validItemsToAdd = items.filter(item => !itemAlreadyInList(item)).map(buildSaveData);
+        await setAllowedList([...cache_allowedList, ...validItemsToAdd]);
 
-    cache_allowedList = await getAllowedList();
+        showToast(`Added ${validItemsToAdd.length} emojis to the list, ${items.length - validItemsToAdd.length} already in the list`);
+    });
+}
+
+function removeBulkFromAllowedList(items: ContextMenuEmoji[]) {
+    return withWriteLock(async () => {
+        const itemsToRemove = items.filter(item => itemAlreadyInList(item));
+        await setAllowedList(cache_allowedList.filter(emoji => !itemsToRemove.some(item => item.name === emoji.name)));
+
+        showToast(`Removed ${itemsToRemove.length} emojis from the list`);
+    });
+}
+
+function addToAllowedList(item: ContextMenuEmoji) {
+    return withWriteLock(async () => {
+        if (itemAlreadyInList(item)) {
+            showToast(`"${item.name}" is already in the list`, Toasts.Type.FAILURE);
+            return;
+        }
+
+        await setAllowedList([...cache_allowedList, buildSaveData(item)]);
+        showToast(`Added "${item.name}" to the list`);
+    });
+}
+
+function removeFromAllowedList(item: ContextMenuEmoji) {
+    return withWriteLock(async () => {
+        if (!itemAlreadyInList(item)) {
+            showToast(`"${item.name}" is not in the list`, Toasts.Type.FAILURE);
+            return;
+        }
+
+        await setAllowedList(cache_allowedList.filter(emoji => emoji.name !== item.name));
+        showToast(`Removed "${item.name}" from the list`);
+    });
 }
 
 const expressionPickerPatch: NavContextMenuPatchCallback = (children, { target }: { target: Target; }) => {
@@ -229,8 +150,7 @@ const buildGuildContextPatch = (guild: { id: string; name: string; }) => {
                 key="add-white-list-guild-emojis"
                 label="Add All Guild Emojis"
                 action={() => {
-                    const { id, name } = guild;
-                    const emojis = EmojiStore.getGuildEmoji(id);
+                    const emojis = EmojiStore.getGuildEmoji(guild.id);
                     addBulkToAllowedList(emojis.map(emoji => ({
                         type: "emoji",
                         id: emoji.id,
@@ -243,8 +163,7 @@ const buildGuildContextPatch = (guild: { id: string; name: string; }) => {
                 key="remove-white-list-guild-emojis"
                 label="Remove All Guild Emojis"
                 action={() => {
-                    const { id, name } = guild;
-                    const emojis = EmojiStore.getGuildEmoji(id);
+                    const emojis = EmojiStore.getGuildEmoji(guild.id);
                     removeBulkFromAllowedList(emojis.map(emoji => ({
                         type: "emoji",
                         id: emoji.id,
@@ -257,49 +176,39 @@ const buildGuildContextPatch = (guild: { id: string; name: string; }) => {
 };
 
 function buildMenuItems(emoji: ContextMenuEmoji) {
-    const typeString = itemAlreadyInList(emoji) ? "Remove" : "Add";
+    const isInList = itemAlreadyInList(emoji);
     return (
         <>
             <Menu.MenuSeparator />
             <Menu.MenuItem
-                id={`white-list-emoji-${typeString}`}
-                key={`white-list-emoji-${typeString}`}
-                label={`${typeString} to Whitelist`}
-                action={() => {
-                    if (typeString === "Add") {
-                        addToAllowedList(emoji);
-                    } else {
-                        removeFromAllowedList(emoji);
-                    }
-                }}
+                id="white-list-emoji"
+                key="white-list-emoji"
+                label={isInList ? "Remove from Whitelist" : "Add to Whitelist"}
+                action={() => isInList ? removeFromAllowedList(emoji) : addToAllowedList(emoji)}
             />
         </>
     );
 }
 
+function useWhitelistedEmojis(): SavedEmoji[] {
+    const [, forceUpdate] = useState(0);
+    useEffect(() => {
+        const listener = () => forceUpdate(v => v + 1);
+        cacheListeners.add(listener);
+        return () => void cacheListeners.delete(listener);
+    }, []);
+    return cache_allowedList as SavedEmoji[];
+}
+
 const WhiteListedEmojisComponent = (): JSX.Element => {
-    const [whitelistedEmojis, setWhitelistedEmojis] = useState<customSaveEmoji[]>([]);
+    const whitelistedEmojis = useWhitelistedEmojis();
     const [collapsedGroups, setCollapsedGroups] = useState<Record<string, boolean>>({});
 
-    useEffect(() => {
-        const fetchAllowedList = async () => {
-            const allowedList = await getAllowedList() as customSaveEmoji[];
-            setWhitelistedEmojis(allowedList);
-        };
-        fetchAllowedList();
-    }, []);
+    const handleRemoveEmoji = (emoji: SavedEmoji) => removeFromAllowedList(emoji);
 
-    const handleRemoveEmoji = async (emoji: customSaveEmoji) => {
-        await removeFromAllowedList(emoji);
-        setWhitelistedEmojis(await getAllowedList() as customSaveEmoji[]);
-    };
-
-    const handleRemoveAllEmojis = async (guildId: string) => {
+    const handleRemoveAllEmojis = (guildId: string) => {
         const emojisToRemove = whitelistedEmojis.filter(emoji => emoji.guildId === guildId || (guildId === "default" && !emoji.guildId));
-        for (const emoji of emojisToRemove) {
-            await removeFromAllowedList(emoji);
-        }
-        setWhitelistedEmojis(await getAllowedList() as customSaveEmoji[]);
+        return removeBulkFromAllowedList(emojisToRemove);
     };
 
     const toggleGroupCollapse = (guildId: string) => {
@@ -316,7 +225,7 @@ const WhiteListedEmojisComponent = (): JSX.Element => {
         }
         groups[groupKey].push(emoji);
         return groups;
-    }, {} as Record<string, customSaveEmoji[]>);
+    }, {} as Record<string, SavedEmoji[]>);
 
     return (
         <div className="emoji-container">
@@ -346,7 +255,7 @@ const WhiteListedEmojisComponent = (): JSX.Element => {
                                     ) : (
                                         <img
                                             className="emoji-image"
-                                            src={`https://cdn.discordapp.com/emojis/${emoji.id}.${emoji.animated ? "gif" : "png"}`}
+                                            src={IconUtils.getEmojiURL({ id: emoji.id, animated: !!emoji.animated, size: 64 })}
                                             alt={emoji.name}
                                         />
                                     )}
@@ -374,67 +283,25 @@ const WhiteListedEmojisComponent = (): JSX.Element => {
 
 const exportEmojis = async () => {
     const fileName = "whitelisted-emojis.json";
-    const exportData = await exportEmojisToJson();
-    const data = new TextEncoder().encode(exportData);
+    const emojis = await getAllowedList();
+    const json = JSON.stringify({ emojis }, null, 4);
 
     if (IS_WEB || IS_EQUIBOP || IS_VESKTOP) {
-        const file = new File([data], fileName, { type: "application/json" });
-        const a = document.createElement("a");
-        a.href = URL.createObjectURL(file);
-        a.download = fileName;
-
-        document.body.appendChild(a);
-        a.click();
-        setImmediate(() => {
-            URL.revokeObjectURL(a.href);
-            document.body.removeChild(a);
-        });
+        saveFile(new File([json], fileName, { type: "application/json" }));
     } else {
-        DiscordNative.fileManager.saveWithDialog(data, fileName);
+        DiscordNative.fileManager.saveWithDialog(new TextEncoder().encode(json), fileName);
     }
 
-    if (!settings.store.disableToasts) {
-        Toasts.show({
-            message: "Successfully exported emojis",
-            type: Toasts.Type.SUCCESS,
-            id: Toasts.genId(),
-            options: {
-                duration: 3000,
-                position: Toasts.Position.BOTTOM
-            }
-        });
-    }
+    showToast("Successfully exported emojis");
 };
 
-async function exportEmojisToJson() {
-    const emojis = await getAllowedList();
-    return JSON.stringify({ emojis }, null, 4);
-}
-
 const uploadEmojis = async () => {
+    let data: string;
+
     if (IS_WEB || IS_EQUIBOP || IS_VESKTOP) {
-        const input = document.createElement("input");
-        input.type = "file";
-        input.style.display = "none";
-        input.accept = "application/json";
-        input.onchange = async () => {
-            const file = input.files?.[0];
-            if (!file) return;
-
-            const reader = new FileReader();
-            reader.onload = async () => {
-                const data = reader.result as string;
-                await importEmojis(data);
-            };
-
-            reader.readAsText(file);
-        };
-
-        document.body.appendChild(input);
-        input.click();
-        setImmediate(() => {
-            document.body.removeChild(input);
-        });
+        const file = await chooseFile("application/json");
+        if (!file) return;
+        data = await file.text();
     } else {
         const [file] = await DiscordNative.fileManager.openFiles({
             filters: [
@@ -442,105 +309,46 @@ const uploadEmojis = async () => {
                 { name: "all", extensions: ["*"] }
             ]
         });
-
-        if (file) {
-            try {
-                await importEmojis(new TextDecoder().decode(file.data));
-            } catch (err) {
-                console.error(err);
-                if (!settings.store.disableToasts) {
-                    Toasts.show({
-                        message: `Failed to import emojis: ${err}`,
-                        type: Toasts.Type.FAILURE,
-                        id: Toasts.genId(),
-                        options: {
-                            duration: 3000,
-                            position: Toasts.Position.BOTTOM
-                        }
-                    });
-                }
-            }
-        }
+        if (!file) return;
+        data = new TextDecoder().decode(file.data);
     }
+
+    await importEmojis(data);
 };
 
-const importEmojis = async (data: string) => {
+const importEmojis = (data: string) => withWriteLock(async () => {
     try {
         const parsed = JSON.parse(data);
         if (parsed && typeof parsed === "object" && Array.isArray(parsed.emojis)) {
-            await DataStore.set(DATA_COLLECTION_NAME, parsed.emojis);
-            cache_allowedList = await getAllowedList();
-
-            if (!settings.store.disableToasts) {
-                Toasts.show({
-                    message: "Successfully imported emojis",
-                    type: Toasts.Type.SUCCESS,
-                    id: Toasts.genId(),
-                    options: {
-                        duration: 3000,
-                        position: Toasts.Position.BOTTOM
-                    }
-                });
-            }
+            await setAllowedList(parsed.emojis);
+            showToast("Successfully imported emojis");
         } else {
-            if (!settings.store.disableToasts) {
-                Toasts.show({
-                    message: "Invalid JSON data",
-                    type: Toasts.Type.FAILURE,
-                    id: Toasts.genId(),
-                    options: {
-                        duration: 3000,
-                        position: Toasts.Position.BOTTOM
-                    }
-                });
-            }
+            showToast("Invalid JSON data", Toasts.Type.FAILURE);
         }
     } catch (err) {
-        if (!settings.store.disableToasts) {
-            Toasts.show({
-                message: `Failed to import emojis: ${err}`,
-                type: Toasts.Type.FAILURE,
-                id: Toasts.genId(),
-                options: {
-                    duration: 3000,
-                    position: Toasts.Position.BOTTOM
-                }
-            });
-        }
+        showToast(`Failed to import emojis: ${err}`, Toasts.Type.FAILURE);
     }
-};
+});
 
-const resetEmojis = async () => {
-    await DataStore.set(DATA_COLLECTION_NAME, []);
-    cache_allowedList = await getAllowedList();
-
-    if (!settings.store.disableToasts) {
-        Toasts.show({
-            message: "Reset emojis",
-            type: Toasts.Type.SUCCESS,
-            id: Toasts.genId(),
-            options: {
-                duration: 3000,
-                position: Toasts.Position.BOTTOM
-            }
-        });
-    }
-};
+const resetEmojis = () => withWriteLock(async () => {
+    await setAllowedList([]);
+    showToast("Reset emojis");
+});
 
 const settings = definePluginSettings({
     defaultEmojis: {
         type: OptionType.BOOLEAN,
-        description: "Hide default emojis",
+        description: "Hide default Unicode emojis from the autocomplete unless whitelisted.",
         default: true
     },
     serverEmojis: {
         type: OptionType.BOOLEAN,
-        description: "Hide server emojis",
+        description: "Hide custom server emojis from the autocomplete unless whitelisted.",
         default: true
     },
     disableToasts: {
         type: OptionType.BOOLEAN,
-        description: "Disable toasts",
+        description: "Don't show toasts when adding or removing emojis.",
         default: false
     },
     whiteListedEmojis: {
@@ -566,10 +374,7 @@ const settings = definePluginSettings({
                     confirmText: "Import",
                     confirmColor: Button.Colors.RED,
                     cancelText: "Cancel",
-                    onConfirm: async () => {
-                        await DataStore.set(DATA_COLLECTION_NAME, []);
-                        await uploadEmojis();
-                    }
+                    onConfirm: uploadEmojis
                 })}>
                 Import Emojis
             </Button>
@@ -601,16 +406,17 @@ export default definePlugin({
     authors: [EquicordDevs.creations],
     patches: [
         {
-            find: "#{intl::EMOJI_MATCHING}",
+            find: "queryEmojiResults({query:",
             replacement: {
-                match: /renderResults\((\i)\){/,
-                replace: "$&$1.results.emojis=$self.filterEmojis($1);if($1.results.emojis.length===0)return;"
+                match: /\{emojis:\{unlocked:(\i)\}\}=\i\.\i\.queryEmojiResults\(\{.{0,200}\}\);/,
+                replace: "$&$1=$self.filterEmojis($1);"
             }
         }
     ],
     settings: settings,
     async start() {
         cache_allowedList = await getAllowedList();
+        notifyCacheChange();
         addContextMenuPatch("expression-picker", expressionPickerPatch);
         addContextMenuPatch("guild-context", guildContextPatch);
     },
@@ -618,18 +424,14 @@ export default definePlugin({
         removeContextMenuPatch("expression-picker", expressionPickerPatch);
         removeContextMenuPatch("guild-context", guildContextPatch);
     },
-    filterEmojis: (data: { results: { emojis: (CustomEmoji | UnicodeEmoji)[]; }; }) => {
-        const { emojis } = data.results;
-        let modifiedEmojis = emojis;
-
+    filterEmojis(emojis: (CustomEmoji | UnicodeEmoji)[]): (CustomEmoji | UnicodeEmoji)[] {
+        let result = emojis;
         if (settings.store.defaultEmojis) {
-            modifiedEmojis = modifiedEmojis.filter(emoji => !("uniqueName" in emoji) || isItemAllowed(emoji));
+            result = result.filter(e => !("uniqueName" in e) || isItemAllowed(e));
         }
-
         if (settings.store.serverEmojis) {
-            modifiedEmojis = modifiedEmojis.filter(emoji => "uniqueName" in emoji || isItemAllowed(emoji));
+            result = result.filter(e => "uniqueName" in e || isItemAllowed(e));
         }
-
-        return modifiedEmojis;
+        return result;
     }
 });
