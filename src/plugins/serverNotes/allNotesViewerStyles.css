@@ -1,0 +1,250 @@
+.vc-all-notes-modal-root {
+    display: flex;
+    flex-direction: column;
+    background-color: var(--background-primary);
+}
+
+.vc-all-notes-modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--background-modifier-accent);
+    flex-shrink: 0;
+    background-color: var(--background-secondary-alt);
+}
+
+.vc-all-notes-title {
+    font-family: var(--font-display);
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--header-primary);
+    margin: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.vc-all-notes-modal-header .vc-modal-close-button {
+    color: var(--interactive-normal);
+}
+
+.vc-all-notes-modal-header .vc-modal-close-button:hover {
+    color: var(--interactive-hover);
+}
+
+
+.vc-all-notes-filter-controls-area {
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--background-modifier-accent);
+    background-color: var(--background-secondary-alt);
+    flex-shrink: 0;
+}
+
+.vc-all-notes-filter-input {
+    width: 100%;
+    margin-bottom: 16px;
+}
+
+.vc-all-notes-filter-input input {
+    font-size: 15px;
+    background-color: var(--input-background);
+    border: 1px solid var(--input-border-color, var(--background-tertiary));
+    border-radius: 4px;
+}
+
+.vc-all-notes-filter-input input:focus {
+    border-color: var(--input-border-color-focus, var(--brand-experiment));
+}
+
+.vc-all-notes-tag-filter-section .vc-form-title {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--header-secondary);
+    text-transform: uppercase;
+    margin-bottom: 8px;
+    padding-left: 0;
+}
+
+.vc-all-notes-tag-filter-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.vc-all-notes-tag-pill {
+    display: inline-flex;
+    align-items: center;
+    padding: 5px 10px;
+    border-radius: 16px;
+    background-color: var(--background-secondary);
+    border: 1px solid var(--background-tertiary);
+    color: var(--interactive-normal);
+    font-size: 12px;
+    font-weight: 500;
+    line-height: 1.2;
+    cursor: default;
+    transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.vc-all-notes-tag-pill.vc-all-notes-filter {
+    cursor: pointer;
+}
+
+.vc-all-notes-tag-pill.vc-all-notes-filter:hover,
+.vc-all-notes-tag-pill.vc-all-notes-filter:focus-within {
+    border-color: var(--interactive-hover);
+    background-color: var(--background-modifier-hover);
+}
+
+.vc-all-notes-tag-pill.vc-all-notes-filter.vc-all-notes-selected {
+    background-color: var(--brand-experiment);
+    border-color: var(--brand-experiment-hover);
+    color: var(--white-500);
+}
+
+.vc-all-notes-tag-pill.vc-all-notes-filter.vc-all-notes-selected:hover {
+    background-color: var(--brand-experiment-560);
+}
+
+
+.vc-all-notes-tag-pill.vc-all-notes-display-tag-pill {
+    background-color: var(--background-secondary-alt);
+    font-size: 12px;
+    padding: 4px 8px;
+    border-radius: 4px;
+}
+
+
+.vc-all-notes-modal-content {
+    flex-grow: 1;
+    min-height: 200px;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    background-color: var(--background-primary);
+}
+
+.vc-all-notes-list-scroller {
+    flex-grow: 1;
+}
+
+.vc-all-notes-list-container {
+    padding: 16px 20px;
+}
+
+.vc-all-notes-empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 40px 20px;
+    height: 100%;
+    color: var(--text-muted);
+}
+
+.vc-all-notes-empty-state p {
+    font-size: 16px;
+    line-height: 1.4;
+}
+
+.vc-all-notes-list-item {
+    background-color: var(--background-secondary);
+    border: 1px solid var(--background-modifier-accent);
+    border-radius: 8px;
+    padding: 16px;
+    margin-bottom: 12px;
+    transition: border-color 0.2s ease, background-color 0.2s ease;
+}
+
+.vc-all-notes-list-item:last-child {
+    margin-bottom: 0;
+}
+
+.vc-all-notes-list-item:hover {
+    border-color: var(--interactive-hover);
+    background-color: var(--background-secondary-alt);
+}
+
+.vc-all-notes-list-item-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.vc-all-notes-list-item-guild-icon {
+    width: 28px;
+    height: 28px;
+    border-radius: 14px;
+    margin-right: 10px;
+    object-fit: cover;
+    background-color: var(--background-accent);
+    flex-shrink: 0;
+}
+
+.vc-all-notes-list-item-guild-icon.vc-all-notes-placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--interactive-normal);
+}
+
+.vc-all-notes-list-item-guild-name {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--header-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+
+.vc-all-notes-list-item-tags-display {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 10px;
+}
+
+
+.vc-all-notes-list-item-note-snippet {
+    font-size: 14px;
+    color: var(--text-normal);
+    line-height: 1.5;
+    overflow: hidden;
+    margin: 0 0 12px;
+}
+
+.vc-all-notes-list-item-note-snippet.vc-all-notes-empty-text,
+.vc-all-notes-list-item-note-snippet.vc-all-notes-parse-error {
+    font-style: italic;
+    color: var(--text-muted);
+}
+
+.vc-all-notes-list-item-note-snippet.vc-all-notes-parse-error {
+    color: var(--text-danger);
+}
+
+.vc-all-notes-list-item-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 12px;
+    align-items: center;
+}
+
+.vc-all-notes-action-button {
+    font-size: 13px;
+    font-weight: 500;
+    min-width: 80px;
+}
+
+.vc-all-notes-tag-pill[role="button"]:focus,
+.vc-all-notes-tag-filter-button:focus,
+.vc-all-notes-clear-tags-button:focus,
+.vc-all-notes-action-button:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px var(--focus-primary);
+}
