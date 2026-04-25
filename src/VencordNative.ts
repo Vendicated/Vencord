@@ -20,7 +20,7 @@ export function sendSync<T = any>(event: IpcEvents, ...args: any[]) {
     return ipcRenderer.sendSync(event, ...args) as T;
 }
 
-const PluginHelpers = {} as Record<string, Record<string, (...args: any[]) => Promise<any>>>;
+const PluginHelpers: Record<string, PluginNative<Record<string, (event: Electron.IpcMainInvokeEvent, ...args: any[]) => any>>> = {} as any;
 const pluginIpcMap = sendSync<PluginIpcMappings>(IpcEvents.GET_PLUGIN_IPC_METHOD_MAP);
 
 for (const [plugin, methods] of Object.entries(pluginIpcMap)) {
