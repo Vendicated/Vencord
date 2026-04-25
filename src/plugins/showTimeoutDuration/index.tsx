@@ -9,14 +9,13 @@ import "./styles.css";
 import { definePluginSettings } from "@api/Settings";
 import { BaseText } from "@components/BaseText";
 import ErrorBoundary from "@components/ErrorBoundary";
-import { TooltipContainer } from "@components/TooltipContainer";
 import { Devs } from "@utils/constants";
 import { getIntlMessage } from "@utils/discord";
 import { canonicalizeMatch } from "@utils/patches";
 import definePlugin, { OptionType } from "@utils/types";
 import { Message } from "@vencord/discord-types";
 import { findComponentLazy } from "@webpack";
-import { ChannelStore, GuildMemberStore } from "@webpack/common";
+import { ChannelStore, GuildMemberStore, Tooltip } from "@webpack/common";
 import { ReactNode } from "react";
 
 const countDownFilter = canonicalizeMatch(/#{intl::MAX_AGE_NEVER}/);
@@ -88,15 +87,23 @@ export default definePlugin({
 
     TooltipWrapper: ErrorBoundary.wrap(({ message, children, text }: { message: Message; children: ReactNode; text: ReactNode; }) => {
         if (settings.store.displayStyle === DisplayStyle.Tooltip)
-            return <TooltipContainer text={renderTimeout(message, false)}>{children}</TooltipContainer>;
+            return (
+                <Tooltip text={renderTimeout(message, false)}>
+                    {tooltipProps => <span {...tooltipProps}>{children}</span>}
+                </Tooltip>
+            );
 
         return (
-            <div className="vc-std-wrapper">
-                <TooltipContainer text={text}>{children}</TooltipContainer>
-                <BaseText size="md" color="text-danger">
-                    {renderTimeout(message, true)} timeout remaining
-                </BaseText>
-            </div>
+            <Tooltip text={renderTimeout(message, false)}>
+                {tooltipProps => (
+                    <div {...tooltipProps} className="vc-std-wrapper">
+                        {children}
+                        <BaseText tag="span" size="md" color="text-danger">
+                            {renderTimeout(message, true)} timeout remaining
+                        </BaseText>
+                    </div>
+                )}
+            </Tooltip>
         );
     }, { noop: true })
 });
