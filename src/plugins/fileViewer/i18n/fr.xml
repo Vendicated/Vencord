@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<language code="fr">
+    <string key="plugin.name">Viewer de fichiers</string>
+    <string key="plugin.description">Ouvrir les fichiers complets</string>
+    <string key="defaultFilename">document.txt</string>
+    <string key="defaultLogFilename">log</string>
+    <string key="validation.minimumOne">La valeur doit être au moins 1</string>
+
+    <string key="settings.category.general">Général</string>
+    <string key="settings.category.editMode">Mode édition</string>
+    <string key="settings.category.performance">Performance</string>
+    <string key="settings.general.useShiki.title">Utiliser le plugin ShikiCodeblocks</string>
+    <string key="settings.general.useShiki.description">Active ou désactive l’intégration avec le plugin ShikiCodeblocks pour la coloration syntaxique des blocs de code.</string>
+    <string key="settings.general.enablePerformance.title">Activer le mode Performance</string>
+    <string key="settings.general.enablePerformance.description">Active ou désactive les optimisations de performance du plugin.</string>
+    <string key="settings.edit.useShiki.title">Utiliser ShikiCodeblocks dans le mode édition</string>
+    <string key="settings.edit.useShiki.description">Utilise le plugin ShikiCodeblocks pour afficher la coloration syntaxique dans l’éditeur lorsque celui-ci est installé.</string>
+    <string key="settings.edit.lineNumbers.title">Afficher les numéros de lignes dans l’éditeur</string>
+    <string key="settings.edit.lineNumbers.description">Affiche une colonne de numéros de lignes pendant l’édition.</string>
+    <string key="settings.edit.autoClose.title">Fermeture automatique du viewer</string>
+    <string key="settings.edit.autoClose.description">Ferme automatiquement le viewer lorsque le fichier est inséré dans le chat ou sauvegardé sur l’ordinateur.</string>
+    <string key="settings.shortcuts.section">Personnalisation des raccourcis clavier</string>
+    <string key="settings.shortcuts.default">Valeur par défaut : {shortcut}</string>
+    <string key="settings.edit.actionInterface.title">Type d’interface pour les actions</string>
+    <string key="settings.edit.actionInterface.description">Permet de choisir comment les actions principales sont affichées dans l’interface.</string>
+    <string key="settings.edit.actionInterface.buttons">Boutons séparés</string>
+    <string key="settings.edit.actionInterface.dropdown">Menu déroulant</string>
+    <string key="settings.actions.section">Configuration des actions</string>
+    <string key="settings.actions.insert.description">Active ou désactive l’action d’insertion du fichier.</string>
+    <string key="settings.actions.insertAndSend.description">Active ou désactive l’action d’insertion avec envoi immédiat.</string>
+    <string key="settings.actions.save.description">Active ou désactive l’action de sauvegarde locale.</string>
+    <string key="settings.actions.shiftClose.title">Maintenir SHIFT pour fermer automatiquement le viewer</string>
+    <string key="settings.actions.shiftClose.description">Si la touche SHIFT est maintenue lors de l’exécution d’une action, le viewer se ferme automatiquement.</string>
+    <string key="settings.performance.auto.title">Mode Performance automatique</string>
+    <string key="settings.performance.auto.description">Active automatiquement les optimisations de performance lorsque le fichier devient trop grand.</string>
+    <string key="settings.performance.lines.title">Nombre de lignes pour activer le mode Performance automatique</string>
+    <string key="settings.performance.lines.description">Nombre de lignes à partir duquel le mode Performance automatique s’active.</string>
+    <string key="settings.performance.characters.title">Nombre de caractères pour activer le mode Performance automatique</string>
+    <string key="settings.performance.forceShiki.title">Forcer ShikiCodeblocks en mode Performance</string>
+    <string key="settings.performance.forceShiki.description">Force l’utilisation d’un mode optimisé du plugin ShikiCodeblocks pour améliorer les performances.</string>
+    <string key="settings.performance.viewerToggle.title">Activer le bouton Performance dans le viewer</string>
+
+    <string key="action.insert">Insérer le fichier dans le chat</string>
+    <string key="action.insertAndSend">Insérer le fichier dans le chat et envoyer le message</string>
+    <string key="action.save">Sauvegarder le fichier sur l’ordinateur</string>
+
+    <string key="viewer.search.placeholder">Rechercher...</string>
+    <string key="viewer.search.previous">Précédent</string>
+    <string key="viewer.search.next">Suivant</string>
+    <string key="viewer.copyAll">Tout copier</string>
+    <string key="viewer.editFile">Modifier le fichier</string>
+    <string key="viewer.cancelEdit">Annuler l’édition</string>
+    <string key="viewer.cancelEdit.title">Ferme l’éditeur sans appliquer les changements actuels</string>
+    <string key="viewer.close">Fermer</string>
+    <string key="viewer.actions">Actions</string>
+    <string key="viewer.action.insert.short">Insérer</string>
+    <string key="viewer.action.insert.title">Insérer le fichier dans le chat ({shortcut})</string>
+    <string key="viewer.action.insertAndSend.short">Insérer + Envoyer</string>
+    <string key="viewer.action.insertAndSend.title">Insérer le fichier dans le chat et l’envoyer ({shortcut})</string>
+    <string key="viewer.action.save.short">Sauvegarder</string>
+    <string key="viewer.action.save.title">Sauvegarder le fichier sur l’ordinateur ({shortcut})</string>
+    <string key="viewer.performance.on">Perf : ON</string>
+    <string key="viewer.performance.off">Perf : OFF</string>
+    <string key="viewer.loading">Chargement...</string>
+    <string key="viewer.openFullFile">Ouvrir le fichier complet</string>
+
+    <string key="toast.copied">Fichier copié dans le presse-papiers !</string>
+    <string key="toast.downloadStarted">Téléchargement du fichier lancé.</string>
+    <string key="toast.saveFailed">Impossible de sauvegarder le fichier.</string>
+    <string key="toast.attachNoChannel">Impossible d’ajouter la pièce jointe : aucun salon actif.</string>
+    <string key="toast.attachAndSendAttempted">Fichier ajouté comme pièce jointe. Envoi immédiat tenté.</string>
+    <string key="toast.attachAdded">Fichier ajouté comme pièce jointe.</string>
+    <string key="toast.attachFailed">Impossible d’ajouter la pièce jointe.</string>
+
+    <string key="stats.summary">{characters} caractères • {lines} lignes</string>
+    <string key="stats.results">{count} résultats</string>
+    <string key="stats.performance">mode perf ({mode}, recherche &gt;= {min} caractères, max {max} surlignages)</string>
+    <string key="stats.performance.auto">auto</string>
+    <string key="stats.performance.globalManual">manuel-global</string>
+    <string key="stats.performance.viewerManual">manuel-viewer</string>
+    <string key="stats.lowGpu">mode faible GPU</string>
+    <string key="stats.editing">édition</string>
+
+    <string key="alert.fetchFullFileFailed">Impossible de récupérer le fichier complet. Le lien de la pièce jointe est peut-être introuvable.</string>
+    <string key="alert.loadFullFileFailed">Impossible de charger le fichier complet. Vérifie que le lien de la pièce jointe est encore valide.</string>
+</language>

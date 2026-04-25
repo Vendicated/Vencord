@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<language code="de">
+    <string key="plugin.name">Dateibetrachter</string>
+    <string key="plugin.description">Vollständige Dateien öffnen</string>
+    <string key="defaultFilename">dokument.txt</string>
+    <string key="defaultLogFilename">log</string>
+    <string key="validation.minimumOne">Der Wert muss mindestens 1 sein</string>
+
+    <string key="settings.category.general">Allgemein</string>
+    <string key="settings.category.editMode">Bearbeitungsmodus</string>
+    <string key="settings.category.performance">Leistung</string>
+    <string key="settings.general.useShiki.title">ShikiCodeblocks verwenden</string>
+    <string key="settings.general.useShiki.description">Aktiviert oder deaktiviert die ShikiCodeblocks-Integration für Syntaxhervorhebung in Codeblöcken.</string>
+    <string key="settings.general.enablePerformance.title">Leistungsmodus aktivieren</string>
+    <string key="settings.general.enablePerformance.description">Aktiviert oder deaktiviert die Leistungsoptimierungen des Plugins.</string>
+    <string key="settings.edit.useShiki.title">ShikiCodeblocks im Bearbeitungsmodus verwenden</string>
+    <string key="settings.edit.useShiki.description">Verwendet ShikiCodeblocks für Syntaxhervorhebung im Editor, wenn das Plugin installiert ist.</string>
+    <string key="settings.edit.lineNumbers.title">Zeilennummern im Editor anzeigen</string>
+    <string key="settings.edit.lineNumbers.description">Zeigt beim Bearbeiten eine Spalte mit Zeilennummern an.</string>
+    <string key="settings.edit.autoClose.title">Viewer automatisch schließen</string>
+    <string key="settings.edit.autoClose.description">Schließt den Viewer automatisch, wenn die Datei in den Chat eingefügt oder auf dem Computer gespeichert wird.</string>
+    <string key="settings.shortcuts.section">Tastenkürzel anpassen</string>
+    <string key="settings.shortcuts.default">Standardwert: {shortcut}</string>
+    <string key="settings.edit.actionInterface.title">Oberflächentyp für Aktionen</string>
+    <string key="settings.edit.actionInterface.description">Legt fest, wie die Hauptaktionen in der Oberfläche angezeigt werden.</string>
+    <string key="settings.edit.actionInterface.buttons">Separate Schaltflächen</string>
+    <string key="settings.edit.actionInterface.dropdown">Dropdown-Menü</string>
+    <string key="settings.actions.section">Aktionskonfiguration</string>
+    <string key="settings.actions.insert.description">Aktiviert oder deaktiviert die Aktion zum Einfügen der Datei.</string>
+    <string key="settings.actions.insertAndSend.description">Aktiviert oder deaktiviert das Einfügen mit sofortigem Senden.</string>
+    <string key="settings.actions.save.description">Aktiviert oder deaktiviert das lokale Speichern.</string>
+    <string key="settings.actions.shiftClose.title">SHIFT gedrückt halten, um den Viewer automatisch zu schließen</string>
+    <string key="settings.actions.shiftClose.description">Wenn SHIFT während einer Aktion gedrückt gehalten wird, schließt sich der Viewer automatisch.</string>
+    <string key="settings.performance.auto.title">Automatischer Leistungsmodus</string>
+    <string key="settings.performance.auto.description">Aktiviert Leistungsoptimierungen automatisch, wenn die Datei zu groß wird.</string>
+    <string key="settings.performance.lines.title">Zeilenanzahl für automatischen Leistungsmodus</string>
+    <string key="settings.performance.lines.description">Anzahl der Zeilen, ab der der automatische Leistungsmodus aktiviert wird.</string>
+    <string key="settings.performance.characters.title">Zeichenanzahl für automatischen Leistungsmodus</string>
+    <string key="settings.performance.forceShiki.title">ShikiCodeblocks im Leistungsmodus erzwingen</string>
+    <string key="settings.performance.forceShiki.description">Erzwingt einen optimierten ShikiCodeblocks-Modus, um die Leistung zu verbessern.</string>
+    <string key="settings.performance.viewerToggle.title">Leistungsschaltfläche im Viewer aktivieren</string>
+
+    <string key="action.insert">Datei in den Chat einfügen</string>
+    <string key="action.insertAndSend">Datei in den Chat einfügen und Nachricht senden</string>
+    <string key="action.save">Datei auf dem Computer speichern</string>
+
+    <string key="viewer.search.placeholder">Suchen...</string>
+    <string key="viewer.search.previous">Vorherige</string>
+    <string key="viewer.search.next">Nächste</string>
+    <string key="viewer.copyAll">Alles kopieren</string>
+    <string key="viewer.editFile">Datei bearbeiten</string>
+    <string key="viewer.cancelEdit">Bearbeitung abbrechen</string>
+    <string key="viewer.cancelEdit.title">Editor schließen, ohne die aktuellen Änderungen anzuwenden</string>
+    <string key="viewer.close">Schließen</string>
+    <string key="viewer.actions">Aktionen</string>
+    <string key="viewer.action.insert.short">Einfügen</string>
+    <string key="viewer.action.insert.title">Datei in den Chat einfügen ({shortcut})</string>
+    <string key="viewer.action.insertAndSend.short">Einfügen + Senden</string>
+    <string key="viewer.action.insertAndSend.title">Datei in den Chat einfügen und senden ({shortcut})</string>
+    <string key="viewer.action.save.short">Speichern</string>
+    <string key="viewer.action.save.title">Datei auf dem Computer speichern ({shortcut})</string>
+    <string key="viewer.performance.on">Perf: EIN</string>
+    <string key="viewer.performance.off">Perf: AUS</string>
+    <string key="viewer.loading">Lädt...</string>
+    <string key="viewer.openFullFile">Vollständige Datei öffnen</string>
+
+    <string key="toast.copied">Datei in die Zwischenablage kopiert!</string>
+    <string key="toast.downloadStarted">Dateidownload gestartet.</string>
+    <string key="toast.saveFailed">Datei konnte nicht gespeichert werden.</string>
+    <string key="toast.attachNoChannel">Anhang konnte nicht hinzugefügt werden: kein aktiver Kanal.</string>
+    <string key="toast.attachAndSendAttempted">Datei als Anhang hinzugefügt. Sofortiges Senden versucht.</string>
+    <string key="toast.attachAdded">Datei als Anhang hinzugefügt.</string>
+    <string key="toast.attachFailed">Anhang konnte nicht hinzugefügt werden.</string>
+
+    <string key="stats.summary">{characters} Zeichen • {lines} Zeilen</string>
+    <string key="stats.results">{count} Ergebnisse</string>
+    <string key="stats.performance">Leistungsmodus ({mode}, Suche &gt;= {min} Zeichen, max. {max} Hervorhebungen)</string>
+    <string key="stats.performance.auto">automatisch</string>
+    <string key="stats.performance.globalManual">manuell-global</string>
+    <string key="stats.performance.viewerManual">manuell-viewer</string>
+    <string key="stats.lowGpu">niedriger GPU-Modus</string>
+    <string key="stats.editing">Bearbeitung</string>
+
+    <string key="alert.fetchFullFileFailed">Die vollständige Datei konnte nicht abgerufen werden. Der Anhang-Link fehlt möglicherweise.</string>
+    <string key="alert.loadFullFileFailed">Die vollständige Datei konnte nicht geladen werden. Prüfe, ob der Anhang-Link noch gültig ist.</string>
+</language>

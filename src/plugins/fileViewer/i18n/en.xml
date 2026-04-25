@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<language code="en">
+    <string key="plugin.name">Files viewer</string>
+    <string key="plugin.description">Open full files</string>
+    <string key="defaultFilename">document.txt</string>
+    <string key="defaultLogFilename">log</string>
+    <string key="validation.minimumOne">Value must be at least 1</string>
+
+    <string key="settings.category.general">General</string>
+    <string key="settings.category.editMode">Edit Mode</string>
+    <string key="settings.category.performance">Performance</string>
+    <string key="settings.general.useShiki.title">Use ShikiCodeblocks</string>
+    <string key="settings.general.useShiki.description">Enables or disables ShikiCodeblocks integration for code block syntax highlighting.</string>
+    <string key="settings.general.enablePerformance.title">Enable Performance mode</string>
+    <string key="settings.general.enablePerformance.description">Enables or disables plugin performance optimizations.</string>
+    <string key="settings.edit.useShiki.title">Use ShikiCodeblocks in edit mode</string>
+    <string key="settings.edit.useShiki.description">Uses ShikiCodeblocks to display syntax highlighting in the editor when it is installed.</string>
+    <string key="settings.edit.lineNumbers.title">Show line numbers in the editor</string>
+    <string key="settings.edit.lineNumbers.description">Shows a line number column while editing.</string>
+    <string key="settings.edit.autoClose.title">Auto-close viewer</string>
+    <string key="settings.edit.autoClose.description">Automatically closes the viewer when the file is inserted into chat or saved to the computer.</string>
+    <string key="settings.shortcuts.section">Keyboard shortcut customization</string>
+    <string key="settings.shortcuts.default">Default value: {shortcut}</string>
+    <string key="settings.edit.actionInterface.title">Action interface type</string>
+    <string key="settings.edit.actionInterface.description">Controls how the main actions are displayed in the interface.</string>
+    <string key="settings.edit.actionInterface.buttons">Separate buttons</string>
+    <string key="settings.edit.actionInterface.dropdown">Dropdown menu</string>
+    <string key="settings.actions.section">Action configuration</string>
+    <string key="settings.actions.insert.description">Enables or disables the file insert action.</string>
+    <string key="settings.actions.insertAndSend.description">Enables or disables the insert and immediate send action.</string>
+    <string key="settings.actions.save.description">Enables or disables the local save action.</string>
+    <string key="settings.actions.shiftClose.title">Hold SHIFT to auto-close the viewer</string>
+    <string key="settings.actions.shiftClose.description">If SHIFT is held while running an action, the viewer closes automatically.</string>
+    <string key="settings.performance.auto.title">Automatic Performance mode</string>
+    <string key="settings.performance.auto.description">Automatically enables performance optimizations when the file gets too large.</string>
+    <string key="settings.performance.lines.title">Line count for automatic Performance mode</string>
+    <string key="settings.performance.lines.description">Number of lines from which automatic Performance mode activates.</string>
+    <string key="settings.performance.characters.title">Character count for automatic Performance mode</string>
+    <string key="settings.performance.forceShiki.title">Force ShikiCodeblocks in Performance mode</string>
+    <string key="settings.performance.forceShiki.description">Forces an optimized ShikiCodeblocks mode to improve performance.</string>
+    <string key="settings.performance.viewerToggle.title">Enable the Performance button in the viewer</string>
+
+    <string key="action.insert">Insert the file into chat</string>
+    <string key="action.insertAndSend">Insert the file into chat and send the message</string>
+    <string key="action.save">Save the file to the computer</string>
+
+    <string key="viewer.search.placeholder">Search...</string>
+    <string key="viewer.search.previous">Previous</string>
+    <string key="viewer.search.next">Next</string>
+    <string key="viewer.copyAll">Copy all</string>
+    <string key="viewer.editFile">Edit file</string>
+    <string key="viewer.cancelEdit">Cancel edit</string>
+    <string key="viewer.cancelEdit.title">Close the editor without applying the current changes</string>
+    <string key="viewer.close">Close</string>
+    <string key="viewer.actions">Actions</string>
+    <string key="viewer.action.insert.short">Insert</string>
+    <string key="viewer.action.insert.title">Insert the file into chat ({shortcut})</string>
+    <string key="viewer.action.insertAndSend.short">Insert + Send</string>
+    <string key="viewer.action.insertAndSend.title">Insert the file into chat and send it ({shortcut})</string>
+    <string key="viewer.action.save.short">Save</string>
+    <string key="viewer.action.save.title">Save the file to the computer ({shortcut})</string>
+    <string key="viewer.performance.on">Perf: ON</string>
+    <string key="viewer.performance.off">Perf: OFF</string>
+    <string key="viewer.loading">Loading...</string>
+    <string key="viewer.openFullFile">Open full file</string>
+
+    <string key="toast.copied">File copied to clipboard!</string>
+    <string key="toast.downloadStarted">File download started.</string>
+    <string key="toast.saveFailed">Unable to save the file.</string>
+    <string key="toast.attachNoChannel">Unable to add attachment: no active channel.</string>
+    <string key="toast.attachAndSendAttempted">File added as an attachment. Immediate send attempted.</string>
+    <string key="toast.attachAdded">File added as an attachment.</string>
+    <string key="toast.attachFailed">Unable to add the attachment.</string>
+
+    <string key="stats.summary">{characters} characters • {lines} lines</string>
+    <string key="stats.results">{count} results</string>
+    <string key="stats.performance">perf mode ({mode}, search &gt;= {min} chars, max {max} highlights)</string>
+    <string key="stats.performance.auto">auto</string>
+    <string key="stats.performance.globalManual">manual-global</string>
+    <string key="stats.performance.viewerManual">manual-viewer</string>
+    <string key="stats.lowGpu">low-gpu mode</string>
+    <string key="stats.editing">editing</string>
+
+    <string key="alert.fetchFullFileFailed">Unable to retrieve the full file. The attachment link may be missing.</string>
+    <string key="alert.loadFullFileFailed">Unable to load the full file. Check that the attachment link is still valid.</string>
+</language>
