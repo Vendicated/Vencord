@@ -24,15 +24,20 @@ import { useMemo } from "@webpack/common";
 
 // Calculate a CSS color string based on the user ID
 function calculateNameColorForUser(id?: string) {
-    const { lightness } = settings.use(["lightness"]);
+    const { lightness, saturation } = settings.use(["lightness","saturation"]);
     const idHash = useMemo(() => id ? h64(id) : null, [id]);
 
-    return idHash && `hsl(${idHash % 360n}, 100%, ${lightness}%)`;
+    return idHash && `hsl(${idHash % 360n}, ${saturation}%, ${lightness}%)`;
 }
 
 const settings = definePluginSettings({
     lightness: {
         description: "Lightness, in %. Change if the colors are too light or too dark",
+        type: OptionType.NUMBER,
+        default: 70,
+    },
+    saturation: {
+        description: "Saturation, in %. Change if the colors are too vibrant or dull",
         type: OptionType.NUMBER,
         default: 70,
     },
