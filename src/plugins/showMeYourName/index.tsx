@@ -765,7 +765,7 @@ function handleHoveringMessage(message: any, isHovering: boolean) {
     const repliedId = message?.messageReference?.message_id;
     const groupId = message?.showMeYourNameGroupId ?? "";
 
-    const effectiveIsHovering = settings.store.alwaysShowGradients || isHovering;
+    const effectiveIsHovering = settings.store.alwaysShowEffects || isHovering;
 
     useEffect(() => {
         if (!message) return;
@@ -1023,10 +1023,10 @@ const settings = definePluginSettings({
         default: false,
         description: "Only display custom names when in DMs, and not in servers.",
     },
-    alwaysShowGradients: {
+    alwaysShowEffects: {
         type: OptionType.BOOLEAN,
         default: false,
-        description: "Always show gradients instead of only on hover.",
+        description: "Always show effects as if you were hovering.",
     },
     includedNames: {
         type: OptionType.STRING,
