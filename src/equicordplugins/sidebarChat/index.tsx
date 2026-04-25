@@ -334,8 +334,8 @@ export default definePlugin({
                     replace: "const vc_SidebarChat=$self.renderSidebar();$&"
                 },
                 {
-                    match: /return(\(0,\i\.jsxs?\)\(\i,{}\))}/,
-                    replace: "return [$1, vc_SidebarChat]}"
+                    match: /=>(\(0,\i\.jsxs?\)\(\i,{}\))/,
+                    replace: "=>[$1, vc_SidebarChat]"
                 },
                 {
                     match: /(?<=guild_products.{0,1600})(case \i\.\i.{0,50}return)(.+?\}\));(?=.+?params\.messageId)/g,
