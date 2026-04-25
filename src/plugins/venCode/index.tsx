@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { definePluginSettings } from "@api/Settings";
+import { definePluginSettings, migratePluginSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { FormSwitch } from "@components/FormSwitch";
 import { Devs } from "@utils/constants";
@@ -21,6 +21,8 @@ import type { Root } from "react-dom/client";
 const ACTION_DISPLAY_BUTTONS = "buttons";
 const ACTION_DISPLAY_DROPDOWN = "dropdown";
 const LocaleManager = findByPropsLazy("getLocale") as Record<string, unknown>;
+
+migratePluginSettings("VenCode", "FileViewer");
 
 const languageXml = {
     en: enXml,
@@ -2394,8 +2396,8 @@ function FullLogButton({ fileName, fileContents, bytesLeft, attachmentUrl }: { f
 }
 
 export default definePlugin({
-    name: "FileViewer",
-    description: "Open, search, copy and edit full text file attachments",
+    name: "VenCode",
+    description: "Add a text editor to Discord !",
     tags: ["Chat", "Utility"],
     settings,
     authors: [Devs.Lepoissongamer],

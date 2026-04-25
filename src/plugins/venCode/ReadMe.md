@@ -1,4 +1,4 @@
-## File Viewer
+## VenCode
 
 Adds an improved file viewer to Discord.
 

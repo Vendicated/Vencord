@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <language code="fr">
-    <string key="plugin.name">Viewer de fichiers</string>
+    <string key="plugin.name">VenCode</string>
     <string key="plugin.description">Ouvrir les fichiers complets</string>
     <string key="defaultFilename">document.txt</string>
     <string key="defaultLogFilename">log</string>
