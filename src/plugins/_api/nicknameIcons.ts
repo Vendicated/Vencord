@@ -17,7 +17,7 @@ export default definePlugin({
             replacement: [
                 {
                     match: /(?<=children:\i\}\):\i,)null!=\i/,
-                    replace: "($&||Vencord.Api.NicknameIcons._renderIcons({userId:arguments[0].user?.id})?.length)"
+                    replace: "($&||!!Vencord.Api.NicknameIcons._renderIcons({userId:arguments[0].user?.id})?.length)"
                 },
                 {
                     match: /(?<=shouldUnderlineOnHover:null.{0,300})children:(\i)(?=\}\)\])/,
