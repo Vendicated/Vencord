@@ -1151,8 +1151,8 @@ export default definePlugin({
                     predicate: () => !settings.store.alwaysHaveGradientsActive
                 },
                 {
-                    match: /(keyboardModeEnabled.{0,20}&&\i,\i=\i\|\|(\i).*?)(let \i=\i.id===\i,\i=)/,
-                    replace: "$1arguments[0].message.showMeYourNameGroupId=!!arguments[0].groupId?`g-${arguments[0].groupId}`:null;$self.handleHoveringMessage(arguments[0].message,$2);$3",
+                    match: /(let \i=\i.id===\i,\i=)/,
+                    replace: "arguments[0].message.showMeYourNameGroupId=!!arguments[0].groupId?`g-${arguments[0].groupId}`:null;$self.handleHoveringMessage(arguments[0].message,true);$1",
                     predicate: () => settings.store.alwaysHaveGradientsActive
                 }
             ],
