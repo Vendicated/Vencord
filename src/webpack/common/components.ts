@@ -56,15 +56,15 @@ export const Tooltip = waitForComponent<t.Tooltip>("Tooltip", m => m.prototype?.
 /** @deprecated import from @vencord/components */
 export const TooltipContainer = TooltipContainerComponent as never;
 
-export const TextInput = waitForComponent<t.TextInput>("TextInput", filters.componentByCode("#{intl::MAXIMUM_LENGTH_ERROR}", '"input"'));
-export const TextArea = waitForComponent<t.TextArea>("TextArea", filters.componentByCode('"data-mana-component":"text-area"'));
+// FIXME: t.TextInput was for the old void components, and is not 100% correct for the mana component
+export const TextInput = waitForComponent<t.TextInput>("TextInput", filters.componentByCode('setHasValue?.(""!==', '="text",'));
+export const TextArea = waitForComponent<t.TextArea>("TextArea", filters.componentByCode("!0,rows:", "showRemainingCharacterCount:"));
 export const Select = waitForComponent<t.Select>("Select", filters.componentByCode('selectionMode:"single",onSelectionChange:', "isSelected:"));
 export const SearchableSelect = waitForComponent<t.SearchableSelect>("SearchableSelect", filters.componentByCode('?"multiple":"single",required:'));
 export const Slider = waitForComponent<t.Slider>("Slider", filters.componentByCode("markDash", "this.renderMark("));
 export const Popout = waitForComponent<t.Popout>("Popout", filters.componentByCode("ref:this.ref,", "renderPopout:this.renderPopout,"));
 export const Dialog = waitForComponent<t.Dialog>("Dialog", filters.componentByCode('role:"dialog",tabIndex:-1'));
 export const TabBar = waitForComponent("TabBar", filters.componentByCode("ref:this.tabBarRef,className:"));
-export const Paginator = waitForComponent<t.Paginator>("Paginator", filters.componentByCode('rel:"prev",children:'));
 // TODO: remake this component
 export const Clickable = waitForComponent<t.Clickable>("Clickable", filters.componentByCode("this.context?this.renderNonInteractive():"));
 export const Avatar = waitForComponent<t.Avatar>("Avatar", filters.componentByCode(".size-1.375*"));
