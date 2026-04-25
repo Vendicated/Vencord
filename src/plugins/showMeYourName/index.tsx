@@ -765,10 +765,12 @@ function handleHoveringMessage(message: any, isHovering: boolean) {
     const repliedId = message?.messageReference?.message_id;
     const groupId = message?.showMeYourNameGroupId ?? "";
 
+    const effectiveIsHovering = settings.store.alwaysShowGradients || isHovering;
+
     useEffect(() => {
         if (!message) return;
 
-        if (isHovering) {
+        if (effectiveIsHovering) {
             addHoveringMessage(messageId);
             addHoveringMessage(groupId);
             addHoveringReply(repliedId);
@@ -777,7 +779,7 @@ function handleHoveringMessage(message: any, isHovering: boolean) {
             removeHoveringMessage(groupId);
             removeHoveringReply(repliedId);
         }
-    }, [messageId, groupId, isHovering]);
+    }, [messageId, groupId, effectiveIsHovering]);
 }
 
 function addHoveringMessage(id: string) {
@@ -1021,6 +1023,11 @@ const settings = definePluginSettings({
         default: false,
         description: "Only display custom names when in DMs, and not in servers.",
     },
+    alwaysShowGradients: {
+        type: OptionType.BOOLEAN,
+        default: false,
+        description: "Always show gradients instead of only on hover.",
+    },
     includedNames: {
         type: OptionType.STRING,
         description: "The order to display usernames, display names, nicknames, friend names, and custom names. Use the following placeholders: {user}, {display}, {nick}, {friend}, {custom}. You can provide multiple name options to use as fallbacks if one is unavailable by separating them with commas as such: {custom, friend, nick}. You can have up to three prefixes and three suffixes per name.",
@@ -1062,12 +1069,6 @@ const settings = definePluginSettings({
         description: "Trigger a name rerender by toggling this setting.",
         default: false,
         hidden: true
-    },
-    alwaysHaveGradientsActive: {
-        type: OptionType.BOOLEAN,
-        description: "Enables gradients always on in dms and such instead of just on hover",
-        default: false,
-        restartNeeded: true
     },
 });
 
@@ -1148,13 +1149,7 @@ export default definePlugin({
                 {
                     match: /(hasHovered:\i,isHovered:(\i).{0,2000})(let \i=\i.id===\i,\i=)/,
                     replace: "$1arguments[0].message.showMeYourNameGroupId=!!arguments[0].groupId?`g-${arguments[0].groupId}`:null;$self.handleHoveringMessage(arguments[0].message,$2);$3",
-                    predicate: () => !settings.store.alwaysHaveGradientsActive
                 },
-                {
-                    match: /(let \i=\i.id===\i,\i=)/,
-                    replace: "arguments[0].message.showMeYourNameGroupId=!!arguments[0].groupId?`g-${arguments[0].groupId}`:null;$self.handleHoveringMessage(arguments[0].message,true);$1",
-                    predicate: () => settings.store.alwaysHaveGradientsActive
-                }
             ],
         },
         {
