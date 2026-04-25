@@ -17,7 +17,7 @@
 */
 
 import { classNameFactory } from "@utils/css";
-import { Toasts, UserStore } from "@webpack/common";
+import { showToast as showToastCommon, Toasts, UserStore } from "@webpack/common";
 
 import { Auth } from "./auth";
 import { Review, UserType } from "./entities";
@@ -43,12 +43,7 @@ export function canReportReview(review: Review) {
 }
 
 export function showToast(message: string, type = Toasts.Type.MESSAGE) {
-    Toasts.show({
-        id: Toasts.genId(),
-        message,
-        type,
-        options: {
-            position: Toasts.Position.BOTTOM, // NOBODY LIKES TOASTS AT THE TOP
-        },
+    showToastCommon(message, type, {
+        position: Toasts.Position.BOTTOM, // NOBODY LIKES TOASTS AT THE TOP
     });
 }
