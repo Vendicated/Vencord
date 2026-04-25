@@ -216,8 +216,11 @@ export type Select = ComponentType<PropsWithChildren<{
     popoutPosition?: PopoutPosition;
     optionClassName?: string;
 
+    label?: string;
+
     autoFocus?: boolean;
     isDisabled?: boolean;
+    disabled?: boolean;
     clearable?: boolean;
     closeOnSelect?: boolean;
     hideIcon?: boolean;
@@ -296,6 +299,7 @@ export type Slider = ComponentClass<PropsWithChildren<{
     /** 0 above, 1 below */
     markerPosition?: 0 | 1;
     orientation?: "horizontal" | "vertical";
+    label?: string;
 
     getAriaValueText?(currentValue: number): string;
     renderMarker?(marker: number): ReactNode;
