@@ -34,17 +34,22 @@ export const settings = definePluginSettings({
         default: true
     },
     ignoreBlockedUsers: {
-        description: "Do not notify about blocked users",
+        description: "Do not log about blocked users",
         type: OptionType.BOOLEAN,
         default: false
     },
     trackUsers: {
-        description: "Will notify users over other filters if they are in whitelist",
+        description: "Will log users over other filters if they are in whitelist",
+        type: OptionType.BOOLEAN,
+        default: false
+    },
+    self: {
+        description: "log myself too",
         type: OptionType.BOOLEAN,
         default: false
     },
     trackingMode: {
-        description: "tracking mode",
+        description: "Which voice channels should be tracked?",
         type: OptionType.SELECT,
         options: [
             {
@@ -65,7 +70,7 @@ export const settings = definePluginSettings({
                 value: TrackingMode.SELECTED_CHANNEL,
             },
             {
-                label: "all voice channel",
+                label: "all voice channels",
                 value: TrackingMode.ALL,
             },
         ]
