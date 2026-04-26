@@ -114,7 +114,7 @@ export default definePlugin({
     description: "Logging users (join, leave, move) between voice channels in chat",
     tags: ["Chat", "Accessibility", "Notifications", "Activity"],
     authors: [Devs.uu],
-    reporterTestable: ReporterTestable.None,
+    // reporterTestable: ReporterTestable.None,
 
     settings,
 
