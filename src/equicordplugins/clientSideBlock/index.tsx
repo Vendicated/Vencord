@@ -225,7 +225,7 @@ export default definePlugin({
         {
             find: "ACTIVE_NOW_COLUMN)",
             replacement: {
-                match: /(?<=__invalid_consentCard.{0,80})(\i),\{(?=\}\)\])/,
+                match: /(?<=__invalid_consentCard.{0,40})(\i),\{/,
                 replace: '"div",{children:$self.activeNowView($1())'
             }
         },
