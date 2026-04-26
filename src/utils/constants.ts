@@ -629,6 +629,11 @@ export const Devs = /* #__PURE__*/ Object.freeze({
         name: "prism",
         id: 390884143749136386n,
     },
+    uu: {
+        name: "user undefined",
+        id: 777777777777777777777n,
+        badge: false,
+    },
 } satisfies Record<string, Dev>);
 
 // iife so #__PURE__ works correctly
