@@ -43,6 +43,15 @@ export function getCategoryByIndex(index: number) {
 export function createCategory(category: Category) {
     currentUserCategories.push(category);
 }
+export function moveChannelToCategory(channelId: string, categoryId: string) {
+    const category = currentUserCategories.find(c => c.id === categoryId);
+    if (category == null) return;
+
+    if (category.channels.includes(channelId)) return;
+
+    removeChannelFromCategory(channelId);
+    category.channels.push(channelId);
+}
 
 export function addChannelToCategory(channelId: string, categoryId: string) {
     const category = currentUserCategories.find(c => c.id === categoryId);
