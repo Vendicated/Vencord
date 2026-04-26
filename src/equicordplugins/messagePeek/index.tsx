@@ -9,7 +9,7 @@ import "./style.css";
 import { DecoratorProps } from "@api/MemberListDecorators";
 import { isPluginEnabled } from "@api/PluginManager";
 import { definePluginSettings } from "@api/Settings";
-import { ImageIcon, Microphone } from "@components/Icons";
+import { AttachmentIcon, GifIcon, ImageIcon, Microphone, StickerIcon, VideoIcon } from "@components/Icons";
 import betterActivities from "@equicordplugins/betterActivities";
 import showMeYourName from "@plugins/showMeYourName";
 import { Devs, EquicordDevs } from "@utils/constants";
@@ -45,11 +45,11 @@ type IconType = AttachmentType | "voice" | "sticker";
 
 const Icons: Record<IconType, React.ComponentType<{ size: string; className: string; }>> = {
     image: ImageIcon,
-    file: findComponentByCodeLazy("9.86 0l.54.55a6.99 6.99"),
+    file: AttachmentIcon,
     voice: Microphone,
-    sticker: findComponentByCodeLazy("1-.5.5H6a4 4 0 0 1-4-4V6a4 4 0 0 1 4-4Zm.5 8a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3ZM19"),
-    gif: findComponentByCodeLazy("3.18 0 0 1-1.12-1.35A4.88 4.8"),
-    video: findComponentByCodeLazy(" 3-3v-2.12a1"),
+    sticker: StickerIcon,
+    gif: GifIcon,
+    video: VideoIcon,
 };
 
 const ATTACHMENT_LABELS: Record<AttachmentType, string> = {

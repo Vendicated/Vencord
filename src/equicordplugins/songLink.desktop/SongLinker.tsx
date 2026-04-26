@@ -6,13 +6,11 @@
 
 import { BaseText } from "@components/BaseText";
 import { Card } from "@components/Card";
-import { findComponentByCodeLazy } from "@webpack";
+import { HeadphonesIcon } from "@components/Icons";
 import { Button, useEffect, useState } from "@webpack/common";
 
 import pl, { Native, settings, SongLinkResult } from ".";
 import Providers from "./Providers";
-
-const HeadphonesIcon = findComponentByCodeLazy("4.1-2.13h1.86A9");
 
 export default function SongLinker({ url }: { url: string; }) {
     const [songData, setSongData] = useState<SongLinkResult>();

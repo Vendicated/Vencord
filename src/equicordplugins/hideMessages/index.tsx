@@ -6,14 +6,11 @@
 
 import { findGroupChildrenByChildId, NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { definePluginSettings } from "@api/Settings";
+import { EyeIcon } from "@components/Icons";
 import { EquicordDevs } from "@utils/constants";
-import definePlugin, { IconComponent, OptionType } from "@utils/types";
+import definePlugin, { OptionType } from "@utils/types";
 import { Message } from "@vencord/discord-types";
-import { findComponentByCodeLazy } from "@webpack";
 import { ChannelStore, FluxDispatcher, Menu } from "@webpack/common";
-
-const EyeIconLazy = findComponentByCodeLazy("0-.78-.41l-9.53 6.35c-.42.28-.96.28-1.38");
-const EyeIcon: IconComponent = props => <EyeIconLazy {...props} />;
 
 const hideMessage = (messageId: string, channelId: string) => {
     FluxDispatcher.dispatch({
