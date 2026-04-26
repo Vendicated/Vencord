@@ -38,6 +38,11 @@ export const settings = definePluginSettings({
         type: OptionType.BOOLEAN,
         default: false
     },
+    trackUsers: {
+        description: "Will notify users over other filters if they are in whitelist",
+        type: OptionType.BOOLEAN,
+        default: false
+    },
     trackingMode: {
         description: "tracking mode",
         type: OptionType.SELECT,

@@ -143,7 +143,7 @@ export default definePlugin({
             const channels = (settings.store.channels?.split(",") || []).map(i => i.trim()).filter(i => i !== "");
             const users = (settings.store.users?.split(",") || []).map(i => i.trim()).filter(i => i !== "");
 
-            const { guildsFilter, channelsFilter, usersFilter, trackingMode, loggingMode, ignoreBlockedUsers } = settings.store;
+            const { guildsFilter, channelsFilter, usersFilter, trackingMode, loggingMode, ignoreBlockedUsers, trackUsers } = settings.store;
 
             for (var state of voiceStates) {
                 const { userId, channelId, oldChannelId, guildId } = state;
@@ -152,36 +152,42 @@ export default definePlugin({
 
                 if (isMe) continue;
 
-                if (ignoreBlockedUsers) if (RelationshipStore.isBlocked(userId)) continue;
+                let enableFilters = true;
 
-                if (users.length) {
-                    if (users.includes(userId) && usersFilter === Filter.BLACK) continue;
-                    if (!users.includes(userId) && usersFilter === Filter.WHITE) continue;
-                }
-                if (guilds.length) {
-                    if (guilds.includes(guildId) && guildsFilter === Filter.BLACK) continue;
-                    if (!guilds.includes(guildId) && guildsFilter === Filter.WHITE) continue;
-                }
-                if (channels.length) {
-                    if (channels.includes(channelId as string) && channelsFilter === Filter.BLACK) continue;
-                    if (!channels.includes(channelId as string) && channelsFilter === Filter.WHITE) continue;
-                }
+                if (trackUsers && (users.length && users.includes(userId) && usersFilter === Filter.WHITE)) enableFilters = false;
 
-                if (!joinedVoiceChannelId && (trackingMode === TrackingMode.CHANNEL || trackingMode === TrackingMode.GUILD || loggingMode === LoggingMode.JOINED)) continue;
+                if (enableFilters) {
+                    if (ignoreBlockedUsers) if (RelationshipStore.isBlocked(userId)) continue;
 
-                switch (trackingMode) {
-                    case TrackingMode.CHANNEL:
-                        if (![channelId, oldChannelId].includes(joinedVoiceChannelId)) continue;
-                        break;
-                    case TrackingMode.GUILD:
-                        if (guildId !== joinedGuildId) continue;
-                        break;
-                    case TrackingMode.SELECTED_GUILD:
-                        if (guildId !== CurrentlySelectedGuildId) continue;
-                        break;
-                    case TrackingMode.SELECTED_CHANNEL:
-                        if (![channelId, oldChannelId].includes(CurrentlySelectedChannelId)) continue;
-                        break;
+                    if (users.length) {
+                        if (users.includes(userId) && usersFilter === Filter.BLACK) continue;
+                        if (!users.includes(userId) && usersFilter === Filter.WHITE) continue;
+                    }
+                    if (channels.length) {
+                        if (channels.includes(channelId as string) && channelsFilter === Filter.BLACK) continue;
+                        if (!channels.includes(channelId as string) && channelsFilter === Filter.WHITE) continue;
+                    }
+                    if (guilds.length) {
+                        if (guilds.includes(guildId) && guildsFilter === Filter.BLACK) continue;
+                        if (!guilds.includes(guildId) && guildsFilter === Filter.WHITE) continue;
+                    }
+
+                    switch (trackingMode) {
+                        case TrackingMode.CHANNEL:
+                            if (![channelId, oldChannelId].includes(joinedVoiceChannelId)) continue;
+                            break;
+                        case TrackingMode.GUILD:
+                            if (guildId !== joinedGuildId) continue;
+                            break;
+                        case TrackingMode.SELECTED_GUILD:
+                            if (guildId !== CurrentlySelectedGuildId) continue;
+                            break;
+                        case TrackingMode.SELECTED_CHANNEL:
+                            if (![channelId, oldChannelId].includes(CurrentlySelectedChannelId)) continue;
+                            break;
+                    }
+
+                    if (!joinedVoiceChannelId && (trackingMode === TrackingMode.CHANNEL || trackingMode === TrackingMode.GUILD || loggingMode === LoggingMode.JOINED)) continue;
                 }
 
                 const content = getContent(state);
