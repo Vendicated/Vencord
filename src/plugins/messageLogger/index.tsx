@@ -492,8 +492,8 @@ export default definePlugin({
             find: "#{intl::REMOVE_ATTACHMENT_TOOLTIP_TEXT}",
             replacement: [
                 {
-                    match: /\.SPOILER,(?=\[\i\.\i\]:)/,
-                    replace: '$&"messagelogger-deleted-attachment":n?.originalItem?.deleted,"messagelogger-deleted-attachment-overlay":n?.originalItem?.deleted,'
+                    match: /item:(\i),message:\i,getObscureReason:.+?\.SPOILER,(?=\[\i\.\i\]:)/,
+                    replace: '$&"messagelogger-deleted-attachment":$1?.originalItem?.deleted,"messagelogger-deleted-attachment-overlay":$1?.originalItem?.deleted,'
                 }
             ]
         },
