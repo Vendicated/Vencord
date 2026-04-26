@@ -27,6 +27,7 @@ import { formatDuration } from "@utils/text";
 import type { Channel, RoleOrUserPermission } from "@vencord/discord-types";
 import { findByPropsLazy, findComponentByCodeLazy, findCssClassesLazy } from "@webpack";
 import { EmojiStore, FluxDispatcher, GuildMemberStore, GuildStore, Parser, PermissionsBits, PermissionStore, SnowflakeUtils, Text, Timestamp, Tooltip, useEffect, useState } from "@webpack/common";
+import { ComponentType } from "react";
 
 import { cl, settings } from "..";
 
@@ -65,8 +66,10 @@ const enum ChannelFlags {
 }
 
 const ChatScrollClasses = findCssClassesLazy("auto", "managedReactiveScroller", "customTheme");
-const ChannelBeginHeader = findComponentByCodeLazy("#{intl::ROLE_REQUIRED_SINGLE_USER_MESSAGE}");
 const TagComponent = findComponentByCodeLazy("#{intl::FORUM_TAG_A11Y_FILTER_BY_TAG}");
+
+let ChannelBeginHeader: ComponentType<any> = () => null;
+export const setChannelBeginHeader = v => ChannelBeginHeader = v;
 
 const EmojiParser = findByPropsLazy("convertSurrogateToName");
 const EmojiUtils = findByPropsLazy("getURL", "getEmojiColors");
