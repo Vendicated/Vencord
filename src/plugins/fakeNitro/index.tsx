@@ -73,11 +73,29 @@ const fakeNitroStickerRegex = /\/stickers\/(\d+?)\./;
 const fakeNitroGifStickerRegex = /\/attachments\/\d+?\/\d+?\/(\d+?)\.gif/;
 const hyperLinkRegex = /\[.+?\]\((https?:\/\/.+?)\)/;
 
+interface EmojiAutocompleteState {
+    query?: {
+        type: string;
+        typeInfo?: {
+            sentinel?: string;
+        };
+        results?: {
+            emojis: Emoji[] & { sliceTo?: number; };
+        };
+    };
+}
+
 const settings = definePluginSettings({
     enableEmojiBypass: {
         description: "Allows sending fake emojis (also bypasses missing permission to use custom emojis)",
         type: OptionType.BOOLEAN,
         default: true,
+        restartNeeded: true
+    },
+    preferCurrentServerEmoji: {
+        description: "Prefer current server custom emojis in emoji autocomplete",
+        type: OptionType.BOOLEAN,
+        default: false,
         restartNeeded: true
     },
     emojiSize: {
@@ -153,7 +171,7 @@ const hasAttachmentPerms = (channelId: string) => hasPermission(channelId, Permi
 
 export default definePlugin({
     name: "FakeNitro",
-    authors: [Devs.Arjix, Devs.D3SOX, Devs.Ven, Devs.fawn, Devs.captain, Devs.Nuckyz, Devs.AutumnVN, Devs.sadan],
+    authors: [Devs.Arjix, Devs.D3SOX, Devs.Ven, Devs.fawn, Devs.captain, Devs.Nuckyz, Devs.AutumnVN, Devs.sadan, Devs.laz],
     description: "Allows you to send fake emojis/stickers, use nitro themes, and stream in nitro quality",
     tags: ["Emotes", "Appearance", "Customisation", "Chat"],
     dependencies: ["MessageEventsAPI"],
@@ -196,6 +214,27 @@ export default definePlugin({
             replacement: {
                 match: ".CHAT",
                 replace: ".STATUS"
+            }
+        },
+        {
+            find: "renderResults({results:",
+            predicate: () => settings.store.preferCurrentServerEmoji,
+            replacement: {
+                // https://regex101.com/r/N7kpLM/1
+                match: /let \i=.{1,100}renderResults\({results:(\i)\.query\.results,/,
+                replace: "$self.sortCurrentGuildEmojis($1);$&"
+            }
+        },
+        {
+            find: "numEmojiResults:",
+            predicate: () => settings.store.preferCurrentServerEmoji,
+            replacement: {
+                // Adapted from FavoriteEmojiFirst: collect full emoji results, then re-apply slice after custom sorting.
+                // set maxCount to Infinity so we can sort the full emoji list first
+                // searchEmojis(...,maxCount: stuff) ... endEmojis = emojis.slice(0, maxCount - gifResults.length)
+                match: /,maxCount:(\i)(.{1,500}\i)=(\i)\.slice\(0,(Math\.max\(\i,\i(?:-\i\.length){2}\))\)/,
+                // ,maxCount:Infinity ... endEmojis = (emojis.sliceTo = n, emojis)
+                replace: ",maxCount:Infinity$2=($3.sliceTo = $4, $3)"
             }
         },
         {
@@ -706,6 +745,30 @@ export default definePlugin({
                 return node;
             }
         }
+    },
+
+    sortCurrentGuildEmojis({ query }: EmojiAutocompleteState) {
+        if (
+            query?.type !== "EMOJIS_AND_STICKERS"
+            || query.typeInfo?.sentinel !== ":"
+            || !query.results?.emojis?.length
+        ) return;
+
+        const { guildId } = this;
+        const { emojis } = query.results;
+        if (guildId) {
+            emojis.sort((a, b) => {
+                const aIsCurrentGuildEmoji = a.type === 1 && a.guildId === guildId;
+                const bIsCurrentGuildEmoji = b.type === 1 && b.guildId === guildId;
+
+                if (aIsCurrentGuildEmoji && !bIsCurrentGuildEmoji) return -1;
+                if (!aIsCurrentGuildEmoji && bIsCurrentGuildEmoji) return 1;
+
+                return 0;
+            });
+        }
+
+        query.results.emojis = emojis.slice(0, emojis.sliceTo ?? Infinity);
     },
 
     getStickerLink({ format_type, id }: Sticker) {
