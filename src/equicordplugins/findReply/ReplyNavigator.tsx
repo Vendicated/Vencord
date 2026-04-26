@@ -7,17 +7,14 @@
 import "./styles.css";
 
 import ErrorBoundary from "@components/ErrorBoundary";
+import { Paginator, requirePaginator } from "@plugins/reviewDB/components/ReviewModal";
 import { ModalCloseButton } from "@utils/modal";
-import * as t from "@vencord/discord-types";
 import { Message } from "@vencord/discord-types";
-import { DefaultExtractAndLoadChunksRegex, extractAndLoadChunksLazy, findComponentByCodeLazy, findCssClassesLazy } from "@webpack";
+import { findCssClassesLazy } from "@webpack";
 import { React, useRef, useState } from "@webpack/common";
-import { ComponentProps, MutableRefObject } from "react";
+import { MutableRefObject } from "react";
 
 import { jumper } from "./index";
-
-const Paginator = findComponentByCodeLazy<ComponentProps<t.Paginator>>('rel:"prev",children:');
-const requirePaginator = extractAndLoadChunksLazy(['name:"SearchResults"'], new RegExp(`${DefaultExtractAndLoadChunksRegex.source}.{0,30}?name:"SearchResults"`));
 
 const containerStyles = findCssClassesLazy("containerBottom", "containerTop");
 
