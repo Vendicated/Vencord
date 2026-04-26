@@ -1,8 +1,9 @@
 ## VenCode
 
-Adds an improved file viewer to Discord.
+Adds an improved file viewe to Discord.
 
-<img width="1499" height="994" alt="image" src="https://github.com/user-attachments/assets/3039f8c4-16b0-4c52-82fd-786482a9da60" />
+<img width="1502" height="995" alt="image" src="https://github.com/user-attachments/assets/e2e10a02-f602-4768-a29f-e13c11282c2e" />
+
 
 ### Features
 
@@ -15,13 +16,17 @@ Adds an improved file viewer to Discord.
 
 Edit files directly inside Discord and send the modified version instantly.
 
-https://github.com/user-attachments/assets/0027580e-c10f-4b97-aa03-105ae26cfbe8
+
+
+https://github.com/user-attachments/assets/174d483f-122e-4dec-bbb3-51d02fd2dc07
+
+
 
 ### Customization
 
-The viewer includes several settings allowing you to customize how files are displayed and handled.
+The viewer includes several settings.
 
-https://github.com/user-attachments/assets/ada8c743-ef33-448f-bb84-d12e38b3ff44
+https://github.com/user-attachments/assets/3f724546-f589-4911-a082-7a9284927416
 
 ### Languages
 
