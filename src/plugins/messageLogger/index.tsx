@@ -406,17 +406,24 @@ export default definePlugin({
                 },
                 {
                     // Add current cached content + new edit time to cached message's editHistory
-                    match: /(MESSAGE_UPDATE:function\((\i)\).+?)\.update\((\i)/,
-                    replace: `
-                        $1
-                        .update($3, m =>
-                            (($2.message.flags & 64) === 64 || $self.shouldIgnore($2.message, true)) ? m :
-                            $2.message.edited_timestamp && $2.message.content !== m.content ?
-                                m.set('editHistory',[...(m.editHistory || []), $self.makeEdit($2.message, m)]) :
-                                m
+                    match: /(MESSAGE_UPDATE:function\((\i)\).+?)(\i)=(\i)\.update\((\i)/,
+                    replace: `$1$3=$4
+                        .update($5,m =>
+                           (($2.message.flags & 64) === 64 || $self.shouldIgnore($2.message, true)) ? m :
+                           $2.message.edited_timestamp && $self.isMessageModified(m, $2.message) ? (() => {
+                               if (m.attachments && m.attachments.length > 0) {
+                                   const newAttachmentIds = new Set($2.message.attachments.map(a => a.id));
+                                   const updatedAttachments = m.attachments.map(a =>
+                                       newAttachmentIds.has(a.id) ? a : { ...a, deleted: true }
+                                   );
+                                   $2.message.attachments = updatedAttachments;
+                                   $3 = $3.update(m.id, m => m.set('attachments', updatedAttachments));
+                               }
+                               return m.set('editHistory',[...(m.editHistory || []), $self.makeEdit($2.message, m)]);
+                           })()
+                           : m
                         )
-                        .update($3
-                    `
+                        .update($5`
                 },
                 {
                     // fix up key (edit last message) attempting to edit a deleted message
