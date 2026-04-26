@@ -128,7 +128,7 @@ export default definePlugin({
                 const currentUserColor = Number(h64(currentUserId) % 360n);
                 const otherUserColor = Number(h64(userId) % 360n);
                 const colorDiff = Math.min(Math.abs(currentUserColor - otherUserColor), 360 - Math.abs(currentUserColor - otherUserColor));
-                if (colorDiff < 45) {
+                if (colorDiff < 90) {
                     const newColor = (otherUserColor + 180) % 360;
                     return `hsl(${newColor}, 100%, ${settings.store.lightness}%)`;
                 }
