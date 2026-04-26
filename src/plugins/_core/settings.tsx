@@ -89,6 +89,11 @@ const settings = definePluginSettings({
             { label: "Below Activity Settings", value: "belowActivity" },
             { label: "At the very bottom", value: "bottom" },
         ] as { label: string; value: SettingsLocation; default?: boolean; }[]
+    },
+    versionCopyExcludeVencord: {
+        type: OptionType.BOOLEAN,
+        description: "Exclude Vencord info (Vencord, Electron, Chromium) from the copied version string",
+        default: false
     }
 });
 
@@ -295,6 +300,7 @@ export default definePlugin({
     },
 
     getInfoString() {
+        if (settings.store.versionCopyExcludeVencord) return "";
         return "\n" + this.getInfoRows().join("\n");
     },
 
