@@ -64,7 +64,7 @@ type FolderMentionProps = {
 export const ExpandedGuildFolderStore = findStoreLazy("ExpandedGuildFolderStore");
 export const SortedGuildStore = findStoreLazy("SortedGuildStore");
 const FolderUtils = findByPropsLazy("move", "toggleGuildFolderExpand");
-const FolderItem = findComponentByCodeLazy("folderButtonContent", "onHoverChange", "treeItemProps");
+const FolderItem = findComponentByCodeLazy("FolderItem", "onExpandCollapse", "folderButtonSize");
 
 const MAX_TREE_FILTER_DEPTH = 1000;
 let dispatchingFoldersClose = false;
@@ -528,6 +528,13 @@ export default definePlugin({
             replacement: {
                 match: /`transitionTo - Transitioning to \$\{\i\}`\);/,
                 replace: "$&$self.handleRouteNavigation(arguments[0]);"
+            }
+        },
+        {
+            find: ".getCompatibleGuildFolders())",
+            replacement: {
+                match: /\i:\(\)=>\i(?=.*?\.FOLDER_ITEM_ANIMATION_DURATION.{0,10}\.animated\)\(\i\.\i\),(\i))/,
+                replace: "$&,FolderItem:()=>$1"
             }
         }
     ],
