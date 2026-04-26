@@ -204,9 +204,13 @@ export default definePlugin({
         const resetChannels = () => {
             settings.store.channels = "";
         };
+        const resetUsers = () => {
+            settings.store.users = "";
+        };
         const reset = () => {
             resetGuilds();
             resetChannels();
+            resetUsers();
             settings.store.enable = true;
             settings.store.channelsFilter = Filter.WHITE;
             settings.store.guildsFilter = Filter.WHITE;
@@ -217,13 +221,14 @@ export default definePlugin({
             <div
                 style={{
                     display: "grid",
-                    gridTemplateColumns: "repeat(3, 1fr)",
+                    gridTemplateColumns: "repeat(4, 1fr)",
                     gap: "1rem",
                 }}
                 className={"vc-logger-buttons"}
             >
                 <Button onClick={resetGuilds} > Reset Guilds </Button>
                 <Button onClick={resetChannels} > Reset Channels </Button>
+                <Button onClick={resetUsers} > Reset Users </Button>
                 <Button onClick={reset} > Reset Settings </Button>
             </div>
         );
