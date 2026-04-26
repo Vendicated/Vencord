@@ -28,7 +28,7 @@ export async function putCloudSettings(manual?: boolean) {
     if (!await checkCloudUrlCsp()) return;
 
     try {
-        const res = await fetch(new URL("/v1/settings", getCloudUrl()), {
+        const res = await fetch(new URL("v1/settings", getCloudUrl()), {
             method: "PUT",
             headers: {
                 Authorization: await getCloudAuth(),
@@ -76,7 +76,7 @@ export async function getCloudSettings(shouldNotify = true, force = false) {
     if (!await checkCloudUrlCsp()) return;
 
     try {
-        const res = await fetch(new URL("/v1/settings", getCloudUrl()), {
+        const res = await fetch(new URL("v1/settings", getCloudUrl()), {
             method: "GET",
             headers: {
                 Authorization: await getCloudAuth(),
@@ -169,7 +169,7 @@ export async function deleteCloudSettings() {
     if (!await checkCloudUrlCsp()) return;
 
     try {
-        const res = await fetch(new URL("/v1/settings", getCloudUrl()), {
+        const res = await fetch(new URL("v1/settings", getCloudUrl()), {
             method: "DELETE",
             headers: { Authorization: await getCloudAuth() },
         });
@@ -203,7 +203,7 @@ export async function deleteCloudSettings() {
 export async function eraseAllCloudData() {
     if (!await checkCloudUrlCsp()) return;
 
-    const res = await fetch(new URL("/v1/", getCloudUrl()), {
+    const res = await fetch(new URL("v1/", getCloudUrl()), {
         method: "DELETE",
         headers: { Authorization: await getCloudAuth() }
     });
