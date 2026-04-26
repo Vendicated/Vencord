@@ -20,7 +20,6 @@ import { definePluginSettings } from "@api/Settings";
 import { BackupRestoreIcon, CloudIcon, MainSettingsIcon, PaintbrushIcon, PatchHelperIcon, PlaceholderIcon, PluginsIcon, UpdaterIcon, VesktopSettingsIcon } from "@components/Icons";
 import { BackupAndRestoreTab, CloudTab, PatchHelperTab, PluginsTab, ThemesTab, UpdaterTab, VencordTab } from "@components/settings/tabs";
 import { Devs } from "@utils/constants";
-import { getIntlMessage } from "@utils/discord";
 import { isTruthy } from "@utils/guards";
 import definePlugin, { IconProps, OptionType } from "@utils/types";
 import { waitFor } from "@webpack";
@@ -33,9 +32,10 @@ let LayoutTypes = {
     SECTION: 1,
     SIDEBAR_ITEM: 2,
     PANEL: 3,
-    PANE: 4
+    CATEGORY: 5,
+    CUSTOM: 19,
 };
-waitFor(["SECTION", "SIDEBAR_ITEM", "PANEL"], v => LayoutTypes = v);
+waitFor(["SECTION", "SIDEBAR_ITEM", "PANEL", "CUSTOM"], v => LayoutTypes = v);
 
 const FallbackSectionTypes = {
     HEADER: "HEADER",
@@ -105,17 +105,10 @@ export default definePlugin({
             find: "#{intl::COPY_VERSION}",
             replacement: [
                 {
-                    match: /"text-xxs\/normal".{0,300}?(?=null!=(\i)&&(.{0,20}\i\.Text.{0,200}?,children:).{0,15}?("span"),({className:\i\.\i,children:\["Build Override: ",\1\.id\]\})\)\}\))/,
+                    match: /"text-xxs\/normal".{0,300}?(?=null!=(\i)&&(.{0,20}\i\.\i.{0,200}?,children:).{0,15}?("span"),({className:\i\.\i,children:\["Build Override: ",\1\.id\]\})\)\}\))/,
                     replace: (m, _buildOverride, makeRow, component, props) => {
                         props = props.replace(/children:\[.+\]/, "");
                         return `${m},$self.makeInfoElements(${component},${props}).map(e=>${makeRow}e})),`;
-                    }
-                },
-                {
-                    match: /"text-xs\/normal".{0,300}?\[\(0,\i\.jsxs?\)\((.{1,10}),(\{[^{}}]+\{.{0,20}className:\i.\i,.+?\})\)," "/,
-                    replace: (m, component, props) => {
-                        props = props.replace(/children:\[.+\]/, "");
-                        return `${m},$self.makeInfoElements(${component},${props})`;
                     }
                 },
                 {
@@ -125,38 +118,10 @@ export default definePlugin({
             ]
         },
         {
-            find: ".SEARCH_NO_RESULTS&&0===",
-            replacement: [
-                {
-                    match: /(?<=section:(.{0,50})\.DIVIDER\}\))([,;])(?=.{0,200}(\i)\.push.{0,100}label:(\i)\.header)/,
-                    replace: (_, sectionTypes, commaOrSemi, elements, element) => `${commaOrSemi} $self.addSettings(${elements}, ${element}, ${sectionTypes}) ${commaOrSemi}`
-                },
-                {
-                    match: /({(?=.+?function (\i).{0,160}(\i)=\i\.useMemo.{0,140}return \i\.useMemo\(\(\)=>\i\(\3).+?\(\)=>)\2/,
-                    replace: (_, rest, settingsHook) => `${rest}$self.wrapSettingsHook(${settingsHook})`
-                }
-            ]
-        },
-        {
-            find: "#{intl::USER_SETTINGS_ACTIONS_MENU_LABEL}",
-            replacement: {
-                // Skip the check Discord performs to make sure the section being selected in the user settings context menu is valid
-                match: /null!=\(\i=Object.values\(\i\.\i\).{0,50}?&&(?=\(0,\i\.openUserSettings\)\(\i,\{section:\i)/,
-                replace: ""
-            }
-        },
-        {
             find: ".buildLayout().map",
             replacement: {
                 match: /(\i)\.buildLayout\(\)(?=\.map)/,
                 replace: "$self.buildLayout($1)"
-            }
-        },
-        {
-            find: "getWebUserSettingFromSection",
-            replacement: {
-                match: /new Map\(\[(?=\[.{0,10}\.ACCOUNT,.{0,10}\.ACCOUNT_PANEL)/,
-                replace: "new Map([...$self.getSettingsSectionMappings(),"
             }
         }
     ],
@@ -168,52 +133,25 @@ export default definePlugin({
             key: key + "_panel",
             type: LayoutTypes.PANEL,
             useTitle: () => panelTitle,
+            buildLayout: () => [{
+                type: LayoutTypes.CATEGORY,
+                key: key + "_category",
+                buildLayout: () => [{
+                    type: LayoutTypes.CUSTOM,
+                    key: key + "_custom",
+                    Component: Component,
+                    useSearchTerms: () => [title]
+                }]
+            }]
         };
-
-        const render = {
-            // FIXME
-            StronglyDiscouragedCustomComponent: () => <Component />,
-            render: () => <Component />,
-        };
-
-        // FIXME
-        if (LayoutTypes.PANE) {
-            panel.buildLayout = () => [
-                {
-                    key: key + "_pane",
-                    type: LayoutTypes.PANE,
-                    useTitle: () => panelTitle,
-                    buildLayout: () => [],
-                    ...render
-                }
-            ];
-        } else {
-            Object.assign(panel, render);
-            panel.buildLayout = () => [];
-        }
 
         return ({
             key,
             type: LayoutTypes.SIDEBAR_ITEM,
-            // FIXME
-            legacySearchKey: title.toUpperCase(),
-            getLegacySearchKey: () => title.toUpperCase(),
             useTitle: () => title,
             icon: () => <Icon width={20} height={20} />,
             buildLayout: () => [panel]
         });
-    },
-
-    getSettingsSectionMappings() {
-        return [
-            ["VencordSettings", "vencord_main_panel"],
-            ["VencordPlugins", "vencord_plugins_panel"],
-            ["VencordThemes", "vencord_themes_panel"],
-            ["VencordUpdater", "vencord_updater_panel"],
-            ["VencordCloud", "vencord_cloud_panel"],
-            ["VencordBackupAndRestore", "vencord_backup_restore_panel"],
-            ["VencordPatchHelper", "vencord_patch_helper_panel"]
-        ];
     },
 
     buildLayout(originalLayoutBuilder: SettingsLayoutBuilder) {
@@ -321,111 +259,6 @@ export default definePlugin({
     /** @deprecated Use customEntries */
     customSections: [] as ((SectionTypes: SectionTypes) => any)[],
     customEntries: [] as EntryOptions[],
-
-    makeSettingsCategories(SectionTypes: SectionTypes) {
-        return [
-            {
-                section: SectionTypes.HEADER,
-                label: "Vencord",
-                className: "vc-settings-header"
-            },
-            {
-                section: "VencordSettings",
-                label: "Vencord",
-                element: VencordTab,
-                className: "vc-settings"
-            },
-            {
-                section: "VencordPlugins",
-                label: "Plugins",
-                element: PluginsTab,
-                className: "vc-plugins"
-            },
-            {
-                section: "VencordThemes",
-                label: "Themes",
-                element: ThemesTab,
-                className: "vc-themes"
-            },
-            !IS_UPDATER_DISABLED && {
-                section: "VencordUpdater",
-                label: "Updater",
-                element: UpdaterTab,
-                className: "vc-updater"
-            },
-            {
-                section: "VencordCloud",
-                label: "Cloud",
-                element: CloudTab,
-                className: "vc-cloud"
-            },
-            {
-                section: "VencordBackupAndRestore",
-                label: "Backup & Restore",
-                element: BackupAndRestoreTab,
-                className: "vc-backup-restore"
-            },
-            IS_DEV && {
-                section: "VencordPatchHelper",
-                label: "Patch Helper",
-                element: PatchHelperTab,
-                className: "vc-patch-helper"
-            },
-            ...this.customSections.map(func => func(SectionTypes)),
-            {
-                section: SectionTypes.DIVIDER
-            }
-        ].filter(Boolean);
-    },
-
-    isRightSpot({ header, settings: s }: { header?: string; settings?: string[]; }) {
-        const firstChild = s?.[0];
-        // lowest two elements... sanity backup
-        if (firstChild === "LOGOUT" || firstChild === "SOCIAL_LINKS") return true;
-
-        const { settingsLocation } = settings.store;
-
-        if (settingsLocation === "bottom") return firstChild === "LOGOUT";
-        if (settingsLocation === "belowActivity") return firstChild === "CHANGELOG";
-
-        if (!header) return;
-
-        try {
-            const names: Record<Exclude<SettingsLocation, "bottom" | "belowActivity">, string> = {
-                top: getIntlMessage("USER_SETTINGS"),
-                aboveNitro: getIntlMessage("BILLING_SETTINGS"),
-                belowNitro: getIntlMessage("APP_SETTINGS"),
-                aboveActivity: getIntlMessage("ACTIVITY_SETTINGS")
-            };
-
-            if (!names[settingsLocation] || names[settingsLocation].endsWith("_SETTINGS"))
-                return firstChild === "PREMIUM";
-
-            return header === names[settingsLocation];
-        } catch {
-            return firstChild === "PREMIUM";
-        }
-    },
-
-    patchedSettings: new WeakSet(),
-
-    addSettings(elements: any[], element: { header?: string; settings: string[]; }, sectionTypes: SectionTypes) {
-        if (this.patchedSettings.has(elements) || !this.isRightSpot(element)) return;
-
-        this.patchedSettings.add(elements);
-
-        elements.push(...this.makeSettingsCategories(sectionTypes));
-    },
-
-    wrapSettingsHook(originalHook: (...args: any[]) => Record<string, unknown>[]) {
-        return (...args: any[]) => {
-            const elements = originalHook(...args);
-            if (!this.patchedSettings.has(elements))
-                elements.unshift(...this.makeSettingsCategories(FallbackSectionTypes));
-
-            return elements;
-        };
-    },
 
     get electronVersion() {
         return VencordNative.native.getVersions().electron || window.legcord?.electron || null;

@@ -1,4 +1,17 @@
 import { Channel, FluxStore, Guild, User } from "..";
+import { Application } from "../common/Application";
+import { GuildScheduledEvent } from "./GuildScheduledEventStore";
+import { GuildScheduledEventPrivacyLevel, InviteTargetType } from "../../enums";
+
+export interface StageInstance {
+    id: string;
+    guild_id: string;
+    channel_id: string;
+    topic: string;
+    privacy_level: GuildScheduledEventPrivacyLevel;
+    discoverable_disabled: boolean;
+    guild_scheduled_event_id: string | null;
+}
 
 export interface Invite {
     code: string;
@@ -9,12 +22,11 @@ export interface Invite {
     approximate_presence_count?: number;
     expires_at?: string | null;
     flags?: number;
-    target_type?: number;
+    target_type?: InviteTargetType;
     target_user?: User;
-    // TODO: type these
-    target_application?: any;
-    stage_instance?: any;
-    guild_scheduled_event?: any;
+    target_application?: Application;
+    stage_instance?: StageInstance;
+    guild_scheduled_event?: GuildScheduledEvent;
 }
 
 export class InviteStore extends FluxStore {

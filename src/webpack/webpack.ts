@@ -16,6 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { traceFunction } from "@debug/Tracer";
 import { makeLazy, proxyLazy } from "@utils/lazy";
 import { LazyComponent } from "@utils/lazyReact";
 import { Logger } from "@utils/Logger";
@@ -24,7 +25,6 @@ import { escapeRegExp } from "@utils/text";
 import type { FluxStore } from "@vencord/discord-types";
 import type { ModuleExports, ModuleFactory, WebpackRequire } from "@vencord/discord-types/webpack";
 
-import { traceFunction } from "../debug/Tracer";
 import type { AnyModuleFactory, AnyWebpackRequire } from "./types";
 
 const logger = new Logger("Webpack");
@@ -726,12 +726,12 @@ export async function extractAndLoadChunks(code: CodeFilter, matcher = DefaultEx
     }
 
     const numEntryPoint = Number(entryPointId);
-    const entryPoint = Number.isNaN(numEntryPoint) ? entryPointId : numEntryPoint;
+    const entryPoint = Number.isNaN(numEntryPoint) ? entryPointId : String(numEntryPoint);
 
     if (rawChunkIds) {
         const chunkIds = Array.from(rawChunkIds.matchAll(ChunkIdsRegex)).map(m => {
             const numChunkId = Number(m[1]);
-            return Number.isNaN(numChunkId) ? m[1] : numChunkId;
+            return Number.isNaN(numChunkId) ? m[1] : String(numChunkId);
         });
 
         await Promise.all(chunkIds.map(id => wreq.e(id)));

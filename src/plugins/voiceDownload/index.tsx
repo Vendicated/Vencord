@@ -12,10 +12,11 @@ import definePlugin from "@utils/types";
 export default definePlugin({
     name: "VoiceDownload",
     description: "Adds a download to voice messages. (Opens a new browser tab)",
+    tags: ["Voice", "Media"],
     authors: [Devs.puv],
     patches: [
         {
-            find: "#{intl::LgCPMt::raw}",
+            find: "#{intl::VOICE_MESSAGES_PLAYBACK_RATE_LABEL}",
             replacement: {
                 match: /(?<=onVolumeHide:\i\}\))/,
                 replace: ",$self.renderDownload(arguments[0].src)"

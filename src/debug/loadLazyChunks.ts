@@ -9,15 +9,16 @@ import { canonicalizeMatch } from "@utils/patches";
 import { ModuleFactory } from "@vencord/discord-types/webpack";
 import * as Webpack from "@webpack";
 import { wreq } from "@webpack";
-import { AnyModuleFactory } from "webpack";
+import { AnyModuleFactory } from "@webpack/types";
+import pLimit from "p-limit";
 
 function getWebpackChunkMap() {
     const sym = Symbol();
-    let v: Record<PropertyKey, string> | null = null;
+    let chunksMap: unknown;
 
     Object.defineProperty(Object.prototype, sym, {
         get() {
-            v = this;
+            chunksMap = this;
             return "";
         },
         configurable: true
@@ -26,11 +27,12 @@ function getWebpackChunkMap() {
     wreq.u(sym);
     delete Object.prototype[sym];
 
-    return v;
+    return chunksMap as Record<PropertyKey, string> | null;
 }
 
 export async function loadLazyChunks() {
     const LazyChunkLoaderLogger = new Logger("LazyChunkLoader");
+    const queue = pLimit(50);
 
     try {
         LazyChunkLoaderLogger.log("Loading all chunks...");
@@ -52,7 +54,10 @@ export async function loadLazyChunks() {
 
         async function searchAndLoadLazyChunks(factoryCode: string) {
             // Workaround to avoid loading the CSS debugging chunk which turns the app pink
-            const hasCssDebuggingLoad = foundCssDebuggingLoad ? false : (foundCssDebuggingLoad = factoryCode.includes(".cssDebuggingEnabled&&"));
+            // const hasCssDebuggingLoad = foundCssDebuggingLoad ? false : (foundCssDebuggingLoad = factoryCode.includes(".cssDebuggingEnabled&&"));
+
+            // Disabled for now since this causes lots of chunks concatenated into the same module get marked as invalid, and thus not loaded.
+            const hasCssDebuggingLoad = foundCssDebuggingLoad = false;
 
             const lazyChunks = factoryCode.matchAll(hasCssDebuggingLoad ? CompleteLazyChunkRegex : PartialLazyChunkRegex);
             const validChunkGroups = new Set<[chunkIds: PropertyKey[], entryPoint: PropertyKey]>();
@@ -60,10 +65,14 @@ export async function loadLazyChunks() {
             const shouldForceDefer = false;
 
             await Promise.all(Array.from(lazyChunks).map(async ([, rawChunkIds, entryPoint]) => {
-                const chunkIds = rawChunkIds ? Array.from(rawChunkIds.matchAll(Webpack.ChunkIdsRegex)).map(m => {
-                    const numChunkId = Number(m[1]);
-                    return Number.isNaN(numChunkId) ? m[1] : numChunkId;
-                }) : [];
+                const chunkIds = rawChunkIds
+                    ?.matchAll(Webpack.ChunkIdsRegex)
+                    .map(m => {
+                        const numChunkId = Number(m[1]);
+                        return Number.isNaN(numChunkId) ? m[1] : String(numChunkId);
+                    })
+                    .toArray()
+                    ?? [];
 
                 if (chunkIds.length === 0) {
                     return;
@@ -84,9 +93,11 @@ export async function loadLazyChunks() {
 
                     if (wreq.u(id) == null || wreq.u(id) === "undefined.js") continue;
 
-                    const isWorkerAsset = await fetch(wreq.p + wreq.u(id))
-                        .then(r => r.text())
-                        .then(t => /importScripts\(|self\.postMessage/.test(t));
+                    const isWorkerAsset = await queue(() =>
+                        fetch(wreq.p + wreq.u(id))
+                            .then(r => r.text())
+                            .then(t => /importScripts\(|self\.postMessage/.test(t))
+                    );
 
                     if (isWorkerAsset) {
                         invalidChunks.add(id);
@@ -99,7 +110,7 @@ export async function loadLazyChunks() {
 
                 if (!invalidChunkGroup) {
                     const numEntryPoint = Number(entryPoint);
-                    validChunkGroups.add([chunkIds, Number.isNaN(numEntryPoint) ? entryPoint : numEntryPoint]);
+                    validChunkGroups.add([chunkIds, Number.isNaN(numEntryPoint) ? entryPoint : String(numEntryPoint)]);
                 }
             }));
 
@@ -170,10 +181,10 @@ export async function loadLazyChunks() {
         }
 
         // All chunks Discord has mapped to asset files, even if they are not used anymore
-        const chunkMap = getWebpackChunkMap();
-        if (!chunkMap) throw new Error("Failed to get chunk map");
+        const chunksMap = getWebpackChunkMap();
+        if (!chunksMap) throw new Error("Failed to get chunk map");
 
-        const allChunks = Object.keys(chunkMap).map(id => Number.isNaN(Number(id)) ? id : Number(id));
+        const allChunks = Object.keys(chunksMap);
         if (allChunks.length === 0) throw new Error("Failed to get all chunks");
 
         // Chunks which our regex could not catch to load
@@ -182,7 +193,7 @@ export async function loadLazyChunks() {
             return !(validChunks.has(id) || invalidChunks.has(id));
         });
 
-        await Promise.all(chunksLeft.map(async id => {
+        await Promise.all(chunksLeft.map(async id => queue(async () => {
             const isWorkerAsset = await fetch(wreq.p + wreq.u(id))
                 .then(r => r.text())
                 .then(t => /importScripts\(|self\.postMessage/.test(t));
@@ -191,7 +202,7 @@ export async function loadLazyChunks() {
             if (!isWorkerAsset) {
                 await wreq.e(id);
             }
-        }));
+        })));
 
         LazyChunkLoaderLogger.log("Finished loading all chunks!");
     } catch (e) {

@@ -28,7 +28,7 @@ import type { Channel, Role } from "@vencord/discord-types";
 import { findCssClassesLazy } from "@webpack";
 import { ChannelStore, PermissionsBits, PermissionStore, Tooltip } from "@webpack/common";
 
-import HiddenChannelLockScreen from "./components/HiddenChannelLockScreen";
+import HiddenChannelLockScreen, { setChannelBeginHeader } from "./components/HiddenChannelLockScreen";
 
 export const cl = classNameFactory("vc-shc-");
 
@@ -71,6 +71,7 @@ function isUncategorized(objChannel: { channel: Channel; comparator: number; }) 
 export default definePlugin({
     name: "ShowHiddenChannels",
     description: "Show channels that you do not have access to view.",
+    tags: ["Servers", "Utility"],
     authors: [Devs.BigDuck, Devs.AverageReactEnjoyer, Devs.D3SOX, Devs.Ven, Devs.Nuckyz, Devs.Nickyux, Devs.dzshn],
     settings,
 
@@ -301,7 +302,7 @@ export default definePlugin({
                 },
                 {
                     // Patch the header to only return allowed users and roles if it's a hidden channel or locked channel (Like when it's used on the HiddenChannelLockScreen)
-                    match: /return\(0,\i\.jsxs?\)\(\i\.\i,{channelId:(\i)\.id(?=.+?(\(0,\i\.jsxs?\)\("div",{className:\i\.\i,children:\[.{0,100}\i\.length>0.+?\]}\)),)/,
+                    match: /return\(0,\i\.jsxs?\)\(\i\.\i,{channelId:(\i)\.id,children:\[(?=.{0,1000}?(\(0,\i\.jsxs?\)\("div",{className:\i\.\i,children:\[.{0,100}\i\.length>0.+?\]}\)),)/,
                     replace: (m, channel, allowedUsersAndRolesComponent) => `if($self.isHiddenChannel(${channel},true)){return${allowedUsersAndRolesComponent};}${m}`
                 },
                 {
@@ -408,7 +409,7 @@ export default definePlugin({
                 },
                 {
                     // Remove the open chat button for the HiddenChannelLockScreen
-                    match: /(?<="participants-list-button"\),!\i&&)\(0,\i\.jsxs?\).{0,280}?iconClassName:/,
+                    match: /(?<=numRequestToSpeak:\i\}\)\}\):null,!\i&&)\(0,\i\.jsxs?\).{0,280}?iconClassName:/,
                     replace: "!$self.isHiddenChannel(arguments[0]?.channel,true)&&$&"
                 }
             ]
@@ -438,11 +439,11 @@ export default definePlugin({
             },
         },
         {
-            find: 'className:"channelMention",children:',
+            find: 'getConfig({location:"channel_mention"})',
             replacement: {
                 // Show inside voice channel instead of trying to join them when clicking on a channel mention
-                match: /(?<=getChannel\(\i\);null!=(\i))(?=.{0,100}?selectVoiceChannel)/,
-                replace: (_, channel) => `&&!$self.isHiddenChannel(${channel})`
+                match: /(?<=getChannel\(\i\);if\(null!=(\i)).{0,200}?return void (?=\i\.default\.selectVoiceChannel)/,
+                replace: (m, channel) => `${m}!$self.isHiddenChannel(${channel})&&`
             }
         },
         {
@@ -475,9 +476,19 @@ export default definePlugin({
                 match: /(getVoiceStateForUser.{0,150}?)&&\i\.\i\.canWithPartialContext.{0,20}VIEW_CHANNEL.+?}\)(?=\?)/,
                 replace: "$1"
             }
+        },
+        {
+            find: "#{intl::ROLE_REQUIRED_SINGLE_USER_MESSAGE}",
+            replacement: {
+                match: /(?=function (\i)\(\i\){let{channel:.{0,200}?getSortedRoles\()/,
+                replace: "$self.ChannelBeginHeader=$1;"
+            }
         }
     ],
 
+    set ChannelBeginHeader(value: any) {
+        setChannelBeginHeader(value);
+    },
 
     swapViewChannelWithConnectPermission(mergedPermissions: bigint, channel: Channel) {
         if (!PermissionStore.can(PermissionsBits.CONNECT, channel)) {

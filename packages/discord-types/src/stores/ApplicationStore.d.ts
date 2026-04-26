@@ -1,4 +1,5 @@
 import { Application, FluxStore } from "..";
+import { ApplicationType } from "../../enums";
 
 export interface ApplicationStoreState {
     botUserIdToAppUsage: Record<string, ApplicationUsage>;
@@ -10,11 +11,12 @@ export interface ApplicationUsage {
 }
 
 export class ApplicationStore extends FluxStore {
+    _getAllApplications(): Application[];
     getState(): ApplicationStoreState;
     getApplication(applicationId: string): Application;
     getApplicationByName(name: string): Application | undefined;
     getApplicationLastUpdated(applicationId: string): number | undefined;
-    getGuildApplication(guildId: string, type: number): Application | undefined;
+    getGuildApplication(guildId: string, type: ApplicationType): Application | undefined;
     getGuildApplicationIds(guildId: string): string[];
     getAppIdForBotUserId(botUserId: string): string | undefined;
     getFetchingOrFailedFetchingIds(): string[];

@@ -56,6 +56,7 @@ export type BaseTextProps<Tag extends TextTag = "div"> = ComponentPropsWithoutRe
     size?: TextSize;
     weight?: TextWeight;
     tag?: Tag;
+    defaultColor?: boolean;
 };
 
 export function BaseText<T extends TextTag = "div">(props: BaseTextProps<T>): ReactNode {
@@ -63,13 +64,14 @@ export function BaseText<T extends TextTag = "div">(props: BaseTextProps<T>): Re
         size = "md",
         weight = "normal",
         tag: Tag = "div",
+        defaultColor = true,
         children,
         className,
         ...restProps
     } = props;
 
     return (
-        <Tag className={classes(textCls("base", size, weight), className)} {...restProps}>
+        <Tag className={classes(textCls("base", size, weight, defaultColor && "defaultColor"), className)} {...restProps}>
             {children}
         </Tag>
     );

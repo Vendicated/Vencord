@@ -16,9 +16,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { BaseText } from "@components/BaseText";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { handleComponentFailed } from "@components/handleComponentFailed";
-import { ModalCloseButton, ModalContent, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
+import { ModalCloseButton, ModalContent, ModalHeader, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
 import { onlyOnce } from "@utils/onlyOnce";
 import type { ComponentType, PropsWithChildren } from "react";
 
@@ -43,13 +44,17 @@ export function wrapTab(component: ComponentType<any>, tab: string) {
 export function openSettingsTabModal(Tab: ComponentType<any>) {
     try {
         openModal(wrapTab((modalProps: ModalProps) => (
-            <ModalRoot {...modalProps} size={ModalSize.MEDIUM}>
+            <ModalRoot {...modalProps} size={ModalSize.MEDIUM} className="vc-settings-modal-root">
+                <ModalHeader>
+                    <BaseText size="lg" weight="semibold" style={{ flexGrow: 1 }}>{Tab.displayName?.replace("SettingsTab", "") || "Settings"}</BaseText>
+                    <ModalCloseButton onClick={modalProps.onClose} />
+                </ModalHeader>
+
                 <ModalContent className="vc-settings-modal">
-                    <ModalCloseButton onClick={modalProps.onClose} className="vc-settings-modal-close" />
                     <Tab />
                 </ModalContent>
             </ModalRoot>
-        ), Tab.displayName || "Settings Tab"));
+        ), Tab.displayName || "SettingsTab"));
     } catch {
         handleSettingsTabError();
     }

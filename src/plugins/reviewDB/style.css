@@ -131,3 +131,8 @@
 .vc-rdb-block-modal-unblock {
     cursor: pointer;
 }
+
+.vc-rdb-profile-popout-disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
