@@ -22,13 +22,10 @@ import ErrorBoundary from "@components/ErrorBoundary";
 import { closeModal, ModalCloseButton, ModalContent, ModalHeader, ModalRoot, ModalSize, openModal } from "@utils/modal";
 import { useTimer } from "@utils/react";
 import { User } from "@vencord/discord-types";
-import { findByPropsLazy } from "@webpack";
 import { Menu, React, SearchableSelect, Timestamp, useEffect, UserStore, useState } from "@webpack/common";
 
 import { settings } from "./settings";
 import { formatTimezoneLabel, getOffsetMinutes, getUserTimezone, setUserTimezone, update } from "./utils";
-
-const cl = findByPropsLazy("dotSpacer", "userTag");
 
 export const TimezoneTriggerInline = (props: { userId: string;[key: string]: any; }) => {
     const { userId } = props;
@@ -62,7 +59,6 @@ export const TimezoneTriggerInline = (props: { userId: string;[key: string]: any
                     </span>
                 </div>
             </div>
-            <div className={cl.dotSpacer}></div>
         </>
     );
 };
