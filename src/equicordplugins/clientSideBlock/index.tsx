@@ -225,8 +225,8 @@ export default definePlugin({
         {
             find: "ACTIVE_NOW_COLUMN)",
             replacement: {
-                match: /(?<=__invalid_consentCard.{0,40})(\i),\{/,
-                replace: '"div",{children:$self.activeNowView($1())'
+                match: /(__invalid_consentCard.{0,40}\()(\i),\{/,
+                replace: '$1"div",{children:$self.activeNowView($2())'
             }
         },
         // mutual friends list in user profile
