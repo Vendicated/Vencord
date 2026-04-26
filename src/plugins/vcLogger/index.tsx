@@ -207,22 +207,29 @@ export default definePlugin({
         const resetGuilds = () => {
             settings.store.guilds = "";
         };
+
         const resetChannels = () => {
             settings.store.channels = "";
         };
+
         const resetUsers = () => {
             settings.store.users = "";
         };
+
         const reset = () => {
             resetGuilds();
             resetChannels();
             resetUsers();
             settings.store.enable = true;
+            settings.store.ignoreBlockedUsers = false;
+            settings.store.trackUsers = false;
             settings.store.channelsFilter = Filter.WHITE;
             settings.store.guildsFilter = Filter.WHITE;
+            settings.store.usersFilter = Filter.WHITE;
             settings.store.trackingMode = TrackingMode.CHANNEL;
             settings.store.loggingMode = LoggingMode.JOINED;
         };
+
         return (
             <div
                 style={{
