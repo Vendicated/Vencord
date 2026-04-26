@@ -114,7 +114,7 @@ export default definePlugin({
     description: "Logging users (join, leave, move) between voice channels in chat",
     tags: ["Chat", "Accessibility", "Notifications", "Activity"],
     authors: [Devs.uu],
-    // reporterTestable: ReporterTestable.None,
+    reporterTestable: ReporterTestable.None,
 
     settings,
 
@@ -145,29 +145,31 @@ export default definePlugin({
 
             const { guildsFilter, channelsFilter, usersFilter, trackingMode, loggingMode, ignoreBlockedUsers, trackUsers, self } = settings.store;
 
+            if (voiceStates.length > 3) return;
+
             for (var state of voiceStates) {
                 const { userId, channelId, oldChannelId, guildId } = state;
                 const isMe = userId === myId;
                 const author = UserStore.getUser(userId);
+
                 let enableFilters = true;
 
                 if (!self && isMe) continue;
-
 
                 if (trackUsers && (users.length && users.includes(userId) && usersFilter === Filter.WHITE)) enableFilters = false;
 
                 if (enableFilters) {
                     if (ignoreBlockedUsers) if (RelationshipStore.isBlocked(userId)) continue;
 
-                    if (users.length) {
+                    if (users.length && usersFilter !== Filter.NONE) {
                         if (users.includes(userId) && usersFilter === Filter.BLACK) continue;
                         if (!users.includes(userId) && usersFilter === Filter.WHITE) continue;
                     }
-                    if (channels.length) {
+                    if (channels.length && channelsFilter !== Filter.NONE) {
                         if (channels.includes(channelId as string) && channelsFilter === Filter.BLACK) continue;
                         if (!channels.includes(channelId as string) && channelsFilter === Filter.WHITE) continue;
                     }
-                    if (guilds.length) {
+                    if (guilds.length && guildsFilter !== Filter.NONE) {
                         if (guilds.includes(guildId) && guildsFilter === Filter.BLACK) continue;
                         if (!guilds.includes(guildId) && guildsFilter === Filter.WHITE) continue;
                     }
@@ -193,12 +195,13 @@ export default definePlugin({
                 const content = getContent(state);
                 if (!content) continue;
 
-                var msg = sendBotMessage(
-                    loggingMode === LoggingMode.JOINED
-                        ? joinedVoiceChannelId as string
-                        : CurrentlySelectedChannelId || joinedVoiceChannelId as string,
-                    { content, author }
-                );
+                const _channelId = loggingMode === LoggingMode.JOINED
+                    ? joinedVoiceChannelId
+                    : CurrentlySelectedChannelId;
+
+                if (!_channelId) continue;
+
+                const msg = sendBotMessage(_channelId, { content, author });
             }
         }
     },
@@ -221,14 +224,14 @@ export default definePlugin({
             resetChannels();
             resetUsers();
             settings.store.enable = true;
+            settings.store.self = false;
             settings.store.ignoreBlockedUsers = false;
             settings.store.trackUsers = false;
-            settings.store.self = false;
-            settings.store.channelsFilter = Filter.WHITE;
-            settings.store.guildsFilter = Filter.WHITE;
-            settings.store.usersFilter = Filter.WHITE;
+            settings.store.channelsFilter = Filter.NONE;
+            settings.store.guildsFilter = Filter.NONE;
+            settings.store.usersFilter = Filter.NONE;
             settings.store.trackingMode = TrackingMode.CHANNEL;
-            settings.store.loggingMode = LoggingMode.JOINED;
+            settings.store.loggingMode = LoggingMode.SELECTED;
         };
 
         return (
