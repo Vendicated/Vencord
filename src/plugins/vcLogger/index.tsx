@@ -114,7 +114,7 @@ export default definePlugin({
     description: "Logging users (join, leave, move) between voice channels in chat",
     tags: ["Chat", "Accessibility", "Notifications", "Activity"],
     authors: [Devs.uu],
-    reporterTestable: ReporterTestable.None,
+    // reporterTestable: ReporterTestable.None,
 
     settings,
 
@@ -143,16 +143,16 @@ export default definePlugin({
             const channels = (settings.store.channels?.split(",") || []).map(i => i.trim()).filter(i => i !== "");
             const users = (settings.store.users?.split(",") || []).map(i => i.trim()).filter(i => i !== "");
 
-            const { guildsFilter, channelsFilter, usersFilter, trackingMode, loggingMode, ignoreBlockedUsers, trackUsers } = settings.store;
+            const { guildsFilter, channelsFilter, usersFilter, trackingMode, loggingMode, ignoreBlockedUsers, trackUsers, self } = settings.store;
 
             for (var state of voiceStates) {
                 const { userId, channelId, oldChannelId, guildId } = state;
                 const isMe = userId === myId;
                 const author = UserStore.getUser(userId);
-
-                if (isMe) continue;
-
                 let enableFilters = true;
+
+                if (!self && isMe) continue;
+
 
                 if (trackUsers && (users.length && users.includes(userId) && usersFilter === Filter.WHITE)) enableFilters = false;
 
@@ -223,6 +223,7 @@ export default definePlugin({
             settings.store.enable = true;
             settings.store.ignoreBlockedUsers = false;
             settings.store.trackUsers = false;
+            settings.store.self = false;
             settings.store.channelsFilter = Filter.WHITE;
             settings.store.guildsFilter = Filter.WHITE;
             settings.store.usersFilter = Filter.WHITE;
