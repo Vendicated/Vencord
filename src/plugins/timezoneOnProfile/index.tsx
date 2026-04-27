@@ -39,26 +39,19 @@ export default definePlugin({
     TimezoneTriggerInline,
     patches: [
         {
-            find: ".SIDEBAR}),nicknameIcons",
+            find: '="SYSTEM_TAG"',
             replacement: {
-                match: /\(0,\s*(\i)\.jsx\)\(b\.A,\s*\{[^}]*userId:\s*(\i)\.id[^}]*\}\),/,
-                replace: "$&(0,$1.jsx)($self.TimezoneTriggerInline,{userId:$2.id}),"
+                match: /(children:\[(?:(?!\]\}\)).){0,900}),ep(?=\]\}\))/g,
+                replace: '$1,ep,(0,a.jsx)(Vencord.Plugins.plugins["TimezoneOnProfile"].TimezoneTriggerInline,{userId:arguments[0].message.author.id})'
             }
         },
         {
-            find: "USER_PROFILE_ACCOUNT_POPOUT",
+            find: "forceUsername:!0,className",
             replacement: {
-                match: /(POPOUT,onOpenProfile:.*?\}\),)/, // miniprofile, this SHOULD work, but for some reason isn't? i might find a solution sometime
-                replace: "$1$self.TimezoneTriggerInline,"
+                match: /(\i=(\i)\.isProvisional\?null:)(\(0,(\i)\.jsx\)\(\i\.\i,\{user:\2.{0,350}?forceUsername:!0.{0,350}?hideBotTag:!0\}\))/,
+                replace: "$1(0,$4.jsxs)($4.Fragment,{children:[(0,$4.jsx)($self.TimezoneTriggerInline,{userId:$2.id}),$3]})"
             }
-        },
-        {
-            find: /!t\.isProvisional&&\i\(\(0,\i\.jsx\)\(\i\.\i,\{/,
-            replacement: {
-                match: /(!t\.isProvisional&&)(\i\(\(0,(\i)\.jsx\)\(\i\.\i,\{)/,
-                replace: "$1(0,$3.jsx)($self.TimezoneTriggerInline,{userId:t.id}),$2"
-            }
-        },
+        }
     ],
 });
 

@@ -55,7 +55,9 @@ export const TimezoneTriggerInline = (props: { userId: string;[key: string]: any
             <div className="vc-tzonprofile-container">
                 <div className="vc-tzonprofile-selector">
                     <span style={{ fontSize: settings.store.timeFontSize }} className="vc-tzonprofile-time">
+                        {" "}
                         <Timestamp timestamp={currentTime} />
+                        {"  •"}
                     </span>
                 </div>
             </div>
@@ -128,6 +130,7 @@ export const UserContextMenuPatch: NavContextMenuPatchCallback = (children, { us
     if (group) {
         const currentTimezone = getUserTimezone(user.id);
         const timezoneMenuItems = createTimezoneMenuItems(user, currentTimezone);
-        group.push(...timezoneMenuItems as any);
+        group.push(timezoneMenuItems as any); // for some reason this was causing an error or something when using .../arrayifing it, idk why tbh
     }
+    // it seems that when selecting a timezone, no re-render takes place
 };
