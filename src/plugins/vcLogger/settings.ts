@@ -58,15 +58,15 @@ export const settings = definePluginSettings({
     self: {
         description: "log myself too",
         type: OptionType.BOOLEAN,
+        default: true
+    },
+    trackUsers: {
+        description: "Will log users over other filters if they are in whitelist",
+        type: OptionType.BOOLEAN,
         default: false
     },
     ignoreBlockedUsers: {
         description: "Do not log about blocked users",
-        type: OptionType.BOOLEAN,
-        default: false
-    },
-    trackUsers: {
-        description: "Will log users over other filters if they are in whitelist",
         type: OptionType.BOOLEAN,
         default: false
     },

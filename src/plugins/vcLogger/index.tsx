@@ -7,11 +7,12 @@
 import { ChatBarButton, ChatBarButtonFactory } from "@api/ChatButtons";
 import { sendBotMessage } from "@api/Commands";
 import { findGroupChildrenByChildId, NavContextMenuPatchCallback } from "@api/ContextMenu";
+import { openPluginModal } from "@components/settings";
 import { Devs } from "@utils/constants";
 import { getIntlMessage } from "@utils/discord";
 import definePlugin, { IconComponent, ReporterTestable, StartAt } from "@utils/types";
 import { Message } from "@vencord/discord-types";
-import { Button, ChannelStore, Menu, MessageActions, RelationshipStore, SelectedChannelStore, SelectedGuildStore, useMemo, UserStore } from "@webpack/common";
+import { Button, ChannelStore, Menu, MessageActions, RelationshipStore, SelectedChannelStore, SelectedGuildStore, Toasts, useMemo, UserStore } from "@webpack/common";
 
 import { Filter, LoggingMode, settings, TrackingMode } from "./settings";
 
@@ -146,7 +147,14 @@ export const ClearChatBarButton: ChatBarButtonFactory = ({ channel: { id: channe
     const { created, showClearBtn } = settings.use(["created", "showClearBtn"]);
     const msgs = useMemo(() => createdMessages.getOrInsert(channelId, []), [created, showClearBtn]);
     if (!msgs.length || !showClearBtn) return null;
-    const on_click = () => clearMessages(channelId, msgs);
+    const on_click = () => {
+        clearMessages(channelId, createdMessages.getOrInsert(channelId, []));
+        Toasts.show({
+            id: Toasts.genId(),
+            message: "vcLogger: channel logging cleared",
+            type: Toasts.Type.SUCCESS
+        });
+    };
     const button = (
         <ChatBarButton
             tooltip="Clear Chat logging"
@@ -160,18 +168,18 @@ export const ClearChatBarButton: ChatBarButtonFactory = ({ channel: { id: channe
 
 function clearMessages(channelId: string, msgs: Message[]) {
     let count = settings.store.created as number;
+    createdMessages.set(channelId, []);
     msgs.forEach(msg => {
         MessageActions.dismissAutomatedMessage(msg);
         count--;
     });
-    createdMessages.set(channelId, []);
     settings.store.created = count;
 }
 
 export const parseIds = (ids: string | undefined, sep: string = ",") => (ids?.split(sep) || []).flatMap(i => i.trim() !== "" ? [i.trim()] : []);
 
 
-export default definePlugin({
+const plugin = definePlugin({
     name: "vcLogger",
     description: "Logging users (join, leave, move) between voice channels in chat",
     tags: ["Chat", "Accessibility", "Notifications", "Activity"],
@@ -194,6 +202,10 @@ export default definePlugin({
     chatBarButton: {
         icon: IdIcon,
         render: ClearChatBarButton
+    },
+
+    toolboxActions: {
+        "vcLogger Settings": () => openPluginModal(plugin),
     },
 
     flux: {
@@ -226,7 +238,7 @@ export default definePlugin({
 
                 if (!self && isMe) continue;
 
-                if (trackUsers && (users.length && users.includes(userId) && usersFilter === Filter.WHITE)) enableFilters = false;
+                if (trackUsers && (users.length && users.includes(userId) && [Filter.WHITE, Filter.NONE].includes(usersFilter))) enableFilters = false;
 
                 if (enableFilters) {
                     if (ignoreBlockedUsers) if (RelationshipStore.isBlocked(userId)) continue;
@@ -273,47 +285,96 @@ export default definePlugin({
 
                 if (!_channelId) continue;
 
+                debugger;
                 const msg = sendBotMessage(_channelId, { content, author });
                 const msgs = createdMessages.getOrInsert(_channelId, []);
                 msgs.push(msg);
                 settings.store.created = settings.store.created as number + 1;
             }
-        }
+        },
+
+        MESSAGE_DELETE: ({ id }: { id: string; }) => {
+            const _guildId = SelectedGuildStore.getGuildId() as string;
+            const _channelId = SelectedChannelStore.getCurrentlySelectedChannelId(_guildId) as string;
+
+            if (!_channelId) return;
+
+            const msgs = createdMessages.getOrInsert(_channelId, []);
+            const index = msgs.findIndex(msg => msg.id === id);
+
+            if (index === -1) return;
+
+            msgs.splice(index, 1);
+            settings.store.created = settings.store.created as number - 1;
+        },
     },
 
     settingsAboutComponent: () => {
         const resetGuilds = () => {
             settings.store.guilds = "";
+            settings.store.guildsFilter = Filter.NONE;
+            Toasts.show({
+                id: Toasts.genId(),
+                message: "vcLogger:  reset guilds list",
+                type: Toasts.Type.SUCCESS
+            });
         };
 
         const resetChannels = () => {
             settings.store.channels = "";
+            settings.store.channelsFilter = Filter.NONE;
+            Toasts.show({
+                id: Toasts.genId(),
+                message: "vcLogger:  reset channels list",
+                type: Toasts.Type.SUCCESS
+            });
         };
 
         const resetUsers = () => {
             settings.store.users = "";
+            settings.store.usersFilter = Filter.NONE;
+            Toasts.show({
+                id: Toasts.genId(),
+                message: "vcLogger:  reset users list",
+                type: Toasts.Type.SUCCESS
+            });
         };
 
         const reset = () => {
-            resetGuilds();
-            resetChannels();
-            resetUsers();
             settings.store.enable = true;
             settings.store.self = false;
             settings.store.showClearBtn = true;
-            settings.store.ignoreBlockedUsers = false;
             settings.store.trackUsers = false;
+            settings.store.ignoreBlockedUsers = false;
+
+            settings.store.trackingMode = TrackingMode.CHANNEL;
+            settings.store.loggingMode = LoggingMode.SELECTED;
+
             settings.store.usersFilter = Filter.NONE;
             settings.store.channelsFilter = Filter.NONE;
             settings.store.guildsFilter = Filter.NONE;
-            settings.store.trackingMode = TrackingMode.CHANNEL;
-            settings.store.loggingMode = LoggingMode.SELECTED;
+
+            settings.store.users = "";
+            settings.store.channels = "";
+            settings.store.guilds = "";
+
+            Toasts.show({
+                id: Toasts.genId(),
+                message: "vcLogger: settings reset",
+                type: Toasts.Type.SUCCESS
+            });
         };
 
         const clear = () => {
             createdMessages
                 .entries()
                 .forEach(([channelId, msgs]) => clearMessages(channelId, msgs));
+
+            Toasts.show({
+                id: Toasts.genId(),
+                message: "vcLogger: all channels logging cleared",
+                type: Toasts.Type.SUCCESS
+            });
         };
 
         return (
@@ -334,3 +395,5 @@ export default definePlugin({
         );
     }
 });
+
+export default plugin;
