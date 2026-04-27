@@ -20,7 +20,7 @@ import { definePluginSettings } from "@api/Settings";
 import { hash as h64 } from "@intrnl/xxhash64";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { useMemo } from "@webpack/common";
+import { useMemo, UserStore } from "@webpack/common";
 
 // Calculate a CSS color string based on the user ID
 function calculateNameColorForUser(id?: string) {
@@ -117,9 +117,24 @@ export default definePlugin({
             return colorString;
         }
 
-        return (!settings.store.applyColorOnlyToUsersWithoutColor || !colorString)
+        const dmColor = (!settings.store.applyColorOnlyToUsersWithoutColor || !colorString)
             ? color
             : colorString;
+
+        // guarantee minimum difference in dms
+        if (context?.channel?.isPrivate?.() && dmColor && userId) {
+            const currentUserId = UserStore.getCurrentUser()?.id;
+            if (currentUserId && userId !== currentUserId) {
+                const currentUserColor = Number(h64(currentUserId) % 360n);
+                const otherUserColor = Number(h64(userId) % 360n);
+                const colorDiff = Math.min(Math.abs(currentUserColor - otherUserColor), 360 - Math.abs(currentUserColor - otherUserColor));
+                if (colorDiff < 90) {
+                    const newColor = (otherUserColor + 180) % 360;
+                    return `hsl(${newColor}, 100%, ${settings.store.lightness}%)`;
+                }
+            }
+        }
+        return dmColor;
     },
 
     calculateNameColorForListContext(context: any) {
@@ -140,3 +155,4 @@ export default definePlugin({
         }
     }
 });
+
