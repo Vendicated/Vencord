@@ -139,7 +139,6 @@ function onWindowFocusChanged() {
 
     isSidebarHovered = false;
     hoverActiveFolderCounts.clear();
-    hoverPinnedFolderIds.clear();
 
     for (const id of hoverOpenedFolderIds)
         scheduleHoverClose(id);
@@ -186,6 +185,14 @@ function filterTreeWithTargetNode(children: any, predicate: (node: any) => boole
 }
 
 export const settings = definePluginSettings({
+    folderOpenBehavior: {
+        type: OptionType.SELECT,
+        description: "Open folders",
+        options: [
+            { label: "Click to open", value: FolderOpenBehavior.Default, default: true },
+            { label: "Hover to open", value: FolderOpenBehavior.Hover }
+        ]
+    },
     sidebar: {
         type: OptionType.BOOLEAN,
         description: "Display servers from folder on dedicated sidebar",
@@ -223,14 +230,6 @@ export const settings = definePluginSettings({
         description: "Keep showing guild icons in the primary guild bar folder when it's open in the BetterFolders sidebar",
         restartNeeded: true,
         default: false
-    },
-    folderOpenBehavior: {
-        type: OptionType.SELECT,
-        description: "Open folders",
-        options: [
-            { label: "Click to open", value: FolderOpenBehavior.Default, default: true },
-            { label: "Hover to open", value: FolderOpenBehavior.Hover }
-        ]
     },
     showFolderIcon: {
         type: OptionType.SELECT,
@@ -445,13 +444,48 @@ export default definePlugin({
             if (lastGuildId !== data.guildId) {
                 lastGuildId = data.guildId;
                 const guildFolder = getGuildFolder(data.guildId);
+                const targetFolderId = guildFolder?.folderId ?? null;
 
-                if (guildFolder?.folderId) {
-                    if (settings.store.forceOpen && !ExpandedGuildFolderStore.isFolderExpanded(guildFolder.folderId)) {
-                        FolderUtils.toggleGuildFolderExpand(guildFolder.folderId);
+                if (targetFolderId) {
+                    if (settings.store.forceOpen) {
+                        if (!ExpandedGuildFolderStore.isFolderExpanded(targetFolderId)) {
+                            FolderUtils.toggleGuildFolderExpand(targetFolderId);
+                        }
+
+                        if (settings.store.folderOpenBehavior === FolderOpenBehavior.Hover) {
+                            hoverOpenedFolderIds.add(targetFolderId);
+                            hoverPinnedFolderIds.add(targetFolderId);
+                            hoverOpenedAt.set(targetFolderId, Date.now());
+                            clearHoverCloseTimer(targetFolderId);
+                        }
+
+                        for (const id of Array.from(hoverOpenedFolderIds)) {
+                            if (id === targetFolderId) continue;
+                            if (ExpandedGuildFolderStore.isFolderExpanded(id)) {
+                                FolderUtils.toggleGuildFolderExpand(id);
+                            }
+                            hoverOpenedFolderIds.delete(id);
+                            hoverPinnedFolderIds.delete(id);
+                            hoverOpenedAt.delete(id);
+                            clearHoverCloseTimer(id);
+                        }
                     }
-                } else if (settings.store.closeAllFolders) {
-                    closeFolders();
+                } else {
+
+                    if (settings.store.closeAllFolders) {
+                        closeFolders();
+                    } else if (settings.store.folderOpenBehavior === FolderOpenBehavior.Hover) {
+
+                        for (const id of Array.from(hoverOpenedFolderIds)) {
+                            if (ExpandedGuildFolderStore.isFolderExpanded(id)) {
+                                FolderUtils.toggleGuildFolderExpand(id);
+                            }
+                            hoverOpenedFolderIds.delete(id);
+                            hoverPinnedFolderIds.delete(id);
+                            hoverOpenedAt.delete(id);
+                            clearHoverCloseTimer(id);
+                        }
+                    }
                 }
             }
         },
