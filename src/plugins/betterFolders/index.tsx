@@ -223,6 +223,7 @@ export const settings = definePluginSettings({
     forceOpen: {
         type: OptionType.BOOLEAN,
         description: "Force a folder to open when switching to a server of that folder",
+        restartNeeded: true,
         default: false
     },
     keepIcons: {
