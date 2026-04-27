@@ -50,6 +50,11 @@ export const settings = definePluginSettings({
         type: OptionType.BOOLEAN,
         default: true
     },
+    showClearBtn: {
+        description: "Show clear button on chat bar",
+        type: OptionType.BOOLEAN,
+        default: true
+    },
     self: {
         description: "log myself too",
         type: OptionType.BOOLEAN,
@@ -133,5 +138,12 @@ export const settings = definePluginSettings({
     guilds: {
         description: "guilds id separated by comma (,)",
         type: OptionType.STRING,
+    },
+    created: {
+        description: "guilds id separated by comma (,)",
+        type: OptionType.NUMBER,
+        default: 0,
+        restartNeeded: true,
+        hidden: true,
     },
 });
