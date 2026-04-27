@@ -43,7 +43,7 @@ export function getContent({ channelId, oldChannelId }: VoiceStateChangeEvent) {
     return "";
 }
 
-export const IdIcon: IconComponent = ({ height = 24, width = 24, className }) => {
+export const IdIcon: IconComponent = ({ height = 20, width = 20, className }) => {
     return (
         <svg
             viewBox="0 0 24 24"
@@ -66,7 +66,7 @@ export const IdIcon: IconComponent = ({ height = 24, width = 24, className }) =>
     );
 };
 
-export const ClearIcon: IconComponent = ({ height = 24, width = 24, className }) => {
+export const ClearIcon: IconComponent = ({ height = 20, width = 20, className }) => {
     return (
         <svg
             viewBox="0 0 24 24"
@@ -95,25 +95,25 @@ export const ClearIcon: IconComponent = ({ height = 24, width = 24, className })
 function MakeContextCallback(name: "Guild" | "Channel" | "User"): NavContextMenuPatchCallback {
     return (children, props) => {
         const _name = name.toLowerCase();
-        const value = props[_name];
-        const _id_ = value.id;
+        const obj = props[_name];
+        const _id_ = obj.id;
 
-        if (!value) return;
-        if (name === "Channel" && ![13, 2].includes(value.type)) return;
+        if (!obj) return;
+        if (name === "Channel" && ![13, 2].includes(obj.type)) return;
         if (props.label === getIntlMessage("CHANNEL_ACTIONS_MENU_LABEL")) return;
 
         const add_css_id = `vc-add-${_name}-id`;
         const remove_css_id = `vc-remove-${_name}-id`;
         const ids_key = `${_name}s`;
 
-        const devContainer = findGroupChildrenByChildId(`devmode-copy-id-${_id_}`, children);
+        const container = findGroupChildrenByChildId(`devmode-copy-id-${_id_}`, children);
 
         const add_action = () => {
             if (!_id_) return;
             const ids_str: string = settings.store[ids_key];
             const ids = parseIds(ids_str);
-            if (ids.includes(value.id)) return;
-            ids.push(value.id);
+            if (ids.includes(_id_)) return;
+            ids.push(_id_);
             settings.store[ids_key] = ids.join(",");
         };
 
@@ -121,20 +121,20 @@ function MakeContextCallback(name: "Guild" | "Channel" | "User"): NavContextMenu
             if (!_id_) return;
             const ids_str: string = settings.store[ids_key];
             const ids = parseIds(ids_str);
-            if (!ids.includes(value.id)) return;
-            settings.store[ids_key] = ids.filter(i => i !== value.id).join(",");
+            if (!ids.includes(_id_)) return;
+            settings.store[ids_key] = ids.filter(i => i !== _id_).join(",");
         };
 
-        (devContainer ?? children).splice(-1, 0,
+        (container ?? children).splice(-1, 0,
             <Menu.MenuItem
                 id={add_css_id}
-                label={`Add ${name} To List`}
+                label={`Add To ${name}s List`}
                 action={add_action}
                 icon={IdIcon}
             />,
             <Menu.MenuItem
                 id={remove_css_id}
-                label={`Remove ${name} From List`}
+                label={`Remove From ${name}s List`}
                 action={remove_action}
                 icon={IdIcon}
             />
