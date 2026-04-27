@@ -20,7 +20,7 @@ import { enableStyle } from "@api/Styles";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 
-import { TimezoneTriggerInline, UserContextMenuPatch } from "./components";
+import {TimezoneTriggerProfile, TimezoneTriggerUsername, UserContextMenuPatch} from "./components";
 import { settings } from "./settings";
 import timeZoneStyle from "./style.css?managed";
 
@@ -36,20 +36,21 @@ export default definePlugin({
         "user-profile-actions": UserContextMenuPatch,
         "user-profile-overflow-menu": UserContextMenuPatch
     },
-    TimezoneTriggerInline,
+    TimezoneTriggerProfile,
+    TimezoneTriggerUsername,
     patches: [
         {
             find: '="SYSTEM_TAG"',
             replacement: {
-                match: /(children:\[(?:(?!\]\}\)).){0,900}),ep(?=\]\}\))/g,
-                replace: '$1,ep,(0,a.jsx)(Vencord.Plugins.plugins["TimezoneOnProfile"].TimezoneTriggerInline,{userId:arguments[0].message.author.id})'
+                match: /(\(0,(\i)\.jsxs\)\(\2\.Fragment,\{children:\[(?:(?!\]\}\)).){0,900}?),(\i)(?=\]\}\))/g,
+                replace: '$1,$3,(0,$2.jsx)(Vencord.Plugins.plugins["TimezoneOnProfile"].TimezoneTriggerUsername,{userId:arguments[0].message.author.id})'
             }
         },
         {
             find: "forceUsername:!0,className",
             replacement: {
-                match: /(\i=(\i)\.isProvisional\?null:)(\(0,(\i)\.jsx\)\(\i\.\i,\{user:\2.{0,350}?forceUsername:!0.{0,350}?hideBotTag:!0\}\))/,
-                replace: "$1(0,$4.jsxs)($4.Fragment,{children:[(0,$4.jsx)($self.TimezoneTriggerInline,{userId:$2.id}),$3]})"
+                match: /(\i=(\i)\.isProvisional\?null:)(\(0,(\i)\.jsx\)\(\i\.\i,\{user:\2.{0,250}?forceUsername:!0.{0,250}?usernameClass:((\i)\.\i).{0,250}?hideBotTag:!0\}\))/,
+                replace: "$1(0,$4.jsxs)($4.Fragment,{children:[(0,$4.jsx)($self.TimezoneTriggerProfile,{userId:$2.id,className:$5}),$3]})"
             }
         }
     ],

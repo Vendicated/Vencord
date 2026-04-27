@@ -1,9 +1,13 @@
 .vc-tzonprofile-container {
     display: inline;
+    margin: 0 3px 0 0;
 }
 
-.vc-tzonprofile-selector {
-    display: inline;
+.vc-tzonprofile-selector * {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0;
 }
 
 .vc-tzonprofile-time {
@@ -18,4 +22,10 @@
 
 .vc-tzonprofile-time > *::after {
     content: " •";
+}
+
+[class*="clickable"]:has(.vc-tzonprofile-container) {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
 }
