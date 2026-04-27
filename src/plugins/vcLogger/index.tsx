@@ -285,7 +285,6 @@ const plugin = definePlugin({
 
                 if (!_channelId) continue;
 
-                debugger;
                 const msg = sendBotMessage(_channelId, { content, author });
                 const msgs = createdMessages.getOrInsert(_channelId, []);
                 msgs.push(msg);
