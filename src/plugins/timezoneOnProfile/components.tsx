@@ -22,12 +22,54 @@ import ErrorBoundary from "@components/ErrorBoundary";
 import { closeModal, ModalCloseButton, ModalContent, ModalHeader, ModalRoot, ModalSize, openModal } from "@utils/modal";
 import { useTimer } from "@utils/react";
 import { User } from "@vencord/discord-types";
+import { findCssClassesLazy } from "@webpack";
 import { Menu, React, SearchableSelect, Timestamp, useEffect, UserStore, useState } from "@webpack/common";
 
 import { settings } from "./settings";
 import { formatTimezoneLabel, getOffsetMinutes, getUserTimezone, setUserTimezone, update } from "./utils";
 
-export const TimezoneTriggerInline = (props: { userId: string;[key: string]: any; }) => {
+const cl = findCssClassesLazy("dotSpacer", "userTagUsername");
+
+export const TimezoneTriggerProfile = (props: { userId: string;[key: string]: any; }) => {
+    const { userId, className } = props;
+    settings.use(["timezonesByUser"]);
+    const [selectedTz, setSelectedTz] = useState(getUserTimezone(userId));
+    const [currentTime, setCurrentTime] = useState<Date>(new Date(Date.now()));
+
+    const elapsed = useTimer({
+        interval: 60_000 - (Date.now() % 60_000),
+        deps: [selectedTz]
+    });
+
+    useEffect(() => {
+        const tz = getUserTimezone(userId);
+        if (tz !== selectedTz) setSelectedTz(tz);
+    }, [userId]);
+
+    useEffect(() => {
+        if (!selectedTz) return;
+        setCurrentTime(update(selectedTz));
+    }, [elapsed, selectedTz]);
+
+    if (!selectedTz) return null;
+
+    const getDotSpacer = () => cl.dotSpacer ?? Object.values(cl).find(v => v.includes("dotSpacer"));
+
+    return (
+        <>
+            <div className="vc-tzonprofile-container">
+                <div className="vc-tzonprofile-selector">
+                    <span style={{ fontSize: settings.store.timeFontSize }} className={className}>
+                        <Timestamp timestamp={currentTime} />
+                    </span>
+                </div>
+            </div>
+            <div aria-hidden="true" className={getDotSpacer()}/>
+        </>
+    );
+};
+
+export const TimezoneTriggerUsername = (props: { userId: string;[key: string]: any; }) => {
     const { userId } = props;
     settings.use(["timezonesByUser"]);
     const [selectedTz, setSelectedTz] = useState(getUserTimezone(userId));
@@ -52,15 +94,10 @@ export const TimezoneTriggerInline = (props: { userId: string;[key: string]: any
 
     return (
         <>
-            <div className="vc-tzonprofile-container">
-                <div className="vc-tzonprofile-selector">
-                    <span style={{ fontSize: settings.store.timeFontSize }} className="vc-tzonprofile-time">
-                        {" "}
-                        <Timestamp timestamp={currentTime} />
-                        {"  •"}
-                    </span>
-                </div>
-            </div>
+            <span style={{ fontSize: settings.store.timeFontSize }} className="vc-tzonprofile-time">
+                {" "}
+                <Timestamp timestamp={currentTime} />
+            </span>
         </>
     );
 };
