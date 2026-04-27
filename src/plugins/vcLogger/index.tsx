@@ -4,14 +4,21 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { ChatBarButton, ChatBarButtonFactory } from "@api/ChatButtons";
 import { sendBotMessage } from "@api/Commands";
 import { findGroupChildrenByChildId, NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { Devs } from "@utils/constants";
 import { getIntlMessage } from "@utils/discord";
-import definePlugin, { IconComponent, ReporterTestable } from "@utils/types";
-import { Button, ChannelStore, Menu, RelationshipStore, SelectedChannelStore, SelectedGuildStore, UserStore } from "@webpack/common";
+import definePlugin, { IconComponent, ReporterTestable, StartAt } from "@utils/types";
+import { Message } from "@vencord/discord-types";
+import { Button, ChannelStore, Menu, MessageActions, RelationshipStore, SelectedChannelStore, SelectedGuildStore, useMemo, UserStore } from "@webpack/common";
 
 import { Filter, LoggingMode, settings, TrackingMode } from "./settings";
+
+
+export const createdMessages = new Map<string, Message[]>();
+
+// const [messageCreated, setMessageCreated] = useState(0);
 
 export interface VoiceStateChangeEvent {
     guildId: string;
@@ -53,6 +60,32 @@ export const IdIcon: IconComponent = ({ height = 24, width = 24, className }) =>
                 fillRule="evenodd"
                 clipRule="evenodd"
                 d="M5 2a3 3 0 0 0-3 3v14a3 3 0 0 0 3 3h14a3 3 0 0 0 3-3V5a3 3 0 0 0-3-3H5Zm1 15h2.04V7.34H6V17Zm4-9.66V17h3.44c1.46 0 2.6-.42 3.38-1.25.8-.83 1.2-2.02 1.2-3.58s-.4-2.75-1.2-3.58c-.79-.83-1.92-1.25-3.38-1.25H10Z"
+            >
+            </path>
+        </svg>
+    );
+};
+
+export const ClearIcon: IconComponent = ({ height = 24, width = 24, className }) => {
+    return (
+        <svg
+            viewBox="0 0 24 24"
+            fill="currentColor"
+            aria-hidden="true"
+            width={width}
+            height={height}
+            className={className}
+            role="img"
+        >
+            <path
+                fill="currentColor"
+                d="M14.25 1c.41 0 .75.34.75.75V3h5.25c.41 0 .75.34.75.75v.5c0 .41-.34.75-.75.75H3.75A.75.75 0 0 1 3 4.25v-.5c0-.41.34-.75.75-.75H9V1.75c0-.41.34-.75.75-.75h4.5Z"
+            ></path>
+            <path
+                fill="currentColor"
+                fillRule="evenodd"
+                clipRule="evenodd"
+                d="M5.06 7a1 1 0 0 0-1 1.06l.76 12.13a3 3 0 0 0 3 2.81h8.36a3 3 0 0 0 3-2.81l.75-12.13a1 1 0 0 0-1-1.06H5.07ZM11 12a1 1 0 1 0-2 0v6a1 1 0 1 0 2 0v-6Zm3-1a1 1 0 0 1 1 1v6a1 1 0 1 1-2 0v-6a1 1 0 0 1 1-1Z"
             >
             </path>
         </svg>
@@ -109,13 +142,41 @@ function MakeContextCallback(name: "Guild" | "Channel" | "User"): NavContextMenu
     };
 }
 
+export const ClearChatBarButton: ChatBarButtonFactory = ({ channel: { id: channelId } }) => {
+    const { created, showClearBtn } = settings.use(["created", "showClearBtn"]);
+    const msgs = useMemo(() => createdMessages.getOrInsert(channelId, []), [created, showClearBtn]);
+    if (!msgs.length || !showClearBtn) return null;
+    const on_click = () => clearMessages(channelId, msgs);
+    const button = (
+        <ChatBarButton
+            tooltip="Clear Chat logging"
+            onClick={on_click}
+        >
+            <ClearIcon />
+        </ChatBarButton>
+    );
+    return button;
+};
+
+function clearMessages(channelId: string, msgs: Message[]) {
+    let count = settings.store.created as number;
+    msgs.forEach(msg => {
+        MessageActions.dismissAutomatedMessage(msg);
+        count--;
+    });
+    createdMessages.set(channelId, []);
+    settings.store.created = count;
+}
+
 export const parseIds = (ids: string | undefined, sep: string = ",") => (ids?.split(sep) || []).flatMap(i => i.trim() !== "" ? [i.trim()] : []);
+
 
 export default definePlugin({
     name: "vcLogger",
     description: "Logging users (join, leave, move) between voice channels in chat",
     tags: ["Chat", "Accessibility", "Notifications", "Activity"],
     authors: [Devs.uu],
+    startAt: StartAt.Init,
     reporterTestable: ReporterTestable.None,
 
     settings,
@@ -126,6 +187,13 @@ export default definePlugin({
         "thread-context": MakeContextCallback("Channel"),
         "gdm-context": MakeContextCallback("Channel"),
         "user-context": MakeContextCallback("User"),
+    },
+
+    createdMessages,
+
+    chatBarButton: {
+        icon: IdIcon,
+        render: ClearChatBarButton
     },
 
     flux: {
@@ -206,6 +274,9 @@ export default definePlugin({
                 if (!_channelId) continue;
 
                 const msg = sendBotMessage(_channelId, { content, author });
+                const msgs = createdMessages.getOrInsert(_channelId, []);
+                msgs.push(msg);
+                settings.store.created = settings.store.created as number + 1;
             }
         }
     },
@@ -229,20 +300,27 @@ export default definePlugin({
             resetUsers();
             settings.store.enable = true;
             settings.store.self = false;
+            settings.store.showClearBtn = true;
             settings.store.ignoreBlockedUsers = false;
             settings.store.trackUsers = false;
+            settings.store.usersFilter = Filter.NONE;
             settings.store.channelsFilter = Filter.NONE;
             settings.store.guildsFilter = Filter.NONE;
-            settings.store.usersFilter = Filter.NONE;
             settings.store.trackingMode = TrackingMode.CHANNEL;
             settings.store.loggingMode = LoggingMode.SELECTED;
+        };
+
+        const clear = () => {
+            createdMessages
+                .entries()
+                .forEach(([channelId, msgs]) => clearMessages(channelId, msgs));
         };
 
         return (
             <div
                 style={{
                     display: "grid",
-                    gridTemplateColumns: "repeat(4, 1fr)",
+                    gridTemplateColumns: "repeat(3, 1fr)",
                     gap: "1rem",
                 }}
                 className={"vc-logger-buttons"}
@@ -251,6 +329,7 @@ export default definePlugin({
                 <Button onClick={resetChannels} > Reset Channels </Button>
                 <Button onClick={resetUsers} > Reset Users </Button>
                 <Button onClick={reset} > Reset Settings </Button>
+                <Button onClick={clear} > Clear Logs </Button>
             </div>
         );
     }
