@@ -149,7 +149,6 @@ export const settings = definePluginSettings({
         description: "count of created bot messages",
         type: OptionType.NUMBER,
         default: 0,
-        restartNeeded: true,
         hidden: true,
     },
 });

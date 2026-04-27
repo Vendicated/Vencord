@@ -308,6 +308,10 @@ const plugin = definePlugin({
         },
     },
 
+    start() {
+        settings.store.created = 0;
+    },
+
     settingsAboutComponent: () => {
         const resetGuilds = () => {
             settings.store.guilds = "";
