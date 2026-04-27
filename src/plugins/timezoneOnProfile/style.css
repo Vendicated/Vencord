@@ -1,23 +1,21 @@
 .vc-tzonprofile-container {
-    position: relative;
-    display: inline-block;
+    display: inline;
 }
 
 .vc-tzonprofile-selector {
-    color: var(--text-strong);
+    display: inline;
 }
 
 .vc-tzonprofile-time {
-    color: var(--text-strong);
+    display: inline;
+    color: var(--text-muted);
 }
 
 .vc-tzonprofile-time * {
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    display: inline;
     margin: 0;
 }
 
-.vc-tzonprofile-modal {
-    min-height: 140px;
+.vc-tzonprofile-time > *::after {
+    content: " •";
 }
