@@ -13,7 +13,7 @@ import { Button, ChannelStore, Menu, RelationshipStore, SelectedChannelStore, Se
 
 import { Filter, LoggingMode, settings, TrackingMode } from "./settings";
 
-interface VoiceStateChangeEvent {
+export interface VoiceStateChangeEvent {
     guildId: string;
     userId: string;
     channelId?: string;
@@ -26,7 +26,7 @@ interface VoiceStateChangeEvent {
     selfVideo: boolean;
 }
 
-function getContent({ channelId, oldChannelId }: VoiceStateChangeEvent) {
+export function getContent({ channelId, oldChannelId }: VoiceStateChangeEvent) {
     if (channelId !== oldChannelId) {
         if (channelId) return !oldChannelId
             ? `joined <#${channelId}>`
@@ -36,7 +36,7 @@ function getContent({ channelId, oldChannelId }: VoiceStateChangeEvent) {
     return "";
 }
 
-const IdIcon: IconComponent = ({ height = 24, width = 24, className }) => {
+export const IdIcon: IconComponent = ({ height = 24, width = 24, className }) => {
     return (
         <svg
             viewBox="0 0 24 24"
@@ -78,7 +78,7 @@ function MakeContextCallback(name: "Guild" | "Channel" | "User"): NavContextMenu
         const add_action = () => {
             if (!_id_) return;
             const ids_str: string = settings.store[ids_key];
-            const ids = (ids_str?.split(",") || []).map(i => i.trim()).filter(i => i !== "");
+            const ids = parseIds(ids_str);
             if (ids.includes(value.id)) return;
             ids.push(value.id);
             settings.store[ids_key] = ids.join(",");
@@ -87,7 +87,7 @@ function MakeContextCallback(name: "Guild" | "Channel" | "User"): NavContextMenu
         const remove_action = () => {
             if (!_id_) return;
             const ids_str: string = settings.store[ids_key];
-            const ids = (ids_str?.split(",") || []).map(i => i.trim()).filter(i => i !== "");
+            const ids = parseIds(ids_str);
             if (!ids.includes(value.id)) return;
             settings.store[ids_key] = ids.filter(i => i !== value.id).join(",");
         };
@@ -108,6 +108,8 @@ function MakeContextCallback(name: "Guild" | "Channel" | "User"): NavContextMenu
         );
     };
 }
+
+export const parseIds = (ids: string | undefined, sep: string = ",") => (ids?.split(sep) || []).flatMap(i => i.trim() !== "" ? [i.trim()] : []);
 
 export default definePlugin({
     name: "vcLogger",
@@ -139,9 +141,9 @@ export default definePlugin({
             const user = UserStore.getCurrentUser();
             const myId = user.id;
 
-            const guilds = (settings.store.guilds?.split(",") || []).map(i => i.trim()).filter(i => i !== "");
-            const channels = (settings.store.channels?.split(",") || []).map(i => i.trim()).filter(i => i !== "");
-            const users = (settings.store.users?.split(",") || []).map(i => i.trim()).filter(i => i !== "");
+            const guilds = parseIds(settings.store.guilds);
+            const channels = parseIds(settings.store.channels);
+            const users = parseIds(settings.store.users);
 
             const { guildsFilter, channelsFilter, usersFilter, trackingMode, loggingMode, ignoreBlockedUsers, trackUsers, self } = settings.store;
 
@@ -165,18 +167,20 @@ export default definePlugin({
                         if (users.includes(userId) && usersFilter === Filter.BLACK) continue;
                         if (!users.includes(userId) && usersFilter === Filter.WHITE) continue;
                     }
-                    if (channels.length && channelsFilter !== Filter.NONE) {
+                    else if (channels.length && channelsFilter !== Filter.NONE) {
                         if (channels.includes(channelId as string) && channelsFilter === Filter.BLACK) continue;
                         if (!channels.includes(channelId as string) && channelsFilter === Filter.WHITE) continue;
                     }
-                    if (guilds.length && guildsFilter !== Filter.NONE) {
+                    else if (guilds.length && guildsFilter !== Filter.NONE) {
                         if (guilds.includes(guildId) && guildsFilter === Filter.BLACK) continue;
                         if (!guilds.includes(guildId) && guildsFilter === Filter.WHITE) continue;
                     }
 
+                    const _channels = [channelId, oldChannelId];
+
                     switch (trackingMode) {
                         case TrackingMode.CHANNEL:
-                            if (![channelId, oldChannelId].includes(joinedVoiceChannelId)) continue;
+                            if (!_channels.includes(joinedVoiceChannelId)) continue;
                             break;
                         case TrackingMode.GUILD:
                             if (guildId !== joinedGuildId) continue;
@@ -185,7 +189,7 @@ export default definePlugin({
                             if (guildId !== CurrentlySelectedGuildId) continue;
                             break;
                         case TrackingMode.SELECTED_CHANNEL:
-                            if (![channelId, oldChannelId].includes(CurrentlySelectedChannelId)) continue;
+                            if (!_channels.includes(CurrentlySelectedChannelId)) continue;
                             break;
                     }
 
