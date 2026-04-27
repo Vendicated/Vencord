@@ -342,7 +342,7 @@ const plugin = definePlugin({
 
         const reset = () => {
             settings.store.enable = true;
-            settings.store.self = false;
+            settings.store.self = true;
             settings.store.showClearBtn = true;
             settings.store.trackUsers = false;
             settings.store.ignoreBlockedUsers = false;
