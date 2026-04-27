@@ -16,7 +16,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { ClockIcon } from "@components/Icons";
+import SettingsPlugin from "@plugins/_core/settings";
 import { Devs } from "@utils/constants";
+import { removeFromArray } from "@utils/misc";
 import definePlugin from "@utils/types";
 
 import StartupTimingPage from "./StartupTimingPage";
@@ -24,19 +27,17 @@ import StartupTimingPage from "./StartupTimingPage";
 export default definePlugin({
     name: "StartupTimings",
     description: "Adds Startup Timings to the Settings menu",
+    tags: ["Developers"],
     authors: [Devs.Megu],
-
-    patches: [{
-        find: "#{intl::ACTIVITY_SETTINGS}",
-        replacement: [
-            {
-                match: /(?<=}\)([,;])(\i\.settings)\.forEach.+?(\i)\.push.+\)\)\}\))(?=\)\})/,
-                replace: (_, commaOrSemi, settings, elements) => "" +
-                    `${commaOrSemi}${settings}?.[0]==="CHANGELOG"` +
-                    `&&${elements}.push({section:"StartupTimings",label:"Startup Timings",element:$self.StartupTimingPage})`,
-            },
-        ]
-    }],
-
-    StartupTimingPage
+    start() {
+        SettingsPlugin.customEntries.push({
+            key: "vencord_startup_timings",
+            title: "Startup Timings",
+            Component: StartupTimingPage,
+            Icon: ClockIcon
+        });
+    },
+    stop() {
+        removeFromArray(SettingsPlugin.customEntries, e => e.key === "vencord_startup_timings");
+    },
 });

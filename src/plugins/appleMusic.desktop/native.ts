@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { canonicalizeMatch } from "@utils/patches";
+import { VENCORD_USER_AGENT } from "@shared/vencordUserAgent";
 import { execFile } from "child_process";
 import { promisify } from "util";
 
@@ -26,24 +26,6 @@ interface RemoteData {
 
 let cachedRemoteData: { id: string, data: RemoteData; } | { id: string, failures: number; } | null = null;
 
-const APPLE_MUSIC_BUNDLE_REGEX = /<script type="module" crossorigin src="([a-zA-Z0-9.\-/]+)"><\/script>/;
-const APPLE_MUSIC_TOKEN_REGEX = canonicalizeMatch(/\b(\i)="([A-Za-z0-9-_]*\.[A-Za-z0-9-_]*\.[A-Za-z0-9-_]*)"(?=.+?Bearer \$\{\1\})/);
-
-let cachedToken: string | undefined = undefined;
-
-const getToken = async () => {
-    if (cachedToken) return cachedToken;
-
-    const html = await fetch("https://music.apple.com/").then(r => r.text());
-    const bundleUrl = new URL(html.match(APPLE_MUSIC_BUNDLE_REGEX)![1], "https://music.apple.com/");
-
-    const bundle = await fetch(bundleUrl).then(r => r.text());
-    const token = bundle.match(APPLE_MUSIC_TOKEN_REGEX)![2];
-
-    cachedToken = token;
-    return token;
-};
-
 async function fetchRemoteData({ id, name, artist, album }: { id: string, name: string, artist: string, album: string; }) {
     if (id === cachedRemoteData?.id) {
         if ("data" in cachedRemoteData) return cachedRemoteData.data;
@@ -51,36 +33,34 @@ async function fetchRemoteData({ id, name, artist, album }: { id: string, name: 
     }
 
     try {
-        const dataUrl = new URL("https://amp-api-edge.music.apple.com/v1/catalog/us/search");
-        dataUrl.searchParams.set("platform", "web");
-        dataUrl.searchParams.set("l", "en-US");
-        dataUrl.searchParams.set("limit", "1");
-        dataUrl.searchParams.set("with", "serverBubbles");
-        dataUrl.searchParams.set("types", "songs");
+        const dataUrl = new URL("https://itunes.apple.com/search");
         dataUrl.searchParams.set("term", `${name} ${artist} ${album}`);
-        dataUrl.searchParams.set("include[songs]", "artists");
-
-        const token = await getToken();
+        dataUrl.searchParams.set("media", "music");
+        dataUrl.searchParams.set("entity", "song");
 
         const songData = await fetch(dataUrl, {
             headers: {
-                "accept": "*/*",
-                "accept-language": "en-US,en;q=0.9",
-                "authorization": `Bearer ${token}`,
-                "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36",
-                "origin": "https://music.apple.com",
+                "user-agent": VENCORD_USER_AGENT,
             },
         })
             .then(r => r.json())
-            .then(data => data.results.song.data[0]);
+            .then(data => data.results.find(song => song.collectionName === album) || data.results[0]);
+
+        const artistArtworkURL = await fetch(songData.artistViewUrl)
+            .then(r => r.text())
+            .then(data => {
+                const match = data.match(/<meta property="og:image" content="(.+?)">/);
+                return match ? match[1].replace(/[0-9]+x.+/, "220x220bb-60.png") : undefined;
+            })
+            .catch(() => void 0);
 
         cachedRemoteData = {
             id,
             data: {
-                appleMusicLink: songData.attributes.url,
-                songLink: `https://song.link/i/${songData.id}`,
-                albumArtwork: songData.attributes.artwork.url.replace("{w}x{h}", "512x512"),
-                artistArtwork: songData.relationships.artists.data[0].attributes.artwork.url.replace("{w}x{h}", "512x512"),
+                appleMusicLink: songData.trackViewUrl,
+                songLink: `https://song.link/i/${new URL(songData.trackViewUrl).searchParams.get("i")}`,
+                albumArtwork: (songData.artworkUrl100).replace("100x100", "512x512"),
+                artistArtwork: artistArtworkURL
             }
         };
 

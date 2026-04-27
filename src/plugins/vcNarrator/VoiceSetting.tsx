@@ -36,7 +36,7 @@ function SimplePicker({ voice, voices }: PickerProps) {
             placeholder="Select a voice"
             maxVisibleItems={5}
             options={options}
-            value={options.find(o => o.value === voice)}
+            value={options.find(o => o.value === voice)?.value}
             onChange={v => settings.store.voice = v}
             closeOnSelect
         />
@@ -87,7 +87,7 @@ function ComplexPicker({ voice, voices }: PickerProps) {
             <SearchableSelect
                 placeholder="Select a language"
                 options={languageOptions}
-                value={languageOptions.find(l => l.value === selectedLanguage)}
+                value={languageOptions.find(l => l.value === selectedLanguage)?.value}
                 onChange={v => setSelectedLanguage(v)}
                 maxVisibleItems={5}
                 closeOnSelect
@@ -118,9 +118,9 @@ function VoiceSetting() {
 
 export function VoiceSettingSection() {
     return (
-        <Forms.FormSection>
+        <section>
             <Forms.FormTitle>Voice</Forms.FormTitle>
             <VoiceSetting />
-        </Forms.FormSection>
+        </section>
     );
 }

@@ -18,17 +18,28 @@
 
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
+import { Logger } from "@utils/Logger";
 import definePlugin, { OptionType } from "@utils/types";
-import { findStoreLazy } from "@webpack";
-import { Constants, FluxDispatcher, GuildStore, RelationshipStore, SnowflakeUtils, UserStore } from "@webpack/common";
-import { Settings } from "Vencord";
+import { Constants, FluxDispatcher, GuildStore, RelationshipStore, SnowflakeUtils, UserAffinitiesStore, UserStore } from "@webpack/common";
 
-const UserAffinitiesStore = findStoreLazy("UserAffinitiesV2Store");
+const settings = definePluginSettings(
+    {
+        sortByAffinity: {
+            type: OptionType.BOOLEAN,
+            default: true,
+            description: "Whether to sort implicit relationships by their affinity to you.",
+            restartNeeded: true
+        },
+    }
+);
 
 export default definePlugin({
     name: "ImplicitRelationships",
     description: "Shows your implicit relationships in the Friends tab.",
+    tags: ["Friends", "Servers"],
     authors: [Devs.Dolfies],
+    settings,
+
     patches: [
         // Counts header
         {
@@ -48,9 +59,9 @@ export default definePlugin({
         },
         // Sections header
         {
-            find: "#{intl::FRIENDS_SECTION_ONLINE}",
+            find: "#{intl::FRIENDS_SECTION_ONLINE}),className:",
             replacement: {
-                match: /,{id:(\i\.\i)\.PENDING,show:.+?className:(\i\.item)/,
+                match: /,{id:(\i\.\i)\.PENDING,show:.+?className:(\i\.\i)(?=\},\{id:)/,
                 replace: (rest, relationShipTypes, className) => `,{id:${relationShipTypes}.IMPLICIT,show:true,className:${className},content:"Implicit"}${rest}`
             }
         },
@@ -75,7 +86,7 @@ export default definePlugin({
         {
             find: "getRelationshipCounts(){",
             replacement: {
-                predicate: () => Settings.plugins.ImplicitRelationships.sortByAffinity,
+                predicate: () => settings.store.sortByAffinity,
                 match: /\}\)\.sortBy\((.+?)\)\.value\(\)/,
                 replace: "}).sortBy(row => $self.wrapSort(($1), row)).value()"
             }
@@ -83,9 +94,9 @@ export default definePlugin({
 
         // Add support for the nonce parameter to Discord's shitcode
         {
-            find: ".REQUEST_GUILD_MEMBERS",
+            find: ".REQUEST_GUILD_MEMBERS,",
             replacement: {
-                match: /\.send\(8,{/,
+                match: /\.send\(\i\.REQUEST_GUILD_MEMBERS,{/,
                 replace: "$&nonce:arguments[1].nonce,"
             }
         },
@@ -104,16 +115,6 @@ export default definePlugin({
             },
         }
     ],
-    settings: definePluginSettings(
-        {
-            sortByAffinity: {
-                type: OptionType.BOOLEAN,
-                default: true,
-                description: "Whether to sort implicit relationships by their affinity to you.",
-                restartNeeded: true
-            },
-        }
-    ),
 
     wrapSort(comparator: Function, row: any) {
         return row.type === 5
@@ -143,13 +144,17 @@ export default definePlugin({
         // with will not be fetched; so, if they're not otherwise cached, they will not be shown
         // This should not be a big deal as these should be rare
         const callback = ({ chunks }) => {
-            const chunkCount = chunks.filter(chunk => chunk.nonce === sentNonce).length;
-            if (chunkCount === 0) return;
+            try {
+                const chunkCount = chunks.filter(chunk => chunk.nonce === sentNonce).length;
+                if (chunkCount === 0) return;
 
-            count -= chunkCount;
-            RelationshipStore.emitChange();
-            if (count <= 0) {
-                FluxDispatcher.unsubscribe("GUILD_MEMBERS_CHUNK_BATCH", callback);
+                count -= chunkCount;
+                RelationshipStore.emitChange();
+                if (count <= 0) {
+                    FluxDispatcher.unsubscribe("GUILD_MEMBERS_CHUNK_BATCH", callback);
+                }
+            } catch (e) {
+                new Logger("ImplicitRelationships").error("Error in GUILD_MEMBERS_CHUNK_BATCH handler", e);
             }
         };
 

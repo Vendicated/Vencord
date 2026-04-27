@@ -16,16 +16,16 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { traceFunction } from "@debug/Tracer";
 import { makeLazy, proxyLazy } from "@utils/lazy";
 import { LazyComponent } from "@utils/lazyReact";
 import { Logger } from "@utils/Logger";
 import { canonicalizeMatch } from "@utils/patches";
-import { FluxStore } from "@vencord/discord-types";
-import { ModuleExports, WebpackRequire } from "@vencord/discord-types/webpack";
+import { escapeRegExp } from "@utils/text";
+import type { FluxStore } from "@vencord/discord-types";
+import type { ModuleExports, ModuleFactory, WebpackRequire } from "@vencord/discord-types/webpack";
 
-import { traceFunction } from "../debug/Tracer";
-import { Flux } from "./common";
-import { AnyModuleFactory, AnyWebpackRequire } from "./types";
+import type { AnyModuleFactory, AnyWebpackRequire } from "./types";
 
 const logger = new Logger("Webpack");
 
@@ -39,7 +39,7 @@ export const onceReady = new Promise<void>(r => _resolveReady = r);
 export let wreq: WebpackRequire;
 export let cache: WebpackRequire["c"];
 
-export const fluxStores: Record<string, FluxStore> = {};
+export const fluxStores = new Map<string, FluxStore>();
 
 export type FilterFn = (mod: any) => boolean;
 
@@ -53,6 +53,10 @@ export const stringMatches = (s: string, filter: CodeFilter) =>
             ? s.includes(f)
             : (f.global && (f.lastIndex = 0), f.test(s))
     );
+
+export function makeClassNameRegex(className: string) {
+    return new RegExp(`(?:\\b|_)${escapeRegExp(className)}(?:\\b|_)`);
+}
 
 export const filters = {
     byProps: (...props: PropsFilter): FilterFn =>
@@ -75,7 +79,7 @@ export const filters = {
 
     componentByCode: (...code: CodeFilter): FilterFn => {
         const byCodeFilter = filters.byCode(...code);
-        const filter = m => {
+        const filter = (m: any) => {
             let inner = m;
 
             while (inner != null) {
@@ -91,6 +95,17 @@ export const filters = {
 
         filter.$$vencordProps = [...code];
         return filter;
+    },
+
+    byClassNames: (...classes: string[]): FilterFn => {
+        const regexes = classes.map(makeClassNameRegex);
+
+        return (m: any) => {
+            if (typeof m !== "object") return false;
+
+            const values = Object.values(m);
+            return regexes.every(cls => values.some(v => typeof v === "string" && cls.test(v)));
+        };
     }
 };
 
@@ -210,7 +225,9 @@ export function handleModuleNotFound(method: string, ...filter: unknown[]) {
 /**
  * Find the first module that matches the filter
  */
-export const find = traceFunction("find", function find(filter: FilterFn, { isIndirect = false, isWaitFor = false }: { isIndirect?: boolean; isWaitFor?: boolean; } = {}) {
+export const find = traceFunction("find", function find(filter: FilterFn, { isIndirect = false, isWaitFor = false, topLevelOnly = false }: { isIndirect?: boolean; isWaitFor?: boolean; topLevelOnly?: boolean; } = {}) {
+    if (IS_ANTI_CRASH_TEST) return null;
+
     if (typeof filter !== "function")
         throw new Error("Invalid filter. Expected a function got " + typeof filter);
 
@@ -222,7 +239,7 @@ export const find = traceFunction("find", function find(filter: FilterFn, { isIn
             return isWaitFor ? [mod.exports, key] : mod.exports;
         }
 
-        if (typeof mod.exports !== "object") continue;
+        if (typeof mod.exports !== "object" || topLevelOnly) continue;
 
         for (const nestedMod in mod.exports) {
             const nested = mod.exports[nestedMod];
@@ -239,7 +256,7 @@ export const find = traceFunction("find", function find(filter: FilterFn, { isIn
     return isWaitFor ? [null, null] : null;
 });
 
-export function findAll(filter: FilterFn) {
+export function findAll(filter: FilterFn, { topLevelOnly = false }: { topLevelOnly?: boolean; } = {}) {
     if (typeof filter !== "function")
         throw new Error("Invalid filter. Expected a function got " + typeof filter);
 
@@ -251,7 +268,7 @@ export function findAll(filter: FilterFn) {
         if (filter(mod.exports))
             ret.push(mod.exports);
 
-        if (typeof mod.exports !== "object")
+        if (typeof mod.exports !== "object" || topLevelOnly)
             continue;
 
         for (const nestedMod in mod.exports) {
@@ -270,6 +287,8 @@ export function findAll(filter: FilterFn) {
  * @returns Array of results in the same order as the passed filters
  */
 export const findBulk = traceFunction("findBulk", function findBulk(...filterFns: FilterFn[]) {
+    if (IS_ANTI_CRASH_TEST) return [];
+
     if (!Array.isArray(filterFns))
         throw new Error("Invalid filters. Expected function[] got " + typeof filterFns);
 
@@ -370,7 +389,7 @@ export function findModuleFactory(...code: CodeFilter) {
     return wreq.m[id];
 }
 
-export const lazyWebpackSearchHistory = [] as Array<["find" | "findByProps" | "findByCode" | "findStore" | "findComponent" | "findComponentByCode" | "findExportedComponent" | "waitFor" | "waitForComponent" | "waitForStore" | "proxyLazyWebpack" | "LazyComponentWebpack" | "extractAndLoadChunks" | "mapMangledModule", any[]]>;
+export const lazyWebpackSearchHistory = [] as Array<["find" | "findByProps" | "findByCode" | "findCssClasses" | "findStore" | "findComponent" | "findComponentByCode" | "findExportedComponent" | "waitFor" | "waitForComponent" | "waitForStore" | "proxyLazyWebpack" | "LazyComponentWebpack" | "extractAndLoadChunks" | "mapMangledModule", any[]]>;
 
 /**
  * This is just a wrapper around {@link proxyLazy} to make our reporter test for your webpack finds.
@@ -451,55 +470,50 @@ export function findByCodeLazy(...code: CodeFilter) {
     return proxyLazy(() => findByCode(...code));
 }
 
+function populateFluxStoreMap() {
+    const { Flux } = require("./common") as typeof import("./common");
+
+    Flux.Store.getAll?.().forEach(store =>
+        fluxStores.set(store.getName(), store)
+    );
+
+    try {
+        const getLibdiscore = findByCode("libdiscoreWasm is not initialized");
+        const libdiscoreExports = getLibdiscore();
+
+        for (const libdiscoreExportName in libdiscoreExports) {
+            if (!libdiscoreExportName.endsWith("Store")) {
+                continue;
+            }
+
+            const storeName = libdiscoreExportName;
+            const store = libdiscoreExports[storeName];
+
+            fluxStores.set(storeName, store);
+        }
+    } catch { }
+}
+
 /**
  * Find a store by its displayName
  */
 export function findStore(name: StoreNameFilter) {
-    let res = fluxStores[name] as any;
-    if (res == null) {
-        for (const store of Flux.Store.getAll?.() ?? []) {
-            const storeName = store.getName();
-
-            if (storeName === name) {
-                res = store;
-            }
-
-            if (fluxStores[storeName] == null) {
-                fluxStores[storeName] = store;
-            }
-        }
-
-        try {
-            const getLibdiscore = findByCode("libdiscoreWasm is not initialized");
-            const libdiscoreExports = getLibdiscore();
-
-            for (const libdiscoreExportName in libdiscoreExports) {
-                if (!libdiscoreExportName.endsWith("Store")) {
-                    continue;
-                }
-
-                const storeName = libdiscoreExportName;
-                const store = libdiscoreExports[storeName];
-
-                if (storeName === name) {
-                    res = store;
-                }
-
-                if (fluxStores[storeName] == null) {
-                    fluxStores[storeName] = store;
-                }
-            }
-
-        } catch { }
-
-        if (res == null) {
-            res = find(filters.byStoreName(name), { isIndirect: true });
-        }
+    if (!fluxStores.has(name)) {
+        populateFluxStoreMap();
     }
 
-    if (!res)
-        handleModuleNotFound("findStore", name);
-    return res;
+    if (fluxStores.has(name)) {
+        return fluxStores.get(name);
+    }
+
+    const res = find(filters.byStoreName(name), { isIndirect: true });
+    if (res) {
+        fluxStores.set(name, res);
+        return res;
+    }
+
+    handleModuleNotFound("findStore", name);
+    return null;
 }
 
 /**
@@ -564,6 +578,40 @@ export function findExportedComponentLazy<T extends object = any>(...props: Prop
     });
 }
 
+export function mapMangledCssClasses<S extends string>(mappedModule: object, classes: S[] | ReadonlyArray<S>): Record<S, string> {
+    const values = Object.values(mappedModule);
+    const mapped = {} as Record<S, string>;
+
+    for (const cls of classes) {
+        const re = makeClassNameRegex(cls);
+        mapped[cls] = values.find(v => typeof v === "string" && re.test(v)) as string;
+
+        if (!mapped[cls]) // this should never happen unless this is used manually with invalid input
+            throw new Error(`mapMangledCssClasses: Invalid input. ${cls} not found in module`);
+    }
+
+    return mapped;
+}
+
+export function findCssClasses<S extends string>(...classes: S[]): Record<S, string> {
+    const res = find(filters.byClassNames(...classes), { isIndirect: true, topLevelOnly: true });
+
+    if (!res) {
+        handleModuleNotFound("findCssClasses", ...classes);
+
+        if (IS_REPORTER) return null as any;
+        return {} as Record<S, string>;
+    }
+
+    return mapMangledCssClasses(res, classes);
+}
+
+export function findCssClassesLazy<S extends string>(...classes: S[]) {
+    if (IS_REPORTER) lazyWebpackSearchHistory.push(["findCssClasses", classes]);
+
+    return proxyLazy(() => findCssClasses(...classes));
+}
+
 function getAllPropertyNames(object: Record<PropertyKey, any>, includeNonEnumerable: boolean) {
     const names = new Set<PropertyKey>();
 
@@ -595,6 +643,9 @@ function getAllPropertyNames(object: Record<PropertyKey, any>, includeNonEnumera
 export const mapMangledModule = traceFunction("mapMangledModule", function mapMangledModule<S extends string>(code: string | RegExp | CodeFilter, mappers: Record<S, FilterFn>, includeBlacklistedExports = false): Record<S, any> {
     const exports = {} as Record<S, any>;
 
+    // whitelist Modal API to be able to test modals
+    if (IS_ANTI_CRASH_TEST && code !== ':"thin")' && code !== ".modalKey?") return exports;
+
     const id = findModuleId(...Array.isArray(code) ? code : [code]);
     if (id === null)
         return exports;
@@ -625,7 +676,7 @@ export function mapMangledModuleLazy<S extends string>(code: string | RegExp | C
     return proxyLazy(() => mapMangledModule(code, mappers, includeBlacklistedExports));
 }
 
-export const DefaultExtractAndLoadChunksRegex = /(?:(?:Promise\.all\(\[)?(\i\.e\("?[^)]+?"?\)[^\]]*?)(?:\]\))?|Promise\.resolve\(\))\.then\(\i\.bind\(\i,"?([^)]+?)"?\)\)/;
+export const DefaultExtractAndLoadChunksRegex = /(?:(?:Promise\.all\(\[)?((?:\i\.e\("?[^)]+?"?\),?)+?)(?:\]\))?|Promise\.resolve\(\))\.then\(\i\.bind\(\i,"?([^)]+?)"?\)\)/;
 export const ChunkIdsRegex = /\("([^"]+?)"\)/g;
 
 /**
@@ -635,6 +686,8 @@ export const ChunkIdsRegex = /\("([^"]+?)"\)/g;
  * @returns A promise that resolves with a boolean whether the chunks were loaded
  */
 export async function extractAndLoadChunks(code: CodeFilter, matcher = DefaultExtractAndLoadChunksRegex) {
+    if (IS_ANTI_CRASH_TEST) return false;
+
     const module = findModuleFactory(...code);
     if (!module) {
         const err = new Error("extractAndLoadChunks: Couldn't find module factory");
@@ -673,12 +726,12 @@ export async function extractAndLoadChunks(code: CodeFilter, matcher = DefaultEx
     }
 
     const numEntryPoint = Number(entryPointId);
-    const entryPoint = Number.isNaN(numEntryPoint) ? entryPointId : numEntryPoint;
+    const entryPoint = Number.isNaN(numEntryPoint) ? entryPointId : String(numEntryPoint);
 
     if (rawChunkIds) {
         const chunkIds = Array.from(rawChunkIds.matchAll(ChunkIdsRegex)).map(m => {
             const numChunkId = Number(m[1]);
-            return Number.isNaN(numChunkId) ? m[1] : numChunkId;
+            return Number.isNaN(numChunkId) ? m[1] : String(numChunkId);
         });
 
         await Promise.all(chunkIds.map(id => wreq.e(id)));
@@ -718,6 +771,9 @@ export function extractAndLoadChunksLazy(code: CodeFilter, matcher = DefaultExtr
  * then call the callback with the module as the first argument
  */
 export function waitFor(filter: string | PropsFilter | FilterFn, callback: CallbackFn, { isIndirect = false }: { isIndirect?: boolean; } = {}) {
+    // if react find fails then we are fully cooked
+    if (IS_ANTI_CRASH_TEST && filter !== "useState") return;
+
     if (IS_REPORTER && !isIndirect) lazyWebpackSearchHistory.push(["waitFor", Array.isArray(filter) ? filter : [filter]]);
 
     if (typeof filter === "string")
@@ -763,20 +819,24 @@ export function search(...code: CodeFilter) {
  * to view a massive file. extract then returns the extracted module so you can jump to it.
  * As mentioned above, note that this extracted module is not actually used,
  * so putting breakpoints or similar will have no effect.
- * @param id The id of the module to extract
+ * @param moduleId The id of the module to extract
  */
-export function extract(id: string | number) {
-    const mod = wreq.m[id] as Function;
-    if (!mod) return null;
+export function extract(moduleId: PropertyKey) {
+    const originalFactory = wreq.m[moduleId];
+    if (!originalFactory) return null;
 
+    const originalFactoryCode = String(originalFactory);
+    const isArrowFunction = originalFactoryCode.startsWith("(");
+
+    const wrappedCode = "0," + (!isArrowFunction ? "function" : "") + originalFactoryCode.slice(originalFactoryCode.indexOf("("));
     const code = `
-// [EXTRACTED] WebpackModule${id}
+// [EXTRACTED] WebpackModule${String(moduleId)}
 // WARNING: This module was extracted to be more easily readable.
 //          This module is NOT ACTUALLY USED! This means putting breakpoints will have NO EFFECT!!
 
-0,${mod.toString()}
-//# sourceURL=file:///ExtractedWebpackModule${id}
+0,${wrappedCode}
+//# sourceURL=file:///ExtractedWebpackModule${String(moduleId)}
 `;
-    const extracted = (0, eval)(code);
-    return extracted as Function;
+
+    return (0, eval)(code) as ModuleFactory;
 }

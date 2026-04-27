@@ -5,19 +5,19 @@
  */
 
 import { Settings } from "@api/Settings";
+import { traceFunctionWithResults } from "@debug/Tracer";
 import { makeLazy } from "@utils/lazy";
 import { Logger } from "@utils/Logger";
 import { interpolateIfDefined } from "@utils/misc";
-import { canonicalizeReplacement } from "@utils/patches";
 import { Patch, PatchReplacement } from "@utils/types";
 import { WebpackRequire } from "@vencord/discord-types/webpack";
 
-import { traceFunctionWithResults } from "../debug/Tracer";
 import { AnyModuleFactory, AnyWebpackRequire, MaybePatchedModuleFactory, PatchedModuleFactory } from "./types";
 import { _blacklistBadModules, _initWebpack, factoryListeners, findModuleFactory, moduleListeners, waitForSubscriptions, wreq } from "./webpack";
 
 export const patches = [] as Patch[];
 
+export const SYM_ORIGINAL_MODULE_FACTORIES = Symbol("WebpackPatcher.originalModuleFactories");
 export const SYM_IS_PROXIED_FACTORY = Symbol("WebpackPatcher.isProxiedFactory");
 export const SYM_ORIGINAL_FACTORY = Symbol("WebpackPatcher.originalFactory");
 export const SYM_PATCHED_SOURCE = Symbol("WebpackPatcher.patchedSource");
@@ -29,7 +29,7 @@ export const patchTimings = [] as Array<[plugin: string, moduleId: PropertyKey, 
 export const getBuildNumber = makeLazy(() => {
     try {
         function matchBuildNumber(factoryStr: string) {
-            const buildNumberMatch = factoryStr.match(/.concat\("(\d+?)"\)/);
+            const buildNumberMatch = factoryStr.match(/"Trying to open a changelog for an invalid build number (\d+?)"\)/);
             if (buildNumberMatch == null) {
                 return -1;
             }
@@ -37,13 +37,15 @@ export const getBuildNumber = makeLazy(() => {
             return Number(buildNumberMatch[1]);
         }
 
-        const hardcodedFactoryStr = String(wreq.m[128014]);
+        const hardcodedFactoryStr = String(wreq.m[927815]);
         if (hardcodedFactoryStr.includes("Trying to open a changelog for an invalid build number")) {
             const hardcodedBuildNumber = matchBuildNumber(hardcodedFactoryStr);
 
             if (hardcodedBuildNumber !== -1) {
                 return hardcodedBuildNumber;
             }
+        } else if (IS_DEV || IS_REPORTER) {
+            logger.error("Hardcoded build number module id is invalid");
         }
 
         const moduleFactory = findModuleFactory("Trying to open a changelog for an invalid build number");
@@ -110,7 +112,7 @@ define(Function.prototype, "m", {
         // Currently, sentry and libdiscore Webpack instances are not meant to be patched.
         // As an extra measure, take advatange of the fact their files include the names and return early if it's one of them.
         // Later down we also include other measures to avoid patching them.
-        if (["sentry", "libdiscore"].some(name => fileName?.toLowerCase()?.includes(name))) {
+        if (["sentry", "libdiscore", "fast-connect"].some(name => fileName?.toLowerCase()?.includes(name))) {
             return;
         }
 
@@ -127,7 +129,7 @@ define(Function.prototype, "m", {
                 // libdiscore init Webpack instance always returns a constant string for the js filename of a chunk.
                 // In that case, avoid patching this instance,
                 // as it runs before the main Webpack instance and will make the WebpackRequire fallback not work properly, or init an wrongful main WebpackRequire.
-                if (bundlePath !== "/assets/" || /(?:=>|{return)"[^"]/.exec(String(this.u))) {
+                if (bundlePath !== "/assets/" || /(?:=>|{return)"[^"]+?"[^=]/.exec(String(this.u))) {
                     return;
                 }
 
@@ -184,7 +186,7 @@ define(Function.prototype, "m", {
 
             // Proxy (and maybe patch) pre-populated factories
             for (const moduleId in originalModules) {
-                updateExistingOrProxyFactory(originalModules, moduleId, originalModules[moduleId], originalModules, true);
+                proxyFactoryAndUpdateExisting(originalModules, moduleId, originalModules[moduleId], originalModules, true);
             }
 
             define(originalModules, Symbol.toStringTag, {
@@ -234,20 +236,30 @@ const moduleFactoriesHandler: ProxyHandler<AnyWebpackRequire["m"]> = {
     },
     */
 
-    set: updateExistingOrProxyFactory
+    get(target, p, receiver) {
+        if (p === SYM_ORIGINAL_MODULE_FACTORIES) {
+            return target;
+        }
+
+        return Reflect.get(target, p, receiver);
+    },
+
+    set: proxyFactoryAndUpdateExisting
 };
 
 // The proxy for patching lazily and/or running factories with our wrapper.
 const moduleFactoryHandler: ProxyHandler<MaybePatchedModuleFactory> = {
     apply(target, thisArg: unknown, argArray: Parameters<AnyModuleFactory>) {
-        // SYM_ORIGINAL_FACTORY means the factory has already been patched
+        // If SYM_ORIGINAL_FACTORY exists in the proxy target, it means the proxy target is already a patched factory.
+        // In that case, just run it.
         if (target[SYM_ORIGINAL_FACTORY] != null) {
             return runFactoryWithWrap(target as PatchedModuleFactory, thisArg, argArray);
         }
 
-        // SAFETY: Factories have `name` as their key in the module factories object, and that is always their module id
+        // SAFETY: Factories have `name` as their key in the module factories object, and that is always their module id.
         const moduleId: string = target.name;
 
+        // Patch the proxy target, which is the original factory.
         const patchedFactory = patchFactory(moduleId, target);
         return runFactoryWithWrap(patchedFactory, thisArg, argArray);
     },
@@ -257,9 +269,10 @@ const moduleFactoryHandler: ProxyHandler<MaybePatchedModuleFactory> = {
             return true;
         }
 
+        // If the proxy target is a patched factory, SYM_ORIGINAL_FACTORY will have the original factory. Otherwise the target itself will be it.
         const originalFactory: AnyModuleFactory = target[SYM_ORIGINAL_FACTORY] ?? target;
 
-        // Redirect these properties to the original factory, including making `toString` return the original factory `toString`
+        // Redirect getting these properties from the original factory, including making `toString` return the original factory `toString`
         if (p === "toString" || p === SYM_PATCHED_SOURCE || p === SYM_PATCHED_BY) {
             const v = Reflect.get(originalFactory, p, originalFactory);
             return p === "toString" ? v.bind(originalFactory) : v;
@@ -269,62 +282,55 @@ const moduleFactoryHandler: ProxyHandler<MaybePatchedModuleFactory> = {
     }
 };
 
-function updateExistingOrProxyFactory(moduleFactories: AnyWebpackRequire["m"], moduleId: PropertyKey, newFactory: AnyModuleFactory, receiver: any, ignoreExistingInTarget = false) {
-    if (updateExistingFactory(moduleFactories, moduleId, newFactory, receiver, ignoreExistingInTarget)) {
+function proxyFactoryAndUpdateExisting(moduleFactories: AnyWebpackRequire["m"], moduleId: PropertyKey, newFactory: AnyModuleFactory, receiver: any, ignoreExistingInTarget = false) {
+    notifyFactoryListeners(moduleId, newFactory);
+    const proxiedFactory = new Proxy(Settings.eagerPatches ? patchFactory(moduleId, newFactory) : newFactory, moduleFactoryHandler);
+
+    if (updateExistingFactory(moduleFactories, moduleId, newFactory, proxiedFactory, ignoreExistingInTarget)) {
         return true;
     }
 
-    notifyFactoryListeners(moduleId, newFactory);
-
-    const proxiedFactory = new Proxy(Settings.eagerPatches ? patchFactory(moduleId, newFactory) : newFactory, moduleFactoryHandler);
     return Reflect.set(moduleFactories, moduleId, proxiedFactory, receiver);
 }
 
 /**
- * Update a duplicated factory that exists in any of the Webpack instances we track with a new original factory.
+ * Update a duplicated factory that exists in any of the Webpack instances we track with a new original and proxied factory.
  *
  * @param moduleFactories The module factories where this new original factory is being set
  * @param moduleId The id of the module
  * @param newFactory The new original factory
+ * @param newProxiedFactory The new original and proxied factory
  * @param receiver The receiver of the factory
  * @param ignoreExistingInTarget Whether to ignore checking if the factory already exists in the moduleFactories where it is being set
  * @returns Whether the original factory was updated, or false if it doesn't exist in any of the tracked Webpack instances
  */
-function updateExistingFactory(moduleFactories: AnyWebpackRequire["m"], moduleId: PropertyKey, newFactory: AnyModuleFactory, receiver: any, ignoreExistingInTarget) {
+function updateExistingFactory(moduleFactories: AnyWebpackRequire["m"], moduleId: PropertyKey, newFactory: AnyModuleFactory, newProxiedFactory: AnyModuleFactory, ignoreExistingInTarget: boolean) {
     let existingFactory: AnyModuleFactory | undefined;
-    let moduleFactoriesWithFactory: AnyWebpackRequire["m"] | undefined;
     for (const wreq of allWebpackInstances) {
-        if (ignoreExistingInTarget && wreq.m === moduleFactories) {
+        const instanceModuleFactories = wreq.m[SYM_ORIGINAL_MODULE_FACTORIES] ?? wreq.m;
+
+        if (ignoreExistingInTarget && instanceModuleFactories === moduleFactories) {
             continue;
         }
 
         if (Object.hasOwn(wreq.m, moduleId)) {
-            existingFactory = wreq.m[moduleId];
-            moduleFactoriesWithFactory = wreq.m;
+            existingFactory = wreq.m[moduleId]; // Must use wreq.m here instead of instanceModuleFactories to use our proxy in case the module factories are already proxied.
             break;
         }
     }
 
     if (existingFactory != null) {
-        // If existingFactory exists in any of the Webpack instances we track, it's either wrapped in our proxy, or it has already been required.
-        // In the case it is wrapped in our proxy, and the instance we are setting does not already have it, we need to make sure the instance contains our proxy too.
-        if (moduleFactoriesWithFactory !== moduleFactories && existingFactory[SYM_IS_PROXIED_FACTORY]) {
-            Reflect.set(moduleFactories, moduleId, existingFactory, receiver);
-        }
-        // Else, if it is not wrapped in our proxy, set this new original factory in all the instances
-        else {
-            defineInWebpackInstances(moduleId, newFactory);
-        }
-
-        // Update existingFactory with the new original, if it does have a current original factory
+        // SYM_ORIGINAL_FACTORY means the factory has already been patched. In this case, only update existingFactory original factory to the new one.
         if (existingFactory[SYM_ORIGINAL_FACTORY] != null) {
             existingFactory[SYM_ORIGINAL_FACTORY] = newFactory;
-        }
 
-        // Persist patched source and patched by in the new original factory
-        if (IS_DEV) {
-            newFactory[SYM_PATCHED_SOURCE] = existingFactory[SYM_PATCHED_SOURCE];
-            newFactory[SYM_PATCHED_BY] = existingFactory[SYM_PATCHED_BY];
+            // Persist patched source and patched by in the new original factory
+            if (IS_DEV) {
+                newFactory[SYM_PATCHED_SOURCE] = existingFactory[SYM_PATCHED_SOURCE];
+                newFactory[SYM_PATCHED_BY] = existingFactory[SYM_PATCHED_BY];
+            }
+        } else {
+            defineInWebpackInstances(moduleId, newProxiedFactory);
         }
 
         return true;
@@ -496,8 +502,11 @@ function runFactoryWithWrap(patchedFactory: PatchedModuleFactory, thisArg: unkno
  * @returns The patched module factory
  */
 function patchFactory(moduleId: PropertyKey, originalFactory: AnyModuleFactory): PatchedModuleFactory {
+    const originalFactoryCode = String(originalFactory);
+    const isArrowFunction = originalFactoryCode.startsWith("(");
+
     // 0, prefix to turn it into an expression: 0,function(){} would be invalid syntax without the 0,
-    let code: string = "0," + String(originalFactory);
+    let code = "0," + (!isArrowFunction ? "function" : "") + originalFactoryCode.slice(originalFactoryCode.indexOf("("));
     let patchedSource = code;
     let patchedFactory = originalFactory;
 
@@ -538,7 +547,7 @@ function patchFactory(moduleId: PropertyKey, originalFactory: AnyModuleFactory):
         const previousFactory = originalFactory;
         let markedAsPatched = false;
 
-        // We change all patch.replacement to array in plugins/index
+        // We change all patch.replacement to array in PluginManager
         for (const replacement of patch.replacement as PatchReplacement[]) {
             if (
                 shouldCheckBuildNumber &&
@@ -546,11 +555,6 @@ function patchFactory(moduleId: PropertyKey, originalFactory: AnyModuleFactory):
                 (replacement.toBuild != null && buildNumber > replacement.toBuild)
             ) {
                 continue;
-            }
-
-            // TODO: remove once Vesktop has been updated to use addPatch
-            if (patch.plugin === "Vesktop") {
-                canonicalizeReplacement(replacement, "VCDP");
             }
 
             const lastCode = code;
@@ -592,7 +596,7 @@ function patchFactory(moduleId: PropertyKey, originalFactory: AnyModuleFactory):
                 }
 
                 code = newCode;
-                patchedSource = `// Webpack Module ${String(moduleId)} - Patched by ${pluginsList.join(", ")}\n${newCode}\n//# sourceURL=file:///WebpackModule${String(moduleId)}`;
+                patchedSource = `// Webpack Module ${String(moduleId)} - Patched by ${pluginsList.join(", ")}\n${code}\n//# sourceURL=file:///WebpackModule${String(moduleId)}`;
                 patchedFactory = (0, eval)(patchedSource);
 
                 if (!patchedBy.has(patch.plugin)) {
@@ -600,10 +604,14 @@ function patchFactory(moduleId: PropertyKey, originalFactory: AnyModuleFactory):
                     markedAsPatched = true;
                 }
             } catch (err) {
-                logger.error(`Patch by ${patch.plugin} errored (Module id is ${String(moduleId)}): ${replacement.match}\n`, err);
+                // FIXME: Maybe fix this properly
+                const shouldSuppressError = patch.plugin === "ContextMenuAPI" && err instanceof SyntaxError && err.message.includes("arguments");
+                if (!shouldSuppressError) {
+                    logger.error(`Patch by ${patch.plugin} errored (Module id is ${String(moduleId)}): ${replacement.match}\n`, err);
 
-                if (IS_DEV) {
-                    diffErroredPatch(code, lastCode, lastCode.match(replacement.match)!);
+                    if (IS_DEV) {
+                        diffErroredPatch(code, lastCode, lastCode.match(replacement.match)!);
+                    }
                 }
 
                 if (markedAsPatched) {

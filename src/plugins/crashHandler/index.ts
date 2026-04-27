@@ -16,6 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { DataStore } from "@api/index";
 import { showNotification } from "@api/Notifications";
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
@@ -61,8 +62,8 @@ export default definePlugin({
     name: "CrashHandler",
     description: "Utility plugin for handling and possibly recovering from crashes without a restart",
     authors: [Devs.Nuckyz],
+    tags: ["Utility", "Developers"],
     enabledByDefault: true,
-
     settings,
 
     patches: [
@@ -76,6 +77,15 @@ export default definePlugin({
     ],
 
     handleCrash(_this: any, errorState: any) {
+        DataStore.del("KeepCurrentChannel_previousData");
+
+        if (IS_DEV) {
+            try {
+                if (errorState?.info && "componentStack" in errorState.info) {
+                    console.error("Component Stack:", errorState.info.componentStack);
+                }
+            } catch { }
+        }
         _this.setState(errorState);
 
         // Already recovering, prevent error which happens more than once too fast to trigger another recover

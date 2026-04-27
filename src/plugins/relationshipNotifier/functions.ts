@@ -17,10 +17,11 @@
 */
 
 import { getUniqueUsername, openUserProfile } from "@utils/discord";
+import { ChannelType, RelationshipType } from "@vencord/discord-types/enums";
 import { UserUtils } from "@webpack/common";
 
 import settings from "./settings";
-import { ChannelDelete, ChannelType, GuildDelete, RelationshipRemove, RelationshipType } from "./types";
+import { ChannelDelete, GuildDelete, RelationshipRemove } from "./types";
 import { deleteGroup, deleteGuild, getGroup, getGuild, GuildAvailabilityStore, notify } from "./utils";
 
 let manuallyRemovedFriend: string | undefined;

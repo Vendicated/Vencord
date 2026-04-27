@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Switch } from "@components/settings/Switch";
+import { Switch } from "@components/Switch";
 import { PluginOptionBoolean } from "@utils/types";
 import { React, useState } from "@webpack/common";
 
@@ -40,8 +40,12 @@ export function BooleanSetting({ option, pluginSettings, definedSettings, id, on
     }
 
     return (
-        <SettingsSection name={id} description={option.description} error={error} inlineSetting>
-            <Switch checked={state} onChange={handleChange} />
+        <SettingsSection tag="label" name={id} description={option.description} error={error} inlineSetting>
+            <Switch
+                checked={state}
+                onChange={handleChange}
+                disabled={option.disabled?.call(definedSettings) ?? false}
+            />
         </SettingsSection>
     );
 }

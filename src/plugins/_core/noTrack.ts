@@ -49,7 +49,7 @@ export default definePlugin({
             },
         },
         {
-            find: ".METRICS",
+            find: ".METRICS_V2",
             replacement: [
                 {
                     match: /this\._intervalId=/,
@@ -71,20 +71,29 @@ export default definePlugin({
         }
     ],
 
+    // The TRACK event takes an optional `resolve` property that is called when the tracking event was submitted to the server.
+    // A few spots in Discord await this callback before continuing (most notably the Voice Debug Logging toggle).
+    // Since we NOOP the AnalyticsActionHandlers module, there is no handler for the TRACK event, so we have to handle it ourselves
+    flux: {
+        TRACK(event) {
+            event?.resolve?.();
+        }
+    },
+
     startAt: StartAt.Init,
     start() {
         // Sentry is initialized in its own WebpackInstance.
         // It has everything it needs preloaded, so, it doesn't include any chunk loading functionality.
         // Because of that, its WebpackInstance doesnt export wreq.m or wreq.c
 
-        // To circuvent this and disable Sentry we are gonna hook when wreq.g of its WebpackInstance is set.
+        // To circuvent this and disable Sentry we are gonna hook when wreq.d of its WebpackInstance is set.
         // When that happens we are gonna forcefully throw an error and abort everything.
-        Object.defineProperty(Function.prototype, "g", {
+        Object.defineProperty(Function.prototype, "d", {
             configurable: true,
 
-            set(this: WebpackRequire, globalObj: WebpackRequire["g"]) {
-                Object.defineProperty(this, "g", {
-                    value: globalObj,
+            set(this: WebpackRequire, esmDeclareFunc: WebpackRequire["d"]) {
+                Object.defineProperty(this, "d", {
+                    value: esmDeclareFunc,
                     configurable: true,
                     enumerable: true,
                     writable: true
@@ -114,7 +123,7 @@ export default definePlugin({
 
                 new Logger("NoTrack", "#8caaee").info("Disabling Sentry by erroring its WebpackInstance");
 
-                Reflect.deleteProperty(Function.prototype, "g");
+                Reflect.deleteProperty(Function.prototype, "d");
                 Reflect.deleteProperty(window, "DiscordSentry");
 
                 throw new Error("Sentry successfully disabled");
@@ -127,7 +136,7 @@ export default definePlugin({
             set() {
                 new Logger("NoTrack", "#8caaee").error("Failed to disable Sentry. Falling back to deleting window.DiscordSentry");
 
-                Reflect.deleteProperty(Function.prototype, "g");
+                Reflect.deleteProperty(Function.prototype, "d");
                 Reflect.deleteProperty(window, "DiscordSentry");
             }
         });

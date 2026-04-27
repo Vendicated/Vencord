@@ -35,7 +35,7 @@ let ReactDND: typeof import("react-dnd");
 export const useDrag: typeof ReactDND.useDrag = findByCodeLazy("useDrag::spec.begin");
 export const useDrop: typeof ReactDND.useDrop = findByCodeLazy(/\i=\(0,\i.\i\)\(\i.options\)/);
 
-waitFor("useState", m => {
+waitFor(["createElement", "useEffect"], m => {
     React = m;
     ({ useEffect, useState, useLayoutEffect, useMemo, useRef, useReducer, useCallback } = React);
 });

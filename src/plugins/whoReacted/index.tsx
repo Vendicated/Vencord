@@ -23,13 +23,11 @@ import { Queue } from "@utils/Queue";
 import { useForceUpdater } from "@utils/react";
 import definePlugin from "@utils/types";
 import { CustomEmoji, Message, ReactionEmoji, User } from "@vencord/discord-types";
-import { findByPropsLazy } from "@webpack";
-import { ChannelStore, Constants, FluxDispatcher, React, RestAPI, Tooltip, useEffect, useLayoutEffect, UserSummaryItem } from "@webpack/common";
+import { ChannelStore, Constants, FluxDispatcher, React, RestAPI, useEffect, useLayoutEffect, UserStore, UserSummaryItem } from "@webpack/common";
 
-const AvatarStyles = findByPropsLazy("moreUsers", "emptyUser", "avatarContainer", "clickableAvatar");
 let Scroll: any = null;
 const queue = new Queue();
-let reactions: Record<string, ReactionCacheEntry>;
+let reactions: Record<string, ReactionCacheEntry> = {};
 
 function fetchReactions(msg: Message, emoji: ReactionEmoji, type: number) {
     const key = emoji.name + (emoji.id ? `:${emoji.id}` : "");
@@ -73,24 +71,6 @@ function getReactionsWithQueue(msg: Message, e: ReactionEmoji, type: number) {
     return cache.users;
 }
 
-function makeRenderMoreUsers(users: User[]) {
-    return function renderMoreUsers(_label: string, _count: number) {
-        return (
-            <Tooltip text={users.slice(4).map(u => u.username).join(", ")} >
-                {({ onMouseEnter, onMouseLeave }) => (
-                    <div
-                        className={AvatarStyles.moreUsers}
-                        onMouseEnter={onMouseEnter}
-                        onMouseLeave={onMouseLeave}
-                    >
-                        +{users.length - 4}
-                    </div>
-                )}
-            </Tooltip >
-        );
-    };
-}
-
 function handleClickAvatar(event: React.UIEvent<HTMLElement, Event>) {
     event.stopPropagation();
 }
@@ -98,6 +78,7 @@ function handleClickAvatar(event: React.UIEvent<HTMLElement, Event>) {
 export default definePlugin({
     name: "WhoReacted",
     description: "Renders the avatars of users who reacted to a message",
+    tags: ["Reactions", "Chat", "Appearance"],
     authors: [Devs.Ven, Devs.KannaDev, Devs.newwares],
 
     patches: [
@@ -111,15 +92,15 @@ export default definePlugin({
         {
             find: '"MessageReactionsStore"',
             replacement: {
-                match: /function (\i)\(\){(\i)={}(?=.*CONNECTION_OPEN:\1)/,
-                replace: "$&;$self.reactions=$2;"
+                match: /CONNECTION_OPEN:function\(\){(\i)={}/,
+                replace: "$&;$self.reactions=$1;"
             }
         },
         {
 
             find: "cleanAutomaticAnchor(){",
             replacement: {
-                match: /constructor\(\i\)\{(?=.{0,100}automaticAnchor)/,
+                match: /constructor\(\i\)\{(?=.{0,100}(?:automaticAnchor|\.messages\.loadingMore))/,
                 replace: "$&$self.setScrollObj(this);"
             }
         }
@@ -148,7 +129,7 @@ export default definePlugin({
 
         useEffect(() => {
             const cb = (e: any) => {
-                if (e.messageId === message.id)
+                if (e?.messageId === message.id)
                     forceUpdate();
             };
             FluxDispatcher.subscribe("MESSAGE_REACTION_ADD_USERS", cb);
@@ -157,13 +138,13 @@ export default definePlugin({
         }, [message.id, forceUpdate]);
 
         const reactions = getReactionsWithQueue(message, emoji, type);
-        const users = [...reactions.values()].filter(Boolean);
+        const users = Array.from(reactions, ([id]) => UserStore.getUser(id)).filter(Boolean);
 
         return (
             <div
                 style={{ marginLeft: "0.5em", transform: "scale(0.9)" }}
             >
-                <div onClick={handleClickAvatar} onKeyPress={handleClickAvatar}>
+                <div onClick={handleClickAvatar} onKeyDown={handleClickAvatar}>
                     <UserSummaryItem
                         users={users}
                         guildId={ChannelStore.getChannel(message.channel_id)?.guild_id}
@@ -171,7 +152,6 @@ export default definePlugin({
                         max={5}
                         showDefaultAvatarsForNullUsers
                         showUserPopout
-                        renderMoreUsers={makeRenderMoreUsers(users)}
                     />
                 </div>
             </div>

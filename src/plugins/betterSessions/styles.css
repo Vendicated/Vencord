@@ -1,0 +1,17 @@
+.vc-betterSessions-footer-buttons {
+    display: flex;
+    gap: 0.5em;
+    align-items: center;
+}
+
+.vc-betterSessions-rename-btn {
+    margin-left: 4px;
+    translate: 0 -2px;
+}
+
+.vc-betterSessions-new-btn {
+    margin-left: 4px;
+    translate: 0 -2px;
+    pointer-events: none;
+    padding: 1px 4px;
+}

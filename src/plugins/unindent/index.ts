@@ -23,6 +23,7 @@ import definePlugin from "@utils/types";
 export default definePlugin({
     name: "Unindent",
     description: "Trims leading indentation from codeblocks",
+    tags: ["Chat", "Utility"],
     authors: [Devs.Ven],
 
     patches: [
@@ -30,7 +31,7 @@ export default definePlugin({
             find: "inQuote:",
             replacement: {
                 match: /,content:([^,]+),inQuote/,
-                replace: (_, content) => `,content:Vencord.Plugins.plugins.Unindent.unindent(${content}),inQuote`
+                replace: (_, content) => `,content:$self.unindent(${content}),inQuote`
             }
         }
     ],

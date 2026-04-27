@@ -20,6 +20,7 @@ import { LazyComponent, LazyComponentWrapper } from "@utils/lazyReact";
 import { Logger } from "@utils/Logger";
 import { Margins } from "@utils/margins";
 import type { React } from "@webpack/common";
+import { ComponentType } from "react";
 
 import { ErrorCard } from "./ErrorCard";
 
@@ -115,13 +116,21 @@ const ErrorBoundary = LazyComponent(() => {
     };
 }) as
     LazyComponentWrapper<React.ComponentType<React.PropsWithChildren<Props>> & {
-        wrap<T extends object = any>(Component: React.ComponentType<T>, errorBoundaryProps?: Omit<Props<T>, "wrappedProps">): React.FunctionComponent<T>;
+        wrap<T extends object = any>(Component: React.ComponentType<T>, errorBoundaryProps?: Omit<Props<T>, "wrappedProps"> & { displayName?: string; }): React.FunctionComponent<T>;
     }>;
 
-ErrorBoundary.wrap = (Component, errorBoundaryProps) => props => (
-    <ErrorBoundary {...errorBoundaryProps} wrappedProps={props}>
-        <Component {...props} />
-    </ErrorBoundary>
-);
+ErrorBoundary.wrap = (Component, errorBoundaryProps) => {
+    const wrapper: ComponentType<any> = props => (
+        <ErrorBoundary {...errorBoundaryProps} wrappedProps={props}>
+            <Component {...props} />
+        </ErrorBoundary>
+    );
+
+    if (errorBoundaryProps?.displayName) {
+        wrapper.displayName = errorBoundaryProps.displayName;
+    }
+
+    return wrapper;
+};
 
 export default ErrorBoundary;

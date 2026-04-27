@@ -47,6 +47,6 @@ export function runtimeHashMessageKey(key: string): string {
         BASE64_TABLE[((bytes[1] & 0x0f) << 2) | (bytes[2] >> 6)],
         BASE64_TABLE[bytes[2] & 0x3f],
         BASE64_TABLE[bytes[3] >> 2],
-        BASE64_TABLE[((bytes[3] & 0x03) << 4) | (bytes[3] >> 4)],
+        BASE64_TABLE[((bytes[3] & 0x03) << 4) | (bytes[4] >> 4)],
     ].join("");
 }

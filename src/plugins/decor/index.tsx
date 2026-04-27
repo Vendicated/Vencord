@@ -16,7 +16,7 @@ import { useAuthorizationStore } from "./lib/stores/AuthorizationStore";
 import { useCurrentUserDecorationsStore } from "./lib/stores/CurrentUserDecorationsStore";
 import { useUserDecorAvatarDecoration, useUsersDecorationsStore } from "./lib/stores/UsersDecorationsStore";
 import { settings } from "./settings";
-import { setDecorationGridDecoration, setDecorationGridItem } from "./ui/components";
+import { setAvatarDecorationModalPreview, setDecorationGridDecoration, setDecorationGridItem } from "./ui/components";
 import DecorSection from "./ui/components/DecorSection";
 
 export interface AvatarDecoration {
@@ -27,6 +27,7 @@ export interface AvatarDecoration {
 export default definePlugin({
     name: "Decor",
     description: "Create and use your own custom avatar decorations, or pick your favorite from the presets.",
+    tags: ["Appearance", "Customisation"],
     authors: [Devs.FieryFlames],
     patches: [
         // Patch MediaResolver to return correct URL for Decor avatar decorations
@@ -47,19 +48,19 @@ export default definePlugin({
         },
         // Decoration modal module
         {
-            find: ".decorationGridItem,",
+            find: "80,onlyAnimateOnHoverOrFocus:!",
             replacement: [
                 {
-                    match: /(?<==)\i=>{var{children.{20,200}decorationGridItem/,
+                    match: /(?<==)\i=>{let{children.{20,200}isSelected:\i.{0,5}\}=\i/,
                     replace: "$self.DecorationGridItem=$&",
                 },
                 {
-                    match: /(?<==)\i=>{var{user:\i,avatarDecoration/,
+                    match: /(?<==)\i=>{let{user:\i,avatarDecoration/,
                     replace: "$self.DecorationGridDecoration=$&",
                 },
                 // Remove NEW label from decor avatar decorations
                 {
-                    match: /(?<=\.\i\.PURCHASE)(?=,)(?<=avatarDecoration:(\i).+?)/,
+                    match: /(?<=\i\.PURCHASE)(?=,)(?<=avatarDecoration:(\i).+?)/,
                     replace: "||$1.skuId===$self.SKU_ID"
                 }
             ]
@@ -70,7 +71,7 @@ export default definePlugin({
             replacement: [
                 // Add Decor avatar decoration hook to avatar decoration hook
                 {
-                    match: /(?<=TryItOut:\i,guildId:\i}\),)(?<=user:(\i).+?)/,
+                    match: /(?<=\.avatarDecoration,guildId:\i\}\)\),)(?<=user:(\i).+?)/,
                     replace: "vcDecorAvatarDecoration=$self.useUserDecorAvatarDecoration($1),"
                 },
                 // Use added hook
@@ -87,12 +88,37 @@ export default definePlugin({
         },
         // Current user area, at bottom of channels/dm list
         {
-            find: "#{intl::ACCOUNT_SPEAKING_WHILE_MUTED}",
+            find: ".DISPLAY_NAME_STYLES_COACHMARK)",
             replacement: [
                 // Use Decor avatar decoration hook
                 {
-                    match: /(?<=\i\)\({avatarDecoration:)(\i)(?=,)(?<=currentUser:(\i).+?)/,
+                    match: /(?<=\i\)\({avatarDecoration:)\i(?=,)(?<=currentUser:(\i).+?)/,
                     replace: "$self.useUserDecorAvatarDecoration($1)??$&"
+                }
+            ]
+        },
+        ...[
+            "#{intl::GUILD_COMMUNICATION_DISABLED_ICON_TOOLTIP_BODY}", // Messages
+            "#{intl::COLLECTIBLES_NAMEPLATE_PREVIEW_A11Y}", // Nameplate preview
+            "#{intl::COLLECTIBLES_PROFILE_PREVIEW_A11Y}", // Avatar preview
+        ].map(find => ({
+            find,
+            replacement: {
+                match: /(?<=userValue:)((\i(?:\.author)?)\?\.avatarDecoration)/,
+                replace: "$self.useUserDecorAvatarDecoration($2)??$1"
+            }
+        })),
+        // Patch avatar decoration preview to display Decor avatar decorations as if they are purchased
+        {
+            find: "#{intl::PREMIUM_UPSELL_PROFILE_AVATAR_DECO_INLINE_UPSELL_DESCRIPTION}",
+            replacement: [
+                {
+                    match: /(#{intl::PREMIUM_UPSELL_PROFILE_AVATAR_DECO_INLINE_UPSELL_DESCRIPTION}.+?return null!=(\i)&&\()(null==\i)/,
+                    replace: (_, rest, avatarDecoration, hasPurchase) => `${rest}(${avatarDecoration}.skuId!==$self.SKU_ID&&${avatarDecoration}.skuId!==$self.RAW_SKU_ID&&${hasPurchase})`
+                },
+                {
+                    match: /(?<==)\i=>{let{user:\i,guildId:\i,avatarDecoration:/,
+                    replace: "$self.AvatarDecorationModalPreview=$&"
                 }
             ]
         }
@@ -118,7 +144,12 @@ export default definePlugin({
         setDecorationGridDecoration(e);
     },
 
+    set AvatarDecorationModalPreview(e: any) {
+        setAvatarDecorationModalPreview(e);
+    },
+
     SKU_ID,
+    RAW_SKU_ID,
 
     useUserDecorAvatarDecoration,
 

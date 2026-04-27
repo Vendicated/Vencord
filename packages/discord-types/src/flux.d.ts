@@ -1,4 +1,41 @@
+import { GuildMemberFlags } from "../enums";
+import { VoiceState } from "./stores";
 import { FluxStore } from "./stores/FluxStore";
+
+export interface PassiveUpdateState {
+    type: string;
+    guildId: string;
+    members?: ({
+        user: {
+            avatar: string | null;
+            communication_disabled_until: string | null;
+            deaf: boolean;
+            flags: GuildMemberFlags;
+            joined_at: string;
+            mute: boolean;
+            nick: string;
+            pending: boolean;
+            premium_since: string | null;
+        };
+        roles: string[];
+        premium_since: string | null;
+        pending: boolean;
+        nick: string | null;
+        mute: boolean;
+        joined_at: string;
+        flags: GuildMemberFlags;
+        deaf: boolean;
+        communication_disabled_until: string | null;
+        avatar: string | null;
+    })[];
+    channels: ({
+        lastPinTimestamp?: string;
+        lastMessageId: string;
+        id: string;
+    })[];
+    voiceStates?: VoiceState[];
+}
+
 
 export class FluxEmitter {
     constructor();

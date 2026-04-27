@@ -30,7 +30,7 @@ export default definePlugin({
 
     patches: [
         {
-            find: ".lostPermission)",
+            find: "#{intl::GUILD_OWNER}),children:",
             replacement: [
                 {
                     match: /children:\[(?=.{0,300},lostPermissionTooltipText:)/,

@@ -20,22 +20,28 @@ import "./style.css";
 
 import { NavContextMenuPatchCallback } from "@api/ContextMenu";
 import ErrorBoundary from "@components/ErrorBoundary";
-import { NotesIcon, OpenExternalIcon } from "@components/Icons";
+import { OpenExternalIcon } from "@components/Icons";
+import { Paragraph } from "@components/Paragraph";
+import { Span } from "@components/Span";
 import { Devs } from "@utils/constants";
 import { classes } from "@utils/misc";
+import { useAwaiter } from "@utils/react";
 import definePlugin from "@utils/types";
 import { Guild, User } from "@vencord/discord-types";
-import { findByPropsLazy } from "@webpack";
-import { Alerts, Button, Menu, Parser, TooltipContainer } from "@webpack/common";
+import { findCssClassesLazy } from "@webpack";
+import { Alerts, Clickable, IconUtils, Menu, Parser } from "@webpack/common";
 
 import { Auth, initAuth, updateAuth } from "./auth";
 import { openReviewsModal } from "./components/ReviewModal";
 import { NotificationType, ReviewType } from "./entities";
-import { getCurrentUserInfo, readNotification } from "./reviewDbApi";
+import { getCurrentUserInfo, getReviews, readNotification } from "./reviewDbApi";
 import { settings } from "./settings";
-import { showToast } from "./utils";
+import { cl, showToast } from "./utils";
 
-const RoleButtonClasses = findByPropsLazy("button", "buttonInner", "icon", "banner");
+const DMSideBarClasses = findCssClassesLazy("widgetPreviews");
+const ProfileCardClasses = findCssClassesLazy("cardsList", "firstCardContainer", "card", "container");
+const ProfileCardContainerClasses = findCssClassesLazy("innerContainer", "icons", "icon", "displayCount", "displayCountText", "displayCountTextColor", "breadcrumb");
+const ProfileCardOverlayClasses = findCssClassesLazy("overlay", "isPrivate", "outer");
 
 const guildPopoutPatch: NavContextMenuPatchCallback = (children, { guild }: { guild: Guild, onClose(): void; }) => {
     if (!guild) return;
@@ -64,6 +70,7 @@ const userContextPatch: NavContextMenuPatchCallback = (children, { user }: { use
 export default definePlugin({
     name: "ReviewDB",
     description: "Review other users (Adds a new settings to profiles)",
+    tags: ["Friends", "Servers"],
     authors: [Devs.mantikafasi, Devs.Ven],
 
     settings,
@@ -77,17 +84,20 @@ export default definePlugin({
 
     patches: [
         {
-            find: ".POPOUT,user:",
+            // DM profile sidebar
+            find: ".SIDEBAR,disableToolbar:",
             replacement: {
-                match: /children:\[(?=[^[]+?shouldShowTooltip:)/,
-                replace: "$&$self.BiteSizeReviewsButton({user:arguments[0].user}),"
+                match: /user:(\i),widgets:.{0,100}?\}\),/,
+                replace: "$&$self.renderProfileComponent({user:$1,isSideBar:true}),"
             }
         },
         {
-            find: ".SIDEBAR,shouldShowTooltip:",
+            // User popout
+            // Same find as ShowConnections
+            find: "#{intl::XcTHmQ::raw}",
             replacement: {
-                match: /children:\[(?=[^[]+?shouldShowTooltip:)/,
-                replace: "$&$self.BiteSizeReviewsButton({user:arguments[0].user}),"
+                match: /user:(\i),widgets:.{0,100}?\}\),/,
+                replace: "$&$self.renderProfileComponent({user:$1}),"
             }
         }
     ],
@@ -146,20 +156,62 @@ export default definePlugin({
         }, 4000);
     },
 
-    BiteSizeReviewsButton: ErrorBoundary.wrap(({ user }: { user: User; }) => {
-        return (
-            <TooltipContainer text="View Reviews">
-                <Button
-                    onClick={() => openReviewsModal(user.id, user.username, ReviewType.User)}
-                    look={Button.Looks.FILLED}
-                    size={Button.Sizes.NONE}
-                    color={RoleButtonClasses.bannerColor}
-                    className={classes(RoleButtonClasses.button, RoleButtonClasses.icon, RoleButtonClasses.banner)}
-                    innerClassName={classes(RoleButtonClasses.buttonInner, RoleButtonClasses.icon, RoleButtonClasses.banner)}
-                >
-                    <NotesIcon height={16} width={16} />
-                </Button>
-            </TooltipContainer>
+    renderProfileComponent: ErrorBoundary.wrap(({ user, isSideBar = false }: { user: User; isSideBar?: boolean; }) => {
+        const [reviewData] = useAwaiter(() => getReviews(user.id, { limit: 4 }), { deps: [user.id], fallbackValue: null });
+
+        // Discord are masters at using a crap ton of html elements and css classes to create a simple ui that could have
+        // been made with less than half of the number of elements, so we have to do this insanity to replicate their ui
+        const reviewsSection = (
+            <section className={ProfileCardClasses.container}>
+                <ul className={ProfileCardClasses.cardsList} tabIndex={-1}>
+                    <li className={ProfileCardClasses.firstCardContainer}>
+                        <Clickable
+                            className={classes(ProfileCardContainerClasses.breadcrumb, reviewData?.hasOptedOut && cl("profile-popout-disabled"))}
+                            onClick={() => !reviewData?.hasOptedOut && openReviewsModal(user.id, user.username, ReviewType.User)}
+                        >
+                            <div className={classes(ProfileCardOverlayClasses.overlay, ProfileCardContainerClasses.innerContainer, ProfileCardClasses.card)}>
+                                <Paragraph size={isSideBar ? "sm" : "xs"} weight="medium">User Reviews</Paragraph>
+                                {!!reviewData?.reviewCount
+                                    ? (
+                                        <div className={ProfileCardContainerClasses.icons}>
+                                            {reviewData.reviews
+                                                .filter(review => review.id !== 0)
+                                                .slice(0, 4)
+                                                .reverse()
+                                                .map((review, idx) => {
+                                                    const showCount = idx === 3 && reviewData.reviewCount > 4;
+
+                                                    return (
+                                                        <div className={ProfileCardContainerClasses.icon} key={review.id}>
+                                                            <img
+                                                                src={review.sender.profilePhoto}
+                                                                alt={review.sender.username}
+                                                                className={showCount ? ProfileCardContainerClasses.displayCount : undefined}
+                                                                onError={e => e.currentTarget.src = IconUtils.getDefaultAvatarURL(review.sender.discordID)}
+                                                            />
+                                                            {showCount && (
+                                                                <div className={ProfileCardContainerClasses.displayCountText}>
+                                                                    <Span className={ProfileCardContainerClasses.displayCountTextColor} size="xs" weight="medium" defaultColor={false}>
+                                                                        +{reviewData.reviewCount - 3}
+                                                                    </Span>
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                    );
+                                                })}
+                                        </div>
+                                    )
+                                    : <Paragraph size={isSideBar ? "sm" : "xs"}>{reviewData?.hasOptedOut ? "User opted out" : "No reviews yet"}</Paragraph>
+                                }
+                            </div>
+                        </Clickable>
+                    </li>
+                </ul>
+            </section>
         );
+
+        return isSideBar
+            ? <div className={DMSideBarClasses.widgetPreviews}>{reviewsSection}</div>
+            : reviewsSection;
     }, { noop: true })
 });

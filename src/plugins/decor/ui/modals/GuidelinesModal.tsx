@@ -4,23 +4,24 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { Flex } from "@components/Flex";
 import { Link } from "@components/Link";
+import { settings } from "@plugins/decor/settings";
+import { cl, DecorationModalClasses, requireAvatarDecorationModal } from "@plugins/decor/ui";
 import { ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
 import { Button, Forms, Text } from "@webpack/common";
 
-import { settings } from "../../settings";
-import { cl, DecorationModalStyles, requireAvatarDecorationModal } from "../";
 import { openCreateDecorationModal } from "./CreateDecorationModal";
 
 function GuidelinesModal(props: ModalProps) {
     return <ModalRoot
         {...props}
         size={ModalSize.SMALL}
-        className={DecorationModalStyles.modal}
+        className={DecorationModalClasses.modal}
     >
         <ModalHeader separator={false} className={cl("modal-header")}>
             <Text
-                color="header-primary"
+                color="text-strong"
                 variant="heading-lg/semibold"
                 tag="h1"
                 style={{ flexGrow: 1 }}
@@ -41,22 +42,24 @@ function GuidelinesModal(props: ModalProps) {
             </Forms.FormText>
         </ModalContent>
         <ModalFooter className={cl("modal-footer")}>
-            <Button
-                onClick={() => {
-                    settings.store.agreedToGuidelines = true;
-                    props.onClose();
-                    openCreateDecorationModal();
-                }}
-            >
-                Continue
-            </Button>
-            <Button
-                onClick={props.onClose}
-                color={Button.Colors.PRIMARY}
-                look={Button.Looks.LINK}
-            >
-                Go Back
-            </Button>
+            <Flex gap="4px">
+                <Button
+                    onClick={() => {
+                        settings.store.agreedToGuidelines = true;
+                        props.onClose();
+                        openCreateDecorationModal();
+                    }}
+                >
+                    Continue
+                </Button>
+                <Button
+                    onClick={props.onClose}
+                    color={Button.Colors.PRIMARY}
+                    look={Button.Looks.LINK}
+                >
+                    Go Back
+                </Button>
+            </Flex>
         </ModalFooter>
     </ModalRoot>;
 }
