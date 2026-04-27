@@ -168,14 +168,13 @@ function PluginSettings() {
 
     const pluginFilter = (plugin: typeof Plugins[keyof typeof Plugins]) => {
         const { status, tags } = searchValue;
-        const enabled = isPluginEnabled(plugin.name);
 
         switch (status) {
             case SearchStatus.DISABLED:
-                if (enabled) return false;
+                if (isPluginEnabled(plugin.name)) return false;
                 break;
             case SearchStatus.ENABLED:
-                if (!enabled) return false;
+                if (!isPluginEnabled(plugin.name)) return false;
                 break;
             case SearchStatus.NEW:
                 if (!newPlugins?.includes(plugin.name)) return false;
@@ -194,6 +193,7 @@ function PluginSettings() {
 
         return (
             plugin.name.toLowerCase().includes(search) ||
+            plugin.name.match(/[A-Z]/g)?.join("").toLowerCase().includes(search) || // acronyms like BF for BetterFolders
             plugin.description.toLowerCase().includes(search) ||
             plugin.searchTerms?.some(t => t.toLowerCase().includes(search))
         );
