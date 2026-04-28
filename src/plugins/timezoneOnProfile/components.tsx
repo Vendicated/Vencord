@@ -23,7 +23,7 @@ import { closeModal, ModalCloseButton, ModalContent, ModalHeader, ModalRoot, Mod
 import { useTimer } from "@utils/react";
 import { User } from "@vencord/discord-types";
 import { findCssClassesLazy } from "@webpack";
-import {Menu, React, SearchableSelect, Timestamp, Tooltip, useEffect, UserStore, useState} from "@webpack/common";
+import { Menu, React, SearchableSelect, Timestamp, Tooltip, useEffect, UserStore, useState } from "@webpack/common";
 
 import { settings } from "./settings";
 import { formatTimezoneLabel, getOffsetMinutes, getUserTimezone, setUserTimezone, update } from "./utils";
