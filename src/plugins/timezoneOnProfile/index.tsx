@@ -20,7 +20,7 @@ import { enableStyle } from "@api/Styles";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 
-import {TimezoneTriggerProfile, TimezoneTriggerUsername, UserContextMenuPatch} from "./components";
+import { TimezoneTriggerProfile, TimezoneTriggerUsername, UserContextMenuPatch } from "./components";
 import { settings } from "./settings";
 import timeZoneStyle from "./style.css?managed";
 
@@ -53,5 +53,5 @@ export default definePlugin({
                 replace: "$1(0,$4.jsxs)($4.Fragment,{children:[(0,$4.jsx)($self.TimezoneTriggerProfile,{userId:$2.id,className:$5}),$3]})"
             }
         }
-    ],
+    ], // fix up this patch because it's lowkey grossing me out
 });
