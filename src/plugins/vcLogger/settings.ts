@@ -50,8 +50,13 @@ export const settings = definePluginSettings({
         type: OptionType.BOOLEAN,
         default: true
     },
-    showClearBtn: {
+    showClearButton: {
         description: "Show clear button on chat bar",
+        type: OptionType.BOOLEAN,
+        default: true
+    },
+    showContextMenuButtons: {
+        description: "Show add/remove ids button on context menu",
         type: OptionType.BOOLEAN,
         default: true
     },

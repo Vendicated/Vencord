@@ -95,6 +95,8 @@ export const ClearIcon: IconComponent = ({ height = 20, width = 20, className })
 
 function MakeContextCallback(name: "Guild" | "Channel" | "User"): NavContextMenuPatchCallback {
     return (children, props) => {
+        const { showContextMenuButtons } = settings.use(["showContextMenuButtons"]);
+        if (!showContextMenuButtons) return;
         const _name = name.toLowerCase();
         const obj = props[_name];
         const _id_ = obj.id;
@@ -144,14 +146,14 @@ function MakeContextCallback(name: "Guild" | "Channel" | "User"): NavContextMenu
 }
 
 export const ClearChatBarButton: ChatBarButtonFactory = ({ channel: { id: channelId } }) => {
-    const { created, showClearBtn } = settings.use(["created", "showClearBtn"]);
-    const msgs = useMemo(() => createdMessages.getOrInsert(channelId, []), [created, showClearBtn]);
-    if (!msgs.length || !showClearBtn) return null;
+    const { created, showClearButton } = settings.use(["created", "showClearButton"]);
+    const msgs = useMemo(() => createdMessages.getOrInsert(channelId, []), [created, showClearButton]);
+    if (!msgs.length || !showClearButton) return null;
     const on_click = () => {
-        clearMessages(channelId, createdMessages.getOrInsert(channelId, []));
+        clearMessages(channelId, msgs);
         Toasts.show({
             id: Toasts.genId(),
-            message: "vcLogger: channel logging cleared",
+            message: `${plugin.name}: channel logging cleared`,
             type: Toasts.Type.SUCCESS
         });
     };
@@ -176,7 +178,7 @@ function clearMessages(channelId: string, msgs: Message[]) {
     settings.store.created = count;
 }
 
-export const parseIds = (ids: string | undefined, sep: string = ",") => (ids?.split(sep) || []).flatMap(i => i.trim() !== "" ? [i.trim()] : []);
+export const parseIds = (ids: string | undefined, sep: string = ",") => (ids?.split(sep) || []).flatMap(i => (i = i.trim()) !== "" ? [i] : []);
 
 
 const plugin = definePlugin({
@@ -318,7 +320,7 @@ const plugin = definePlugin({
             settings.store.guildsFilter = Filter.NONE;
             Toasts.show({
                 id: Toasts.genId(),
-                message: "vcLogger:  reset guilds list",
+                message: `${plugin.name}: reset guilds list`,
                 type: Toasts.Type.SUCCESS
             });
         };
@@ -328,7 +330,7 @@ const plugin = definePlugin({
             settings.store.channelsFilter = Filter.NONE;
             Toasts.show({
                 id: Toasts.genId(),
-                message: "vcLogger:  reset channels list",
+                message: `${plugin.name}: reset channels list`,
                 type: Toasts.Type.SUCCESS
             });
         };
@@ -338,7 +340,7 @@ const plugin = definePlugin({
             settings.store.usersFilter = Filter.NONE;
             Toasts.show({
                 id: Toasts.genId(),
-                message: "vcLogger:  reset users list",
+                message: `${plugin.name}: reset users list`,
                 type: Toasts.Type.SUCCESS
             });
         };
@@ -346,7 +348,8 @@ const plugin = definePlugin({
         const reset = () => {
             settings.store.enable = true;
             settings.store.self = true;
-            settings.store.showClearBtn = true;
+            settings.store.showClearButton = true;
+            settings.store.showContextMenuButtons = true;
             settings.store.trackUsers = false;
             settings.store.ignoreBlockedUsers = false;
 
@@ -363,7 +366,7 @@ const plugin = definePlugin({
 
             Toasts.show({
                 id: Toasts.genId(),
-                message: "vcLogger: settings reset",
+                message: `${plugin.name}: settings reset`,
                 type: Toasts.Type.SUCCESS
             });
         };
@@ -375,7 +378,7 @@ const plugin = definePlugin({
 
             Toasts.show({
                 id: Toasts.genId(),
-                message: "vcLogger: all channels logging cleared",
+                message: `${plugin.name}: all channels logging cleared`,
                 type: Toasts.Type.SUCCESS
             });
         };
