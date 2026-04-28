@@ -23,28 +23,28 @@ import { closeModal, ModalCloseButton, ModalContent, ModalHeader, ModalRoot, Mod
 import { useTimer } from "@utils/react";
 import { User } from "@vencord/discord-types";
 import { findCssClassesLazy } from "@webpack";
-import { Menu, React, SearchableSelect, Timestamp, useEffect, UserStore, useState } from "@webpack/common";
+import {Menu, React, SearchableSelect, Timestamp, Tooltip, useEffect, UserStore, useState} from "@webpack/common";
 
 import { settings } from "./settings";
 import { formatTimezoneLabel, getOffsetMinutes, getUserTimezone, setUserTimezone, update } from "./utils";
 
 const cl = findCssClassesLazy("dotSpacer", "userTagUsername");
 
+function useSelectedTimezone(userId: string) {
+    const { timezonesByUser } = settings.use(["timezonesByUser"]);
+
+    return (timezonesByUser as unknown as Record<string, string>)[userId] ?? "";
+}
+
 export const TimezoneTriggerProfile = (props: { userId: string;[key: string]: any; }) => {
     const { userId, className } = props;
-    settings.use(["timezonesByUser"]);
-    const [selectedTz, setSelectedTz] = useState(getUserTimezone(userId));
+    const selectedTz = useSelectedTimezone(userId);
     const [currentTime, setCurrentTime] = useState<Date>(new Date(Date.now()));
 
     const elapsed = useTimer({
         interval: 60_000 - (Date.now() % 60_000),
         deps: [selectedTz]
     });
-
-    useEffect(() => {
-        const tz = getUserTimezone(userId);
-        if (tz !== selectedTz) setSelectedTz(tz);
-    }, [userId]);
 
     useEffect(() => {
         if (!selectedTz) return;
@@ -64,15 +64,14 @@ export const TimezoneTriggerProfile = (props: { userId: string;[key: string]: an
                     </span>
                 </div>
             </div>
-            <div aria-hidden="true" className={getDotSpacer()}/>
+            <div aria-hidden="true" className={getDotSpacer()} />
         </>
     );
 };
 
 export const TimezoneTriggerUsername = (props: { userId: string;[key: string]: any; }) => {
     const { userId } = props;
-    settings.use(["timezonesByUser"]);
-    const [selectedTz, setSelectedTz] = useState(getUserTimezone(userId));
+    const selectedTz = useSelectedTimezone(userId);
     const [currentTime, setCurrentTime] = useState<Date>(new Date(Date.now()));
 
     const elapsed = useTimer({
@@ -80,10 +79,8 @@ export const TimezoneTriggerUsername = (props: { userId: string;[key: string]: a
         deps: [selectedTz]
     });
 
-    useEffect(() => {
-        const tz = getUserTimezone(userId);
-        if (tz !== selectedTz) setSelectedTz(tz);
-    }, [userId]);
+    const user = UserStore.getUser(userId);
+    const username = user?.globalName || user?.username || "Their";
 
     useEffect(() => {
         if (!selectedTz) return;
@@ -94,10 +91,18 @@ export const TimezoneTriggerUsername = (props: { userId: string;[key: string]: a
 
     return (
         <>
-            <span style={{ fontSize: settings.store.timeFontSize }} className="vc-tzonprofile-time">
-                {" "}
-                <Timestamp timestamp={currentTime} />
-            </span>
+            <Tooltip text={`${username}'s Timezone`}>
+                {tooltipProps => (
+                    <span
+                        {...tooltipProps}
+                        style={{ fontSize: settings.store.timeFontSize }}
+                        className="vc-tzonprofile-time"
+                    >
+                        {" "}
+                        <Timestamp timestamp={currentTime} />
+                    </span>
+                )}
+            </Tooltip>
         </>
     );
 };
@@ -159,7 +164,6 @@ export function createTimezoneMenuItems(user: User, currentTimezone: string) {
 
 export const UserContextMenuPatch: NavContextMenuPatchCallback = (children, { user }: { user: User; }) => {
     if (!user || user.bot) return;
-    // don't add context menu entries for the current user
     const self = UserStore.getCurrentUser()?.id;
     if (self && user.id === self) return;
 
@@ -167,7 +171,6 @@ export const UserContextMenuPatch: NavContextMenuPatchCallback = (children, { us
     if (group) {
         const currentTimezone = getUserTimezone(user.id);
         const timezoneMenuItems = createTimezoneMenuItems(user, currentTimezone);
-        group.push(timezoneMenuItems as any); // for some reason this was causing an error or something when using .../arrayifing it, idk why tbh
+        group.push(timezoneMenuItems as any); // had to remove ...
     }
-    // it seems that when selecting a timezone, no re-render takes place
 };

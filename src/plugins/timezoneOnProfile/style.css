@@ -29,3 +29,7 @@
     align-items: center;
     gap: 4px;
 }
+
+.vc-tzonprofile-time [class*="timestamp_"] {
+    pointer-events: none;
+}
