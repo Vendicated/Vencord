@@ -1,0 +1,29 @@
+.vc-dm-opener-icon {
+    bottom: -2px;
+    padding: 0;
+    width: var(--space-32);
+    min-width: 0;
+    height: var(--space-32);
+    color: var(--interactive-normal) !important;
+    transition: all 0.2s ease;
+
+    &:hover {
+        color: var(--brand-experiment) !important;
+        transform: scale(1.1);
+    }
+
+    & svg {
+        filter: drop-shadow(0 0 2px rgba(88, 101, 242, 0.3));
+    }
+
+    &:active {
+        transform: scale(0.95);
+    }
+}
+
+.vc-dm-opener {
+    &:hover {
+        background-color: var(--background-modifier-hover);
+        border-radius: 4px;
+    }
+}
