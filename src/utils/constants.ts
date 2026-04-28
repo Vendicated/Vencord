@@ -621,9 +621,14 @@ export const Devs = /* #__PURE__*/ Object.freeze({
         name: "VV",
         id: 254866377087778816n
     },
+   Nanakusa: {
+        name: "Nanakusa",
+        id: 1121961711080050780n
+    },
     u32: {
         name: "u32",
         id: 1063237286818488351n,
+
     },
     prism: {
         name: "prism",
