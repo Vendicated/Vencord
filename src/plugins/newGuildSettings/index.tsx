@@ -118,7 +118,8 @@ function applyDefaultSettings(guildId: string | null) {
 export default definePlugin({
     name: "NewGuildSettings",
     description: "Automatically mute new servers and change various other settings upon joining",
-    tags: ["MuteNewGuild", "mute", "server"],
+    tags: ["Servers", "Customisation"],
+    searchTerms: ["MuteNewGuild", "mute", "server"],
     authors: [Devs.Glitch, Devs.Nuckyz, Devs.carince, Devs.Mopi, Devs.GabiRP],
     contextMenus: {
         "guild-context": makeContextMenuPatch(false),

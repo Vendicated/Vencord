@@ -42,6 +42,7 @@ const settings = definePluginSettings({
 export default definePlugin({
     name: "AutoDNDWhilePlaying",
     description: "Automatically updates your online status (online, idle, dnd) when launching games",
+    tags: ["Activity", "Utility"],
     authors: [Devs.thororen],
     settings,
     flux: {

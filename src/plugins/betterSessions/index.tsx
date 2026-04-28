@@ -26,7 +26,7 @@ import definePlugin, { OptionType } from "@utils/types";
 import { findComponentByCodeLazy, findCssClassesLazy, findStoreLazy } from "@webpack";
 import { Constants, React, RestAPI, SettingsRouter, Tooltip } from "@webpack/common";
 
-import { RenameButton } from "./components/RenameButton";
+import { NewButton, RenameButton } from "./components/RenameButton";
 import { Session, SessionInfo } from "./types";
 import { fetchNamesFromDataStore, getDefaultName, GetOsColor, GetPlatformIcon, savedSessionsCache, saveSessionsToDataStore } from "./utils";
 
@@ -56,7 +56,7 @@ export default definePlugin({
     name: "BetterSessions",
     description: "Enhances the sessions (devices) menu. Allows you to view exact timestamps, give each session a custom name, and receive notifications about new sessions.",
     authors: [Devs.amia],
-
+    tags: ["Notifications", "Customisation", "Utility"],
     settings: settings,
 
     patches: [
@@ -74,8 +74,8 @@ export default definePlugin({
                 },
                 // Replace the icon
                 {
-                    match: /children:\[(?=.{0,125}?width:"32")(?<=,icon:(\i)\}.+?)/,
-                    replace: "children:[$self.renderIcon({...arguments[0],DeviceIcon:$1}),false&&"
+                    match: /(?<=Icon:(\i).{0,250}className:\i\.\i,children:\[)/,
+                    replace: "$self.renderIcon({...arguments[0],DeviceIcon:$1}),false&&"
                 }
             ]
         }
@@ -92,15 +92,7 @@ export default definePlugin({
             <>
                 <span>{title}</span>
                 {(savedSession == null || savedSession.isNew) && (
-                    <div
-                        className="vc-addon-badge"
-                        style={{
-                            backgroundColor: "#ED4245",
-                            marginLeft: "2px"
-                        }}
-                    >
-                        NEW
-                    </div>
+                    <NewButton />
                 )}
                 <RenameButton session={session} state={state} />
             </>
