@@ -6,6 +6,7 @@
 
 import "./style.css";
 
+import { isPluginEnabled } from "@api/PluginManager";
 import { definePluginSettings, migrateOldSettingToNewPlugin, migratePluginSetting, migratePluginSettings } from "@api/Settings";
 import { Divider } from "@components/Divider";
 import { HeadingSecondary } from "@components/Heading";
@@ -13,6 +14,7 @@ import { Notice } from "@components/Notice";
 import { classNameFactory } from "@utils/css";
 import { Devs, EquicordDevs } from "@utils/index";
 import definePlugin, { OptionType } from "@utils/types";
+import { Alerts } from "@webpack/common";
 
 migratePluginSettings("Declutter", "BetterUserArea", "Anammox");
 migrateOldSettingToNewPlugin("Declutter", "removeClanTag", "GuildTagSettings", "hideTags");
@@ -36,6 +38,13 @@ export const settings = definePluginSettings({
     userProfileHeader: {
         type: OptionType.COMPONENT,
         component: () => SectionSeparator("User Profile"),
+    },
+    removeAvatarDecoration: {
+        type: OptionType.BOOLEAN,
+        description: "Remove avatar decorations.",
+        default: false,
+        disabled: () => isPluginEnabled("Decor"),
+        restartNeeded: true,
     },
     removeNameplate: {
         type: OptionType.BOOLEAN,
@@ -143,8 +152,29 @@ export default definePlugin({
     description: "Cleans up Discord by removing non-essential UI elements like profile effects, shop tabs, boosts, and more.",
     tags: ["Appearance", "Customisation"],
     authors: [EquicordDevs.Leon135, Devs.prism, Devs.Kyuuhachi],
+    start() {
+        if (isPluginEnabled("Decor") && settings.store.removeAvatarDecoration) {
+            settings.store.removeAvatarDecoration = false;
+            Alerts.show({
+                title: "Declutter",
+                body: "Avatar decoration removal has been disabled to prevent conflicts with Decor plugin.",
+                confirmText: "OK",
+                // @ts-expect-error not typed
+                confirmVariant: "critical-primary"
+            });
+        }
+    },
     settings,
     patches: [
+        {
+            // Avatar decoration
+            find: "getAvatarDecorationURL:",
+            replacement: {
+                match: /(?<=function \i\(\i\){)(?=.{0,150}let{avatarDecoration)/,
+                replace: "$&return null;"
+            },
+            predicate: () => settings.store.removeAvatarDecoration && !isPluginEnabled("Decor"),
+        },
         {
             // Nameplate
             find: ".MINI_PREVIEW,[",
