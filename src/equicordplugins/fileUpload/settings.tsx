@@ -172,15 +172,15 @@ export const settings = definePluginSettings({
         default: false,
         hidden: true
     },
-    interceptDiscordUpload: {
+    bypassDiscordUpload: {
         type: OptionType.BOOLEAN,
-        description: "Intercept Discord uploads and use FileUpload instead.",
-        default: false,
+        description: "Bypass Discord uploads and use FileUpload instead.",
+        default: true,
         hidden: true
     },
-    interceptDiscordUploadOnlyOverLimit: {
+    bypassDiscordUploadOnlyOverLimit: {
         type: OptionType.BOOLEAN,
-        description: "Only intercept uploads that exceed Discord file size limit.",
+        description: "Only use FileUpload if the file(s) exceed the file size limit.",
         default: true,
         hidden: true
     },
@@ -238,6 +238,11 @@ export const settings = definePluginSettings({
         description: "Auto copy upload URL",
         default: true,
         hidden: true
+    },
+    autoUploadPastedFiles: {
+        type: OptionType.BOOLEAN,
+        description: "Automatically upload files from clipboard to image host when pasting in chat input.",
+        default: false
     },
     settingsComponent: {
         type: OptionType.COMPONENT,
@@ -592,17 +597,24 @@ export function SettingsComponent() {
                 />
             </SettingsSection>
 
-            <SettingsSection tag="label" name="Intercept Discord Upload Button" description="Use FileUpload when uploading through Discord's file picker" inlineSetting>
+            <SettingsSection tag="label" name="Bypass Discord Upload Button" description="Use FileUpload when uploading through Discord's file picker" inlineSetting>
                 <Switch
-                    checked={Boolean((store as { interceptDiscordUpload?: boolean; }).interceptDiscordUpload)}
-                    onChange={v => (store as { interceptDiscordUpload?: boolean; }).interceptDiscordUpload = v}
+                    checked={Boolean((store as { bypassDiscordUpload?: boolean; }).bypassDiscordUpload)}
+                    onChange={v => (store as { bypassDiscordUpload?: boolean; }).bypassDiscordUpload = v}
                 />
             </SettingsSection>
 
-            <SettingsSection tag="label" name="Only Intercept Over Discord File Size Limit" description="Use FileUpload only for files larger than your current Discord upload limit" inlineSetting>
+            <SettingsSection tag="label" name="Auto Upload Pasted Files" description="Automatically upload files from clipboard to image host when pasting in chat input" inlineSetting>
                 <Switch
-                    checked={store.interceptDiscordUploadOnlyOverLimit}
-                    onChange={v => store.interceptDiscordUploadOnlyOverLimit = v}
+                    checked={store.autoUploadPastedFiles}
+                    onChange={v => store.autoUploadPastedFiles = v}
+                />
+            </SettingsSection>
+
+            <SettingsSection tag="label" name="Respect Discord File Size Limit" description="Use FileUpload only for files larger than your current Discord upload limit" inlineSetting>
+                <Switch
+                    checked={store.bypassDiscordUploadOnlyOverLimit}
+                    onChange={v => store.bypassDiscordUploadOnlyOverLimit = v}
                 />
             </SettingsSection>
 
