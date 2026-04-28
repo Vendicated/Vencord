@@ -21,12 +21,19 @@ import { Auth } from "@plugins/reviewDB/auth";
 import { ReviewType } from "@plugins/reviewDB/entities";
 import { REVIEWS_PER_PAGE, UserReviewsData } from "@plugins/reviewDB/reviewDbApi";
 import { cl } from "@plugins/reviewDB/utils";
-import { ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalRoot, ModalSize, openModal } from "@utils/modal";
+import { ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalRoot, ModalSize, openModalLazy } from "@utils/modal";
 import { useForceUpdater } from "@utils/react";
-import { Paginator, Text, useRef, useState } from "@webpack/common";
+import * as t from "@vencord/discord-types";
+import { DefaultExtractAndLoadChunksRegex, extractAndLoadChunksLazy, findComponentByCodeLazy } from "@webpack";
+import { Text, useRef, useState } from "@webpack/common";
+import { ComponentProps } from "react";
 
 import ReviewComponent from "./ReviewComponent";
 import ReviewsView, { ReviewsInputComponent } from "./ReviewsView";
+
+const Paginator = findComponentByCodeLazy<ComponentProps<t.Paginator>>('rel:"prev",children:');
+// This matches a massive module with ~230k chars so we need an anchor before to prevent REDOS
+const requirePaginator = extractAndLoadChunksLazy(['name:"SearchResults"'], new RegExp(`name:"StageChannelCall",renderLoader:.+?(?:${DefaultExtractAndLoadChunksRegex.source}).{0,30}?name:"SearchResults"`));
 
 function Modal({ modalProps, modalKey, discordId, name, type }: { modalProps: any; modalKey: string, discordId: string; name: string; type: ReviewType; }) {
     const [data, setData] = useState<UserReviewsData>();
@@ -100,13 +107,15 @@ function Modal({ modalProps, modalKey, discordId, name, type }: { modalProps: an
 export function openReviewsModal(discordId: string, name: string, type: ReviewType) {
     const modalKey = "vc-rdb-modal-" + Date.now();
 
-    openModal(props => (
-        <Modal
-            modalKey={modalKey}
-            modalProps={props}
-            discordId={discordId}
-            name={name}
-            type={type}
-        />
-    ), { modalKey });
+    openModalLazy(async () => {
+        await requirePaginator();
+        return props => (
+            <Modal
+                modalKey={modalKey}
+                modalProps={props}
+                discordId={discordId}
+                name={name}
+                type={type} />
+        );
+    }, { modalKey });
 }

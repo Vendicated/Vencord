@@ -21,7 +21,8 @@ export default definePlugin({
     name: "NoMosaic",
     authors: [Devs.AutumnVN],
     description: "Removes Discord image mosaic",
-    tags: ["image", "mosaic", "media"],
+    tags: ["Media", "Appearance", "Chat"],
+    searchTerms: ["image", "mosaic", "media"],
 
     settings,
 
@@ -29,8 +30,8 @@ export default definePlugin({
         {
             find: '"PLAINTEXT_PREVIEW":"OTHER"',
             replacement: {
-                match: /=>"IMAGE"===\i\|\|"VIDEO"===\i(?:\|\|("VISUAL_PLACEHOLDER"===\i))?;/,
-                replace: (_, visualPlaceholderPred) => visualPlaceholderPred != null ? `=>${visualPlaceholderPred};` : "=>false;"
+                match: /return"IMAGE"===\i\|\|"VIDEO"===\i(?:\|\|("VISUAL_PLACEHOLDER"===\i)\|\|\i&&"CLIP"===\i)?/,
+                replace: (_, visualPlaceholderPred) => visualPlaceholderPred != null ? `return ${visualPlaceholderPred}` : "return false"
             }
         },
         {

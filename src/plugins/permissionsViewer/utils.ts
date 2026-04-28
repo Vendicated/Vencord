@@ -18,12 +18,11 @@
 
 import { classNameFactory } from "@utils/css";
 import { Guild, GuildMember, Role } from "@vencord/discord-types";
+import { PermissionOverwriteType } from "@vencord/discord-types/enums";
 import { findByPropsLazy } from "@webpack";
 import { GuildRoleStore } from "@webpack/common";
 
 import { PermissionsSortOrder, settings } from ".";
-import { PermissionType } from "./components/RolesAndUsersPermissions";
-
 export const { getGuildPermissionSpecMap } = findByPropsLazy("getGuildPermissionSpecMap");
 
 export const cl = classNameFactory("vc-permviewer-");
@@ -50,7 +49,7 @@ export function sortPermissionOverwrites<T extends { id: string; type: number; }
     const roles = GuildRoleStore.getRolesSnapshot(guildId);
 
     return overwrites.sort((a, b) => {
-        if (a.type !== PermissionType.Role || b.type !== PermissionType.Role) return 0;
+        if (a.type !== PermissionOverwriteType.ROLE || b.type !== PermissionOverwriteType.ROLE) return 0;
 
         const roleA = roles[a.id];
         const roleB = roles[b.id];

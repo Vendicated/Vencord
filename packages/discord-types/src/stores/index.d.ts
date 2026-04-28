@@ -1,13 +1,18 @@
 // please keep in alphabetical order
 export * from "./AccessibilityStore";
 export * from "./ActiveJoinedThreadsStore";
+export * from "./ApplicationCommandIndexStore";
 export * from "./ApplicationStore";
+export * from "./ApplicationStreamingStore";
+export * from "./ApplicationStreamPreviewStore";
 export * from "./AuthenticationStore";
 export * from "./CallStore";
 export * from "./ChannelRTCStore";
 export * from "./ChannelStore";
 export * from "./DraftStore";
+export * from "./EditMessageStore";
 export * from "./EmojiStore";
+export * from "./ExperimentStore";
 export * from "./FluxStore";
 export * from "./FriendsStore";
 export * from "./GuildChannelStore";
@@ -41,6 +46,7 @@ export * from "./StreamerModeStore";
 export * from "./ThemeStore";
 export * from "./TypingStore";
 export * from "./UploadAttachmentStore";
+export * from "./UserAffinitiesStore";
 export * from "./UserGuildSettingsStore";
 export * from "./UserProfileStore";
 export * from "./UserSettingsProtoStore";

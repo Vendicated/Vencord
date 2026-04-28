@@ -53,12 +53,6 @@ export default definePlugin({
             find: "#{intl::COMMANDS_OPTIONAL_COUNT}",
             replacement: [
                 {
-                    // ...children: p?.name
-                    match: /(?<=:(\i)\.displayDescription\}.{0,200}children:).{0,50}\.name(?=\}\))/,
-                    replace: "$1.plugin||($&)",
-                    noWarn: true // TODO: remove legacy compatibility code in the future
-                },
-                {
                     match: /children:(?=\i\?\?\i\?\.name)(?<=command:(\i),.+?)/,
                     replace: "children:$1.plugin??"
                 }

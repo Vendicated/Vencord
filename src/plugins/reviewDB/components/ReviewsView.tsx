@@ -65,10 +65,11 @@ export default function ReviewsView({
         fallbackValue: null,
         deps: [refetchSignal, signal, page],
         onSuccess: data => {
-            if (settings.store.hideBlockedUsers)
-                data!.reviews = data!.reviews?.filter(r => !RelationshipStore.isBlocked(r.sender.discordID));
+            if (settings.store.hideBlockedUsers) data!.reviews = data!.reviews?.filter(r => !RelationshipStore.isBlocked(r.sender.discordID));
+            const systemReviews = data!.reviews.filter(r => r.type === ReviewType.System);
+            const normalReviews = data!.reviews.filter(r => r.type !== ReviewType.System);
 
-            data!.reviews.reverse();
+            data!.reviews = [...systemReviews, ...normalReviews.reverse()];
             scrollToTop?.();
             onFetchReviews(data!);
         }
