@@ -288,6 +288,16 @@ export default function ChannelsTabsContainer(props: BasicChannelTabsProps) {
 
     if (isFullscreen) return null;
 
+    const shouldFollowNewTabButton = newTabButtonBehavior && !tabsOverflow;
+    const newTabButton = (
+        <button
+            onClick={() => createTab(props, true)}
+            className={cl("button", "new-button", "hoverable")}
+        >
+            <PlusSmallIcon />
+        </button>
+    );
+
     return (
         <div
             className={classes(
@@ -322,20 +332,16 @@ export default function ChannelsTabsContainer(props: BasicChannelTabsProps) {
             <div className={cl("tab-container")}>
                 <HorizontalScroller
                     customRef={node => { scrollerRef.current = node; }}
-                    className={cl("tab-scroller", newTabButtonBehavior && !tabsOverflow && "tab-scroller-following")}
+                    className={cl("tab-scroller", shouldFollowNewTabButton && "tab-scroller-following")}
                 >
                     {openedTabs.filter(tab => tab != null).map((tab, i) =>
                         <ChannelTab {...tab} index={i} key={tab.id} />
                     )}
                     {GhostTabs}
+                    {shouldFollowNewTabButton && newTabButton}
                 </HorizontalScroller>
 
-                <button
-                    onClick={() => createTab(props, true)}
-                    className={cl("button", "new-button", "hoverable")}
-                >
-                    <PlusSmallIcon />
-                </button>
+                {!shouldFollowNewTabButton && newTabButton}
             </div >
 
         </div>
