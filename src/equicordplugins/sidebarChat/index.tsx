@@ -311,13 +311,6 @@ export default definePlugin({
     dependencies: ["HeaderBarAPI"],
     patches: [
         {
-            find: "this.renderThreadSidebar()",
-            replacement: {
-                match: /(this\.renderThreadSidebar\(\))\]/,
-                replace: "$1,$self.renderSidebar()]"
-            }
-        },
-        {
             find: 'case"pendingFriends":',
             group: true,
             replacement: [
