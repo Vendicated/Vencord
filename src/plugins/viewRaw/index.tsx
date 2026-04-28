@@ -141,7 +141,6 @@ function MakeContextCallback(name: "Guild" | "Role" | "User" | "Channel" | "Mess
         const isMessage = name === "Message";
         if (isMessage && !settings.store.messageContextMenu) return;
 
-
         // typescript parser goes crazy if this is inline
         const id = `vc-view-${name.toLowerCase()}-raw`;
         const action = isMessage

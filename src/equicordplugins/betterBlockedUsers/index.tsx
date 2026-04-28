@@ -22,17 +22,18 @@ export default definePlugin({
     patches: [
         {
             find: '"],{numberOfBlockedUsers:',
+            group: true,
             replacement: [
                 {
-                    match: /(?<=listType:\i,numberOfUsers:\i\}=(\i).{0,800}numberOfIgnoredUsers:\i\}\)\}\)\]\}\))/,
-                    replace: ",$1.listType==='blocked'?$self.renderSearchInput():null"
+                    match: /(?<=\(0,\i\.jsx\)\(\i,\{listType:(\i),numberOfUsers:\i\.length\}\),)/,
+                    replace: "$1==='blocked'?$self.renderSearchInput():null,"
                 },
                 {
                     match: /(?<=\{userId:(\i).*?\.globalName.{0,25}\}\)\]\}\),)(\(.*?loading:\i\}\))/,
                     replace: "$self.renderUser($1,$2)",
                 },
                 {
-                    match: /(?<=\}=(\i).{0,10}(\i).useState.{0,5};)/,
+                    match: /(?<=userIds:\i,listType:\i\}=(\i).{0,30}(\i)\.useState\(\d+\);)/,
                     replace: "let [searchResults,setSearchResults]=$2.useState([]);$self.setUpdateFunc($1,setSearchResults);"
                 },
                 {
@@ -50,17 +51,19 @@ export default definePlugin({
             updateFunc(searchResults);
         }, []);
 
-        return <TextInput
-            placeholder="Search users..."
-            style={{ width: "200px" }}
-            onInput={e => {
-                const search = (e.target as HTMLInputElement).value.toLowerCase().trim();
-                setValue(search);
-                lastSearch = search;
-                const searchResults = this.getFilteredUsers(search);
-                updateFunc(searchResults);
-            }} value={value}
-        ></TextInput>;
+        return <div className="vc-bbu-search">
+            <TextInput
+                placeholder="Search users..."
+                style={{ width: "200px" }}
+                onInput={e => {
+                    const search = (e.target as HTMLInputElement).value.toLowerCase().trim();
+                    setValue(search);
+                    lastSearch = search;
+                    const searchResults = this.getFilteredUsers(search);
+                    updateFunc(searchResults);
+                }} value={value}
+            />
+        </div>;
     },
     renderUser(userId: string, rest: any) {
         return (

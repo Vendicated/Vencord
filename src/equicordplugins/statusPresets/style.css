@@ -2,12 +2,23 @@
     opacity: 0.5;
 }
 
-.vc-sp-item:hover {
-    background-color: var(--menu-item-default-hover-bg) !important;
-    color: var(--white) !important;
-}
-
 .vc-sp-icon {
     transform: rotate(45deg);
-    margin-top: 4px;
+    width: 16px;
+    height: 16px;
+    color: var(--interactive-normal);
+    opacity: 0;
+}
+
+[data-menu-item="true"]:hover .vc-sp-icon {
+    opacity: 1;
+}
+
+[data-menu-item="true"]:hover .vc-sp-icon:hover {
+    color: var(--status-danger);
+}
+
+[data-menu-item="true"][id^="sp-custom-status-submenu"] img.emoji {
+    width: 16px !important;
+    height: 16px !important;
 }

@@ -23,46 +23,30 @@ import { getUserSettingLazy } from "@api/UserSettings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { EquicordDevs } from "@utils/constants";
 import { proxyLazy } from "@utils/lazy";
-import { classes } from "@utils/misc";
 import { openModalLazy } from "@utils/modal";
 import { useForceUpdater } from "@utils/react";
 import definePlugin, { OptionType, StartAt } from "@utils/types";
 import { extractAndLoadChunksLazy, findComponentByCodeLazy, findModuleId, wreq } from "@webpack";
-import { Clickable, Menu, OverridePremiumTypeStore, Toasts, useState } from "@webpack/common";
-
-import managedStyle from "./fixActionBar.css?managed";
-
-const settings = definePluginSettings({
-    StatusPresets: {
-        type: OptionType.COMPONENT,
-        description: "Status Presets",
-        component: () => <></>,
-        default: {}
-    }
-});
+import { Menu, OverridePremiumTypeStore, Toasts } from "@webpack/common";
 
 interface Emoji {
     animated: boolean;
-    id: bigint | null;
+    id: string | null;
     name: string;
 }
-
-const PlusSmallIcon = findComponentByCodeLazy("0-2h-5V6Z");
 
 interface DiscordStatus {
     emojiInfo: Emoji | null;
     text: string;
     clearAfter: "TODAY" | number | null;
-    status: "online" | "dnd" | "idle" | "invisible";
 }
 
-// TODO: find clearCustomStatusHint original css/svg or replace
-let PMenu;
+const PMenu = findComponentByCodeLazy("#{intl::MORE_OPTIONS}", ",renderSubmenu:");
 const EmojiComponent = findComponentByCodeLazy(/\.translateSurrogatesToInlineEmoji\(\i\.name\);/);
 
 const CustomStatusSettings = getUserSettingLazy("status", "customStatus")!;
 const StatusModule = proxyLazy(() => {
-    const id = findModuleId(".customStatusInputTitle,");
+    const id = findModuleId("#{intl::SAVE}", '"custom-status-input"', '"Invalid custom status clear timeout"),');
     return wreq(Number(id));
 });
 
@@ -77,7 +61,6 @@ const openCustomStatusModalLazy = () => openModalLazy(async () => {
 
 function getExpirationMs(expiration: "TODAY" | number) {
     if (expiration !== "TODAY") return Date.now() + expiration;
-
     const now = new Date();
     return new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1).getTime();
 }
@@ -92,69 +75,64 @@ function setStatus(status: DiscordStatus) {
     });
 }
 
-const ClearStatusButton = () => <Clickable onClick={e => { e.stopPropagation(); CustomStatusSettings?.updateSetting(null); }}><PlusSmallIcon className={"vc-sp-icon"} /></Clickable>;
-
-function StatusIcon({ isHovering, status }: { isHovering: boolean; status: DiscordStatus; }) {
-    return <div>{isHovering ?
-        <PlusSmallIcon className={"vc-sp-icon"} />
-        : (status.emojiInfo != null ? <EmojiComponent emoji={status.emojiInfo} animate={false} hideTooltip={false} /> : <div />)}</div>;
-}
-
-const RenderStatusMenuItem = ({ status, update, disabled }: { status: DiscordStatus; update: () => void; disabled: boolean; }) => {
-    const [isHovering, setIsHovering] = useState(false);
-    const handleMouseOver = () => {
-        setIsHovering(true);
-    };
-
-    const handleMouseOut = () => {
-        setIsHovering(false);
-    };
-
-    return <div className={classes("vc-sp-item", disabled ? "vc-sp-disabled" : null)}
-        onMouseOver={handleMouseOver}
-        onMouseOut={handleMouseOut}>
-        <Clickable
-            onClick={e => {
-                e.stopPropagation();
-                settings.store.StatusPresets[status.text] = undefined; // setting to undefined to remove it.
-                update();
-            }}><StatusIcon isHovering={isHovering} status={status} /></Clickable>
-        <div style={{ marginLeft: "2px" }}>{status.text}</div>
-    </div >;
-};
-
 const StatusSubMenuComponent = () => {
     const premiumType = OverridePremiumTypeStore.getState().premiumTypeActual ?? 0;
     const update = useForceUpdater();
-    return <Menu.Menu navId="sp-custom-status-submenu" onClose={() => { }}>
-        {Object.entries((settings.store.StatusPresets as { [k: string]: DiscordStatus | undefined; })).map(([index, status]) => status != null ? <Menu.MenuItem
-            key={"status-presets-" + index}
-            id={"status-presets-" + index}
-            label={status.status}
-            action={() => (status.emojiInfo?.id != null && premiumType > 0 || status.emojiInfo?.id == null) && setStatus(status)}
-            render={() => <RenderStatusMenuItem
-                status={status}
-                update={update}
-                disabled={status.emojiInfo?.id != null && premiumType === 0}
-            />}
-        /> : null)}
-    </Menu.Menu>;
+
+    return (
+        <Menu.Menu navId="sp-custom-status-submenu" onClose={() => { }}>
+            {Object.entries((settings.store.StatusPresets as { [k: string]: DiscordStatus | undefined; })).map(([index, status]) =>
+                status != null ? (
+                    <Menu.MenuItem
+                        key={"status-presets-" + index}
+                        id={"status-presets-" + index}
+                        label={status.text}
+                        action={() => (status.emojiInfo?.id == null || premiumType > 0) && setStatus(status)}
+                        icon={status.emojiInfo != null
+                            ? () => <EmojiComponent emoji={status.emojiInfo} animate={false} hideTooltip={false} />
+                            : undefined
+                        }
+                        disabled={status.emojiInfo?.id != null && premiumType === 0}
+                    >
+                        <Menu.MenuItem
+                            id={"status-presets-delete-" + index}
+                            label="Delete Preset"
+                            action={() => {
+                                const newPresets = JSON.parse(JSON.stringify(settings.store.StatusPresets));
+                                delete newPresets[status.text];
+                                settings.store.StatusPresets = newPresets;
+                                update();
+                            }}
+                        />
+                    </Menu.MenuItem>
+                ) : null
+            )}
+        </Menu.Menu>
+    );
 };
+
+const settings = definePluginSettings({
+    StatusPresets: {
+        type: OptionType.COMPONENT,
+        description: "Status Presets",
+        component: () => <></>,
+        default: {}
+    }
+});
 
 export default definePlugin({
     name: "StatusPresets",
     description: "Allows you to remember your statuses and set them later",
     tags: ["Activity", "Utility"],
     authors: [EquicordDevs.iamme],
-    settings: settings,
+    settings,
     dependencies: ["UserSettingsAPI"],
-    managedStyle,
     patches: [
         {
             find: '="custom-status-input";',
             replacement: {
-                match: /(?<=(\i)\?\.state\?\?.*?)\{text:\i\.\i\.\i\(\i\.\i#{intl::SAVE}\)/,
-                replace: "$self.renderRememberButton($1),$&"
+                match: /(?<=\[(\i).{0,6}\.useState\(\i\?\.state\?\?""\),\[(\i).{0,25}\?\?null\),\[(\i).*?)\{text:\i\.\i\.\i\(\i\.\i#{intl::SAVE}\)/,
+                replace: "$self.renderRememberButton({text:$1,emojiInfo:$2,clearAfter:$3}),$&"
             }
         },
         {
@@ -167,14 +145,12 @@ export default definePlugin({
         {
             find: "#{intl::MORE_OPTIONS}),...",
             replacement: {
-                match: /(?<=targetElementRef:\i,spacing:.{0,150}className:\i\.\i,children:(\i)\(\)\}\)\})/,
-                replace: "$self.PMenu=$1;"
+                match: /\i:\(\)=>\i,(?=.*?function (\i).{0,100}renderSubmenu:\i,ref:)/,
+                replace: "$&PMenu:()=>$1,"
             }
         },
     ],
-    set PMenu(value: any) {
-        PMenu = value;
-    },
+
     render() {
         const status = CustomStatusSettings.getSetting();
         return (
@@ -185,9 +161,7 @@ export default definePlugin({
                         id="sp-custom/presets-status"
                         action="PRESS_SET_STATUS"
                         onClick={openCustomStatusModalLazy}
-                        icon={
-                            () => <div />
-                        }
+                        icon={() => <div />}
                         label="Set Custom Status"
                         renderSubmenu={StatusSubMenuComponent}
                     />
@@ -196,19 +170,13 @@ export default definePlugin({
                         id="sp-edit/presets-status"
                         action="PRESS_EDIT_CUSTOM_STATUS"
                         onClick={openCustomStatusModalLazy}
-                        hint={<ClearStatusButton />}
-                        icon={
-                            () => status.emoji != null ? (
-                                <EmojiComponent
-                                    emoji={status.emoji}
-                                    animate={false}
-                                    hideTooltip={false}
-                                />
-                            ) : null
-                        }
+                        icon={() => status.emoji != null ? (
+                            <EmojiComponent emoji={status.emoji} animate={false} hideTooltip={false} />
+                        ) : null}
                         label="Edit Custom Status"
                         renderSubmenu={StatusSubMenuComponent}
-                    />}
+                    />
+                }
             </ErrorBoundary>
         );
     },
