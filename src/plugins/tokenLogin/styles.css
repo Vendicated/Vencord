@@ -1,0 +1,22 @@
+.token-login-modal-content {
+    padding: 16px;
+}
+
+.token-login-section {
+    margin-bottom: 16px;
+}
+
+.token-login-footer {
+    padding: 16px;
+    background-color: var(--background-secondary);
+    border-top: 1px solid var(--background-modifier-accent);
+}
+
+.token-field {
+    -webkit-text-security: disc;
+}
+
+.account-actions {
+    display: flex;
+    gap: 0.5em;
+}

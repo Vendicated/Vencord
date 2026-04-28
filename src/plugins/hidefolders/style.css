@@ -1,0 +1,54 @@
+.vc-hidefolders-button-wrapper {
+    display: flex;
+    justify-content: center;
+    margin: 0 0 8px;
+}
+
+.vc-hidefolders-button {
+    max-width: 48px;
+    font-size: 60%;
+    background-color: var(--background-primary);
+    color: var(--text-default);
+}
+
+.vc-hidefolders-list {
+    flex: 1 1 auto;
+}
+
+/* copied from blocked row */
+.vc-hidefolders-row {
+    height: 62px;
+    display: flex;
+    align-items: center;
+    flex-direction: row;
+    margin-left: 20px;
+    margin-right: 20px;
+    border-top: 1px solid var(--input-border-default, var(--input-border));
+    border-bottom: 1px solid transparent;
+    justify-content: space-between;
+}
+
+.vc-hidefolders-guildicon {
+    display: flex;
+    align-items: center;
+    margin-right: 1em;
+}
+
+.vc-hidefolders-guildicon img {
+    border-radius: 50%;
+}
+
+.vc-hidefolders-name {
+    flex-grow: 1;
+}
+
+.vc-hidefolders-row-button {
+    margin-left: auto;
+}
+
+.vc-hidefolders-folder-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-right: 20px;
+}

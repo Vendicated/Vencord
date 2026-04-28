@@ -1,0 +1,45 @@
+import { ApplicationCommandInputType, ApplicationCommandOptionType, findOption } from "@api/Commands";
+import { Devs } from "@utils/constants";
+import definePlugin from "@utils/types";
+import { findByPropsLazy } from "@webpack";
+
+
+const typing = findByPropsLazy("startTyping");
+
+async function typeForever(seconds: number, ctx: any) {
+    for (let i = 0; i < seconds; i += 5) {
+        typing.startTyping(ctx.channel.id);
+        await new Promise(resolve => setTimeout(resolve, 5000));
+        }
+        typing.stopTyping(ctx.channel.id);
+    }
+
+
+export default definePlugin({
+    name: "TypeForever!",
+    description: "Type for any amount of time with a slash command",
+    authors: [Devs.rz30,],
+    dependencies: ["CommandsAPI"],
+    commands: [{
+        name: "TypeForever",
+        description: "Type forever!",
+        inputType: ApplicationCommandInputType.BUILT_IN,
+        options: [{
+            name: "seconds",
+            description: "Number of seconds to type for",
+            type: ApplicationCommandOptionType.INTEGER,
+            required: true
+        }],
+        execute: async (_, ctx) => {
+            var count = findOption(_, "seconds", "");
+            let seconds: number = Number(count);
+            if (seconds > 0 && seconds < 6000) {
+                typeForever(seconds, ctx);
+
+            } else {
+               console.log("Invalid number of seconds");
+            }
+
+        }
+    }]
+});
