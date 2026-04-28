@@ -19,6 +19,7 @@
 import { findGroupChildrenByChildId, NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { BaseText } from "@components/BaseText";
 import ErrorBoundary from "@components/ErrorBoundary";
+import {classes} from "@utils/misc";
 import { closeModal, ModalCloseButton, ModalContent, ModalHeader, ModalRoot, ModalSize, openModal } from "@utils/modal";
 import { useTimer } from "@utils/react";
 import { User } from "@vencord/discord-types";
@@ -27,7 +28,6 @@ import { Menu, React, SearchableSelect, Timestamp, Tooltip, useEffect, UserStore
 
 import { settings } from "./settings";
 import { formatTimezoneLabel, getOffsetMinutes, getUserTimezone, setUserTimezone, update } from "./utils";
-import {classes} from "@utils/misc";
 
 const cl = findCssClassesLazy("dotSpacer", "userTagUsername");
 
@@ -54,7 +54,13 @@ export const TimezoneTriggerProfile = (props: { userId: string;[key: string]: an
 
     if (!selectedTz) return null;
 
-    const getDotSpacer = () => cl.dotSpacer ?? Object.values(cl).find(v => v.includes("dotSpacer"));
+    const getDotSpacer = () => {
+        try {
+            return cl.dotSpacer ?? Object.values(cl).find(v => String(v).includes("dotSpacer")) ?? "vc-tzonprofile-dotSpacer";
+        } catch {
+            return "vc-tzonprofile-dotSpacer"; // if this fallback starts happening often, genuinely heartbreaking
+        }
+    };
 
     return (
         <>
@@ -70,17 +76,23 @@ export const TimezoneTriggerProfile = (props: { userId: string;[key: string]: an
     );
 };
 
-export const TimezoneTriggerUsername = (props: { userId: string;[key: string]: any; }) => {
-    if (!settings.store.showTimeOnMessages)
-        return;
-
-    const { userId } = props;
+export const TimezoneTriggerUsername = (props: { userId: string; timestamp?: string | number | Date; isDM?: boolean; [key: string]: any; }) => {
+    const { userId, timestamp, isDM = false } = props;
     const selectedTz = useSelectedTimezone(userId);
-    const [currentTime, setCurrentTime] = useState<Date>(new Date(Date.now()));
+    const { messageTimeMode } = settings.use(["messageTimeMode"]);
+
+    const shouldShow =
+        messageTimeMode !== "off";
+
+    const shouldUseSentTime =
+        messageTimeMode === "sent"
+        || (messageTimeMode === "dm-sent-server-current" && isDM);
+
+    const [currentTime, setCurrentTime] = useState<Date>(new Date());
 
     const elapsed = useTimer({
         interval: 60_000 - (Date.now() % 60_000),
-        deps: [selectedTz]
+        deps: [selectedTz, messageTimeMode, timestamp, isDM]
     });
 
     const user = UserStore.getUser(userId);
@@ -88,10 +100,16 @@ export const TimezoneTriggerUsername = (props: { userId: string;[key: string]: a
 
     useEffect(() => {
         if (!selectedTz) return;
-        setCurrentTime(update(selectedTz));
-    }, [elapsed, selectedTz]);
 
-    if (!selectedTz) return null;
+        const sourceDate =
+            shouldUseSentTime && timestamp
+                ? new Date(timestamp)
+                : new Date();
+
+        setCurrentTime(update(selectedTz, sourceDate));
+    }, [elapsed, selectedTz, timestamp, shouldUseSentTime]);
+
+    if (!shouldShow || !selectedTz) return null;
 
     return (
         <>
@@ -147,7 +165,7 @@ export function createTimezoneMenuItems(user: User, currentTimezone: string) {
                     <ErrorBoundary>
                         <div className="vc-tzonprofile-modalinformation">
                             <div className="vc-tzonprofile-current-timezone">
-                                <span>Current Timezone: </span>
+                                <span>Selected Timezone: </span>
                                 <strong>
                                     {currentTimezone ? formatTimezoneLabel(currentTimezone) : "None"}
                                 </strong>

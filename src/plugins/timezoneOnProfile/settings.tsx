@@ -33,11 +33,6 @@ export const settings = definePluginSettings({
         description: "The font size of the time.",
         default: 14
     },
-    showTimeOnMessages: {
-        type: OptionType.BOOLEAN,
-        description: "Show time next to messages",
-        default: true
-    },
     yourTimezone: {
         type: OptionType.COMPONENT,
         component() {
@@ -51,5 +46,28 @@ export const settings = definePluginSettings({
                 </div>
             );
         }
-    }
+    },
+    messageTimeMode: {
+        type: OptionType.SELECT,
+        description: "What time to show next to messages",
+        options: [
+            {
+                label: "Sent time in user's timezone next to messages",
+                value: "sent",
+                default: true
+            },
+            {
+                label: "Current time next to messages",
+                value: "current",
+            },
+            {
+                label: "Sent time in DMs, current time in servers",
+                value: "dm-sent-server-current"
+            },
+            {
+                label: "Off",
+                value: "off"
+            }
+        ]
+    },
 });

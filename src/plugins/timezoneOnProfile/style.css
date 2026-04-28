@@ -35,10 +35,6 @@
     pointer-events: none;
 }
 
-.vc-tzonprofile-current-timezone {
-
-}
-
 .vc-tzonprofile-modalcontent * {
     color: var(--text-default);
 }
@@ -49,7 +45,7 @@
 }
 
 .vc-tzonprofile-modalinformation > * {
-    padding: 4px 0;
+    padding: 12px 0;
 }
 
 .vc-tzonprofile-tooltip-outer {
@@ -76,4 +72,12 @@
 
 .vc-tzonprofile-profiletime:hover {
     text-decoration: underline;
+}
+
+.vc-tzonprofile-dotSpacer {
+    background-color: var(--text-default);
+    border-radius: 50%;
+    height: 4px;
+    width: 4px;
+    flex: 0 0 auto;
 }
