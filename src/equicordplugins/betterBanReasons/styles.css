@@ -8,6 +8,13 @@
 
 .vc-bbr-remove-button {
     color: var(--text-muted);
+    align-self: start;
+}
+
+.vc-bbr-duration-row {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
 }
 
 .vc-bbr-remove-button:hover {
