@@ -19,8 +19,6 @@ lerna-debug.log*
 .pnpm-debug.log*
 *.tsbuildinfo
 
-src/userplugins
-
 .copilot-memory/*.db
 
 ExtensionCache/
