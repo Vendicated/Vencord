@@ -13,6 +13,9 @@ importers:
 
   .:
     dependencies:
+      '@fluent/langneg':
+        specifier: ^0.7.0
+        version: 0.7.0
       '@intrnl/xxhash64':
         specifier: ^0.1.2
         version: 0.1.2
@@ -750,6 +753,10 @@ packages:
   '@eslint/plugin-kit@0.7.1':
     resolution: {integrity: sha512-rZAP3aVgB9ds9KOeUSL+zZ21hPmo8dh6fnIFwRQj5EAZl9gzR7wxYbYXYysAM8CTqGmUGyp2S4kUdV17MnGuWQ==}
     engines: {node: ^20.19.0 || ^22.13.0 || >=24}
+
+  '@fluent/langneg@0.7.0':
+    resolution: {integrity: sha512-StAM0vgsD1QK+nFikaKs9Rxe3JGNipiXrpmemNGwM4gWERBXPe9gjzsBoKjgBgq1Vyiy+xy/C652QIWY+MPyYw==}
+    engines: {node: '>=14.0.0', npm: '>=7.0.0'}
 
   '@humanfs/core@0.19.1':
     resolution: {integrity: sha512-5DyQ4+1JEUzejeK1JGICcideyfUbGixgS9jNgex5nqkW+cY7WZhxBigmieN5Qnw9ZosSNVC9KQKyb+GUaGyKUA==}
@@ -3389,6 +3396,8 @@ snapshots:
     dependencies:
       '@eslint/core': 1.2.1
       levn: 0.4.1
+
+  '@fluent/langneg@0.7.0': {}
 
   '@humanfs/core@0.19.1': {}
 

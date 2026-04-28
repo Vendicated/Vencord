@@ -21,6 +21,7 @@ import { BackupRestoreIcon, CloudIcon, MainSettingsIcon, PaintbrushIcon, PatchHe
 import { BackupAndRestoreTab, CloudTab, PatchHelperTab, PluginsTab, ThemesTab, UpdaterTab, VencordTab } from "@components/settings/tabs";
 import { Devs } from "@utils/constants";
 import { isTruthy } from "@utils/guards";
+import { t } from "@utils/translation";
 import definePlugin, { IconProps, OptionType } from "@utils/types";
 import { waitFor } from "@webpack";
 import { React } from "@webpack/common";
@@ -167,7 +168,7 @@ export default definePlugin({
             buildEntry({
                 key: "vencord_main",
                 title: "Vencord",
-                panelTitle: "Vencord Settings",
+                panelTitle: t("vencord.tabs.settings"),
                 Component: VencordTab,
                 Icon: MainSettingsIcon
             }),

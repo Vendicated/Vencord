@@ -31,6 +31,7 @@ import { IS_MAC, IS_WINDOWS } from "@utils/constants";
 import { Margins } from "@utils/margins";
 import { isPluginDev } from "@utils/misc";
 import { relaunch } from "@utils/native";
+import { t, Translate } from "@utils/translation";
 import { Alerts, Forms, React, useMemo, UserStore } from "@webpack/common";
 
 import { DonateButtonComponent, isDonor } from "./DonateButton";
@@ -54,36 +55,36 @@ function Switches() {
     const Switches = [
         {
             key: "useQuickCss",
-            title: "Enable Custom CSS",
+            title: t("vencord.settings.useQuickCss.title"),
+            description: t("vencord.settings.useQuickCss.description")
         },
         !IS_WEB && {
             key: "enableReactDevtools",
-            title: "Enable React Developer Tools",
+            title: t("vencord.settings.enableReactDevtools.title"),
             restartRequired: true
         },
         !IS_WEB && (!IS_DISCORD_DESKTOP || !IS_WINDOWS ? {
             key: "frameless",
-            title: "Disable the window frame",
+            title: t("vencord.settings.frameless.title"),
             restartRequired: true
         } : {
             key: "winNativeTitleBar",
-            title: "Use Windows' native title bar instead of Discord's custom one",
+            title: t("vencord.settings.winNativeTitleBar.title"),
             restartRequired: true
         }),
         !IS_WEB && {
             key: "transparent",
-            title: "Enable window transparency",
-            description: "A theme that supports transparency is required or this will do nothing. Stops the window from being resizable as a side effect",
-            restartRequired: true
+            title: t("vencord.settings.transparent.title"),
+            description: t("vencord.settings.transparent.description")
         },
         IS_DISCORD_DESKTOP && {
             key: "disableMinSize",
-            title: "Disable minimum window size",
+            title: t("vencord.settings.disableMinSize.title"),
             restartRequired: true
         },
         !IS_WEB && IS_WINDOWS && {
             key: "winCtrlQ",
-            title: "Register Ctrl+Q as shortcut to close Discord (Alternative to Alt+F4)",
+            title: t("vencord.settings.winCtrlQ.title"),
             restartRequired: true
         },
     ] satisfies Array<false | {
@@ -111,10 +112,10 @@ function Switches() {
 
                     if (restartRequired) {
                         Alerts.show({
-                            title: "Restart Required",
-                            body: "A restart is required to apply this change",
-                            confirmText: "Restart now",
-                            cancelText: "Later!",
+                            title: t("vencord.settings.restartRequired.title"),
+                            body: t("vencord.settings.restartRequired.body"),
+                            confirmText: t("vencord.settings.restartRequired.confirm"),
+                            cancelText: t("vencord.settings.restartRequired.cancel"),
                             onConfirm: relaunch
                         });
                     }
@@ -139,9 +140,9 @@ function VencordSettings() {
             {isDonor(user?.id)
                 ? (
                     <SpecialCard
-                        title="Donations"
-                        subtitle="Thank you for donating!"
-                        description="You can manage your perks at any time by messaging @vending.machine."
+                        title={t("vencord.donorCard.donated.title")}
+                        subtitle={t("vencord.donorCard.donated.subtitle")}
+                        description={t("vencord.donorCard.donated.description", { v: "vending.machine" })}
                         cardImage={VENNIE_DONATOR_IMAGE}
                         backgroundImage={DONOR_BACKGROUND_IMAGE}
                         backgroundColor="#ED87A9"
@@ -151,8 +152,8 @@ function VencordSettings() {
                 )
                 : (
                     <SpecialCard
-                        title="Support the Project"
-                        description="Please consider supporting the development of Vencord by donating!"
+                        title={t("vencord.donorCard.notDonated.title")}
+                        description={t("vencord.donorCard.notDonated.description")}
                         cardImage={donateImage}
                         backgroundImage={DONOR_BACKGROUND_IMAGE}
                         backgroundColor="#c3a3ce"
@@ -164,48 +165,47 @@ function VencordSettings() {
 
             {isPluginDev(user?.id) && (
                 <SpecialCard
-                    title="Contributions"
-                    subtitle="Thank you for contributing!"
-                    description="Since you've contributed to Vencord you now have a cool new badge!"
+                    title={t("vencord.contributorCard.title")}
+                    subtitle={t("vencord.contributorCard.subtitle")}
+                    description={t("vencord.contributorCard.description")}
                     cardImage={COZY_CONTRIB_IMAGE}
                     backgroundImage={CONTRIB_BACKGROUND_IMAGE}
                     backgroundColor="#EDCC87"
-                    buttonTitle="See what you've contributed to"
+                    buttonTitle={t("vencord.contributorCard.contributionsButton")}
                     buttonOnClick={() => openContributorModal(user)}
                 />
             )}
 
             <section>
-                <Forms.FormTitle tag="h5">Quick Actions</Forms.FormTitle>
-
+                <Forms.FormTitle tag="h5">{t("vencord.quickActions.title")}</Forms.FormTitle>
                 <QuickActionCard>
                     <QuickAction
                         Icon={LogIcon}
-                        text="Notification Log"
+                        text={t("vencord.quickActions.notificationLog")}
                         action={openNotificationLogModal}
                     />
                     <QuickAction
                         Icon={PaintbrushIcon}
-                        text="Edit QuickCSS"
+                        text={t("vencord.quickActions.editQuickCSS")}
                         action={() => VencordNative.quickCss.openEditor()}
                     />
                     {!IS_WEB && (
                         <>
                             <QuickAction
                                 Icon={RestartIcon}
-                                text="Relaunch Discord"
+                                text={t("vencord.quickActions.relaunchDiscord")}
                                 action={relaunch}
                             />
                             <QuickAction
                                 Icon={FolderIcon}
-                                text="Open Settings Folder"
+                                text={t("vencord.quickActions.openSettings")}
                                 action={() => VencordNative.settings.openFolder()}
                             />
                         </>
                     )}
                     <QuickAction
                         Icon={GithubIcon}
-                        text="View Source Code"
+                        text={t("vencord.quickActions.viewSource")}
                         action={() => VencordNative.native.openExternal("https://github.com/" + gitRemote)}
                     />
                 </QuickActionCard>
@@ -214,17 +214,18 @@ function VencordSettings() {
             <Divider />
 
             <section className={Margins.top16}>
-                <Forms.FormTitle tag="h5">Settings</Forms.FormTitle>
+                <Forms.FormTitle tag="h5">{t("vencord.settings.title")}</Forms.FormTitle>
                 <Forms.FormText className={Margins.bottom20} style={{ color: "var(--text-muted)" }}>
-                    Hint: You can change the position of this settings section in the{" "}
-                    <a onClick={() => openPluginModal(Vencord.Plugins.plugins.Settings)}>
-                        settings of the Settings plugin
-                    </a>!
+                    <Translate i18nKey="vencord.settings.hint">
+                        Hint: You can change the position of this settings section in the
+                        <a onClick={() => openPluginModal(Vencord.Plugins.plugins.Settings)}>
+                            settings of the Settings plugin
+                        </a>!
+                    </Translate>
                 </Forms.FormText>
 
                 <Switches />
             </section>
-
 
             {needsVibrancySettings && <VibrancySettings />}
 
@@ -233,4 +234,4 @@ function VencordSettings() {
     );
 }
 
-export default wrapTab(VencordSettings, "Vencord Settings");
+export default wrapTab(VencordSettings, t("vencord.tabs.settings"));
