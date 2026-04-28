@@ -43,8 +43,8 @@ export default definePlugin({
             find: '="SYSTEM_TAG"',
             replacement: {
                 match: /(\(0,(\i)\.jsxs\)\(\2\.Fragment,\{children:\[(?:(?!\]\}\)).){0,900}?),(\i)(?=\]\}\))/g,
-                replace: "$1,$3,(0,$2.jsx)($self.TimezoneTriggerUsername,{userId:arguments[0].message.author.id})"
-            }
+                replace: "$1,$3,(0,$2.jsx)($self.TimezoneTriggerUsername,{userId:arguments[0].message.author.id,timestamp:arguments[0].message.timestamp,isDM:arguments[0].channel?.isPrivate?.()})"
+            } // TODO: fix up this patch maybe because it's lowkey disgusting
         },
         {
             find: "forceUsername:!0,className",
@@ -53,5 +53,5 @@ export default definePlugin({
                 replace: "$1(0,$3.jsx)($self.TimezoneTriggerProfile,{userId:arguments[0].user.id}),$2"
             }
         }
-    ], // TODO: fix up this patch because it's lowkey grossing me out
+    ],
 });
