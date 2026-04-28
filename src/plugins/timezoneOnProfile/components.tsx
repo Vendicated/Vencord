@@ -27,6 +27,7 @@ import { Menu, React, SearchableSelect, Timestamp, Tooltip, useEffect, UserStore
 
 import { settings } from "./settings";
 import { formatTimezoneLabel, getOffsetMinutes, getUserTimezone, setUserTimezone, update } from "./utils";
+import {classes} from "@utils/misc";
 
 const cl = findCssClassesLazy("dotSpacer", "userTagUsername");
 
@@ -57,9 +58,9 @@ export const TimezoneTriggerProfile = (props: { userId: string;[key: string]: an
 
     return (
         <>
-            <div className="vc-tzonprofile-container">
+            <div className="vc-tzonprofile-container" onClick={ e => { e.stopPropagation(); createTimezoneMenuItems(UserStore.getUser(userId), selectedTz).props.action(); }}>
                 <div className="vc-tzonprofile-selector">
-                    <span style={{ fontSize: settings.store.timeFontSize }} className={className}>
+                    <span style={{ fontSize: settings.store.timeFontSize }} className={classes(className,"vc-tzonprofile-profiletime")}>
                         <Timestamp timestamp={currentTime} />
                     </span>
                 </div>
@@ -70,6 +71,9 @@ export const TimezoneTriggerProfile = (props: { userId: string;[key: string]: an
 };
 
 export const TimezoneTriggerUsername = (props: { userId: string;[key: string]: any; }) => {
+    if (!settings.store.showTimeOnMessages)
+        return;
+
     const { userId } = props;
     const selectedTz = useSelectedTimezone(userId);
     const [currentTime, setCurrentTime] = useState<Date>(new Date(Date.now()));
@@ -91,7 +95,15 @@ export const TimezoneTriggerUsername = (props: { userId: string;[key: string]: a
 
     return (
         <>
-            <Tooltip text={`${username}'s Timezone`}>
+            <Tooltip
+                tooltipClassName="vc-tzonprofile-tooltip-outer"
+                text={
+                    <div className="vc-tzonprofile-tooltip">
+                        <div style={{ padding: "0 0 4px 0" }}>{username}'s Timezone</div>
+                        <div>{formatTimezoneLabel(selectedTz)}</div>
+                    </div>
+                }
+            >
                 {tooltipProps => (
                     <span
                         {...tooltipProps}
@@ -131,14 +143,21 @@ export function createTimezoneMenuItems(user: User, currentTimezone: string) {
                     <BaseText tag="h3" size="lg" weight="semibold" style={{ flexGrow: 1 }}>Select Timezone</BaseText>
                     <ModalCloseButton onClick={() => closeModal(modalKey)} />
                 </ModalHeader>
-                <ModalContent>
+                <ModalContent className="vc-tzonprofile-modalcontent">
                     <ErrorBoundary>
-                        <div style={{ padding: "4px 0" }}>
+                        <div className="vc-tzonprofile-modalinformation">
+                            <div className="vc-tzonprofile-current-timezone">
+                                <span>Current Timezone: </span>
+                                <strong>
+                                    {currentTimezone ? formatTimezoneLabel(currentTimezone) : "None"}
+                                </strong>
+                            </div>
+
                             <SearchableSelect
                                 options={options}
                                 value={options.find(o => o.value === currentTimezone)}
                                 placeholder="Select a timezone"
-                                maxVisibleItems={8}
+                                maxVisibleItems={12}
                                 closeOnSelect={true}
                                 onChange={(optOrValue: any) => {
                                     const v = typeof optOrValue === "string" ? optOrValue : optOrValue?.value ?? "";
@@ -171,6 +190,6 @@ export const UserContextMenuPatch: NavContextMenuPatchCallback = (children, { us
     if (group) {
         const currentTimezone = getUserTimezone(user.id);
         const timezoneMenuItems = createTimezoneMenuItems(user, currentTimezone);
-        group.push(timezoneMenuItems as any); // had to remove ...
+        group.push(timezoneMenuItems as any); // had to remove "..."
     }
 };

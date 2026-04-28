@@ -29,8 +29,8 @@ export function setUserTimezone(userId: string, tz: string) {
     settings.store.timezonesByUser = store;
 }
 
-export function update(tz: string): Date {
-    const now = new Date();
+export function update(tz: string, date = new Date()): Date {
+    const now = date;
     const parts = new Intl.DateTimeFormat("en-US", {
         timeZone: tz,
         hour12: false,
