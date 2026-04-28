@@ -55,10 +55,3 @@ export default definePlugin({
         }
     ],
 });
-
-/*
-Patches remaining:
-Compact mode usernames
-main modal profile
-miniprofile
- */
