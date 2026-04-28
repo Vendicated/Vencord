@@ -175,10 +175,6 @@ function patchGifPreviewTiles() {
         for (const image of document.querySelectorAll<HTMLImageElement>(gifPreviewImageSelector)) {
             replaceImageWithVideo(image);
         }
-    } else {
-        for (const video of document.querySelectorAll<HTMLVideoElement>(gifPreviewVideoSelector)) {
-            replaceVideoWithImage(video);
-        }
     }
 }
 
@@ -300,24 +296,35 @@ function stopGifPickerProviderHooks() {
 
 // Transform Giphy response to Discord GIF format
 function transformGiphyToDiscord(data: any): DiscordGif[] {
-    const getGiphyStillUrl = (gif: any) =>
-        gif.images?.fixed_height_small_still?.url
-        || gif.images?.downsized_still?.url
-        || gif.images?.fixed_width_still?.url
-        || gif.images?.original_still?.url
-        || gif.images?.preview_webp?.url
-        || gif.images?.fixed_height_small?.url
-        || gif.images?.preview_gif?.url;
+    const getGiphyMp4Url = (gif: any) =>
+        gif.images?.fixed_height?.mp4
+        || gif.images?.fixed_width?.mp4
+        || gif.images?.original?.mp4
+        || gif.images?.hd?.mp4
+        || gif.images?.original?.url
+        || gif.images?.downsized?.url;
+
+    const getGiphyWidth = (gif: any) =>
+        parseInt(gif.images?.fixed_width?.width)
+        || parseInt(gif.images?.fixed_height?.width)
+        || parseInt(gif.images?.original?.width)
+        || 200;
+
+    const getGiphyHeight = (gif: any) =>
+        parseInt(gif.images?.fixed_height?.height)
+        || parseInt(gif.images?.fixed_width?.height)
+        || parseInt(gif.images?.original?.height)
+        || 200;
 
     return (data.data || []).map((gif: any) => ({
         id: gif.id,
         title: gif.title || "",
-        url: gif.images?.original?.url || gif.images?.downsized?.url,
-        src: getGiphyStillUrl(gif),
-        gif_src: gif.images?.original?.url || gif.images?.downsized?.url,
-        width: parseInt(gif.images?.original?.width) || 200,
-        height: parseInt(gif.images?.original?.height) || 200,
-        preview: getGiphyStillUrl(gif)
+        url: getGiphyMp4Url(gif),
+        src: getGiphyMp4Url(gif),
+        gif_src: getGiphyMp4Url(gif),
+        width: getGiphyWidth(gif),
+        height: getGiphyHeight(gif),
+        preview: getGiphyMp4Url(gif)
     }));
 }
 
