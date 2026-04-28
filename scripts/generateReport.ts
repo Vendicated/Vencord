@@ -82,7 +82,7 @@ const IGNORED_DISCORD_ERRORS = [
     /\[GatewaySocket\].{0,110}Cannot access '/,
     "search for 'name' in undefined",
     "Attempting to set fast connect zstd when unsupported",
-    "Cannot read properties of undefined (reading 'call')",
+    /Cannot read properties of undefined \(reading 'call'\)/,
     "Could not complete Remote Auth login, trying to restart with a new Remote Auth session."
 ] as Array<string | RegExp>;
 
