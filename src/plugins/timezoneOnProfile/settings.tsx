@@ -33,10 +33,10 @@ export const settings = definePluginSettings({
         description: "The font size of the time.",
         default: 14
     },
-    showCurrentTimeOnMessages: {
+    showTimeOnMessages: {
         type: OptionType.BOOLEAN,
-        description: "Show current time next to messages",
-        default: false
+        description: "Show time next to messages",
+        default: true
     },
     yourTimezone: {
         type: OptionType.COMPONENT,

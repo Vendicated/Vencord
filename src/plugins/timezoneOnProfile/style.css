@@ -8,6 +8,7 @@
     align-items: center;
     justify-content: center;
     margin: 0;
+    cursor: pointer;
 }
 
 .vc-tzonprofile-time {
@@ -32,4 +33,47 @@
 
 .vc-tzonprofile-time [class*="timestamp_"] {
     pointer-events: none;
+}
+
+.vc-tzonprofile-current-timezone {
+
+}
+
+.vc-tzonprofile-modalcontent * {
+    color: var(--text-default);
+}
+
+.vc-tzonprofile-modalinformation {
+    display: flex;
+    flex-direction: column;
+}
+
+.vc-tzonprofile-modalinformation > * {
+    padding: 4px 0;
+}
+
+.vc-tzonprofile-tooltip-outer {
+    max-width: none !important;
+    width: max-content !important;
+}
+
+.vc-tzonprofile-tooltip-outer [class*="tooltipContent"] {
+    overflow: visible !important;
+}
+
+.vc-tzonprofile-tooltip {
+    white-space: nowrap;
+    width: max-content;
+}
+
+.vc-tzonprofile-tooltip * {
+    text-align: center;
+}
+
+.vc-tzonprofile-profiletime {
+    color: var(--text-default);
+}
+
+.vc-tzonprofile-profiletime:hover {
+    text-decoration: underline;
 }

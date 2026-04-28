@@ -43,15 +43,15 @@ export default definePlugin({
             find: '="SYSTEM_TAG"',
             replacement: {
                 match: /(\(0,(\i)\.jsxs\)\(\2\.Fragment,\{children:\[(?:(?!\]\}\)).){0,900}?),(\i)(?=\]\}\))/g,
-                replace: '$1,$3,(0,$2.jsx)(Vencord.Plugins.plugins["TimezoneOnProfile"].TimezoneTriggerUsername,{userId:arguments[0].message.author.id})'
+                replace: "$1,$3,(0,$2.jsx)($self.TimezoneTriggerUsername,{userId:arguments[0].message.author.id})"
             }
         },
         {
             find: "forceUsername:!0,className",
             replacement: {
-                match: /(\i=(\i)\.isProvisional\?null:)(\(0,(\i)\.jsx\)\(\i\.\i,\{user:\2.{0,250}?forceUsername:!0.{0,250}?usernameClass:((\i)\.\i).{0,250}?hideBotTag:!0\}\))/,
-                replace: "$1(0,$4.jsxs)($4.Fragment,{children:[(0,$4.jsx)($self.TimezoneTriggerProfile,{userId:$2.id,className:$5}),$3]})"
+                match: /(children:\[)(null!=\i&&null!=\i\?\(0,(\i)\.jsx\)\(\i\.D,\{.{0,160}?children:\i\}\):\i)/,
+                replace: "$1(0,$3.jsx)($self.TimezoneTriggerProfile,{userId:arguments[0].user.id}),$2"
             }
         }
-    ], // fix up this patch because it's lowkey grossing me out
+    ], // TODO: fix up this patch because it's lowkey grossing me out
 });
