@@ -201,8 +201,6 @@ export function createTimezoneMenuItems(user: User, currentTimezone: string) {
 
 export const UserContextMenuPatch: NavContextMenuPatchCallback = (children, { user }: { user: User; }) => {
     if (!user || user.bot) return;
-    const self = UserStore.getCurrentUser()?.id;
-    if (self && user.id === self) return;
 
     const group = findGroupChildrenByChildId("close-dm", children) || findGroupChildrenByChildId("block", children) || children;
     if (group) {
