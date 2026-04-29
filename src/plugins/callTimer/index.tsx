@@ -80,7 +80,7 @@ export default definePlugin({
         find: "renderConnectionStatus(){",
         replacement: {
             // in renderConnectionStatus()
-            match: /(lineClamp:1,children:)(\i)(?=,|}\))/,
+            match: /(renderConnectionStatus\(\).{0,1000}?lineClamp:1,children:)(\i)(?=,|}\))/,
             replace: "$1[$2,$self.renderTimer(this.props.channel.id)]"
         }
     }],
