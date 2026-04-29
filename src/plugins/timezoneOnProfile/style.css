@@ -81,3 +81,18 @@
     width: 4px;
     flex: 0 0 auto;
 }
+
+.vc-tzonprofile-erase-danger-btn {
+    color: var(--control-critical-primary-text-default);
+    background-color: var(--control-critical-primary-background-default);
+}
+
+.vc-tzonprofile-button-icon {
+    height: 1.25em;
+}
+
+.vc-tzonprofile-icon-with-button {
+    display: flex;
+    gap: 0.5em;
+    padding-inline: 0.5em 1em;
+}
