@@ -22,15 +22,13 @@ import { React, Select, useState } from "@webpack/common";
 import { resolveError, SettingProps, SettingsSection } from "./Common";
 
 export function SelectSetting({ option, pluginSettings, definedSettings, onChange, id }: SettingProps<PluginOptionSelect>) {
-    const def = pluginSettings[id] ?? option.options?.find(o => o.default)?.value;
-
-    const [state, setState] = useState<any>(def ?? null);
+    const state = pluginSettings[id];
+    if (state === undefined) pluginSettings[id] = option.options?.find(o => o.default)?.value ?? null;
     const [error, setError] = useState<string | null>(null);
 
     function handleChange(newValue: any) {
         const isValid = option.isValid?.call(definedSettings, newValue) ?? true;
 
-        setState(newValue);
         setError(resolveError(isValid));
 
         if (isValid === true) {

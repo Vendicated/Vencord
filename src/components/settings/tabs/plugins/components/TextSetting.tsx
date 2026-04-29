@@ -22,13 +22,13 @@ import { React, TextArea, TextInput, useState } from "@webpack/common";
 import { resolveError, SettingProps, SettingsSection } from "./Common";
 
 export function TextSetting({ option, pluginSettings, definedSettings, id, onChange }: SettingProps<PluginOptionString>) {
-    const [state, setState] = useState(pluginSettings[id] ?? option.default ?? null);
+    const state = pluginSettings[id];
+    if (state === undefined) pluginSettings[id] = option.default ?? null;
     const [error, setError] = useState<string | null>(null);
 
     function handleChange(newValue: string) {
         const isValid = option.isValid?.call(definedSettings, newValue) ?? true;
 
-        setState(newValue);
         setError(resolveError(isValid));
 
         if (isValid === true) {

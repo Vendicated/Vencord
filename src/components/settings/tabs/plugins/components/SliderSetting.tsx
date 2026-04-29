@@ -22,7 +22,8 @@ import { React, Slider, useState } from "@webpack/common";
 import { resolveError, SettingProps, SettingsSection } from "./Common";
 
 export function SliderSetting({ option, pluginSettings, definedSettings, id, onChange }: SettingProps<PluginOptionSlider>) {
-    const def = pluginSettings[id] ?? option.default;
+    const state = pluginSettings[id];
+    if (state === undefined) pluginSettings[id] = option.default ?? option.markers[0];
 
     const [error, setError] = useState<string | null>(null);
 
@@ -42,7 +43,7 @@ export function SliderSetting({ option, pluginSettings, definedSettings, id, onC
                 markers={option.markers}
                 minValue={option.markers[0]}
                 maxValue={option.markers[option.markers.length - 1]}
-                initialValue={def}
+                initialValue={state}
                 onValueChange={handleChange}
                 onValueRender={(v: number) => String(v.toFixed(2))}
                 stickToMarkers={option.stickToMarkers ?? true}

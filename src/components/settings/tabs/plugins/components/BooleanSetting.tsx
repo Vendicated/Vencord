@@ -23,15 +23,13 @@ import { React, useState } from "@webpack/common";
 import { resolveError, SettingProps, SettingsSection } from "./Common";
 
 export function BooleanSetting({ option, pluginSettings, definedSettings, id, onChange }: SettingProps<PluginOptionBoolean>) {
-    const def = pluginSettings[id] ?? option.default;
-
-    const [state, setState] = useState(def ?? false);
+    const state = pluginSettings[id];
+    if (state === undefined) pluginSettings[id] = option.default ?? false;
     const [error, setError] = useState<string | null>(null);
 
     function handleChange(newValue: boolean): void {
         const isValid = option.isValid?.call(definedSettings, newValue) ?? true;
 
-        setState(newValue);
         setError(resolveError(isValid));
 
         if (isValid === true) {
