@@ -66,7 +66,7 @@ export default definePlugin({
             const listener = () => {
                 if (!editorRef?.current) return setSelectedCount(0);
 
-                setTimeout(() => setSelectedCount(SlateUtils.getSelectedText(editorRef.current.getSlateEditor())?.length ?? 0), 50);
+                setTimeout(() => setSelectedCount(SlateUtils.getSelectedText(editorRef.current?.getSlateEditor())?.length ?? 0), 50);
             };
 
             document.addEventListener("selectionchange", listener);
