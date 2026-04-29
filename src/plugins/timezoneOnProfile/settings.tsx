@@ -21,8 +21,15 @@ import { Paragraph } from "@components/Paragraph";
 import { Span } from "@components/Span";
 import { OptionType } from "@utils/types";
 
-import {formatTimezoneLabel, setUserTimezone} from "./utils";
+import { formatTimezoneLabel, setUserTimezone } from "./utils";
 import { Button } from "@components/Button";
+import { Alerts } from "@webpack/common";
+
+import { DeleteIcon } from "@components/Icons";
+
+function clearAllTimezones() {
+    settings.store.timezonesByUser = () => ({});
+}
 
 export const settings = definePluginSettings({
     timezonesByUser: {
@@ -79,17 +86,21 @@ export const settings = definePluginSettings({
 
             return (
                 <Button
-                    size="small"
-                    style={{ background: "red" }}
+                    variant="dangerPrimary"
                     disabled={count === 0}
-                    onClick={() => {
-                        for (const userId of Object.keys(timezones)) {
-                            setUserTimezone(userId, "");
-                        }
-                    }}
+                    className="vc-tzonprofile-icon-with-button"
+                    onClick={() => Alerts.show({
+                        title: "Are you sure?",
+                        body: "This removes timezone data for all users, once erased it cannot be recovered.",
+                        onConfirm: clearAllTimezones,
+                        confirmText: "Erase it!",
+                        confirmColor: "vc-tzonprofile-erase-danger-btn",
+                        cancelText: "Nevermind"
+                    })}
                 >
+                    <DeleteIcon className="vc-tzonprofile-button-icon" />
                     Clear Saved Timezones
-                </Button>
+                </Button >
             );
         }
     },
