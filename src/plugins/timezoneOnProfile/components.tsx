@@ -19,7 +19,7 @@
 import { findGroupChildrenByChildId, NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { BaseText } from "@components/BaseText";
 import ErrorBoundary from "@components/ErrorBoundary";
-import {classes} from "@utils/misc";
+import { classes } from "@utils/misc";
 import { closeModal, ModalCloseButton, ModalContent, ModalHeader, ModalRoot, ModalSize, openModal } from "@utils/modal";
 import { useTimer } from "@utils/react";
 import { User } from "@vencord/discord-types";
@@ -64,9 +64,9 @@ export const TimezoneTriggerProfile = (props: { userId: string;[key: string]: an
 
     return (
         <>
-            <div className="vc-tzonprofile-container" onClick={ e => { e.stopPropagation(); createTimezoneMenuItems(UserStore.getUser(userId), selectedTz).props.action(); }}>
+            <div className="vc-tzonprofile-container" onClick={e => { e.stopPropagation(); createTimezoneMenuItems(UserStore.getUser(userId), selectedTz).props.action(); }}>
                 <div className="vc-tzonprofile-selector">
-                    <span style={{ fontSize: settings.store.timeFontSize }} className={classes(className,"vc-tzonprofile-profiletime")}>
+                    <span style={{ fontSize: settings.store.timeFontSize }} className={classes(className, "vc-tzonprofile-profiletime")}>
                         <Timestamp timestamp={currentTime} />
                     </span>
                 </div>
@@ -76,7 +76,7 @@ export const TimezoneTriggerProfile = (props: { userId: string;[key: string]: an
     );
 };
 
-export const TimezoneTriggerUsername = (props: { userId: string; timestamp?: string | number | Date; isDM?: boolean; [key: string]: any; }) => {
+export const TimezoneTriggerUsername = (props: { userId: string; timestamp?: string | number | Date; isDM?: boolean;[key: string]: any; }) => {
     const { userId, timestamp, isDM = false } = props;
     const selectedTz = useSelectedTimezone(userId);
     const { messageTimeMode } = settings.use(["messageTimeMode"]);

@@ -17,15 +17,14 @@
 */
 
 import { definePluginSettings } from "@api/Settings";
+import { Button } from "@components/Button";
+import { DeleteIcon } from "@components/Icons";
 import { Paragraph } from "@components/Paragraph";
 import { Span } from "@components/Span";
 import { OptionType } from "@utils/types";
-
-import { formatTimezoneLabel, setUserTimezone } from "./utils";
-import { Button } from "@components/Button";
 import { Alerts } from "@webpack/common";
 
-import { DeleteIcon } from "@components/Icons";
+import { formatTimezoneLabel } from "./utils";
 
 function clearAllTimezones() {
     settings.store.timezonesByUser = () => ({});
