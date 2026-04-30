@@ -1,0 +1,98 @@
+.vc-tzonprofile-container {
+    display: inline;
+    margin: 0 3px 0 0;
+}
+
+.vc-tzonprofile-selector * {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0;
+    cursor: pointer;
+}
+
+.vc-tzonprofile-time {
+    display: inline;
+    color: var(--text-muted);
+}
+
+.vc-tzonprofile-time * {
+    display: inline;
+    margin: 0;
+}
+
+.vc-tzonprofile-time > *::after {
+    content: " •";
+}
+
+[class*="clickable"]:has(.vc-tzonprofile-container) {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.vc-tzonprofile-time [class*="timestamp_"] {
+    pointer-events: none;
+}
+
+.vc-tzonprofile-modalcontent * {
+    color: var(--text-default);
+}
+
+.vc-tzonprofile-modalinformation {
+    display: flex;
+    flex-direction: column;
+}
+
+.vc-tzonprofile-modalinformation > * {
+    padding: 12px 0;
+}
+
+.vc-tzonprofile-tooltip-outer {
+    max-width: none !important;
+    width: max-content !important;
+}
+
+.vc-tzonprofile-tooltip-outer [class*="tooltipContent"] {
+    overflow: visible !important;
+}
+
+.vc-tzonprofile-tooltip {
+    white-space: nowrap;
+    width: max-content;
+}
+
+.vc-tzonprofile-tooltip * {
+    text-align: center;
+}
+
+.vc-tzonprofile-profiletime {
+    color: var(--text-default);
+}
+
+.vc-tzonprofile-profiletime:hover {
+    text-decoration: underline;
+}
+
+.vc-tzonprofile-dotSpacer {
+    background-color: var(--text-default);
+    border-radius: 50%;
+    height: 4px;
+    width: 4px;
+    flex: 0 0 auto;
+}
+
+.vc-tzonprofile-erase-danger-btn {
+    color: var(--control-critical-primary-text-default);
+    background-color: var(--control-critical-primary-background-default);
+}
+
+.vc-tzonprofile-button-icon {
+    height: 1.25em;
+}
+
+.vc-tzonprofile-icon-with-button {
+    display: flex;
+    gap: 0.5em;
+    padding-inline: 0.5em 1em;
+}
