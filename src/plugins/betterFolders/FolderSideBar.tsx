@@ -21,7 +21,7 @@ import { findComponentByCodeLazy } from "@webpack";
 import { Animations, ChannelRTCStore, useStateFromStores } from "@webpack/common";
 import type { CSSProperties } from "react";
 
-import { ExpandedGuildFolderStore, settings, SortedGuildStore } from ".";
+import { ExpandedGuildFolderStore, settings, setSidebarHovered, SortedGuildStore } from ".";
 
 const GuildsBar = findComponentByCodeLazy('("guildsnav")');
 
@@ -63,7 +63,7 @@ export default ErrorBoundary.wrap(guildsBarProps => {
 
     if (!guilds || !settings.store.sidebarAnim) {
         return visible
-            ? <div className="vc-betterFolders-sidebar" style={sidebarStyle}>{Sidebar}</div>
+            ? <div className="vc-betterFolders-sidebar" style={sidebarStyle} onMouseEnter={() => setSidebarHovered(true)} onMouseLeave={() => setSidebarHovered(false)}>{Sidebar}</div>
             : null;
     }
 
@@ -77,7 +77,7 @@ export default ErrorBoundary.wrap(guildsBarProps => {
         >
             {(animationStyle: any, show: any) =>
                 show && (
-                    <Animations.animated.div className="vc-betterFolders-sidebar" style={{ ...animationStyle, ...sidebarStyle }}>
+                    <Animations.animated.div className="vc-betterFolders-sidebar" style={{ ...animationStyle, ...sidebarStyle }} onMouseEnter={() => setSidebarHovered(true)} onMouseLeave={() => setSidebarHovered(false)}>
                         {Sidebar}
                     </Animations.animated.div>
                 )

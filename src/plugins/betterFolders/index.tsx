@@ -24,8 +24,7 @@ import { getIntlMessage } from "@utils/discord";
 import { Logger } from "@utils/Logger";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByPropsLazy, findStoreLazy } from "@webpack";
-import { FluxDispatcher } from "@webpack/common";
-import { ReactNode } from "react";
+import { FluxDispatcher, React, WindowStore } from "@webpack/common";
 
 import FolderSideBar from "./FolderSideBar";
 
@@ -35,12 +34,24 @@ enum FolderIconDisplay {
     MoreThanOneFolderExpanded
 }
 
+enum FolderOpenBehavior {
+    Default,
+    Hover
+}
+
 export const ExpandedGuildFolderStore = findStoreLazy("ExpandedGuildFolderStore");
 export const SortedGuildStore = findStoreLazy("SortedGuildStore");
 const FolderUtils = findByPropsLazy("move", "toggleGuildFolderExpand");
 
 let lastGuildId = null as string | null;
+
 let dispatchingFoldersClose = false;
+const hoverOpenedFolderIds = new Set<string>();
+const hoverPinnedFolderIds = new Set<string>();
+const hoverActiveFolderCounts = new Map<string, number>();
+const hoverOpenedAt = new Map<string, number>();
+const hoverCloseTimers = new Map<string, number>();
+let isSidebarHovered = false;
 
 function getGuildFolder(id: string) {
     return SortedGuildStore.getGuildFolders().find(folder => folder.guildIds.includes(id));
@@ -49,6 +60,100 @@ function getGuildFolder(id: string) {
 function closeFolders() {
     for (const id of ExpandedGuildFolderStore.getExpandedFolders())
         FolderUtils.toggleGuildFolderExpand(id);
+
+    for (const timer of hoverCloseTimers.values())
+        clearTimeout(timer);
+    hoverCloseTimers.clear();
+    hoverOpenedFolderIds.clear();
+    hoverPinnedFolderIds.clear();
+    hoverActiveFolderCounts.clear();
+    hoverOpenedAt.clear();
+    isSidebarHovered = false;
+}
+
+function getHoverCount(folderId: string) {
+    return hoverActiveFolderCounts.get(folderId) ?? 0;
+}
+
+function incrementHoverCount(folderId: string) {
+    hoverActiveFolderCounts.set(folderId, getHoverCount(folderId) + 1);
+}
+
+function decrementHoverCount(folderId: string) {
+    const next = Math.max(0, getHoverCount(folderId) - 1);
+    if (next === 0) {
+        hoverActiveFolderCounts.delete(folderId);
+        return 0;
+    }
+    hoverActiveFolderCounts.set(folderId, next);
+    return next;
+}
+
+function clearHoverCloseTimer(folderId: string) {
+    const timer = hoverCloseTimers.get(folderId);
+    if (timer != null) {
+        clearTimeout(timer);
+        hoverCloseTimers.delete(folderId);
+    }
+}
+
+function scheduleHoverClose(folderId: string) {
+    clearHoverCloseTimer(folderId);
+    if (getHoverCount(folderId) > 0) return;
+    if (hoverPinnedFolderIds.has(folderId)) return;
+    if (!hoverOpenedFolderIds.has(folderId)) return;
+
+    const preTimer = window.setTimeout(() => {
+        if (getHoverCount(folderId) > 0) return;
+        if (isSidebarHovered) return;
+        if (hoverPinnedFolderIds.has(folderId)) return;
+        if (!hoverOpenedFolderIds.has(folderId)) return;
+
+        const openedAt = hoverOpenedAt.get(folderId) ?? 0;
+        const elapsed = Date.now() - openedAt;
+        const minOpenMs = 300;
+        const baseDelayMs = 200;
+        const delay = Math.max(baseDelayMs, minOpenMs - elapsed);
+
+        const timer = window.setTimeout(() => {
+            hoverCloseTimers.delete(folderId);
+            if (settings.store.folderOpenBehavior !== FolderOpenBehavior.Hover) return;
+            if (isSidebarHovered) return;
+            if (getHoverCount(folderId) > 0) return;
+            if (hoverPinnedFolderIds.has(folderId)) return;
+            if (!hoverOpenedFolderIds.has(folderId)) return;
+            if (ExpandedGuildFolderStore.isFolderExpanded(folderId)) {
+                FolderUtils.toggleGuildFolderExpand(folderId);
+            }
+            hoverOpenedFolderIds.delete(folderId);
+            hoverOpenedAt.delete(folderId);
+        }, delay);
+        hoverCloseTimers.set(folderId, timer);
+    }, 0);
+
+    hoverCloseTimers.set(folderId, preTimer);
+}
+
+function onWindowFocusChanged() {
+    if (WindowStore.isFocused()) return;
+
+    isSidebarHovered = false;
+    hoverActiveFolderCounts.clear();
+
+    for (const id of hoverOpenedFolderIds)
+        scheduleHoverClose(id);
+}
+
+export function setSidebarHovered(hovered: boolean) {
+    isSidebarHovered = hovered;
+    if (hovered) {
+        for (const id of hoverOpenedFolderIds)
+            clearHoverCloseTimer(id);
+        return;
+    }
+
+    for (const id of hoverOpenedFolderIds)
+        scheduleHoverClose(id);
 }
 
 // Nuckyz: Unsure if this should be a general utility or not
@@ -80,6 +185,14 @@ function filterTreeWithTargetNode(children: any, predicate: (node: any) => boole
 }
 
 export const settings = definePluginSettings({
+    folderOpenBehavior: {
+        type: OptionType.SELECT,
+        description: "Open folders",
+        options: [
+            { label: "Click to open", value: FolderOpenBehavior.Default, default: true },
+            { label: "Hover to open", value: FolderOpenBehavior.Hover }
+        ]
+    },
     sidebar: {
         type: OptionType.BOOLEAN,
         description: "Display servers from folder on dedicated sidebar",
@@ -110,6 +223,7 @@ export const settings = definePluginSettings({
     forceOpen: {
         type: OptionType.BOOLEAN,
         description: "Force a folder to open when switching to a server of that folder",
+        restartNeeded: true,
         default: false
     },
     keepIcons: {
@@ -140,6 +254,14 @@ export default definePlugin({
     authors: [Devs.juby, Devs.AutumnVN, Devs.Nuckyz],
     tags: ["Organisation", "Servers", "Appearance"],
     settings,
+
+    start() {
+        WindowStore.addChangeListener(onWindowFocusChanged);
+    },
+
+    stop() {
+        WindowStore.removeChangeListener(onWindowFocusChanged);
+    },
 
     patches: [
         {
@@ -185,8 +307,49 @@ export default definePlugin({
             ]
         },
         {
+            find: '("guildsnav")',
+            predicate: () => !settings.store.sidebar,
+            replacement: {
+                match: /switch\((\i)\.type\){.+?default:return null}/,
+                replace: "return $self.wrapGuildNodeForHover($1,()=>{$&});"
+            }
+        },
+        {
+            find: "onExpandCollapse",
+            replacement: [
+                {
+                    match: /toggleGuildFolderExpand\((\i)\)[\s\S]{0,200}?onExpandCollapse:(\i)/,
+                    replace: (match, folderId, handler) => match.replace(
+                        `onExpandCollapse:${handler}`,
+                        `onExpandCollapse:()=>{if($self.handleFolderClick(${folderId}))return;${handler}()}`
+                    )
+                },
+                {
+                    match: /(folderNode:(\i)[\s\S]{0,600}?onMouseEnter:)(\i)(,onMouseLeave:)(\i)/,
+                    replace: (_match, prefix, folderNode, onEnter, mid, onLeave) =>
+                        `${prefix}e=>{${onEnter}(e);$self.handleFolderMouseEnter(${folderNode}.id)}${mid}e=>{${onLeave}(e);$self.handleFolderMouseLeave(${folderNode}.id)}`
+                }
+            ]
+        },
+        {
+            find: "toggleGuildFolderExpand(",
+            replacement: [
+                {
+                    match: /folderNode:(\i)/,
+                    replace: (_match, folderNode) => `folderNode:${folderNode},onMouseEnter:()=>{$self.handleFolderMouseEnter(${folderNode}.id)},onMouseLeave:()=>{$self.handleFolderMouseLeave(${folderNode}.id)}`
+                },
+                {
+                    match: /onClick:\(\)=>\{[^}]*?toggleGuildFolderExpand\((\i)\)[^}]*?\}/,
+                    replace: (match, folderId) => {
+                        const guarded = match.replace("onClick:()=>{", `onClick:()=>{if($self.handleFolderClick(${folderId}))return;`);
+                        return `onMouseEnter:()=>{$self.handleFolderMouseEnter(${folderId})},onMouseLeave:()=>{$self.handleFolderMouseLeave(${folderId})},${guarded}`;
+                    }
+                }
+            ]
+        },
+        {
             // This is the parent folder component
-            find: ".toggleGuildFolderExpand(",
+            find: "toggleGuildFolderExpand(",
             predicate: () => settings.store.sidebar && settings.store.showFolderIcon !== FolderIconDisplay.Always,
             replacement: [
                 {
@@ -282,13 +445,48 @@ export default definePlugin({
             if (lastGuildId !== data.guildId) {
                 lastGuildId = data.guildId;
                 const guildFolder = getGuildFolder(data.guildId);
+                const targetFolderId = guildFolder?.folderId ?? null;
 
-                if (guildFolder?.folderId) {
-                    if (settings.store.forceOpen && !ExpandedGuildFolderStore.isFolderExpanded(guildFolder.folderId)) {
-                        FolderUtils.toggleGuildFolderExpand(guildFolder.folderId);
+                if (targetFolderId) {
+                    if (settings.store.forceOpen) {
+                        if (!ExpandedGuildFolderStore.isFolderExpanded(targetFolderId)) {
+                            FolderUtils.toggleGuildFolderExpand(targetFolderId);
+                        }
+
+                        if (settings.store.folderOpenBehavior === FolderOpenBehavior.Hover) {
+                            hoverOpenedFolderIds.add(targetFolderId);
+                            hoverPinnedFolderIds.add(targetFolderId);
+                            hoverOpenedAt.set(targetFolderId, Date.now());
+                            clearHoverCloseTimer(targetFolderId);
+                        }
+
+                        for (const id of Array.from(hoverOpenedFolderIds)) {
+                            if (id === targetFolderId) continue;
+                            if (ExpandedGuildFolderStore.isFolderExpanded(id)) {
+                                FolderUtils.toggleGuildFolderExpand(id);
+                            }
+                            hoverOpenedFolderIds.delete(id);
+                            hoverPinnedFolderIds.delete(id);
+                            hoverOpenedAt.delete(id);
+                            clearHoverCloseTimer(id);
+                        }
                     }
-                } else if (settings.store.closeAllFolders) {
-                    closeFolders();
+                } else {
+
+                    if (settings.store.closeAllFolders) {
+                        closeFolders();
+                    } else if (settings.store.folderOpenBehavior === FolderOpenBehavior.Hover) {
+
+                        for (const id of Array.from(hoverOpenedFolderIds)) {
+                            if (ExpandedGuildFolderStore.isFolderExpanded(id)) {
+                                FolderUtils.toggleGuildFolderExpand(id);
+                            }
+                            hoverOpenedFolderIds.delete(id);
+                            hoverPinnedFolderIds.delete(id);
+                            hoverOpenedAt.delete(id);
+                            clearHoverCloseTimer(id);
+                        }
+                    }
                 }
             }
         },
@@ -301,8 +499,11 @@ export default definePlugin({
                     const expandedFolders = ExpandedGuildFolderStore.getExpandedFolders();
 
                     if (expandedFolders.size > 1) {
-                        for (const id of expandedFolders) if (id !== data.folderId)
+                        for (const id of expandedFolders) {
+                            if (id === data.folderId) continue;
+                            if (settings.store.folderOpenBehavior === FolderOpenBehavior.Hover && hoverPinnedFolderIds.has(id)) continue;
                             FolderUtils.toggleGuildFolderExpand(id);
+                        }
                     }
 
                     dispatchingFoldersClose = false;
@@ -318,19 +519,113 @@ export default definePlugin({
     FolderSideBar,
     closeFolders,
 
+    handleFolderMouseEnter(folderId: string) {
+        if (settings.store.folderOpenBehavior !== FolderOpenBehavior.Hover) return;
+        incrementHoverCount(folderId);
+        clearHoverCloseTimer(folderId);
 
-    wrapGuildNodeComponent(node: any, originalComponent: () => ReactNode, isBetterFolders: boolean, expandedFolderIds?: Set<any>) {
-        if (
-            !isBetterFolders ||
-            node.type === "folder" && expandedFolderIds?.has(node.id) ||
-            node.type === "guild" && expandedFolderIds?.has(node.parentId)
-        ) {
+        if (!ExpandedGuildFolderStore.isFolderExpanded(folderId)) {
+            FolderUtils.toggleGuildFolderExpand(folderId);
+            hoverOpenedFolderIds.add(folderId);
+            hoverOpenedAt.set(folderId, Date.now());
+        }
+
+        setTimeout(() => {
+            const expandedFolders = ExpandedGuildFolderStore.getExpandedFolders();
+            if (expandedFolders.size <= 1) return;
+            for (const id of expandedFolders) {
+                if (id === folderId) continue;
+                if (hoverPinnedFolderIds.has(id)) continue;
+                if (!hoverOpenedFolderIds.has(id)) continue;
+                FolderUtils.toggleGuildFolderExpand(id);
+                hoverOpenedFolderIds.delete(id);
+                hoverPinnedFolderIds.delete(id);
+                hoverOpenedAt.delete(id);
+                clearHoverCloseTimer(id);
+            }
+        }, 0);
+    },
+
+    handleFolderMouseLeave(folderId: string) {
+        if (settings.store.folderOpenBehavior !== FolderOpenBehavior.Hover) return;
+        const remaining = decrementHoverCount(folderId);
+        if (remaining > 0) return;
+        if (hoverPinnedFolderIds.has(folderId)) return;
+        if (!hoverOpenedFolderIds.has(folderId)) return;
+        if (isSidebarHovered) {
+            clearHoverCloseTimer(folderId);
+            return;
+        }
+
+        scheduleHoverClose(folderId);
+    },
+
+    handleFolderClick(folderId: string) {
+        if (settings.store.folderOpenBehavior !== FolderOpenBehavior.Hover) return false;
+        const isHoverOwned = hoverOpenedFolderIds.has(folderId) || hoverPinnedFolderIds.has(folderId);
+        if (!isHoverOwned) return false;
+
+        if (hoverPinnedFolderIds.has(folderId)) {
+            hoverPinnedFolderIds.delete(folderId);
+            hoverOpenedFolderIds.delete(folderId);
+            hoverOpenedAt.delete(folderId);
+            clearHoverCloseTimer(folderId);
+            if (ExpandedGuildFolderStore.isFolderExpanded(folderId)) {
+                FolderUtils.toggleGuildFolderExpand(folderId);
+            }
+            return true;
+        }
+
+        hoverPinnedFolderIds.add(folderId);
+        clearHoverCloseTimer(folderId);
+        return true;
+    },
+
+
+    wrapGuildNodeComponent(node: any, originalComponent: () => React.ReactNode, isBetterFolders: boolean, expandedFolderIds?: Set<any>) {
+        if (!isBetterFolders) {
+            return this.wrapGuildNodeForHover(node, originalComponent);
+        }
+
+        if (node.type === "folder" && expandedFolderIds?.has(node.id) || node.type === "guild" && expandedFolderIds?.has(node.parentId)) {
             return originalComponent();
         }
 
         return (
             <div style={{ display: "none" }}>
                 {originalComponent()}
+            </div>
+        );
+    },
+
+    wrapGuildNodeForHover(node: any, originalComponent: () => React.ReactNode) {
+        if (settings.store.folderOpenBehavior !== FolderOpenBehavior.Hover) {
+            return originalComponent();
+        }
+
+        if (node.type === "guild" && node.parentId) {
+            return this.withHoverHandlers(originalComponent(), node.parentId);
+        }
+
+        return originalComponent();
+    },
+
+    withHoverHandlers(element: React.ReactNode, folderId: string) {
+        const elementProps = React.isValidElement(element) ? element.props as any : null;
+
+        return (
+            <div
+                style={{ display: "contents" }}
+                onMouseEnter={(e: any) => {
+                    elementProps?.onMouseEnter?.(e);
+                    this.handleFolderMouseEnter(folderId);
+                }}
+                onMouseLeave={(e: any) => {
+                    elementProps?.onMouseLeave?.(e);
+                    this.handleFolderMouseLeave(folderId);
+                }}
+            >
+                {element}
             </div>
         );
     },
