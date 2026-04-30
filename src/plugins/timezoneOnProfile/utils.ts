@@ -19,13 +19,12 @@
 import { settings } from "./settings";
 
 export function setUserTimezone(userId: string, tz: string) {
-    const store = { ...settings.store.timezonesByUser } as Record<string, string>;
+    const store = { ...settings.store.timezonesByUser };
     if (!tz) {
         delete store[userId];
     } else {
         store[userId] = tz;
     }
-    // @ts-ignore
     settings.store.timezonesByUser = store;
 }
 
