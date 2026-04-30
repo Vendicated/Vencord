@@ -38,7 +38,7 @@ import { openHistoryModal } from "./HistoryModal";
 
 interface MLMessage extends Message {
     deleted?: boolean;
-    editHistory?: { timestamp: Date; content: string; }[];
+    editHistory?: { timestamp: Date; content: string; attachmentsEdited: boolean; }[];
     firstEditTimestamp?: Date;
 }
 
@@ -58,12 +58,14 @@ const REMOVE_HISTORY_ID = "ml-remove-history";
 const TOGGLE_DELETE_STYLE_ID = "ml-toggle-style";
 const patchMessageContextMenu: NavContextMenuPatchCallback = (children, props) => {
     const { message } = props;
-    const { deleted, editHistory, id, channel_id } = message;
+    const { deleted, editHistory, attachments, id, channel_id } = message;
 
-    if (!deleted && !editHistory?.length) return;
+    const hasDeletedAttachments = attachments.some(a => a.deleted);
+
+    if (!deleted && !hasDeletedAttachments && !editHistory?.length) return;
 
     toggle: {
-        if (!deleted) break toggle;
+        if (!deleted && !hasDeletedAttachments) break toggle;
 
         const domElement = document.getElementById(`chat-messages-${channel_id}-${id}`);
         if (!domElement) break toggle;
@@ -73,7 +75,17 @@ const patchMessageContextMenu: NavContextMenuPatchCallback = (children, props) =
                 id={TOGGLE_DELETE_STYLE_ID}
                 key={TOGGLE_DELETE_STYLE_ID}
                 label="Toggle Deleted Highlight"
-                action={() => domElement.classList.toggle("messagelogger-deleted")}
+                action={() => {
+                    const hasClass = domElement.classList.toggle("messagelogger-highlight-bypass");
+
+                    for (const attachment of domElement.querySelectorAll(".messagelogger-deleted-attachment")) {
+                        if (hasClass) {
+                            attachment.classList.add("messagelogger-highlight-bypass");
+                        } else {
+                            attachment.classList.remove("messagelogger-highlight-bypass");
+                        }
+                    }
+                }}
             />
         ));
     }
@@ -93,7 +105,10 @@ const patchMessageContextMenu: NavContextMenuPatchCallback = (children, props) =
                         mlDeleted: true
                     });
                 } else {
-                    updateMessage(channel_id, id, { editHistory: [] });
+                    updateMessage(channel_id, id, {
+                        editHistory: [],
+                        attachments: message.attachments.filter(a => !a.deleted)
+                    });
                 }
             }}
         />
@@ -121,7 +136,8 @@ const patchChannelContextMenu: NavContextMenuPatchCallback = (children, { channe
                         });
                     else
                         updateMessage(channel.id, msg.id, {
-                            editHistory: []
+                            editHistory: [],
+                            attachments: msg.attachments.filter((a: any) => !a.deleted)
                         });
                 });
             }}
@@ -145,7 +161,7 @@ export default definePlugin({
     name: "MessageLogger",
     description: "Temporarily logs deleted and edited messages.",
     tags: ["Chat", "Utility"],
-    authors: [Devs.rushii, Devs.Ven, Devs.AutumnVN, Devs.Nickyux, Devs.Kyuuhachi],
+    authors: [Devs.rushii, Devs.Ven, Devs.AutumnVN, Devs.Nickyux, Devs.Kyuuhachi, Devs.xNasuni],
     dependencies: ["MessageUpdaterAPI"],
 
     contextMenus: {
@@ -156,8 +172,19 @@ export default definePlugin({
         "gdm-context": patchChannelContextMenu
     },
 
+    onMessageDeleteCallback({ channelId, id }) {
+        document.getElementById(`chat-messages-${channelId}-${id}`)
+            ?.querySelectorAll(".messagelogger-highlight-bypass")
+            .forEach(el => el.classList.remove("messagelogger-highlight-bypass"));
+    },
+
     start() {
         addDeleteStyle();
+        FluxDispatcher.subscribe("MESSAGE_DELETE", this.onMessageDeleteCallback);
+    },
+
+    stop() {
+        FluxDispatcher.unsubscribe("MESSAGE_DELETE", this.onMessageDeleteCallback);
     },
 
     renderEdits: ErrorBoundary.wrap(({ message: { id: messageId, channel_id: channelId } }: { message: Message; }) => {
@@ -170,7 +197,7 @@ export default definePlugin({
 
         return Settings.plugins.MessageLogger.inlineEdits && (
             <>
-                {message.editHistory?.map((edit, idx) => (
+                {message.editHistory?.map((edit, idx) => !edit.attachmentsEdited && (
                     <div key={idx} className="messagelogger-edited">
                         {parseEditContent(edit.content, message)}
                         <Timestamp
@@ -189,7 +216,8 @@ export default definePlugin({
     makeEdit(newMessage: any, oldMessage: any): any {
         return {
             timestamp: new Date(newMessage.edited_timestamp),
-            content: oldMessage.content
+            content: oldMessage.content,
+            attachmentsEdited: (oldMessage.attachments?.filter(a => !a.deleted)?.length || 0) !== (newMessage.attachments?.filter(a => !a.deleted)?.length || 0)
         };
     },
 
@@ -307,6 +335,10 @@ export default definePlugin({
         }
     },
 
+    isMessageModified(oldMessage: any, newMessage: any) {
+        return oldMessage.content !== newMessage.content || oldMessage.attachments.length !== newMessage.attachments.length;
+    },
+
     EditMarker({ message, className, children, ...props }: any) {
         return (
             <span
@@ -374,17 +406,24 @@ export default definePlugin({
                 },
                 {
                     // Add current cached content + new edit time to cached message's editHistory
-                    match: /(MESSAGE_UPDATE:function\((\i)\).+?)\.update\((\i)/,
-                    replace: `
-                        $1
-                        .update($3, m =>
-                            (($2.message.flags & 64) === 64 || $self.shouldIgnore($2.message, true)) ? m :
-                            $2.message.edited_timestamp && $2.message.content !== m.content ?
-                                m.set('editHistory',[...(m.editHistory || []), $self.makeEdit($2.message, m)]) :
-                                m
+                    match: /(MESSAGE_UPDATE:function\((\i)\).+?)(\i)=(\i)\.update\((\i)/,
+                    replace: `$1$3=$4
+                        .update($5,m =>
+                           (($2.message.flags & 64) === 64 || $self.shouldIgnore($2.message, true)) ? m :
+                           $2.message.edited_timestamp && $self.isMessageModified(m, $2.message) ? (() => {
+                               if (m.attachments && m.attachments.length > 0) {
+                                   const newAttachmentIds = new Set($2.message.attachments.map(a => a.id));
+                                   const updatedAttachments = m.attachments.map(a =>
+                                       newAttachmentIds.has(a.id) ? a : { ...a, deleted: true }
+                                   );
+                                   $2.message.attachments = updatedAttachments;
+                                   $3 = $3.update(m.id, m => m.set('attachments', updatedAttachments));
+                               }
+                               return m.set('editHistory',[...(m.editHistory || []), $self.makeEdit($2.message, m)]);
+                           })()
+                           : m
                         )
-                        .update($3
-                    `
+                        .update($5`
                 },
                 {
                     // fix up key (edit last message) attempting to edit a deleted message
@@ -442,7 +481,7 @@ export default definePlugin({
                     // Preserve deleted attribute on attachments
                     match: /(\((\i)\){return null==\2\.attachments.+?)spoiler:/,
                     replace:
-                        "$1deleted: arguments[0]?.deleted," +
+                        "$1deleted: arguments[0]?.deleted || e?.deleted," +
                         "spoiler:"
                 }
             ]
@@ -453,8 +492,8 @@ export default definePlugin({
             find: "#{intl::REMOVE_ATTACHMENT_TOOLTIP_TEXT}",
             replacement: [
                 {
-                    match: /\.SPOILER,(?=\[\i\.\i\]:)/,
-                    replace: '$&"messagelogger-deleted-attachment":arguments[0]?.item?.originalItem?.deleted,'
+                    match: /item:(\i),message:\i,getObscureReason:.+?\.SPOILER,(?=\[\i\.\i\]:)/,
+                    replace: '$&"messagelogger-deleted-attachment":$1?.originalItem?.deleted,"messagelogger-deleted-attachment-overlay":$1?.originalItem?.deleted,'
                 }
             ]
         },

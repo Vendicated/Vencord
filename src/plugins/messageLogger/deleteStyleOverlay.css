@@ -1,3 +1,7 @@
 .messagelogger-deleted {
+    transition: 150ms background-color ease-in-out;
+}
+
+.messagelogger-deleted:not(.messagelogger-highlight-bypass) {
     background-color: hsl(var(--red-430-hsl, 0 85% 61%) / 15%) !important;
 }

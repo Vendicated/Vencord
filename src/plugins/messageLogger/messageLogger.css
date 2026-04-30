@@ -2,28 +2,7 @@
     display: none;
 }
 
-.messagelogger-deleted
-:is(
-    .messagelogger-deleted-attachment,
-    .emoji,
-    [data-type="sticker"],
-    [class*="embedIframe"],
-    [class*="embedSpotify"],
-    [class*="imageContainer"]
-) {
-    filter: grayscale(1) !important;
-    transition: 150ms filter ease-in-out;
-
-    &[class*="hiddenMosaicItem"] {
-        filter: grayscale(1) blur(var(--custom-message-attachment-spoiler-blur-radius, 44px)) !important;
-    }
-
-    &:hover {
-        filter: grayscale(0) !important;
-    }
-}
-
-.messagelogger-deleted [class*="spoilerWarning"] {
+.messagelogger-deleted:not(.messagelogger-highlight-bypass) [class*="spoilerWarning"] {
     color: var(--status-danger);
 }
 
@@ -47,4 +26,26 @@
 .vc-ml-modal-tab-bar {
     flex-wrap: wrap;
     gap: 16px;
+}
+
+.messagelogger-deleted-attachment-overlay:not(.messagelogger-highlight-bypass) {
+    --border-subtle: #360f13;
+}
+
+.messagelogger-deleted-attachment-overlay::after {
+    transition: 150ms opacity ease-in-out;
+    position: absolute;
+    pointer-events: none;
+    content: "";
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: hsl(var(--red-430-hsl, 0 85% 61%) / 75%);
+    opacity: 0;
+    border-radius: 8px;
+}
+
+.messagelogger-deleted-attachment-overlay:not(.messagelogger-highlight-bypass)::after {
+    opacity: 0.2;
 }
