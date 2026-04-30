@@ -26,14 +26,16 @@ import { Alerts } from "@webpack/common";
 
 import { formatTimezoneLabel } from "./utils";
 
+type TimezonesByUser = Record<string, string>;
+
 function clearAllTimezones() {
-    settings.store.timezonesByUser = () => ({});
+    settings.store.timezonesByUser = {};
 }
 
 export const settings = definePluginSettings({
     timezonesByUser: {
         type: OptionType.CUSTOM,
-        default: () => ({})
+        default: {} as TimezonesByUser,
     },
     timeFontSize: {
         type: OptionType.NUMBER,
