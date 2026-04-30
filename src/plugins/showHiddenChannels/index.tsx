@@ -158,7 +158,7 @@ export default definePlugin({
             replacement: {
                 // Lock Icon
                 match: /(?<=(\i)\.isNSFW\(\);)switch\(\i\.type\)/,
-                replace: (_, channel) => `if($self.isHiddenChannel(${channel}))return $self.LockIcon;${_}`
+                replace: (m, channel) => `if($self.isHiddenChannel(${channel}))return $self.LockIcon;${m}`
             }
         },
         {
