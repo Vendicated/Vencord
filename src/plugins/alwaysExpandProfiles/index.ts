@@ -5,24 +5,21 @@
  */
 
 import { Devs } from "@utils/constants";
-import { openUserProfile } from "@utils/discord";
 import definePlugin from "@utils/types";
 
 export default definePlugin({
     name: "AlwaysExpandProfiles",
     description: "Always expands profile popouts to the full modal",
+    tags: ["Appearance", "Utility"],
     authors: [Devs.thororen],
     patches: [
         {
             find: '"view-profile"',
             replacement: {
-                match: /(\.POPOUT_CLOSE.{0,200})return(?<=userId:(\i\.id).*?)/,
-                replace: "$1return $self.openUserModal($2);"
+                match: /(\i)=.{0,45}\(0,\i\.openUserProfileModal.{0,300}(?=return)/,
+                replace: "$&return $1();"
             },
             all: true
         },
     ],
-    openUserModal(userId: string) {
-        openUserProfile(userId);
-    }
 });
