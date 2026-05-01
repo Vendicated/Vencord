@@ -44,8 +44,8 @@ export default definePlugin({
             find: "AnalyticsActionHandlers.handle",
             predicate: () => settings.store.disableAnalytics,
             replacement: {
-                match: /\(0,\i\.analyticsTrackingStoreMaker.{0,800}scheduleWhenIdle:\i\.\i\}\);/,
-                replace: "",
+                match: /\(0,\i\.analyticsTrackingStoreMaker\)/,
+                replace: "(()=>{})",
             },
         },
         {
