@@ -74,7 +74,7 @@ function Switches() {
         !IS_WEB && {
             key: "transparent",
             title: "Enable window transparency",
-            description: "A theme that supports transparency is required or this will do nothing. Stops the window from being resizable as a side effect",
+            description: "A theme that supports transparency is required or this will do nothing. Stops the window from being resizable as a side effect" + (IS_WINDOWS ? ". Not recommended if Windows material style is enabled" : ""),
             restartRequired: true
         },
         IS_DISCORD_DESKTOP && {
