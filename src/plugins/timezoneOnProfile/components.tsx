@@ -30,6 +30,7 @@ import { settings } from "./settings";
 import { formatTimezoneLabel, getOffsetMinutes, getUserTimezone, setUserTimezone, update } from "./utils";
 
 const cl = findCssClassesLazy("dotSpacer", "userTagUsername");
+const tc = findCssClassesLazy("timestamp", "timestampInline");
 
 function useSelectedTimezone(userId: string) {
     const { timezonesByUser } = settings.use(["timezonesByUser"]);
@@ -134,6 +135,114 @@ export const TimezoneTriggerUsername = (props: { userId: string; timestamp?: str
                 )}
             </Tooltip>
         </>
+    );
+};
+
+export const TimezoneTriggerUsernameCompact = (props: {
+    timestampElement?: React.ReactNode;
+    userId: string;
+    timestamp?: string | number | Date;
+    isDM?: boolean;
+    [key: string]: any;
+}) => {
+    const { timestampElement, userId, timestamp, isDM = false } = props;
+    const selectedTz = useSelectedTimezone(userId);
+    const { messageTimeMode } = settings.use(["messageTimeMode"]);
+
+    const shouldShow = messageTimeMode !== "off";
+
+    const shouldUseSentTime =
+        messageTimeMode === "sent"
+        || (messageTimeMode === "dm-sent-server-current" && isDM);
+
+    const [currentTime, setCurrentTime] = useState<Date>(new Date());
+    const [hovered, setHovered] = useState(false);
+
+    const elapsed = useTimer({
+        interval: 60_000 - (Date.now() % 60_000),
+        deps: [selectedTz, messageTimeMode, timestamp, isDM]
+    });
+
+    const user = UserStore.getUser(userId);
+    const username = user?.globalName || user?.username || "Their";
+
+    useEffect(() => {
+        if (!selectedTz) return;
+
+        const sourceDate =
+            shouldUseSentTime && timestamp
+                ? new Date(timestamp)
+                : new Date();
+
+        setCurrentTime(update(selectedTz, sourceDate));
+    }, [elapsed, selectedTz, timestamp, shouldUseSentTime]);
+
+    if (!timestampElement) return null;
+
+    const showTime = hovered && shouldShow && !!selectedTz;
+
+    return (
+        <span
+            className="vc-tzonprofile-compact-wrap"
+            onMouseEnter={() => setHovered(true)}
+            onMouseLeave={() => setHovered(false)}
+            style={{
+                display: "inline-flex",
+                alignItems: "baseline",
+                verticalAlign: "baseline",
+                whiteSpace: "nowrap"
+            }}
+        >
+            {timestampElement}
+
+            <span
+                className="vc-tzonprofile-compact-reveal"
+                style={{
+                    display: "flex",
+                    justifyContent: "center",
+                    width: showTime ? "3.5rem" : "0rem",
+                    marginLeft: showTime ? "calc(var(--custom-message-meta-space) * -1)" : 0,
+                    opacity: showTime ? 1 : 0,
+                    overflow: "hidden",
+                    whiteSpace: "nowrap",
+                    verticalAlign: "baseline",
+                    transition: "width 160ms ease, margin-left 160ms ease, margin-right 160ms ease, opacity 120ms ease"
+                }}
+            >
+                {shouldShow && selectedTz && (
+                    <Tooltip
+                        tooltipClassName="vc-tzonprofile-tooltip-outer"
+                        text={
+                            <div className="vc-tzonprofile-tooltip">
+                                <div style={{ padding: "0 0 4px 0" }}>{username}'s Timezone</div>
+                                <div>{formatTimezoneLabel(selectedTz)}</div>
+                            </div>
+                        }
+                    >
+                        {tooltipProps => (
+                            <span
+                                {...tooltipProps}
+                                className={classes(
+                                    tc.timestamp,
+                                    "vc-tzonprofile-compact-time"
+                                )}
+                                style={{
+                                    width: "auto",
+                                    height: "auto",
+                                    margin: 0,
+                                    padding: 0
+                                }}
+                            >
+                                {currentTime.toLocaleTimeString([], {
+                                    hour: "numeric",
+                                    minute: "2-digit"
+                                })}
+                            </span>
+                        )}
+                    </Tooltip>
+                )}
+            </span>
+        </span>
     );
 };
 

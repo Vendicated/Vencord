@@ -20,7 +20,12 @@ import { enableStyle } from "@api/Styles";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 
-import { TimezoneTriggerProfile, TimezoneTriggerUsername, UserContextMenuPatch } from "./components";
+import {
+    TimezoneTriggerProfile,
+    TimezoneTriggerUsername,
+    TimezoneTriggerUsernameCompact,
+    UserContextMenuPatch
+} from "./components";
 import { settings } from "./settings";
 import timeZoneStyle from "./style.css?managed";
 
@@ -38,13 +43,23 @@ export default definePlugin({
     },
     TimezoneTriggerProfile,
     TimezoneTriggerUsername,
+    TimezoneTriggerUsernameCompact,
     patches: [
+        {
+            find: "showCommunicationDisabledStyles",
+            replacement: {
+                // Add into timestamp left of username, compact
+                match: /(d&&c&&)(\(0,(\i)\.jsx\)\(\i\.A,\{id:\(0,\i\.\i\)\((\i)\),compact:!0,timestamp:\4\.timestamp,isVisibleOnlyOnHover:\i,className:\i,isInline:!1,application:\i\}\))/,
+                replace: "$1(0,$3.jsx)($self.TimezoneTriggerUsernameCompact,{timestampElement:$2,userId:arguments[0].message.author.id,timestamp:arguments[0].message.timestamp,isDM:arguments[0].channel?.isPrivate?.()})"
+            }
+        },
         {
             find: '="SYSTEM_TAG"',
             replacement: {
+                // Add next to username, non-compact
                 match: /(\(0,(\i)\.jsxs\)\(\2\.Fragment,\{children:\[(?:(?!\]\}\)).){0,900}?),(\i)(?=\]\}\))/g,
-                replace: "$1,$3,(0,$2.jsx)($self.TimezoneTriggerUsername,{userId:arguments[0].message.author.id,timestamp:arguments[0].message.timestamp,isDM:arguments[0].channel?.isPrivate?.()})"
-            } // TODO: fix up this patch maybe because it's lowkey disgusting
+                replace: "$1,$3,!arguments[0].compact&&(0,$2.jsx)($self.TimezoneTriggerUsername,{userId:arguments[0].message.author.id,timestamp:arguments[0].message.timestamp,isDM:arguments[0].channel?.isPrivate?.()})"
+            }
         },
         {
             find: "forceUsername:!0,className",
