@@ -94,7 +94,7 @@ export default definePlugin({
         {
             // User popout
             // Same find as ShowConnections
-            find: "#{intl::XcTHmQ::raw}",
+            find: "#{intl::USER_PROFILE_FRIEND_REQUEST_TOAST}",
             replacement: {
                 match: /user:(\i),widgets:.{0,100}?\}\),/,
                 replace: "$&$self.renderProfileComponent({user:$1}),"
