@@ -304,6 +304,18 @@ function transformGiphyToDiscord(data: any): DiscordGif[] {
         || gif.images?.original?.url
         || gif.images?.downsized?.url;
 
+    const getGiphyGifUrl = (gif: any) => {
+        const mp4Url = getGiphyMp4Url(gif);
+        if (!mp4Url) return mp4Url;
+
+        // 1. Replace .mp4 with .gif
+        let url = mp4Url.replace(/\.mp4(?=($|\?))/i, ".gif");
+
+        // 2. Replace size-specific filenames (like 200.gif, 200w.gif, etc.) with giphy.gif
+        // This looks for a / followed by any digits (and optional 'w'), ending in .gif
+        return url.replace(/\/(\d+w?)\.gif($|\?)/i, "/giphy.gif$2");
+    };
+
     const getGiphyWidth = (gif: any) =>
         parseInt(gif.images?.fixed_width?.width)
         || parseInt(gif.images?.fixed_height?.width)
@@ -319,9 +331,9 @@ function transformGiphyToDiscord(data: any): DiscordGif[] {
     return (data.data || []).map((gif: any) => ({
         id: gif.id,
         title: gif.title || "",
-        url: getGiphyMp4Url(gif),
+        url: getGiphyGifUrl(gif),
         src: getGiphyMp4Url(gif),
-        gif_src: getGiphyMp4Url(gif),
+        gif_src: getGiphyGifUrl(gif),
         width: getGiphyWidth(gif),
         height: getGiphyHeight(gif),
         preview: getGiphyMp4Url(gif)
