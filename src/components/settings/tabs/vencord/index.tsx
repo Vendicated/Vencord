@@ -35,6 +35,7 @@ import { Alerts, Forms, React, useMemo, UserStore } from "@webpack/common";
 
 import { DonateButtonComponent, isDonor } from "./DonateButton";
 import { VibrancySettings } from "./MacVibrancySettings";
+import { WinMaterialSettings } from "./WinMaterialSettings";
 import { NotificationSection } from "./NotificationSettings";
 
 const DEFAULT_DONATE_IMAGE = "https://cdn.discordapp.com/emojis/1026533090627174460.png";
@@ -131,6 +132,7 @@ function VencordSettings() {
     );
 
     const needsVibrancySettings = IS_DISCORD_DESKTOP && IS_MAC;
+    const needsWinMaterialSettings = IS_DISCORD_DESKTOP && IS_WINDOWS;
 
     const user = UserStore?.getCurrentUser();
 
@@ -227,6 +229,7 @@ function VencordSettings() {
 
 
             {needsVibrancySettings && <VibrancySettings />}
+            {needsWinMaterialSettings && <WinMaterialSettings />}
 
             <NotificationSection />
         </SettingsTab>

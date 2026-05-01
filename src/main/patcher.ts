@@ -91,12 +91,15 @@ if (!IS_VANILLA) {
                     options.minHeight = 0;
                 }
 
-                const needsVibrancy = process.platform === "darwin" && settings.macosVibrancyStyle;
+                const needsVibrancy = (process.platform === "darwin" && settings.macosVibrancyStyle) || (process.platform === "win32" && settings.winMaterialStyle);
 
                 if (needsVibrancy) {
                     options.backgroundColor = "#00000000";
                     if (settings.macosVibrancyStyle) {
                         options.vibrancy = settings.macosVibrancyStyle;
+                    }
+                    if (settings.winMaterialStyle) {
+                        options.backgroundMaterial = settings.winMaterialStyle;
                     }
                 }
 
