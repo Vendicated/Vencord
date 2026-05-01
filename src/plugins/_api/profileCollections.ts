@@ -14,7 +14,7 @@ export default definePlugin({
     patches: [
         // message and member list popouts
         {
-            find: /\.POPOUT,onClose:\i}\),nicknameIcons:.+?\.isProvisional/,
+            find: "#{intl::USER_PROFILE_FRIEND_REQUEST_TOAST}",
             replacement: {
                 match: /user:\i,widgets:.{0,100}?\}\),/,
                 replace: "$&Vencord.Api.ProfileCollections.renderProfileCollections(arguments[0]),",
