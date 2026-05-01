@@ -25,12 +25,11 @@ import { Devs, IS_MAC } from "@utils/constants";
 import { Margins } from "@utils/margins";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByPropsLazy } from "@webpack";
-import { Forms, React } from "@webpack/common";
+import { ExperimentStore, Forms, React } from "@webpack/common";
 
 import hideBugReport from "./hideBugReport.css?managed";
 
 const KbdStyles = findByPropsLazy("key", "combo");
-let BugReporterExperiment: any;
 
 const modKey = IS_MAC ? "cmd" : "ctrl";
 const altKey = IS_MAC ? "opt" : "alt";
@@ -128,20 +127,10 @@ export default definePlugin({
                 replace: "$&if($1==null)return;"
             }
         },
-        {
-            find: "2026-01-bug-reporter",
-            replacement: {
-                match: /(?<==)(?=\(0,\i\(.+?\)\.\i\)\({name:"2026-01-bug-reporter")/,
-                replace: "$self.BugReporterExperiment="
-            }
-        }
+
     ],
 
-    set BugReporterExperiment(value: any) {
-        BugReporterExperiment = value;
-    },
-
-    start: () => !BugReporterExperiment.getConfig().hasBugReporterAccess && enableStyle(hideBugReport),
+    start: () => ExperimentStore.getUserExperimentBucket("2026-01-bug-reporter") > 0 && enableStyle(hideBugReport),
     stop: () => disableStyle(hideBugReport),
 
     settingsAboutComponent: () => {
