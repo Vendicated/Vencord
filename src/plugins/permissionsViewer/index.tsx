@@ -35,7 +35,7 @@ import openRolesAndUsersPermissionsModal from "./components/RolesAndUsersPermiss
 import UserPermissions from "./components/UserPermissions";
 import { getSortedRolesForMember, sortPermissionOverwrites } from "./utils";
 
-const PopoutClasses = findCssClassesLazy("container", "scroller", "list");
+const PopoutClasses = findCssClassesLazy("container", "popoutRoleDot");
 
 export const enum PermissionsSortOrder {
     HighestRole,
