@@ -16,9 +16,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { addMessagePreSendListener } from "@api/MessageEvents";
 import { Logger } from "@utils/Logger";
 import { makeCodeblock } from "@utils/text";
-import { CommandArgument, CommandContext, CommandOption } from "@vencord/discord-types";
+import { CommandArgument, CommandContext, CommandOption, CommandReturnValue } from "@vencord/discord-types";
 
 import { sendBotMessage } from "./commandHelpers";
 import { ApplicationCommandInputType, ApplicationCommandOptionType, ApplicationCommandType, VencordCommand } from "./types";
@@ -50,6 +51,26 @@ export let RequiredMessageOption: CommandOption = ReqPlaceholder;
 // Add this offset to every added command to keep them unique
 let commandIdOffset: number;
 
+const pendingCommandCancels = new Map<string, Set<string>>();
+
+addMessagePreSendListener((channelId, messageObj) => {
+    const pendingCommands = pendingCommandCancels.get(channelId);
+    if (!pendingCommands?.size) return;
+
+    const content = messageObj.content.trimStart();
+    if (!content.startsWith("/")) return;
+
+    const commandBody = content.slice(1);
+    for (const commandName of pendingCommands) {
+        if (commandBody !== commandName && !commandBody.startsWith(commandName + " ")) continue;
+
+        pendingCommands.delete(commandName);
+        if (!pendingCommands.size) pendingCommandCancels.delete(channelId);
+
+        return { cancel: true };
+    }
+});
+
 export const _init = function (cmds: VencordCommand[]) {
     try {
         BUILT_IN = cmds;
@@ -66,10 +87,25 @@ export const _handleCommand = function (cmd: VencordCommand, args: CommandArgume
     if (!cmd.isVencordCommand)
         return cmd.execute(args, ctx);
 
-    const handleError = (err: any) => {
-        // TODO: cancel send if cmd.inputType === BUILT_IN_TEXT
+    const handleResult = (cmd: VencordCommand, ctx: CommandContext, result: CommandReturnValue | void) => {
+        if (result?.cancel && cmd.inputType === ApplicationCommandInputType.BUILT_IN_TEXT) {
+            let pendingCommands = pendingCommandCancels.get(ctx.channel.id);
+
+            if (!pendingCommands) {
+                pendingCommands = new Set();
+                pendingCommandCancels.set(ctx.channel.id, pendingCommands);
+            }
+
+            pendingCommands.add(cmd.name);
+        }
+
+        return result;
+    };
+
+    const handleError = (err: any): CommandReturnValue | void => {
         const msg = `An Error occurred while executing command "${cmd.name}"`;
         const reason = err instanceof Error ? err.stack || err.message : String(err);
+        const cancel = cmd.inputType === ApplicationCommandInputType.BUILT_IN_TEXT;
 
         console.error(msg, err);
         sendBotMessage(ctx.channel.id, {
@@ -78,13 +114,23 @@ export const _handleCommand = function (cmd: VencordCommand, args: CommandArgume
                 username: "Vencord"
             }
         });
+
+        return {
+            content: "",
+            cancel: cancel,
+        };
     };
 
     try {
         const res = cmd.execute(args, ctx);
-        return res instanceof Promise ? res.catch(handleError) : res;
+        return res instanceof Promise
+            ? res.then(
+                result => handleResult(cmd, ctx, result),
+                err => handleResult(cmd, ctx, handleError(err))
+            )
+            : handleResult(cmd, ctx, res as CommandReturnValue | void);
     } catch (err) {
-        return handleError(err);
+        return handleResult(cmd, ctx, handleError(err));
     }
 } as never;
 

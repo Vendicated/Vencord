@@ -28,8 +28,7 @@ export interface ChoicesOption {
 
 export interface CommandReturnValue {
     content: string;
-    // TODO: implement
-    // cancel?: boolean;
+    cancel?: boolean;
 }
 
 export interface CommandArgument {
