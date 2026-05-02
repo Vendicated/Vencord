@@ -203,9 +203,6 @@ export const TimezoneTriggerUsernameCompact = (props: {
                     width: showTime ? "3.5rem" : "0rem",
                     marginLeft: showTime ? "calc(var(--custom-message-meta-space) * -1)" : 0,
                     opacity: showTime ? 1 : 0,
-                    overflow: "hidden",
-                    whiteSpace: "nowrap",
-                    verticalAlign: "baseline",
                     transition: "width 160ms ease, margin-left 160ms ease, margin-right 160ms ease, opacity 120ms ease"
                 }}
             >
