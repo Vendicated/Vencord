@@ -144,7 +144,7 @@ function HiddenChannelLockScreen({ channel }: { channel: Channel; }) {
             });
         }
 
-        if (PermissionsViewerPlugin.settings.store.enabled) {
+        if (isPluginEnabled(PermissionsViewerPlugin.name)) {
             setPermissions(sortPermissionOverwrites(Object.values(permissionOverwrites).map(overwrite => ({
                 type: overwrite.type,
                 id: overwrite.id,

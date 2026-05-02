@@ -18,6 +18,7 @@
 
 import "./style.css";
 
+import { isPluginEnabled } from "@api/PluginManager";
 import { definePluginSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import TypingTweaksPlugin, { buildSeveralUsers } from "@plugins/typingTweaks";
@@ -85,7 +86,7 @@ function TypingIndicator({ channelId, guildId }: { channelId: string; guildId: s
             break;
         }
         default: {
-            tooltipText = TypingTweaksPlugin.settings.store.enabled
+            tooltipText = isPluginEnabled(TypingTweaksPlugin.name)
                 ? buildSeveralUsers({ users: [a, b].map(UserStore.getUser), count: typingUsersArray.length - 2, guildId })
                 : getIntlMessage("SEVERAL_USERS_TYPING");
             break;
