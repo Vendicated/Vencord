@@ -5,7 +5,7 @@
  */
 
 import { openNotificationLogModal } from "@api/Notifications/notificationLog";
-import { isPluginEnabled, plugins } from "@api/PluginManager";
+import { isPluginEnabled, isSettingDisabled, isSettingHidden, plugins } from "@api/PluginManager";
 import { Settings, useSettings } from "@api/Settings";
 import { openPluginModal, openSettingsTabModal, PluginsTab, ThemesTab } from "@components/settings";
 import { useAwaiter } from "@utils/react";
@@ -81,13 +81,8 @@ export function buildPluginMenuEntries(includeEmpty = false) {
 
                     let hasAnyOption = false;
 
-                    if (p.options) for (const [key, option] of Object.entries(p.options)) {
-                        const shouldHide = "hidden" in option && (
-                            typeof option.hidden === "function"
-                                ? option.hidden.call(p.settings)
-                                : option.hidden
-                        );
-                        if (shouldHide) continue;
+                    if (p.settings) for (const [key, option] of Object.entries(p.settings.def)) {
+                        if (isSettingHidden(p.settings, option)) continue;
 
                         hasAnyOption = true;
 
@@ -97,7 +92,7 @@ export function buildPluginMenuEntries(includeEmpty = false) {
                             id: `${p.name}-${key}`,
                             key: key,
                             label: wordsToTitle(wordsFromCamel(key)),
-                            disabled: "disabled" in option ? option.disabled?.call(p.settings) : false,
+                            disabled: isSettingDisabled(p.settings, option)
                         };
 
                         switch (option.type) {
