@@ -5,9 +5,9 @@
  */
 
 import ErrorBoundary from "@components/ErrorBoundary";
+import { Margins } from "@components/margins";
 import { TooltipContainer } from "@components/TooltipContainer";
 import { classNameFactory } from "@utils/css";
-import { Margins } from "@utils/margins";
 import { classes } from "@utils/misc";
 import { ModalCloseButton, ModalContent, ModalHeader, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
 import { findCssClassesLazy } from "@webpack";

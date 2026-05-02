@@ -5,10 +5,10 @@
  */
 
 import { ErrorCard } from "@components/ErrorCard";
+import { Margins } from "@components/margins";
 import { relativeLuminance } from "@plugins/clientTheme/utils/colorUtils";
 import { createOrUpdateThemeColorVars } from "@plugins/clientTheme/utils/styleUtils";
 import { classNameFactory } from "@utils/css";
-import { Margins } from "@utils/margins";
 import { findByCodeLazy, findStoreLazy } from "@webpack";
 import { Button, ColorPicker, Forms, ThemeStore, useStateFromStores } from "@webpack/common";
 

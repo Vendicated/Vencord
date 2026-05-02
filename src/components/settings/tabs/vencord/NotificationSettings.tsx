@@ -8,7 +8,7 @@ import { openNotificationLogModal } from "@api/Notifications/notificationLog";
 import { useSettings } from "@api/Settings";
 import { ErrorCard } from "@components/ErrorCard";
 import { Flex } from "@components/Flex";
-import { Margins } from "@utils/margins";
+import { Margins } from "@components/margins";
 import { identity } from "@utils/misc";
 import { ModalCloseButton, ModalContent, ModalHeader, ModalRoot, ModalSize, openModal } from "@utils/modal";
 import { Button, Forms, Select, Slider, Text } from "@webpack/common";

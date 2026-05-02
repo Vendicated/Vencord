@@ -6,7 +6,7 @@
 
 import { useSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
-import { Margins } from "@utils/margins";
+import { Margins } from "@components/margins";
 import { identity } from "@utils/misc";
 import { Forms, Select } from "@webpack/common";
 

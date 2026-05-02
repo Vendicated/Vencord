@@ -8,8 +8,8 @@ import { definePluginSettings, Settings } from "@api/Settings";
 import { getUserSettingLazy } from "@api/UserSettings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Flex } from "@components/Flex";
+import { Margins } from "@components/margins";
 import { Devs } from "@utils/constants";
-import { Margins } from "@utils/margins";
 import definePlugin, { OptionType } from "@utils/types";
 import { Button, Forms, RunningGameStore, showToast, TextArea, Toasts, Tooltip, useEffect, useState } from "@webpack/common";
 

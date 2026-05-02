@@ -21,6 +21,7 @@ import { useSettings } from "@api/Settings";
 import { Divider } from "@components/Divider";
 import { FormSwitch } from "@components/FormSwitch";
 import { FolderIcon, GithubIcon, LogIcon, PaintbrushIcon, RestartIcon } from "@components/Icons";
+import { Margins } from "@components/margins";
 import { QuickAction, QuickActionCard } from "@components/settings/QuickAction";
 import { SpecialCard } from "@components/settings/SpecialCard";
 import { SettingsTab, wrapTab } from "@components/settings/tabs/BaseTab";
@@ -28,7 +29,6 @@ import { openContributorModal } from "@components/settings/tabs/plugins/Contribu
 import { openPluginModal } from "@components/settings/tabs/plugins/PluginModal";
 import { gitRemote } from "@shared/vencordUserAgent";
 import { IS_MAC, IS_WINDOWS } from "@utils/constants";
-import { Margins } from "@utils/margins";
 import { isPluginDev } from "@utils/misc";
 import { relaunch } from "@utils/native";
 import { Alerts, Forms, React, useMemo, UserStore } from "@webpack/common";

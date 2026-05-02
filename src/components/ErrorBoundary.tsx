@@ -16,9 +16,9 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { Margins } from "@components/margins";
 import { LazyComponent, LazyComponentWrapper } from "@utils/lazyReact";
 import { Logger } from "@utils/Logger";
-import { Margins } from "@utils/margins";
 import type { React } from "@webpack/common";
 import { ComponentType } from "react";
 

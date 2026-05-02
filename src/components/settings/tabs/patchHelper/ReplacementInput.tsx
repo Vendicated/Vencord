@@ -5,7 +5,7 @@
  */
 
 import { FormSwitch } from "@components/FormSwitch";
-import { Margins } from "@utils/margins";
+import { Margins } from "@components/margins";
 import { Forms, Parser, TextInput, useEffect, useState } from "@webpack/common";
 
 const RegexGuide = {

@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { Margins } from "@utils/margins";
+import { Margins } from "@components/margins";
 import { Patch, ReplaceFn } from "@utils/types";
 import { Forms, TextArea, useEffect, useRef, useState } from "@webpack/common";
 

@@ -7,8 +7,8 @@
 import { Divider } from "@components/Divider";
 import { ErrorCard } from "@components/ErrorCard";
 import { Link } from "@components/Link";
+import { Margins } from "@components/margins";
 import { CspBlockedUrls, useCspErrors } from "@utils/cspViolations";
-import { Margins } from "@utils/margins";
 import { classes } from "@utils/misc";
 import { relaunch } from "@utils/native";
 import { useForceUpdater } from "@utils/react";

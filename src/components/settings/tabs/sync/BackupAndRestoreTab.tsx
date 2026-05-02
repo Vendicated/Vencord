@@ -20,9 +20,9 @@ import { downloadSettingsBackup, uploadSettingsBackup } from "@api/SettingsSync/
 import { Card } from "@components/Card";
 import { Flex } from "@components/Flex";
 import { Heading } from "@components/Heading";
+import { Margins } from "@components/margins";
 import { Paragraph } from "@components/Paragraph";
 import { SettingsTab, wrapTab } from "@components/settings/tabs/BaseTab";
-import { Margins } from "@utils/margins";
 import { Button, Text } from "@webpack/common";
 
 function BackupAndRestoreTab() {

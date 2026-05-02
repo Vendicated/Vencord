@@ -18,7 +18,7 @@
 
 import { Divider } from "@components/Divider";
 import { FormSwitch } from "@components/FormSwitch";
-import { Margins } from "@utils/margins";
+import { Margins } from "@components/margins";
 import { ModalCloseButton, ModalContent, ModalHeader, ModalProps, ModalRoot } from "@utils/modal";
 import { Forms, SearchableSelect, useMemo } from "@webpack/common";
 

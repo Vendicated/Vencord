@@ -6,7 +6,7 @@
 
 import { definePluginSettings } from "@api/Settings";
 import { Link } from "@components/Link";
-import { Margins } from "@utils/margins";
+import { Margins } from "@components/margins";
 import { classes } from "@utils/misc";
 import { closeAllModals } from "@utils/modal";
 import { OptionType } from "@utils/types";

@@ -7,6 +7,7 @@
 import { Button as NewButton } from "@components/Button";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Flex } from "@components/Flex";
+import { Margins } from "@components/margins";
 import { Decoration, getPresets, Preset } from "@plugins/decor/lib/api";
 import { GUILD_ID, INVITE_KEY } from "@plugins/decor/lib/constants";
 import { useAuthorizationStore } from "@plugins/decor/lib/stores/AuthorizationStore";
@@ -20,7 +21,6 @@ import DecorationGridNone from "@plugins/decor/ui/components/DecorationGridNone"
 import DecorDecorationGridDecoration from "@plugins/decor/ui/components/DecorDecorationGridDecoration";
 import SectionedGridList from "@plugins/decor/ui/components/SectionedGridList";
 import { copyWithToast, openInviteModal } from "@utils/discord";
-import { Margins } from "@utils/margins";
 import { closeAllModals, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
 import { Queue } from "@utils/Queue";
 import { User } from "@vencord/discord-types";

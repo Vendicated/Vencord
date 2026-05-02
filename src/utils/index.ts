@@ -30,7 +30,6 @@ export * from "./lazy";
 export * from "./lazyReact";
 export * from "./localStorage";
 export * from "./Logger";
-export * from "./margins";
 export * from "./mergeDefaults";
 export * from "./misc";
 export * from "./modal";

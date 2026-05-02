@@ -8,7 +8,7 @@ import { Card } from "@components/Card";
 import { ErrorCard } from "@components/ErrorCard";
 import { Flex } from "@components/Flex";
 import { Link } from "@components/Link";
-import { Margins } from "@utils/margins";
+import { Margins } from "@components/margins";
 import { classes } from "@utils/misc";
 import { relaunch } from "@utils/native";
 import { changes, checkForUpdates, update, updateError } from "@utils/updater";
