@@ -16,6 +16,7 @@
     z-index: 2147483647;
     right: 1rem;
     width: 25vw;
+    max-width: 500px;
     min-height: 10vh;
 }
 
