@@ -44,24 +44,27 @@ export const settings = definePluginSettings({
         default: "en",
         hidden: true
     },
-
     service: {
         type: OptionType.SELECT,
         description: IS_WEB ? "Translation service (Not supported on Web!)" : "Translation service",
-        disabled: () => IS_WEB,
+        hidden: IS_WEB,
         options: [
             { label: "Google Translate", value: "google", default: true },
-            { label: "DeepL Free", value: "deepl" },
-            { label: "DeepL Pro", value: "deepl-pro" }
+            { label: "DeepL Free — API key required", value: "deepl" },
+            { label: "DeepL Pro — API key required", value: "deepl-pro" },
+            { label: "Kagi Translate — API key required", value: "kagi" }
         ] as const,
         onChange: resetLanguageDefaults
     },
     deeplApiKey: {
         type: OptionType.STRING,
-        description: "DeepL API key",
-        default: "",
-        placeholder: "Get your API key from https://deepl.com/your-account",
-        disabled: () => IS_WEB
+        description: "Get your API key from https://deepl.com/your-account",
+        default: ""
+    },
+    kagiSession: {
+        type: OptionType.STRING,
+        description: "Get your session token from https://kagi.com/settings?p=user_details",
+        default: ""
     },
     autoTranslate: {
         type: OptionType.BOOLEAN,
@@ -73,12 +76,19 @@ export const settings = definePluginSettings({
         description: "Show a tooltip on the ChatBar button whenever a message is automatically translated",
         default: true
     },
+}, {
+    deeplApiKey: {
+        hidden() { return this.store.service !== "deepl" && this.store.service !== "deepl-pro"; }
+    },
+    kagiSession: {
+        hidden() { return this.store.service !== "kagi"; }
+    }
 }).withPrivateSettings<{
     showAutoTranslateAlert: boolean;
 }>();
 
 export function resetLanguageDefaults() {
-    if (IS_WEB || settings.store.service === "google") {
+    if (IS_WEB || settings.store.service === "google" || settings.store.service === "kagi") {
         settings.store.receivedInput = "auto";
         settings.store.receivedOutput = "en";
         settings.store.sentInput = "auto";

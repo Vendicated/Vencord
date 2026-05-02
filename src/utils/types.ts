@@ -259,8 +259,8 @@ export const enum OptionType {
 
 export type SettingsDefinition = Record<string, PluginSettingDef>;
 export type SettingsChecks<D extends SettingsDefinition> = {
-    [K in keyof D]?: D[K] extends PluginSettingComponentDef ? IsDisabled<DefinedSettings<D>> :
-    (IsDisabled<DefinedSettings<D>> & IsValid<PluginSettingType<D[K]>, DefinedSettings<D>>);
+    [K in keyof D]?: D[K] extends PluginSettingComponentDef ? IsDisabledOrHidden<DefinedSettings<D>> :
+    (IsDisabledOrHidden<DefinedSettings<D>> & IsValid<PluginSettingType<D[K]>, DefinedSettings<D>>);
 };
 
 export type PluginSettingDef =
@@ -286,18 +286,22 @@ export interface PluginSettingCommon {
     /**
      * Hide this setting from the settings UI
      */
-    hidden?: boolean;
+    hidden?: boolean | (() => boolean);
     /**
      * Set this if the setting only works on Browser or Desktop, not both
      */
     target?: "WEB" | "DESKTOP" | "BOTH";
 }
 
-interface IsDisabled<D = unknown> {
+interface IsDisabledOrHidden<D = unknown> {
     /**
      * Checks if this setting should be disabled
      */
     disabled?(this: D): boolean;
+    /**
+     * Checks if this setting should be hidden
+     */
+    hidden?(this: D): boolean;
 }
 
 interface IsValid<T, D = unknown> {
@@ -432,7 +436,7 @@ export type IpcRes<V = any> = { ok: true; value: V; } | { ok: false, error: any;
 /*             Legacy Options Types             */
 /* -------------------------------------------- */
 
-export type PluginOptionBase = PluginSettingCommon & IsDisabled;
+export type PluginOptionBase = PluginSettingCommon & IsDisabledOrHidden;
 export type PluginOptionsItem =
     | PluginOptionString
     | PluginOptionNumber
@@ -441,12 +445,12 @@ export type PluginOptionsItem =
     | PluginOptionSlider
     | PluginOptionComponent
     | PluginOptionCustom;
-export type PluginOptionString = PluginSettingStringDef & PluginSettingCommon & IsDisabled & IsValid<string>;
-export type PluginOptionNumber = (PluginSettingNumberDef | PluginSettingBigIntDef) & PluginSettingCommon & IsDisabled & IsValid<number | BigInt>;
-export type PluginOptionBoolean = PluginSettingBooleanDef & PluginSettingCommon & IsDisabled & IsValid<boolean>;
-export type PluginOptionSelect = PluginSettingSelectDef & PluginSettingCommon & IsDisabled & IsValid<PluginSettingSelectOption>;
-export type PluginOptionSlider = PluginSettingSliderDef & PluginSettingCommon & IsDisabled & IsValid<number>;
-export type PluginOptionComponent = PluginSettingComponentDef & Omit<PluginSettingCommon, "description" | "placeholder">;
+export type PluginOptionString = PluginSettingStringDef & PluginOptionBase & IsValid<string>;
+export type PluginOptionNumber = (PluginSettingNumberDef | PluginSettingBigIntDef) & PluginOptionBase & IsValid<number | BigInt>;
+export type PluginOptionBoolean = PluginSettingBooleanDef & PluginOptionBase & IsValid<boolean>;
+export type PluginOptionSelect = PluginSettingSelectDef & PluginOptionBase & IsValid<PluginSettingSelectOption>;
+export type PluginOptionSlider = PluginSettingSliderDef & PluginOptionBase & IsValid<number>;
+export type PluginOptionComponent = PluginSettingComponentDef & Omit<PluginOptionBase, "description" | "placeholder">;
 export type PluginOptionCustom = PluginSettingCustomDef & Pick<PluginSettingCommon, "onChange">;
 
 export type PluginNative<PluginExports extends Record<string, (event: Electron.IpcMainInvokeEvent, ...args: any[]) => any>> = {

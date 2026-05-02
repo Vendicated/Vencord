@@ -82,7 +82,12 @@ export function buildPluginMenuEntries(includeEmpty = false) {
                     let hasAnyOption = false;
 
                     if (p.options) for (const [key, option] of Object.entries(p.options)) {
-                        if ("hidden" in option && option.hidden) continue;
+                        const shouldHide = "hidden" in option && (
+                            typeof option.hidden === "function"
+                                ? option.hidden.call(p.settings)
+                                : option.hidden
+                        );
+                        if (shouldHide) continue;
 
                         hasAnyOption = true;
 

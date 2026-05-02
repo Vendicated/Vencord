@@ -107,7 +107,14 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
             return <Forms.FormText>There are no settings for this plugin.</Forms.FormText>;
 
         const options = Object.entries(plugin.options).map(([key, setting]) => {
-            if (setting.type === OptionType.CUSTOM || setting.hidden) return null;
+            if (setting.type === OptionType.CUSTOM) return null;
+
+            const shouldHide = "hidden" in setting && (
+                typeof setting.hidden === "function"
+                    ? setting.hidden.call(plugin.settings)
+                    : setting.hidden
+            );
+            if (shouldHide) return null;
 
             function onChange(newValue: any) {
                 const option = plugin.options?.[key];
