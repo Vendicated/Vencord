@@ -445,12 +445,12 @@ export type PluginOptionsItem =
     | PluginOptionSlider
     | PluginOptionComponent
     | PluginOptionCustom;
-export type PluginOptionString = PluginSettingStringDef & PluginSettingCommon & IsDisabledOrHidden & IsValid<string>;
-export type PluginOptionNumber = (PluginSettingNumberDef | PluginSettingBigIntDef) & PluginSettingCommon & IsDisabledOrHidden & IsValid<number | BigInt>;
-export type PluginOptionBoolean = PluginSettingBooleanDef & PluginSettingCommon & IsDisabledOrHidden & IsValid<boolean>;
-export type PluginOptionSelect = PluginSettingSelectDef & PluginSettingCommon & IsDisabledOrHidden & IsValid<PluginSettingSelectOption>;
-export type PluginOptionSlider = PluginSettingSliderDef & PluginSettingCommon & IsDisabledOrHidden & IsValid<number>;
-export type PluginOptionComponent = PluginSettingComponentDef & Omit<PluginSettingCommon, "description" | "placeholder">;
+export type PluginOptionString = PluginSettingStringDef & PluginOptionBase & IsValid<string>;
+export type PluginOptionNumber = (PluginSettingNumberDef | PluginSettingBigIntDef) & PluginOptionBase & IsValid<number | BigInt>;
+export type PluginOptionBoolean = PluginSettingBooleanDef & PluginOptionBase & IsValid<boolean>;
+export type PluginOptionSelect = PluginSettingSelectDef & PluginOptionBase & IsValid<PluginSettingSelectOption>;
+export type PluginOptionSlider = PluginSettingSliderDef & PluginOptionBase & IsValid<number>;
+export type PluginOptionComponent = PluginSettingComponentDef & Omit<PluginOptionBase, "description" | "placeholder">;
 export type PluginOptionCustom = PluginSettingCustomDef & Pick<PluginSettingCommon, "onChange">;
 
 export type PluginNative<PluginExports extends Record<string, (event: Electron.IpcMainInvokeEvent, ...args: any[]) => any>> = {
