@@ -17,15 +17,17 @@
 */
 
 import { Settings } from "@api/Settings";
+import { managedStyleRootNode } from "@api/Styles";
 import { Devs } from "@utils/constants";
+import { createAndAppendStyle } from "@utils/css";
 import definePlugin, { OptionType } from "@utils/types";
 
 let style: HTMLStyleElement;
 
 function setCss() {
     style.textContent = `
-        .vc-nsfw-img [class^=imageContainer],
-        .vc-nsfw-img [class^=wrapperPaused] {
+        .vc-nsfw-img [class*=imageContainer],
+        .vc-nsfw-img [class*=wrapperPaused] {
             filter: blur(${Settings.plugins.BlurNSFW.blurAmount}px);
             transition: filter 0.2s;
 
@@ -39,15 +41,18 @@ function setCss() {
 export default definePlugin({
     name: "BlurNSFW",
     description: "Blur attachments in NSFW channels until hovered",
+    tags: ["Privacy", "Appearance"],
     authors: [Devs.Ven],
 
     patches: [
         {
-            find: "}renderEmbeds(",
-            replacement: [{
-                match: /\.container/,
-                replace: "$&+(this.props.channel.nsfw? ' vc-nsfw-img': '')"
-            }]
+            find: "}renderStickersAccessories(",
+            replacement: [
+                {
+                    match: /(\.renderReactions\(\i\).+?className:)/,
+                    replace: '$&(this.props?.channel?.nsfw?"vc-nsfw-img ":"")+'
+                }
+            ]
         }
     ],
 
@@ -61,9 +66,7 @@ export default definePlugin({
     },
 
     start() {
-        style = document.createElement("style");
-        style.id = "VcBlurNsfw";
-        document.head.appendChild(style);
+        style = createAndAppendStyle("VcBlurNsfw", managedStyleRootNode);
 
         setCss();
     },

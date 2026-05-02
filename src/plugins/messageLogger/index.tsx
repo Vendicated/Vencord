@@ -29,7 +29,7 @@ import { Logger } from "@utils/Logger";
 import { classes } from "@utils/misc";
 import definePlugin, { OptionType } from "@utils/types";
 import { Message } from "@vencord/discord-types";
-import { findByPropsLazy } from "@webpack";
+import { findCssClassesLazy } from "@webpack";
 import { ChannelStore, FluxDispatcher, Menu, MessageStore, Parser, SelectedChannelStore, Timestamp, UserStore, useStateFromStores } from "@webpack/common";
 
 import overlayStyle from "./deleteStyleOverlay.css?managed";
@@ -42,7 +42,7 @@ interface MLMessage extends Message {
     firstEditTimestamp?: Date;
 }
 
-const styles = findByPropsLazy("edited", "communicationDisabled", "isSystemMessage");
+const MessageClasses = findCssClassesLazy("edited", "communicationDisabled", "isSystemMessage");
 
 function addDeleteStyle() {
     if (Settings.plugins.MessageLogger.deleteStyle === "text") {
@@ -93,7 +93,7 @@ const patchMessageContextMenu: NavContextMenuPatchCallback = (children, props) =
                         mlDeleted: true
                     });
                 } else {
-                    message.editHistory = [];
+                    updateMessage(channel_id, id, { editHistory: [] });
                 }
             }}
         />
@@ -144,6 +144,7 @@ export function parseEditContent(content: string, message: Message) {
 export default definePlugin({
     name: "MessageLogger",
     description: "Temporarily logs deleted and edited messages.",
+    tags: ["Chat", "Utility"],
     authors: [Devs.rushii, Devs.Ven, Devs.AutumnVN, Devs.Nickyux, Devs.Kyuuhachi],
     dependencies: ["MessageUpdaterAPI"],
 
@@ -177,7 +178,7 @@ export default definePlugin({
                             isEdited={true}
                             isInline={false}
                         >
-                            <span className={styles.edited}>{" "}({getIntlMessage("MESSAGE_EDITED")})</span>
+                            <span className={MessageClasses.edited}>{" "}({getIntlMessage("MESSAGE_EDITED")})</span>
                         </Timestamp>
                     </div>
                 ))}
@@ -237,17 +238,20 @@ export default definePlugin({
         ignoreUsers: {
             type: OptionType.STRING,
             description: "Comma-separated list of user IDs to ignore",
-            default: ""
+            default: "",
+            multiline: true
         },
         ignoreChannels: {
             type: OptionType.STRING,
             description: "Comma-separated list of channel IDs to ignore",
-            default: ""
+            default: "",
+            multiline: true
         },
         ignoreGuilds: {
             type: OptionType.STRING,
             description: "Comma-separated list of guild IDs to ignore",
-            default: ""
+            default: "",
+            multiline: true
         },
     },
 
@@ -285,18 +289,22 @@ export default definePlugin({
     },
 
     shouldIgnore(message: any, isEdit = false) {
-        const { ignoreBots, ignoreSelf, ignoreUsers, ignoreChannels, ignoreGuilds, logEdits, logDeletes } = Settings.plugins.MessageLogger;
-        const myId = UserStore.getCurrentUser().id;
+        try {
+            const { ignoreBots, ignoreSelf, ignoreUsers, ignoreChannels, ignoreGuilds, logEdits, logDeletes } = Settings.plugins.MessageLogger;
+            const myId = UserStore.getCurrentUser().id;
 
-        return ignoreBots && message.author?.bot ||
-            ignoreSelf && message.author?.id === myId ||
-            ignoreUsers.includes(message.author?.id) ||
-            ignoreChannels.includes(message.channel_id) ||
-            ignoreChannels.includes(ChannelStore.getChannel(message.channel_id)?.parent_id) ||
-            (isEdit ? !logEdits : !logDeletes) ||
-            ignoreGuilds.includes(ChannelStore.getChannel(message.channel_id)?.guild_id) ||
-            // Ignore Venbot in the support channels
-            (message.author?.id === VENBOT_USER_ID && ChannelStore.getChannel(message.channel_id)?.parent_id === SUPPORT_CATEGORY_ID);
+            return ignoreBots && message.author?.bot ||
+                ignoreSelf && message.author?.id === myId ||
+                ignoreUsers.includes(message.author?.id) ||
+                ignoreChannels.includes(message.channel_id) ||
+                ignoreChannels.includes(ChannelStore.getChannel(message.channel_id)?.parent_id) ||
+                (isEdit ? !logEdits : !logDeletes) ||
+                ignoreGuilds.includes(ChannelStore.getChannel(message.channel_id)?.guild_id) ||
+                // Ignore Venbot in the support channels
+                (message.author?.id === VENBOT_USER_ID && ChannelStore.getChannel(message.channel_id)?.parent_id === SUPPORT_CATEGORY_ID);
+        } catch (e) {
+            return false;
+        }
     },
 
     EditMarker({ message, className, children, ...props }: any) {
@@ -342,40 +350,41 @@ export default definePlugin({
 
     patches: [
         {
-            // MessageStore
             find: '"MessageStore"',
             replacement: [
                 {
                     // Add deleted=true to all target messages in the MESSAGE_DELETE event
-                    match: /function (?=.+?MESSAGE_DELETE:(\i))\1\((\i)\){let.+?((?:\i\.){2})getOrCreate.+?}(?=function)/,
-                    replace:
-                        "function $1($2){" +
-                        "   var cache = $3getOrCreate($2.channelId);" +
-                        "   cache = $self.handleDelete(cache, $2, false);" +
-                        "   $3commit(cache);" +
-                        "}"
+                    match: /(?<=MESSAGE_DELETE:function\((\i)\)\{)(?=let.{0,100}(\i\.\i)\.getOrCreate)/,
+                    replace: `
+                        let cache = $2.getOrCreate($1.channelId);
+                        cache = $self.handleDelete(cache, $1, false);
+                        $2.commit(cache);
+                        return;
+                    `
                 },
                 {
                     // Add deleted=true to all target messages in the MESSAGE_DELETE_BULK event
-                    match: /function (?=.+?MESSAGE_DELETE_BULK:(\i))\1\((\i)\){let.+?((?:\i\.){2})getOrCreate.+?}(?=function)/,
-                    replace:
-                        "function $1($2){" +
-                        "   var cache = $3getOrCreate($2.channelId);" +
-                        "   cache = $self.handleDelete(cache, $2, true);" +
-                        "   $3commit(cache);" +
-                        "}"
+                    match: /(?<=MESSAGE_DELETE_BULK:function\((\i)\){)(?=let.{0,100}(\i\.\i)\.getOrCreate)/,
+                    replace: `
+                        let cache = $2.getOrCreate($1.channelId);
+                        cache = $self.handleDelete(cache, $1, true);
+                        $2.commit(cache);
+                        return;
+                    `
                 },
                 {
                     // Add current cached content + new edit time to cached message's editHistory
-                    match: /(function (\i)\((\i)\).+?)\.update\((\i)(?=.*MESSAGE_UPDATE:\2)/,
-                    replace: "$1" +
-                        ".update($4,m =>" +
-                        "   (($3.message.flags & 64) === 64 || $self.shouldIgnore($3.message, true)) ? m :" +
-                        "   $3.message.edited_timestamp && $3.message.content !== m.content ?" +
-                        "       m.set('editHistory',[...(m.editHistory || []), $self.makeEdit($3.message, m)]) :" +
-                        "       m" +
-                        ")" +
-                        ".update($4"
+                    match: /(MESSAGE_UPDATE:function\((\i)\).+?)\.update\((\i)/,
+                    replace: `
+                        $1
+                        .update($3, m =>
+                            (($2.message.flags & 64) === 64 || $self.shouldIgnore($2.message, true)) ? m :
+                            $2.message.edited_timestamp && $2.message.content !== m.content ?
+                                m.set('editHistory',[...(m.editHistory || []), $self.makeEdit($2.message, m)]) :
+                                m
+                        )
+                        .update($3
+                    `
                 },
                 {
                     // fix up key (edit last message) attempting to edit a deleted message
@@ -401,7 +410,7 @@ export default definePlugin({
 
         {
             // Updated message transformer(?)
-            find: "THREAD_STARTER_MESSAGE?null==",
+            find: ".PREMIUM_REFERRAL&&(",
             replacement: [
                 {
                     // Pass through editHistory & deleted & original attachments to the "edited message" transformer
@@ -441,11 +450,11 @@ export default definePlugin({
 
         {
             // Attachment renderer
-            find: ".removeMosaicItemHoverButton",
+            find: "#{intl::REMOVE_ATTACHMENT_TOOLTIP_TEXT}",
             replacement: [
                 {
-                    match: /\[\i\.obscured\]:.+?,(?<=item:(\i).+?)/,
-                    replace: '$&"messagelogger-deleted-attachment":$1.originalItem?.deleted,'
+                    match: /\.SPOILER,(?=\[\i\.\i\]:)/,
+                    replace: '$&"messagelogger-deleted-attachment":arguments[0]?.item?.originalItem?.deleted,'
                 }
             ]
         },
@@ -467,7 +476,7 @@ export default definePlugin({
             find: ".SEND_FAILED,",
             replacement: {
                 // Render editHistory behind the message content
-                match: /\.isFailed]:.+?children:\[/,
+                match: /\]:\i.isUnsupported.{0,20}?,children:\[/,
                 replace: "$&arguments[0]?.message?.editHistory?.length>0&&$self.renderEdits(arguments[0]),"
             }
         },
@@ -476,8 +485,8 @@ export default definePlugin({
             find: "#{intl::MESSAGE_EDITED}",
             replacement: {
                 // Make edit marker clickable
-                match: /"span",\{(?=className:\i\.edited,)/,
-                replace: "$self.EditMarker,{message:arguments[0].message,"
+                match: /(isInline:!1,children:.{0,50}?)"span",\{(?=className:)/,
+                replace: "$1$self.EditMarker,{message:arguments[0].message,"
             }
         },
 
@@ -486,12 +495,12 @@ export default definePlugin({
             find: '"ReferencedMessageStore"',
             replacement: [
                 {
-                    match: /MESSAGE_DELETE:\i,/,
-                    replace: "MESSAGE_DELETE:()=>{},"
+                    match: /(?<=MESSAGE_DELETE:function\(\i\)\{)/,
+                    replace: "return;"
                 },
                 {
-                    match: /MESSAGE_DELETE_BULK:\i,/,
-                    replace: "MESSAGE_DELETE_BULK:()=>{},"
+                    match: /(?<=MESSAGE_DELETE_BULK:function\(\i\)\{)/,
+                    replace: "return;"
                 }
             ]
         },
@@ -525,8 +534,8 @@ export default definePlugin({
                     replace: '$&$1.type==="MESSAGE_GROUP_DELETED"||',
                 },
                 {
-                    match: /(\i).type===\i\.\i\.MESSAGE_GROUP_BLOCKED\?.*?:/,
-                    replace: '$&$1.type==="MESSAGE_GROUP_DELETED"?$self.DELETED_MESSAGE_COUNT:',
+                    match: /(\i).type===\i\.\i\.MESSAGE_GROUP_BLOCKED\?(\i)=.*?:/,
+                    replace: '$&$1.type==="MESSAGE_GROUP_DELETED"?$2=$self.DELETED_MESSAGE_COUNT:',
                 },
             ],
             predicate: () => Settings.plugins.MessageLogger.collapseDeleted

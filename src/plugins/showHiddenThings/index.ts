@@ -37,8 +37,9 @@ const settings = definePluginSettings({
 
 export default definePlugin({
     name: "ShowHiddenThings",
-    tags: ["ShowTimeouts", "ShowInvitesPaused", "ShowModView", "DisableDiscoveryFilters"],
+    searchTerms: ["ShowTimeouts", "ShowInvitesPaused", "ShowModView", "DisableDiscoveryFilters"],
     description: "Displays various hidden & moderator-only things regardless of permissions.",
+    tags: ["Servers", "Utility"],
     authors: [Devs.Dolfies],
     settings,
 
@@ -52,7 +53,7 @@ export default definePlugin({
             },
         },
         {
-            find: "INVITES_DISABLED))||",
+            find: "INVITES_DISABLED)||",
             predicate: () => settings.store.showInvitesPaused,
             replacement: {
                 match: /\i\.\i\.can\(\i\.\i.MANAGE_GUILD,\i\)/,
@@ -69,11 +70,11 @@ export default definePlugin({
         },
         // fixes a bug where Members page must be loaded to see highest role, why is Discord depending on MemberSafetyStore.getEnhancedMember for something that can be obtained here?
         {
-            find: "#{intl::GUILD_MEMBER_MOD_VIEW_PERMISSION_GRANTED_BY_ARIA_LABEL}),allowOverflow:",
+            find: "#{intl::GUILD_MEMBER_MOD_VIEW_HIGHEST_ROLE}),children:",
             predicate: () => settings.store.showModView,
             replacement: {
-                match: /(?<=\.highestRole\),)role:\i(?<=\[\i\.roles,\i\.highestRoleId,(\i)\].+)/,
-                replace: "role:$self.getHighestRole(arguments[0],$1)",
+                match: /(#{intl::GUILD_MEMBER_MOD_VIEW_HIGHEST_ROLE}.{0,80})role:\i(?<=\[\i\.roles,\i\.highestRoleId,(\i)\].+?)/,
+                replace: (_, rest, roles) => `${rest}role:$self.getHighestRole(arguments[0],${roles})`,
             }
         },
         // allows you to open mod view on yourself

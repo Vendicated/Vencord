@@ -16,17 +16,81 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Settings } from "@api/Settings";
+import { definePluginSettings } from "@api/Settings";
+import { BackupRestoreIcon, CloudIcon, MainSettingsIcon, PaintbrushIcon, PatchHelperIcon, PlaceholderIcon, PluginsIcon, UpdaterIcon, VesktopSettingsIcon } from "@components/Icons";
 import { BackupAndRestoreTab, CloudTab, PatchHelperTab, PluginsTab, ThemesTab, UpdaterTab, VencordTab } from "@components/settings/tabs";
 import { Devs } from "@utils/constants";
-import { getIntlMessage } from "@utils/discord";
-import definePlugin, { OptionType } from "@utils/types";
+import { isTruthy } from "@utils/guards";
+import definePlugin, { IconProps, OptionType } from "@utils/types";
+import { waitFor } from "@webpack";
 import { React } from "@webpack/common";
+import type { ComponentType, PropsWithChildren, ReactNode } from "react";
 
 import gitHash from "~git-hash";
 
-type SectionType = "HEADER" | "DIVIDER" | "CUSTOM";
-type SectionTypes = Record<SectionType, SectionType>;
+let LayoutTypes = {
+    SECTION: 1,
+    SIDEBAR_ITEM: 2,
+    PANEL: 3,
+    CATEGORY: 5,
+    CUSTOM: 19,
+};
+waitFor(["SECTION", "SIDEBAR_ITEM", "PANEL", "CUSTOM"], v => LayoutTypes = v);
+
+const FallbackSectionTypes = {
+    HEADER: "HEADER",
+    DIVIDER: "DIVIDER",
+    CUSTOM: "CUSTOM"
+};
+type SectionTypes = typeof FallbackSectionTypes;
+
+type SettingsLocation =
+    | "top"
+    | "aboveNitro"
+    | "belowNitro"
+    | "aboveActivity"
+    | "belowActivity"
+    | "bottom";
+
+interface SettingsLayoutNode {
+    type: number;
+    key?: string;
+    legacySearchKey?: string;
+    getLegacySearchKey?(): string;
+    useLabel?(): string;
+    useTitle?(): string;
+    buildLayout?(): SettingsLayoutNode[];
+    icon?(): ReactNode;
+    render?(): ReactNode;
+    StronglyDiscouragedCustomComponent?(): ReactNode;
+}
+
+interface EntryOptions {
+    key: string,
+    title: string,
+    panelTitle?: string,
+    Component: ComponentType<{}>,
+    Icon: ComponentType<IconProps>;
+}
+interface SettingsLayoutBuilder {
+    key?: string;
+    buildLayout(): SettingsLayoutNode[];
+}
+
+const settings = definePluginSettings({
+    settingsLocation: {
+        type: OptionType.SELECT,
+        description: "Where to put the Vencord settings section",
+        options: [
+            { label: "At the very top", value: "top" },
+            { label: "Above the Nitro section", value: "aboveNitro", default: true },
+            { label: "Below the Nitro section", value: "belowNitro" },
+            { label: "Above Activity Settings", value: "aboveActivity" },
+            { label: "Below Activity Settings", value: "belowActivity" },
+            { label: "At the very bottom", value: "bottom" },
+        ] as { label: string; value: SettingsLocation; default?: boolean; }[]
+    }
+});
 
 export default definePlugin({
     name: "Settings",
@@ -34,170 +98,167 @@ export default definePlugin({
     authors: [Devs.Ven, Devs.Megu],
     required: true,
 
+    settings,
+
     patches: [
         {
-            find: ".versionHash",
+            find: "#{intl::COPY_VERSION}",
             replacement: [
                 {
-                    match: /\[\(0,\i\.jsxs?\)\((.{1,10}),(\{[^{}}]+\{.{0,20}.versionHash,.+?\})\)," "/,
-                    replace: (m, component, props) => {
+                    match: /"text-xxs\/normal".{0,300}?(?=null!=(\i)&&(.{0,20}\i\.\i.{0,200}?,children:).{0,15}?("span"),({className:\i\.\i,children:\["Build Override: ",\1\.id\]\})\)\}\))/,
+                    replace: (m, _buildOverride, makeRow, component, props) => {
                         props = props.replace(/children:\[.+\]/, "");
-                        return `${m},$self.makeInfoElements(${component}, ${props})`;
+                        return `${m},$self.makeInfoElements(${component},${props}).map(e=>${makeRow}e})),`;
                     }
                 },
                 {
-                    match: /copyValue:\i\.join\(" "\)/,
+                    match: /copyValue:\i\.join\(" "\)/g,
                     replace: "$& + $self.getInfoString()"
                 }
             ]
         },
         {
-            find: ".SEARCH_NO_RESULTS&&0===",
-            replacement: [
-                {
-                    match: /(?<=section:(.{0,50})\.DIVIDER\}\))([,;])(?=.{0,200}(\i)\.push.{0,100}label:(\i)\.header)/,
-                    replace: (_, sectionTypes, commaOrSemi, elements, element) => `${commaOrSemi} $self.addSettings(${elements}, ${element}, ${sectionTypes}) ${commaOrSemi}`
-                },
-                {
-                    match: /({(?=.+?function (\i).{0,160}(\i)=\i\.useMemo.{0,140}return \i\.useMemo\(\(\)=>\i\(\3).+?\(\)=>)\2/,
-                    replace: (_, rest, settingsHook) => `${rest}$self.wrapSettingsHook(${settingsHook})`
-                }
-            ]
-        },
-        {
-            find: "#{intl::USER_SETTINGS_ACTIONS_MENU_LABEL}",
+            find: ".buildLayout().map",
             replacement: {
-                match: /(?<=function\((\i),\i\)\{)(?=let \i=Object.values\(\i.\i\).*?(\i\.\i)\.open\()/,
-                replace: "$2.open($1);return;"
+                match: /(\i)\.buildLayout\(\)(?=\.map)/,
+                replace: "$self.buildLayout($1)"
             }
         }
     ],
 
-    customSections: [] as ((SectionTypes: SectionTypes) => any)[],
+    buildEntry(options: EntryOptions): SettingsLayoutNode {
+        const { key, title, panelTitle = title, Component, Icon } = options;
 
-    makeSettingsCategories(SectionTypes: SectionTypes) {
-        return [
-            {
-                section: SectionTypes.HEADER,
-                label: "Vencord",
-                className: "vc-settings-header"
-            },
-            {
-                section: "settings/tabs",
-                label: "Vencord",
-                element: VencordTab,
-                className: "vc-settings"
-            },
-            {
-                section: "VencordPlugins",
-                label: "Plugins",
-                element: PluginsTab,
-                className: "vc-plugins"
-            },
-            {
-                section: "VencordThemes",
-                label: "Themes",
-                element: ThemesTab,
-                className: "vc-themes"
-            },
-            !IS_UPDATER_DISABLED && {
-                section: "VencordUpdater",
-                label: "Updater",
-                element: UpdaterTab,
-                className: "vc-updater"
-            },
-            {
-                section: "VencordCloud",
-                label: "Cloud",
-                element: CloudTab,
-                className: "vc-cloud"
-            },
-            {
-                section: "settings/tabsSync",
-                label: "Backup & Restore",
-                element: BackupAndRestoreTab,
-                className: "vc-backup-restore"
-            },
-            IS_DEV && {
-                section: "VencordPatchHelper",
-                label: "Patch Helper",
-                element: PatchHelperTab,
-                className: "vc-patch-helper"
-            },
-            ...this.customSections.map(func => func(SectionTypes)),
-            {
-                section: SectionTypes.DIVIDER
-            }
-        ].filter(Boolean);
-    },
-
-    isRightSpot({ header, settings }: { header?: string; settings?: string[]; }) {
-        const firstChild = settings?.[0];
-        // lowest two elements... sanity backup
-        if (firstChild === "LOGOUT" || firstChild === "SOCIAL_LINKS") return true;
-
-        const { settingsLocation } = Settings.plugins.Settings;
-
-        if (settingsLocation === "bottom") return firstChild === "LOGOUT";
-        if (settingsLocation === "belowActivity") return firstChild === "CHANGELOG";
-
-        if (!header) return;
-
-        try {
-            const names = {
-                top: getIntlMessage("USER_SETTINGS"),
-                aboveNitro: getIntlMessage("BILLING_SETTINGS"),
-                belowNitro: getIntlMessage("APP_SETTINGS"),
-                aboveActivity: getIntlMessage("ACTIVITY_SETTINGS")
-            };
-
-            if (!names[settingsLocation] || names[settingsLocation].endsWith("_SETTINGS"))
-                return firstChild === "PREMIUM";
-
-            return header === names[settingsLocation];
-        } catch {
-            return firstChild === "PREMIUM";
-        }
-    },
-
-    patchedSettings: new WeakSet(),
-
-    addSettings(elements: any[], element: { header?: string; settings: string[]; }, sectionTypes: SectionTypes) {
-        if (this.patchedSettings.has(elements) || !this.isRightSpot(element)) return;
-
-        this.patchedSettings.add(elements);
-
-        elements.push(...this.makeSettingsCategories(sectionTypes));
-    },
-
-    wrapSettingsHook(originalHook: (...args: any[]) => Record<string, unknown>[]) {
-        return (...args: any[]) => {
-            const elements = originalHook(...args);
-            if (!this.patchedSettings.has(elements))
-                elements.unshift(...this.makeSettingsCategories({
-                    HEADER: "HEADER",
-                    DIVIDER: "DIVIDER",
-                    CUSTOM: "CUSTOM"
-                }));
-
-            return elements;
+        const panel: SettingsLayoutNode = {
+            key: key + "_panel",
+            type: LayoutTypes.PANEL,
+            useTitle: () => panelTitle,
+            buildLayout: () => [{
+                type: LayoutTypes.CATEGORY,
+                key: key + "_category",
+                buildLayout: () => [{
+                    type: LayoutTypes.CUSTOM,
+                    key: key + "_custom",
+                    Component: Component,
+                    useSearchTerms: () => [title]
+                }]
+            }]
         };
+
+        return ({
+            key,
+            type: LayoutTypes.SIDEBAR_ITEM,
+            useTitle: () => title,
+            icon: () => <Icon width={20} height={20} />,
+            buildLayout: () => [panel]
+        });
     },
 
-    options: {
-        settingsLocation: {
-            type: OptionType.SELECT,
-            description: "Where to put the Vencord settings section",
-            options: [
-                { label: "At the very top", value: "top" },
-                { label: "Above the Nitro section", value: "aboveNitro", default: true },
-                { label: "Below the Nitro section", value: "belowNitro" },
-                { label: "Above Activity Settings", value: "aboveActivity" },
-                { label: "Below Activity Settings", value: "belowActivity" },
-                { label: "At the very bottom", value: "bottom" },
-            ]
-        },
+    buildLayout(originalLayoutBuilder: SettingsLayoutBuilder) {
+        const layout = originalLayoutBuilder.buildLayout();
+        if (originalLayoutBuilder.key !== "$Root") return layout;
+        if (!Array.isArray(layout)) return layout;
+
+        if (layout.some(s => s?.key === "vencord_section")) return layout;
+
+        const { buildEntry } = this;
+
+        const vencordEntries: SettingsLayoutNode[] = [
+            buildEntry({
+                key: "vencord_main",
+                title: "Vencord",
+                panelTitle: "Vencord Settings",
+                Component: VencordTab,
+                Icon: MainSettingsIcon
+            }),
+            buildEntry({
+                key: "vencord_plugins",
+                title: "Plugins",
+                Component: PluginsTab,
+                Icon: PluginsIcon
+            }),
+            buildEntry({
+                key: "vencord_themes",
+                title: "Themes",
+                Component: ThemesTab,
+                Icon: PaintbrushIcon
+            }),
+            !IS_UPDATER_DISABLED && UpdaterTab && buildEntry({
+                key: "vencord_updater",
+                title: "Updater",
+                panelTitle: "Vencord Updater",
+                Component: UpdaterTab,
+                Icon: UpdaterIcon
+            }),
+            buildEntry({
+                key: "vencord_cloud",
+                title: "Cloud",
+                panelTitle: "Vencord Cloud",
+                Component: CloudTab,
+                Icon: CloudIcon
+            }),
+            buildEntry({
+                key: "vencord_backup_restore",
+                title: "Backup & Restore",
+                Component: BackupAndRestoreTab,
+                Icon: BackupRestoreIcon
+            }),
+            IS_DEV && PatchHelperTab && buildEntry({
+                key: "vencord_patch_helper",
+                title: "Patch Helper",
+                Component: PatchHelperTab,
+                Icon: PatchHelperIcon
+            }),
+            ...this.customEntries.map(buildEntry),
+            // TODO: Remove deprecated customSections in a future update
+            ...this.customSections.map((func, i) => {
+                const { section, element, label } = func(FallbackSectionTypes);
+                if (Object.values(FallbackSectionTypes).includes(section)) return null;
+
+                return buildEntry({
+                    key: `vencord_deprecated_custom_${section}`,
+                    title: label,
+                    Component: element,
+                    Icon: section === "Vesktop" ? VesktopSettingsIcon : PlaceholderIcon
+                });
+            })
+        ].filter(isTruthy);
+
+        const vencordSection: SettingsLayoutNode = {
+            key: "vencord_section",
+            type: LayoutTypes.SECTION,
+            useTitle: () => "Vencord Settings",
+            buildLayout: () => vencordEntries
+        };
+
+        const { settingsLocation } = settings.store;
+
+        const places: Record<SettingsLocation, string> = {
+            top: "user_section",
+            aboveNitro: "billing_section",
+            belowNitro: "billing_section",
+            aboveActivity: "activity_section",
+            belowActivity: "activity_section",
+            bottom: "logout_section"
+        };
+
+        const key = places[settingsLocation] ?? places.top;
+        let idx = layout.findIndex(s => typeof s?.key === "string" && s.key === key);
+
+        if (idx === -1) {
+            idx = 2;
+        } else if (settingsLocation.startsWith("below")) {
+            idx += 1;
+        }
+
+        layout.splice(idx, 0, vencordSection);
+
+        return layout;
     },
+
+    /** @deprecated Use customEntries */
+    customSections: [] as ((SectionTypes: SectionTypes) => any)[],
+    customEntries: [] as EntryOptions[],
 
     get electronVersion() {
         return VencordNative.native.getVersions().electron || window.legcord?.electron || null;
@@ -237,7 +298,7 @@ export default definePlugin({
         return "\n" + this.getInfoRows().join("\n");
     },
 
-    makeInfoElements(Component: React.ComponentType<React.PropsWithChildren>, props: React.PropsWithChildren) {
+    makeInfoElements(Component: ComponentType<PropsWithChildren>, props: PropsWithChildren) {
         return this.getInfoRows().map((text, i) =>
             <Component key={i} {...props}>{text}</Component>
         );

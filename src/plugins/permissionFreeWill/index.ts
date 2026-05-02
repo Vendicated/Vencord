@@ -27,6 +27,7 @@ const settings = definePluginSettings({
 export default definePlugin({
     name: "PermissionFreeWill",
     description: "Disables the client-side restrictions for channel permission management.",
+    tags: ["Servers", "Roles"],
     authors: [Devs.lewisakura],
 
     patches: [
@@ -46,8 +47,9 @@ export default definePlugin({
             find: "#{intl::ONBOARDING_CHANNEL_THRESHOLD_WARNING}",
             replacement: [
                 {
+                    // replace export getters with functions that always resolve to true
                     match: /{(?:\i:\(\)=>\i,?){2}}/,
-                    replace: m => m.replaceAll(canonicalizeMatch(/\(\)=>\i/g), "()=>Promise.resolve(true)")
+                    replace: m => m.replaceAll(canonicalizeMatch(/\(\)=>\i/g), "()=>()=>Promise.resolve(true)")
                 }
             ],
             predicate: () => settings.store.onboarding
