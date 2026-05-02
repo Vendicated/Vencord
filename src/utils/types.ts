@@ -392,23 +392,23 @@ export interface DefinedSettings<
     Def extends SettingsDefinition = SettingsDefinition,
     PrivateSettings extends object = {}
 > {
-    /** Shorthand for `Vencord.Settings.plugins.PluginName`, but with typings */
+    /** Definitions of each setting */
+    def: Def;
+    /** Reactive Read/Write settings store - This is a Proxy, use .plain for a plain object */
     store: SettingsStore<Def> & PrivateSettings;
-    /** Shorthand for `Vencord.PlainSettings.plugins.PluginName`, but with typings */
+    /** Pure Read-only settings object */
     plain: SettingsStore<Def> & PrivateSettings;
     /**
      * React hook for getting the settings for this plugin
-     * @param filter optional filter to avoid rerenders for irrelevent settings
+     * @param filter optional filter to avoid rerenders for irrelevant settings
      */
     use<F extends Extract<keyof Def | keyof PrivateSettings, string>>(filter?: F[]): Pick<SettingsStore<Def> & PrivateSettings, F>;
-    /** Definitions of each setting */
-    def: Def;
     /**
      * Name of the plugin these settings belong to,
      * will be an empty string until plugin is initialized
      */
     pluginName: string;
-
+    /** Extend this Settings object type with more properties, useful for non-user-facing settings */
     withPrivateSettings<T extends object>(): DefinedSettings<Def, T>;
 }
 
