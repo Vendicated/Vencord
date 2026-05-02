@@ -49,7 +49,7 @@ type KeysOfType<Object, Type> = {
 }[keyof Object];
 
 function Switches() {
-    const settings = useSettings(["useQuickCss", "enableReactDevtools", "frameless", "winNativeTitleBar", "transparent", "winCtrlQ", "disableMinSize"]);
+    const settings = useSettings([["useQuickCss"], ["enableReactDevtools"], ["frameless"], ["winNativeTitleBar"], ["transparent"], ["winCtrlQ"], ["disableMinSize"]]);
 
     const Switches = [
         {

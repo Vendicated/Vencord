@@ -197,7 +197,7 @@ export function buildThemeMenu() {
 }
 
 export function buildThemeMenuEntries() {
-    const { useQuickCss, enabledThemes } = useSettings(["useQuickCss", "enabledThemes"]);
+    const { useQuickCss, enabledThemes } = useSettings([["useQuickCss"], ["enabledThemes"]]);
     const [themes] = useAwaiter(VencordNative.themes.getThemesList);
 
     return (

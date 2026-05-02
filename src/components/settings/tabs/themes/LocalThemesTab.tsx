@@ -68,7 +68,7 @@ async function onFileUpload(e: SyntheticEvent<HTMLInputElement>) {
 }
 
 export function LocalThemesTab() {
-    const settings = useSettings(["enabledThemes"]);
+    const settings = useSettings([["enabledThemes"]]);
 
     const fileInputRef = useRef<HTMLInputElement>(null);
 

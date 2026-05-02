@@ -91,7 +91,7 @@ function Section(props: {
 }
 
 function UIElementsModal(props: ModalProps) {
-    const { uiElements } = useSettings(["uiElements.*"]);
+    const { uiElements } = useSettings([["uiElements", "*"]]);
 
     return (
         <ModalRoot {...props} size={ModalSize.MEDIUM}>

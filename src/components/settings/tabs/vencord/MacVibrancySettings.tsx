@@ -11,7 +11,7 @@ import { identity } from "@utils/misc";
 import { Forms, Select } from "@webpack/common";
 
 export function VibrancySettings() {
-    const settings = useSettings(["macosVibrancyStyle"]);
+    const settings = useSettings([["macosVibrancyStyle"]]);
 
     return (
         <>

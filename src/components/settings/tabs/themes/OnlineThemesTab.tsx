@@ -10,7 +10,7 @@ import { Flex } from "@components/Flex";
 import { Forms, TextArea, useState } from "@webpack/common";
 
 export function OnlineThemesTab() {
-    const settings = useSettings(["themeLinks"]);
+    const settings = useSettings([["themeLinks"]]);
 
     const [themeText, setThemeText] = useState(settings.themeLinks.join("\n"));
 

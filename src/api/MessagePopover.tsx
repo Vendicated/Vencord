@@ -67,7 +67,7 @@ export function removeMessagePopoverButton(identifier: string) {
 function VencordPopoverButtons(props: { Component: React.ComponentType<MessagePopoverButtonItem>, message: Message; }) {
     const { Component, message } = props;
 
-    const { messagePopoverButtons } = useSettings(["uiElements.messagePopoverButtons.*"]).uiElements;
+    const { messagePopoverButtons } = useSettings([["uiElements", "messagePopoverButtons", "*"]]).uiElements;
 
     const elements = Array.from(MessagePopoverButtonMap.entries())
         .filter(([key]) => messagePopoverButtons[key]?.enabled !== false)

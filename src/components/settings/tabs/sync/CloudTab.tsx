@@ -67,7 +67,7 @@ function ButtonWithIcon({ children, Icon, className, ...buttonProps }: ButtonPro
 }
 
 function CloudSetupSection() {
-    const { cloud } = useSettings(["cloud.authenticated", "cloud.url"]);
+    const { cloud } = useSettings([["cloud", "authenticated"], ["cloud", "url"]]);
 
     return (
         <section>
@@ -125,7 +125,7 @@ function CloudSetupSection() {
 }
 
 function SettingsSyncSection() {
-    const { cloud } = useSettings(["cloud.authenticated", "cloud.settingsSync"]);
+    const { cloud } = useSettings([["cloud", "authenticated"], ["cloud", "settingsSync"]]);
     const sectionEnabled = cloud.authenticated && cloud.settingsSync;
 
     return (
@@ -209,7 +209,7 @@ function SettingsSyncSection() {
 }
 
 function ResetSection() {
-    const { authenticated, settingsSync } = useSettings(["cloud.authenticated", "cloud.settingsSync"]).cloud;
+    const { authenticated, settingsSync } = useSettings([["cloud", "authenticated"], ["cloud", "settingsSync"]]).cloud;
 
     return (
         <section>

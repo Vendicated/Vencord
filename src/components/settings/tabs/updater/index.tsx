@@ -65,7 +65,7 @@ function VesktopSection() {
 }
 
 function Updater() {
-    const settings = useSettings(["autoUpdate", "autoUpdateNotification"]);
+    const settings = useSettings([["autoUpdate"], ["autoUpdateNotification"]]);
 
     const [repo, err, repoPending] = useAwaiter(getRepo, {
         fallbackValue: "Loading...",

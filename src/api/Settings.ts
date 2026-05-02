@@ -199,25 +199,24 @@ export const Settings = SettingsStore.store;
  * @param paths An optional list of paths to whitelist for rerenders
  * @returns Settings
  */
-// TODO: Representing paths as essentially "string[].join('.')" wont allow dots in paths, change to "paths?: string[][]" later
 export function useSettings(paths?: UseSettings<Settings>[]) {
     const [, forceUpdate] = React.useReducer(() => ({}), {});
 
     useEffect(() => {
         if (paths) {
             paths.forEach(p => {
-                if (p.endsWith(".*")) {
-                    SettingsStore.addPrefixChangeListener(p.slice(0, -2), forceUpdate);
+                if (p.at(-1) === "*") {
+                    SettingsStore.addPrefixChangeListener(p.slice(0, -1).join("."), forceUpdate);
                 } else {
-                    SettingsStore.addChangeListener(p, forceUpdate);
+                    SettingsStore.addChangeListener(p.join("."), forceUpdate);
                 }
             });
 
             return () => paths.forEach(p => {
-                if (p.endsWith(".*")) {
-                    SettingsStore.removePrefixChangeListener(p.slice(0, -2), forceUpdate);
+                if (p.at(-1) === "*") {
+                    SettingsStore.removePrefixChangeListener(p.slice(0, -1).join("."), forceUpdate);
                 } else {
-                    SettingsStore.removeChangeListener(p, forceUpdate);
+                    SettingsStore.removeChangeListener(p.join("."), forceUpdate);
                 }
             });
         } else {
@@ -271,8 +270,8 @@ export function definePluginSettings<
         },
         use: settings => useSettings((
             settings
-                ? settings.map(name => `plugins.${definedSettings.pluginName}.${name}`)
-                : [`plugins.${definedSettings.pluginName}.*`]
+                ? settings.map(name => ["plugins", definedSettings.pluginName, name] as UseSettings<Settings>)
+                : [["plugins", definedSettings.pluginName, "*"]]
         ) as UseSettings<Settings>[]).plugins[definedSettings.pluginName] as any,
         def,
         checks: checks ?? {} as any,
@@ -292,8 +291,13 @@ type ResolveUseSettings<T extends object> = {
     [Key in keyof T]:
     Key extends string
     ? T[Key] extends Record<string, unknown>
-    // @ts-expect-error "Type instantiation is excessively deep and possibly infinite"
-    ? `${Key}.*` | (ResolveUseSettings<T[Key]> extends Record<string, string> ? `${Key}.${ResolveUseSettings<T[Key]>[keyof T[Key]]}` : never)
-    : Key
+    ? [Key, "*"] | (
+        ResolveUseSettings<T[Key]>[keyof ResolveUseSettings<T[Key]>] extends infer Path
+        ? Path extends string[]
+        ? [Key, ...Path]
+        : never
+        : never
+    )
+    : [Key]
     : never;
 };

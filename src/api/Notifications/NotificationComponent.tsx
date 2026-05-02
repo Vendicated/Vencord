@@ -38,7 +38,7 @@ export default ErrorBoundary.wrap(function NotificationComponent({
     className,
     dismissOnClick
 }: NotificationData & { className?: string; }) {
-    const { timeout, position } = useSettings(["notifications.timeout", "notifications.position"]).notifications;
+    const { timeout, position } = useSettings([["notifications", "timeout"], ["notifications", "position"]]).notifications;
     const hasFocus = useStateFromStores([WindowStore], () => WindowStore.isFocused());
 
     const [isHover, setIsHover] = useState(false);
