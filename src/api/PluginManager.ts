@@ -381,9 +381,9 @@ export const initPluginManager = onlyOnce(function init() {
         if (p.settings) {
             p.settings.pluginName = p.name;
 
-            for (const def of Object.values(p.settings.def)) {
+            for (const [key, def] of Object.entries(p.settings.def)) {
                 if (def.onChange)
-                    SettingsStore.addChangeListener(`plugins.${p.name}.${name}`, def.onChange);
+                    SettingsStore.addChangeListener(`plugins.${p.name}.${key}`, def.onChange);
             }
         }
 
