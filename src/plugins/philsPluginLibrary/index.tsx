@@ -29,8 +29,8 @@ export default definePlugin({
         {
             find: '"--custom-app-panels-height",',
             replacement: {
-                match: /{}\)}\),/,
-                replace: "{})}),$self.replacedUserPanelComponent(),"
+                match: /(\(0,\i\.jsx\)\(\i\.\i,\{section:\i\.\i+\.ACCOUNT_PANEL)/,
+                replace: "$self.replacedUserPanelComponent(),$1"
             }
         },
         {
