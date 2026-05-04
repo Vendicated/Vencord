@@ -95,7 +95,7 @@ const settings = definePluginSettings({
                         )}
                         {preview
                             ? <span style={{ color: "var(--text-positive, #3ba55c)", fontSize: "13px" }}>✓ Image loaded</span>
-                            : <span style={{ color: "var(--text-muted)", fontSize: "13px" }}>No image selected — using default placeholder</span>
+                            : <span style={{ color: "var(--text-muted)", fontSize: "13px" }}>No image selected, using default placeholder</span>
                         }
                     </div>
                     {preview && (
