@@ -51,6 +51,7 @@ export default definePlugin({
     name: "VolumeBooster",
     authors: [Devs.Nuckyz, Devs.sadan],
     description: "Allows you to set the user and stream volume above the default maximum",
+    tags: ["Voice", "Utility"],
     settings,
 
     patches: [
@@ -98,7 +99,7 @@ export default definePlugin({
             find: "AudioContextSettingsMigrated",
             replacement: [
                 {
-                    match: /(?<=isLocalMute\(\i,\i\),volume:(\i).+?\i\(\i,\i,)\1(?=\))/,
+                    match: /(?<=isLocalMute\(\i,\i\),volume:(\i).+?\(0,\i\.\i\)\(\i,\i,\{volume:)\1(?=\}\))/,
                     replace: "$&>200?200:$&"
                 },
                 {

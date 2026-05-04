@@ -22,7 +22,7 @@ import { ApngBlendOp, ApngDisposeOp, parseAPNG } from "@utils/apng";
 import { Devs } from "@utils/constants";
 import { getCurrentGuild } from "@utils/discord";
 import { Logger } from "@utils/Logger";
-import definePlugin, { OptionType, Patch } from "@utils/types";
+import definePlugin, { OptionType } from "@utils/types";
 import type { Emoji, Message, Sticker } from "@vencord/discord-types";
 import { StickerFormatType } from "@vencord/discord-types/enums";
 import { findByCodeLazy, findByPropsLazy, proxyLazyWebpack } from "@webpack";
@@ -151,36 +151,44 @@ const hasExternalStickerPerms = (channelId: string) => hasPermission(channelId, 
 const hasEmbedPerms = (channelId: string) => hasPermission(channelId, PermissionsBits.EMBED_LINKS);
 const hasAttachmentPerms = (channelId: string) => hasPermission(channelId, PermissionsBits.ATTACH_FILES);
 
-function makeBypassPatches(): Omit<Patch, "plugin"> {
-    const mapping: Array<{ func: string, predicate?: () => boolean; }> = [
-        { func: "canUseCustomStickersEverywhere", predicate: () => settings.store.enableStickerBypass },
-        { func: "canUseHighVideoUploadQuality", predicate: () => settings.store.enableStreamQualityBypass },
-        { func: "canStreamQuality", predicate: () => settings.store.enableStreamQualityBypass },
-        { func: "canUseClientThemes" },
-        { func: "canUsePremiumAppIcons" }
-    ];
-
-    return {
-        find: "canUseCustomStickersEverywhere:",
-        replacement: mapping.map(({ func, predicate }) => ({
-            match: new RegExp(String.raw`(?<=${func}:)\i`),
-            replace: "() => true",
-            predicate
-        }))
-    };
-}
-
 export default definePlugin({
     name: "FakeNitro",
     authors: [Devs.Arjix, Devs.D3SOX, Devs.Ven, Devs.fawn, Devs.captain, Devs.Nuckyz, Devs.AutumnVN, Devs.sadan],
     description: "Allows you to send fake emojis/stickers, use nitro themes, and stream in nitro quality",
+    tags: ["Emotes", "Appearance", "Customisation", "Chat"],
     dependencies: ["MessageEventsAPI"],
 
     settings,
 
     patches: [
-        // General bypass patches
-        makeBypassPatches(),
+        {
+            find: "canUseCustomStickersEverywhere:",
+            replacement: [
+                {
+                    match: /(?<=canUseCustomStickersEverywhere:function\(\i\)\{)/,
+                    replace: "return true;",
+                    predicate: () => settings.store.enableStickerBypass
+                },
+                {
+                    match: /(?<=canUseHighVideoUploadQuality:function\(\i\)\{)/,
+                    replace: "return true;",
+                    predicate: () => settings.store.enableStreamQualityBypass
+                },
+                {
+                    match: /(?<=canStreamQuality:function\(\i,\i\)\{)/,
+                    replace: "return true;",
+                    predicate: () => settings.store.enableStreamQualityBypass
+                },
+                {
+                    match: /(?<=canUseClientThemes:function\(\i\)\{)/,
+                    replace: "return true;"
+                },
+                {
+                    match: /(?<=canUsePremiumAppIcons:function\(\i\)\{)/,
+                    replace: "return true;"
+                }
+            ],
+        },
         // Patch the emoji picker in voice calls to not be bypassed by fake nitro
         {
             find: '.getByName("fork_and_knife")',
@@ -253,8 +261,8 @@ export default definePlugin({
             replacement: [
                 {
                     // Overwrite incoming connection settings proto with our local settings
-                    match: /function (\i)\((\i)\){(?=.*CONNECTION_OPEN:\1)/,
-                    replace: (m, funcName, props) => `${m}$self.handleProtoChange(${props}.userSettingsProto,${props}.user);`
+                    match: /(?<=CONNECTION_OPEN:function\((\i)\){)/,
+                    replace: (_, props) => `$self.handleProtoChange(${props}.userSettingsProto,${props}.user);`
                 },
                 {
                     // Overwrite non local proto changes with our local settings
@@ -351,7 +359,7 @@ export default definePlugin({
             predicate: () => settings.store.transformEmojis,
             replacement: {
                 // Add the fake nitro emoji notice
-                match: /(?<=emojiDescription:)(\i)(?<=\1=\i\((\i)\).+?)/,
+                match: /(?<=emojiDescription:)(\i)(?<=\1=\(\i=>\{.+?\}\)\((\i)\)[,;].+?)/,
                 replace: (_, reactNode, props) => `$self.addFakeNotice(${FakeNoticeType.Emoji},${reactNode},!!${props}?.fakeNitroNode?.fake)`
             }
         },

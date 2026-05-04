@@ -97,16 +97,6 @@ const settings = definePluginSettings({
     }
 });
 
-const settingsSectionMap: [string, string][] = [
-    ["VencordSettings", "vencord_main_panel"],
-    ["VencordPlugins", "vencord_plugins_panel"],
-    ["VencordThemes", "vencord_themes_panel"],
-    ["VencordUpdater", "vencord_updater_panel"],
-    ["VencordCloud", "vencord_cloud_panel"],
-    ["VencordBackupAndRestore", "vencord_backup_restore_panel"],
-    ["VencordPatchHelper", "vencord_patch_helper_panel"]
-];
-
 export default definePlugin({
     name: "Settings",
     description: "Adds Settings UI and debug info",
@@ -114,24 +104,16 @@ export default definePlugin({
     required: true,
 
     settings,
-    settingsSectionMap,
 
     patches: [
         {
             find: "#{intl::COPY_VERSION}",
             replacement: [
                 {
-                    match: /"text-xxs\/normal".{0,300}?(?=null!=(\i)&&(.{0,20}\i\.Text.{0,200}?,children:).{0,15}?("span"),({className:\i\.\i,children:\["Build Override: ",\1\.id\]\})\)\}\))/,
+                    match: /"text-xxs\/normal".{0,300}?(?=null!=(\i)&&(.{0,20}\i\.\i.{0,200}?,children:).{0,15}?("span"),({className:\i\.\i,children:\["Build Override: ",\1\.id\]\})\)\}\))/,
                     replace: (m, _buildOverride, makeRow, component, props) => {
                         props = props.replace(/children:\[.+\]/, "");
                         return `${m},$self.makeInfoElements(${component},${props}).map(e=>${makeRow}e})),`;
-                    }
-                },
-                {
-                    match: /"text-xs\/normal".{0,300}?\[\(0,\i\.jsxs?\)\((.{1,10}),(\{[^{}}]+\{.{0,20}className:\i.\i,.+?\})\)," "/,
-                    replace: (m, component, props) => {
-                        props = props.replace(/children:\[.+\]/, "");
-                        return `${m},$self.makeInfoElements(${component},${props})`;
                     }
                 },
                 {
@@ -145,13 +127,6 @@ export default definePlugin({
             replacement: {
                 match: /(\i)\.buildLayout\(\)(?=\.map)/,
                 replace: "$self.buildLayout($1)"
-            }
-        },
-        {
-            find: "getWebUserSettingFromSection",
-            replacement: {
-                match: /new Map\(\[(?=\[.{0,10}\.ACCOUNT,.{0,10}\.ACCOUNT_PANEL)/,
-                replace: "new Map([...$self.getSettingsSectionMappings(),"
             }
         }
     ],
@@ -182,10 +157,6 @@ export default definePlugin({
             icon: () => <Icon width={20} height={20} />,
             buildLayout: () => [panel]
         });
-    },
-
-    getSettingsSectionMappings() {
-        return settingsSectionMap;
     },
 
     buildLayout(originalLayoutBuilder: SettingsLayoutBuilder) {
@@ -273,7 +244,7 @@ export default definePlugin({
             belowNitro: "billing_section",
             aboveActivity: "activity_section",
             belowActivity: "activity_section",
-            bottom: "logout_section"
+            bottom: "utility_section"
         };
 
         const key = places[settingsLocation] ?? places.top;

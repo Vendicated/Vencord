@@ -61,10 +61,10 @@
     height: 1.25em;
 }
 
-.vc-settings-modal {
-    padding: 1.5em !important;
+.vc-settings-modal-root {
+    background: var(--background-base-low);
 }
 
-.vc-settings-modal-close {
-    float: right;
+.vc-settings-modal {
+    padding-bottom: 1em;
 }

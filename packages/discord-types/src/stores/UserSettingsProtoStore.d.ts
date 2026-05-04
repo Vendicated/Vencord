@@ -1,4 +1,7 @@
 import { FluxStore } from "..";
+import { StickerAnimationSetting, Theme, UIDensity } from "../../enums";
+
+export type UserStatus = "online" | "idle" | "dnd" | "invisible";
 
 export interface GuildFolder {
     guildIds: string[];
@@ -68,7 +71,7 @@ export interface TextAndImagesSettings {
     renderEmbeds: boolean;
     renderReactions: boolean;
     animateEmoji: boolean;
-    animateStickers: number;
+    animateStickers: StickerAnimationSetting;
     enableTtsCommand: boolean;
     messageDisplayCompact: boolean;
     explicitContentFilter: number;
@@ -122,7 +125,7 @@ export interface GameLibrarySettings {
 
 export interface StatusSettings {
     statusExpiresAtMs: string;
-    status: { status: string; } | null;
+    status: { value: UserStatus; } | null;
     showCurrentGame: boolean;
     statusCreatedAtMs: string;
 }
@@ -133,12 +136,12 @@ export interface LocalizationSettings {
 }
 
 export interface AppearanceSettings {
-    theme: number;
+    theme: Theme;
     developerMode: boolean;
     mobileRedesignDisabled: boolean;
     timestampHourCycle: number;
     launchPadMode: number;
-    uiDensity: number;
+    uiDensity: UIDensity;
     swipeRightToLeftMode: number;
     // TODO: type
     clientThemeSettings: any;

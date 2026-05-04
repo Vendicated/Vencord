@@ -78,6 +78,7 @@ export default definePlugin({
     name: "BetterSettings",
     description: "Enhances your settings-menu-opening experience",
     authors: [Devs.Kyuuhachi],
+    tags: ["Appearance", "Customisation", "Organisation"],
     settings,
 
     start() {
@@ -154,7 +155,7 @@ export default definePlugin({
             predicate: () => settings.store.organizeMenu,
             replacement: [
                 {
-                    match: /children:\[(\i),(?<=\1=.{0,30}\.openUserSettings.+?)/,
+                    match: /children:\[(\i),(?<=\1=(?:function|.{0,30}\.openUserSettings).+?)/, // TODO .{0,30}\.openUserSettings is stable compat
                     replace: "children:[$self.transformSettingsEntries($1),",
                 },
             ]

@@ -70,6 +70,7 @@ const userContextPatch: NavContextMenuPatchCallback = (children, { user }: { use
 export default definePlugin({
     name: "ReviewDB",
     description: "Review other users (Adds a new settings to profiles)",
+    tags: ["Friends", "Servers"],
     authors: [Devs.mantikafasi, Devs.Ven],
 
     settings,
@@ -92,7 +93,8 @@ export default definePlugin({
         },
         {
             // User popout
-            find: /\.POPOUT,onClose:\i}\),nicknameIcons:.+?\.isProvisional/,
+            // Same find as ShowConnections
+            find: "#{intl::USER_PROFILE_FRIEND_REQUEST_TOAST}",
             replacement: {
                 match: /user:(\i),widgets:.{0,100}?\}\),/,
                 replace: "$&$self.renderProfileComponent({user:$1}),"
