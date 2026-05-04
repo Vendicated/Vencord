@@ -10,9 +10,10 @@ import { ImageIcon } from "@components/Icons";
 import { copyToClipboard } from "@utils/clipboard";
 import { Devs } from "@utils/constants";
 import { getCurrentChannel, getCurrentGuild, openImageModal } from "@utils/discord";
+import { isTruthy } from "@utils/guards";
 import { classes } from "@utils/misc";
 import definePlugin, { OptionType } from "@utils/types";
-import { PopoutProps } from "@vencord/discord-types";
+import { Guild, PopoutProps, Role } from "@vencord/discord-types";
 import { findByCodeLazy, findByPropsLazy, findCssClassesLazy } from "@webpack";
 import { GuildRoleStore, Menu, PermissionStore, Popout, useRef } from "@webpack/common";
 import { ComponentType } from "react";
@@ -85,6 +86,90 @@ type RoleMemberPopout = ComponentType<RoleMemberPopoutProps>;
 
 let RoleMemberPopout: RoleMemberPopout = () => null;
 
+export function buildExtraRoleContextMenuItems(role: Role, guild: Guild, popoutRef?: React.RefObject<any>) {
+    if (!role) return { before: [], after: [] };
+
+    const before = [
+        PermissionStore.getGuildPermissionProps(guild).canManageRoles && (
+            <Menu.MenuItem
+                key="vc-edit-role"
+                id="vc-edit-role"
+                label="Edit Role"
+                action={async () => {
+                    await GuildSettingsActions.open(guild.id, "ROLES");
+                    GuildSettingsActions.selectRole(role.id);
+                }}
+                icon={PencilIcon}
+            />
+        ),
+        role.colorString && (
+            <Menu.MenuItem
+                key="vc-copy-role-color"
+                id="vc-copy-role-color"
+                label="Copy Role Color"
+                action={() => copyToClipboard(role.colorString!)}
+                icon={AppearanceIcon}
+            />
+        )
+    ].filter(isTruthy);
+
+    const after = [
+        role.icon && (
+            <Menu.MenuItem
+                id="vc-view-role-icon"
+                label="View Role Icon"
+                action={() => {
+                    openImageModal({
+                        url: `${location.protocol}//${window.GLOBAL_ENV.CDN_HOST}/role-icons/${role.id}/${role.icon}.${settings.store.roleIconFileFormat}`,
+                        height: 128,
+                        width: 128
+                    });
+                }}
+                icon={ImageIcon}
+            />
+        ),
+        popoutRef && (
+            <Menu.MenuItem
+                key="vc-view-role-members"
+                id="vc-view-role-members"
+                label="View Role Members"
+                render={() => (
+                    <Popout
+                        position="right"
+                        align="center"
+                        targetElementRef={popoutRef}
+                        preload={() => loadRoleMembers(guild.id, role.id)}
+                        renderPopout={popoutProps => (
+                            <RoleMemberPopout
+                                popoutProps={popoutProps}
+                                guildId={guild.id}
+                                channelId={getCurrentChannel()!.id}
+                                roleId={role.id}
+                            />
+                        )}
+                    >
+                        {popoutProps => (
+                            <div
+                                className={classes(MenuItemClasses.item, MenuItemClasses.labelContainer, MenuItemClasses.colorDefault)}
+                                ref={popoutRef}
+                                role="menuitem"
+                                {...popoutProps}
+                            >
+                                <div className={MenuItemClasses.label}>View Role Members</div>
+                                <div className={MenuItemClasses.iconContainer}>
+                                    <RoleMembersIcon />
+                                </div>
+                            </div>
+                        )}
+                    </Popout>
+                )}
+            />
+        )
+    ].filter(isTruthy);
+
+    return { before, after };
+}
+
 export default definePlugin({
     name: "BetterRoleContext",
     description: "Adds options to copy role color / edit role / view role icon when right clicking roles in the user profile",
@@ -121,81 +206,9 @@ export default definePlugin({
             const role = GuildRoleStore.getRole(guild.id, id);
             if (!role) return;
 
-            if (role.colorString) {
-                children.unshift(
-                    <Menu.MenuItem
-                        id="vc-copy-role-color"
-                        label="Copy Role Color"
-                        action={() => copyToClipboard(role.colorString!)}
-                        icon={AppearanceIcon}
-                    />
-                );
-            }
-
-            if (PermissionStore.getGuildPermissionProps(guild).canManageRoles) {
-                children.unshift(
-                    <Menu.MenuItem
-                        id="vc-edit-role"
-                        label="Edit Role"
-                        action={async () => {
-                            await GuildSettingsActions.open(guild.id, "ROLES");
-                            GuildSettingsActions.selectRole(id);
-                        }}
-                        icon={PencilIcon}
-                    />
-                );
-            }
-
-            if (role.icon) {
-                children.push(
-                    <Menu.MenuItem
-                        id="vc-view-role-icon"
-                        label="View Role Icon"
-                        action={() => {
-                            openImageModal({
-                                url: `${location.protocol}//${window.GLOBAL_ENV.CDN_HOST}/role-icons/${role.id}/${role.icon}.${settings.store.roleIconFileFormat}`,
-                                height: 128,
-                                width: 128
-                            });
-                        }}
-                        icon={ImageIcon}
-                    />
-
-                );
-            }
-
-            children.push(
-                <Menu.MenuItem id="vc-view-role-members" label="View Role Members" render={() => (
-                    <Popout
-                        position="right"
-                        align="center"
-                        targetElementRef={popoutRef}
-                        preload={() => loadRoleMembers(guild.id, id)}
-                        renderPopout={popoutProps => (
-                            <RoleMemberPopout
-                                popoutProps={popoutProps}
-                                guildId={guild.id}
-                                channelId={getCurrentChannel()!.id}
-                                roleId={id}
-                            />
-                        )}
-                    >
-                        {popoutProps => (
-                            <div
-                                className={classes(MenuItemClasses.item, MenuItemClasses.labelContainer, MenuItemClasses.colorDefault)}
-                                ref={popoutRef}
-                                role="menuitem"
-                                {...popoutProps}
-                            >
-                                <div className={MenuItemClasses.label}>View Role Members</div>
-                                <div className={MenuItemClasses.iconContainer}>
-                                    <RoleMembersIcon />
-                                </div>
-                            </div>
-                        )}
-                    </Popout>
-                )} />
-            );
+            const { before, after } = buildExtraRoleContextMenuItems(role, guild, popoutRef);
+            children.unshift(...before);
+            children.push(...after);
         }
     }
 });
