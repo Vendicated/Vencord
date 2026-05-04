@@ -18,7 +18,7 @@
 
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Flex } from "@components/Flex";
-import { InfoIcon, OwnerCrownIcon, RightArrow } from "@components/Icons";
+import { InfoIcon, OwnerCrownIcon } from "@components/Icons";
 import { buildExtraRoleContextMenuItems } from "@plugins/betterRoleContext";
 import { cl, getGuildPermissionSpecMap, loadGetGuildPermissionSpecMap } from "@plugins/permissionsViewer/utils";
 import { copyToClipboard } from "@utils/clipboard";
@@ -214,6 +214,14 @@ function IDIcon() {
     );
 }
 
+function ViewAsRoleIcon() {
+    return (
+        <svg width="18" height="18" viewBox="0 0 24 24">
+            <path fill="currentColor" d="M20.7 12.7a1 1 0 0 0 0-1.4l-5-5a1 1 0 1 0-1.4 1.4l3.29 3.3H4a1 1 0 1 0 0 2h13.59l-3.3 3.3a1 1 0 0 0 1.42 1.4l5-5Z" />
+        </svg>
+    );
+}
+
 function RoleContextMenu({ guild, roleId, onClose }: { guild: Guild; roleId: string; onClose: () => void; }) {
     const popoutRef = useRef(null);
     const role = GuildRoleStore.getRole(guild.id, roleId);
@@ -240,7 +248,7 @@ function RoleContextMenu({ guild, roleId, onClose }: { guild: Guild; roleId: str
                 <Menu.MenuItem
                     id={cl("view-as-role")}
                     label={getIntlMessage("VIEW_AS_ROLE")}
-                    icon={() => <RightArrow height={18} width={18} />}
+                    icon={ViewAsRoleIcon}
                     action={() => {
                         const role = GuildRoleStore.getRole(guild.id, roleId);
                         if (!role) return;

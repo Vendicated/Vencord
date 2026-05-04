@@ -116,6 +116,7 @@ export function buildExtraRoleContextMenuItems(role: Role, guild: Guild, popoutR
     const after = [
         role.icon && (
             <Menu.MenuItem
+                key="vc-view-role-icon"
                 id="vc-view-role-icon"
                 label="View Role Icon"
                 action={() => {
