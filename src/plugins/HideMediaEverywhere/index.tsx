@@ -1,14 +1,24 @@
 /*
- * Vencord userplugin
- * Right-click a message → "Hide this media" hides that specific GIF URL everywhere it appears.
- * Supports: chat messages, DMs, and search results panel (NO_LIST___<messageId>).
+ * Vencord, a modification for Discord's desktop app
+ * Copyright (c) 2026 Vendicated and contributors
  *
- * Vesktop/custom Vencord path:
- * C:\Users\tarkan\Documents\Vencord\src\userplugins\HideMediaEverywhere\index.tsx
- */
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+*/
 
 import { findGroupChildrenByChildId, NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { definePluginSettings } from "@api/Settings";
+import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { FluxDispatcher, Forms, Menu, MessageStore, React } from "@webpack/common";
 
@@ -97,7 +107,7 @@ const settings = definePluginSettings({
     }
 });
 
-// ─── Selectors (constant strings, defined once) ───────────────────────────────
+// these selectors find message elements and media inside them
 const CHAT_MSG_PREFIX = "chat-messages___chat-messages-";
 const NO_LIST_PREFIX  = "NO_LIST___";
 
@@ -120,12 +130,12 @@ const EMBED_SELECTORS = [
     "[class*='visualMediaItemContainer']",
 ].join(",");
 
-// ─── URL normalization (with simple cache) ────────────────────────────────────
-// Simple capped cache — evicts oldest entry when full (Map preserves insertion order)
+// normalize URLs so the same image always matches even if Discord gives it a slightly different URL.
+// we cache results so we're not re-parsing the same URLs over and over
 const NORM_CACHE_MAX = 500;
 const normCache = new Map<string, string>();
 
-/** Evicts the oldest entry from a Map (Maps preserve insertion order). */
+// when a cache gets full, just drop the oldest entry (Maps keep insertion order so this works)
 function evictOldest(map: Map<any, any>) {
     map.delete(map.keys().next().value);
 }
@@ -136,9 +146,9 @@ function normalizeMediaUrl(url: string): string {
     try {
         const parsed = new URL(url);
         const parts = parsed.pathname.split("/").filter(Boolean);
-        // Discord attachment paths: /attachments/{channel_id}/{attachment_id}/{filename}
-        // Drop the attachment_id (index 2) so the same file sent multiple times in the
-        // same channel always matches, but image.png in a different channel does not.
+        // Discord attachment URLs look like /attachments/{channel_id}/{attachment_id}/{filename}
+        // the attachment_id changes every time the same file is re-uploaded, so we strip it.
+        // this way "image.png" sent twice in the same channel still matches.
         if (parts[0] === "attachments" && parts.length >= 4) parts.splice(2, 1);
         n = (parsed.host + "/" + parts.join("/")).toLowerCase();
     } catch {
@@ -153,7 +163,7 @@ function normalizeUrls(urls: string[]): string[] {
     return urls.map(normalizeMediaUrl);
 }
 
-// ─── Blocked URL cache ────────────────────────────────────────────────────────
+// in-memory set of blocked URLs so we're not parsing settings strings on every message
 let blockedUrlCache = new Set<string>();
 
 function rebuildBlockedCache() {
@@ -185,12 +195,11 @@ function unblockUrls(rawUrls: string[]) {
     const next = new Set(blockedUrlCache);
     for (const u of normalizeUrls(rawUrls)) next.delete(u);
     saveAndSync(next);
-    // Only need to revisit already-hidden messages, not the whole chat
+    // when unblocking we only need to re-check messages that are already hidden, not everything
     scanHiddenMessages();
 }
 
-// ─── Message data helpers ─────────────────────────────────────────────────────
-// Cap search cache to avoid unbounded growth across many searches
+// search results don't go through MessageStore, so we cache them ourselves when we intercept the XHR
 const SEARCH_CACHE_MAX = 200;
 const searchMessageCache = new Map<string, any>();
 
@@ -527,7 +536,7 @@ let observer: MutationObserver | null = null;
 export default definePlugin({
     name: "HideMediaEverywhere",
     description: "Right-click a GIF/media message to hide that specific media URL everywhere it appears.",
-    authors: [{ name: "Tarkan", id: 738215409559404562n }],
+    authors: [Devs.t6rtar],
 
     settings,
 
