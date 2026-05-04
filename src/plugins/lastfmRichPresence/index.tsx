@@ -174,6 +174,11 @@ const settings = definePluginSettings({
         type: OptionType.BOOLEAN,
         default: true,
     },
+    showAlbumCover: {
+        description: "Show album cover. Disabling this will display a placeholder. Useful if your Music has inappropriate art",
+        type: OptionType.BOOLEAN,
+        default: true,
+    }
 });
 
 export default definePlugin({
@@ -250,7 +255,7 @@ export default definePlugin({
     },
 
     getLargeImage(track: TrackData): string | undefined {
-        if (track.imageUrl && !track.imageUrl.includes(LASTFM_PLACEHOLDER_IMAGE_HASH))
+        if (settings.store.showAlbumCover && track.imageUrl && !track.imageUrl.includes(LASTFM_PLACEHOLDER_IMAGE_HASH))
             return track.imageUrl;
 
         if (settings.store.missingArt === "placeholder")
