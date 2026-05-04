@@ -22,8 +22,8 @@ import { ImageIcon } from "@components/Icons";
 import { Devs } from "@utils/constants";
 import { openImageModal } from "@utils/discord";
 import definePlugin, { OptionType } from "@utils/types";
+import type { Channel, Guild, User } from "@vencord/discord-types";
 import { GuildMemberStore, IconUtils, Menu } from "@webpack/common";
-import type { Channel, Guild, User } from "discord-types/general";
 
 
 interface UserContextProps {
@@ -71,9 +71,14 @@ const openAvatar = (url: string) => openImage(url, 512, 512);
 const openBanner = (url: string) => openImage(url, 1024);
 
 function openImage(url: string, width: number, height?: number) {
-    const format = url.startsWith("/") ? "png" : settings.store.format;
-
     const u = new URL(url, window.location.href);
+
+    const format = url.startsWith("/")
+        ? "png"
+        : u.searchParams.get("animated") === "true"
+            ? "gif"
+            : settings.store.format;
+
     u.searchParams.set("size", settings.store.imgSize);
     u.pathname = u.pathname.replace(/\.(png|jpe?g|webp)$/, `.${format}`);
     url = u.toString();
@@ -175,7 +180,8 @@ export default definePlugin({
     name: "ViewIcons",
     authors: [Devs.Ven, Devs.TheKodeToad, Devs.Nuckyz, Devs.nyx],
     description: "Makes avatars and banners in user profiles clickable, adds View Icon/Banner entries in the user, server and group channel context menu.",
-    tags: ["ImageUtilities"],
+    tags: ["Media", "Servers", "Appearance"],
+    searchTerms: ["ImageUtilities"],
     dependencies: ["DynamicImageModalAPI"],
 
     settings,
@@ -190,21 +196,20 @@ export default definePlugin({
     },
 
     patches: [
-        // Avatar component used in User DMs "User Profile" popup in the right and Profiles Modal pfp
+        // Avatar component used in User DMs "User Profile" popup in the right and User Profile Modal pfp
         {
-            find: ".overlay:void 0,status:",
+            find: "return{avatarProps:{",
             replacement: {
-                match: /avatarSrc:(\i),eventHandlers:(\i).+?"div",{...\2,/,
-                replace: "$&style:{cursor:\"pointer\"},onClick:()=>{$self.openAvatar($1)},"
-            },
-            all: true
+                match: /(?<=avatarProps:(\i),eventHandlers:(\i).{0,50}?)return null==/,
+                replace: 'Object.assign($2,{style:{cursor:"pointer"},onClick:()=>$self.openAvatar($1.src)});$&',
+            }
         },
         // Banners
         {
             find: 'backgroundColor:"COMPLETE"',
             replacement: {
-                match: /(\.banner,.+?),style:{(?=.+?backgroundImage:null!=(\i)\?"url\("\.concat\(\2,)/,
-                replace: (_, rest, bannerSrc) => `${rest},onClick:()=>${bannerSrc}!=null&&$self.openBanner(${bannerSrc}),style:{cursor:${bannerSrc}!=null?"pointer":void 0,`
+                match: /(overflow:"visible",.{0,125}?!1\),)style:{(?=.+?backgroundImage:null!=(\i)\?`url\(\$\{\2\}\))/,
+                replace: (_, rest, bannerSrc) => `${rest}onClick:()=>${bannerSrc}!=null&&$self.openBanner(${bannerSrc}),style:{cursor:${bannerSrc}!=null?"pointer":void 0,`
             }
         },
         // Group DMs top small & large icon
@@ -218,18 +223,18 @@ export default definePlugin({
         },
         // User DMs top small icon
         {
-            find: ".cursorPointer:null,children",
+            find: ".channel.getRecipientId(),",
             replacement: {
-                match: /.Avatar,.+?src:(.+?\))(?=[,}])/,
-                replace: (m, avatarUrl) => `${m},onClick:()=>$self.openAvatar(${avatarUrl})`
+                match: /(?=,src:(\i.getAvatarURL\(.+?[)]))/,
+                replace: (_, avatarUrl) => `,onClick:()=>$self.openAvatar(${avatarUrl})`
             }
         },
         // User Dms top large icon
         {
-            find: 'experimentLocation:"empty_messages"',
+            find: ".EMPTY_GROUP_DM)",
             replacement: {
-                match: /.Avatar,.+?src:(.+?\))(?=[,}])/,
-                replace: (m, avatarUrl) => `${m},onClick:()=>$self.openAvatar(${avatarUrl})`
+                match: /(?<=SIZE_80,)(?=src:(.+?\))[,}])/,
+                replace: (_, avatarUrl) => `onClick:()=>$self.openAvatar(${avatarUrl}),`
             }
         }
     ]

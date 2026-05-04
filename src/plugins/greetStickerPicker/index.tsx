@@ -19,16 +19,8 @@
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { findLazy } from "@webpack";
+import { Channel, Message } from "@vencord/discord-types";
 import { ContextMenuApi, FluxDispatcher, Menu, MessageActions } from "@webpack/common";
-import { Channel, Message } from "discord-types/general";
-
-interface Sticker {
-    id: string;
-    format_type: number;
-    description: string;
-    name: string;
-}
 
 enum GreetMode {
     Greet = "Greet",
@@ -49,7 +41,7 @@ const settings = definePluginSettings({
     unholyMultiGreetEnabled?: boolean;
 }>();
 
-const WELCOME_STICKERS = findLazy(m => Array.isArray(m) && m[0]?.name === "Wave");
+let WELCOME_STICKERS: any;
 
 function greet(channel: Channel, message: Message, stickers: string[]) {
     const options = MessageActions.getSendMessageOptionsForReply({
@@ -160,6 +152,7 @@ function GreetMenu({ channel, message }: { message: Message, channel: Channel; }
 export default definePlugin({
     name: "GreetStickerPicker",
     description: "Allows you to use any greet sticker instead of only the random one by right-clicking the 'Wave to say hi!' button",
+    tags: ["Emotes", "Customisation"],
     authors: [Devs.Ven],
 
     settings,
@@ -168,11 +161,22 @@ export default definePlugin({
         {
             find: "#{intl::WELCOME_CTA_LABEL}",
             replacement: {
-                match: /innerClassName:\i\.welcomeCTAButton,(?<={channel:\i,message:\i}=(\i).{0,400}?)/,
+                match: /className:\i\.\i,(?=.{0,40}?"sticker")(?<={channel:\i,message:\i}=(\i).+?)/,
                 replace: "$&onContextMenu:(vcEvent)=>$self.pickSticker(vcEvent, $1),"
+            }
+        },
+        {
+            find: '"Wumpus waves hello"',
+            replacement: {
+                match: /(?<==)(?=\[{id:"749054660769218631",format_type:\d,description:"Wumpus waves hello")/,
+                replace: "$self.WELCOME_STICKERS="
             }
         }
     ],
+
+    set WELCOME_STICKERS(value: any) {
+        WELCOME_STICKERS = value;
+    },
 
     pickSticker(
         event: React.UIEvent,

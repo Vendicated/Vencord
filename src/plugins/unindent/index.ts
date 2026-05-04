@@ -16,21 +16,22 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { addPreEditListener, addPreSendListener, MessageObject, removePreEditListener, removePreSendListener } from "@api/MessageEvents";
+import { MessageObject } from "@api/MessageEvents";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 
 export default definePlugin({
     name: "Unindent",
     description: "Trims leading indentation from codeblocks",
+    tags: ["Chat", "Utility"],
     authors: [Devs.Ven],
-    dependencies: ["MessageEventsAPI"],
+
     patches: [
         {
             find: "inQuote:",
             replacement: {
                 match: /,content:([^,]+),inQuote/,
-                replace: (_, content) => `,content:Vencord.Plugins.plugins.Unindent.unindent(${content}),inQuote`
+                replace: (_, content) => `,content:$self.unindent(${content}),inQuote`
             }
         }
     ],
@@ -55,13 +56,11 @@ export default definePlugin({
         });
     },
 
-    start() {
-        this.preSend = addPreSendListener((_, msg) => this.unindentMsg(msg));
-        this.preEdit = addPreEditListener((_cid, _mid, msg) => this.unindentMsg(msg));
+    onBeforeMessageSend(_, msg) {
+        return this.unindentMsg(msg);
     },
 
-    stop() {
-        removePreSendListener(this.preSend);
-        removePreEditListener(this.preEdit);
+    onBeforeMessageEdit(_cid, _mid, msg) {
+        return this.unindentMsg(msg);
     }
 });

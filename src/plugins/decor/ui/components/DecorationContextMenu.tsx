@@ -5,11 +5,11 @@
  */
 
 import { CopyIcon, DeleteIcon } from "@components/Icons";
-import { Alerts, Clipboard, ContextMenuApi, Menu, UserStore } from "webpack/common";
-
-import { Decoration } from "../../lib/api";
-import { useCurrentUserDecorationsStore } from "../../lib/stores/CurrentUserDecorationsStore";
-import { cl } from "../";
+import { Decoration } from "@plugins/decor/lib/api";
+import { useCurrentUserDecorationsStore } from "@plugins/decor/lib/stores/CurrentUserDecorationsStore";
+import { cl } from "@plugins/decor/ui";
+import { copyToClipboard } from "@utils/clipboard";
+import { Alerts, ContextMenuApi, Menu, UserStore } from "@webpack/common";
 
 export default function DecorationContextMenu({ decoration }: { decoration: Decoration; }) {
     const { delete: deleteDecoration } = useCurrentUserDecorationsStore();
@@ -23,7 +23,7 @@ export default function DecorationContextMenu({ decoration }: { decoration: Deco
             id={cl("decoration-context-menu-copy-hash")}
             label="Copy Decoration Hash"
             icon={CopyIcon}
-            action={() => Clipboard.copy(decoration.hash)}
+            action={() => copyToClipboard(decoration.hash)}
         />
         {decoration.authorId === UserStore.getCurrentUser().id &&
             <Menu.MenuItem

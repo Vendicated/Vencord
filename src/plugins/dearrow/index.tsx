@@ -121,6 +121,7 @@ function DearrowButton({ component }: { component: Component<Props>; }) {
                         height="24px"
                         viewBox="0 0 36 36"
                         aria-label="Toggle Dearrow"
+                        className="vc-dearrow-icon"
                     >
                         <path
                             fill="#1213BD"
@@ -170,6 +171,7 @@ const settings = definePluginSettings({
 export default definePlugin({
     name: "Dearrow",
     description: "Makes YouTube embed titles and thumbnails less sensationalist, powered by Dearrow",
+    tags: ["Media", "Utility"],
     authors: [Devs.Ven],
     settings,
 

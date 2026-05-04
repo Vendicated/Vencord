@@ -55,7 +55,7 @@ function FriendsIndicator() {
             width: "100%",
             fontSize: "12px",
             fontWeight: "600",
-            color: "var(--header-secondary)",
+            color: "var(--text-default)",
             textTransform: "uppercase",
             textAlign: "center",
         }}>
@@ -79,7 +79,7 @@ function ServersIndicator() {
             width: "100%",
             fontSize: "12px",
             fontWeight: "600",
-            color: "var(--header-secondary)",
+            color: "var(--text-default)",
             textTransform: "uppercase",
             textAlign: "center",
         }}>
@@ -91,6 +91,7 @@ function ServersIndicator() {
 export default definePlugin({
     name: "ServerListIndicators",
     description: "Add online friend count or server count in the server list",
+    tags: ["Servers", "Appearance"],
     authors: [Devs.dzshn],
     dependencies: ["ServerListAPI"],
 

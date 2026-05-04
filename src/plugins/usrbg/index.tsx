@@ -17,12 +17,9 @@
 */
 
 import { definePluginSettings } from "@api/Settings";
-import { enableStyle } from "@api/Styles";
-import { Link } from "@components/Link";
+import { LinkButton } from "@components/Button";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-
-import style from "./index.css?managed";
 
 const API_URL = "https://usrbg.is-hardly.online/users";
 
@@ -53,13 +50,14 @@ const settings = definePluginSettings({
 export default definePlugin({
     name: "USRBG",
     description: "Displays user banners from USRBG, allowing anyone to get a banner without Nitro",
+    tags: ["Appearance", "Customisation"],
     authors: [Devs.AutumnVN, Devs.katlyn, Devs.pylix, Devs.TheKodeToad],
     settings,
     patches: [
         {
-            find: '.banner)==null?"COMPLETE"',
+            find: ':"SHOULD_LOAD");',
             replacement: {
-                match: /(?<=void 0:)\i.getPreviewBanner\(\i,\i,\i\)/,
+                match: /\i(?:\?)?.getPreviewBanner\(\i,\i,\i\)(?=.{0,100}"COMPLETE")/,
                 replace: "$self.patchBannerUrl(arguments[0])||$&"
 
             }
@@ -73,6 +71,14 @@ export default definePlugin({
                     replace: "$1.style=$self.getVoiceBackgroundStyles($1);"
                 }
             ]
+        },
+        {
+            find: '"VideoBackground-web"',
+            predicate: () => settings.store.voiceBackground,
+            replacement: {
+                match: /backgroundColor:.{0,25},\{style:(?=\i\?)/,
+                replace: "$&$self.userHasBackground(arguments[0]?.userId)?null:",
+            }
         }
     ],
 
@@ -80,12 +86,14 @@ export default definePlugin({
 
     settingsAboutComponent: () => {
         return (
-            <Link href="https://github.com/AutumnVN/usrbg#how-to-request-your-own-usrbg-banner">CLICK HERE TO GET YOUR OWN BANNER</Link>
+            <LinkButton href="https://github.com/AutumnVN/usrbg#how-to-request-your-own-usrbg-banner" variant="primary">
+                Get your own USRBG banner
+            </LinkButton>
         );
     },
 
     getVoiceBackgroundStyles({ className, participantUserId }: any) {
-        if (className.includes("tile_")) {
+        if (className.includes("tile")) {
             if (this.userHasBackground(participantUserId)) {
                 return {
                     backgroundImage: `url(${this.getImageUrl(participantUserId)})`,
@@ -115,8 +123,6 @@ export default definePlugin({
     },
 
     async start() {
-        enableStyle(style);
-
         const res = await fetch(API_URL);
         if (res.ok) {
             this.data = await res.json();

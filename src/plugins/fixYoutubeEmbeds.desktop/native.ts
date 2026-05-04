@@ -9,7 +9,7 @@ import { app } from "electron";
 
 app.on("browser-window-created", (_, win) => {
     win.webContents.on("frame-created", (_, { frame }) => {
-        frame.once("dom-ready", () => {
+        frame?.once("dom-ready", () => {
             if (frame.url.startsWith("https://www.youtube.com/")) {
                 const settings = RendererSettings.store.plugins?.FixYoutubeEmbeds;
                 if (!settings?.enabled) return;

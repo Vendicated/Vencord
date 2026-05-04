@@ -16,16 +16,20 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { isPluginEnabled } from "@api/PluginManager";
 import { Settings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
+import PermissionsViewerPlugin from "@plugins/permissionsViewer";
+import openRolesAndUsersPermissionsModal from "@plugins/permissionsViewer/components/RolesAndUsersPermissions";
+import { sortPermissionOverwrites } from "@plugins/permissionsViewer/utils";
+import { classes } from "@utils/misc";
 import { formatDuration } from "@utils/text";
-import { findByPropsLazy, findComponentByCodeLazy } from "@webpack";
+import type { Channel, RoleOrUserPermission } from "@vencord/discord-types";
+import { findByPropsLazy, findComponentByCodeLazy, findCssClassesLazy } from "@webpack";
 import { EmojiStore, FluxDispatcher, GuildMemberStore, GuildStore, Parser, PermissionsBits, PermissionStore, SnowflakeUtils, Text, Timestamp, Tooltip, useEffect, useState } from "@webpack/common";
-import type { Channel } from "discord-types/general";
+import { ComponentType } from "react";
 
-import openRolesAndUsersPermissionsModal, { PermissionType, RoleOrUserPermission } from "../../permissionsViewer/components/RolesAndUsersPermissions";
-import { sortPermissionOverwrites } from "../../permissionsViewer/utils";
-import { settings } from "..";
+import { cl, settings } from "..";
 
 const enum SortOrderTypes {
     LATEST_ACTIVITY = 0,
@@ -41,22 +45,6 @@ const enum ForumLayoutTypes {
 interface DefaultReaction {
     emojiId: string | null;
     emojiName: string | null;
-}
-
-interface Tag {
-    id: string;
-    name: string;
-    emojiId: string | null;
-    emojiName: string | null;
-    moderated: boolean;
-}
-
-interface ExtendedChannel extends Channel {
-    defaultThreadRateLimitPerUser?: number;
-    defaultSortOrder?: SortOrderTypes | null;
-    defaultForumLayout?: ForumLayoutTypes;
-    defaultReactionEmoji?: DefaultReaction | null;
-    availableTags?: Array<Tag>;
 }
 
 const enum ChannelTypes {
@@ -77,11 +65,11 @@ const enum ChannelFlags {
     REQUIRE_TAG = 1 << 4
 }
 
-
-const ChatScrollClasses = findByPropsLazy("auto", "managedReactiveScroller");
-const ChatClasses = findByPropsLazy("chat", "content", "noChat", "chatContent");
-const ChannelBeginHeader = findComponentByCodeLazy("#{intl::ROLE_REQUIRED_SINGLE_USER_MESSAGE}");
+const ChatScrollClasses = findCssClassesLazy("auto", "managedReactiveScroller", "customTheme");
 const TagComponent = findComponentByCodeLazy("#{intl::FORUM_TAG_A11Y_FILTER_BY_TAG}");
+
+let ChannelBeginHeader: ComponentType<any> = () => null;
+export const setChannelBeginHeader = v => ChannelBeginHeader = v;
 
 const EmojiParser = findByPropsLazy("convertSurrogateToName");
 const EmojiUtils = findByPropsLazy("getURL", "getEmojiColors");
@@ -113,7 +101,7 @@ const VideoQualityModesToNames = {
 // Icon from the modal when clicking a message link you don't have access to view
 const HiddenChannelLogo = "/assets/433e3ec4319a9d11b0cbe39342614982.svg";
 
-function HiddenChannelLockScreen({ channel }: { channel: ExtendedChannel; }) {
+function HiddenChannelLockScreen({ channel }: { channel: Channel; }) {
     const { defaultAllowedUsersAndRolesDropdownState } = settings.use(["defaultAllowedUsersAndRolesDropdownState"]);
     const [permissions, setPermissions] = useState<RoleOrUserPermission[]>([]);
 
@@ -140,7 +128,7 @@ function HiddenChannelLockScreen({ channel }: { channel: ExtendedChannel; }) {
     useEffect(() => {
         const membersToFetch: Array<string> = [];
 
-        const guildOwnerId = GuildStore.getGuild(guild_id).ownerId;
+        const guildOwnerId = GuildStore.getGuild(guild_id)?.ownerId;
         if (!GuildMemberStore.getMember(guild_id, guildOwnerId)) membersToFetch.push(guildOwnerId);
 
         Object.values(permissionOverwrites).forEach(({ type, id: userId }) => {
@@ -159,7 +147,7 @@ function HiddenChannelLockScreen({ channel }: { channel: ExtendedChannel; }) {
 
         if (Settings.plugins.PermissionsViewer.enabled) {
             setPermissions(sortPermissionOverwrites(Object.values(permissionOverwrites).map(overwrite => ({
-                type: overwrite.type as PermissionType,
+                type: overwrite.type,
                 id: overwrite.id,
                 overwriteAllow: overwrite.allow,
                 overwriteDeny: overwrite.deny
@@ -168,19 +156,19 @@ function HiddenChannelLockScreen({ channel }: { channel: ExtendedChannel; }) {
     }, [channelId]);
 
     return (
-        <div className={ChatScrollClasses.auto + " " + ChatScrollClasses.customTheme + " " + ChatClasses.chatContent + " " + "shc-lock-screen-outer-container"}>
-            <div className="shc-lock-screen-container">
-                <img className="shc-lock-screen-logo" src={HiddenChannelLogo} />
+        <div className={classes(ChatScrollClasses.auto, ChatScrollClasses.customTheme, ChatScrollClasses.managedReactiveScroller)}>
+            <div className={cl("container")}>
+                <img className={cl("logo")} src={HiddenChannelLogo} />
 
-                <div className="shc-lock-screen-heading-container">
-                    <Text variant="heading-xxl/bold">This is a {!PermissionStore.can(PermissionsBits.VIEW_CHANNEL, channel) ? "hidden" : "locked"} {ChannelTypesToChannelNames[type]} channel.</Text>
+                <div className={cl("heading-container")}>
+                    <Text variant="heading-xxl/bold">This is a {!PermissionStore.can(PermissionsBits.VIEW_CHANNEL, channel) ? "hidden" : "locked"} {ChannelTypesToChannelNames[type]} channel</Text>
                     {channel.isNSFW() &&
                         <Tooltip text="NSFW">
                             {({ onMouseLeave, onMouseEnter }) => (
                                 <svg
                                     onMouseLeave={onMouseLeave}
                                     onMouseEnter={onMouseEnter}
-                                    className="shc-lock-screen-heading-nsfw-icon"
+                                    className={cl("heading-nsfw-icon")}
                                     width="32"
                                     height="32"
                                     viewBox="0 0 48 48"
@@ -202,7 +190,7 @@ function HiddenChannelLockScreen({ channel }: { channel: ExtendedChannel; }) {
                 )}
 
                 {channel.isForumChannel() && topic && topic.length > 0 && (
-                    <div className="shc-lock-screen-topic-container">
+                    <div className={cl("topic-container")}>
                         {Parser.parseTopic(topic, false, { channelId })}
                     </div>
                 )}
@@ -213,7 +201,6 @@ function HiddenChannelLockScreen({ channel }: { channel: ExtendedChannel; }) {
                         <Timestamp timestamp={new Date(SnowflakeUtils.extractTimestamp(lastMessageId))} />
                     </Text>
                 }
-
                 {lastPinTimestamp &&
                     <Text variant="text-md/normal">Last message pin: <Timestamp timestamp={new Date(lastPinTimestamp)} /></Text>
                 }
@@ -247,7 +234,7 @@ function HiddenChannelLockScreen({ channel }: { channel: ExtendedChannel; }) {
                     <Text variant="text-md/normal">Default sort order: {SortOrderTypesToNames[defaultSortOrder]}</Text>
                 }
                 {defaultReactionEmoji != null &&
-                    <div className="shc-lock-screen-default-emoji-container">
+                    <div className={cl("default-emoji-container")}>
                         <Text variant="text-md/normal">Default reaction emoji:</Text>
                         {Parser.defaultRules[defaultReactionEmoji.emojiName ? "emoji" : "customEmoji"].react({
                             name: defaultReactionEmoji.emojiName
@@ -258,29 +245,29 @@ function HiddenChannelLockScreen({ channel }: { channel: ExtendedChannel; }) {
                             src: defaultReactionEmoji.emojiName
                                 ? EmojiUtils.getURL(defaultReactionEmoji.emojiName)
                                 : void 0
-                        }, void 0, { key: "0" })}
+                        }, void 0, { key: 0 })}
                     </div>
                 }
                 {channel.hasFlag(ChannelFlags.REQUIRE_TAG) &&
                     <Text variant="text-md/normal">Posts on this forum require a tag to be set.</Text>
                 }
                 {availableTags && availableTags.length > 0 &&
-                    <div className="shc-lock-screen-tags-container">
+                    <div className={cl("tags-container")}>
                         <Text variant="text-lg/bold">Available tags:</Text>
-                        <div className="shc-lock-screen-tags">
+                        <div className={cl("tags")}>
                             {availableTags.map(tag => <TagComponent tag={tag} key={tag.id} />)}
                         </div>
                     </div>
                 }
-                <div className="shc-lock-screen-allowed-users-and-roles-container">
-                    <div className="shc-lock-screen-allowed-users-and-roles-container-title">
-                        {Settings.plugins.PermissionsViewer.enabled && (
+                <div className={cl("allowed-users-and-roles-container")}>
+                    <div className={cl("allowed-users-and-roles-container-title")}>
+                        {isPluginEnabled(PermissionsViewerPlugin.name) && (
                             <Tooltip text="Permission Details">
                                 {({ onMouseLeave, onMouseEnter }) => (
                                     <button
                                         onMouseLeave={onMouseLeave}
                                         onMouseEnter={onMouseEnter}
-                                        className="shc-lock-screen-allowed-users-and-roles-container-permdetails-btn"
+                                        className={cl("allowed-users-and-roles-container-permdetails-btn")}
                                         onClick={() => openRolesAndUsersPermissionsModal(permissions, GuildStore.getGuild(channel.guild_id), channel.name)}
                                     >
                                         <svg
@@ -300,7 +287,7 @@ function HiddenChannelLockScreen({ channel }: { channel: ExtendedChannel; }) {
                                 <button
                                     onMouseLeave={onMouseLeave}
                                     onMouseEnter={onMouseEnter}
-                                    className="shc-lock-screen-allowed-users-and-roles-container-toggle-btn"
+                                    className={cl("allowed-users-and-roles-container-toggle-btn")}
                                     onClick={() => settings.store.defaultAllowedUsersAndRolesDropdownState = !defaultAllowedUsersAndRolesDropdownState}
                                 >
                                     <svg

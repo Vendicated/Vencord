@@ -52,7 +52,7 @@ const UrlReplacementRules: Record<string, URLReplacementRule> = {
         description: "Open Epic Games links in the Epic Games Launcher",
     },
     tidal: {
-        match: /^https:\/\/tidal\.com\/browse\/(track|album|artist|playlist|user|video|mix)\/(.+)(?:\?.+?)?$/,
+        match: /^https:\/\/(?:listen\.)?tidal\.com\/(?:browse\/)?(track|album|artist|playlist|user|video|mix)\/([a-f0-9-]+).*/,
         replace: (_, type, id) => `tidal://${type}/${id}`,
         description: "Open Tidal links in the Tidal app",
     },
@@ -80,6 +80,7 @@ const Native = VencordNative.pluginHelpers.OpenInApp as PluginNative<typeof impo
 export default definePlugin({
     name: "OpenInApp",
     description: "Open links in their respective apps instead of your browser",
+    tags: ["Utility"],
     authors: [Devs.Ven, Devs.surgedevs],
     settings: pluginSettings,
 
@@ -100,18 +101,20 @@ export default definePlugin({
                     replace: "true"
                 },
                 {
-                    match: /!\(0,\i\.isDesktop\)\(\)/,
-                    replace: "false"
+                    match: /\(0,\i\.isDesktop\)\(\)/,
+                    replace: "true"
                 }
             ]
         },
-        {
-            find: ".CONNECTED_ACCOUNT_VIEWED,",
+
+        // User Profile Modal & User Profile Modal v2
+        ...[".__invalid_connectedAccountOpenIconContainer", ".BLUESKY||"].map(find => ({
+            find,
             replacement: {
-                match: /(?<=href:\i,onClick:(\i)=>\{)(?=.{0,10}\i=(\i)\.type,.{0,100}CONNECTED_ACCOUNT_VIEWED)/,
+                match: /(?<=onClick:(\i)=>\{)(?=.{0,100}\.CONNECTED_ACCOUNT_VIEWED)(?<==(\i)\.metadata.+?)/,
                 replace: "if($self.handleAccountView($1,$2.type,$2.id)) return;"
             }
-        }
+        }))
     ],
 
     async handleLink(data: { href: string; }, event?: MouseEvent) {

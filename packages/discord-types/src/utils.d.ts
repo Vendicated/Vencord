@@ -1,0 +1,416 @@
+import { Channel, Guild, GuildMember, Message, User } from ".";
+import type { ReactNode } from "react";
+import { LiteralUnion } from "type-fest";
+
+import type { FluxEvents } from "./fluxEvents";
+import { ApplicationCommandOptionType, ChannelType, PremiumType } from "../enums";
+
+export { FluxEvents };
+
+type FluxEventsAutoComplete = LiteralUnion<FluxEvents, string>;
+
+export interface FluxDispatcher {
+    _actionHandlers: any;
+    _interceptors: any;
+    _subscriptions: any;
+    addInterceptor(interceptor: any): void;
+    dispatch(event: { [key: string]: unknown; type: FluxEventsAutoComplete; }): Promise<void>;
+    isDispatching(): boolean;
+    subscribe(event: FluxEventsAutoComplete, callback: (data: any) => void): void;
+    unsubscribe(event: FluxEventsAutoComplete, callback: (data: any) => void): void;
+    wait(callback: () => void): void;
+}
+
+export type Parser = Record<
+    | "parse"
+    | "parseTopic"
+    | "parseEmbedTitle"
+    | "parseEmbedTitleWithoutLinks"
+    | "parseInlineReply"
+    | "parseGuildVerificationFormRule"
+    | "parseGuildEventDescription"
+    | "parseAutoModerationSystemMessage"
+    | "parseForumPostGuidelines"
+    | "parseForumPostMostRecentMessage"
+    | "parseVoiceChannelStatus",
+    (content: string, inline?: boolean, state?: Record<string, any>) => ReactNode[]
+> & Record<
+    | "parseToAST"
+    | "parseTopicToAST"
+    | "parseEmbedTitleToAST"
+    | "parseEmbedTitleWithoutLinksToAST"
+    | "parseInlineReplyToAST"
+    | "parseAutoModerationSystemMessageToAST",
+    (content: string, inline?: boolean, state?: Record<string, any>) => any[]
+> & Record<"defaultRules" | "guildEventRules" | "notifCenterV2MessagePreviewRules" | "lockscreenWidgetMessageRules", Record<string, Record<"react" | "html" | "parse" | "match" | "order", any>>> & {
+    reactParserFor(rules: Record<string, any>): (content: string, inline?: boolean, state?: Record<string, any>) => ReactNode[];
+    astParserFor(rules: Record<string, any>): (content: string, inline?: boolean, state?: Record<string, any>) => any[];
+    createReactRules(options: Record<string, any>): Record<string, any>;
+    defaultReactRuleOptions: Record<string, any>;
+    combineAndInjectMentionRule(rules: Record<string, any>, mentionRule: Record<string, any>): Record<string, any>;
+};
+
+export interface Alerts {
+    show(alert: {
+        title: any;
+        body: React.ReactNode;
+        className?: string;
+        confirmColor?: string;
+        cancelText?: string;
+        confirmText?: string;
+        secondaryConfirmText?: string;
+        onCancel?(): void;
+        onConfirm?(): void;
+        onConfirmSecondary?(): void;
+        onCloseCallback?(): void;
+    }): void;
+    confirm(alert: {
+        title: any;
+        body: React.ReactNode;
+        className?: string;
+        confirmColor?: string;
+        cancelText?: string;
+        confirmText?: string;
+        secondaryConfirmText?: string;
+        onCancel?(): void;
+        onConfirmSecondary?(): void;
+        onCloseCallback?(): void;
+    }): Promise<boolean>;
+    /** This is a noop, it does nothing. */
+    close(): void;
+}
+
+export interface SnowflakeUtils {
+    fromTimestamp(timestamp: number): string;
+    fromTimestampWithSequence(timestamp: number, sequence: number): string;
+    extractTimestamp(snowflake: string): number;
+    age(snowflake: string): number;
+    atPreviousMillisecond(snowflake: string): string;
+    atNextMillisecond(snowflake: string): string;
+    compare(snowflake1?: string, snowflake2?: string): number;
+    isProbablyAValidSnowflake(snowflake: string): boolean;
+    castChannelIdAsMessageId(channelId: string): string;
+    castMessageIdAsChannelId(messageId: string): string;
+    castGuildIdAsEveryoneGuildRoleId(guildId: string): string;
+    cast(snowflake: string): string;
+    keys(obj: Record<string, any>): string[];
+    forEach(obj: Record<string, any>, callback: (value: any, key: string) => void): void;
+    forEachKey(obj: Record<string, any>, callback: (key: string) => void): void;
+    entries(obj: Record<string, any>): [string, any][];
+}
+
+interface RestRequestData {
+    url: string;
+    query?: Record<string, any>;
+    body?: Record<string, any>;
+    oldFormErrors?: boolean;
+    retries?: number;
+}
+
+export type RestAPI = Record<"del" | "get" | "patch" | "post" | "put", (data: RestRequestData) => Promise<any>>;
+
+export type Permissions = "CREATE_INSTANT_INVITE"
+    | "KICK_MEMBERS"
+    | "BAN_MEMBERS"
+    | "ADMINISTRATOR"
+    | "MANAGE_CHANNELS"
+    | "MANAGE_GUILD"
+    | "CHANGE_NICKNAME"
+    | "MANAGE_NICKNAMES"
+    | "MANAGE_ROLES"
+    | "MANAGE_WEBHOOKS"
+    | "MANAGE_GUILD_EXPRESSIONS"
+    | "CREATE_GUILD_EXPRESSIONS"
+    | "VIEW_AUDIT_LOG"
+    | "VIEW_CHANNEL"
+    | "VIEW_GUILD_ANALYTICS"
+    | "VIEW_CREATOR_MONETIZATION_ANALYTICS"
+    | "MODERATE_MEMBERS"
+    | "USE_EMBEDDED_ACTIVITIES"
+    | "USE_EXTERNAL_APPS"
+    | "SEND_MESSAGES"
+    | "SEND_TTS_MESSAGES"
+    | "MANAGE_MESSAGES"
+    | "EMBED_LINKS"
+    | "ATTACH_FILES"
+    | "READ_MESSAGE_HISTORY"
+    | "MENTION_EVERYONE"
+    | "USE_EXTERNAL_EMOJIS"
+    | "ADD_REACTIONS"
+    | "USE_APPLICATION_COMMANDS"
+    | "MANAGE_THREADS"
+    | "CREATE_PUBLIC_THREADS"
+    | "CREATE_PRIVATE_THREADS"
+    | "USE_EXTERNAL_STICKERS"
+    | "SEND_MESSAGES_IN_THREADS"
+    | "SEND_VOICE_MESSAGES"
+    | "SEND_POLLS"
+    | "PIN_MESSAGES"
+    | "BYPASS_SLOWMODE"
+    | "CONNECT"
+    | "SPEAK"
+    | "MUTE_MEMBERS"
+    | "DEAFEN_MEMBERS"
+    | "MOVE_MEMBERS"
+    | "USE_VAD"
+    | "PRIORITY_SPEAKER"
+    | "STREAM"
+    | "USE_SOUNDBOARD"
+    | "USE_EXTERNAL_SOUNDS"
+    | "SET_VOICE_CHANNEL_STATUS"
+    | "REQUEST_TO_SPEAK"
+    | "MANAGE_EVENTS"
+    | "CREATE_EVENTS";
+
+export type PermissionsBits = Record<Permissions, bigint>;
+
+export interface MessageSnapshot {
+    message: Message;
+}
+
+export interface Locale {
+    name: string;
+    value: string;
+    localizedName: string;
+}
+
+export interface LocaleInfo {
+    code: string;
+    enabled: boolean;
+    name: string;
+    englishName: string;
+    postgresLang: string;
+}
+
+export interface Clipboard {
+    copy(text: string): void;
+    SUPPORTS_COPY: boolean;
+}
+
+export interface NavigationRouter {
+    back(): void;
+    forward(): void;
+    transitionTo(path: string, ...args: unknown[]): void;
+    transitionToGuild(guildId: string, ...args: unknown[]): void;
+}
+
+export interface ChannelRouter {
+    transitionToChannel: (channelId: string) => void;
+    transitionToThread: (channel: Channel) => void;
+}
+
+export interface IconUtils {
+    getUserAvatarURL(user: User, canAnimate?: boolean, size?: number, format?: string): string;
+    getDefaultAvatarURL(id: string, discriminator?: string): string;
+    getUserBannerURL(data: { id: string, banner: string, canAnimate?: boolean, size: number; }): string | undefined;
+    getAvatarDecorationURL(data: { avatarDecoration: string, size: number; canCanimate?: boolean; }): string | undefined;
+
+    getGuildMemberAvatarURL(member: GuildMember, canAnimate?: string): string | null;
+    getGuildMemberAvatarURLSimple(data: { guildId: string, userId: string, avatar: string, canAnimate?: boolean; size?: number; }): string;
+    getGuildMemberBannerURL(data: { id: string, guildId: string, banner: string, canAnimate?: boolean, size: number; }): string | undefined;
+
+    getGuildIconURL(data: { id: string, icon?: string, size?: number, canAnimate?: boolean; }): string | undefined;
+    getGuildBannerURL(guild: Guild, canAnimate?: boolean): string | null;
+
+    getChannelIconURL(data: { id: string; icon?: string; applicationId?: string; size?: number; }): string | undefined;
+    getEmojiURL(data: { id: string, animated: boolean, size: number, forcePNG?: boolean; }): string;
+
+    hasAnimatedGuildIcon(guild: Guild): boolean;
+    isAnimatedIconHash(hash: string): boolean;
+
+    getGuildSplashURL: any;
+    getGuildDiscoverySplashURL: any;
+    getGuildHomeHeaderURL: any;
+    getResourceChannelIconURL: any;
+    getNewMemberActionIconURL: any;
+    getGuildTemplateIconURL: any;
+    getApplicationIconURL: any;
+    getGameAssetURL: any;
+    getVideoFilterAssetURL: any;
+
+    getGuildMemberAvatarSource: any;
+    getUserAvatarSource: any;
+    getGuildSplashSource: any;
+    getGuildDiscoverySplashSource: any;
+    makeSource: any;
+    getGameAssetSource: any;
+    getGuildIconSource: any;
+    getGuildTemplateIconSource: any;
+    getGuildBannerSource: any;
+    getGuildHomeHeaderSource: any;
+    getChannelIconSource: any;
+    getApplicationIconSource: any;
+    getAnimatableSourceWithFallback: any;
+}
+
+export interface Constants {
+    Endpoints: Record<string, any>;
+    UserFlags: Record<string, number>;
+    FriendsSections: Record<string, string>;
+}
+
+export type ActiveView = LiteralUnion<"emoji" | "gif" | "sticker" | "soundboard", string>;
+
+export interface ExpressionPickerStoreState extends Record<PropertyKey, any> {
+    activeView: ActiveView | null;
+    lastActiveView: ActiveView | null;
+    activeViewType: any | null;
+    searchQuery: string;
+    isSearchSuggestion: boolean,
+    pickerId: string;
+}
+
+export interface ExpressionPickerStore {
+    openExpressionPicker(activeView: ActiveView, activeViewType?: any): void;
+    closeExpressionPicker(activeViewType?: any): void;
+    toggleMultiExpressionPicker(activeViewType?: any): void;
+    toggleExpressionPicker(activeView: ActiveView, activeViewType?: any): void;
+    setExpressionPickerView(activeView: ActiveView): void;
+    setSearchQuery(searchQuery: string, isSearchSuggestion?: boolean): void;
+    useExpressionPickerStore(): ExpressionPickerStoreState;
+    useExpressionPickerStore<T>(selector: (state: ExpressionPickerStoreState) => T): T;
+}
+
+export { BrowserWindowFeatures, PopoutActions } from "./stores/PopoutWindowStore";
+
+export type UserNameUtilsTagInclude = LiteralUnion<"auto" | "always" | "never", string>;
+export interface UserNameUtilsTagOptions {
+    forcePomelo?: boolean;
+    identifiable?: UserNameUtilsTagInclude;
+    decoration?: UserNameUtilsTagInclude;
+    mode?: "full" | "username";
+}
+
+export interface UsernameUtils {
+    getGlobalName(user: User): string;
+    getFormattedName(user: User, useTagInsteadOfUsername?: boolean): string;
+    getName(user: User): string;
+    useName(user: User): string;
+    getUserTag(user: User, options?: UserNameUtilsTagOptions): string;
+    useUserTag(user: User, options?: UserNameUtilsTagOptions): string;
+    isNameConcealed(user: User): boolean;
+    getUserIsStaff(user: User): boolean;
+    useDirectMessageRecipient: any;
+    humanizeStatus: any;
+}
+
+export class DisplayProfile {
+    userId: string;
+    guildId?: string;
+    banner?: string;
+    bio?: string;
+    pronouns?: string;
+    accentColor?: number;
+    themeColors?: number[];
+    profileEffect?: any;
+    popoutAnimationParticleType?: any;
+    fetchStartedAt?: Date | null;
+    fetchEndedAt?: Date | null;
+    _userProfile?: any;
+    _guildMemberProfile?: any;
+
+    get premiumSince(): Date | null;
+    get premiumGuildSince(): Date | null;
+    get premiumType(): PremiumType | undefined;
+    get private(): boolean;
+    get widgets(): any[] | undefined;
+    get gameWidgets(): any[] | undefined;
+    get primaryColor(): number | undefined;
+    get canUsePremiumProfileCustomization(): boolean;
+    get canEditThemes(): boolean;
+    get application(): any;
+    get isLoaded(): boolean;
+
+    hasThemeColors(): boolean;
+    hasPremiumCustomization(): boolean;
+    isUsingGuildMemberBanner(): boolean;
+    isUsingGuildMemberBio(): boolean;
+    isUsingGuildMemberPronouns(): boolean;
+    getBannerURL(options: { canAnimate: boolean; size: number; }): string;
+    getPreviewBanner(banner: string | null, canAnimate: boolean, size?: number): string | null;
+    getPreviewBio(bio: string | undefined): string | undefined;
+    getPreviewThemeColors(themeColors: number[] | undefined): number[] | undefined;
+    getBadges(): Array<{
+        id: string;
+        description: string;
+        icon: string;
+        link?: string;
+    }>;
+    getLegacyUsername(): string | null;
+}
+
+export interface DisplayProfileUtils {
+    getDisplayProfile(userId: string, guildId?: string, customStores?: any): DisplayProfile | null;
+    useDisplayProfile(userId: string, guildId?: string, customStores?: any): DisplayProfile | null;
+}
+
+export interface DateUtils {
+    isSameDay(date1: Date, date2: Date): boolean;
+    calendarFormat(date: Date): string;
+    dateFormat(date: Date, format: string): string;
+    diffAsUnits(start: Date, end: Date, stopAtOneSecond?: boolean): Record<"days" | "hours" | "minutes" | "seconds", number>;
+}
+
+export interface CommandOptions {
+    type: ApplicationCommandOptionType;
+    name: string;
+    description: string;
+    required?: boolean;
+    choices?: {
+        name: string;
+        values: string | number;
+    }[];
+    options?: CommandOptions[];
+    channel_types?: ChannelType[];
+    min_value?: number;
+    max_value?: number;
+    autocomplete?: boolean;
+}
+
+export interface URLUtils {
+    URL_REGEX: RegExp;
+    makeUrl(url: string): URL | null;
+    isDiscordUrl(url: string): boolean;
+    isDiscordCdnUrl(url: string): boolean;
+    isDiscordAssetUrl(url: string, proxyUrl?: string, originalUrl?: string): boolean;
+    isDiscordDirectAssetUrl(url: string): boolean;
+    isDiscordProxiedAssetUrl(url: string, proxyUrl?: string, originalUrl?: string): boolean;
+    isDiscordHostname(hostname: string): boolean;
+    isDiscordLocalhost(hostname: string): boolean;
+    isDiscordProtocol(url: string): boolean;
+    isDiscordUri(url: string): boolean;
+    isDiscordUrlOrUri(url: string): boolean;
+    isAllowedGifProviderUrl(url: string): boolean;
+    isAppRoute(url: string): boolean;
+    isOriginalContentTypeDifferent(url: string, proxyUrl: string): boolean;
+    toURLSafe(url: string): URL | null;
+    safeDecodeURIComponent(component: string): string;
+    safeParseWithQuery(url: string): URL | null;
+    format(url: URL): string;
+    formatPathWithQuery(path: string, query: Record<string, string>): string;
+    formatSearch(query: Record<string, string>): string;
+}
+
+export interface Humanize {
+    filesize(bytes: number, base?: number, decimals?: number, decimalSep?: string, thousandsSep?: string, suffix?: string): string;
+    intword(number: number, units?: string[], base?: number, decimals?: number, decimalSep?: string, thousandsSep?: string): string;
+    relativeTime(timestamp?: number): string;
+    naturalDay(timestamp?: number, format?: string): string;
+    ordinal(value: number): string;
+    numberFormat(number: number, decimals?: number, decimalSep?: string, thousandsSep?: string): string;
+    truncatechars(str: string, maxLength: number): string;
+    truncatewords(str: string, maxWords: number): string;
+    pad(str: string, length: number, padChar?: string, direction?: "left" | "right"): string;
+    date(format: string, timestamp?: Date | number): string;
+    time(): number;
+    linebreaks(str: string): string;
+    nl2br(str: string): string;
+}
+
+export interface EmojiUtils {
+    getEmojiColors(emoji: any): number[] | null;
+    getURL(emoji: any): string;
+    filterUnsupportedEmojis(emojis: any[]): any[];
+    triggerFullscreenAnimation(emoji: any, node: HTMLElement): void;
+    applyPlatformToThemedEmojiColorPalette(colors: any): any;
+}
