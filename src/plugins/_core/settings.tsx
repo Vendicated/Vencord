@@ -90,10 +90,10 @@ const settings = definePluginSettings({
             { label: "At the very bottom", value: "bottom" },
         ] as { label: string; value: SettingsLocation; default?: boolean; }[]
     },
-    versionCopyExcludeVencord: {
+    includeVencordInfoWhenCopying: {
         type: OptionType.BOOLEAN,
-        description: "Exclude Vencord info (Vencord, Electron, Chromium) from the copied version string",
-        default: false
+        description: "Also copy Vencord info (Vencord, Electron, Chromium) when clicking the version info in the bottom left area of the Settings page",
+        default: true
     }
 });
 
@@ -329,7 +329,7 @@ export default definePlugin({
     },
 
     getInfoString() {
-        if (settings.store.versionCopyExcludeVencord) return "";
+        if (!settings.store.includeVencordInfoWhenCopying) return "";
         return "\n" + this.getInfoRows().join("\n");
     },
 
