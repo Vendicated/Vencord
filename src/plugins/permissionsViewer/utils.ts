@@ -19,13 +19,56 @@
 import { classNameFactory } from "@utils/css";
 import { Guild, GuildMember, Role } from "@vencord/discord-types";
 import { PermissionOverwriteType } from "@vencord/discord-types/enums";
-import { findByPropsLazy } from "@webpack";
-import { GuildRoleStore } from "@webpack/common";
+import { GuildRoleStore, PermissionsBits } from "@webpack/common";
 
 import { PermissionsSortOrder, settings } from ".";
-export const { getGuildPermissionSpecMap } = findByPropsLazy("getGuildPermissionSpecMap");
 
 export const cl = classNameFactory("vc-permviewer-");
+
+type PermissionSpec = {
+    title: string;
+    description: string;
+};
+
+const WORD_REPLACEMENTS: Record<string, string> = {
+    GUILD: "Server",
+    VAD: "Voice Activity",
+    TTS: "Text-To-Speech",
+    DMS: "DMs"
+};
+
+const PERMISSION_TITLES: Partial<Record<keyof typeof PermissionsBits, string>> = {
+    CREATE_INSTANT_INVITE: "Create Invite",
+    MANAGE_GUILD: "Manage Server",
+    MANAGE_GUILD_EXPRESSIONS: "Manage Expressions",
+    CREATE_GUILD_EXPRESSIONS: "Create Expressions",
+    VIEW_GUILD_ANALYTICS: "View Server Insights",
+    VIEW_CREATOR_MONETIZATION_ANALYTICS: "View Creator Monetization Insights",
+    MODERATE_MEMBERS: "Timeout Members"
+};
+
+function formatPermissionName(name: keyof typeof PermissionsBits) {
+    return PERMISSION_TITLES[name] ?? name
+        .split("_")
+        .map(part => WORD_REPLACEMENTS[part] ?? (part[0] + part.slice(1).toLowerCase()))
+        .join(" ");
+}
+
+let guildPermissionSpecMap: Record<string, PermissionSpec> | undefined;
+
+export function getGuildPermissionSpecMap(_guild: Guild) {
+    guildPermissionSpecMap ??= Object.fromEntries(
+        Object.entries(PermissionsBits).map(([permission, bit]) => [
+            String(bit),
+            {
+                title: formatPermissionName(permission as keyof typeof PermissionsBits),
+                description: formatPermissionName(permission as keyof typeof PermissionsBits)
+            } satisfies PermissionSpec
+        ])
+    ) as Record<string, PermissionSpec>;
+
+    return guildPermissionSpecMap;
+}
 
 export function getSortedRolesForMember({ id: guildId }: Guild, member: GuildMember) {
     // The guild id is the @everyone role
