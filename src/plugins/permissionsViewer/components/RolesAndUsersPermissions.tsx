@@ -19,10 +19,10 @@
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Flex } from "@components/Flex";
 import { InfoIcon, OwnerCrownIcon } from "@components/Icons";
-import { cl, getGuildPermissionSpecMap } from "@plugins/permissionsViewer/utils";
+import { cl, getGuildPermissionSpecMap, loadGetGuildPermissionSpecMap } from "@plugins/permissionsViewer/utils";
 import { copyToClipboard } from "@utils/clipboard";
 import { getIntlMessage, getUniqueUsername } from "@utils/discord";
-import { ModalCloseButton, ModalContent, ModalHeader, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
+import { ModalCloseButton, ModalContent, ModalHeader, ModalProps, ModalRoot, ModalSize, openModalLazy } from "@utils/modal";
 import { Guild, Role, RoleOrUserPermission, UnicodeEmoji, User } from "@vencord/discord-types";
 import { PermissionOverwriteType } from "@vencord/discord-types/enums";
 import { findByCodeLazy } from "@webpack";
@@ -266,12 +266,16 @@ function UserContextMenu({ userId }: { userId: string; }) {
 const RolesAndUsersPermissions = ErrorBoundary.wrap(RolesAndUsersPermissionsComponent);
 
 export default function openRolesAndUsersPermissionsModal(permissions: Array<RoleOrUserPermission>, guild: Guild, header: string) {
-    return openModal(modalProps => (
-        <RolesAndUsersPermissions
-            modalProps={modalProps}
-            permissions={permissions}
-            guild={guild}
-            header={header}
-        />
-    ));
+    return openModalLazy(async () => {
+        await loadGetGuildPermissionSpecMap();
+
+        return modalProps => (
+            <RolesAndUsersPermissions
+                modalProps={modalProps}
+                permissions={permissions}
+                guild={guild}
+                header={header}
+            />
+        );
+    });
 }
