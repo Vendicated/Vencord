@@ -1,0 +1,250 @@
+.vc-7tv-pill-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+}
+
+.vc-7tv-pill {
+    position: absolute;
+    left: -2px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 4px;
+    border-radius: 0 4px 4px 0;
+    pointer-events: none;
+    height: 0;
+    opacity: 0;
+    transition:
+        height 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+        opacity 0.15s ease;
+    background: #fff;
+}
+
+.theme-dark .vc-7tv-pill {
+    background: #fff !important;
+}
+
+.theme-light .vc-7tv-pill {
+    background: #060607 !important;
+}
+
+.vc-7tv-pill-wrapper:hover .vc-7tv-pill,
+.vc-7tv-pill-wrapper:focus-within .vc-7tv-pill {
+    height: 20px;
+    opacity: 1;
+}
+
+.vc-7tv-pill-wrapper.vc-7tv-pill-active .vc-7tv-pill {
+    height: 40px;
+    opacity: 1;
+}
+
+.vc-7tv-channel-button {
+    width: 44px;
+    height: 44px;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    display: grid;
+    place-items: center;
+    overflow: hidden;
+    flex-shrink: 0;
+    border-radius: 50%;
+    background: var(--background-secondary);
+    color: var(--interactive-normal);
+    transition:
+        border-radius 0.15s ease,
+        background 0.15s ease,
+        color 0.15s ease;
+}
+
+.vc-7tv-channel-button:hover {
+    border-radius: 30%;
+    background: var(--brand-experiment);
+    color: #fff;
+}
+
+.vc-7tv-channel-button-active {
+    border-radius: 30% !important;
+    background: var(--brand-experiment) !important;
+    color: #fff !important;
+}
+
+.vc-7tv-settings-button {
+    color: var(--status-positive) !important;
+    background: var(--background-secondary);
+    transition: background 0.15s ease, color 0.15s ease;
+}
+
+.vc-7tv-settings-button:hover {
+    color: #fff !important;
+    background: var(--status-positive) !important;
+}
+
+.vc-7tv-search-input {
+    background: var(--input-background) !important;
+    border: 1px solid var(--input-border, var(--background-tertiary)) !important;
+    caret-color: #fff !important;
+}
+
+.theme-dark .vc-7tv-search-input,
+.theme-dark .vc-7tv-search-input input {
+    color: #fff !important;
+    -webkit-text-fill-color: #fff !important;
+    caret-color: #fff !important;
+}
+
+.theme-light .vc-7tv-search-input,
+.theme-light .vc-7tv-search-input input {
+    color: #060607 !important;
+    -webkit-text-fill-color: #060607 !important;
+    caret-color: #060607 !important;
+}
+
+.vc-7tv-search-input:focus {
+    border-color: var(--brand-experiment);
+    box-shadow: 0 0 0 1px var(--brand-experiment);
+}
+
+.theme-dark .vc-7tv-search-input::placeholder {
+    color: #b5bac1 !important;
+    -webkit-text-fill-color: #b5bac1 !important;
+}
+
+.theme-light .vc-7tv-search-input::placeholder {
+    color: #747f8d !important;
+    -webkit-text-fill-color: #747f8d !important;
+}
+
+.vc-7tv-search-input::selection {
+    background: var(--brand-experiment);
+    color: #fff;
+}
+
+.vc-7tv-scrollbar {
+    scrollbar-color: var(--scrollbar-thin-thumb) var(--scrollbar-thin-track);
+}
+
+.vc-7tv-scrollbar::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+.vc-7tv-scrollbar::-webkit-scrollbar-thumb {
+    background: var(--scrollbar-thin-thumb);
+    border-radius: 999px;
+    border: 2px solid var(--scrollbar-thin-track);
+}
+
+.vc-7tv-scrollbar::-webkit-scrollbar-track {
+    background: var(--scrollbar-thin-track);
+}
+
+.vc-7tv-settings-root {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 6px;
+}
+
+.vc-7tv-settings-row {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.vc-7tv-settings-row > div:first-child {
+    flex: 1;
+}
+
+.vc-7tv-settings-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.vc-7tv-settings-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border: 1px solid var(--background-modifier-accent);
+    background: var(--background-secondary);
+    border-radius: 8px;
+    padding: 6px 8px;
+}
+
+.vc-7tv-settings-avatar {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    object-fit: cover;
+    flex-shrink: 0;
+}
+
+.vc-7tv-settings-avatar-fallback {
+    display: grid;
+    place-items: center;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--interactive-active);
+    background: var(--background-primary);
+}
+
+.vc-7tv-settings-channel-name {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 13px;
+    color: inherit;
+}
+
+.vc-7tv-refresh-button {
+    color: inherit;
+    transition: background 0.15s ease, color 0.15s ease;
+}
+
+.vc-7tv-refresh-button:hover {
+    background: var(--background-modifier-hover) !important;
+    color: inherit !important;
+}
+
+.theme-dark .vc-7tv-settings-channel-name,
+.theme-dark .vc-7tv-refresh-button,
+.theme-dark .vc-7tv-refresh-button svg {
+    color: #fff !important;
+    -webkit-text-fill-color: #fff !important;
+}
+
+.theme-light .vc-7tv-settings-channel-name,
+.theme-light .vc-7tv-refresh-button,
+.theme-light .vc-7tv-refresh-button svg {
+    color: #060607 !important;
+    -webkit-text-fill-color: #060607 !important;
+}
+
+.vc-7tv-settings-item button {
+    margin-left: auto;
+}
+
+.vc-7tv-settings-empty {
+    color: var(--text-muted);
+    font-size: 13px;
+    padding: 6px 2px;
+}
+
+.vc-7tv-favorite-star {
+    position: absolute;
+    top: 0;
+    right: 0;
+    z-index: 1;
+    font-size: 16px;
+    line-height: 1;
+    color: #FFD700 !important;
+    text-shadow: 0 1px 2px rgb(0 0 0 / 60%) !important;
+    pointer-events: none;
+    filter: drop-shadow(0 0 1px #FFD700) !important;
+    -webkit-text-fill-color: #FFD700 !important;
+}
