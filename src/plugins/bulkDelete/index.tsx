@@ -219,7 +219,6 @@ async function deleteMessageWithRetry(channelId: string, messageId: string): Pro
                 return false;
             }
 
-            // Extract retry_after - handle various error formats
             const retryAfter = Number(
                 error?.body?.retry_after ?? 
                 error?.retry_after ?? 
@@ -229,7 +228,6 @@ async function deleteMessageWithRetry(channelId: string, messageId: string): Pro
 
             let delayMs = getRetryDelay(error, 1000 * (attempt + 1));
             
-            // If we hit a rate limit, add extra buffer
             if (error?.status === 429 || retryAfter > 0) {
                 delayMs = Math.max(delayMs, Math.ceil(retryAfter * 1000) + 500);
                 console.warn(`Rate limited! Waiting ${delayMs}ms before retry...`);
