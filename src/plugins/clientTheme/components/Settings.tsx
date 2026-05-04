@@ -4,15 +4,15 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { classNameFactory } from "@api/Styles";
 import { ErrorCard } from "@components/ErrorCard";
+import { relativeLuminance } from "@plugins/clientTheme/utils/colorUtils";
+import { createOrUpdateThemeColorVars } from "@plugins/clientTheme/utils/styleUtils";
+import { classNameFactory } from "@utils/css";
 import { Margins } from "@utils/margins";
 import { findByCodeLazy, findStoreLazy } from "@webpack";
 import { Button, ColorPicker, Forms, ThemeStore, useStateFromStores } from "@webpack/common";
 
 import { settings } from "..";
-import { relativeLuminance } from "../utils/colorUtils";
-import { createOrUpdateThemeColorVars } from "../utils/styleUtils";
 
 const saveClientTheme = findByCodeLazy('type:"UNSYNCED_USER_SETTINGS_UPDATE', '"system"===');
 const NitroThemeStore = findStoreLazy("ClientThemesBackgroundStore");

@@ -19,31 +19,36 @@
 import "./styles.css";
 
 import * as DataStore from "@api/DataStore";
+import { isPluginEnabled } from "@api/PluginManager";
 import { useSettings } from "@api/Settings";
-import { classNameFactory } from "@api/Styles";
+import { Card } from "@components/Card";
 import { Divider } from "@components/Divider";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { HeadingTertiary } from "@components/Heading";
 import { Paragraph } from "@components/Paragraph";
 import { SettingsTab, wrapTab } from "@components/settings/tabs/BaseTab";
 import { ChangeList } from "@utils/ChangeList";
+import { classNameFactory } from "@utils/css";
+import { isTruthy } from "@utils/guards";
 import { Logger } from "@utils/Logger";
 import { Margins } from "@utils/margins";
 import { classes } from "@utils/misc";
 import { useAwaiter, useCleanupEffect } from "@utils/react";
-import { Alerts, Button, Card, lodash, Parser, React, Select, TextInput, Tooltip, useMemo, useState } from "@webpack/common";
+import { PluginTag, PluginTags } from "@utils/types";
+import { Alerts, Button, lodash, Parser, React, SearchableSelect, Select, TextInput, Tooltip, useMemo, useRef, useState } from "@webpack/common";
 import { JSX } from "react";
 
-import Plugins, { ExcludedPlugins } from "~plugins";
+import Plugins, { ExcludedPlugins, PluginMeta } from "~plugins";
 
 import { PluginCard } from "./PluginCard";
+import { UIElementsButton } from "./UIElements";
 
 export const cl = classNameFactory("vc-plugins-");
 export const logger = new Logger("PluginSettings", "#a6d189");
 
 function ReloadRequiredCard({ required }: { required: boolean; }) {
     return (
-        <Card className={classes(cl("info-card"), required && "vc-warning-card")}>
+        <Card variant={required ? "warning" : "normal"} className={cl("info-card")}>
             {required
                 ? (
                     <>
@@ -71,12 +76,16 @@ const enum SearchStatus {
     ALL,
     ENABLED,
     DISABLED,
-    NEW
+    NEW,
+    USER_PLUGINS,
+    API_PLUGINS
 }
 
 function ExcludedPluginsList({ search }: { search: string; }) {
-    const matchingExcludedPlugins = Object.entries(ExcludedPlugins)
-        .filter(([name]) => name.toLowerCase().includes(search));
+    const matchingExcludedPlugins = search
+        ? Object.entries(ExcludedPlugins)
+            .filter(([name]) => name.toLowerCase().includes(search))
+        : [];
 
     const ExcludedReasons: Record<"web" | "discordDesktop" | "vesktop" | "desktop" | "dev", string> = {
         desktop: "Discord Desktop app or Vesktop",
@@ -107,7 +116,8 @@ function ExcludedPluginsList({ search }: { search: string; }) {
 
 function PluginSettings() {
     const settings = useSettings();
-    const changes = useMemo(() => new ChangeList<string>(), []);
+    const changeRef = useRef<ChangeList<string>>(null);
+    const changes = changeRef.current ??= new ChangeList<string>();
 
     useCleanupEffect(() => {
         if (changes.hasChanges)
@@ -149,34 +159,43 @@ function PluginSettings() {
         []
     );
 
-    const [searchValue, setSearchValue] = useState({ value: "", status: SearchStatus.ALL });
+    const hasUserPlugins = useMemo(() => !IS_STANDALONE && Object.values(PluginMeta).some(m => m.userPlugin), []);
+
+    const [searchValue, setSearchValue] = useState({ value: "", tags: [] as PluginTag[], status: SearchStatus.ALL });
 
     const search = searchValue.value.toLowerCase();
     const onSearch = (query: string) => setSearchValue(prev => ({ ...prev, value: query }));
-    const onStatusChange = (status: SearchStatus) => setSearchValue(prev => ({ ...prev, status }));
 
     const pluginFilter = (plugin: typeof Plugins[keyof typeof Plugins]) => {
-        const { status } = searchValue;
-        const enabled = Vencord.Plugins.isPluginEnabled(plugin.name);
+        const { status, tags } = searchValue;
 
         switch (status) {
             case SearchStatus.DISABLED:
-                if (enabled) return false;
+                if (isPluginEnabled(plugin.name)) return false;
                 break;
             case SearchStatus.ENABLED:
-                if (!enabled) return false;
+                if (!isPluginEnabled(plugin.name)) return false;
                 break;
             case SearchStatus.NEW:
                 if (!newPlugins?.includes(plugin.name)) return false;
                 break;
+            case SearchStatus.USER_PLUGINS:
+                if (!PluginMeta[plugin.name]?.userPlugin) return false;
+                break;
+            case SearchStatus.API_PLUGINS:
+                if (!plugin.name.endsWith("API")) return false;
+                break;
         }
+
+        if (tags.length && tags.some(t => !plugin.tags?.includes(t))) return false;
 
         if (!search.length) return true;
 
         return (
             plugin.name.toLowerCase().includes(search) ||
+            plugin.name.match(/[A-Z]/g)?.join("").toLowerCase().includes(search) || // acronyms like BF for BetterFolders
             plugin.description.toLowerCase().includes(search) ||
-            plugin.tags?.some(t => t.toLowerCase().includes(search))
+            plugin.searchTerms?.some(t => t.toLowerCase().includes(search))
         );
     };
 
@@ -200,9 +219,9 @@ function PluginSettings() {
     const plugins = [] as JSX.Element[];
     const requiredPlugins = [] as JSX.Element[];
 
-    const showApi = searchValue.value.includes("API");
+    const showApi = searchValue.status === SearchStatus.API_PLUGINS;
     for (const p of sortedPlugins) {
-        if (p.hidden || (!p.options && p.name.endsWith("API") && !showApi))
+        if (p.hidden || (!p.settings && p.name.endsWith("API") && !showApi))
             continue;
 
         if (!pluginFilter(p)) continue;
@@ -242,34 +261,52 @@ function PluginSettings() {
     }
 
     return (
-        <SettingsTab title="Plugins">
+        <SettingsTab>
             <ReloadRequiredCard required={changes.hasChanges} />
+
+            <UIElementsButton />
 
             <HeadingTertiary className={classes(Margins.top20, Margins.bottom8)}>
                 Filters
             </HeadingTertiary>
 
-            <div className={classes(Margins.bottom20, cl("filter-controls"))}>
-                <ErrorBoundary noop>
-                    <TextInput autoFocus value={searchValue.value} placeholder="Search for a plugin..." onChange={onSearch} />
-                </ErrorBoundary>
-                <div>
-                    <ErrorBoundary noop>
-                        <Select
-                            options={[
-                                { label: "Show All", value: SearchStatus.ALL, default: true },
-                                { label: "Show Enabled", value: SearchStatus.ENABLED },
-                                { label: "Show Disabled", value: SearchStatus.DISABLED },
-                                { label: "Show New", value: SearchStatus.NEW }
-                            ]}
-                            serialize={String}
-                            select={onStatusChange}
-                            isSelected={v => v === searchValue.status}
-                            closeOnSelect={true}
-                        />
-                    </ErrorBoundary>
+            <ErrorBoundary noop>
+                <TextInput
+                    inputClassName={cl("filter-control")}
+                    placeholder="Search for a plugin..."
+                    value={searchValue.value}
+                    onChange={onSearch}
+                    autoFocus
+                />
+            </ErrorBoundary>
+
+            <ErrorBoundary noop>
+                <div className={classes(Margins.bottom20, Margins.top8, cl("filter-controls"))}>
+                    <Select
+                        options={[
+                            { label: "Show All", value: SearchStatus.ALL, default: true },
+                            { label: "Show Enabled", value: SearchStatus.ENABLED },
+                            { label: "Show Disabled", value: SearchStatus.DISABLED },
+                            { label: "Show New", value: SearchStatus.NEW },
+                            hasUserPlugins && { label: "Show UserPlugins", value: SearchStatus.USER_PLUGINS },
+                            { label: "Show API Plugins", value: SearchStatus.API_PLUGINS },
+                        ].filter(isTruthy)}
+                        serialize={String}
+                        select={status => setSearchValue(prev => ({ ...prev, status }))}
+                        isSelected={v => v === searchValue.status}
+                        closeOnSelect={true}
+                        placeholder="Filter by Type"
+                    />
+                    <SearchableSelect
+                        options={PluginTags.map(tag => ({ label: tag, value: tag }))}
+                        value={searchValue.tags}
+                        onChange={tags => setSearchValue(prev => ({ ...prev, tags }))}
+                        closeOnSelect={false}
+                        placeholder="Filter by Tags"
+                        multi
+                    />
                 </div>
-            </div>
+            </ErrorBoundary>
 
             <HeadingTertiary className={Margins.top20}>Plugins</HeadingTertiary>
 
@@ -291,6 +328,7 @@ function PluginSettings() {
             <HeadingTertiary className={classes(Margins.top20, Margins.bottom8)}>
                 Required Plugins
             </HeadingTertiary>
+
             <div className={cl("grid")}>
                 {requiredPlugins.length
                     ? requiredPlugins

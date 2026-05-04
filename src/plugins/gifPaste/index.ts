@@ -24,13 +24,14 @@ import { ExpressionPickerStore } from "@webpack/common";
 export default definePlugin({
     name: "GifPaste",
     description: "Makes picking a gif in the gif picker insert a link into the chatbox instead of instantly sending it",
+    tags: ["Media", "Chat"],
     authors: [Devs.Ven],
 
     patches: [{
-        find: '"handleSelectGIF",',
+        find: "handleSelectGIF=",
         replacement: {
-            match: /"handleSelectGIF",(\i)=>\{/,
-            replace: '"handleSelectGIF",$1=>{if (!this.props.className) return $self.handleSelect($1);'
+            match: /handleSelectGIF=(\i)=>\{/,
+            replace: "$&if (!this.props.className) return $self.handleSelect($1);"
         }
     }],
 

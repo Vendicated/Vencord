@@ -23,13 +23,11 @@ import { Queue } from "@utils/Queue";
 import { useForceUpdater } from "@utils/react";
 import definePlugin from "@utils/types";
 import { CustomEmoji, Message, ReactionEmoji, User } from "@vencord/discord-types";
-import { findByPropsLazy } from "@webpack";
-import { ChannelStore, Constants, FluxDispatcher, React, RestAPI, useEffect, useLayoutEffect, UserSummaryItem } from "@webpack/common";
+import { ChannelStore, Constants, FluxDispatcher, React, RestAPI, useEffect, useLayoutEffect, UserStore, UserSummaryItem } from "@webpack/common";
 
-const AvatarStyles = findByPropsLazy("moreUsers", "emptyUser", "avatarContainer", "clickableAvatar");
 let Scroll: any = null;
 const queue = new Queue();
-let reactions: Record<string, ReactionCacheEntry>;
+let reactions: Record<string, ReactionCacheEntry> = {};
 
 function fetchReactions(msg: Message, emoji: ReactionEmoji, type: number) {
     const key = emoji.name + (emoji.id ? `:${emoji.id}` : "");
@@ -80,6 +78,7 @@ function handleClickAvatar(event: React.UIEvent<HTMLElement, Event>) {
 export default definePlugin({
     name: "WhoReacted",
     description: "Renders the avatars of users who reacted to a message",
+    tags: ["Reactions", "Chat", "Appearance"],
     authors: [Devs.Ven, Devs.KannaDev, Devs.newwares],
 
     patches: [
@@ -93,15 +92,15 @@ export default definePlugin({
         {
             find: '"MessageReactionsStore"',
             replacement: {
-                match: /function (\i)\(\){(\i)={}(?=.*CONNECTION_OPEN:\1)/,
-                replace: "$&;$self.reactions=$2;"
+                match: /CONNECTION_OPEN:function\(\){(\i)={}/,
+                replace: "$&;$self.reactions=$1;"
             }
         },
         {
 
             find: "cleanAutomaticAnchor(){",
             replacement: {
-                match: /constructor\(\i\)\{(?=.{0,100}automaticAnchor)/,
+                match: /constructor\(\i\)\{(?=.{0,100}(?:automaticAnchor|\.messages\.loadingMore))/,
                 replace: "$&$self.setScrollObj(this);"
             }
         }
@@ -139,7 +138,7 @@ export default definePlugin({
         }, [message.id, forceUpdate]);
 
         const reactions = getReactionsWithQueue(message, emoji, type);
-        const users = [...reactions.values()].filter(Boolean);
+        const users = Array.from(reactions, ([id]) => UserStore.getUser(id)).filter(Boolean);
 
         return (
             <div
