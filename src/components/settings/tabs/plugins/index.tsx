@@ -221,7 +221,7 @@ function PluginSettings() {
 
     const showApi = searchValue.status === SearchStatus.API_PLUGINS;
     for (const p of sortedPlugins) {
-        if (p.hidden || (!p.options && p.name.endsWith("API") && !showApi))
+        if (p.hidden || (!p.settings && p.name.endsWith("API") && !showApi))
             continue;
 
         if (!pluginFilter(p)) continue;

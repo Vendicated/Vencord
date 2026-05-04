@@ -30,8 +30,8 @@ export default definePlugin({
         {
             find: '"PLAINTEXT_PREVIEW":"OTHER"',
             replacement: {
-                match: /return"IMAGE"===\i\|\|"VIDEO"===\i(?:\|\|("VISUAL_PLACEHOLDER"===\i)\|\|\i&&"CLIP"===\i)?/,
-                replace: (_, visualPlaceholderPred) => visualPlaceholderPred != null ? `return ${visualPlaceholderPred}` : "return false"
+                match: /"IMAGE"===\i\|\|"VIDEO"===\i\|\|"CLIP"===\i/,
+                replace: "false"
             }
         },
         {
