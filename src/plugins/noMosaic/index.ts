@@ -28,6 +28,13 @@ export default definePlugin({
 
     patches: [
         {
+            find: '"PLAINTEXT_PREVIEW":"OTHER"',
+            replacement: {
+                match: /"IMAGE"===\i\|\|"VIDEO"===\i\|\|"CLIP"===\i/,
+                replace: "false"
+            }
+        },
+        {
             find: "renderAttachments(",
             predicate: () => settings.store.inlineVideo,
             replacement: {
