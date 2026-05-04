@@ -346,7 +346,7 @@ function hideMediaInsideMessage(el: HTMLElement) {
             ? Object.assign(document.createElement("img"), { src, referrerPolicy: "no-referrer", className: PLACEHOLDER_CLASS })
             : Object.assign(document.createElement("div"), {
                 className: PLACEHOLDER_CLASS,
-                textContent: "🚫 Media hidden — set a placeholder image in plugin settings",
+                textContent: "set a placeholder image in plugin settings",
             });
         container.insertAdjacentElement("afterend", placeholder);
     }
