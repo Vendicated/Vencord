@@ -16,17 +16,17 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-// eslint-disable-next-line path-alias/no-relative
-import { filters, mapMangledModuleLazy, waitFor } from "../webpack";
-import type * as t from "./types/menu";
+import type * as t from "@vencord/discord-types";
+import { filters, mapMangledModuleLazy, waitFor } from "@webpack";
 
-export let Menu = {} as t.Menu;
+export const Menu = {} as t.Menu;
 
-waitFor(["MenuItem", "MenuSliderControl"], m => Menu = m);
+waitFor(filters.componentByCode('path:["empty"]'), m => Menu.Menu = m);
+waitFor(filters.componentByCode("SLIDER)", "handleSize:16"), m => Menu.MenuSliderControl = m);
+waitFor(filters.componentByCode(".SEARCH)", ".focus()", "query:"), m => Menu.MenuSearchControl = m);
 
 export const ContextMenuApi: t.ContextMenuApi = mapMangledModuleLazy('type:"CONTEXT_MENU_OPEN', {
     closeContextMenu: filters.byCode("CONTEXT_MENU_CLOSE"),
     openContextMenu: filters.byCode("renderLazy:"),
     openContextMenuLazy: e => typeof e === "function" && e.toString().length < 100
 });
-

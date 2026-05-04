@@ -4,17 +4,14 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { DataStore } from "@api/index";
+import * as DataStore from "@api/DataStore";
 import { Logger } from "@utils/Logger";
 import { openModal } from "@utils/modal";
-import { findByPropsLazy } from "@webpack";
-import { showToast, Toasts, UserStore } from "@webpack/common";
+import { OAuth2AuthorizeModal, showToast, Toasts, UserStore } from "@webpack/common";
 
 import { ReviewDBAuth } from "./entities";
 
 const DATA_STORE_KEY = "rdb-auth";
-
-const { OAuth2AuthorizeModal } = findByPropsLazy("OAuth2AuthorizeModal");
 
 export let Auth: ReviewDBAuth = {};
 

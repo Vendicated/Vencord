@@ -32,7 +32,7 @@ export class Logger {
     constructor(public name: string, public color: string = "white") { }
 
     private _log(level: "log" | "error" | "warn" | "info" | "debug", levelColor: string, args: any[], customFmt = "") {
-        if (IS_REPORTER && IS_WEB) {
+        if (IS_REPORTER && IS_WEB && !IS_VESKTOP) {
             console[level]("[Vencord]", this.name + ":", ...args);
             return;
         }

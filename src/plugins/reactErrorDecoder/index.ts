@@ -20,21 +20,21 @@ import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 import { React } from "@webpack/common";
 
-let ERROR_CODES: any;
+let ERROR_CODES: Record<string, string> | undefined;
 
 export default definePlugin({
     name: "ReactErrorDecoder",
-    description: 'Replaces "Minifed React Error" with the actual error.',
+    description: 'Replaces "Minified React Error" with the actual error.',
+    tags: ["Developers"],
     authors: [Devs.Cyn, Devs.maisymoe],
     patches: [
         {
-            find: '"https://reactjs.org/docs/error-decoder.html?invariant="',
+            find: "React has blocked a javascript: URL as a security precaution.",
             replacement: {
-                match: /(function .\(.\)){(for\(var .="https:\/\/reactjs\.org\/docs\/error-decoder\.html\?invariant="\+.,.=1;.<arguments\.length;.\+\+\).\+="&args\[\]="\+encodeURIComponent\(arguments\[.\]\);return"Minified React error #"\+.\+"; visit "\+.\+" for the full message or use the non-minified dev environment for full errors and additional helpful warnings.")}/,
-                replace: (_, func, original) =>
-                    `${func}{var decoded=$self.decodeError.apply(null, arguments);if(decoded)return decoded;${original}}`,
-            },
-        },
+                match: /"https:\/\/react.dev\/errors\/"\+\i;/,
+                replace: "$&const vcDecodedError=$self.decodeError(...arguments);if(vcDecodedError)return vcDecodedError;"
+            }
+        }
     ],
 
     async start() {
@@ -56,5 +56,5 @@ export default definePlugin({
             index++;
             return arg;
         });
-    },
+    }
 });

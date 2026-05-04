@@ -17,12 +17,21 @@
 */
 
 import { React, useEffect, useMemo, useReducer, useState } from "@webpack/common";
+import type { ActionDispatch, ReactNode } from "react";
 
 import { checkIntersecting } from "./misc";
 
 export * from "./lazyReact";
 
 export const NoopComponent = () => null;
+
+/**
+ * Check if a React node is a primitive (string, number, bigint, boolean, undefined)
+ */
+export function isPrimitiveReactNode(node: ReactNode): boolean {
+    const t = typeof node;
+    return t === "string" || t === "number" || t === "bigint" || t === "boolean" || t === "undefined";
+}
 
 /**
  * Check if an element is on screen
@@ -117,8 +126,8 @@ export function useAwaiter<T>(factory: () => Promise<T>, providedOpts?: AwaiterO
 /**
  * Returns a function that can be used to force rerender react components
  */
-export function useForceUpdater(): () => void;
-export function useForceUpdater(withDep: true): [unknown, () => void];
+export function useForceUpdater(): ActionDispatch<[]>;
+export function useForceUpdater(withDep: true): [any, ActionDispatch<[]>];
 export function useForceUpdater(withDep?: true) {
     const r = useReducer(x => x + 1, 0);
     return withDep ? r : r[1];
@@ -143,4 +152,11 @@ export function useTimer({ interval = 1000, deps = [] }: TimerOpts) {
     }, deps);
 
     return time;
+}
+
+export function useCleanupEffect(
+    effect: () => void,
+    deps?: React.DependencyList
+): void {
+    useEffect(() => effect, deps);
 }

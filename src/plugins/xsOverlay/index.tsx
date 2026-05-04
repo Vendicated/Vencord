@@ -5,13 +5,12 @@
  */
 
 import { definePluginSettings } from "@api/Settings";
-import { makeRange } from "@components/PluginSettings/components";
 import { Devs } from "@utils/constants";
 import { Logger } from "@utils/Logger";
-import definePlugin, { OptionType, PluginNative, ReporterTestable } from "@utils/types";
+import definePlugin, { makeRange, OptionType, PluginNative, ReporterTestable } from "@utils/types";
+import type { Channel, Embed, GuildMember, MessageAttachment, User } from "@vencord/discord-types";
 import { findByCodeLazy, findLazy } from "@webpack";
-import { Button, ChannelStore, GuildStore, UserStore } from "@webpack/common";
-import type { Channel, Embed, GuildMember, MessageAttachment, User } from "discord-types/general";
+import { Button, ChannelStore, GuildRoleStore, GuildStore, UserStore } from "@webpack/common";
 
 const ChannelTypes = findLazy(m => m.ANNOUNCEMENT_THREAD === 10);
 
@@ -189,8 +188,9 @@ const Native = VencordNative.pluginHelpers.XSOverlay as PluginNative<typeof impo
 export default definePlugin({
     name: "XSOverlay",
     description: "Forwards discord notifications to XSOverlay, for easy viewing in VR",
+    tags: ["Notifications"],
     authors: [Devs.Nyako],
-    tags: ["vr", "notify"],
+    searchTerms: ["vr", "notify"],
     reporterTestable: ReporterTestable.None,
     settings,
 
@@ -267,7 +267,7 @@ export default definePlugin({
             // color role mentions (unity styling btw lol)
             if (message.mention_roles.length > 0) {
                 for (const roleId of message.mention_roles) {
-                    const role = GuildStore.getRole(channel.guild_id, roleId);
+                    const role = GuildRoleStore.getRole(channel.guild_id, roleId);
                     if (!role) continue;
                     const roleColor = role.colorString ?? `#${pingColor}`;
                     finalMsg = finalMsg.replace(`<@&${roleId}>`, `<b><color=${roleColor}>@${role.name}</color></b>`);

@@ -24,19 +24,20 @@ const settings = definePluginSettings({
 export default definePlugin({
     name: "PictureInPicture",
     description: "Adds picture in picture to videos (next to the Download button)",
+    tags: ["Media", "Utility"],
     authors: [Devs.Lumap],
     settings,
     patches: [
         {
-            find: ".removeMosaicItemHoverButton),",
+            find: '["VIDEO","CLIP","AUDIO"]',
             replacement: {
-                match: /\.nonMediaMosaicItem\]:.{0,40}children:\[(?<=showDownload:(\i).+?isVisualMediaType:(\i).+?)/,
-                replace: "$&$1&&$2&&$self.renderPiPButton(),"
+                match: /(\[\i>0&&\i\.length>0.{0,150}?children:)(\i.slice\(\i\))(?<=showDownload:(\i).+?isVisualMediaType:(\i).+?)/,
+                replace: (_, rest, origChildren, showDownload, isVisualMediaType) => `${rest}[${showDownload}&&${isVisualMediaType}&&$self.PictureInPictureButton(),...${origChildren}]`
             }
         }
     ],
 
-    renderPiPButton: ErrorBoundary.wrap(() => {
+    PictureInPictureButton: ErrorBoundary.wrap(() => {
         return (
             <Tooltip text="Toggle Picture in Picture">
                 {tooltipProps => (

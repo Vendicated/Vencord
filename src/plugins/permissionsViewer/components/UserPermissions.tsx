@@ -17,15 +17,17 @@
 */
 
 import ErrorBoundary from "@components/ErrorBoundary";
+import { HeadingTertiary } from "@components/Heading";
+import { cl, getGuildPermissionSpecMap, getSortedRolesForMember, sortUserRoles } from "@plugins/permissionsViewer/utils";
 import { getIntlMessage } from "@utils/discord";
 import { classes } from "@utils/misc";
-import { filters, findBulk, proxyLazyWebpack } from "@webpack";
+import type { Guild, GuildMember, RoleOrUserPermission } from "@vencord/discord-types";
+import { PermissionOverwriteType } from "@vencord/discord-types/enums";
+import { findCssClassesLazy } from "@webpack";
 import { PermissionsBits, Text, Tooltip, useMemo, UserStore } from "@webpack/common";
-import type { Guild, GuildMember } from "discord-types/general";
 
 import { PermissionsSortOrder, settings } from "..";
-import { cl, getGuildPermissionSpecMap, getSortedRoles, sortUserRoles } from "../utils";
-import openRolesAndUsersPermissionsModal, { PermissionType, type RoleOrUserPermission } from "./RolesAndUsersPermissions";
+import openRolesAndUsersPermissionsModal from "./RolesAndUsersPermissions";
 
 interface UserPermission {
     permission: string;
@@ -36,15 +38,8 @@ interface UserPermission {
 
 type UserPermissions = Array<UserPermission>;
 
-const { RoleRootClasses, RoleClasses, RoleBorderClasses } = proxyLazyWebpack(() => {
-    const [RoleRootClasses, RoleClasses, RoleBorderClasses] = findBulk(
-        filters.byProps("root", "expandButton", "collapseButton"),
-        filters.byProps("role", "roleCircle", "roleName"),
-        filters.byProps("roleCircle", "dot", "dotBorderColor")
-    ) as Record<string, string>[];
-
-    return { RoleRootClasses, RoleClasses, RoleBorderClasses };
-});
+const RoleClasses = findCssClassesLazy("role", "roleName", "roleRemoveButton", "roleNameOverflow", "root");
+const RoleBorderClasses = findCssClassesLazy("roleCircle", "dot", "dotBorderColor");
 
 interface FakeRoleProps extends React.HTMLAttributes<HTMLDivElement> {
     text: string;
@@ -56,7 +51,7 @@ function FakeRole({ text, color, ...props }: FakeRoleProps) {
         <div {...props} className={classes(RoleClasses.role)}>
             <div className={RoleClasses.roleRemoveButton}>
                 <span
-                    className={classes(RoleBorderClasses.roleCircle, RoleClasses.roleCircle)}
+                    className={RoleBorderClasses.roleCircle}
                     style={{ backgroundColor: color }}
                 />
             </div>
@@ -94,16 +89,16 @@ function UserPermissionsComponent({ guild, guildMember, closePopout }: { guild: 
     const [rolePermissions, userPermissions] = useMemo(() => {
         const userPermissions: UserPermissions = [];
 
-        const userRoles = getSortedRoles(guild, guildMember);
+        const userRoles = getSortedRolesForMember(guild, guildMember);
 
         const rolePermissions: Array<RoleOrUserPermission> = userRoles.map(role => ({
-            type: PermissionType.Role,
+            type: PermissionOverwriteType.ROLE,
             ...role
         }));
 
         if (guild.ownerId === guildMember.userId) {
             rolePermissions.push({
-                type: PermissionType.Owner,
+                type: PermissionOverwriteType.OWNER,
                 permissions: Object.values(PermissionsBits).reduce((prev, curr) => prev | curr, 0n)
             });
 
@@ -140,7 +135,7 @@ function UserPermissionsComponent({ guild, guildMember, closePopout }: { guild: 
 
     return <div>
         <div className={cl("user-header-container")}>
-            <Text variant="eyebrow">Permissions</Text>
+            <HeadingTertiary>Permissions</HeadingTertiary>
             <div className={cl("user-header-btns")}>
                 <Tooltip text={`Sorting by ${permissionsSortOrder === PermissionsSortOrder.HighestRole ? "Highest Role" : "Lowest Role"}`}>
                     {tooltipProps => (
@@ -159,7 +154,7 @@ function UserPermissionsComponent({ guild, guildMember, closePopout }: { guild: 
                                 viewBox="0 96 960 960"
                                 transform={permissionsSortOrder === PermissionsSortOrder.HighestRole ? "scale(1 1)" : "scale(1 -1)"}
                             >
-                                <path fill="var(--text-normal)" d="M440 896V409L216 633l-56-57 320-320 320 320-56 57-224-224v487h-80Z" />
+                                <path fill="var(--text-default)" d="M440 896V409L216 633l-56-57 320-320 320 320-56 57-224-224v487h-80Z" />
                             </svg>
                         </div>
                     )}
@@ -181,7 +176,7 @@ function UserPermissionsComponent({ guild, guildMember, closePopout }: { guild: 
                                 height="24"
                                 viewBox="0 0 24 24"
                             >
-                                <path fill="var(--text-normal)" d="M7 12.001C7 10.8964 6.10457 10.001 5 10.001C3.89543 10.001 3 10.8964 3 12.001C3 13.1055 3.89543 14.001 5 14.001C6.10457 14.001 7 13.1055 7 12.001ZM14 12.001C14 10.8964 13.1046 10.001 12 10.001C10.8954 10.001 10 10.8964 10 12.001C10 13.1055 10.8954 14.001 12 14.001C13.1046 14.001 14 13.1055 14 12.001ZM19 10.001C20.1046 10.001 21 10.8964 21 12.001C21 13.1055 20.1046 14.001 19 14.001C17.8954 14.001 17 13.1055 17 12.001C17 10.8964 17.8954 10.001 19 10.001Z" />
+                                <path fill="var(--text-default)" d="M7 12.001C7 10.8964 6.10457 10.001 5 10.001C3.89543 10.001 3 10.8964 3 12.001C3 13.1055 3.89543 14.001 5 14.001C6.10457 14.001 7 13.1055 7 12.001ZM14 12.001C14 10.8964 13.1046 10.001 12 10.001C10.8954 10.001 10 10.8964 10 12.001C10 13.1055 10.8954 14.001 12 14.001C13.1046 14.001 14 13.1055 14 12.001ZM19 10.001C20.1046 10.001 21 10.8964 21 12.001C21 13.1055 20.1046 14.001 19 14.001C17.8954 14.001 17 13.1055 17 12.001C17 10.8964 17.8954 10.001 19 10.001Z" />
                             </svg>
                         </div>
                     )}
@@ -189,9 +184,10 @@ function UserPermissionsComponent({ guild, guildMember, closePopout }: { guild: 
             </div>
         </div>
         {userPermissions.length > 0 && (
-            <div className={classes(RoleRootClasses.root)}>
+            <div className={classes(RoleClasses.root)}>
                 {userPermissions.map(({ permission, roleColor, roleName }) => (
                     <Tooltip
+                        key={permission}
                         text={<GrantedByTooltip roleName={roleName} roleColor={roleColor} />}
                         tooltipClassName={cl("granted-by-container")}
                         tooltipContentClassName={cl("granted-by-content")}

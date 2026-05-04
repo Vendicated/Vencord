@@ -27,14 +27,14 @@ export default definePlugin({
         {
             find: "#{intl::DISCODO_DISABLED}",
             replacement: {
-                match: /(?<=#{intl::DISCODO_DISABLED}.+?return)(\(.{0,75}?tutorialContainer.+?}\))(?=}function)/,
+                match: /(?<=#{intl::DISCODO_DISABLED}.+?return)(\(.{0,150}?tutorialId:"friends-list".+?}\))(?=}function)/,
                 replace: "[$1].concat(Vencord.Api.ServerList.renderAll(Vencord.Api.ServerList.ServerListRenderPosition.Above))"
             }
         },
         {
-            find: "#{intl::SERVERS}),children",
+            find: ".setGuildsTree(",
             replacement: {
-                match: /(?<=#{intl::SERVERS}\),children:)\i\.map\(\i\)/,
+                match: /(?<=#{intl::SERVERS}\),gap:"xs",children:)\i\.map\(.{0,50}\.length\)/,
                 replace: "Vencord.Api.ServerList.renderAll(Vencord.Api.ServerList.ServerListRenderPosition.In).concat($&)"
             }
         }

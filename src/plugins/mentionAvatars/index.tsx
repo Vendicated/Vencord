@@ -10,8 +10,8 @@ import { definePluginSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { GuildStore, SelectedGuildStore, useState } from "@webpack/common";
-import { User } from "discord-types/general";
+import { User } from "@vencord/discord-types";
+import { GuildRoleStore, SelectedGuildStore, useState } from "@webpack/common";
 
 const settings = definePluginSettings({
     showAtSymbol: {
@@ -45,19 +45,20 @@ function DefaultRoleIcon() {
 export default definePlugin({
     name: "MentionAvatars",
     description: "Shows user avatars and role icons inside mentions",
+    tags: ["Appearance", "Customisation"],
     authors: [Devs.Ven, Devs.SerStars],
 
     patches: [{
         find: ".USER_MENTION)",
         replacement: {
-            match: /children:"@"\.concat\((null!=\i\?\i:\i)\)(?<=\.useName\((\i)\).+?)/,
+            match: /children:`@\$\{(\i\?\?\i)\}`(?<=\.useName\((\i)\).+?)/,
             replace: "children:$self.renderUsername({username:$1,user:$2})"
         }
     },
     {
         find: ".ROLE_MENTION)",
         replacement: {
-            match: /children:\[\i&&.{0,50}\.RoleDot.{0,300},\i(?=\])/,
+            match: /children:\[\i&&.{0,100}className:\i.\i,background:!1,.{0,50}?,\i(?=\])/,
             replace: "$&,$self.renderRoleIcon(arguments[0])"
         }
     }],
@@ -89,7 +90,7 @@ export default definePlugin({
         // Discord uses Role Mentions for uncached users because .... idk
         if (!roleId) return null;
 
-        const role = GuildStore.getRole(guildId, roleId);
+        const role = GuildRoleStore.getRole(guildId, roleId);
 
         if (!role?.icon) return <DefaultRoleIcon />;
 
@@ -99,7 +100,7 @@ export default definePlugin({
                 src={`${location.protocol}//${window.GLOBAL_ENV.CDN_HOST}/role-icons/${roleId}/${role.icon}.webp?size=24&quality=lossless`}
             />
         );
-    }),
+    }, { noop: true }),
 });
 
 function getUsernameString(username: string) {

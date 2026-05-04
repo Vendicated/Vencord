@@ -28,6 +28,7 @@ export default definePlugin({
     name: "UserMessagesPronouns",
     authors: [Devs.Tyman, Devs.TheKodeToad, Devs.Ven, Devs.Elvyra],
     description: "Adds pronouns to chat user messages",
+    tags: ["Chat", "Appearance"],
     settings,
 
     patches: [
@@ -41,11 +42,13 @@ export default definePlugin({
         },
         {
             find: '="SYSTEM_TAG"',
-            replacement: {
-                // Add next to username (compact mode)
-                match: /className:\i\(\)\(\i\.className(?:,\i\.clickable)?,\i\)}\),(?=\i)/g,
-                replace: "$&$self.CompactPronounsChatComponentWrapper(arguments[0]),"
-            }
+            replacement: [
+                {
+                    // Add next to username (compact mode)
+                    match: /className:\i\(\)\(\i\.className(?:,\i\.\i)?,\i\)\}\)(?:\))?,(?=\i)/g,
+                    replace: "$&$self.CompactPronounsChatComponentWrapper(arguments[0]),",
+                },
+            ]
         }
     ],
 
