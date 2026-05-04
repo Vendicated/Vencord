@@ -16,10 +16,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { PluginOptionComponent } from "@utils/types";
+import { PluginSettingComponentDef } from "@utils/types";
 
 import { ComponentSettingProps } from "./Common";
 
-export function ComponentSetting({ option, onChange }: ComponentSettingProps<PluginOptionComponent>) {
-    return option.component({ setValue: onChange, option });
+export function ComponentSetting({ setting, onChange }: ComponentSettingProps<PluginSettingComponentDef>) {
+    return setting.component({ setValue: onChange, option: setting });
 }
