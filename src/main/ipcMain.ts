@@ -155,7 +155,7 @@ ipcMain.handle(IpcEvents.OPEN_MONACO_EDITOR, async () => {
         title,
         autoHideMenuBar: true,
         darkTheme: true,
-        backgroundColor: "#1e1e1e",
+        backgroundColor: nativeTheme.shouldUseDarkColors ? "#1e1e1e" : "white",
         webPreferences: {
             preload: join(__dirname, IS_DISCORD_DESKTOP ? "preload.js" : "vencordDesktopPreload.js"),
             contextIsolation: true,
