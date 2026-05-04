@@ -1,3 +1,9 @@
+/*
+ * Vencord, a Discord client mod
+ * Copyright (c) 2023 Vendicated and contributors
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
+
 import { NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
 import definePlugin from "@utils/types";
@@ -26,7 +32,13 @@ type LoadProgress = {
     pages: number;
 };
 
+type ShouldCancel = () => boolean;
+
 let rangeStart: { channelId: string; messageId: string; } | null = null;
+
+function isCancelled(shouldCancel?: ShouldCancel): boolean {
+    return shouldCancel?.() === true;
+}
 
 function getCurrentUserId(): string | null {
     const user = UserStore.getCurrentUser();
@@ -115,13 +127,16 @@ function getRetryDelay(error: any, fallback: number): number {
     return fallback;
 }
 
-async function fetchChannelPage(channelId: string, before?: string): Promise<ChannelMessage[]> {
+async function fetchChannelPage(channelId: string, before?: string, shouldCancel?: ShouldCancel): Promise<ChannelMessage[]> {
     const url = `/channels/${channelId}/messages?limit=${MESSAGE_PAGE_SIZE}${before ? `&before=${before}` : ""}`;
 
     for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
+        if (isCancelled(shouldCancel)) return [];
+
         try {
             return normalizeMessagesResponse(await RestAPI.get({ url }));
         } catch (error) {
+            if (isCancelled(shouldCancel)) return [];
             if (attempt === MAX_RETRIES) throw error;
             await sleep(getRetryDelay(error, 750 * (attempt + 1)));
         }
@@ -133,7 +148,8 @@ async function fetchChannelPage(channelId: string, before?: string): Promise<Cha
 async function loadMyMessages(
     channelId: string,
     maxOwnMessages?: number,
-    onProgress?: (progress: LoadProgress) => void
+    onProgress?: (progress: LoadProgress) => void,
+    shouldCancel?: ShouldCancel
 ): Promise<ChannelMessage[]> {
     const userId = getCurrentUserId();
     if (!userId) return [];
@@ -142,8 +158,11 @@ async function loadMyMessages(
     let before: string | undefined;
 
     for (let page = 0; page < MAX_HISTORY_PAGES; page++) {
-        const pageMessages = await fetchChannelPage(channelId, before);
+        if (isCancelled(shouldCancel)) break;
 
+        const pageMessages = await fetchChannelPage(channelId, before, shouldCancel);
+
+        if (isCancelled(shouldCancel)) break;
         if (pageMessages.length === 0) break;
 
         for (const message of pageMessages) {
@@ -152,7 +171,9 @@ async function loadMyMessages(
             }
         }
 
-        onProgress?.({ found: found.size, pages: page + 1 });
+        if (!isCancelled(shouldCancel)) {
+            onProgress?.({ found: found.size, pages: page + 1 });
+        }
 
         const oldestMessage = getOldestMessage(pageMessages);
         if (!oldestMessage || oldestMessage.id === before) break;
@@ -162,6 +183,7 @@ async function loadMyMessages(
         if (maxOwnMessages != null && found.size >= maxOwnMessages) break;
         if (pageMessages.length < MESSAGE_PAGE_SIZE) break;
 
+        if (isCancelled(shouldCancel)) break;
         await sleep(FETCH_DELAY_MS);
     }
 
@@ -172,7 +194,8 @@ async function loadMyMessagesInRange(
     channelId: string,
     startId: string,
     endId: string,
-    onProgress?: (progress: LoadProgress) => void
+    onProgress?: (progress: LoadProgress) => void,
+    shouldCancel?: ShouldCancel
 ): Promise<ChannelMessage[]> {
     const userId = getCurrentUserId();
     if (!userId) return [];
@@ -182,8 +205,11 @@ async function loadMyMessagesInRange(
     let before: string | undefined = nextSnowflake(high);
 
     for (let page = 0; page < MAX_HISTORY_PAGES; page++) {
-        const pageMessages = await fetchChannelPage(channelId, before);
+        if (isCancelled(shouldCancel)) break;
 
+        const pageMessages = await fetchChannelPage(channelId, before, shouldCancel);
+
+        if (isCancelled(shouldCancel)) break;
         if (pageMessages.length === 0) break;
 
         for (const message of pageMessages) {
@@ -192,7 +218,9 @@ async function loadMyMessagesInRange(
             }
         }
 
-        onProgress?.({ found: found.size, pages: page + 1 });
+        if (!isCancelled(shouldCancel)) {
+            onProgress?.({ found: found.size, pages: page + 1 });
+        }
 
         const oldestMessage = getOldestMessage(pageMessages);
         if (!oldestMessage || oldestMessage.id === before) break;
@@ -202,6 +230,7 @@ async function loadMyMessagesInRange(
 
         if (pageMessages.length < MESSAGE_PAGE_SIZE) break;
 
+        if (isCancelled(shouldCancel)) break;
         await sleep(FETCH_DELAY_MS);
     }
 
@@ -220,16 +249,19 @@ async function deleteMessageWithRetry(channelId: string, messageId: string): Pro
             }
 
             const retryAfter = Number(
-                error?.body?.retry_after ?? 
-                error?.retry_after ?? 
+                error?.body?.retry_after ??
+                error?.retry_after ??
                 error?.response?.body?.retry_after ??
                 error?.response?.retry_after
             );
 
             let delayMs = getRetryDelay(error, 1000 * (attempt + 1));
-            
+
             if (error?.status === 429 || retryAfter > 0) {
-                delayMs = Math.max(delayMs, Math.ceil(retryAfter * 1000) + 500);
+                if (Number.isFinite(retryAfter) && retryAfter > 0) {
+                    delayMs = Math.max(delayMs, Math.ceil(retryAfter * 1000) + 500);
+                }
+
                 console.warn(`Rate limited! Waiting ${delayMs}ms before retry...`);
             }
 
@@ -309,7 +341,7 @@ function DeleteAllModal({ modalProps, channelId }: { modalProps: ModalProps; cha
     const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
-        let alive = true;
+        let cancelled = false;
 
         setLoading(true);
         setMessages([]);
@@ -318,13 +350,13 @@ function DeleteAllModal({ modalProps, channelId }: { modalProps: ModalProps; cha
         setError(null);
 
         loadMyMessages(channelId, undefined, progress => {
-            if (!alive) return;
+            if (cancelled) return;
 
             setFound(progress.found);
             setPages(progress.pages);
-        })
+        }, () => cancelled)
             .then(loadedMessages => {
-                if (!alive) return;
+                if (cancelled) return;
 
                 setMessages(loadedMessages);
                 setFound(loadedMessages.length);
@@ -333,14 +365,14 @@ function DeleteAllModal({ modalProps, channelId }: { modalProps: ModalProps; cha
             .catch(loadError => {
                 console.error("BulkDelete load all failed:", loadError);
 
-                if (!alive) return;
+                if (cancelled) return;
 
                 setError("Failed to load channel history.");
                 setLoading(false);
             });
 
         return () => {
-            alive = false;
+            cancelled = true;
         };
     }, [channelId]);
 
@@ -410,7 +442,7 @@ function RangeDeleteModal({
     const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
-        let alive = true;
+        let cancelled = false;
 
         setLoading(true);
         setMessages([]);
@@ -419,13 +451,13 @@ function RangeDeleteModal({
         setError(null);
 
         loadMyMessagesInRange(channelId, startId, endId, progress => {
-            if (!alive) return;
+            if (cancelled) return;
 
             setFound(progress.found);
             setPages(progress.pages);
-        })
+        }, () => cancelled)
             .then(loadedMessages => {
-                if (!alive) return;
+                if (cancelled) return;
 
                 setMessages(loadedMessages);
                 setFound(loadedMessages.length);
@@ -434,14 +466,14 @@ function RangeDeleteModal({
             .catch(loadError => {
                 console.error("BulkDelete range load failed:", loadError);
 
-                if (!alive) return;
+                if (cancelled) return;
 
                 setError("Failed to load selected range.");
                 setLoading(false);
             });
 
         return () => {
-            alive = false;
+            cancelled = true;
         };
     }, [channelId, startId, endId]);
 
