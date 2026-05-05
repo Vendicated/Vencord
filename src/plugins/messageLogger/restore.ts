@@ -8,6 +8,7 @@ import { Logger } from "@utils/Logger";
 import { Message } from "@vencord/discord-types";
 import { MessageCache, MessageStore } from "@webpack/common";
 
+import { getCachedBlobUrl } from "./attachmentCache";
 import { deserialize, deserializeEditHistory, getEntriesForChannel } from "./persistence";
 import { PersistedMessage } from "./types";
 
@@ -36,13 +37,19 @@ export function minSnowflake(ids: string[]): string | null {
  * Build a real Message instance from a persisted entry, using a constructor we
  * grabbed from a live message in the same channel.
  */
-function restoreMessageInstance(entry: PersistedMessage, Ctor: any): Message {
+async function restoreMessageInstance(entry: PersistedMessage, Ctor: any): Promise<Message> {
     const plain = deserialize(entry.message);
     if (entry.editHistory) plain.editHistory = deserializeEditHistory(entry.editHistory);
     if (entry.firstEditTimestamp != null) plain.firstEditTimestamp = new Date(entry.firstEditTimestamp);
     plain.deleted = entry.deleted;
     if (Array.isArray(plain.attachments)) {
-        plain.attachments = plain.attachments.map((a: any) => ({ ...a, deleted: entry.deleted }));
+        plain.attachments = await Promise.all(plain.attachments.map(async (a: any) => {
+            if (typeof a?.id !== "string") return { ...a, deleted: entry.deleted };
+            const blobUrl = await getCachedBlobUrl(a.id);
+            return blobUrl
+                ? { ...a, url: blobUrl, proxy_url: blobUrl, deleted: entry.deleted }
+                : { ...a, deleted: entry.deleted };
+        }));
     }
     return new Ctor(plain);
 }
@@ -86,7 +93,7 @@ export async function applyEntriesToChannel(channelId: string): Promise<void> {
                 mutated = true;
             } else if (entry.deleted) {
                 if ((cache as any).has?.(entry.id)) continue;
-                const instance = restoreMessageInstance(entry, Ctor);
+                const instance = await restoreMessageInstance(entry, Ctor);
                 cache = cache.receiveMessage(instance).update(entry.id, (m: any) => m
                     .set("deleted", true)
                     .set("attachments", (m.attachments ?? []).map((a: any) => ({ ...a, deleted: true }))));
