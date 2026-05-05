@@ -35,6 +35,7 @@ import { Alerts, Button, ChannelStore, FluxDispatcher, Forms, Menu, MessageStore
 import * as attachmentCache from "./attachmentCache";
 import overlayStyle from "./deleteStyleOverlay.css?managed";
 import textStyle from "./deleteStyleText.css?managed";
+import * as exportImport from "./exportImport";
 import { openHistoryModal } from "./HistoryModal";
 import * as persistence from "./persistence";
 import * as restore from "./restore";
@@ -363,6 +364,18 @@ export default definePlugin({
                     })}
                 >
                     Open Message Log
+                </Button>
+                <Button
+                    size={Button.Sizes.SMALL}
+                    onClick={() => void exportImport.exportLog()}
+                >
+                    Export log
+                </Button>
+                <Button
+                    size={Button.Sizes.SMALL}
+                    onClick={() => exportImport.importLogFromFilePicker()}
+                >
+                    Import log
                 </Button>
                 <Button
                     size={Button.Sizes.SMALL}
