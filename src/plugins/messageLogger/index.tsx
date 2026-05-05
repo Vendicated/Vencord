@@ -35,6 +35,7 @@ import { ChannelStore, FluxDispatcher, Menu, MessageStore, Parser, SelectedChann
 import overlayStyle from "./deleteStyleOverlay.css?managed";
 import textStyle from "./deleteStyleText.css?managed";
 import { openHistoryModal } from "./HistoryModal";
+import * as persistence from "./persistence";
 
 interface MLMessage extends Message {
     deleted?: boolean;
@@ -103,6 +104,11 @@ const settings = definePluginSettings({
         description: "Comma-separated list of guild IDs to ignore",
         default: "",
         multiline: true
+    },
+    persistEnabled: {
+        type: OptionType.BOOLEAN,
+        description: "Persist deleted/edited messages to disk so they survive client reloads",
+        default: true,
     },
 });
 
@@ -249,6 +255,9 @@ export default definePlugin({
     }, { noop: true }),
 
     makeEdit(newMessage: any, oldMessage: any): any {
+        if (settings.store.persistEnabled) {
+            persistence.enqueueEdit(newMessage, oldMessage);
+        }
         return {
             timestamp: new Date(newMessage.edited_timestamp),
             content: oldMessage.content
@@ -271,6 +280,9 @@ export default definePlugin({
                 if (shouldIgnore) {
                     cache = cache.remove(id);
                 } else {
+                    if (settings.store.persistEnabled) {
+                        persistence.enqueueDelete(msg);
+                    }
                     cache = cache.update(id, m => m
                         .set("deleted", true)
                         .set("attachments", m.attachments.map(a => (a.deleted = true, a))));
