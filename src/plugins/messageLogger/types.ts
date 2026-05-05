@@ -31,6 +31,13 @@ export interface PersistedMessage {
     editHistory?: { timestamp: number; content: string; }[];
     /** ms epoch. */
     firstEditTimestamp?: number;
+    /**
+     * If true, this entry is "saved" — retention purge skips it and the viewer's
+     * Saved tab shows it. Convention: present-and-true means saved; absent means
+     * not. Unstarring deletes this key rather than setting it to false, so the
+     * `saved` IDB index stays sparse.
+     */
+    saved?: boolean;
 }
 
 /**
@@ -49,4 +56,4 @@ export type WriteEvent =
     | { kind: "edit"; newMessage: Message; oldMessage: Message; capturedAt: number; };
 
 /** Current schema version. Bumped on incompatible storage changes. */
-export const SCHEMA_VERSION = 1 as const;
+export const SCHEMA_VERSION = 2 as const;
