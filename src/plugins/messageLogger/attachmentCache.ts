@@ -53,6 +53,8 @@ let currentTotalBytes = 0;
 let initialized = false;
 let quotaExceeded = false;
 const blobUrlCache = new Map<string, string>();
+/** IDs currently being downloaded — guards against duplicate dispatches racing the IDB dedup check. */
+const inProgress = new Set<string>();
 
 // ---- concurrency limiter ----------------------------------------------------
 
@@ -186,8 +188,15 @@ export function tryCacheFromMessage(message: any): void {
             logger.debug("skip attachment: over per-file cap", att.id, declaredSize, ">", s.perFileCapBytes);
             continue;
         }
+        if (inProgress.has(att.id)) {
+            logger.debug("skip attachment: already in progress", att.id);
+            continue;
+        }
+        inProgress.add(att.id);
         logger.info("queuing attachment download", att.id, bucket, "size~=", declaredSize);
-        void downloadOne(att, s).catch(e => logger.error("downloadOne failed for", att.id, e));
+        void downloadOne(att, s)
+            .catch(e => logger.error("downloadOne failed for", att.id, e))
+            .finally(() => { inProgress.delete(att.id); });
     }
 }
 
