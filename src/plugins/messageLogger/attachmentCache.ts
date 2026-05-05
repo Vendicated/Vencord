@@ -7,7 +7,12 @@
 import { Logger } from "@utils/Logger";
 import { PluginNative } from "@utils/types";
 
-import { listAttachmentRecords } from "./persistence";
+import {
+    evictAttachmentsOldestFirst,
+    getAttachmentRecord,
+    listAttachmentRecords,
+    putAttachmentRecord,
+} from "./persistence";
 
 const logger = new Logger("MessageLogger");
 
@@ -97,4 +102,123 @@ export function shutdown(): void {
     }
     blobUrlCache.clear();
     initialized = false;
+}
+
+// ---- type filtering ---------------------------------------------------------
+
+type Bucket = "images" | "videos" | "audio" | "other";
+
+function bucketFor(att: any): Bucket {
+    const ct = String(att.content_type ?? "").toLowerCase();
+    if (ct.startsWith("image/")) return "images";
+    if (ct.startsWith("video/")) return "videos";
+    if (ct.startsWith("audio/")) return "audio";
+    const fn = String(att.filename ?? "").toLowerCase();
+    if (/\.(png|jpe?g|gif|webp|bmp|avif|tiff?)$/.test(fn)) return "images";
+    if (/\.(mp4|webm|mov|mkv|m4v|avi)$/.test(fn)) return "videos";
+    if (/\.(mp3|ogg|wav|flac|m4a|opus)$/.test(fn)) return "audio";
+    return "other";
+}
+
+function bucketEnabled(b: Bucket, s: Settings): boolean {
+    return s[b];
+}
+
+// ---- eviction ---------------------------------------------------------------
+
+async function evictUntilUnderCap(needed: number, totalCapBytes: number): Promise<void> {
+    if (currentTotalBytes + needed <= totalCapBytes) return;
+    const toFree = (currentTotalBytes + needed) - totalCapBytes;
+    let freed = 0;
+    const evictedIds: string[] = [];
+    const bytesFreed = await evictAttachmentsOldestFirst(rec => {
+        if (freed >= toFree) return false;
+        evictedIds.push(rec.id);
+        freed += rec.size;
+        return true;
+    });
+    currentTotalBytes -= bytesFreed;
+    if (currentTotalBytes < 0) currentTotalBytes = 0;
+    if (useNative && Native) {
+        for (const id of evictedIds) {
+            try { await Native.deleteAttachment(id); } catch { /* ignore */ }
+        }
+    }
+    for (const id of evictedIds) {
+        const url = blobUrlCache.get(id);
+        if (url) {
+            try { URL.revokeObjectURL(url); } catch { /* ignore */ }
+            blobUrlCache.delete(id);
+        }
+    }
+}
+
+// ---- capture pipeline -------------------------------------------------------
+
+/**
+ * Look at a deleted message and queue downloads for matching attachments.
+ * Fire-and-forget by design — never blocks the delete-handling path.
+ */
+export function tryCacheFromMessage(message: any): void {
+    if (!initialized || quotaExceeded) return;
+    const s = settingsRef();
+    if (!s.enabled) return;
+    const atts = message?.attachments;
+    if (!Array.isArray(atts) || atts.length === 0) return;
+    for (const att of atts) {
+        if (!att || typeof att.id !== "string" || typeof att.url !== "string") continue;
+        const bucket = bucketFor(att);
+        if (!bucketEnabled(bucket, s)) continue;
+        const declaredSize = typeof att.size === "number" ? att.size : 0;
+        if (declaredSize > 0 && declaredSize > s.perFileCapBytes) continue;
+        // Fire-and-forget per-attachment download
+        void downloadOne(att, s).catch(e => logger.error("downloadOne failed for", att.id, e));
+    }
+}
+
+async function downloadOne(att: any, s: Settings): Promise<void> {
+    await acquireSlot();
+    try {
+        // Dedup: already cached?
+        const existing = await getAttachmentRecord(att.id);
+        if (existing) return;
+
+        const resp = await fetch(att.url);
+        if (!resp.ok) {
+            logger.warn("attachment fetch non-ok", att.id, resp.status);
+            return;
+        }
+        const buf = await resp.arrayBuffer();
+        if (buf.byteLength > s.perFileCapBytes) {
+            logger.debug("attachment exceeds per-file cap; skipping", att.id, buf.byteLength);
+            return;
+        }
+        await evictUntilUnderCap(buf.byteLength, s.totalCapBytes);
+
+        const contentType = String(att.content_type ?? resp.headers.get("content-type") ?? "application/octet-stream");
+        const filename = String(att.filename ?? att.id);
+        const firstSeenAt = Date.now();
+
+        if (useNative && Native) {
+            await Native.writeAttachment(att.id, new Uint8Array(buf));
+            await putAttachmentRecord({ id: att.id, firstSeenAt, contentType, size: buf.byteLength, filename });
+        } else {
+            const blob = new Blob([buf], { type: contentType });
+            try {
+                await putAttachmentRecord({ id: att.id, firstSeenAt, contentType, size: buf.byteLength, filename, blob });
+            } catch (e: any) {
+                if (e?.name === "QuotaExceededError" || /quota/i.test(String(e))) {
+                    quotaExceeded = true;
+                    logger.warn("attachment cache quota exceeded; further writes disabled until cache is cleared");
+                    return;
+                }
+                throw e;
+            }
+        }
+        currentTotalBytes += buf.byteLength;
+    } catch (e) {
+        logger.error("downloadOne errored", att?.id, e);
+    } finally {
+        releaseSlot();
+    }
 }
