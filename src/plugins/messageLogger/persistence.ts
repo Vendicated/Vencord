@@ -7,7 +7,7 @@
 import { Logger } from "@utils/Logger";
 import { Message } from "@vencord/discord-types";
 
-import { PersistedMessage, PlainMessage, SCHEMA_VERSION } from "./types";
+import { PersistedMessage, PlainMessage, SCHEMA_VERSION, WriteEvent } from "./types";
 
 const logger = new Logger("MessageLogger");
 const DB_NAME = "VencordMessageLogger";
@@ -120,10 +120,135 @@ export function deserializeEditHistory(history?: PersistedMessage["editHistory"]
     return history.map(e => ({ timestamp: new Date(e.timestamp), content: e.content }));
 }
 
-// Stubs filled in by Task 3 / Task 4.
-export function enqueueDelete(_message: Message): void { /* Task 3 */ }
-export function enqueueEdit(_newMessage: Message, _oldMessage: Message): void { /* Task 3 */ }
-export function flushSync(): void { /* Task 3 */ }
+// ---- write buffer -----------------------------------------------------------
+
+const FLUSH_DEBOUNCE_MS = 500;
+const FLUSH_FORCE_AT = 256;
+
+let buffer: WriteEvent[] = [];
+let flushTimer: ReturnType<typeof setTimeout> | null = null;
+
+function scheduleFlush(): void {
+    if (flushTimer != null) return;
+    flushTimer = setTimeout(() => { flushTimer = null; void flushBuffer(); }, FLUSH_DEBOUNCE_MS);
+}
+
+function maybeFlushNow(): void {
+    if (buffer.length >= FLUSH_FORCE_AT) {
+        if (flushTimer != null) { clearTimeout(flushTimer); flushTimer = null; }
+        void flushBuffer();
+    }
+}
+
+export function enqueueDelete(message: Message): void {
+    if (disabled || readOnly) return;
+    buffer.push({ kind: "delete", message, capturedAt: Date.now() });
+    scheduleFlush();
+    maybeFlushNow();
+}
+
+export function enqueueEdit(newMessage: Message, oldMessage: Message): void {
+    if (disabled || readOnly) return;
+    buffer.push({ kind: "edit", newMessage, oldMessage, capturedAt: Date.now() });
+    scheduleFlush();
+    maybeFlushNow();
+}
+
+/**
+ * Best-effort sync flush for `beforeunload`. IDB transactions are async so this
+ * fires-and-forgets — the browser may cut us off mid-transaction. Acceptable for
+ * this data class.
+ */
+export function flushSync(): void {
+    if (flushTimer != null) { clearTimeout(flushTimer); flushTimer = null; }
+    if (buffer.length === 0) return;
+    void flushBuffer();
+}
+
+/**
+ * Coalesce buffered events by message ID (last-write-wins) and write in one tx.
+ * For an "edit" event whose message ID already has a "delete" buffered: keep the
+ * delete (a deleted message can't gain edit history).
+ */
+async function flushBuffer(): Promise<void> {
+    if (disabled || readOnly) { buffer = []; return; }
+    const batch = buffer;
+    buffer = [];
+    if (batch.length === 0) return;
+
+    type Coalesced = { id: string; entry: PersistedMessage; isDelete: boolean; };
+    const byId = new Map<string, Coalesced>();
+
+    for (const ev of batch) {
+        if (ev.kind === "delete") {
+            const m = ev.message as any;
+            byId.set(m.id, {
+                id: m.id,
+                isDelete: true,
+                entry: {
+                    id: m.id,
+                    channelId: m.channel_id,
+                    guildId: m.guild_id ?? undefined,
+                    capturedAt: ev.capturedAt,
+                    deleted: true,
+                    message: serialize(ev.message),
+                    editHistory: (m.editHistory ?? []).map((e: any) => ({
+                        timestamp: e.timestamp instanceof Date ? e.timestamp.getTime() : e.timestamp,
+                        content: e.content,
+                    })),
+                    firstEditTimestamp: m.firstEditTimestamp instanceof Date ? m.firstEditTimestamp.getTime() : m.firstEditTimestamp,
+                },
+            });
+        } else {
+            const newM = ev.newMessage as any;
+            const oldM = ev.oldMessage as any;
+            const existing = byId.get(newM.id);
+            if (existing?.isDelete) continue;
+
+            const priorHistory: { timestamp: number; content: string; }[] = existing?.entry.editHistory ?? (oldM.editHistory ?? []).map((e: any) => ({
+                timestamp: e.timestamp instanceof Date ? e.timestamp.getTime() : e.timestamp,
+                content: e.content,
+            }));
+            priorHistory.push({
+                timestamp: newM.edited_timestamp ? new Date(newM.edited_timestamp).getTime() : Date.now(),
+                content: oldM.content,
+            });
+
+            byId.set(newM.id, {
+                id: newM.id,
+                isDelete: false,
+                entry: {
+                    id: newM.id,
+                    channelId: newM.channel_id,
+                    guildId: newM.guild_id ?? undefined,
+                    capturedAt: existing?.entry.capturedAt ?? ev.capturedAt,
+                    deleted: false,
+                    message: serialize(ev.newMessage),
+                    editHistory: priorHistory,
+                    firstEditTimestamp: oldM.firstEditTimestamp instanceof Date
+                        ? oldM.firstEditTimestamp.getTime()
+                        : (oldM.firstEditTimestamp ?? (oldM.timestamp instanceof Date ? oldM.timestamp.getTime() : oldM.timestamp)),
+                },
+            });
+        }
+    }
+
+    try {
+        const db = await dbPromise!;
+        const tx = db.transaction(STORE_MESSAGES, "readwrite");
+        const store = tx.objectStore(STORE_MESSAGES);
+        for (const { entry } of byId.values()) {
+            store.put(entry);
+        }
+        await new Promise<void>((res, rej) => {
+            tx.oncomplete = () => res();
+            tx.onerror = () => rej(tx.error);
+            tx.onabort = () => rej(tx.error);
+        });
+    } catch (e) {
+        logger.error("Failed to flush message-log write buffer", e);
+    }
+}
 
 export async function getEntriesForChannel(_channelId: string, _opts?: { since?: number; }): Promise<PersistedMessage[]> { /* Task 4 */ return []; }
 export async function removeEntry(_messageId: string): Promise<void> { /* Task 4 */ }
