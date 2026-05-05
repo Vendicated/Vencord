@@ -408,6 +408,16 @@ export default definePlugin({
     async start() {
         addDeleteStyle();
         await persistence.init();
+        attachmentCache.configureSettings(() => ({
+            enabled: settings.store.cacheAttachmentsEnabled,
+            images: settings.store.cacheAttachmentImages,
+            videos: settings.store.cacheAttachmentVideos,
+            audio: settings.store.cacheAttachmentAudio,
+            other: settings.store.cacheAttachmentOther,
+            perFileCapBytes: Math.max(0, Math.floor(settings.store.cacheAttachmentsPerFileCapMB * 1024 * 1024)),
+            totalCapBytes: Math.max(0, Math.floor(settings.store.cacheAttachmentsTotalCapMB * 1024 * 1024)),
+        }));
+        await attachmentCache.init();
         window.addEventListener("beforeunload", persistence.flushSync);
         setTimeout(() => {
             void persistence.runRetentionPurge({
@@ -420,6 +430,7 @@ export default definePlugin({
     stop() {
         window.removeEventListener("beforeunload", persistence.flushSync);
         persistence.flushSync();
+        attachmentCache.shutdown();
     },
 
     renderEdits: ErrorBoundary.wrap(({ message: { id: messageId, channel_id: channelId } }: { message: Message; }) => {
@@ -476,6 +487,9 @@ export default definePlugin({
                 } else {
                     if (settings.store.persistEnabled) {
                         persistence.enqueueDelete(msg);
+                    }
+                    if (settings.store.cacheAttachmentsEnabled) {
+                        attachmentCache.tryCacheFromMessage(msg);
                     }
                     cache = cache.update(id, m => m
                         .set("deleted", true)
