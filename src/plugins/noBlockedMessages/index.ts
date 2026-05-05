@@ -64,7 +64,7 @@ export default definePlugin({
             ]
         },
         {
-            find: '"MessageStore"',
+            find: "static displayName=\"MessageStore\"",
             predicate: () => settings.store.ignoreMessages,
             replacement: [
                 {

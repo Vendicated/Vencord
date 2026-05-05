@@ -350,7 +350,8 @@ export default definePlugin({
 
     patches: [
         {
-            find: '"MessageStore"',
+            // Narrow match: plain "MessageStore" hits many webpack chunks and breaks unrelated modules on new Discord builds.
+            find: "static displayName=\"MessageStore\"",
             replacement: [
                 {
                     // Add deleted=true to all target messages in the MESSAGE_DELETE event
@@ -492,7 +493,7 @@ export default definePlugin({
 
         {
             // ReferencedMessageStore
-            find: '"ReferencedMessageStore"',
+            find: "static displayName=\"ReferencedMessageStore\"",
             replacement: [
                 {
                     match: /(?<=MESSAGE_DELETE:function\(\i\)\{)/,
