@@ -163,6 +163,8 @@ ipcMain.handle(IpcEvents.OPEN_MONACO_EDITOR, async () => {
         }
     });
 
+    win.removeMenu();
+
     makeLinksOpenExternally(win);
 
     await win.loadURL(`data:text/html;base64,${monacoHtml}`);
