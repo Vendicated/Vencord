@@ -8,6 +8,7 @@ import { Logger } from "@utils/Logger";
 import { PluginNative } from "@utils/types";
 
 import {
+    clearAttachmentRecords,
     evictAttachmentsOldestFirst,
     getAttachmentRecord,
     listAttachmentRecords,
@@ -221,4 +222,52 @@ async function downloadOne(att: any, s: Settings): Promise<void> {
     } finally {
         releaseSlot();
     }
+}
+
+// ---- read path --------------------------------------------------------------
+
+/**
+ * Returns a `blob:` URL for the cached attachment, or null if not cached.
+ * Memoizes the URL for the lifetime of the plugin (revoked on shutdown / evict).
+ */
+export async function getCachedBlobUrl(attachmentId: string): Promise<string | null> {
+    if (!initialized) return null;
+    const memo = blobUrlCache.get(attachmentId);
+    if (memo) return memo;
+    try {
+        if (useNative && Native) {
+            const rec = await getAttachmentRecord(attachmentId);
+            if (!rec) return null;
+            const bytes = await Native.readAttachment(attachmentId);
+            if (!bytes) return null;
+            const blob = new Blob([bytes], { type: rec.contentType });
+            const url = URL.createObjectURL(blob);
+            blobUrlCache.set(attachmentId, url);
+            return url;
+        } else {
+            const rec = await getAttachmentRecord(attachmentId);
+            if (!rec || !rec.blob) return null;
+            const url = URL.createObjectURL(rec.blob);
+            blobUrlCache.set(attachmentId, url);
+            return url;
+        }
+    } catch (e) {
+        logger.error("getCachedBlobUrl failed", attachmentId, e);
+        return null;
+    }
+}
+
+// ---- clearAll ---------------------------------------------------------------
+
+export async function clearAll(): Promise<void> {
+    for (const url of blobUrlCache.values()) {
+        try { URL.revokeObjectURL(url); } catch { /* ignore */ }
+    }
+    blobUrlCache.clear();
+    if (useNative && Native) {
+        try { await Native.clearAllAttachments(); } catch (e) { logger.error("native clearAllAttachments failed", e); }
+    }
+    await clearAttachmentRecords();
+    currentTotalBytes = 0;
+    quotaExceeded = false;
 }
