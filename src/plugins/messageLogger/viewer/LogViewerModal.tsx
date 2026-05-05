@@ -5,7 +5,6 @@
  */
 
 import ErrorBoundary from "@components/ErrorBoundary";
-import { classNameFactory } from "@utils/css";
 import { Logger } from "@utils/Logger";
 import { closeModal, ModalCloseButton, ModalFooter, ModalHeader, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
 import { Alerts, Button, Forms, GuildStore, ListScrollerThin, Select, TabBar, Text, TextInput, useMemo, useState } from "@webpack/common";
@@ -15,7 +14,6 @@ import { LogEntryRow } from "./LogEntryRow";
 import { useLogEntries, ViewerScope } from "./useLogEntries";
 
 const logger = new Logger("MessageLogger");
-const cl = classNameFactory("vc-ml-viewer-");
 
 type Tab = "deleted" | "edited" | "saved" | "all";
 type Sort = "newest" | "oldest";
@@ -181,7 +179,7 @@ function ViewerInner(props: ViewerProps) {
                 </div>
             </div>
 
-            <div className={cl("list-wrapper")} style={{ flex: 1, minHeight: 360, display: "flex", flexDirection: "column" }}>
+            <div style={{ flex: 1, minHeight: 360, display: "flex", flexDirection: "column" }}>
                 {visible.length === 0 ? (
                     <div style={{ padding: 32, textAlign: "center" }}>
                         <Forms.FormText>
