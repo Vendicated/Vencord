@@ -172,28 +172,16 @@ export function tryCacheFromMessage(message: any): void {
         logger.debug("tryCacheFromMessage: no attachments on message", message?.id);
         return;
     }
-    logger.info("tryCacheFromMessage:", atts.length, "attachment(s) on message", message?.id);
+    logger.debug("tryCacheFromMessage:", atts.length, "attachment(s) on message", message?.id);
     for (const att of atts) {
-        if (!att || typeof att.id !== "string" || typeof att.url !== "string") {
-            logger.debug("skip attachment: missing id/url", att);
-            continue;
-        }
+        if (!att || typeof att.id !== "string" || typeof att.url !== "string") continue;
         const bucket = bucketFor(att);
-        if (!bucketEnabled(bucket, s)) {
-            logger.debug("skip attachment: bucket disabled", att.id, bucket);
-            continue;
-        }
+        if (!bucketEnabled(bucket, s)) continue;
         const declaredSize = typeof att.size === "number" ? att.size : 0;
-        if (declaredSize > 0 && declaredSize > s.perFileCapBytes) {
-            logger.debug("skip attachment: over per-file cap", att.id, declaredSize, ">", s.perFileCapBytes);
-            continue;
-        }
-        if (inProgress.has(att.id)) {
-            logger.debug("skip attachment: already in progress", att.id);
-            continue;
-        }
+        if (declaredSize > 0 && declaredSize > s.perFileCapBytes) continue;
+        if (inProgress.has(att.id)) continue;
         inProgress.add(att.id);
-        logger.info("queuing attachment download", att.id, bucket, "size~=", declaredSize);
+        logger.debug("queuing attachment download", att.id, bucket, "size~=", declaredSize);
         void downloadOne(att, s)
             .catch(e => logger.error("downloadOne failed for", att.id, e))
             .finally(() => { inProgress.delete(att.id); });
@@ -240,7 +228,7 @@ async function downloadOne(att: any, s: Settings): Promise<void> {
             }
         }
         currentTotalBytes += buf.byteLength;
-        logger.info("cached attachment", att.id, "size", buf.byteLength, "totalBytes", currentTotalBytes);
+        logger.debug("cached attachment", att.id, "size", buf.byteLength, "totalBytes", currentTotalBytes);
     } catch (e) {
         logger.error("downloadOne errored", att?.id, e);
     } finally {
