@@ -11,7 +11,7 @@ import { PersistedMessage, PlainMessage, SCHEMA_VERSION, WriteEvent } from "./ty
 
 const logger = new Logger("MessageLogger");
 const DB_NAME = "VencordMessageLogger";
-const DB_VERSION = 1;
+const DB_VERSION = 2;
 const STORE_MESSAGES = "messages";
 const STORE_META = "meta";
 
@@ -40,17 +40,26 @@ export function subscribeToChanges(listener: () => void): () => void {
 function openDb(): Promise<IDBDatabase> {
     return new Promise((resolve, reject) => {
         const req = indexedDB.open(DB_NAME, DB_VERSION);
-        req.onupgradeneeded = () => {
+        req.onupgradeneeded = event => {
             const db = req.result;
+            const tx = req.transaction!;
+            let store: IDBObjectStore;
             if (!db.objectStoreNames.contains(STORE_MESSAGES)) {
-                const store = db.createObjectStore(STORE_MESSAGES, { keyPath: "id" });
+                store = db.createObjectStore(STORE_MESSAGES, { keyPath: "id" });
                 store.createIndex("channelId", "channelId", { unique: false });
                 store.createIndex("guildId", "guildId", { unique: false });
                 store.createIndex("capturedAt", "capturedAt", { unique: false });
                 store.createIndex("deleted", "deleted", { unique: false });
+            } else {
+                store = tx.objectStore(STORE_MESSAGES);
             }
             if (!db.objectStoreNames.contains(STORE_META)) {
                 db.createObjectStore(STORE_META);
+            }
+            // v1 → v2: add the `saved` index. Sparse — only entries with the field set
+            // (i.e. saved=true) appear in the index, so unstar = delete the key.
+            if (event.oldVersion < 2 && !store.indexNames.contains("saved")) {
+                store.createIndex("saved", "saved", { unique: false });
             }
         };
         req.onsuccess = () => resolve(req.result);
