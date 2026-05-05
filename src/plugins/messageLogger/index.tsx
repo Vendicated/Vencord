@@ -46,12 +46,29 @@ interface MLMessage extends Message {
 
 const MessageClasses = findCssClassesLazy("edited", "communicationDisabled", "isSystemMessage");
 
+function shouldIgnoreMessage(message: any, isEdit = false): boolean {
+    try {
+        const { ignoreBots, ignoreSelf, ignoreUsers, ignoreChannels, ignoreGuilds, logEdits, logDeletes } = settings.store;
+        const myId = UserStore.getCurrentUser().id;
+
+        return ignoreBots && message.author?.bot ||
+            ignoreSelf && message.author?.id === myId ||
+            ignoreUsers.includes(message.author?.id) ||
+            ignoreChannels.includes(message.channel_id) ||
+            ignoreChannels.includes(ChannelStore.getChannel(message.channel_id)?.parent_id) ||
+            (isEdit ? !logEdits : !logDeletes) ||
+            ignoreGuilds.includes(ChannelStore.getChannel(message.channel_id)?.guild_id) ||
+            (message.author?.id === VENBOT_USER_ID && ChannelStore.getChannel(message.channel_id)?.parent_id === SUPPORT_CATEGORY_ID);
+    } catch (e) {
+        return false;
+    }
+}
+
 function scheduleRetroactivePurge() {
     const cb = () => {
-        const self = definePluginExport as any;
         void persistence.purgeMatching(entry => {
             try {
-                return self.shouldIgnore(persistence.deserialize(entry.message));
+                return shouldIgnoreMessage(persistence.deserialize(entry.message));
             } catch {
                 return false;
             }
@@ -243,7 +260,7 @@ export function parseEditContent(content: string, message: Message) {
     });
 }
 
-const definePluginExport = definePlugin({
+export default definePlugin({
     name: "MessageLogger",
     description: "Logs deleted and edited messages, with optional persistence across client reloads.",
     tags: ["Chat", "Utility"],
@@ -359,22 +376,7 @@ const definePluginExport = definePlugin({
     },
 
     shouldIgnore(message: any, isEdit = false) {
-        try {
-            const { ignoreBots, ignoreSelf, ignoreUsers, ignoreChannels, ignoreGuilds, logEdits, logDeletes } = settings.store;
-            const myId = UserStore.getCurrentUser().id;
-
-            return ignoreBots && message.author?.bot ||
-                ignoreSelf && message.author?.id === myId ||
-                ignoreUsers.includes(message.author?.id) ||
-                ignoreChannels.includes(message.channel_id) ||
-                ignoreChannels.includes(ChannelStore.getChannel(message.channel_id)?.parent_id) ||
-                (isEdit ? !logEdits : !logDeletes) ||
-                ignoreGuilds.includes(ChannelStore.getChannel(message.channel_id)?.guild_id) ||
-                // Ignore Venbot in the support channels
-                (message.author?.id === VENBOT_USER_ID && ChannelStore.getChannel(message.channel_id)?.parent_id === SUPPORT_CATEGORY_ID);
-        } catch (e) {
-            return false;
-        }
+        return shouldIgnoreMessage(message, isEdit);
     },
 
     EditMarker({ message, className, children, ...props }: any) {
@@ -612,5 +614,3 @@ const definePluginExport = definePlugin({
         }
     ]
 });
-
-export default definePluginExport;
