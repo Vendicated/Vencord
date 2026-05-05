@@ -48,3 +48,12 @@
     flex-wrap: wrap;
     gap: 16px;
 }
+
+.vc-ml-viewer-danger-btn {
+    color: var(--white-500);
+    background-color: var(--button-danger-background);
+}
+
+.vc-ml-viewer-danger-btn:hover {
+    background-color: var(--button-danger-background-hover);
+}
