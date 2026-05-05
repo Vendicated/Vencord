@@ -5,12 +5,12 @@
  */
 
 import ErrorBoundary from "@components/ErrorBoundary";
-import { purgeMatching } from "@plugins/messageLogger/persistence";
 import { classNameFactory } from "@utils/css";
 import { Logger } from "@utils/Logger";
 import { closeModal, ModalCloseButton, ModalFooter, ModalHeader, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
 import { Alerts, Button, Forms, GuildStore, ListScrollerThin, Select, TabBar, Text, TextInput, useMemo, useState } from "@webpack/common";
 
+import { removeEntriesFully } from "./actions";
 import { LogEntryRow } from "./LogEntryRow";
 import { useLogEntries, ViewerScope } from "./useLogEntries";
 
@@ -89,8 +89,8 @@ function ViewerInner(props: ViewerProps) {
     const scopeLabel = getScopeLabel(scope, channelId, guildId);
 
     function clearVisible() {
-        const visibleIds = new Set(visible.map(e => e.id));
-        const count = visibleIds.size;
+        const toRemove = visible.slice();
+        const count = toRemove.length;
         if (count === 0) return;
 
         const filterParts: string[] = [];
@@ -107,7 +107,7 @@ function ViewerInner(props: ViewerProps) {
             cancelText: "Cancel",
             async onConfirm() {
                 try {
-                    await purgeMatching(e => visibleIds.has(e.id));
+                    await removeEntriesFully(toRemove);
                 } catch (e) {
                     logger.error("Failed to clear visible entries", e);
                     Alerts.show({ title: "Failed", body: "Could not clear log; see console.", confirmText: "OK" });

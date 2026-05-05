@@ -4,10 +4,11 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { removeEntry } from "@plugins/messageLogger/persistence";
 import { PersistedMessage } from "@plugins/messageLogger/types";
 import { Logger } from "@utils/Logger";
 import { ChannelRouter, ChannelStore, ContextMenuApi, IconUtils, Menu, MessageActions, MessageStore, Text, Timestamp, UserStore } from "@webpack/common";
+
+import { removeEntryFully } from "./actions";
 
 const logger = new Logger("MessageLogger");
 
@@ -71,7 +72,7 @@ function renderRowMenu(entry: PersistedMessage, ev: React.MouseEvent): void {
                 id="vc-ml-row-remove"
                 label="Remove from log"
                 color="danger"
-                action={() => { void removeEntry(entry.id); }}
+                action={() => { void removeEntryFully(entry); }}
             />
         </Menu.Menu>
     ));
