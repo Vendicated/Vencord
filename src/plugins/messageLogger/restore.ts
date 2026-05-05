@@ -102,3 +102,29 @@ export async function applyEntriesToChannel(channelId: string): Promise<void> {
         logger.error("applyEntriesToChannel failed for", channelId, e);
     }
 }
+
+// ---- flux handlers ----------------------------------------------------------
+
+const recentlyApplied = new Map<string, number>();
+const RECENT_THRESHOLD_MS = 250;
+
+function shouldSkipDoubleApply(channelId: string): boolean {
+    const last = recentlyApplied.get(channelId);
+    if (last != null && Date.now() - last < RECENT_THRESHOLD_MS) return true;
+    recentlyApplied.set(channelId, Date.now());
+    return false;
+}
+
+/** Flux handler — exported for the plugin's `flux:` block. */
+export async function onLoadMessagesSuccess({ channelId, messages }: { channelId: string; messages: any[]; }): Promise<void> {
+    if (!messages || messages.length === 0) return;
+    if (shouldSkipDoubleApply(channelId)) return;
+    await applyEntriesToChannel(channelId);
+}
+
+/** Flux handler — exported for the plugin's `flux:` block. */
+export async function onChannelSelect({ channelId }: { channelId: string | null; }): Promise<void> {
+    if (!channelId) return;
+    if (shouldSkipDoubleApply(channelId)) return;
+    await applyEntriesToChannel(channelId);
+}
