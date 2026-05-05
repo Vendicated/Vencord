@@ -378,6 +378,40 @@ export async function setSaved(messageId: string, saved: boolean): Promise<void>
 }
 
 /**
+ * Bulk-insert (or upsert) entries in one transaction. Used by the JSON importer.
+ * Per-entry try/catch so a single malformed entry doesn't kill the whole import.
+ * Returns the count actually written. Fires `notifyChange()` once at the end.
+ */
+export async function putEntries(entries: PersistedMessage[]): Promise<number> {
+    if (disabled || readOnly) return 0;
+    if (entries.length === 0) return 0;
+    try {
+        const db = await dbPromise!;
+        const tx = db.transaction(STORE_MESSAGES, "readwrite");
+        const store = tx.objectStore(STORE_MESSAGES);
+        let written = 0;
+        for (const e of entries) {
+            try {
+                store.put(e);
+                written++;
+            } catch (err) {
+                logger.error("putEntries: skipped malformed entry", (e as any)?.id, err);
+            }
+        }
+        await new Promise<void>((res, rej) => {
+            tx.oncomplete = () => res();
+            tx.onerror = () => rej(tx.error);
+            tx.onabort = () => rej(tx.error);
+        });
+        if (written > 0) notifyChange();
+        return written;
+    } catch (e) {
+        logger.error("putEntries failed", e);
+        return 0;
+    }
+}
+
+/**
  * Walk all entries; delete those for which `predicate(entry) === true`.
  * Returns count deleted. Used for retroactive ignore-list purges.
  */
