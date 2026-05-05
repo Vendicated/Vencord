@@ -339,6 +339,38 @@ export async function removeEntry(messageId: string): Promise<void> {
 }
 
 /**
+ * Set or clear the saved flag on a persisted entry.
+ *  - setSaved(id, true): adds `saved: true` to the entry, fires change notification.
+ *  - setSaved(id, false): deletes the `saved` field from the entry.
+ * No-op if disabled, readOnly, or the entry doesn't exist.
+ */
+export async function setSaved(messageId: string, saved: boolean): Promise<void> {
+    if (disabled || readOnly) return;
+    try {
+        const db = await dbPromise!;
+        const tx = db.transaction(STORE_MESSAGES, "readwrite");
+        const store = tx.objectStore(STORE_MESSAGES);
+        const entry = await new Promise<PersistedMessage | undefined>((res, rej) => {
+            const req = store.get(messageId);
+            req.onsuccess = () => res(req.result as PersistedMessage | undefined);
+            req.onerror = () => rej(req.error);
+        });
+        if (!entry) return;
+        if (saved) entry.saved = true;
+        else delete entry.saved;
+        store.put(entry);
+        await new Promise<void>((res, rej) => {
+            tx.oncomplete = () => res();
+            tx.onerror = () => rej(tx.error);
+            tx.onabort = () => rej(tx.error);
+        });
+        notifyChange();
+    } catch (e) {
+        logger.error("setSaved failed for", messageId, e);
+    }
+}
+
+/**
  * Walk all entries; delete those for which `predicate(entry) === true`.
  * Returns count deleted. Used for retroactive ignore-list purges.
  */
