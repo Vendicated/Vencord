@@ -66,6 +66,8 @@ function formatDuration(ms: number) {
     return res;
 }
 
+
+
 export default definePlugin({
     name: "CallTimer",
     description: "Adds a timer to vcs",
@@ -82,21 +84,17 @@ export default definePlugin({
         replacement: {
             // in renderConnectionStatus()
             match: /(renderConnectionStatus\(\).{0,1000}?lineClamp:1,children:)(\i)(?=,|}\))/,
-            replace: "$1[$2,$self.renderTimer(this.props?.channel?.id)]"
+            replace: "$1[$2,$self.renderTimer({ channelId: this?.props?.channel?.id })]"
         }
     }],
 
-    renderTimer(channelId: string) {
-        return <ErrorBoundary noop>
-            <this.Timer channelId={channelId} />
-        </ErrorBoundary>;
-    },
+    renderTimer: ErrorBoundary.wrap(({ channelId }: { channelId: string; }) => {
+        const time = useTimer({ deps: [channelId] });
 
-    Timer({ channelId }: { channelId: string; }) {
-        const time = useTimer({
-            deps: [channelId]
-        });
-
-        return <p style={{ margin: 0, fontFamily: "var(--font-code)" }}>{formatDuration(time)}</p>;
-    }
+        return (
+            <p style={{ margin: 0, fontFamily: "var(--font-code)" }}>
+                {formatDuration(time)}
+            </p>
+        );
+    }, { noop: true }),
 });
