@@ -406,6 +406,8 @@ export async function purgeMatching(predicate: (e: PersistedMessage) => boolean)
  * Time + count retention purge.
  * - days = 0 disables time purge.
  * - count = 0 disables count purge.
+ * - Saved entries (saved=true) are skipped entirely: never deleted by retention,
+ *   and not counted toward the cap. Total stored = saved + min(non-saved, cap).
  * Walks `capturedAt` index oldest-first and deletes until both caps satisfied.
  */
 export async function runRetentionPurge(opts: { days: number; count: number; }): Promise<void> {
@@ -422,7 +424,13 @@ export async function runRetentionPurge(opts: { days: number; count: number; }):
             r.onsuccess = () => res(r.result);
             r.onerror = () => rej(r.error);
         });
-        let toDeleteForCount = opts.count > 0 ? Math.max(0, total - opts.count) : 0;
+        const savedCount = await new Promise<number>((res, rej) => {
+            const r = store.index("saved").count(IDBKeyRange.only(true));
+            r.onsuccess = () => res(r.result);
+            r.onerror = () => rej(r.error);
+        });
+        const nonSavedTotal = total - savedCount;
+        let toDeleteForCount = opts.count > 0 ? Math.max(0, nonSavedTotal - opts.count) : 0;
         const cutoffMs = opts.days > 0 ? Date.now() - opts.days * 86_400_000 : -Infinity;
 
         let deletedCount = 0;
@@ -433,6 +441,10 @@ export async function runRetentionPurge(opts: { days: number; count: number; }):
                 const cursor = cursorReq.result;
                 if (!cursor) return resolve();
                 const entry = cursor.value as PersistedMessage;
+                if (entry.saved === true) {
+                    cursor.continue();
+                    return;
+                }
                 const tooOld = entry.capturedAt < cutoffMs;
                 const overCount = toDeleteForCount > 0;
                 if (tooOld || overCount) {
