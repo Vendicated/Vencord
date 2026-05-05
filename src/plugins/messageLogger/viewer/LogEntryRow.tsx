@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { setSaved } from "@plugins/messageLogger/persistence";
 import { PersistedMessage } from "@plugins/messageLogger/types";
 import { Logger } from "@utils/Logger";
 import { ChannelRouter, ChannelStore, ContextMenuApi, IconUtils, Menu, MessageActions, MessageStore, Text, Timestamp, UserStore } from "@webpack/common";
@@ -67,6 +68,11 @@ function renderRowMenu(entry: PersistedMessage, ev: React.MouseEvent): void {
                 label="Jump to message"
                 disabled={!channelAccessible}
                 action={() => jumpToEntry(entry)}
+            />
+            <Menu.MenuItem
+                id="vc-ml-row-save"
+                label={entry.saved ? "Unsave" : "Save"}
+                action={() => { void setSaved(entry.id, !entry.saved); }}
             />
             <Menu.MenuItem
                 id="vc-ml-row-remove"
@@ -137,6 +143,26 @@ export function LogEntryRow({ entry, density }: LogEntryRowProps) {
                     {preview}
                 </Text>
             </div>
+            <button
+                aria-label={entry.saved ? "Unsave" : "Save"}
+                title={entry.saved ? "Unsave (remove pin)" : "Save (protect from retention)"}
+                onClick={ev => {
+                    ev.stopPropagation();
+                    void setSaved(entry.id, !entry.saved);
+                }}
+                style={{
+                    flexShrink: 0,
+                    background: "transparent",
+                    border: "none",
+                    cursor: "pointer",
+                    fontSize: 20,
+                    lineHeight: 1,
+                    padding: "0 4px",
+                    color: entry.saved ? "var(--text-warning)" : "var(--text-muted)",
+                }}
+            >
+                {entry.saved ? "★" : "☆"}
+            </button>
         </div>
     );
 }
