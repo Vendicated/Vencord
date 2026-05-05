@@ -30,8 +30,9 @@ import { classes } from "@utils/misc";
 import definePlugin, { OptionType } from "@utils/types";
 import { Message } from "@vencord/discord-types";
 import { findCssClassesLazy } from "@webpack";
-import { Button, ChannelStore, FluxDispatcher, Forms, Menu, MessageStore, Parser, SelectedChannelStore, Timestamp, UserStore, useStateFromStores } from "@webpack/common";
+import { Alerts, Button, ChannelStore, FluxDispatcher, Forms, Menu, MessageStore, Parser, SelectedChannelStore, Timestamp, UserStore, useStateFromStores } from "@webpack/common";
 
+import * as attachmentCache from "./attachmentCache";
 import overlayStyle from "./deleteStyleOverlay.css?managed";
 import textStyle from "./deleteStyleText.css?managed";
 import { openHistoryModal } from "./HistoryModal";
@@ -170,6 +171,41 @@ const settings = definePluginSettings({
             { label: "Compact", value: "compact", default: true },
             { label: "Comfortable", value: "comfortable" },
         ],
+    },
+    cacheAttachmentsEnabled: {
+        type: OptionType.BOOLEAN,
+        description: "Cache attachments from deleted messages so they survive Discord CDN URL expiry (~24h)",
+        default: false,
+    },
+    cacheAttachmentImages: {
+        type: OptionType.BOOLEAN,
+        description: "Cache image attachments (image/* MIME)",
+        default: true,
+    },
+    cacheAttachmentVideos: {
+        type: OptionType.BOOLEAN,
+        description: "Cache video attachments (video/* MIME)",
+        default: false,
+    },
+    cacheAttachmentAudio: {
+        type: OptionType.BOOLEAN,
+        description: "Cache audio attachments (audio/* MIME)",
+        default: false,
+    },
+    cacheAttachmentOther: {
+        type: OptionType.BOOLEAN,
+        description: "Cache everything else (text, archives, etc.)",
+        default: false,
+    },
+    cacheAttachmentsPerFileCapMB: {
+        type: OptionType.NUMBER,
+        description: "Drop attachments larger than this (MB)",
+        default: 5,
+    },
+    cacheAttachmentsTotalCapMB: {
+        type: OptionType.NUMBER,
+        description: "Total attachment cache size cap (MB). LRU evicts when exceeded.",
+        default: 250,
     },
 });
 
@@ -314,15 +350,39 @@ export default definePlugin({
             <Forms.FormText style={{ marginBottom: 8 }}>
                 Browse, search, and clear your captured deletes and edits.
             </Forms.FormText>
-            <Button
-                size={Button.Sizes.SMALL}
-                onClick={() => openLogViewerModal({
-                    scope: "global",
-                    rowDensity: settings.store.viewerRowDensity as "compact" | "comfortable",
-                })}
-            >
-                Open Message Log
-            </Button>
+            <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 8 }}>
+                <Button
+                    size={Button.Sizes.SMALL}
+                    onClick={() => openLogViewerModal({
+                        scope: "global",
+                        rowDensity: settings.store.viewerRowDensity as "compact" | "comfortable",
+                    })}
+                >
+                    Open Message Log
+                </Button>
+                <Button
+                    size={Button.Sizes.SMALL}
+                    color={Button.Colors.RED}
+                    onClick={() => {
+                        Alerts.show({
+                            title: "Clear attachment cache?",
+                            body: "This permanently removes all cached attachment files and frees disk/IDB space. Existing message log entries are kept.",
+                            confirmText: "Clear",
+                            confirmColor: "vc-ml-viewer-danger-btn",
+                            cancelText: "Cancel",
+                            async onConfirm() {
+                                try {
+                                    await attachmentCache.clearAll();
+                                } catch (e) {
+                                    new Logger("MessageLogger").error("clearAll failed", e);
+                                }
+                            },
+                        });
+                    }}
+                >
+                    Clear attachment cache
+                </Button>
+            </div>
         </>
     ),
     contextMenus: {
