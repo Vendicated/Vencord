@@ -46,9 +46,15 @@ async function restoreMessageInstance(entry: PersistedMessage, Ctor: any): Promi
         plain.attachments = await Promise.all(plain.attachments.map(async (a: any) => {
             if (typeof a?.id !== "string") return { ...a, deleted: entry.deleted };
             const blobUrl = await getCachedBlobUrl(a.id);
-            return blobUrl
-                ? { ...a, url: blobUrl, proxy_url: blobUrl, deleted: entry.deleted }
-                : { ...a, deleted: entry.deleted };
+            if (!blobUrl) return { ...a, deleted: entry.deleted };
+            // Fragment guard: Discord's image renderer appends `?format=webp&width=...&height=...`
+            // to attachment URLs for resizing. Blob URLs key on the path (minus fragment), so a bare
+            // `blob:.../<uuid>` becomes `blob:.../<uuid>?format=...` and fails ERR_FILE_NOT_FOUND.
+            // With a `#mlcache` fragment, string-concat appends after the `#`, becoming
+            // `blob:.../<uuid>#mlcache?format=...`. Browser treats everything after `#` as fragment;
+            // path is still `<uuid>` so blob-store lookup resolves.
+            const guarded = `${blobUrl}#mlcache`;
+            return { ...a, url: guarded, proxy_url: guarded, deleted: entry.deleted };
         }));
     }
     return new Ctor(plain);
