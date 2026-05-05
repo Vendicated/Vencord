@@ -307,6 +307,7 @@ const patchChannelContextMenu: NavContextMenuPatchCallback = (children, { channe
                 label="Clear Message Log"
                 color="danger"
                 action={() => {
+                    // Clear in-memory ghosts (red strikethrough deletes, edit history popovers)
                     messages.forEach(msg => {
                         if (msg.deleted)
                             FluxDispatcher.dispatch({
@@ -320,6 +321,9 @@ const patchChannelContextMenu: NavContextMenuPatchCallback = (children, { channe
                                 editHistory: []
                             });
                     });
+                    // Also drop persisted entries for this channel — otherwise they'd be
+                    // restored next reload via the LOAD_MESSAGES_SUCCESS flux handler.
+                    void persistence.purgeMatching(e => e.channelId === channel.id);
                 }}
             />
         );
