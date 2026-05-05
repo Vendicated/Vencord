@@ -248,6 +248,14 @@ async function flushBuffer(): Promise<void> {
                 content: oldM.content,
             });
 
+            // For coalesced edits: keep the first-seen value rather than overwriting.
+            // The second edit's `oldM` reflects the post-first-edit state, so its
+            // `firstEditTimestamp` would already be wrong here.
+            const firstEditTimestamp = existing?.entry.firstEditTimestamp
+                ?? (oldM.firstEditTimestamp instanceof Date
+                    ? oldM.firstEditTimestamp.getTime()
+                    : (oldM.firstEditTimestamp ?? (oldM.timestamp instanceof Date ? oldM.timestamp.getTime() : oldM.timestamp)));
+
             byId.set(newM.id, {
                 id: newM.id,
                 isDelete: false,
@@ -259,9 +267,7 @@ async function flushBuffer(): Promise<void> {
                     deleted: false,
                     message: serialize(ev.newMessage),
                     editHistory: priorHistory,
-                    firstEditTimestamp: oldM.firstEditTimestamp instanceof Date
-                        ? oldM.firstEditTimestamp.getTime()
-                        : (oldM.firstEditTimestamp ?? (oldM.timestamp instanceof Date ? oldM.timestamp.getTime() : oldM.timestamp)),
+                    firstEditTimestamp,
                 },
             });
         }
@@ -553,21 +559,6 @@ export async function putAttachmentRecord(rec: AttachmentRecord): Promise<void> 
     }
 }
 
-export async function deleteAttachmentRecord(id: string): Promise<void> {
-    if (disabled || readOnly) return;
-    try {
-        const db = await dbPromise!;
-        const tx = db.transaction(STORE_ATTACHMENTS, "readwrite");
-        tx.objectStore(STORE_ATTACHMENTS).delete(id);
-        await new Promise<void>((res, rej) => {
-            tx.oncomplete = () => res();
-            tx.onerror = () => rej(tx.error);
-        });
-    } catch (e) {
-        logger.error("deleteAttachmentRecord failed", id, e);
-    }
-}
-
 export async function listAttachmentRecords(): Promise<AttachmentRecord[]> {
     if (disabled) return [];
     try {
@@ -634,11 +625,3 @@ export async function clearAttachmentRecords(): Promise<void> {
         logger.error("clearAttachmentRecords failed", e);
     }
 }
-
-// Internal — exported only so subsequent tasks can wire in.
-export const _internal = {
-    db: () => dbPromise!,
-    STORE_MESSAGES,
-    STORE_META,
-    STORE_ATTACHMENTS,
-};
