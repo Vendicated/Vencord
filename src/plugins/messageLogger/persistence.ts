@@ -11,9 +11,10 @@ import { PersistedMessage, PlainMessage, SCHEMA_VERSION, WriteEvent } from "./ty
 
 const logger = new Logger("MessageLogger");
 const DB_NAME = "VencordMessageLogger";
-const DB_VERSION = 2;
+const DB_VERSION = 3;
 const STORE_MESSAGES = "messages";
 const STORE_META = "meta";
+const STORE_ATTACHMENTS = "attachments";
 
 let dbPromise: Promise<IDBDatabase> | null = null;
 let disabled = false;
@@ -60,6 +61,12 @@ function openDb(): Promise<IDBDatabase> {
             // (i.e. saved=true) appear in the index, so unstar = delete the key.
             if (event.oldVersion < 2 && !store.indexNames.contains("saved")) {
                 store.createIndex("saved", "saved", { unique: false });
+            }
+            // v2 → v3: new `attachments` store for cached message attachments. Browser
+            // stores bytes inline as a Blob; desktop stores them on disk via native.ts.
+            if (event.oldVersion < 3 && !db.objectStoreNames.contains(STORE_ATTACHMENTS)) {
+                const ats = db.createObjectStore(STORE_ATTACHMENTS, { keyPath: "id" });
+                ats.createIndex("firstSeenAt", "firstSeenAt", { unique: false });
             }
         };
         req.onsuccess = () => resolve(req.result);
