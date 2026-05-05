@@ -36,6 +36,7 @@ import overlayStyle from "./deleteStyleOverlay.css?managed";
 import textStyle from "./deleteStyleText.css?managed";
 import { openHistoryModal } from "./HistoryModal";
 import * as persistence from "./persistence";
+import * as restore from "./restore";
 
 interface MLMessage extends Message {
     deleted?: boolean;
@@ -44,6 +45,21 @@ interface MLMessage extends Message {
 }
 
 const MessageClasses = findCssClassesLazy("edited", "communicationDisabled", "isSystemMessage");
+
+function scheduleRetroactivePurge() {
+    const cb = () => {
+        const self = definePluginExport as any;
+        void persistence.purgeMatching(entry => {
+            try {
+                return self.shouldIgnore(persistence.deserialize(entry.message));
+            } catch {
+                return false;
+            }
+        });
+    };
+    if (typeof requestIdleCallback === "function") requestIdleCallback(cb, { timeout: 5_000 });
+    else setTimeout(cb, 0);
+}
 
 const settings = definePluginSettings({
     deleteStyle: {
@@ -91,23 +107,41 @@ const settings = definePluginSettings({
         type: OptionType.STRING,
         description: "Comma-separated list of user IDs to ignore",
         default: "",
-        multiline: true
+        multiline: true,
+        onChange: scheduleRetroactivePurge,
     },
     ignoreChannels: {
         type: OptionType.STRING,
         description: "Comma-separated list of channel IDs to ignore",
         default: "",
-        multiline: true
+        multiline: true,
+        onChange: scheduleRetroactivePurge,
     },
     ignoreGuilds: {
         type: OptionType.STRING,
         description: "Comma-separated list of guild IDs to ignore",
         default: "",
-        multiline: true
+        multiline: true,
+        onChange: scheduleRetroactivePurge,
     },
     persistEnabled: {
         type: OptionType.BOOLEAN,
         description: "Persist deleted/edited messages to disk so they survive client reloads",
+        default: true,
+    },
+    persistRetentionDays: {
+        type: OptionType.NUMBER,
+        description: "Auto-purge persisted entries older than N days (0 = disabled)",
+        default: 30,
+    },
+    persistRetentionCount: {
+        type: OptionType.NUMBER,
+        description: "Cap total persisted entries; oldest get purged when exceeded (0 = disabled)",
+        default: 10_000,
+    },
+    restoreInline: {
+        type: OptionType.BOOLEAN,
+        description: "On reload, restore deleted messages and edit history inline in their original channels (otherwise persistence is invisible until the viewer is added)",
         default: true,
     },
 });
@@ -209,9 +243,9 @@ export function parseEditContent(content: string, message: Message) {
     });
 }
 
-export default definePlugin({
+const definePluginExport = definePlugin({
     name: "MessageLogger",
-    description: "Temporarily logs deleted and edited messages.",
+    description: "Logs deleted and edited messages, with optional persistence across client reloads.",
     tags: ["Chat", "Utility"],
     authors: [Devs.rushii, Devs.Ven, Devs.AutumnVN, Devs.Nickyux, Devs.Kyuuhachi],
     dependencies: ["MessageUpdaterAPI"],
@@ -224,8 +258,32 @@ export default definePlugin({
         "gdm-context": patchChannelContextMenu
     },
 
-    start() {
+    flux: {
+        async LOAD_MESSAGES_SUCCESS(e: any) {
+            if (!settings.store.persistEnabled || !settings.store.restoreInline) return;
+            await restore.onLoadMessagesSuccess(e);
+        },
+        async CHANNEL_SELECT(e: any) {
+            if (!settings.store.persistEnabled || !settings.store.restoreInline) return;
+            await restore.onChannelSelect(e);
+        },
+    },
+
+    async start() {
         addDeleteStyle();
+        await persistence.init();
+        window.addEventListener("beforeunload", persistence.flushSync);
+        setTimeout(() => {
+            void persistence.runRetentionPurge({
+                days: settings.store.persistRetentionDays,
+                count: settings.store.persistRetentionCount,
+            });
+        }, 5_000);
+    },
+
+    stop() {
+        window.removeEventListener("beforeunload", persistence.flushSync);
+        persistence.flushSync();
     },
 
     renderEdits: ErrorBoundary.wrap(({ message: { id: messageId, channel_id: channelId } }: { message: Message; }) => {
@@ -554,3 +612,5 @@ export default definePlugin({
         }
     ]
 });
+
+export default definePluginExport;
