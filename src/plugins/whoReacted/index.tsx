@@ -32,20 +32,8 @@ interface ReactionCacheEntry {
 
 interface ReactionProps {
     message: Message;
-    readOnly: boolean;
-    isLurking: boolean;
-    isPendingMember: boolean;
-    useChatFontScaling: boolean;
     emoji: CustomEmoji;
-    count: number;
-    burst_user_ids: any[];
-    burst_count: number;
-    burst_colors: any[];
-    burst_me: boolean;
-    me: boolean;
     type: number;
-    hideEmoji: boolean;
-    remainingBurstCurrency: number;
 }
 
 let Scroll: any = null;
@@ -148,8 +136,8 @@ export default definePlugin({
         {
             find: ",reactionRef:",
             replacement: {
-                match: /(\i)\?null:\(0,\i\.jsx\)\(\i\.\i,{className:\i\.reactionCount,.*?}\),/,
-                replace: "$&$1?null:$self.renderUsers(this?.props),"
+                match: /(\i)\?null:\(0,\i\.jsx\)\(\i\.\i,{className:\i\.reactionCount,.*?}\),(?<=(emoji:\i,message:\i,type:\i).+?)/,
+                replace: "$&$1?null:$self.renderUsers({$2}),"
             }
         },
         {
