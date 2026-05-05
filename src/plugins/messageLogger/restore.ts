@@ -17,12 +17,12 @@ const logger = new Logger("MessageLogger");
 const DISCORD_EPOCH = 1_420_070_400_000n;
 
 /** Snowflake ID → ms epoch. Pure function. */
-export function snowflakeToMs(id: string): number {
+function snowflakeToMs(id: string): number {
     return Number((BigInt(id) >> 22n) + DISCORD_EPOCH);
 }
 
 /** Pick the chronologically-earliest snowflake from an array using BigInt compare. */
-export function minSnowflake(ids: string[]): string | null {
+function minSnowflake(ids: string[]): string | null {
     if (ids.length === 0) return null;
     let minId = ids[0];
     let minBig = BigInt(minId);
@@ -122,9 +122,17 @@ const recentlyApplied = new Map<string, number>();
 const RECENT_THRESHOLD_MS = 250;
 
 function shouldSkipDoubleApply(channelId: string): boolean {
+    const now = Date.now();
     const last = recentlyApplied.get(channelId);
-    if (last != null && Date.now() - last < RECENT_THRESHOLD_MS) return true;
-    recentlyApplied.set(channelId, Date.now());
+    if (last != null && now - last < RECENT_THRESHOLD_MS) return true;
+    recentlyApplied.set(channelId, now);
+    // Opportunistic eviction: when the map grows large, drop entries past the
+    // dedup window. Power users browse hundreds of channels per session.
+    if (recentlyApplied.size > 256) {
+        for (const [k, t] of recentlyApplied) {
+            if (now - t > RECENT_THRESHOLD_MS) recentlyApplied.delete(k);
+        }
+    }
     return false;
 }
 
