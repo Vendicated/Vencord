@@ -30,13 +30,14 @@ import { classes } from "@utils/misc";
 import definePlugin, { OptionType } from "@utils/types";
 import { Message } from "@vencord/discord-types";
 import { findCssClassesLazy } from "@webpack";
-import { ChannelStore, FluxDispatcher, Menu, MessageStore, Parser, SelectedChannelStore, Timestamp, UserStore, useStateFromStores } from "@webpack/common";
+import { Button, ChannelStore, FluxDispatcher, Forms, Menu, MessageStore, Parser, SelectedChannelStore, Timestamp, UserStore, useStateFromStores } from "@webpack/common";
 
 import overlayStyle from "./deleteStyleOverlay.css?managed";
 import textStyle from "./deleteStyleText.css?managed";
 import { openHistoryModal } from "./HistoryModal";
 import * as persistence from "./persistence";
 import * as restore from "./restore";
+import { openLogViewerModal } from "./viewer/LogViewerModal";
 
 interface MLMessage extends Message {
     deleted?: boolean;
@@ -161,6 +162,15 @@ const settings = definePluginSettings({
         description: "On reload, restore deleted messages and edit history inline in their original channels (otherwise persistence is invisible until the viewer is added)",
         default: true,
     },
+    viewerRowDensity: {
+        type: OptionType.SELECT,
+        description: "Row density in the message-log viewer modal",
+        default: "compact",
+        options: [
+            { label: "Compact", value: "compact", default: true },
+            { label: "Comfortable", value: "comfortable" },
+        ],
+    },
 });
 
 function addDeleteStyle() {
@@ -219,33 +229,65 @@ const patchMessageContextMenu: NavContextMenuPatchCallback = (children, props) =
     ));
 };
 
-const patchChannelContextMenu: NavContextMenuPatchCallback = (children, { channel }) => {
-    const messages = MessageStore.getMessages(channel?.id) as MLMessage[];
-    if (!messages?.some(msg => msg.deleted || msg.editHistory?.length)) return;
-
-    const group = findGroupChildrenByChildId("mark-channel-read", children) ?? children;
-    group.push(
+const patchGuildContextMenu: NavContextMenuPatchCallback = (children, props) => {
+    const guildId: string | undefined = props?.guild?.id;
+    if (!guildId) return;
+    children.push(
         <Menu.MenuItem
-            id="vc-ml-clear-channel"
-            label="Clear Message Log"
-            color="danger"
-            action={() => {
-                messages.forEach(msg => {
-                    if (msg.deleted)
-                        FluxDispatcher.dispatch({
-                            type: "MESSAGE_DELETE",
-                            channelId: channel.id,
-                            id: msg.id,
-                            mlDeleted: true
-                        });
-                    else
-                        updateMessage(channel.id, msg.id, {
-                            editHistory: []
-                        });
-                });
-            }}
+            id="vc-ml-show-log-guild"
+            label="Show Message Log"
+            action={() => openLogViewerModal({
+                scope: "guild",
+                guildId,
+                rowDensity: settings.store.viewerRowDensity as "compact" | "comfortable",
+            })}
         />
     );
+};
+
+const patchChannelContextMenu: NavContextMenuPatchCallback = (children, { channel }) => {
+    if (!channel?.id) return;
+
+    const group = findGroupChildrenByChildId("mark-channel-read", children) ?? children;
+
+    group.push(
+        <Menu.MenuItem
+            id="vc-ml-show-log-channel"
+            label="Show Message Log"
+            action={() => openLogViewerModal({
+                scope: "channel",
+                channelId: channel.id,
+                guildId: channel.guild_id ?? undefined,
+                rowDensity: settings.store.viewerRowDensity as "compact" | "comfortable",
+            })}
+        />
+    );
+
+    const messages = MessageStore.getMessages(channel.id) as MLMessage[];
+    if (messages?.some(msg => msg.deleted || msg.editHistory?.length)) {
+        group.push(
+            <Menu.MenuItem
+                id="vc-ml-clear-channel"
+                label="Clear Message Log"
+                color="danger"
+                action={() => {
+                    messages.forEach(msg => {
+                        if (msg.deleted)
+                            FluxDispatcher.dispatch({
+                                type: "MESSAGE_DELETE",
+                                channelId: channel.id,
+                                id: msg.id,
+                                mlDeleted: true
+                            });
+                        else
+                            updateMessage(channel.id, msg.id, {
+                                editHistory: []
+                            });
+                    });
+                }}
+            />
+        );
+    }
 };
 
 export function parseEditContent(content: string, message: Message) {
@@ -267,12 +309,29 @@ export default definePlugin({
     authors: [Devs.rushii, Devs.Ven, Devs.AutumnVN, Devs.Nickyux, Devs.Kyuuhachi],
     dependencies: ["MessageUpdaterAPI"],
     settings,
+    settingsAboutComponent: () => (
+        <>
+            <Forms.FormText style={{ marginBottom: 8 }}>
+                Browse, search, and clear your captured deletes and edits.
+            </Forms.FormText>
+            <Button
+                size={Button.Sizes.SMALL}
+                onClick={() => openLogViewerModal({
+                    scope: "global",
+                    rowDensity: settings.store.viewerRowDensity as "compact" | "comfortable",
+                })}
+            >
+                Open Message Log
+            </Button>
+        </>
+    ),
     contextMenus: {
         "message": patchMessageContextMenu,
         "channel-context": patchChannelContextMenu,
         "thread-context": patchChannelContextMenu,
         "user-context": patchChannelContextMenu,
-        "gdm-context": patchChannelContextMenu
+        "gdm-context": patchChannelContextMenu,
+        "guild-context": patchGuildContextMenu,
     },
 
     flux: {
