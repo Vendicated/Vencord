@@ -19,6 +19,24 @@ let dbPromise: Promise<IDBDatabase> | null = null;
 let disabled = false;
 let readOnly = false;
 
+const changeListeners = new Set<() => void>();
+
+function notifyChange() {
+    for (const listener of changeListeners) {
+        try {
+            listener();
+        } catch (e) {
+            logger.error("change listener threw", e);
+        }
+    }
+}
+
+/** Subscribe to write/delete events. Listener fires after the change is committed. */
+export function subscribeToChanges(listener: () => void): () => void {
+    changeListeners.add(listener);
+    return () => { changeListeners.delete(listener); };
+}
+
 function openDb(): Promise<IDBDatabase> {
     return new Promise((resolve, reject) => {
         const req = indexedDB.open(DB_NAME, DB_VERSION);
@@ -245,6 +263,7 @@ async function flushBuffer(): Promise<void> {
             tx.onerror = () => rej(tx.error);
             tx.onabort = () => rej(tx.error);
         });
+        notifyChange();
     } catch (e) {
         logger.error("Failed to flush message-log write buffer", e);
     }
@@ -273,6 +292,27 @@ export async function getEntriesForChannel(channelId: string, opts: { since?: nu
     }
 }
 
+/**
+ * Snapshot of every persisted entry. Cheap enough up to the default 10k retention
+ * cap. Callers (the viewer modal) filter and sort in JS afterwards.
+ */
+export async function getAllEntries(): Promise<PersistedMessage[]> {
+    if (disabled) return [];
+    try {
+        const db = await dbPromise!;
+        const tx = db.transaction(STORE_MESSAGES, "readonly");
+        const store = tx.objectStore(STORE_MESSAGES);
+        return await new Promise((resolve, reject) => {
+            const req = store.getAll();
+            req.onsuccess = () => resolve(req.result as PersistedMessage[]);
+            req.onerror = () => reject(req.error);
+        });
+    } catch (e) {
+        logger.error("getAllEntries failed", e);
+        return [];
+    }
+}
+
 export async function removeEntry(messageId: string): Promise<void> {
     if (disabled || readOnly) return;
     try {
@@ -283,6 +323,7 @@ export async function removeEntry(messageId: string): Promise<void> {
             tx.oncomplete = () => res();
             tx.onerror = () => rej(tx.error);
         });
+        notifyChange();
     } catch (e) {
         logger.error("Failed to remove entry", messageId, e);
     }
@@ -312,6 +353,7 @@ export async function purgeMatching(predicate: (e: PersistedMessage) => boolean)
             };
             cursorReq.onerror = () => reject(cursorReq.error);
         });
+        if (count > 0) notifyChange();
         return count;
     } catch (e) {
         logger.error("purgeMatching failed", e);
@@ -342,6 +384,7 @@ export async function runRetentionPurge(opts: { days: number; count: number; }):
         let toDeleteForCount = opts.count > 0 ? Math.max(0, total - opts.count) : 0;
         const cutoffMs = opts.days > 0 ? Date.now() - opts.days * 86_400_000 : -Infinity;
 
+        let deletedCount = 0;
         await new Promise<void>((resolve, reject) => {
             const idx = store.index("capturedAt");
             const cursorReq = idx.openCursor();
@@ -354,6 +397,7 @@ export async function runRetentionPurge(opts: { days: number; count: number; }):
                 if (tooOld || overCount) {
                     cursor.delete();
                     if (overCount) toDeleteForCount--;
+                    deletedCount++;
                     cursor.continue();
                 } else {
                     resolve();
@@ -364,6 +408,7 @@ export async function runRetentionPurge(opts: { days: number; count: number; }):
 
         meta.put(Date.now(), "lastPurgeAt");
         await new Promise<void>((res, rej) => { tx.oncomplete = () => res(); tx.onerror = () => rej(tx.error); });
+        if (deletedCount > 0) notifyChange();
     } catch (e) {
         logger.error("runRetentionPurge failed", e);
     }
