@@ -431,10 +431,19 @@ export async function runRetentionPurge(opts: { days: number; count: number; }):
             r.onsuccess = () => res(r.result);
             r.onerror = () => rej(r.error);
         });
+        // Count saved entries via cursor walk. Booleans aren't valid IDB keys,
+        // so `index("saved").count(IDBKeyRange.only(true))` throws DataError;
+        // entries with `saved:true` are silently dropped from the index anyway.
         const savedCount = await new Promise<number>((res, rej) => {
-            const r = store.index("saved").count(IDBKeyRange.only(true));
-            r.onsuccess = () => res(r.result);
-            r.onerror = () => rej(r.error);
+            let count = 0;
+            const cursorReq = store.openCursor();
+            cursorReq.onsuccess = () => {
+                const cursor = cursorReq.result;
+                if (!cursor) return res(count);
+                if ((cursor.value as PersistedMessage).saved === true) count++;
+                cursor.continue();
+            };
+            cursorReq.onerror = () => rej(cursorReq.error);
         });
         const nonSavedTotal = total - savedCount;
         let toDeleteForCount = opts.count > 0 ? Math.max(0, nonSavedTotal - opts.count) : 0;

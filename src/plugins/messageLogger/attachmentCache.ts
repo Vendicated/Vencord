@@ -161,18 +161,32 @@ async function evictUntilUnderCap(needed: number, totalCapBytes: number): Promis
  * Fire-and-forget by design — never blocks the delete-handling path.
  */
 export function tryCacheFromMessage(message: any): void {
-    if (!initialized || quotaExceeded) return;
+    if (!initialized) { logger.debug("tryCacheFromMessage: not initialized"); return; }
+    if (quotaExceeded) { logger.debug("tryCacheFromMessage: quota exceeded for session"); return; }
     const s = settingsRef();
-    if (!s.enabled) return;
+    if (!s.enabled) { logger.debug("tryCacheFromMessage: cacheAttachmentsEnabled is off"); return; }
     const atts = message?.attachments;
-    if (!Array.isArray(atts) || atts.length === 0) return;
+    if (!Array.isArray(atts) || atts.length === 0) {
+        logger.debug("tryCacheFromMessage: no attachments on message", message?.id);
+        return;
+    }
+    logger.info("tryCacheFromMessage:", atts.length, "attachment(s) on message", message?.id);
     for (const att of atts) {
-        if (!att || typeof att.id !== "string" || typeof att.url !== "string") continue;
+        if (!att || typeof att.id !== "string" || typeof att.url !== "string") {
+            logger.debug("skip attachment: missing id/url", att);
+            continue;
+        }
         const bucket = bucketFor(att);
-        if (!bucketEnabled(bucket, s)) continue;
+        if (!bucketEnabled(bucket, s)) {
+            logger.debug("skip attachment: bucket disabled", att.id, bucket);
+            continue;
+        }
         const declaredSize = typeof att.size === "number" ? att.size : 0;
-        if (declaredSize > 0 && declaredSize > s.perFileCapBytes) continue;
-        // Fire-and-forget per-attachment download
+        if (declaredSize > 0 && declaredSize > s.perFileCapBytes) {
+            logger.debug("skip attachment: over per-file cap", att.id, declaredSize, ">", s.perFileCapBytes);
+            continue;
+        }
+        logger.info("queuing attachment download", att.id, bucket, "size~=", declaredSize);
         void downloadOne(att, s).catch(e => logger.error("downloadOne failed for", att.id, e));
     }
 }
@@ -217,6 +231,7 @@ async function downloadOne(att: any, s: Settings): Promise<void> {
             }
         }
         currentTotalBytes += buf.byteLength;
+        logger.info("cached attachment", att.id, "size", buf.byteLength, "totalBytes", currentTotalBytes);
     } catch (e) {
         logger.error("downloadOne errored", att?.id, e);
     } finally {
