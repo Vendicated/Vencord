@@ -17,7 +17,7 @@ import { useLogEntries, ViewerScope } from "./useLogEntries";
 const logger = new Logger("MessageLogger");
 const cl = classNameFactory("vc-ml-viewer-");
 
-type Tab = "deleted" | "edited" | "all";
+type Tab = "deleted" | "edited" | "saved" | "all";
 type Sort = "newest" | "oldest";
 
 interface ViewerProps {
@@ -53,6 +53,7 @@ function ViewerInner(props: ViewerProps) {
         switch (tab) {
             case "deleted": return baseEntries.filter(e => e.deleted);
             case "edited": return baseEntries.filter(e => !e.deleted && (e.editHistory?.length ?? 0) > 0);
+            case "saved": return baseEntries.filter(e => e.saved === true);
             default: return baseEntries;
         }
     }, [baseEntries, tab]);
@@ -139,6 +140,7 @@ function ViewerInner(props: ViewerProps) {
             >
                 <TabBar.Item id="deleted">Deleted</TabBar.Item>
                 <TabBar.Item id="edited">Edited</TabBar.Item>
+                <TabBar.Item id="saved">Saved</TabBar.Item>
                 <TabBar.Item id="all">All</TabBar.Item>
             </TabBar>
 
