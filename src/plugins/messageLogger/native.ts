@@ -4,15 +4,10 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { app } from "electron";
+import { DATA_DIR } from "@main/utils/constants";
 import { mkdir, readdir, readFile, rm, stat, writeFile } from "fs/promises";
 import { join, normalize } from "path";
 
-const DATA_DIR = process.env.VENCORD_USER_DATA_DIR ?? (
-    process.env.DISCORD_USER_DATA_DIR
-        ? join(process.env.DISCORD_USER_DATA_DIR, "..", "VencordData")
-        : join(app.getPath("userData"), "..", "Vencord")
-);
 const ATTACH_DIR = join(DATA_DIR, "messageLogger", "attachments");
 
 function safeIdToPath(id: string): string | null {
