@@ -95,7 +95,9 @@ export function LogEntryRow({ entry, density }: LogEntryRowProps) {
         const last = entry.editHistory[entry.editHistory.length - 1];
         preview = `edited from "${last.content}" → "${preview}"`;
     }
-    if (preview.length > contentLimit) preview = preview.slice(0, contentLimit - 1) + "…";
+    // Truncate by codepoint, not UTF-16 code unit, so we don't slice an emoji
+    // surrogate pair in half (Discord messages are full of emoji).
+    if (preview.length > contentLimit) preview = [...preview].slice(0, contentLimit - 1).join("") + "…";
     if (!preview) preview = "(no text content)";
 
     return (

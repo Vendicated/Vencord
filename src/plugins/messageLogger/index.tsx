@@ -41,6 +41,8 @@ import * as persistence from "./persistence";
 import * as restore from "./restore";
 import { openLogViewerModal } from "./viewer/LogViewerModal";
 
+const logger = new Logger("MessageLogger");
+
 interface MLMessage extends Message {
     deleted?: boolean;
     editHistory?: { timestamp: Date; content: string; }[];
@@ -391,7 +393,7 @@ export default definePlugin({
                                 try {
                                     await attachmentCache.clearAll();
                                 } catch (e) {
-                                    new Logger("MessageLogger").error("clearAll failed", e);
+                                    logger.error("clearAll failed", e);
                                 }
                             },
                         });
@@ -520,7 +522,7 @@ export default definePlugin({
                 mutate(data.id);
             }
         } catch (e) {
-            new Logger("MessageLogger").error("Error during handleDelete", e);
+            logger.error("Error during handleDelete", e);
         }
         return cache;
     },
