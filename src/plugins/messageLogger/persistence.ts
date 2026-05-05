@@ -7,7 +7,7 @@
 import { Logger } from "@utils/Logger";
 import { Message } from "@vencord/discord-types";
 
-import { PersistedMessage, PlainMessage, SCHEMA_VERSION, WriteEvent } from "./types";
+import { AttachmentRecord, PersistedMessage, PlainMessage, SCHEMA_VERSION, WriteEvent } from "./types";
 
 const logger = new Logger("MessageLogger");
 const DB_NAME = "VencordMessageLogger";
@@ -474,9 +474,128 @@ export async function runRetentionPurge(opts: { days: number; count: number; }):
     }
 }
 
+// ---- attachments store ------------------------------------------------------
+
+export async function getAttachmentRecord(id: string): Promise<AttachmentRecord | undefined> {
+    if (disabled) return undefined;
+    try {
+        const db = await dbPromise!;
+        const tx = db.transaction(STORE_ATTACHMENTS, "readonly");
+        const store = tx.objectStore(STORE_ATTACHMENTS);
+        return await new Promise<AttachmentRecord | undefined>((res, rej) => {
+            const r = store.get(id);
+            r.onsuccess = () => res(r.result as AttachmentRecord | undefined);
+            r.onerror = () => rej(r.error);
+        });
+    } catch (e) {
+        logger.error("getAttachmentRecord failed", id, e);
+        return undefined;
+    }
+}
+
+export async function putAttachmentRecord(rec: AttachmentRecord): Promise<void> {
+    if (disabled || readOnly) return;
+    try {
+        const db = await dbPromise!;
+        const tx = db.transaction(STORE_ATTACHMENTS, "readwrite");
+        tx.objectStore(STORE_ATTACHMENTS).put(rec);
+        await new Promise<void>((res, rej) => {
+            tx.oncomplete = () => res();
+            tx.onerror = () => rej(tx.error);
+            tx.onabort = () => rej(tx.error);
+        });
+    } catch (e) {
+        logger.error("putAttachmentRecord failed", rec.id, e);
+        throw e;
+    }
+}
+
+export async function deleteAttachmentRecord(id: string): Promise<void> {
+    if (disabled || readOnly) return;
+    try {
+        const db = await dbPromise!;
+        const tx = db.transaction(STORE_ATTACHMENTS, "readwrite");
+        tx.objectStore(STORE_ATTACHMENTS).delete(id);
+        await new Promise<void>((res, rej) => {
+            tx.oncomplete = () => res();
+            tx.onerror = () => rej(tx.error);
+        });
+    } catch (e) {
+        logger.error("deleteAttachmentRecord failed", id, e);
+    }
+}
+
+export async function listAttachmentRecords(): Promise<AttachmentRecord[]> {
+    if (disabled) return [];
+    try {
+        const db = await dbPromise!;
+        const tx = db.transaction(STORE_ATTACHMENTS, "readonly");
+        const store = tx.objectStore(STORE_ATTACHMENTS);
+        return await new Promise<AttachmentRecord[]>((res, rej) => {
+            const r = store.getAll();
+            r.onsuccess = () => res(r.result as AttachmentRecord[]);
+            r.onerror = () => rej(r.error);
+        });
+    } catch (e) {
+        logger.error("listAttachmentRecords failed", e);
+        return [];
+    }
+}
+
+/**
+ * Walk the attachments store oldest-first by `firstSeenAt`, calling `visit` for
+ * each record. If `visit` returns true, that record is deleted via the cursor
+ * inside the same transaction. Returns total bytes deleted.
+ */
+export async function evictAttachmentsOldestFirst(visit: (rec: AttachmentRecord) => boolean): Promise<number> {
+    if (disabled || readOnly) return 0;
+    try {
+        const db = await dbPromise!;
+        const tx = db.transaction(STORE_ATTACHMENTS, "readwrite");
+        const store = tx.objectStore(STORE_ATTACHMENTS);
+        let bytesFreed = 0;
+        await new Promise<void>((resolve, reject) => {
+            const idx = store.index("firstSeenAt");
+            const cursorReq = idx.openCursor();
+            cursorReq.onsuccess = () => {
+                const cursor = cursorReq.result;
+                if (!cursor) return resolve();
+                const rec = cursor.value as AttachmentRecord;
+                if (visit(rec)) {
+                    cursor.delete();
+                    bytesFreed += rec.size;
+                }
+                cursor.continue();
+            };
+            cursorReq.onerror = () => reject(cursorReq.error);
+        });
+        await new Promise<void>((res, rej) => { tx.oncomplete = () => res(); tx.onerror = () => rej(tx.error); });
+        return bytesFreed;
+    } catch (e) {
+        logger.error("evictAttachmentsOldestFirst failed", e);
+        return 0;
+    }
+}
+
+export async function clearAttachmentRecords(): Promise<void> {
+    if (disabled || readOnly) return;
+    try {
+        const db = await dbPromise!;
+        const tx = db.transaction(STORE_ATTACHMENTS, "readwrite");
+        tx.objectStore(STORE_ATTACHMENTS).clear();
+        await new Promise<void>((res, rej) => {
+            tx.oncomplete = () => res();
+            tx.onerror = () => rej(tx.error);
+        });
+    } catch (e) {
+        logger.error("clearAttachmentRecords failed", e);
+    }
+}
+
 // Internal — exported only so subsequent tasks can wire in.
 export const _internal = {
     db: () => dbPromise!,
     STORE_MESSAGES,
     STORE_META,
+    STORE_ATTACHMENTS,
 };
