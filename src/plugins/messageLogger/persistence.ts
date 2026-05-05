@@ -250,10 +250,124 @@ async function flushBuffer(): Promise<void> {
     }
 }
 
-export async function getEntriesForChannel(_channelId: string, _opts?: { since?: number; }): Promise<PersistedMessage[]> { /* Task 4 */ return []; }
-export async function removeEntry(_messageId: string): Promise<void> { /* Task 4 */ }
-export async function purgeMatching(_predicate: (e: PersistedMessage) => boolean): Promise<number> { /* Task 4 */ return 0; }
-export async function runRetentionPurge(_opts: { days: number; count: number; }): Promise<void> { /* Task 4 */ }
+// ---- read / purge -----------------------------------------------------------
+
+export async function getEntriesForChannel(channelId: string, opts: { since?: number; } = {}): Promise<PersistedMessage[]> {
+    if (disabled) return [];
+    try {
+        const db = await dbPromise!;
+        const tx = db.transaction(STORE_MESSAGES, "readonly");
+        const store = tx.objectStore(STORE_MESSAGES);
+        const idx = store.index("channelId");
+        return await new Promise((resolve, reject) => {
+            const req = idx.getAll(IDBKeyRange.only(channelId));
+            req.onsuccess = () => {
+                const all = (req.result as PersistedMessage[]);
+                resolve(opts.since == null ? all : all.filter(e => e.capturedAt >= opts.since!));
+            };
+            req.onerror = () => reject(req.error);
+        });
+    } catch (e) {
+        logger.error("Failed to read entries for channel", channelId, e);
+        return [];
+    }
+}
+
+export async function removeEntry(messageId: string): Promise<void> {
+    if (disabled || readOnly) return;
+    try {
+        const db = await dbPromise!;
+        const tx = db.transaction(STORE_MESSAGES, "readwrite");
+        tx.objectStore(STORE_MESSAGES).delete(messageId);
+        await new Promise<void>((res, rej) => {
+            tx.oncomplete = () => res();
+            tx.onerror = () => rej(tx.error);
+        });
+    } catch (e) {
+        logger.error("Failed to remove entry", messageId, e);
+    }
+}
+
+/**
+ * Walk all entries; delete those for which `predicate(entry) === true`.
+ * Returns count deleted. Used for retroactive ignore-list purges.
+ */
+export async function purgeMatching(predicate: (e: PersistedMessage) => boolean): Promise<number> {
+    if (disabled || readOnly) return 0;
+    try {
+        const db = await dbPromise!;
+        const tx = db.transaction(STORE_MESSAGES, "readwrite");
+        const store = tx.objectStore(STORE_MESSAGES);
+        let count = 0;
+        await new Promise<void>((resolve, reject) => {
+            const cursorReq = store.openCursor();
+            cursorReq.onsuccess = () => {
+                const cursor = cursorReq.result;
+                if (!cursor) return resolve();
+                if (predicate(cursor.value as PersistedMessage)) {
+                    cursor.delete();
+                    count++;
+                }
+                cursor.continue();
+            };
+            cursorReq.onerror = () => reject(cursorReq.error);
+        });
+        return count;
+    } catch (e) {
+        logger.error("purgeMatching failed", e);
+        return 0;
+    }
+}
+
+/**
+ * Time + count retention purge.
+ * - days = 0 disables time purge.
+ * - count = 0 disables count purge.
+ * Walks `capturedAt` index oldest-first and deletes until both caps satisfied.
+ */
+export async function runRetentionPurge(opts: { days: number; count: number; }): Promise<void> {
+    if (disabled || readOnly) return;
+    if (opts.days <= 0 && opts.count <= 0) return;
+    try {
+        const db = await dbPromise!;
+        const tx = db.transaction([STORE_MESSAGES, STORE_META], "readwrite");
+        const store = tx.objectStore(STORE_MESSAGES);
+        const meta = tx.objectStore(STORE_META);
+
+        const total = await new Promise<number>((res, rej) => {
+            const r = store.count();
+            r.onsuccess = () => res(r.result);
+            r.onerror = () => rej(r.error);
+        });
+        let toDeleteForCount = opts.count > 0 ? Math.max(0, total - opts.count) : 0;
+        const cutoffMs = opts.days > 0 ? Date.now() - opts.days * 86_400_000 : -Infinity;
+
+        await new Promise<void>((resolve, reject) => {
+            const idx = store.index("capturedAt");
+            const cursorReq = idx.openCursor();
+            cursorReq.onsuccess = () => {
+                const cursor = cursorReq.result;
+                if (!cursor) return resolve();
+                const entry = cursor.value as PersistedMessage;
+                const tooOld = entry.capturedAt < cutoffMs;
+                const overCount = toDeleteForCount > 0;
+                if (tooOld || overCount) {
+                    cursor.delete();
+                    if (overCount) toDeleteForCount--;
+                    cursor.continue();
+                } else {
+                    resolve();
+                }
+            };
+            cursorReq.onerror = () => reject(cursorReq.error);
+        });
+
+        meta.put(Date.now(), "lastPurgeAt");
+        await new Promise<void>((res, rej) => { tx.oncomplete = () => res(); tx.onerror = () => rej(tx.error); });
+    } catch (e) {
+        logger.error("runRetentionPurge failed", e);
+    }
+}
 
 // Internal — exported only so subsequent tasks can wire in.
 export const _internal = {
