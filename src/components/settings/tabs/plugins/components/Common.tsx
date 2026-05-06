@@ -4,28 +4,28 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { classNameFactory } from "@api/Styles";
+import { classNameFactory } from "@utils/css";
 import { classes } from "@utils/misc";
 import { wordsFromCamel, wordsToTitle } from "@utils/text";
-import { DefinedSettings, PluginOptionBase } from "@utils/types";
+import { DefinedSettings, PluginSettingDefCommon } from "@utils/types";
 import { Text } from "@webpack/common";
 import { PropsWithChildren } from "react";
 
 export const cl = classNameFactory("vc-plugins-setting-");
 
 interface SettingBaseProps<T> {
-    option: T;
+    setting: T;
     onChange(newValue: any): void;
     pluginSettings: {
         [setting: string]: any;
         enabled: boolean;
     };
     id: string;
-    definedSettings?: DefinedSettings;
+    definedSettings: DefinedSettings;
 }
 
-export type SettingProps<T extends PluginOptionBase> = SettingBaseProps<T>;
-export type ComponentSettingProps<T extends Omit<PluginOptionBase, "description" | "placeholder">> = SettingBaseProps<T>;
+export type SettingProps<T extends PluginSettingDefCommon> = SettingBaseProps<T>;
+export type ComponentSettingProps<T extends Omit<PluginSettingDefCommon, "description" | "placeholder">> = SettingBaseProps<T>;
 
 export function resolveError(isValidResult: boolean | string) {
     if (typeof isValidResult === "string") return isValidResult;

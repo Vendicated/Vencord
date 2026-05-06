@@ -63,8 +63,9 @@ let tooltipTimeout: any;
 
 export default definePlugin({
     name: "Translate",
-    description: "Translate messages with Google Translate or DeepL",
-    authors: [Devs.Ven, Devs.AshtonMemer],
+    description: "Translate messages with Google Translate, DeepL or Kagi.",
+    tags: ["Chat", "Utility"],
+    authors: [Devs.Ven, Devs.AshtonMemer, Devs.koish1],
     settings,
     contextMenus: {
         "message": messageCtxPatch
@@ -74,22 +75,28 @@ export default definePlugin({
 
     renderMessageAccessory: props => <TranslationAccessory message={props.message} />,
 
-    renderChatBarButton: TranslateChatBarIcon,
+    chatBarButton: {
+        icon: TranslateIcon,
+        render: TranslateChatBarIcon
+    },
 
-    renderMessagePopoverButton(message: Message) {
-        const content = getMessageContent(message);
-        if (!content) return null;
+    messagePopoverButton: {
+        icon: TranslateIcon,
+        render(message: Message) {
+            const content = getMessageContent(message);
+            if (!content) return null;
 
-        return {
-            label: "Translate",
-            icon: TranslateIcon,
-            message,
-            channel: ChannelStore.getChannel(message.channel_id),
-            onClick: async () => {
-                const trans = await translate("received", content);
-                handleTranslate(message.id, trans);
-            }
-        };
+            return {
+                label: "Translate",
+                icon: TranslateIcon,
+                message,
+                channel: ChannelStore.getChannel(message.channel_id),
+                onClick: async () => {
+                    const trans = await translate("received", content);
+                    handleTranslate(message.id, trans);
+                }
+            };
+        }
     },
 
     async onBeforeMessageSend(_, message) {

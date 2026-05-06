@@ -48,7 +48,7 @@
 
 .vc-gp-tab {
     border-bottom: 2px solid transparent;
-    color: var(--interactive-normal);
+    color: var(--interactive-icon-default);
     cursor: pointer;
     line-height: 14px;
 }
@@ -58,7 +58,7 @@
 }
 
 .vc-gp-tab:where(.vc-gp-selected, :hover, :focus) {
-    border-bottom-color: var(--interactive-active);
+    border-bottom-color: var(--interactive-icon-active);
 }
 
 .vc-gp-info {
@@ -71,7 +71,7 @@
     color: var(--text-default);
 }
 
-.vc-gp-server-info-pair [class^="timestamp"] {
+.vc-gp-server-info-pair [class*="timestamp"] {
     margin-left: 0;
 }
 
@@ -92,10 +92,10 @@
     max-height: 500px;
 }
 
-.vc-gp-scroller [class^="listRow"] {
+.vc-gp-scroller [class*="listRow"] {
     margin: 1px 0;
 }
 
-.vc-gp-scroller [class^="listRow"]:hover {
-    background-color: var(--background-modifier-hover);
+.vc-gp-scroller [class*="listRow"]:hover {
+    background-color: var(--background-mod-subtle);
 }

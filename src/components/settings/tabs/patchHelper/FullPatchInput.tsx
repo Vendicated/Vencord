@@ -77,7 +77,7 @@ export function FullPatchInput({ setFind, setParsedFind, setMatch, setReplacemen
                 onChange={setPatch}
                 onBlur={update}
             />
-            {error !== "" && <Forms.FormText style={{ color: "var(--text-danger)" }}>{error}</Forms.FormText>}
+            {error !== "" && <Forms.FormText style={{ color: "var(--text-feedback-critical)" }}>{error}</Forms.FormText>}
         </>
     );
 }

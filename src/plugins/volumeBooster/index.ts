@@ -51,20 +51,26 @@ export default definePlugin({
     name: "VolumeBooster",
     authors: [Devs.Nuckyz, Devs.sadan],
     description: "Allows you to set the user and stream volume above the default maximum",
+    tags: ["Voice", "Utility"],
     settings,
 
     patches: [
         // Change the max volume for sliders to allow for values above 200
-        ...[
-            "#{intl::USER_VOLUME}",
-            "currentVolume:"
-        ].map(find => ({
-            find,
+        {
+            find: "#{intl::USER_VOLUME}",
             replacement: {
-                match: /(?<=maxValue:)\i\.\i\?(\d+?):(\d+?)(?=,)/,
-                replace: (_, higherMaxVolume, minorMaxVolume) => `${higherMaxVolume}*$self.settings.store.multiplier`
+                match: /(?<=maxValue:)\i\.isPlatformEmbedded\?(\i\.\i):\i\.\i(?=,)/,
+                replace: (_, higherMaxVolume) => `${higherMaxVolume}*$self.settings.store.multiplier`
             }
-        })),
+        },
+        // Change the max volume for sliders to allow for values above 200
+        {
+            find: "currentVolume:",
+            replacement: {
+                match: /(?<=maxValue:)\i\.\i\?(\d+?):\d+?(?=,)/,
+                replace: (_, higherMaxVolume) => `${higherMaxVolume}*$self.settings.store.multiplier`
+            }
+        },
         // Patches needed for web/vesktop
         {
             find: "streamSourceNode",
@@ -93,7 +99,7 @@ export default definePlugin({
             find: "AudioContextSettingsMigrated",
             replacement: [
                 {
-                    match: /(?<=isLocalMute\(\i,\i\),volume:(\i).+?\i\(\i,\i,)\1(?=\))/,
+                    match: /(?<=isLocalMute\(\i,\i\),volume:(\i).+?\(0,\i\.\i\)\(\i,\i,\{volume:)\1(?=\}\))/,
                     replace: "$&>200?200:$&"
                 },
                 {
