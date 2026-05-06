@@ -17,20 +17,33 @@
 */
 
 import { PluginNative } from "@utils/types";
-import { Button, MediaEngineStore, showToast, Toasts, useState } from "@webpack/common";
+import { Button, MediaEngineStore, showToast, Toasts, useEffect, useRef, useState } from "@webpack/common";
 
 import type { VoiceRecorder } from ".";
 import { settings } from "./settings";
 
 const Native = VencordNative.pluginHelpers.VoiceMessages as PluginNative<typeof import("./native")>;
 
-export const VoiceRecorderDesktop: VoiceRecorder = ({ setAudioBlob, onRecordingChange }) => {
+export const VoiceRecorderDesktop: VoiceRecorder = ({ setAudioBlob, onRecordingChange, autoStart, stopSignal }) => {
     const [recording, setRecording] = useState(false);
+    const autoStartedRef = useRef(false);
 
     const changeRecording = (recording: boolean) => {
         setRecording(recording);
         onRecordingChange?.(recording);
     };
+
+    useEffect(() => {
+        if (autoStart && !autoStartedRef.current) {
+            autoStartedRef.current = true;
+            toggleRecording();
+        }
+    }, []);
+
+    useEffect(() => {
+        if (!stopSignal) return;
+        if (recording) toggleRecording();
+    }, [stopSignal]);
 
     function toggleRecording() {
         const discordVoice = DiscordNative.nativeModules.requireModule("discord_voice");

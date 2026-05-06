@@ -16,21 +16,34 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Button, MediaEngineStore, useState } from "@webpack/common";
+import { Button, MediaEngineStore, useEffect, useRef, useState } from "@webpack/common";
 
 import type { VoiceRecorder } from ".";
 import { settings } from "./settings";
 
-export const VoiceRecorderWeb: VoiceRecorder = ({ setAudioBlob, onRecordingChange }) => {
+export const VoiceRecorderWeb: VoiceRecorder = ({ setAudioBlob, onRecordingChange, autoStart, stopSignal }) => {
     const [recording, setRecording] = useState(false);
     const [paused, setPaused] = useState(false);
     const [recorder, setRecorder] = useState<MediaRecorder>();
     const [chunks, setChunks] = useState<Blob[]>([]);
+    const autoStartedRef = useRef(false);
 
     const changeRecording = (recording: boolean) => {
         setRecording(recording);
         onRecordingChange?.(recording);
     };
+
+    useEffect(() => {
+        if (autoStart && !autoStartedRef.current) {
+            autoStartedRef.current = true;
+            toggleRecording();
+        }
+    }, []);
+
+    useEffect(() => {
+        if (!stopSignal) return;
+        if (recording) toggleRecording();
+    }, [stopSignal]);
 
     function toggleRecording() {
         const nowRecording = !recording;

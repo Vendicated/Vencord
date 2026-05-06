@@ -33,7 +33,7 @@ import { chooseFile } from "@utils/web";
 import { CloudUpload as TCloudUpload } from "@vencord/discord-types";
 import { CloudUploadPlatform } from "@vencord/discord-types/enums";
 import { findLazy } from "@webpack";
-import { Button, Constants, FluxDispatcher, Forms, lodash, Menu, MessageActions, PendingReplyStore, PermissionsBits, PermissionStore, RestAPI, SelectedChannelStore, showToast, SnowflakeUtils, Toasts, useEffect, useState } from "@webpack/common";
+import { Button, ChannelStore, Constants, FluxDispatcher, Forms, lodash, Menu, MessageActions, PendingReplyStore, PermissionsBits, PermissionStore, RestAPI, SelectedChannelStore, showToast, SnowflakeUtils, Toasts, useEffect, useRef, useState } from "@webpack/common";
 import { ComponentType } from "react";
 
 import { VoiceRecorderDesktop } from "./DesktopRecorder";
@@ -47,6 +47,8 @@ export const cl = classNameFactory("vc-vmsg-");
 export type VoiceRecorder = ComponentType<{
     setAudioBlob(blob: Blob): void;
     onRecordingChange?(recording: boolean): void;
+    autoStart?: boolean;
+    stopSignal?: number;
 }>;
 
 export interface VoiceMessageProps {
@@ -74,10 +76,25 @@ const ctxMenuPatch: NavContextMenuPatchCallback = (children, props) => {
     );
 };
 
+function onKeydown(e: KeyboardEvent) {
+    if (!settings.store.keybind) return;
+    if (e.key !== "v" && e.key !== "V") return;
+    if (!e.altKey || e.ctrlKey || e.shiftKey || e.metaKey) return;
+
+    const channelId = SelectedChannelStore.getChannelId();
+    if (!channelId) return;
+    const channel = ChannelStore.getChannel(channelId);
+    if (!channel) return;
+    if (channel.guild_id && !(PermissionStore.can(PermissionsBits.SEND_VOICE_MESSAGES, channel) && PermissionStore.can(PermissionsBits.SEND_MESSAGES, channel))) return;
+
+    e.preventDefault();
+    openModal(modalProps => <Modal modalProps={modalProps} autoStart />);
+}
+
 export default definePlugin({
     name: "VoiceMessages",
-    description: "Allows you to send voice messages like on mobile. To do so, right click the upload button and click Send Voice Message",
-    tags: ["Voice"],
+    description: "Allows you to send voice messages like on mobile. Right click the upload button or press Alt+V to record, then Alt+B to send.",
+    tags: ["Voice", "Shortcuts"],
     authors: [Devs.Ven, Devs.Vap, Devs.Nickyux],
     settings,
 
@@ -97,6 +114,14 @@ export default definePlugin({
 
     contextMenus: {
         "channel-attach": ctxMenuPatch
+    },
+
+    start() {
+        document.addEventListener("keydown", onKeydown);
+    },
+
+    stop() {
+        document.removeEventListener("keydown", onKeydown);
     }
 });
 
@@ -157,10 +182,12 @@ function useObjectUrl() {
     return [url, setWithFree] as const;
 }
 
-function Modal({ modalProps }: { modalProps: ModalProps; }) {
+function Modal({ modalProps, autoStart }: { modalProps: ModalProps; autoStart?: boolean; }) {
     const [isRecording, setRecording] = useState(false);
     const [blob, setBlob] = useState<Blob>();
     const [blobUrl, setBlobUrl] = useObjectUrl();
+    const [stopSignal, setStopSignal] = useState(0);
+    const pendingSendRef = useRef(false);
 
     useEffect(() => () => {
         if (blobUrl)
@@ -207,6 +234,38 @@ function Modal({ modalProps }: { modalProps: ModalProps; }) {
         || blob.type.includes("codecs") && !blob.type.includes("opus")
     );
 
+    const doSend = () => {
+        if (!blob) return;
+        sendAudio(blob, meta ?? EMPTY_META);
+        modalProps.onClose();
+        showToast("Now sending voice message... Please be patient", Toasts.Type.MESSAGE);
+    };
+
+    useEffect(() => {
+        if (!pendingSendRef.current) return;
+        if (!blob || meta === EMPTY_META) return;
+        pendingSendRef.current = false;
+        doSend();
+    }, [blob, meta]);
+
+    useEffect(() => {
+        function onKey(e: KeyboardEvent) {
+            if (!settings.store.keybind) return;
+            if (e.key !== "b" && e.key !== "B") return;
+            if (!e.altKey || e.ctrlKey || e.shiftKey || e.metaKey) return;
+            e.preventDefault();
+
+            if (isRecording) {
+                pendingSendRef.current = true;
+                setStopSignal(s => s + 1);
+            } else if (blob) {
+                doSend();
+            }
+        }
+        document.addEventListener("keydown", onKey);
+        return () => document.removeEventListener("keydown", onKey);
+    }, [isRecording, blob, meta]);
+
     return (
         <ModalRoot {...modalProps}>
             <ModalHeader>
@@ -221,6 +280,8 @@ function Modal({ modalProps }: { modalProps: ModalProps; }) {
                             setBlobUrl(blob);
                         }}
                         onRecordingChange={setRecording}
+                        autoStart={autoStart}
+                        stopSignal={stopSignal}
                     />
 
                     <Button

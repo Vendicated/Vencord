@@ -30,4 +30,9 @@ export const settings = definePluginSettings({
         description: "Echo Cancellation",
         default: true,
     },
+    keybind: {
+        type: OptionType.BOOLEAN,
+        description: "Use keybinds (Alt+V to open and record, Alt+B to send)",
+        default: true,
+    },
 });
