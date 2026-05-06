@@ -16,19 +16,20 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { PluginOptionSelect } from "@utils/types";
+import { isSettingDisabled } from "@api/PluginManager";
+import { PluginSettingSelectDef } from "@utils/types";
 import { React, Select, useState } from "@webpack/common";
 
 import { resolveError, SettingProps, SettingsSection } from "./Common";
 
-export function SelectSetting({ option, pluginSettings, definedSettings, onChange, id }: SettingProps<PluginOptionSelect>) {
-    const def = pluginSettings[id] ?? option.options?.find(o => o.default)?.value;
+export function SelectSetting({ setting, pluginSettings, definedSettings, onChange, id }: SettingProps<PluginSettingSelectDef>) {
+    const def = pluginSettings[id] ?? setting.options?.find(o => o.default)?.value;
 
     const [state, setState] = useState<any>(def ?? null);
     const [error, setError] = useState<string | null>(null);
 
     function handleChange(newValue: any) {
-        const isValid = option.isValid?.call(definedSettings, newValue) ?? true;
+        const isValid = setting.isValid?.call(definedSettings, newValue) ?? true;
 
         setState(newValue);
         setError(resolveError(isValid));
@@ -39,17 +40,17 @@ export function SelectSetting({ option, pluginSettings, definedSettings, onChang
     }
 
     return (
-        <SettingsSection name={id} description={option.description} error={error}>
+        <SettingsSection name={id} description={setting.description} error={error}>
             <Select
-                placeholder={option.placeholder ?? "Select an option"}
-                options={option.options}
+                placeholder={setting.placeholder ?? "Select an option"}
+                options={setting.options}
                 maxVisibleItems={5}
                 closeOnSelect={true}
                 select={handleChange}
                 isSelected={v => v === state}
                 serialize={v => String(v)}
-                isDisabled={option.disabled?.call(definedSettings) ?? false}
-                {...option.componentProps}
+                isDisabled={isSettingDisabled(definedSettings, setting)}
+                {...setting.componentProps}
             />
         </SettingsSection>
     );

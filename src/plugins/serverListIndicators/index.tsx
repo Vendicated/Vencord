@@ -17,7 +17,7 @@
 */
 
 import { addServerListElement, removeServerListElement, ServerListRenderPosition } from "@api/ServerList";
-import { Settings } from "@api/Settings";
+import { definePluginSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
@@ -31,6 +31,18 @@ const enum IndicatorType {
 }
 
 const UserGuildJoinRequestStore = findStoreLazy("UserGuildJoinRequestStore");
+
+const settings = definePluginSettings({
+    mode: {
+        description: "mode",
+        type: OptionType.SELECT,
+        options: [
+            { label: "Only online friend count", value: IndicatorType.FRIEND, default: true },
+            { label: "Only server count", value: IndicatorType.SERVER },
+            { label: "Both server and online friend counts", value: IndicatorType.BOTH },
+        ]
+    }
+});
 
 function FriendsIndicator() {
     const onlineFriendsCount = useStateFromStores([RelationshipStore, PresenceStore], () => {
@@ -94,21 +106,10 @@ export default definePlugin({
     tags: ["Servers", "Appearance"],
     authors: [Devs.dzshn],
     dependencies: ["ServerListAPI"],
-
-    options: {
-        mode: {
-            description: "mode",
-            type: OptionType.SELECT,
-            options: [
-                { label: "Only online friend count", value: IndicatorType.FRIEND, default: true },
-                { label: "Only server count", value: IndicatorType.SERVER },
-                { label: "Both server and online friend counts", value: IndicatorType.BOTH },
-            ]
-        }
-    },
+    settings,
 
     renderIndicator: () => {
-        const { mode } = Settings.plugins.ServerListIndicators;
+        const { mode } = settings.store;
         return <ErrorBoundary noop>
             <div style={{ marginBottom: "4px" }}>
                 {!!(mode & IndicatorType.FRIEND) && <FriendsIndicator />}

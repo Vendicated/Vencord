@@ -15,7 +15,7 @@
     position: absolute;
     z-index: 2147483647;
     right: 1rem;
-    width: 25vw;
+    width: min(25vw, 400px);
     min-height: 10vh;
 }
 

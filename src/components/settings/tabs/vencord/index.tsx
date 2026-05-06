@@ -26,6 +26,7 @@ import { SpecialCard } from "@components/settings/SpecialCard";
 import { SettingsTab, wrapTab } from "@components/settings/tabs/BaseTab";
 import { openContributorModal } from "@components/settings/tabs/plugins/ContributorModal";
 import { openPluginModal } from "@components/settings/tabs/plugins/PluginModal";
+import SettingsPlugin from "@plugins/_core/settings";
 import { gitRemote } from "@shared/vencordUserAgent";
 import { IS_MAC, IS_WINDOWS } from "@utils/constants";
 import { Margins } from "@utils/margins";
@@ -217,7 +218,7 @@ function VencordSettings() {
                 <Forms.FormTitle tag="h5">Settings</Forms.FormTitle>
                 <Forms.FormText className={Margins.bottom20} style={{ color: "var(--text-muted)" }}>
                     Hint: You can change the position of this settings section in the{" "}
-                    <a onClick={() => openPluginModal(Vencord.Plugins.plugins.Settings)}>
+                    <a onClick={() => openPluginModal(SettingsPlugin)}>
                         settings of the Settings plugin
                     </a>!
                 </Forms.FormText>

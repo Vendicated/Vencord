@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Settings } from "@api/Settings";
+import { definePluginSettings } from "@api/Settings";
 import { managedStyleRootNode } from "@api/Styles";
 import { Devs } from "@utils/constants";
 import { createAndAppendStyle } from "@utils/css";
@@ -24,11 +24,20 @@ import definePlugin, { OptionType } from "@utils/types";
 
 let style: HTMLStyleElement;
 
+const settings = definePluginSettings({
+    blurAmount: {
+        type: OptionType.NUMBER,
+        description: "Blur Amount (in pixels)",
+        default: 10,
+        onChange: setCss
+    }
+});
+
 function setCss() {
     style.textContent = `
         .vc-nsfw-img [class*=imageContainer],
         .vc-nsfw-img [class*=wrapperPaused] {
-            filter: blur(${Settings.plugins.BlurNSFW.blurAmount}px);
+            filter: blur(${settings.store.blurAmount}px);
             transition: filter 0.2s;
 
             &:hover {
@@ -43,6 +52,7 @@ export default definePlugin({
     description: "Blur attachments in NSFW channels until hovered",
     tags: ["Privacy", "Appearance"],
     authors: [Devs.Ven],
+    settings,
 
     patches: [
         {
@@ -50,20 +60,11 @@ export default definePlugin({
             replacement: [
                 {
                     match: /(\.renderReactions\(\i\).+?className:)/,
-                    replace: '$&(this.props?.channel?.nsfw?"vc-nsfw-img ":"")+'
+                    replace: '$&(this?.props?.channel?.nsfw?"vc-nsfw-img ":"")+'
                 }
             ]
         }
     ],
-
-    options: {
-        blurAmount: {
-            type: OptionType.NUMBER,
-            description: "Blur Amount (in pixels)",
-            default: 10,
-            onChange: setCss
-        }
-    },
 
     start() {
         style = createAndAppendStyle("VcBlurNsfw", managedStyleRootNode);

@@ -170,12 +170,6 @@ export interface PluginDef {
     reporterTestable?: number;
     /**
      * Optionally provide settings that the user can configure in the Plugins tab of settings.
-     * @deprecated Use `settings` instead
-     */
-    // TODO: Remove when everything is migrated to `settings`
-    options?: Record<string, PluginOptionsItem>;
-    /**
-     * Optionally provide settings that the user can configure in the Plugins tab of settings.
      */
     settings?: DefinedSettings;
     /**
@@ -259,22 +253,21 @@ export const enum OptionType {
 
 export type SettingsDefinition = Record<string, PluginSettingDef>;
 export type SettingsChecks<D extends SettingsDefinition> = {
-    [K in keyof D]?: D[K] extends PluginSettingComponentDef ? IsDisabled<DefinedSettings<D>> :
-    (IsDisabled<DefinedSettings<D>> & IsValid<PluginSettingType<D[K]>, DefinedSettings<D>>);
+    [K in keyof D]?: D[K] extends PluginSettingComponentDef ? IsDisabledOrHidden<DefinedSettings<D>> :
+    (IsDisabledOrHidden<DefinedSettings<D>> & IsValid<PluginSettingType<D[K]>, DefinedSettings<D>>);
 };
 
 export type PluginSettingDef =
-    (PluginSettingCustomDef & Pick<PluginSettingCommon, "onChange">) |
-    (PluginSettingComponentDef & Omit<PluginSettingCommon, "description" | "placeholder">) | ((
-        | PluginSettingStringDef
-        | PluginSettingNumberDef
-        | PluginSettingBooleanDef
-        | PluginSettingSelectDef
-        | PluginSettingSliderDef
-        | PluginSettingBigIntDef
-    ) & PluginSettingCommon);
+    | PluginSettingCustomDef
+    | PluginSettingComponentDef
+    | PluginSettingStringDef
+    | PluginSettingNumberDef
+    | PluginSettingBooleanDef
+    | PluginSettingSelectDef
+    | PluginSettingSliderDef
+    | PluginSettingBigIntDef;
 
-export interface PluginSettingCommon {
+export interface PluginSettingDefCommon extends IsDisabledOrHidden, IsValid<unknown> {
     description: string;
     placeholder?: string;
     onChange?(newValue: any): void;
@@ -284,49 +277,49 @@ export interface PluginSettingCommon {
     restartNeeded?: boolean;
     componentProps?: Record<string, any>;
     /**
-     * Hide this setting from the settings UI
-     */
-    hidden?: boolean;
-    /**
      * Set this if the setting only works on Browser or Desktop, not both
      */
     target?: "WEB" | "DESKTOP" | "BOTH";
 }
 
-interface IsDisabled<D = unknown> {
+interface IsDisabledOrHidden<D extends DefinedSettings = DefinedSettings> {
     /**
-     * Checks if this setting should be disabled
+     * Whether this setting should be disabled
      */
-    disabled?(this: D): boolean;
+    disabled?: boolean | ((this: D) => boolean);
+    /**
+     * Whether this setting should be hidden from the user
+     */
+    hidden?: boolean | ((this: D) => boolean);
 }
 
-interface IsValid<T, D = unknown> {
+interface IsValid<T, D extends DefinedSettings = DefinedSettings> {
     /**
-     * Prevents the user from saving settings if this is false or a string
+     * Whether the value the user provided is valid. Either return a boolean for a generic error message or a string for a custom error message.
      */
     isValid?(this: D, value: T): boolean | string;
 }
 
-export interface PluginSettingStringDef {
+export interface PluginSettingStringDef extends PluginSettingDefCommon {
     type: OptionType.STRING;
     default?: string;
     /** Whether to use a multiline text area */
     multiline?: boolean;
 }
-export interface PluginSettingNumberDef {
+export interface PluginSettingNumberDef extends PluginSettingDefCommon {
     type: OptionType.NUMBER;
     default?: number;
 }
-export interface PluginSettingBigIntDef {
+export interface PluginSettingBigIntDef extends PluginSettingDefCommon {
     type: OptionType.BIGINT;
     default?: BigInt;
 }
-export interface PluginSettingBooleanDef {
+export interface PluginSettingBooleanDef extends PluginSettingDefCommon {
     type: OptionType.BOOLEAN;
     default?: boolean;
 }
 
-export interface PluginSettingSelectDef {
+export interface PluginSettingSelectDef extends PluginSettingDefCommon {
     type: OptionType.SELECT;
     options: readonly PluginSettingSelectOption[];
 }
@@ -340,9 +333,10 @@ export interface PluginSettingSelectOption {
 export interface PluginSettingCustomDef {
     type: OptionType.CUSTOM;
     default?: any;
+    onChange?: PluginSettingDefCommon["onChange"];
 }
 
-export interface PluginSettingSliderDef {
+export interface PluginSettingSliderDef extends PluginSettingDefCommon {
     type: OptionType.SLIDER;
     /**
      * All the possible values in the slider. Needs at least two values.
@@ -358,23 +352,20 @@ export interface PluginSettingSliderDef {
     stickToMarkers?: boolean;
 }
 
-export interface IPluginOptionComponentProps {
+export interface PluginSettingComponentDef extends Omit<PluginSettingDefCommon, "description" | "placeholder"> {
+    type: OptionType.COMPONENT;
+    component: (props: PluginSettingComponentProps) => ReactNode | Promise<ReactNode>;
+    default?: any;
+}
+export interface PluginSettingComponentProps {
     /**
      * Run this when the value changes.
-     *
-     * NOTE: The user will still need to click save to apply these changes.
      */
     setValue(newValue: any): void;
     /**
      * The options object
      */
     option: PluginSettingComponentDef;
-}
-
-export interface PluginSettingComponentDef {
-    type: OptionType.COMPONENT;
-    component: (props: IPluginOptionComponentProps) => ReactNode | Promise<ReactNode>;
-    default?: any;
 }
 
 /** Maps a `PluginSettingDef` to its value type */
@@ -399,55 +390,31 @@ type SettingsStore<D extends SettingsDefinition> = {
 /** An instance of defined plugin settings */
 export interface DefinedSettings<
     Def extends SettingsDefinition = SettingsDefinition,
-    Checks extends SettingsChecks<Def> = {},
     PrivateSettings extends object = {}
 > {
-    /** Shorthand for `Vencord.Settings.plugins.PluginName`, but with typings */
+    /** Definitions of each setting */
+    def: Def;
+    /** Reactive Read/Write settings store - This is a Proxy, use .plain for a plain object */
     store: SettingsStore<Def> & PrivateSettings;
-    /** Shorthand for `Vencord.PlainSettings.plugins.PluginName`, but with typings */
+    /** Pure Read-only settings object */
     plain: SettingsStore<Def> & PrivateSettings;
     /**
      * React hook for getting the settings for this plugin
-     * @param filter optional filter to avoid rerenders for irrelevent settings
+     * @param filter optional filter to avoid rerenders for irrelevant settings
      */
     use<F extends Extract<keyof Def | keyof PrivateSettings, string>>(filter?: F[]): Pick<SettingsStore<Def> & PrivateSettings, F>;
-    /** Definitions of each setting */
-    def: Def;
-    /** Setting methods with return values that could rely on other settings */
-    checks: Checks;
     /**
      * Name of the plugin these settings belong to,
      * will be an empty string until plugin is initialized
      */
     pluginName: string;
-
-    withPrivateSettings<T extends object>(): DefinedSettings<Def, Checks, T>;
+    /** Extend this Settings object type with more properties, useful for non-user-facing settings */
+    withPrivateSettings<T extends object>(): DefinedSettings<Def, T>;
 }
 
 export type PartialExcept<T, R extends keyof T> = Partial<T> & Required<Pick<T, R>>;
 
 export type IpcRes<V = any> = { ok: true; value: V; } | { ok: false, error: any; };
-
-/* -------------------------------------------- */
-/*             Legacy Options Types             */
-/* -------------------------------------------- */
-
-export type PluginOptionBase = PluginSettingCommon & IsDisabled;
-export type PluginOptionsItem =
-    | PluginOptionString
-    | PluginOptionNumber
-    | PluginOptionBoolean
-    | PluginOptionSelect
-    | PluginOptionSlider
-    | PluginOptionComponent
-    | PluginOptionCustom;
-export type PluginOptionString = PluginSettingStringDef & PluginSettingCommon & IsDisabled & IsValid<string>;
-export type PluginOptionNumber = (PluginSettingNumberDef | PluginSettingBigIntDef) & PluginSettingCommon & IsDisabled & IsValid<number | BigInt>;
-export type PluginOptionBoolean = PluginSettingBooleanDef & PluginSettingCommon & IsDisabled & IsValid<boolean>;
-export type PluginOptionSelect = PluginSettingSelectDef & PluginSettingCommon & IsDisabled & IsValid<PluginSettingSelectOption>;
-export type PluginOptionSlider = PluginSettingSliderDef & PluginSettingCommon & IsDisabled & IsValid<number>;
-export type PluginOptionComponent = PluginSettingComponentDef & Omit<PluginSettingCommon, "description" | "placeholder">;
-export type PluginOptionCustom = PluginSettingCustomDef & Pick<PluginSettingCommon, "onChange">;
 
 export type PluginNative<PluginExports extends Record<string, (event: Electron.IpcMainInvokeEvent, ...args: any[]) => any>> = {
     [key in keyof PluginExports]:

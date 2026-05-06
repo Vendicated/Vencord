@@ -44,8 +44,8 @@ export default definePlugin({
             find: "AnalyticsActionHandlers.handle",
             predicate: () => settings.store.disableAnalytics,
             replacement: {
-                match: /^.+$/,
-                replace: "()=>{}",
+                match: /\(0,\i\.analyticsTrackingStoreMaker\)/,
+                replace: "(()=>{})",
             },
         },
         {

@@ -95,7 +95,7 @@ const settings = definePluginSettings({
         default: false,
     },
     statusName: {
-        description: "Custom status text",
+        description: "Custom status text. You can use the following variables: {artist} | {album} | {title}",
         type: OptionType.STRING,
         default: "some music",
     },
@@ -174,6 +174,11 @@ const settings = definePluginSettings({
         type: OptionType.BOOLEAN,
         default: true,
     },
+    showAlbumCover: {
+        description: "Show album cover. Disabling this will display a placeholder. Useful if your Music has inappropriate art",
+        type: OptionType.BOOLEAN,
+        default: true,
+    }
 });
 
 export default definePlugin({
@@ -250,7 +255,7 @@ export default definePlugin({
     },
 
     getLargeImage(track: TrackData): string | undefined {
-        if (track.imageUrl && !track.imageUrl.includes(LASTFM_PLACEHOLDER_IMAGE_HASH))
+        if (settings.store.showAlbumCover && track.imageUrl && !track.imageUrl.includes(LASTFM_PLACEHOLDER_IMAGE_HASH))
             return track.imageUrl;
 
         if (settings.store.missingArt === "placeholder")
@@ -307,9 +312,15 @@ export default definePlugin({
                 case NameFormat.SongOnly:
                     return trackData.name;
                 case NameFormat.AlbumName:
-                    return trackData.album || settings.store.statusName;
+                    return trackData.album || settings.store.statusName
+                        .replaceAll("{artist}", trackData.artist || "")
+                        .replaceAll("{album}", trackData.album || "")
+                        .replaceAll("{title}", trackData.name || "");
                 default:
-                    return settings.store.statusName;
+                    return settings.store.statusName
+                        .replaceAll("{artist}", trackData.artist || "")
+                        .replaceAll("{album}", trackData.album || "")
+                        .replaceAll("{title}", trackData.name || "");
             }
         })();
 
