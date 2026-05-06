@@ -16,34 +16,46 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { BaseText } from "@components/BaseText";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { handleComponentFailed } from "@components/handleComponentFailed";
-import { Margins } from "@utils/margins";
+import { ModalCloseButton, ModalContent, ModalHeader, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
 import { onlyOnce } from "@utils/onlyOnce";
-import { Forms, Text } from "@webpack/common";
 import type { ComponentType, PropsWithChildren } from "react";
 
-export function SettingsTab({ title, children }: PropsWithChildren<{ title: string; }>) {
+export function SettingsTab({ children }: PropsWithChildren) {
     return (
-        <Forms.FormSection>
-            <Text
-                variant="heading-lg/semibold"
-                tag="h2"
-                className={Margins.bottom16}
-            >
-                {title}
-            </Text>
-
-            {children}
-        </Forms.FormSection>
+        <section className="vc-settings-tab">{children}</section>
     );
 }
 
 export const handleSettingsTabError = onlyOnce(handleComponentFailed);
 
 export function wrapTab(component: ComponentType<any>, tab: string) {
-    return ErrorBoundary.wrap(component, {
+    const wrapped = ErrorBoundary.wrap(component, {
+        displayName: `${tab}SettingsTab`,
         message: `Failed to render the ${tab} tab. If this issue persists, try using the installer to reinstall!`,
         onError: handleSettingsTabError,
     });
+
+    return wrapped;
+}
+
+export function openSettingsTabModal(Tab: ComponentType<any>) {
+    try {
+        openModal(wrapTab((modalProps: ModalProps) => (
+            <ModalRoot {...modalProps} size={ModalSize.MEDIUM} className="vc-settings-modal-root">
+                <ModalHeader>
+                    <BaseText size="lg" weight="semibold" style={{ flexGrow: 1 }}>{Tab.displayName?.replace("SettingsTab", "") || "Settings"}</BaseText>
+                    <ModalCloseButton onClick={modalProps.onClose} />
+                </ModalHeader>
+
+                <ModalContent className="vc-settings-modal">
+                    <Tab />
+                </ModalContent>
+            </ModalRoot>
+        ), Tab.displayName || "SettingsTab"));
+    } catch {
+        handleSettingsTabError();
+    }
 }

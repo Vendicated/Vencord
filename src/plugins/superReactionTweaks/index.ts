@@ -37,20 +37,24 @@ export const settings = definePluginSettings({
 export default definePlugin({
     name: "SuperReactionTweaks",
     description: "Customize the limit of Super Reactions playing at once, and super react by default",
+    tags: ["Reactions", "Emotes"],
     authors: [Devs.FieryFlames, Devs.ant0n],
     patches: [
         {
             find: ",BURST_REACTION_EFFECT_PLAY",
-            replacement: {
-                match: /(?<=(\i)=\i=>{.+?)(\i\(\i,\i\))>=\i(?=\).+BURST_REACTION_EFFECT_PLAY:\1)/,
-                replace: "!$self.shouldPlayBurstReaction($2)"
-            }
+            replacement: [
+                {
+                    // if (inlinedCalculatePlayingCount(a,b) >= limit) return;
+                    match: /(BURST_REACTION_EFFECT_PLAY:\i=>{.+?if\()(\(\(\i,\i\)=>.+?\(\i,\i\))>=5+?(?=\))/,
+                    replace: (_, rest, playingCount) => `${rest}!$self.shouldPlayBurstReaction(${playingCount})`
+                }
+            ]
         },
         {
             find: ".EMOJI_PICKER_CONSTANTS_EMOJI_CONTAINER_PADDING_HORIZONTAL)",
             replacement: {
-                match: /(openPopoutType:void 0(?=.+?isBurstReaction:(\i).+?(\i===\i\.\i.REACTION)).+?\[\2,\i\]=\i\.useState\().+?\)/,
-                replace: (_, rest, isBurstReactionVariable, isReactionIntention) => `${rest}$self.shouldSuperReactByDefault&&${isReactionIntention})`
+                match: /(openPopoutType:void 0(?=.+?isBurstReaction:(\i).+?;(\i===\i\.\i\.REACTION)&&\i\.push\().+?\[\2,\i\]=\i\.useState\()!1\)/,
+                replace: (_, rest, _isBurstReactionVariable, isReactionIntention) => `${rest}$self.shouldSuperReactByDefault&&${isReactionIntention})`
             }
         }
     ],
@@ -58,8 +62,7 @@ export default definePlugin({
 
     shouldPlayBurstReaction(playingCount: number) {
         if (settings.store.unlimitedSuperReactionPlaying) return true;
-        if (settings.store.superReactionPlayingLimit === 0) return false;
-        if (playingCount <= settings.store.superReactionPlayingLimit) return true;
+        if (settings.store.superReactionPlayingLimit > playingCount) return true;
         return false;
     },
 
