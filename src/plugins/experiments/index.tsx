@@ -20,16 +20,16 @@ import { definePluginSettings } from "@api/Settings";
 import { disableStyle, enableStyle } from "@api/Styles";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { ErrorCard } from "@components/ErrorCard";
+import { Paragraph } from "@components/Paragraph";
 import { Devs, IS_MAC } from "@utils/constants";
 import { Margins } from "@utils/margins";
 import definePlugin, { OptionType } from "@utils/types";
-import { findByPropsLazy, findLazy } from "@webpack";
-import { Forms, React } from "@webpack/common";
+import { findByPropsLazy } from "@webpack";
+import { ExperimentStore, Forms, React } from "@webpack/common";
 
 import hideBugReport from "./hideBugReport.css?managed";
 
 const KbdStyles = findByPropsLazy("key", "combo");
-const BugReporterExperiment = findLazy(m => m?.definition?.id === "2024-09_bug_reporter");
 
 const modKey = IS_MAC ? "cmd" : "ctrl";
 const altKey = IS_MAC ? "opt" : "alt";
@@ -46,6 +46,7 @@ const settings = definePluginSettings({
 export default definePlugin({
     name: "Experiments",
     description: "Enable Access to Experiments & other dev-only features in Discord!",
+    tags: ["Developers", "Utility"],
     authors: [
         Devs.Megu,
         Devs.Ven,
@@ -72,50 +73,48 @@ export default definePlugin({
             }
         },
         {
-            find: 'H1,title:"Experiments"',
-            replacement: {
-                match: 'title:"Experiments",children:[',
-                replace: "$&$self.WarningCard(),"
-            }
+            find: 'placeholder:"Search experiments"',
+            replacement: [
+                {
+                    match: /(?<=children:\[)(?=null!=.{0,150}"Installation ID:)/,
+                    replace: "$self.WarningCard(),"
+                },
+                // for some reason the installation id and copy buttons are on
+                // different lines so it looks stupid when the card above is added
+                {
+                    match: /(?<=,marginBottom:16)(?=\},children:\[)/,
+                    replace: ',flexDirection:"row",alignItems:"center"'
+                }
+            ]
         },
-        // Change top right chat toolbar button from the help one to the dev one
+        // Change top right toolbar button from the help one to the dev one
         {
-            find: '"M9 3v18"',
+            find: '?"BACK_FORWARD_NAVIGATION":',
             replacement: {
                 match: /hasBugReporterAccess:(\i)/,
                 replace: "_hasBugReporterAccess:$1=true"
             },
             predicate: () => settings.store.toolbarDevMenu
         },
-
-        // Make the Favourites Server experiment allow favouriting DMs and threads
+        // Disable opening the bug report menu when clicking the top right toolbar dev button
         {
-            find: "useCanFavoriteChannel",
+            find: 'navId:"staff-help-popout"',
             replacement: {
-                match: /\i\.isDM\(\)\|\|\i\.isThread\(\)/,
-                replace: "false",
+                match: /(isShown.+?)onClick:\i/,
+                replace: (_, rest) => `${rest}onClick:()=>{}`
             }
         },
-        // Enable option to always record clips even if you are not streaming
-        {
-            find: "isDecoupledGameClippingEnabled(){",
-            replacement: {
-                match: /\i\.isStaff\(\)/,
-                replace: "true"
-            }
-        },
-
         // Enable experiment embed on sent experiment links
         {
-            find: "dev://experiment/",
+            find: "Clear Treatment ",
             replacement: [
                 {
-                    match: /\i\.isStaff\(\)/,
+                    match: /\i\?\.isStaff\(\)/,
                     replace: "true"
                 },
                 // Fix some tricky experiments name causing a client crash
                 {
-                    match: /.getExperimentBucketName.+?if\(null==(\i)\|\|null==\i(?=\)return null;)/,
+                    match: /\.isStaffPersonal\(\).+?if\(null==(\i)\|\|null==\i(?=\)return null;)/,
                     replace: "$&||({})[$1]!=null"
                 }
             ]
@@ -127,24 +126,25 @@ export default definePlugin({
                 match: /}getServerAssignment\((\i),\i,\i\){/,
                 replace: "$&if($1==null)return;"
             }
-        }
+        },
+
     ],
 
-    start: () => !BugReporterExperiment.getCurrentConfig().hasBugReporterAccess && enableStyle(hideBugReport),
+    start: () => ExperimentStore.getUserExperimentBucket("2026-01-bug-reporter") > 0 && enableStyle(hideBugReport),
     stop: () => disableStyle(hideBugReport),
 
     settingsAboutComponent: () => {
         return (
             <React.Fragment>
                 <Forms.FormTitle tag="h3">More Information</Forms.FormTitle>
-                <Forms.FormText variant="text-md/normal">
+                <Paragraph size="md">
                     You can open Discord's DevTools via {" "}
                     <div className={KbdStyles.combo} style={{ display: "inline-flex" }}>
                         <kbd className={KbdStyles.key}>{modKey}</kbd> +{" "}
                         <kbd className={KbdStyles.key}>{altKey}</kbd> +{" "}
                         <kbd className={KbdStyles.key}>O</kbd>{" "}
                     </div>
-                </Forms.FormText>
+                </Paragraph>
             </React.Fragment>
         );
     },

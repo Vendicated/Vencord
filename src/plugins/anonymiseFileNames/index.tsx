@@ -16,15 +16,15 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Upload } from "@api/MessageEvents";
 import { definePluginSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
+import { CloudUpload } from "@vencord/discord-types";
 import { findByCodeLazy } from "@webpack";
 import { useState } from "@webpack/common";
 
-const ActionBarIcon = findByCodeLazy(".actionBarIcon)");
+const ActionBarIcon = findByCodeLazy("Children.map", "isValidElement", "dangerous:");
 
 const enum Methods {
     Random,
@@ -53,21 +53,27 @@ const settings = definePluginSettings({
     randomisedLength: {
         description: "Random characters length",
         type: OptionType.NUMBER,
-        default: 7,
-        disabled: () => settings.store.method !== Methods.Random,
+        default: 7
     },
     consistent: {
         description: "Consistent filename",
         type: OptionType.STRING,
-        default: "image",
-        disabled: () => settings.store.method !== Methods.Consistent,
+        default: "image"
     },
+}, {
+    randomisedLength: {
+        disabled() { return this.store.method !== Methods.Random; },
+    },
+    consistent: {
+        disabled() { return this.store.method !== Methods.Consistent; },
+    }
 });
 
 export default definePlugin({
     name: "AnonymiseFileNames",
     authors: [Devs.fawn],
     description: "Anonymise uploaded file names",
+    tags: ["Privacy", "Utility"],
     settings,
 
     patches: [
@@ -89,7 +95,7 @@ export default definePlugin({
         },
     ],
 
-    AnonymiseUploadButton: ErrorBoundary.wrap(({ upload }: { upload: Upload; }) => {
+    AnonymiseUploadButton: ErrorBoundary.wrap(({ upload }: { upload: CloudUpload; }) => {
         const [anonymise, setAnonymise] = useState(upload[ANONYMISE_UPLOAD_SYMBOL] ?? settings.store.anonymiseByDefault);
 
         function onToggleAnonymise() {
@@ -110,7 +116,7 @@ export default definePlugin({
         );
     }, { noop: true }),
 
-    anonymise(upload: Upload) {
+    anonymise(upload: CloudUpload) {
         if ((upload[ANONYMISE_UPLOAD_SYMBOL] ?? settings.store.anonymiseByDefault) === false) {
             return;
         }
@@ -123,7 +129,7 @@ export default definePlugin({
         const newFilename = (() => {
             switch (settings.store.method) {
                 case Methods.Random:
-                    const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+                    const chars = "0123456789bdfhjkmnpqrstvwxz";
                     return Array.from(
                         { length: settings.store.randomisedLength },
                         () => chars[Math.floor(Math.random() * chars.length)]
