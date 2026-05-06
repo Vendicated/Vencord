@@ -16,7 +16,7 @@ import { settings } from "./settings";
 
 export default definePlugin({
     name: "DMSearch",
-    description: "Adds a global DM and message search to the Quick Switcher (Ctrl+K) with Messages, Media, Pins, Links and Files tabs, mirroring the Discord mobile app.",
+    description: "Adds a global DM and Groups search to the Quick Switcher (Ctrl+K) with Messages, Media, Pins, Links and Files tabs.",
     authors: [Devs.QDave],
     tags: ["Chat", "Utility", "Shortcuts"],
     settings,
