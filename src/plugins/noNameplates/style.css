@@ -1,0 +1,10 @@
+[class*="members_"] [class*="nameplated_"] > [class*="container_df39b2"],
+[class*="members_"] [class*="nameplated_"] > [class*="img_df39b2"],
+[class*="members_"] [class*="nameplated_"] > [style*="linear-gradient"],
+[class*="members_"] [class*="nameplated_"] > [style*="mask-image"],
+[class*="membersWrap_"] [class*="nameplated_"] > [class*="container_df39b2"],
+[class*="membersWrap_"] [class*="nameplated_"] > [class*="img_df39b2"],
+[class*="membersWrap_"] [class*="nameplated_"] > [style*="linear-gradient"],
+[class*="membersWrap_"] [class*="nameplated_"] > [style*="mask-image"] {
+    display: none !important;
+}

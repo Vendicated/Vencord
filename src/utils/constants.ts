@@ -196,6 +196,10 @@ export const Devs = /* #__PURE__*/ Object.freeze({
         name: "King Fish",
         id: 499400512559382538n
     },
+    Moli: {
+        name: "Moli",
+        id: 470904884946796544n
+    },
     Commandtechno: {
         name: "Commandtechno",
         id: 296776625432035328n,
