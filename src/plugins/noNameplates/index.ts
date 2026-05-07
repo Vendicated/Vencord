@@ -25,6 +25,6 @@ export default definePlugin({
     name: "NoNameplates",
     description: "Hides Discord nameplates in member lists.",
     tags: ["Appearance", "Customisation"],
-    authors: [Devs.KingFish],
+    authors: [Devs.Moli],
     managedStyle,
 });
