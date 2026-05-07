@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { Devs } from "@utils/constants";
 import { addContextMenuPatch, NavContextMenuPatchCallback, removeContextMenuPatch } from "@api/ContextMenu";
 import { definePluginSettings } from "@api/Settings";
 import definePlugin, { OptionType } from "@utils/types";
@@ -253,7 +254,7 @@ const userContextMenuPatch: NavContextMenuPatchCallback = (children, { user }) =
 export default definePlugin({
     name: "MutualTimeZones",
     description: "Shows a local time badge next to usernames. Right-click any user to set their timezone.",
-    authors: [{ name: "you", id: 0n }],
+    authors: [Devs.tojuszn],
     settings,
 
     patches: [
