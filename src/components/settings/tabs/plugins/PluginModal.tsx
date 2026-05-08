@@ -21,6 +21,7 @@ import "./PluginModal.css";
 import { generateId } from "@api/Commands";
 import { hasAnyVisibleSettings, isSettingHidden } from "@api/PluginManager";
 import { useSettings } from "@api/Settings";
+import { BaseText } from "@components/BaseText";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { debounce } from "@shared/debounce";
 import { gitRemote } from "@shared/vencordUserAgent";
@@ -28,11 +29,12 @@ import { classNameFactory } from "@utils/css";
 import { proxyLazy } from "@utils/lazy";
 import { Margins } from "@utils/margins";
 import { classes } from "@utils/misc";
-import { ModalCloseButton, ModalContent, ModalHeader, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
+import { ModalProps, openModal } from "@utils/modal";
 import { OptionType, Plugin, PluginTag } from "@utils/types";
 import { User } from "@vencord/discord-types";
 import { findCssClassesLazy } from "@webpack";
 import { Clickable, FluxDispatcher, Forms, React, Text, Tooltip, useEffect, useMemo, UserStore, UserSummaryItem, UserUtils, useState } from "@webpack/common";
+import { Modal } from "@webpack/common/modalV2";
 import { Constructor } from "type-fest";
 
 import { PluginMeta } from "~plugins";
@@ -131,6 +133,7 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
                         onChange={debounce(onChange)}
                         pluginSettings={pluginSettings}
                         definedSettings={settings}
+                        closePluginSettings={onClose}
                     />
                 </ErrorBoundary>
             );
@@ -166,32 +169,38 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
     const pluginMeta = PluginMeta[plugin.name];
 
     return (
-        <ModalRoot transitionState={transitionState} size={ModalSize.MEDIUM}>
-            <ModalHeader separator={false} className={Margins.bottom8}>
-                <Text variant="heading-xl/bold" style={{ flexGrow: 1 }}>{plugin.name}</Text>
-                <ModalCloseButton onClick={onClose} />
-            </ModalHeader>
-
-            <ModalContent className={"vc-settings-modal-content"}>
-                <section>
-                    <div className={cl("info")}>
-                        <div>
-                            <Forms.FormText>{plugin.description}</Forms.FormText>
-                            {!!plugin.tags?.length && <PluginTags tags={plugin.tags} />}
+        <Modal
+            transitionState={transitionState}
+            onClose={onClose}
+            size="lg"
+            title={
+                <div className={cl("header")}>
+                    <BaseText tag="h1" weight="semibold" size="lg">{plugin.name}</BaseText>
+                    {!pluginMeta.userPlugin && (
+                        <div className="vc-settings-modal-links">
+                            <WebsiteButton
+                                text="View more info"
+                                href={`https://vencord.dev/plugins/${plugin.name}`}
+                            />
+                            <GithubButton
+                                text="View source code"
+                                href={`https://github.com/${gitRemote}/tree/main/src/plugins/${pluginMeta.folderName}`}
+                            />
                         </div>
-                        {!pluginMeta.userPlugin && (
-                            <div className="vc-settings-modal-links">
-                                <WebsiteButton
-                                    text="View more info"
-                                    href={`https://vencord.dev/plugins/${plugin.name}`}
-                                />
-                                <GithubButton
-                                    text="View source code"
-                                    href={`https://github.com/${gitRemote}/tree/main/src/plugins/${pluginMeta.folderName}`}
-                                />
-                            </div>
-                        )}
+                    )}
+                </div>
+            }
+            subtitle={
+                <div className={cl("info")}>
+                    <div>
+                        <Forms.FormText>{plugin.description}</Forms.FormText>
+                        {!!plugin.tags?.length && <PluginTags tags={plugin.tags} />}
                     </div>
+                </div>
+            }
+        >
+            <div className={"vc-settings-modal-content"}>
+                <section>
                     <Text variant="heading-lg/semibold" className={classes(Margins.top8, Margins.bottom8)}>Authors</Text>
                     <div style={{ width: "fit-content" }}>
                         <ErrorBoundary noop>
@@ -234,8 +243,8 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
                     <Text variant="heading-lg/semibold" className={classes(Margins.top16, Margins.bottom8)}>Settings</Text>
                     {renderSettings()}
                 </section>
-            </ModalContent>
-        </ModalRoot>
+            </div>
+        </Modal>
     );
 }
 

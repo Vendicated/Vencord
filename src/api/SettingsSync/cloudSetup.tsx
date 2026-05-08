@@ -10,7 +10,8 @@ import { Settings } from "@api/Settings";
 import { Logger } from "@utils/Logger";
 import { openModal } from "@utils/modal";
 import { relaunch } from "@utils/native";
-import { Alerts, OAuth2AuthorizeModal, UserStore } from "@webpack/common";
+import { OAuth2AuthorizeModal, UserStore } from "@webpack/common";
+import { ConfirmModal } from "@webpack/common/modalV2";
 
 export const logger = new Logger("SettingsSync:CloudSetup", "#39b7e0");
 
@@ -29,13 +30,17 @@ export async function checkCloudUrlCsp() {
 
     const res = await VencordNative.csp.requestAddOverride(Settings.cloud.url, ["connect-src"], "Cloud Sync");
     if (res === "ok") {
-        Alerts.show({
-            title: "Cloud Integration enabled",
-            body: `${host} has been added to the whitelist. Please restart the app for the changes to take effect.`,
-            confirmText: "Restart now",
-            cancelText: "Later!",
-            onConfirm: relaunch
-        });
+        openModal(props => (
+            <ConfirmModal
+                {...props}
+                title="Cloud Integration enabled"
+                subtitle={`${host} has been added to the whitelist. Please restart the app for the changes to take effect.`}
+                confirmText="Restart now"
+                cancelText="Later!"
+                variant="primary"
+                onConfirm={relaunch}
+            />
+        ));
     }
     return false;
 }

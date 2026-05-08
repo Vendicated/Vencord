@@ -2,7 +2,7 @@ import { ComponentType, ReactNode } from "react";
 import { LiteralUnion } from "type-fest";
 
 export type ModalActionVariant = LiteralUnion<"primary" | "secondary" | "critical-primary", string>;
-export type ModalSize = LiteralUnion<"sm" | "md", string>;
+export type ModalSize = LiteralUnion<"sm" | "md" | "lg" | "xl" | "xxl", string>;
 
 export interface ModalAction {
     text: string;
@@ -69,7 +69,7 @@ export interface ConfirmModalProps extends ModalProps {
      * This notice will either be a generic message if you just throw. If you call setError, it will show that message.
      * Even if you call setError, you still have to throw to keep the Modal open
      */
-    onConfirm(setError: (error: string) => void): void;
+    onConfirm?(setError: (error: string) => void): void;
     /** Optional callback that runs when the user cancels the action. Whether provided or not, the Modal will close when user clicks Cancel. */
     onCancel?(): void;
     onCloseCallback?(): void;

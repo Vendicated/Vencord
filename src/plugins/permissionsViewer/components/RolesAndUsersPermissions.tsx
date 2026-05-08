@@ -23,11 +23,12 @@ import { buildExtraRoleContextMenuItems } from "@plugins/betterRoleContext";
 import { cl, getGuildPermissionSpecMap, loadGetGuildPermissionSpecMap } from "@plugins/permissionsViewer/utils";
 import { copyToClipboard } from "@utils/clipboard";
 import { getIntlMessage, getUniqueUsername } from "@utils/discord";
-import { ModalCloseButton, ModalContent, ModalHeader, ModalProps, ModalRoot, ModalSize, openModalLazy } from "@utils/modal";
+import { ModalProps, openModalLazy } from "@utils/modal";
 import { Guild, Role, RoleOrUserPermission, UnicodeEmoji, User } from "@vencord/discord-types";
 import { PermissionOverwriteType } from "@vencord/discord-types/enums";
 import { findByCodeLazy } from "@webpack";
 import { ContextMenuApi, FluxDispatcher, GuildMemberStore, GuildRoleStore, i18n, Menu, PermissionsBits, ScrollerThin, Text, Tooltip, useEffect, useMemo, useRef, UserStore, useState, useStateFromStores } from "@webpack/common";
+import { Modal } from "@webpack/common/modalV2";
 
 import { settings } from "..";
 import { PermissionAllowedIcon, PermissionDefaultIcon, PermissionDeniedIcon } from "./icons";
@@ -75,133 +76,127 @@ function RolesAndUsersPermissionsComponent({ permissions, guild, modalProps, hea
     const roles = GuildRoleStore.getRolesSnapshot(guild.id);
 
     return (
-        <ModalRoot
+        <Modal
             {...modalProps}
-            size={ModalSize.LARGE}
+            size="xl"
+            title={`${header} Permissions`}
         >
-            <ModalHeader>
-                <Text className={cl("modal-title")} variant="heading-lg/semibold">{header} Permissions</Text>
-                <ModalCloseButton onClick={modalProps.onClose} />
-            </ModalHeader>
+            {!selectedItem && (
+                <div className={cl("modal-no-perms")}>
+                    <Text variant="heading-lg/normal">No permissions to display!</Text>
+                </div>
+            )}
 
-            <ModalContent className={cl("modal-content")}>
-                {!selectedItem && (
-                    <div className={cl("modal-no-perms")}>
-                        <Text variant="heading-lg/normal">No permissions to display!</Text>
-                    </div>
-                )}
+            {selectedItem && (
+                <div className={cl("modal-container")}>
+                    <ScrollerThin className={cl("modal-list")} orientation="auto">
+                        {permissions.map((permission, index) => {
+                            const user: User | undefined = UserStore.getUser(permission.id ?? "");
+                            const role: Role | undefined = roles[permission.id ?? ""];
+                            const roleIconSrc = role != null ? getRoleIconSrc(role) : undefined;
 
-                {selectedItem && (
-                    <div className={cl("modal-container")}>
-                        <ScrollerThin className={cl("modal-list")} orientation="auto">
-                            {permissions.map((permission, index) => {
-                                const user: User | undefined = UserStore.getUser(permission.id ?? "");
-                                const role: Role | undefined = roles[permission.id ?? ""];
-                                const roleIconSrc = role != null ? getRoleIconSrc(role) : undefined;
-
-                                return (
+                            return (
+                                <div
+                                    key={index}
+                                    className={cl("modal-list-item-btn")}
+                                    onClick={() => selectItem(index)}
+                                    role="button"
+                                    tabIndex={0}
+                                >
                                     <div
-                                        key={index}
-                                        className={cl("modal-list-item-btn")}
-                                        onClick={() => selectItem(index)}
-                                        role="button"
-                                        tabIndex={0}
+                                        className={cl("modal-list-item", { "modal-list-item-active": selectedItemIndex === index })}
+                                        onContextMenu={e => {
+                                            if (permission.type === PermissionOverwriteType.ROLE)
+                                                ContextMenuApi.openContextMenu(e, () => (
+                                                    <RoleContextMenu
+                                                        guild={guild}
+                                                        roleId={permission.id!}
+                                                        onClose={modalProps.onClose}
+                                                    />
+                                                ));
+                                            else if (permission.type === PermissionOverwriteType.MEMBER) {
+                                                ContextMenuApi.openContextMenu(e, () => (
+                                                    <UserContextMenu
+                                                        userId={permission.id!}
+                                                    />
+                                                ));
+                                            }
+                                        }}
                                     >
-                                        <div
-                                            className={cl("modal-list-item", { "modal-list-item-active": selectedItemIndex === index })}
-                                            onContextMenu={e => {
-                                                if (permission.type === PermissionOverwriteType.ROLE)
-                                                    ContextMenuApi.openContextMenu(e, () => (
-                                                        <RoleContextMenu
-                                                            guild={guild}
-                                                            roleId={permission.id!}
-                                                            onClose={modalProps.onClose}
-                                                        />
-                                                    ));
-                                                else if (permission.type === PermissionOverwriteType.MEMBER) {
-                                                    ContextMenuApi.openContextMenu(e, () => (
-                                                        <UserContextMenu
-                                                            userId={permission.id!}
-                                                        />
-                                                    ));
-                                                }
-                                            }}
-                                        >
-                                            {(permission.type === PermissionOverwriteType.ROLE || permission.type === PermissionOverwriteType.OWNER) && (
-                                                <span
-                                                    className={cl("modal-role-circle")}
-                                                    style={{ backgroundColor: role?.colorString ?? "var(--primary-300)" }}
-                                                />
-                                            )}
-                                            {permission.type === PermissionOverwriteType.ROLE && roleIconSrc != null && (
-                                                <img
-                                                    className={cl("modal-role-image")}
-                                                    src={roleIconSrc}
-                                                />
-                                            )}
-                                            {permission.type === PermissionOverwriteType.MEMBER && user != null && (
-                                                <img
-                                                    className={cl("modal-user-img")}
-                                                    src={user.getAvatarURL(void 0, void 0, false)}
-                                                />
-                                            )}
-                                            <Text variant="text-md/normal" className={cl("modal-list-item-text")}>
-                                                {
-                                                    permission.type === PermissionOverwriteType.ROLE
-                                                        ? role?.name ?? "Unknown Role"
-                                                        : permission.type === PermissionOverwriteType.MEMBER
-                                                            ? (user != null && getUniqueUsername(user)) ?? "Unknown User"
-                                                            : (
-                                                                <Flex gap="0.2em">
-                                                                    @owner
-                                                                    <OwnerCrownIcon height={18} width={18} aria-hidden="true" />
-                                                                </Flex>
-                                                            )
-                                                }
-                                            </Text>
-                                        </div>
+                                        {(permission.type === PermissionOverwriteType.ROLE || permission.type === PermissionOverwriteType.OWNER) && (
+                                            <span
+                                                className={cl("modal-role-circle")}
+                                                style={{ backgroundColor: role?.colorString ?? "var(--primary-300)" }}
+                                            />
+                                        )}
+                                        {permission.type === PermissionOverwriteType.ROLE && roleIconSrc != null && (
+                                            <img
+                                                className={cl("modal-role-image")}
+                                                src={roleIconSrc}
+                                            />
+                                        )}
+                                        {permission.type === PermissionOverwriteType.MEMBER && user != null && (
+                                            <img
+                                                className={cl("modal-user-img")}
+                                                src={user.getAvatarURL(void 0, void 0, false)}
+                                            />
+                                        )}
+                                        <Text variant="text-md/normal" className={cl("modal-list-item-text")}>
+                                            {
+                                                permission.type === PermissionOverwriteType.ROLE
+                                                    ? role?.name ?? "Unknown Role"
+                                                    : permission.type === PermissionOverwriteType.MEMBER
+                                                        ? (user != null && getUniqueUsername(user)) ?? "Unknown User"
+                                                        : (
+                                                            <Flex gap="0.2em">
+                                                                @owner
+                                                                <OwnerCrownIcon height={18} width={18} aria-hidden="true" />
+                                                            </Flex>
+                                                        )
+                                            }
+                                        </Text>
                                     </div>
-                                );
-                            })}
-                        </ScrollerThin>
-                        <div className={cl("modal-divider")} />
-                        <ScrollerThin className={cl("modal-perms")} orientation="auto">
-                            {Object.values(PermissionsBits).map(bit => (
-                                <div key={bit} className={cl("modal-perms-item")}>
-                                    <div className={cl("modal-perms-item-icon")}>
-                                        {(() => {
-                                            const { permissions, overwriteAllow, overwriteDeny } = selectedItem;
-
-                                            if (permissions)
-                                                return (permissions & bit) === bit
-                                                    ? PermissionAllowedIcon()
-                                                    : PermissionDeniedIcon();
-
-                                            if (overwriteAllow && (overwriteAllow & bit) === bit)
-                                                return PermissionAllowedIcon();
-                                            if (overwriteDeny && (overwriteDeny & bit) === bit)
-                                                return PermissionDeniedIcon();
-
-                                            return PermissionDefaultIcon();
-                                        })()}
-                                    </div>
-                                    <Text variant="text-md/normal">{guildPermissionSpecMap[String(bit)].title}</Text>
-
-                                    <Tooltip text={
-                                        (() => {
-                                            const { description } = guildPermissionSpecMap[String(bit)];
-                                            return typeof description === "function" ? i18n.intl.format(description, {}) : description;
-                                        })()
-                                    }>
-                                        {props => <InfoIcon {...props} />}
-                                    </Tooltip>
                                 </div>
-                            ))}
-                        </ScrollerThin>
-                    </div>
-                )}
-            </ModalContent>
-        </ModalRoot>
+                            );
+                        })}
+                    </ScrollerThin>
+                    <div className={cl("modal-divider")} />
+                    <ScrollerThin className={cl("modal-perms")} orientation="auto">
+                        {Object.values(PermissionsBits).map(bit => (
+                            <div key={bit} className={cl("modal-perms-item")}>
+                                <div className={cl("modal-perms-item-icon")}>
+                                    {(() => {
+                                        const { permissions, overwriteAllow, overwriteDeny } = selectedItem;
+
+                                        if (permissions)
+                                            return (permissions & bit) === bit
+                                                ? PermissionAllowedIcon()
+                                                : PermissionDeniedIcon();
+
+                                        if (overwriteAllow && (overwriteAllow & bit) === bit)
+                                            return PermissionAllowedIcon();
+                                        if (overwriteDeny && (overwriteDeny & bit) === bit)
+                                            return PermissionDeniedIcon();
+
+                                        return PermissionDefaultIcon();
+                                    })()}
+                                </div>
+                                <Text variant="text-md/normal">{guildPermissionSpecMap[String(bit)].title}</Text>
+
+                                <Tooltip text={
+                                    (() => {
+                                        const { description } = guildPermissionSpecMap[String(bit)];
+                                        return typeof description === "function" ? i18n.intl.format(description, {}) : description;
+                                    })()
+                                }>
+                                    {props => <InfoIcon {...props} />}
+                                </Tooltip>
+                            </div>
+                        ))}
+                    </ScrollerThin>
+                </div>
+            )}
+        </Modal>
     );
 }
 

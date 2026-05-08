@@ -33,8 +33,10 @@ import { Paragraph } from "@components/Paragraph";
 import { SettingsTab, wrapTab } from "@components/settings/tabs/BaseTab";
 import { Margins } from "@utils/margins";
 import { classes } from "@utils/misc";
+import { openModal } from "@utils/modal";
 import { IconComponent } from "@utils/types";
-import { Alerts, Select, Tooltip, useState } from "@webpack/common";
+import { Select, Tooltip, useState } from "@webpack/common";
+import { ConfirmModal } from "@webpack/common/modalV2";
 
 function validateUrl(url: string) {
     try {
@@ -228,14 +230,16 @@ function ResetSection() {
                 <ButtonWithIcon
                     variant="dangerPrimary"
                     disabled={!authenticated}
-                    onClick={() => Alerts.show({
-                        title: "Are you sure?",
-                        body: "Once your data is erased, we cannot recover it. There's no going back!",
-                        onConfirm: eraseAllCloudData,
-                        confirmText: "Erase it!",
-                        confirmColor: "vc-cloud-erase-data-danger-btn",
-                        cancelText: "Nevermind"
-                    })}
+                    onClick={() => openModal(props => (
+                        <ConfirmModal
+                            {...props}
+                            title="Are you sure?"
+                            subtitle="Once your data is erased, we cannot recover it. There's no going back!"
+                            onConfirm={eraseAllCloudData}
+                            confirmText="Erase it!"
+                            cancelText="Nevermind"
+                        />
+                    ))}
                     Icon={DeleteIcon}
                 >
                     Delete your Cloud Account
