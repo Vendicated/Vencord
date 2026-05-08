@@ -237,10 +237,10 @@ export default definePlugin({
                             {...props}
                             title="Hold on!"
                             confirmText="Understood"
-                            variant="primary"
-                            onConfirm={NO_OP}
-                            checkboxProps={{
-                            checked: Boolean(settings.store.dismissedDevBuildWarning),
+                        variant="primary"
+                        onConfirm={NO_OP}
+                        checkboxProps={{
+                            checked: false,
                             onChange: checked => settings.store.dismissedDevBuildWarning = checked
                         }}
                     >

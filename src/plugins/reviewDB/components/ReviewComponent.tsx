@@ -75,7 +75,7 @@ export default function ReviewComponent({ review, refetch, profileId }: { review
             <ConfirmModal
                 {...props}
                 title="Are you sure?"
-                subtitle="Do you really you want to report this review?"
+                subtitle="Do you really want to report this review?"
                 confirmText="Report"
                 cancelText="Nevermind"
                 onConfirm={async () => {
@@ -99,7 +99,7 @@ export default function ReviewComponent({ review, refetch, profileId }: { review
             <ConfirmModal
                 {...props}
                 title="Are you sure?"
-                subtitle="Do you really you want to block this user? They will be unable to leave further reviews on your profile. You can unblock users in the plugin settings."
+                subtitle="Do you really want to block this user? They will be unable to leave further reviews on your profile. You can unblock users in the plugin settings."
                 confirmText="Block"
                 cancelText="Nevermind"
                 onConfirm={async () => {
