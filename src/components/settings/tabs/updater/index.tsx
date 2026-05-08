@@ -26,6 +26,7 @@ import { HeadingSecondary } from "@components/Heading";
 import { Link } from "@components/Link";
 import { Paragraph } from "@components/Paragraph";
 import { SettingsTab, wrapTab } from "@components/settings/tabs/BaseTab";
+import { t } from "@utils/i18n";
 import { Margins } from "@utils/margins";
 import { classes } from "@utils/misc";
 import { useAwaiter } from "@utils/react";
@@ -44,19 +45,19 @@ function VesktopSection() {
     return (
         <Flex className={Margins.bottom20} flexDirection="column" gap="1em">
             <Card variant="info">
-                <HeadingSecondary>Vesktop & Vencord</HeadingSecondary>
-                <Paragraph>Vesktop and Vencord are two separate things. This updater is for Vencord.</Paragraph>
+                <HeadingSecondary>{t("Vesktop & Vencord")}</HeadingSecondary>
+                <Paragraph>{t("Vesktop and Vencord are two separate things. This updater is for Vencord.")}</Paragraph>
                 <Paragraph className={Margins.top8}>
-                    You receive separate popups for Vesktop updates. You can also manually update by installing the <Link href="https://vesktop.dev/install">latest version</Link>.
+                    {t("You receive separate popups for Vesktop updates. You can also manually update by installing the ")}<Link href="https://vesktop.dev/install">{t("latest version")}</Link>.
                 </Paragraph>
             </Card>
 
             {isVesktopOutdated && (
                 <Card variant="warning">
-                    <HeadingSecondary>Vesktop Outdated</HeadingSecondary>
+                    <HeadingSecondary>{t("Vesktop Outdated")}</HeadingSecondary>
                     <Flex flexDirection="column" gap="0.5em">
-                        <Paragraph>Your version of Vesktop is outdated!</Paragraph>
-                        <Button variant="link" onClick={() => VesktopNative.app.openUpdater()}>Open Vesktop Updater</Button>
+                        <Paragraph>{t("Your version of Vesktop is outdated!")}</Paragraph>
+                        <Button variant="link" onClick={() => VesktopNative.app.openUpdater()}>{t("Open Vesktop Updater")}</Button>
                     </Flex>
                 </Card>
             )}
@@ -68,7 +69,7 @@ function Updater() {
     const settings = useSettings(["autoUpdate", "autoUpdateNotification"]);
 
     const [repo, err, repoPending] = useAwaiter(getRepo, {
-        fallbackValue: "Loading...",
+        fallbackValue: t("Loading..."),
         onError: e => UpdateLogger.error("Failed to retrieve repo", err)
     });
 
@@ -82,26 +83,26 @@ function Updater() {
             <VesktopSection />
 
             <FormSwitch
-                title="Automatically update"
-                description="Automatically update Vencord without confirmation prompt"
+                title={t("Automatically update")}
+                description={t("Automatically update Vencord without confirmation prompt")}
                 value={settings.autoUpdate}
                 onChange={(v: boolean) => settings.autoUpdate = v}
             />
             <FormSwitch
-                title="Get notified when an automatic update completes"
-                description="Show a notification when Vencord automatically updates"
+                title={t("Get notified when an automatic update completes")}
+                description={t("Show a notification when Vencord automatically updates")}
                 value={settings.autoUpdateNotification}
                 onChange={(v: boolean) => settings.autoUpdateNotification = v}
                 disabled={!settings.autoUpdate}
             />
 
-            <Forms.FormTitle tag="h5" className={Margins.top20}>Repo</Forms.FormTitle>
+            <Forms.FormTitle tag="h5" className={Margins.top20}>{t("Repo")}</Forms.FormTitle>
 
             <Forms.FormText>
                 {repoPending
                     ? repo
                     : err
-                        ? "Failed to retrieve - check console"
+                        ? t("Failed to retrieve - check console")
                         : (
                             <Link href={repo}>
                                 {repo.split("/").slice(-2).join("/")}
@@ -114,7 +115,7 @@ function Updater() {
 
             <Divider className={classes(Margins.top16, Margins.bottom16)} />
 
-            <Forms.FormTitle tag="h5">Updates</Forms.FormTitle>
+            <Forms.FormTitle tag="h5">{t("Updates")}</Forms.FormTitle>
 
             {isNewer
                 ? <Newer {...commonProps} />
@@ -126,4 +127,4 @@ function Updater() {
 
 export default IS_UPDATER_DISABLED
     ? null
-    : wrapTab(Updater, "Updater");
+    : wrapTab(Updater, t("Updater"));

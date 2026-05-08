@@ -19,6 +19,7 @@
 import { BaseText } from "@components/BaseText";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { handleComponentFailed } from "@components/handleComponentFailed";
+import { t } from "@utils/i18n";
 import { ModalCloseButton, ModalContent, ModalHeader, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
 import { onlyOnce } from "@utils/onlyOnce";
 import type { ComponentType, PropsWithChildren } from "react";
@@ -34,7 +35,7 @@ export const handleSettingsTabError = onlyOnce(handleComponentFailed);
 export function wrapTab(component: ComponentType<any>, tab: string) {
     const wrapped = ErrorBoundary.wrap(component, {
         displayName: `${tab}SettingsTab`,
-        message: `Failed to render the ${tab} tab. If this issue persists, try using the installer to reinstall!`,
+        message: t("Failed to render the ") + tab + t(" tab. If this issue persists, try using the installer to reinstall!"),
         onError: handleSettingsTabError,
     });
 
@@ -46,7 +47,7 @@ export function openSettingsTabModal(Tab: ComponentType<any>) {
         openModal(wrapTab((modalProps: ModalProps) => (
             <ModalRoot {...modalProps} size={ModalSize.MEDIUM} className="vc-settings-modal-root">
                 <ModalHeader>
-                    <BaseText size="lg" weight="semibold" style={{ flexGrow: 1 }}>{Tab.displayName?.replace("SettingsTab", "") || "Settings"}</BaseText>
+                    <BaseText size="lg" weight="semibold" style={{ flexGrow: 1 }}>{Tab.displayName?.replace("SettingsTab", "") || t("Settings")}</BaseText>
                     <ModalCloseButton onClick={modalProps.onClose} />
                 </ModalHeader>
 

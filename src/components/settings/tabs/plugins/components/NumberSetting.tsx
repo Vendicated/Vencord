@@ -17,6 +17,7 @@
 */
 
 import { isSettingDisabled } from "@api/PluginManager";
+import { tPluginSettingPlaceholder } from "@utils/i18n";
 import { OptionType, PluginSettingBigIntDef, PluginSettingNumberDef } from "@utils/types";
 import { React, TextInput, useState } from "@webpack/common";
 
@@ -24,7 +25,7 @@ import { resolveError, SettingProps, SettingsSection } from "./Common";
 
 const MAX_SAFE_NUMBER = BigInt(Number.MAX_SAFE_INTEGER);
 
-export function NumberSetting({ setting, pluginSettings, definedSettings, id, onChange }: SettingProps<PluginSettingNumberDef | PluginSettingBigIntDef>) {
+export function NumberSetting({ setting, pluginSettings, definedSettings, id, onChange, pluginName }: SettingProps<PluginSettingNumberDef | PluginSettingBigIntDef>) {
     function serialize(value: any) {
         if (setting.type === OptionType.BIGINT) return BigInt(value);
         return Number(value);
@@ -50,11 +51,11 @@ export function NumberSetting({ setting, pluginSettings, definedSettings, id, on
     }
 
     return (
-        <SettingsSection name={id} description={setting.description} error={error}>
+        <SettingsSection name={id} description={setting.description} error={error} pluginName={pluginName}>
             <TextInput
                 type="number"
                 pattern="-?[0-9]+"
-                placeholder={setting.placeholder ?? "Enter a number"}
+                placeholder={tPluginSettingPlaceholder(pluginName, id, setting.placeholder ?? "Enter a number")}
                 value={state}
                 onChange={handleChange}
                 disabled={isSettingDisabled(definedSettings, setting)}

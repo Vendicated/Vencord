@@ -23,7 +23,7 @@ import { React, useState } from "@webpack/common";
 
 import { resolveError, SettingProps, SettingsSection } from "./Common";
 
-export function BooleanSetting({ setting, pluginSettings, definedSettings, id, onChange }: SettingProps<PluginSettingBooleanDef>) {
+export function BooleanSetting({ setting, pluginSettings, definedSettings, id, onChange, pluginName }: SettingProps<PluginSettingBooleanDef>) {
     const def = pluginSettings[id] ?? setting.default;
 
     const [state, setState] = useState(def ?? false);
@@ -41,7 +41,7 @@ export function BooleanSetting({ setting, pluginSettings, definedSettings, id, o
     }
 
     return (
-        <SettingsSection tag="label" name={id} description={setting.description} error={error} inlineSetting>
+        <SettingsSection tag="label" name={id} description={setting.description} error={error} inlineSetting pluginName={pluginName}>
             <Switch
                 checked={state}
                 onChange={handleChange}
@@ -50,4 +50,3 @@ export function BooleanSetting({ setting, pluginSettings, definedSettings, id, o
         </SettingsSection>
     );
 }
-

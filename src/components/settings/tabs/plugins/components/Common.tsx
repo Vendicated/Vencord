@@ -5,6 +5,7 @@
  */
 
 import { classNameFactory } from "@utils/css";
+import { t, tPluginSettingDescription, tPluginSettingName } from "@utils/i18n";
 import { classes } from "@utils/misc";
 import { wordsFromCamel, wordsToTitle } from "@utils/text";
 import { DefinedSettings, PluginSettingDefCommon } from "@utils/types";
@@ -22,6 +23,7 @@ interface SettingBaseProps<T> {
     };
     id: string;
     definedSettings: DefinedSettings;
+    pluginName: string;
 }
 
 export type SettingProps<T extends PluginSettingDefCommon> = SettingBaseProps<T>;
@@ -39,19 +41,22 @@ interface SettingsSectionProps extends PropsWithChildren {
     error?: string | null;
     inlineSetting?: boolean;
     tag?: "label" | "div";
+    pluginName?: string;
 }
 
-export function SettingsSection({ tag: Tag = "div", name, description, error, inlineSetting, children }: SettingsSectionProps) {
+export function SettingsSection({ tag: Tag = "div", name, description, error, inlineSetting, children, pluginName = "" }: SettingsSectionProps) {
+    const fallbackName = wordsToTitle(wordsFromCamel(name));
+
     return (
         <Tag className={cl("section")}>
             <div className={classes(cl("content"), inlineSetting && cl("inline"))}>
                 <div className={cl("label")}>
-                    {name && <Text className={cl("title")} variant="text-md/medium">{wordsToTitle(wordsFromCamel(name))}</Text>}
-                    {description && <Text className={cl("description")} variant="text-sm/normal">{description}</Text>}
+                    {name && <Text className={cl("title")} variant="text-md/medium">{tPluginSettingName(pluginName, name, fallbackName)}</Text>}
+                    {description && <Text className={cl("description")} variant="text-sm/normal">{tPluginSettingDescription(pluginName, name, description)}</Text>}
                 </div>
                 {children}
             </div>
-            {error && <Text className={cl("error")} variant="text-sm/normal">{error}</Text>}
+            {error && <Text className={cl("error")} variant="text-sm/normal">{t(error)}</Text>}
         </Tag>
     );
 }

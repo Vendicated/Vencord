@@ -21,6 +21,7 @@ import "./styles.css";
 import { Card } from "@components/Card";
 import { Link } from "@components/Link";
 import { SettingsTab, wrapTab } from "@components/settings/tabs/BaseTab";
+import { t } from "@utils/i18n";
 import { getStylusWebStoreUrl } from "@utils/web";
 import { Forms, React, TabBar, useState } from "@webpack/common";
 
@@ -49,13 +50,13 @@ function ThemesTab() {
                     className="vc-settings-tab-bar-item"
                     id={ThemeTab.LOCAL}
                 >
-                    Local Themes
+                    {t("Local Themes")}
                 </TabBar.Item>
                 <TabBar.Item
                     className="vc-settings-tab-bar-item"
                     id={ThemeTab.ONLINE}
                 >
-                    Online Themes
+                    {t("Online Themes")}
                 </TabBar.Item>
             </TabBar>
 
@@ -71,10 +72,10 @@ function UserscriptThemesTab() {
     return (
         <SettingsTab>
             <Card variant="danger">
-                <Forms.FormTitle tag="h5">Themes are not supported on the Userscript!</Forms.FormTitle>
+                <Forms.FormTitle tag="h5">{t("Themes are not supported on the Userscript!")}</Forms.FormTitle>
 
                 <Forms.FormText>
-                    You can instead install themes with the <Link href={getStylusWebStoreUrl()}>Stylus extension</Link>!
+                    {t("You can instead install themes with the ")}<Link href={getStylusWebStoreUrl()}>{t("Stylus extension")}</Link>{t("!")}
                 </Forms.FormText>
             </Card>
         </SettingsTab>
@@ -82,5 +83,5 @@ function UserscriptThemesTab() {
 }
 
 export default IS_USERSCRIPT
-    ? wrapTab(UserscriptThemesTab, "Themes")
-    : wrapTab(ThemesTab, "Themes");
+    ? wrapTab(UserscriptThemesTab, t("Themes"))
+    : wrapTab(ThemesTab, t("Themes"));

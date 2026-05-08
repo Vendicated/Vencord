@@ -8,6 +8,7 @@ import { Divider } from "@components/Divider";
 import { ErrorCard } from "@components/ErrorCard";
 import { Link } from "@components/Link";
 import { CspBlockedUrls, useCspErrors } from "@utils/cspViolations";
+import { t } from "@utils/i18n";
 import { Margins } from "@utils/margins";
 import { classes } from "@utils/misc";
 import { relaunch } from "@utils/native";
@@ -39,10 +40,10 @@ export function CspErrorCard() {
         forceUpdate();
 
         Alerts.show({
-            title: "Restart Required",
-            body: "A restart is required to apply this change",
-            confirmText: "Restart now",
-            cancelText: "Later!",
+            title: t("Restart Required"),
+            body: t("A restart is required to apply this change"),
+            confirmText: t("Restart now"),
+            cancelText: t("Later!"),
             onConfirm: relaunch
         });
     };
@@ -51,14 +52,14 @@ export function CspErrorCard() {
 
     return (
         <ErrorCard className={Margins.bottom16}>
-            <Forms.FormTitle tag="h5">Blocked Resources</Forms.FormTitle>
-            <Forms.FormText>Some images, styles, or fonts were blocked because they come from disallowed domains.</Forms.FormText>
-            <Forms.FormText>It is highly recommended to move them to GitHub or Imgur. But you may also allow domains if you fully trust them.</Forms.FormText>
+            <Forms.FormTitle tag="h5">{t("Blocked Resources")}</Forms.FormTitle>
+            <Forms.FormText>{t("Some images, styles, or fonts were blocked because they come from disallowed domains.")}</Forms.FormText>
+            <Forms.FormText>{t("It is highly recommended to move them to GitHub or Imgur. But you may also allow domains if you fully trust them.")}</Forms.FormText>
             <Forms.FormText>
-                After allowing a domain, you have to fully close (from tray / task manager) and restart {IS_DISCORD_DESKTOP ? "Discord" : "Vesktop"} to apply the change.
+                {t("After allowing a domain, you have to fully close (from tray / task manager) and restart ")}{IS_DISCORD_DESKTOP ? "Discord" : "Vesktop"}{t(" to apply the change.")}
             </Forms.FormText>
 
-            <Forms.FormTitle tag="h5" className={classes(Margins.top16, Margins.bottom8)}>Blocked URLs</Forms.FormTitle>
+            <Forms.FormTitle tag="h5" className={classes(Margins.top16, Margins.bottom8)}>{t("Blocked URLs")}</Forms.FormTitle>
             <div className="vc-settings-csp-list">
                 {errors.map((url, i) => (
                     <div key={url}>
@@ -66,7 +67,7 @@ export function CspErrorCard() {
                         <div className="vc-settings-csp-row">
                             <Link href={url}>{url}</Link>
                             <Button color={Button.Colors.PRIMARY} onClick={() => allowUrl(url)} disabled={isImgurHtmlDomain(url)}>
-                                Allow
+                                {t("Allow")}
                             </Button>
                         </div>
                     </div>
@@ -77,9 +78,9 @@ export function CspErrorCard() {
                 <>
                     <Divider className={classes(Margins.top8, Margins.bottom16)} />
                     <Forms.FormText>
-                        Imgur links should be direct links in the form of <code>https://i.imgur.com/...</code>
+                        {t("Imgur links should be direct links in the form of ")}<code>https://i.imgur.com/...</code>
                     </Forms.FormText>
-                    <Forms.FormText>To obtain a direct link, right-click the image and select "Copy image address".</Forms.FormText>
+                    <Forms.FormText>{t("To obtain a direct link, right-click the image and select \"Copy image address\".")}</Forms.FormText>
                 </>
             )}
         </ErrorCard>

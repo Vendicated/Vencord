@@ -22,6 +22,7 @@ import { Flex } from "@components/Flex";
 import { Heading } from "@components/Heading";
 import { Paragraph } from "@components/Paragraph";
 import { SettingsTab, wrapTab } from "@components/settings/tabs/BaseTab";
+import { t } from "@utils/i18n";
 import { Margins } from "@utils/margins";
 import { Button, Text } from "@webpack/common";
 
@@ -30,31 +31,33 @@ function BackupAndRestoreTab() {
         <SettingsTab>
             <Flex flexDirection="column" gap="0.5em">
                 <Card variant="warning">
-                    <Heading tag="h4">Warning</Heading>
-                    <Paragraph>Importing a settings file will overwrite your current settings.</Paragraph>
+                    <Heading tag="h4">{t("Warning")}</Heading>
+                    <Paragraph>{t("Importing a settings file will overwrite your current settings.")}</Paragraph>
                 </Card>
 
                 <Text variant="text-md/normal" className={Margins.bottom8}>
-                    You can import and export your Vencord settings as a JSON file.
-                    This allows you to easily transfer your settings to another device,
-                    or recover your settings after reinstalling Vencord or Discord.
+                    {t("You can import and export your Vencord settings as a JSON file.")}
+                    {" "}
+                    {t("This allows you to easily transfer your settings to another device,")}
+                    {" "}
+                    {t("or recover your settings after reinstalling Vencord or Discord.")}
                 </Text>
 
-                <Heading tag="h4">Settings Export contains:</Heading>
+                <Heading tag="h4">{t("Settings Export contains:")}</Heading>
                 <Text variant="text-md/normal" className={Margins.bottom8}>
                     <ul>
-                        <li>&mdash; Custom QuickCSS</li>
-                        <li>&mdash; Theme Links</li>
-                        <li>&mdash; Plugin Settings</li>
+                        <li>&mdash; {t("Custom QuickCSS")}</li>
+                        <li>&mdash; {t("Theme Links")}</li>
+                        <li>&mdash; {t("Plugin Settings")}</li>
                     </ul>
                 </Text>
 
                 <Flex>
                     <Button onClick={() => uploadSettingsBackup()}>
-                        Import Settings
+                        {t("Import Settings")}
                     </Button>
                     <Button onClick={downloadSettingsBackup}>
-                        Export Settings
+                        {t("Export Settings")}
                     </Button>
                 </Flex>
             </Flex>
@@ -62,4 +65,4 @@ function BackupAndRestoreTab() {
     );
 }
 
-export default wrapTab(BackupAndRestoreTab, "Backup & Restore");
+export default wrapTab(BackupAndRestoreTab, t("Backup & Restore"));

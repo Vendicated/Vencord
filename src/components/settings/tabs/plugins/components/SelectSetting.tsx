@@ -17,16 +17,21 @@
 */
 
 import { isSettingDisabled } from "@api/PluginManager";
+import { tPluginSettingOption, tPluginSettingPlaceholder } from "@utils/i18n";
 import { PluginSettingSelectDef } from "@utils/types";
-import { React, Select, useState } from "@webpack/common";
+import { React, Select, useMemo, useState } from "@webpack/common";
 
 import { resolveError, SettingProps, SettingsSection } from "./Common";
 
-export function SelectSetting({ setting, pluginSettings, definedSettings, onChange, id }: SettingProps<PluginSettingSelectDef>) {
+export function SelectSetting({ setting, pluginSettings, definedSettings, onChange, id, pluginName }: SettingProps<PluginSettingSelectDef>) {
     const def = pluginSettings[id] ?? setting.options?.find(o => o.default)?.value;
 
     const [state, setState] = useState<any>(def ?? null);
     const [error, setError] = useState<string | null>(null);
+    const options = useMemo(() => setting.options.map(option => ({
+        ...option,
+        label: tPluginSettingOption(pluginName, id, option.label)
+    })), [setting.options, pluginName, id]);
 
     function handleChange(newValue: any) {
         const isValid = setting.isValid?.call(definedSettings, newValue) ?? true;
@@ -40,10 +45,10 @@ export function SelectSetting({ setting, pluginSettings, definedSettings, onChan
     }
 
     return (
-        <SettingsSection name={id} description={setting.description} error={error}>
+        <SettingsSection name={id} description={setting.description} error={error} pluginName={pluginName}>
             <Select
-                placeholder={setting.placeholder ?? "Select an option"}
-                options={setting.options}
+                placeholder={tPluginSettingPlaceholder(pluginName, id, setting.placeholder ?? "Select an option")}
+                options={options}
                 maxVisibleItems={5}
                 closeOnSelect={true}
                 select={handleChange}

@@ -25,6 +25,7 @@ import ErrorBoundary from "@components/ErrorBoundary";
 import { debounce } from "@shared/debounce";
 import { gitRemote } from "@shared/vencordUserAgent";
 import { classNameFactory } from "@utils/css";
+import { t, tPluginDescription, tPluginTag } from "@utils/i18n";
 import { proxyLazy } from "@utils/lazy";
 import { Margins } from "@utils/margins";
 import { classes } from "@utils/misc";
@@ -72,7 +73,7 @@ function PluginTags({ tags }: { tags: PluginTag[]; }) {
     return (
         <div className={cl("tags")}>
             {tags.map(tag => (
-                <div key={tag} className={cl("tag")}>{tag}</div>
+                <div key={tag} className={cl("tag")}>{tPluginTag(tag)}</div>
             ))}
         </div>
     );
@@ -83,7 +84,7 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
     const hasSettings = hasAnyVisibleSettings(plugin);
 
     // avoid layout shift by showing dummy users while loading users
-    const fallbackAuthors = useMemo(() => [makeDummyUser({ username: "Loading...", id: "-1465912127305809920" })], []);
+    const fallbackAuthors = useMemo(() => [makeDummyUser({ username: t("Loading..."), id: "-1465912127305809920" })], []);
     const [authors, setAuthors] = useState<Partial<User>[]>([]);
 
     useEffect(() => {
@@ -106,7 +107,7 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
     function renderSettings() {
         const { settings } = plugin;
         if (!hasSettings || !settings)
-            return <Forms.FormText>There are no settings for this plugin.</Forms.FormText>;
+            return <Forms.FormText>{t("There are no settings for this plugin.")}</Forms.FormText>;
 
         const options = Object.entries(settings.def).map(([key, setting]) => {
             if (setting.type === OptionType.CUSTOM) return null;
@@ -131,6 +132,7 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
                         onChange={debounce(onChange)}
                         pluginSettings={pluginSettings}
                         definedSettings={settings}
+                        pluginName={plugin.name}
                     />
                 </ErrorBoundary>
             );
@@ -176,23 +178,23 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
                 <section>
                     <div className={cl("info")}>
                         <div>
-                            <Forms.FormText>{plugin.description}</Forms.FormText>
+                            <Forms.FormText>{tPluginDescription(plugin.name, plugin.description)}</Forms.FormText>
                             {!!plugin.tags?.length && <PluginTags tags={plugin.tags} />}
                         </div>
                         {!pluginMeta.userPlugin && (
                             <div className="vc-settings-modal-links">
                                 <WebsiteButton
-                                    text="View more info"
+                                    text={t("View more info")}
                                     href={`https://vencord.dev/plugins/${plugin.name}`}
                                 />
                                 <GithubButton
-                                    text="View source code"
+                                    text={t("View source code")}
                                     href={`https://github.com/${gitRemote}/tree/main/src/plugins/${pluginMeta.folderName}`}
                                 />
                             </div>
                         )}
                     </div>
-                    <Text variant="heading-lg/semibold" className={classes(Margins.top8, Margins.bottom8)}>Authors</Text>
+                    <Text variant="heading-lg/semibold" className={classes(Margins.top8, Margins.bottom8)}>{t("Authors")}</Text>
                     <div style={{ width: "fit-content" }}>
                         <ErrorBoundary noop>
                             <UserSummaryItem
@@ -223,7 +225,7 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
                 {!!plugin.settingsAboutComponent && (
                     <div className={Margins.top16}>
                         <section>
-                            <ErrorBoundary message="An error occurred while rendering this plugin's custom Info Component">
+                            <ErrorBoundary message={t("An error occurred while rendering this plugin's custom Info Component")}>
                                 <plugin.settingsAboutComponent />
                             </ErrorBoundary>
                         </section>
@@ -231,7 +233,7 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
                 )}
 
                 <section>
-                    <Text variant="heading-lg/semibold" className={classes(Margins.top16, Margins.bottom8)}>Settings</Text>
+                    <Text variant="heading-lg/semibold" className={classes(Margins.top16, Margins.bottom8)}>{t("Settings")}</Text>
                     {renderSettings()}
                 </section>
             </ModalContent>

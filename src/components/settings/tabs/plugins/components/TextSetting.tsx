@@ -17,12 +17,13 @@
 */
 
 import { isSettingDisabled } from "@api/PluginManager";
+import { tPluginSettingPlaceholder } from "@utils/i18n";
 import { PluginSettingStringDef } from "@utils/types";
 import { React, TextArea, TextInput, useState } from "@webpack/common";
 
 import { resolveError, SettingProps, SettingsSection } from "./Common";
 
-export function TextSetting({ setting, pluginSettings, definedSettings, id, onChange }: SettingProps<PluginSettingStringDef>) {
+export function TextSetting({ setting, pluginSettings, definedSettings, id, onChange, pluginName }: SettingProps<PluginSettingStringDef>) {
     const [state, setState] = useState(pluginSettings[id] ?? setting.default ?? null);
     const [error, setError] = useState<string | null>(null);
 
@@ -38,17 +39,17 @@ export function TextSetting({ setting, pluginSettings, definedSettings, id, onCh
     }
 
     return (
-        <SettingsSection name={id} description={setting.description} error={error}>
+        <SettingsSection name={id} description={setting.description} error={error} pluginName={pluginName}>
             {setting.multiline
                 ? <TextArea
-                    placeholder={setting.placeholder ?? "Enter a value"}
+                    placeholder={tPluginSettingPlaceholder(pluginName, id, setting.placeholder ?? "Enter a value")}
                     value={state}
                     onChange={handleChange}
                     disabled={isSettingDisabled(definedSettings, setting)}
                     {...setting.componentProps} />
                 : <TextInput
                     type="text"
-                    placeholder={setting.placeholder ?? "Enter a value"}
+                    placeholder={tPluginSettingPlaceholder(pluginName, id, setting.placeholder ?? "Enter a value")}
                     value={state}
                     onChange={handleChange}
                     maxLength={null}
