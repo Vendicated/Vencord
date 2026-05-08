@@ -35,7 +35,7 @@ import { onlyOnce } from "@utils/onlyOnce";
 import { makeCodeblock } from "@utils/text";
 import definePlugin from "@utils/types";
 import { checkForUpdates, isOutdated, update } from "@utils/updater";
-import { Channel } from "@vencord/discord-types";
+import { Channel, OpenModalProps } from "@vencord/discord-types";
 import { Button, ChannelStore, Forms, GuildMemberStore, Parser, PermissionsBits, PermissionStore, RelationshipStore, showToast, Text, Toasts, UserStore } from "@webpack/common";
 import { ConfirmModal } from "@webpack/common/modalV2";
 import { JSX } from "react";
@@ -138,6 +138,34 @@ const settings = definePluginSettings({}).withPrivateSettings<{
     dismissedDevBuildWarning?: boolean;
 }>();
 
+function DevBuildConfirmModal(props: OpenModalProps) {
+    const s = settings.use(["dismissedDevBuildWarning"]);
+
+    return (
+        <ConfirmModal
+            {...props}
+            title="Hold on!"
+            confirmText="Understood"
+            variant="primary"
+            checkboxProps={{
+                checked: s.dismissedDevBuildWarning === true,
+                onChange: checked => s.dismissedDevBuildWarning = checked
+            }}
+        >
+            <div>
+                <Forms.FormText>You are using a custom build of Vencord, which we do not provide support for!</Forms.FormText>
+
+                <Forms.FormText className={Margins.top8}>
+                    We only provide support for <Link href="https://vencord.dev/download">official builds</Link>.
+                    Either <Link href="https://vencord.dev/download">switch to an official build</Link> or figure your issue out yourself.
+                </Forms.FormText>
+
+                <Text variant="text-md/bold" className={Margins.top8}>You will be banned from receiving support if you ignore this rule.</Text>
+            </div>
+        </ConfirmModal>
+    );
+}
+
 export default definePlugin({
     name: "SupportHelper",
     required: true,
@@ -230,29 +258,7 @@ export default definePlugin({
             }
 
             if (!IS_STANDALONE && !settings.store.dismissedDevBuildWarning) {
-                openModal(props => (
-                    <ConfirmModal
-                        {...props}
-                        title="Hold on!"
-                        confirmText="Understood"
-                        variant="primary"
-                        checkboxProps={{
-                            checked: false,
-                            onChange: checked => settings.store.dismissedDevBuildWarning = checked
-                        }}
-                    >
-                        <div>
-                            <Forms.FormText>You are using a custom build of Vencord, which we do not provide support for!</Forms.FormText>
-
-                            <Forms.FormText className={Margins.top8}>
-                                We only provide support for <Link href="https://vencord.dev/download">official builds</Link>.
-                                Either <Link href="https://vencord.dev/download">switch to an official build</Link> or figure your issue out yourself.
-                            </Forms.FormText>
-
-                            <Text variant="text-md/bold" className={Margins.top8}>You will be banned from receiving support if you ignore this rule.</Text>
-                        </div>
-                    </ConfirmModal>
-                ));
+                openModal(props => <DevBuildConfirmModal {...props} />);
                 return;
             }
         }

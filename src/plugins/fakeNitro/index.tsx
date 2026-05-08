@@ -24,7 +24,7 @@ import { getCurrentGuild } from "@utils/discord";
 import { Logger } from "@utils/Logger";
 import { openModal } from "@utils/modal";
 import definePlugin, { OptionType } from "@utils/types";
-import type { Emoji, Message, Sticker } from "@vencord/discord-types";
+import type { Emoji, Message, OpenModalProps, Sticker } from "@vencord/discord-types";
 import { StickerFormatType } from "@vencord/discord-types/enums";
 import { findByCodeLazy, findByPropsLazy, proxyLazyWebpack } from "@webpack";
 import { ChannelStore, DraftType, EmojiStore, FluxDispatcher, Forms, GuildMemberStore, IconUtils, lodash, Parser, PermissionsBits, PermissionStore, StickersStore, UploadHandler, UserSettingsActionCreators, UserSettingsProtoStore, UserStore } from "@webpack/common";
@@ -152,6 +152,35 @@ const hasExternalEmojiPerms = (channelId: string) => hasPermission(channelId, Pe
 const hasExternalStickerPerms = (channelId: string) => hasPermission(channelId, PermissionsBits.USE_EXTERNAL_STICKERS);
 const hasEmbedPerms = (channelId: string) => hasPermission(channelId, PermissionsBits.EMBED_LINKS);
 const hasAttachmentPerms = (channelId: string) => hasPermission(channelId, PermissionsBits.ATTACH_FILES);
+
+function getWordBoundary(origStr: string, offset: number) {
+    return (!origStr[offset] || /\s/.test(origStr[offset])) ? "" : " ";
+}
+
+function CannotEmbedNoticeModal({ modalProps, resolve }: { modalProps: OpenModalProps; resolve: (value: boolean) => void; }) {
+    const s = settings.use(["disableEmbedPermissionCheck"]);
+    return (
+        <ConfirmModal
+            {...modalProps}
+            title="Hold on!"
+            subtitle="You are trying to send/edit a message that contains a FakeNitro emoji or sticker, however you do not have permissions to embed links in the current channel. Are you sure you want to send this message? Your FakeNitro items will appear as a link only."
+            confirmText="Send Anyway"
+            cancelText="Cancel"
+            onConfirm={() => resolve(true)}
+            onCloseCallback={() => setImmediate(() => resolve(false))}
+            checkboxProps={{
+                checked: s.disableEmbedPermissionCheck === true,
+                onChange: checked => s.disableEmbedPermissionCheck = checked
+            }}
+        />
+    );
+}
+
+function showCannotEmbedNotice() {
+    return new Promise<boolean>(resolve => {
+        openModal(props => <CannotEmbedNoticeModal modalProps={props} resolve={resolve} />);
+    });
+}
 
 export default definePlugin({
     name: "FakeNitro",
@@ -797,40 +826,6 @@ export default definePlugin({
             return;
         }
 
-        function getWordBoundary(origStr: string, offset: number) {
-            return (!origStr[offset] || /\s/.test(origStr[offset])) ? "" : " ";
-        }
-
-        function cannotEmbedNotice() {
-            return new Promise<boolean>(resolve => {
-                openModal(props => (
-                    <ConfirmModal
-                        {...props}
-                        title="Hold on!"
-                        confirmText="Send Anyway"
-                        cancelText="Cancel"
-                        onConfirm={() => resolve(true)}
-                        onCloseCallback={() => setImmediate(() => resolve(false))}
-                        checkboxProps={{
-                            checked: false,
-                            onChange: checked => settings.store.disableEmbedPermissionCheck = checked
-                        }}
-                    >
-                        <div>
-                            <Forms.FormText>
-                                You are trying to send/edit a message that contains a FakeNitro emoji or sticker,
-                                however you do not have permissions to embed links in the current channel.
-                                Are you sure you want to send this message? Your FakeNitro items will appear as a link only.
-                            </Forms.FormText>
-                            <Forms.FormText>
-                                You can disable this notice in the plugin settings.
-                            </Forms.FormText>
-                        </div>
-                    </ConfirmModal>
-                ));
-            });
-        }
-
         this.preSend = addMessagePreSendListener(async (channelId, messageObj, extra) => {
             const { guildId } = this;
 
@@ -912,7 +907,7 @@ export default definePlugin({
             }
 
             if (hasBypass && !s.disableEmbedPermissionCheck && !hasEmbedPerms(channelId)) {
-                if (!await cannotEmbedNotice()) {
+                if (!await showCannotEmbedNotice()) {
                     return { cancel: true };
                 }
             }
@@ -943,7 +938,7 @@ export default definePlugin({
             });
 
             if (hasBypass && !s.disableEmbedPermissionCheck && !hasEmbedPerms(channelId)) {
-                if (!await cannotEmbedNotice()) {
+                if (!await showCannotEmbedNotice()) {
                     return { cancel: true };
                 }
             }
