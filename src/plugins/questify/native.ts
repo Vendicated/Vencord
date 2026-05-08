@@ -1,50 +1,83 @@
 /*
  * Vencord, a Discord client mod
- * Copyright (c) 2025 Vendicated and contributors
+ * Copyright (c) 2026 Vendicated and contributors
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { IpcMainInvokeEvent } from "electron";
+import { BrowserWindow, type IpcMainInvokeEvent } from "electron";
 
-export async function complete(_: IpcMainInvokeEvent, appID: string, authCode: string, questTarget: number): Promise<{ success: boolean; error: string | null; }> {
-    const result = await authorize(appID, authCode);
+export function canOpenDevTools(event: IpcMainInvokeEvent): boolean {
+    return !event.sender.isDestroyed();
+}
 
-    if (result.error || !result.token) {
-        return { success: false, error: JSON.stringify(result.error) };
+export function openDevTools(event: IpcMainInvokeEvent): boolean {
+    if (!canOpenDevTools(event)) {
+        return false;
     }
 
-    const success = await progress(appID, result.token, questTarget);
+    const window = BrowserWindow.fromWebContents(event.sender);
 
-    if (success.error || !success.success) {
-        return { success: false, error: JSON.stringify(success.error) };
+    if (event.sender.isDevToolsOpened()) {
+        window?.focus();
+
+        return true;
+    }
+
+    event.sender.openDevTools();
+
+    return true;
+}
+
+export async function complete(_: IpcMainInvokeEvent, appId: string, authCode: string, questTarget: number): Promise<{ success: boolean; error: string | null; }> {
+    const authorization = await authorize(appId, authCode);
+
+    if (authorization.error || !authorization.token) {
+        return { success: false, error: JSON.stringify(authorization.error) };
+    }
+
+    const progressResult = await progress(appId, authorization.token, questTarget);
+
+    if (progressResult.error || !progressResult.success) {
+        return { success: false, error: JSON.stringify(progressResult.error) };
     }
 
     return { success: true, error: null };
 }
 
-async function authorize(appID: string, authCode: string): Promise<{ token: string | false; error: any; }> {
-    let error = null;
+async function authorize(appId: string, authCode: string): Promise<{ token: string | false; error: unknown; }> {
+    let error: unknown = null;
 
-    const token = await fetch(`https://${appID}.discordsays.com/.proxy/acf/authorize`, {
+    const token = await fetch(`https://${appId}.discordsays.com/.proxy/acf/authorize`, {
         body: JSON.stringify({ code: authCode }),
         method: "POST",
         mode: "cors",
-        credentials: "include"
-    }).then(res => res.json()).then(data => data.token).catch((e) => { error = e; return ""; });
+        credentials: "include",
+    })
+        .then(res => res.json())
+        .then(data => data.token)
+        .catch(e => {
+            error = e;
+            return false;
+        });
 
     return { token, error };
 }
 
-async function progress(appID: string, token: string, questTarget: number): Promise<{ success: boolean; error: any; }> {
-    let error = null;
+async function progress(appId: string, token: string, questTarget: number): Promise<{ success: boolean; error: unknown; }> {
+    let error: unknown = null;
 
-    const success = await fetch(`https://${appID}.discordsays.com/.proxy/acf/quest/progress`, {
+    const success = await fetch(`https://${appId}.discordsays.com/.proxy/acf/quest/progress`, {
         headers: { "x-auth-token": token },
         body: JSON.stringify({ progress: questTarget }),
         method: "POST",
         mode: "cors",
-        credentials: "include"
-    }).then(res => res.ok).catch((e) => { error = e; return false; });
+        credentials: "include",
+    })
+        .then(res => res.ok)
+        .catch(e => {
+            error = e;
+            return false;
+        });
 
     return { success, error };
 }
