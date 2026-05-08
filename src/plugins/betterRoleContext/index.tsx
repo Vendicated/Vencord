@@ -87,7 +87,6 @@ export type RoleMemberPopout = ComponentType<RoleMemberPopoutProps>;
 let RoleMemberPopout: RoleMemberPopout = () => null;
 
 export function setRoleMemberPopout(component: RoleMemberPopout) {
-    if (RoleMemberPopout) return;
     RoleMemberPopout = component;
 }
 
