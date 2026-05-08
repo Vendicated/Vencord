@@ -23,6 +23,7 @@ import { definePluginSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { SafetyIcon } from "@components/Icons";
 import { TooltipContainer } from "@components/TooltipContainer";
+import { setRoleMemberPopout } from "@plugins/betterRoleContext";
 import { Devs } from "@utils/constants";
 import { classes } from "@utils/misc";
 import definePlugin, { OptionType } from "@utils/types";
@@ -162,7 +163,6 @@ export default definePlugin({
     description: "View the permissions a user or channel has, and the roles of a server",
     tags: ["Servers", "Roles", "Utility"],
     authors: [Devs.Nuckyz, Devs.Ven],
-    dependencies: ["BetterRoleContext"],
     settings,
 
     patches: [
@@ -172,8 +172,16 @@ export default definePlugin({
                 match: /(?<=\i\.id\)\),\i\(\))(?=,\i\?)/,
                 replace: ",$self.ViewPermissionsButton(arguments[0])"
             }
+        },
+        {
+            find: ".ROLE_MENTION)",
+            replacement: {
+                match: /function (\i)(?=.+?renderPopout:.{0,20}\1,\{guildId:\i,channelId:\i)/,
+                replace: "$self.setRoleMemberPopout($1);$&"
+            }
         }
     ],
+    setRoleMemberPopout,
 
     ViewPermissionsButton: ErrorBoundary.wrap(({ className, guild, userId }: { className: string; guild: Guild; userId: string; }) => {
         const buttonRef = useRef(null);
