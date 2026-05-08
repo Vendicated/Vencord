@@ -9,11 +9,12 @@ import "./styles.css";
 import { classNameFactory } from "@utils/css";
 import { getGuildAcronym, openImageModal, openUserProfile } from "@utils/discord";
 import { classes } from "@utils/misc";
-import { ModalRoot, ModalSize, openModal } from "@utils/modal";
+import { openModal } from "@utils/modal";
 import { useAwaiter } from "@utils/react";
 import { Guild, User } from "@vencord/discord-types";
 import { findComponentByCodeLazy, findCssClassesLazy } from "@webpack";
 import { FluxDispatcher, Forms, GuildChannelStore, GuildMemberStore, GuildRoleStore, IconUtils, Parser, PresenceStore, RelationshipStore, ScrollerThin, SnowflakeUtils, TabBar, Timestamp, useEffect, UserStore, UserUtils, useState, useStateFromStores } from "@webpack/common";
+import { Modal } from "@webpack/common/modalV2";
 
 const IconClasses = findCssClassesLazy("icon", "acronym", "childWrapper");
 const FriendRow = findComponentByCodeLazy("discriminatorClass:", ".isMobileOnline", "avatarSrc:");
@@ -22,9 +23,9 @@ const cl = classNameFactory("vc-gp-");
 
 export function openGuildInfoModal(guild: Guild) {
     openModal(props =>
-        <ModalRoot {...props} size={ModalSize.MEDIUM}>
+        <Modal {...props} size="md" title="Server Info">
             <GuildInfoModal guild={guild} />
-        </ModalRoot>
+        </Modal>
     );
 }
 

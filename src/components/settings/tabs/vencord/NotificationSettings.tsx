@@ -10,8 +10,9 @@ import { ErrorCard } from "@components/ErrorCard";
 import { Flex } from "@components/Flex";
 import { Margins } from "@utils/margins";
 import { identity } from "@utils/misc";
-import { ModalCloseButton, ModalContent, ModalHeader, ModalRoot, ModalSize, openModal } from "@utils/modal";
+import { openModal } from "@utils/modal";
 import { Button, Forms, Select, Slider, Text } from "@webpack/common";
+import { Modal } from "@webpack/common/modalV2";
 
 export function NotificationSection() {
     return (
@@ -35,16 +36,15 @@ export function NotificationSection() {
 
 export function openNotificationSettingsModal() {
     openModal(props => (
-        <ModalRoot {...props} size={ModalSize.MEDIUM}>
-            <ModalHeader>
-                <Text variant="heading-lg/semibold" style={{ flexGrow: 1 }}>Notification Settings</Text>
-                <ModalCloseButton onClick={props.onClose} />
-            </ModalHeader>
-
-            <ModalContent>
+        <Modal
+            {...props}
+            size="md"
+            title={<Text variant="heading-lg/semibold">Notification Settings</Text>}
+        >
+            <div>
                 <NotificationSettings />
-            </ModalContent>
-        </ModalRoot>
+            </div>
+        </Modal>
     ));
 }
 

@@ -21,10 +21,11 @@ import DecorDecorationGridDecoration from "@plugins/decor/ui/components/DecorDec
 import SectionedGridList from "@plugins/decor/ui/components/SectionedGridList";
 import { copyWithToast, openInviteModal } from "@utils/discord";
 import { Margins } from "@utils/margins";
-import { closeAllModals, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
+import { closeAllModals, ModalProps, openModal } from "@utils/modal";
 import { Queue } from "@utils/Queue";
 import { User } from "@vencord/discord-types";
-import { Alerts, Button, FluxDispatcher, Forms, GuildStore, NavigationRouter, Parser, Text, Tooltip, useEffect, UserStore, UserSummaryItem, UserUtils, useState } from "@webpack/common";
+import { Button, FluxDispatcher, Forms, GuildStore, NavigationRouter, Parser, Text, Tooltip, useEffect, UserStore, UserSummaryItem, UserUtils, useState } from "@webpack/common";
+import { ConfirmModal, Modal } from "@webpack/common/modalV2";
 
 import { openCreateDecorationModal } from "./CreateDecorationModal";
 import { openGuidelinesModal } from "./GuidelinesModal";
@@ -136,26 +137,27 @@ function ChangeDecorationModal(props: ModalProps) {
         }))
     ] as Section[];
 
-    return <ModalRoot
+    return <Modal
         {...props}
-        size={ModalSize.DYNAMIC}
         className={DecorationModalClasses.modal}
+        title={<Text color="text-strong" variant="heading-lg/semibold" tag="h1">Change Decoration</Text>}
+        actions={[
+            {
+                text: "Cancel",
+                variant: "secondary",
+                onClick: props.onClose
+            },
+            {
+                text: "Apply",
+                variant: "primary",
+                onClick: () => {
+                    selectDecoration(tryingDecoration!).then(props.onClose);
+                },
+                disabled: !isTryingDecoration
+            }
+        ]}
     >
-        <ModalHeader separator={false} className={cl("modal-header")}>
-            <Text
-                color="text-strong"
-                variant="heading-lg/semibold"
-                tag="h1"
-                style={{ flexGrow: 1 }}
-            >
-                Change Decoration
-            </Text>
-            <ModalCloseButton onClick={props.onClose} />
-        </ModalHeader>
-        <ModalContent
-            className={cl("change-decoration-modal-content")}
-            scrollbarType="none"
-        >
+        <div className={cl("change-decoration-modal-content")}>
             <ErrorBoundary>
                 <SectionedGridList
                     renderItem={item => {
@@ -220,66 +222,50 @@ function ChangeDecorationModal(props: ModalProps) {
                         </Button>
                     )}
                 </div>
-            </ErrorBoundary>
-        </ModalContent>
-        <ModalFooter className={cl("change-decoration-modal-footer", "modal-footer")}>
-            <div className={cl("modal-footer-btn-container")}>
-                <Button
-                    onClick={props.onClose}
-                    color={Button.Colors.PRIMARY}
-                >
-                    Cancel
-                </Button>
-                <Button
-                    onClick={() => {
-                        selectDecoration(tryingDecoration!).then(props.onClose);
-                    }}
-                    disabled={!isTryingDecoration}
-                >
-                    Apply
-                </Button>
-            </div>
-            <div className={cl("modal-footer-btn-container")}>
-                <Tooltip text="Join Decor's Discord Server for notifications on your decoration's review, and when new presets are released">
-                    {tooltipProps => <NewButton
-                        {...tooltipProps}
-                        onClick={async () => {
-                            if (!GuildStore.getGuild(GUILD_ID)) {
-                                const inviteAccepted = await openInviteModal(INVITE_KEY);
-                                if (inviteAccepted) {
-                                    closeAllModals();
+                <div className={cl("modal-footer-btn-container", Margins.top8)}>
+                    <Tooltip text="Join Decor's Discord Server for notifications on your decoration's review, and when new presets are released">
+                        {tooltipProps => <NewButton
+                            {...tooltipProps}
+                            onClick={async () => {
+                                if (!GuildStore.getGuild(GUILD_ID)) {
+                                    const inviteAccepted = await openInviteModal(INVITE_KEY);
+                                    if (inviteAccepted) {
+                                        closeAllModals();
+                                        FluxDispatcher.dispatch({ type: "LAYER_POP_ALL" });
+                                    }
+                                } else {
+                                    props.onClose();
                                     FluxDispatcher.dispatch({ type: "LAYER_POP_ALL" });
+                                    NavigationRouter.transitionToGuild(GUILD_ID);
                                 }
-                            } else {
-                                props.onClose();
-                                FluxDispatcher.dispatch({ type: "LAYER_POP_ALL" });
-                                NavigationRouter.transitionToGuild(GUILD_ID);
-                            }
-                        }}
-                        variant="link"
+                            }}
+                            variant="link"
+                        >
+                            Discord Server
+                        </NewButton>}
+                    </Tooltip>
+                    <NewButton
+                        onClick={() => openModal(modalProps => (
+                            <ConfirmModal
+                                {...modalProps}
+                                title="Log Out"
+                                subtitle="Are you sure you want to log out of Decor?"
+                                confirmText="Log Out"
+                                cancelText="Cancel"
+                                onConfirm={() => {
+                                    useAuthorizationStore.getState().remove(UserStore.getCurrentUser().id);
+                                    props.onClose();
+                                }}
+                            />
+                        ))}
+                        variant="dangerSecondary"
                     >
-                        Discord Server
-                    </NewButton>}
-                </Tooltip>
-                <NewButton
-                    onClick={() => Alerts.show({
-                        title: "Log Out",
-                        body: "Are you sure you want to log out of Decor?",
-                        confirmText: "Log Out",
-                        confirmColor: cl("danger-btn"),
-                        cancelText: "Cancel",
-                        onConfirm() {
-                            useAuthorizationStore.getState().remove(UserStore.getCurrentUser().id);
-                            props.onClose();
-                        }
-                    })}
-                    variant="dangerSecondary"
-                >
-                    Log Out
-                </NewButton>
-            </div>
-        </ModalFooter>
-    </ModalRoot>;
+                        Log Out
+                    </NewButton>
+                </div>
+            </ErrorBoundary>
+        </div>
+    </Modal>;
 }
 
 export const openChangeDecorationModal = () =>

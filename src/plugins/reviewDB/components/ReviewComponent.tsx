@@ -23,8 +23,10 @@ import { settings } from "@plugins/reviewDB/settings";
 import { canBlockReviewAuthor, canDeleteReview, canReportReview, cl, showToast } from "@plugins/reviewDB/utils";
 import { openUserProfile } from "@utils/discord";
 import { classes } from "@utils/misc";
+import { openModal } from "@utils/modal";
 import { findCssClassesLazy } from "@webpack";
-import { Alerts, IconUtils, Parser, Timestamp, useState } from "@webpack/common";
+import { IconUtils, Parser, Timestamp, useState } from "@webpack/common";
+import { ConfirmModal } from "@webpack/common/modalV2";
 
 import { openBlockModal } from "./BlockedUserModal";
 import { BlockButton, DeleteButton, ReportButton } from "./MessageButton";
@@ -46,40 +48,45 @@ export default function ReviewComponent({ review, refetch, profileId }: { review
     }
 
     function delReview() {
-        Alerts.show({
-            title: "Are you sure?",
-            body: "Do you really want to delete this review?",
-            confirmText: "Delete",
-            cancelText: "Nevermind",
-            onConfirm: async () => {
-                if (!(await getToken())) {
-                    return showToast("You must be logged in to delete reviews.");
-                } else {
-                    deleteReview(review.id).then(res => {
-                        if (res) {
-                            refetch();
-                        }
-                    });
-                }
-            }
-        });
+        openModal(props => (
+            <ConfirmModal
+                {...props}
+                title="Are you sure?"
+                subtitle="Do you really want to delete this review?"
+                confirmText="Delete"
+                cancelText="Nevermind"
+                onConfirm={async () => {
+                    if (!(await getToken())) {
+                        return showToast("You must be logged in to delete reviews.");
+                    } else {
+                        deleteReview(review.id).then(res => {
+                            if (res) {
+                                refetch();
+                            }
+                        });
+                    }
+                }}
+            />
+        ));
     }
 
     function reportRev() {
-        Alerts.show({
-            title: "Are you sure?",
-            body: "Do you really you want to report this review?",
-            confirmText: "Report",
-            cancelText: "Nevermind",
-            // confirmColor: "red", this just adds a class name and breaks the submit button guh
-            onConfirm: async () => {
-                if (!(await getToken())) {
-                    return showToast("You must be logged in to report reviews.");
-                } else {
-                    reportReview(review.id);
-                }
-            }
-        });
+        openModal(props => (
+            <ConfirmModal
+                {...props}
+                title="Are you sure?"
+                subtitle="Do you really you want to report this review?"
+                confirmText="Report"
+                cancelText="Nevermind"
+                onConfirm={async () => {
+                    if (!(await getToken())) {
+                        return showToast("You must be logged in to report reviews.");
+                    } else {
+                        reportReview(review.id);
+                    }
+                }}
+            />
+        ));
     }
 
     const isAuthorBlocked = Auth?.user?.blockedUsers?.includes(review.sender.discordID) ?? false;
@@ -88,20 +95,22 @@ export default function ReviewComponent({ review, refetch, profileId }: { review
         if (isAuthorBlocked)
             return unblockUser(review.sender.discordID);
 
-        Alerts.show({
-            title: "Are you sure?",
-            body: "Do you really you want to block this user? They will be unable to leave further reviews on your profile. You can unblock users in the plugin settings.",
-            confirmText: "Block",
-            cancelText: "Nevermind",
-            // confirmColor: "red", this just adds a class name and breaks the submit button guh
-            onConfirm: async () => {
-                if (!(await getToken())) {
-                    return showToast("You must be logged in to block users.");
-                } else {
-                    blockUser(review.sender.discordID);
-                }
-            }
-        });
+        openModal(props => (
+            <ConfirmModal
+                {...props}
+                title="Are you sure?"
+                subtitle="Do you really you want to block this user? They will be unable to leave further reviews on your profile. You can unblock users in the plugin settings."
+                confirmText="Block"
+                cancelText="Nevermind"
+                onConfirm={async () => {
+                    if (!(await getToken())) {
+                        return showToast("You must be logged in to block users.");
+                    } else {
+                        blockUser(review.sender.discordID);
+                    }
+                }}
+            />
+        ));
     }
 
     return (

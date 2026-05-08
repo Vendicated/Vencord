@@ -5,7 +5,6 @@
  */
 
 import { BaseText } from "@components/BaseText";
-import { Button } from "@components/Button";
 import { Card } from "@components/Card";
 import { InlineCode } from "@components/CodeBlock";
 import { ExpandableSection } from "@components/ExpandableCard";
@@ -14,21 +13,22 @@ import { HeadingSecondary } from "@components/Heading";
 import { InfoIcon } from "@components/Icons";
 import { Margins } from "@components/margins";
 import { Paragraph } from "@components/Paragraph";
-import { ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
+import { ModalProps, openModal } from "@utils/modal";
 import { TextArea, TextInput, useState } from "@webpack/common";
+import { Modal } from "@webpack/common/modalV2";
 
 import { parseTagArguments } from ".";
 import { addTag, getTag, Tag } from "./settings";
 
 export function openCreateTagModal(initialValue: Tag = { name: "", message: "" }) {
     openModal(modalProps => (
-        <Modal initialValue={initialValue} modalProps={modalProps} />
+        <CreateTagDialog initialValue={initialValue} modalProps={modalProps} />
     ));
 }
 
 const EXAMPLE_RESPONSE = "Hello {{user}}! I am feeling {{mood = great}}.";
 
-function Modal({ initialValue, modalProps }: { initialValue: Tag; modalProps: ModalProps; }) {
+function CreateTagDialog({ initialValue, modalProps }: { initialValue: Tag; modalProps: ModalProps; }) {
     const [name, setName] = useState(initialValue.name);
     const [message, setMessage] = useState(initialValue.message.replaceAll("\\n", "\n"));
 
@@ -37,13 +37,27 @@ function Modal({ initialValue, modalProps }: { initialValue: Tag; modalProps: Mo
     const nameAlreadyExists = name !== initialValue.name && getTag(name);
 
     return (
-        <ModalRoot {...modalProps} size={ModalSize.MEDIUM}>
-            <ModalHeader>
-                <BaseText size="lg" weight="semibold" style={{ flexGrow: 1 }}>Create Tag</BaseText>
-                <ModalCloseButton onClick={modalProps.onClose} />
-            </ModalHeader>
-
-            <ModalContent>
+        <Modal
+            {...modalProps}
+            title={<BaseText size="lg" weight="semibold">Create Tag</BaseText>}
+            actions={[
+                {
+                    text: "Cancel",
+                    variant: "secondary",
+                    onClick: modalProps.onClose
+                },
+                {
+                    text: "Create",
+                    variant: "primary",
+                    onClick: () => {
+                        const tag = { name, message };
+                        addTag(tag);
+                        modalProps.onClose();
+                    },
+                    disabled: !name || !message || hasReservedEphemeral
+                }
+            ]}
+        >
                 <Flex flexDirection="column" gap={12}>
                     <Paragraph>Create a new tag which will be registered as a slash command.</Paragraph>
 
@@ -106,28 +120,6 @@ function Modal({ initialValue, modalProps }: { initialValue: Tag; modalProps: Mo
                         </Card>
                     }
                 </Flex>
-            </ModalContent>
-
-            <ModalFooter>
-                <Flex>
-                    <Button
-                        variant="secondary"
-                        onClick={modalProps.onClose}
-                    >
-                        Cancel
-                    </Button>
-                    <Button
-                        onClick={() => {
-                            const tag = { name, message };
-                            addTag(tag);
-                            modalProps.onClose();
-                        }}
-                        disabled={!name || !message || hasReservedEphemeral}
-                    >
-                        Create
-                    </Button>
-                </Flex>
-            </ModalFooter>
-        </ModalRoot>
+        </Modal>
     );
 }

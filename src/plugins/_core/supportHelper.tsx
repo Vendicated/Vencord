@@ -29,13 +29,15 @@ import { sendMessage } from "@utils/discord";
 import { Logger } from "@utils/Logger";
 import { Margins } from "@utils/margins";
 import { isPluginDev, tryOrElse } from "@utils/misc";
+import { openModal } from "@utils/modal";
 import { relaunch } from "@utils/native";
 import { onlyOnce } from "@utils/onlyOnce";
 import { makeCodeblock } from "@utils/text";
 import definePlugin from "@utils/types";
 import { checkForUpdates, isOutdated, update } from "@utils/updater";
 import { Channel } from "@vencord/discord-types";
-import { Alerts, Button, ChannelStore, Forms, GuildMemberStore, Parser, PermissionsBits, PermissionStore, RelationshipStore, showToast, Text, Toasts, UserStore } from "@webpack/common";
+import { Button, ChannelStore, Forms, GuildMemberStore, Parser, PermissionsBits, PermissionStore, RelationshipStore, showToast, Text, Toasts, UserStore } from "@webpack/common";
+import { ConfirmModal } from "@webpack/common/modalV2";
 import { JSX } from "react";
 
 import gitHash from "~git-hash";
@@ -180,20 +182,28 @@ export default definePlugin({
                 await checkForUpdatesOnce().catch(() => { });
 
                 if (isOutdated) {
-                    return Alerts.show({
-                        title: "Hold on!",
-                        body: <div>
-                            <Forms.FormText>You are using an outdated version of Vencord! Chances are, your issue is already fixed.</Forms.FormText>
-                            <Forms.FormText className={Margins.top8}>
-                                Please first update before asking for support!
-                            </Forms.FormText>
-                        </div>,
-                        onCancel: () => openSettingsTabModal(UpdaterTab!),
-                        cancelText: "View Updates",
-                        confirmText: "Update & Restart Now",
-                        onConfirm: forceUpdate,
-                        secondaryConfirmText: "I know what I'm doing or I can't update"
-                    });
+                    return openModal(props => (
+                        <ConfirmModal
+                            {...props}
+                            title="Hold on!"
+                            onCancel={() => openSettingsTabModal(UpdaterTab!)}
+                            cancelText="View Updates"
+                            confirmText="Update & Restart Now"
+                            onConfirm={forceUpdate}
+                            checkboxProps={{
+                                label: "I know what I'm doing or I can't update",
+                                checked: false,
+                                onChange: () => { }
+                            }}
+                        >
+                            <div>
+                                <Forms.FormText>You are using an outdated version of Vencord! Chances are, your issue is already fixed.</Forms.FormText>
+                                <Forms.FormText className={Margins.top8}>
+                                    Please first update before asking for support!
+                                </Forms.FormText>
+                            </div>
+                        </ConfirmModal>
+                    ));
                 }
             }
 
@@ -201,35 +211,50 @@ export default definePlugin({
             if (!roles || TrustedRolesIds.some(id => roles.includes(id))) return;
 
             if (!IS_WEB && IS_UPDATER_DISABLED) {
-                return Alerts.show({
-                    title: "Hold on!",
-                    body: <div>
-                        <Forms.FormText>You are using an externally updated Vencord version, which we do not provide support for!</Forms.FormText>
-                        <Forms.FormText className={Margins.top8}>
-                            Please either switch to an <Link href="https://vencord.dev/download">officially supported version of Vencord</Link>, or
-                            contact your package maintainer for support instead.
-                        </Forms.FormText>
-                    </div>
-                });
+                return openModal(props => (
+                    <ConfirmModal
+                        {...props}
+                        title="Hold on!"
+                        confirmText="OK"
+                        variant="primary"
+                        onConfirm={() => { }}
+                    >
+                        <div>
+                            <Forms.FormText>You are using an externally updated Vencord version, which we do not provide support for!</Forms.FormText>
+                            <Forms.FormText className={Margins.top8}>
+                                Please either switch to an <Link href="https://vencord.dev/download">officially supported version of Vencord</Link>, or
+                                contact your package maintainer for support instead.
+                            </Forms.FormText>
+                        </div>
+                    </ConfirmModal>
+                ));
             }
 
             if (!IS_STANDALONE && !settings.store.dismissedDevBuildWarning) {
-                return Alerts.show({
-                    title: "Hold on!",
-                    body: <div>
-                        <Forms.FormText>You are using a custom build of Vencord, which we do not provide support for!</Forms.FormText>
+                return openModal(props => (
+                    <ConfirmModal
+                        {...props}
+                        title="Hold on!"
+                        confirmText="Understood"
+                        variant="primary"
+                        onConfirm={() => { }}
+                        checkboxProps={{
+                            checked: settings.store.dismissedDevBuildWarning ?? false,
+                            onChange: checked => settings.store.dismissedDevBuildWarning = checked
+                        }}
+                    >
+                        <div>
+                            <Forms.FormText>You are using a custom build of Vencord, which we do not provide support for!</Forms.FormText>
 
-                        <Forms.FormText className={Margins.top8}>
-                            We only provide support for <Link href="https://vencord.dev/download">official builds</Link>.
-                            Either <Link href="https://vencord.dev/download">switch to an official build</Link> or figure your issue out yourself.
-                        </Forms.FormText>
+                            <Forms.FormText className={Margins.top8}>
+                                We only provide support for <Link href="https://vencord.dev/download">official builds</Link>.
+                                Either <Link href="https://vencord.dev/download">switch to an official build</Link> or figure your issue out yourself.
+                            </Forms.FormText>
 
-                        <Text variant="text-md/bold" className={Margins.top8}>You will be banned from receiving support if you ignore this rule.</Text>
-                    </div>,
-                    confirmText: "Understood",
-                    secondaryConfirmText: "Don't show again",
-                    onConfirmSecondary: () => settings.store.dismissedDevBuildWarning = true
-                });
+                            <Text variant="text-md/bold" className={Margins.top8}>You will be banned from receiving support if you ignore this rule.</Text>
+                        </div>
+                    </ConfirmModal>
+                ));
             }
         }
     },

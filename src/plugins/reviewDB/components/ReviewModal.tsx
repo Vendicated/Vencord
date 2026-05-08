@@ -21,11 +21,12 @@ import { Auth } from "@plugins/reviewDB/auth";
 import { ReviewType } from "@plugins/reviewDB/entities";
 import { REVIEWS_PER_PAGE, UserReviewsData } from "@plugins/reviewDB/reviewDbApi";
 import { cl } from "@plugins/reviewDB/utils";
-import { ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalRoot, ModalSize, openModalLazy } from "@utils/modal";
+import { ModalProps, openModalLazy } from "@utils/modal";
 import { useForceUpdater } from "@utils/react";
 import * as t from "@vencord/discord-types";
 import { DefaultExtractAndLoadChunksRegex, extractAndLoadChunksLazy, findComponentByCodeLazy } from "@webpack";
 import { Text, useRef, useState } from "@webpack/common";
+import { Modal } from "@webpack/common/modalV2";
 import { ComponentProps } from "react";
 
 import ReviewComponent from "./ReviewComponent";
@@ -35,7 +36,7 @@ const Paginator = findComponentByCodeLazy<ComponentProps<t.Paginator>>('rel:"pre
 // This matches a massive module with ~230k chars so we need an anchor before to prevent REDOS
 const requirePaginator = extractAndLoadChunksLazy(['name:"SearchResults"'], new RegExp(`name:"StageChannelCall",renderLoader:.+?(?:${DefaultExtractAndLoadChunksRegex.source}).{0,30}?name:"SearchResults"`));
 
-function Modal({ modalProps, modalKey, discordId, name, type }: { modalProps: any; modalKey: string, discordId: string; name: string; type: ReviewType; }) {
+function ReviewsModal({ modalProps, modalKey, discordId, name, type }: { modalProps: ModalProps; modalKey: string, discordId: string; name: string; type: ReviewType; }) {
     const [data, setData] = useState<UserReviewsData>();
     const [signal, refetch] = useForceUpdater(true);
     const [page, setPage] = useState(1);
@@ -47,16 +48,17 @@ function Modal({ modalProps, modalKey, discordId, name, type }: { modalProps: an
 
     return (
         <ErrorBoundary>
-            <ModalRoot {...modalProps} size={ModalSize.MEDIUM}>
-                <ModalHeader>
+            <Modal
+                {...modalProps}
+                size="md"
+                title={
                     <Text variant="heading-lg/semibold" className={cl("modal-header")}>
                         {name}'s Reviews
                         {!!reviewCount && <span> ({reviewCount} Reviews)</span>}
                     </Text>
-                    <ModalCloseButton onClick={modalProps.onClose} />
-                </ModalHeader>
-
-                <ModalContent scrollerRef={ref}>
+                }
+            >
+                <div ref={ref}>
                     <div className={cl("modal-reviews")}>
                         <ReviewsView
                             discordId={discordId}
@@ -69,9 +71,9 @@ function Modal({ modalProps, modalKey, discordId, name, type }: { modalProps: an
                             type={type}
                         />
                     </div>
-                </ModalContent>
+                </div>
 
-                <ModalFooter className={cl("modal-footer")}>
+                <div className={cl("modal-footer")}>
                     <div className={cl("modal-footer-wrapper")}>
                         {ownReview && (
                             <ReviewComponent
@@ -98,8 +100,8 @@ function Modal({ modalProps, modalKey, discordId, name, type }: { modalProps: an
                             />
                         )}
                     </div>
-                </ModalFooter>
-            </ModalRoot>
+                </div>
+            </Modal>
         </ErrorBoundary>
     );
 }
@@ -110,7 +112,7 @@ export function openReviewsModal(discordId: string, name: string, type: ReviewTy
     openModalLazy(async () => {
         await requirePaginator();
         return props => (
-            <Modal
+            <ReviewsModal
                 modalKey={modalKey}
                 modalProps={props}
                 discordId={discordId}

@@ -28,11 +28,12 @@ import { classNameFactory } from "@utils/css";
 import { proxyLazy } from "@utils/lazy";
 import { Margins } from "@utils/margins";
 import { classes } from "@utils/misc";
-import { ModalCloseButton, ModalContent, ModalHeader, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
+import { ModalProps, openModal } from "@utils/modal";
 import { OptionType, Plugin, PluginTag } from "@utils/types";
 import { User } from "@vencord/discord-types";
 import { findCssClassesLazy } from "@webpack";
 import { Clickable, FluxDispatcher, Forms, React, Text, Tooltip, useEffect, useMemo, UserStore, UserSummaryItem, UserUtils, useState } from "@webpack/common";
+import { Modal } from "@webpack/common/modalV2";
 import { Constructor } from "type-fest";
 
 import { PluginMeta } from "~plugins";
@@ -166,13 +167,13 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
     const pluginMeta = PluginMeta[plugin.name];
 
     return (
-        <ModalRoot transitionState={transitionState} size={ModalSize.MEDIUM}>
-            <ModalHeader separator={false} className={Margins.bottom8}>
-                <Text variant="heading-xl/bold" style={{ flexGrow: 1 }}>{plugin.name}</Text>
-                <ModalCloseButton onClick={onClose} />
-            </ModalHeader>
-
-            <ModalContent className={"vc-settings-modal-content"}>
+        <Modal
+            transitionState={transitionState}
+            onClose={onClose}
+            size="md"
+            title={<Text variant="heading-xl/bold">{plugin.name}</Text>}
+        >
+            <div className={"vc-settings-modal-content"}>
                 <section>
                     <div className={cl("info")}>
                         <div>
@@ -234,8 +235,8 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
                     <Text variant="heading-lg/semibold" className={classes(Margins.top16, Margins.bottom8)}>Settings</Text>
                     {renderSettings()}
                 </section>
-            </ModalContent>
-        </ModalRoot>
+            </div>
+        </Modal>
     );
 }
 

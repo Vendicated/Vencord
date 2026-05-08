@@ -23,11 +23,12 @@ import { buildExtraRoleContextMenuItems } from "@plugins/betterRoleContext";
 import { cl, getGuildPermissionSpecMap, loadGetGuildPermissionSpecMap } from "@plugins/permissionsViewer/utils";
 import { copyToClipboard } from "@utils/clipboard";
 import { getIntlMessage, getUniqueUsername } from "@utils/discord";
-import { ModalCloseButton, ModalContent, ModalHeader, ModalProps, ModalRoot, ModalSize, openModalLazy } from "@utils/modal";
+import { ModalProps, openModalLazy } from "@utils/modal";
 import { Guild, Role, RoleOrUserPermission, UnicodeEmoji, User } from "@vencord/discord-types";
 import { PermissionOverwriteType } from "@vencord/discord-types/enums";
 import { findByCodeLazy } from "@webpack";
 import { ContextMenuApi, FluxDispatcher, GuildMemberStore, GuildRoleStore, i18n, Menu, PermissionsBits, ScrollerThin, Text, Tooltip, useEffect, useMemo, useRef, UserStore, useState, useStateFromStores } from "@webpack/common";
+import { Modal } from "@webpack/common/modalV2";
 
 import { settings } from "..";
 import { PermissionAllowedIcon, PermissionDefaultIcon, PermissionDeniedIcon } from "./icons";
@@ -75,16 +76,12 @@ function RolesAndUsersPermissionsComponent({ permissions, guild, modalProps, hea
     const roles = GuildRoleStore.getRolesSnapshot(guild.id);
 
     return (
-        <ModalRoot
+        <Modal
             {...modalProps}
-            size={ModalSize.LARGE}
+            size="lg"
+            title={<Text className={cl("modal-title")} variant="heading-lg/semibold">{header} Permissions</Text>}
         >
-            <ModalHeader>
-                <Text className={cl("modal-title")} variant="heading-lg/semibold">{header} Permissions</Text>
-                <ModalCloseButton onClick={modalProps.onClose} />
-            </ModalHeader>
-
-            <ModalContent className={cl("modal-content")}>
+            <div className={cl("modal-content")}>
                 {!selectedItem && (
                     <div className={cl("modal-no-perms")}>
                         <Text variant="heading-lg/normal">No permissions to display!</Text>
@@ -200,8 +197,8 @@ function RolesAndUsersPermissionsComponent({ permissions, guild, modalProps, hea
                         </ScrollerThin>
                     </div>
                 )}
-            </ModalContent>
-        </ModalRoot>
+            </div>
+        </Modal>
     );
 }
 

@@ -23,12 +23,13 @@ import { Devs } from "@utils/constants";
 import { getGuildAcronym } from "@utils/discord";
 import { Logger } from "@utils/Logger";
 import { Margins } from "@utils/margins";
-import { ModalContent, ModalHeader, ModalRoot, openModalLazy } from "@utils/modal";
+import { openModalLazy } from "@utils/modal";
 import definePlugin from "@utils/types";
 import { Guild, GuildSticker } from "@vencord/discord-types";
 import { StickerFormatType } from "@vencord/discord-types/enums";
 import { findByCodeLazy } from "@webpack";
 import { Constants, EmojiStore, FluxDispatcher, Forms, GuildStore, IconUtils, Menu, PermissionsBits, PermissionStore, React, RestAPI, StickersStore, Toasts, Tooltip, UserStore } from "@webpack/common";
+import { Modal } from "@webpack/common/modalV2";
 import { Promisable } from "type-fest";
 
 const uploadEmoji = findByCodeLazy(".GUILD_EMOJIS(", "EMOJI_UPLOAD_START");
@@ -329,8 +330,10 @@ function buildMenuItem(type: "Emoji" | "Sticker", fetchData: () => Promisable<Om
                     const url = getUrl(data, 128);
 
                     return modalProps => (
-                        <ModalRoot {...modalProps}>
-                            <ModalHeader>
+                        <Modal
+                            {...modalProps}
+                            title={
+                                <>
                                 <img
                                     role="presentation"
                                     aria-hidden
@@ -341,11 +344,11 @@ function buildMenuItem(type: "Emoji" | "Sticker", fetchData: () => Promisable<Om
                                     style={{ marginRight: "0.5em" }}
                                 />
                                 <Forms.FormText>Clone {data.name}</Forms.FormText>
-                            </ModalHeader>
-                            <ModalContent>
-                                <CloneModal data={data} />
-                            </ModalContent>
-                        </ModalRoot>
+                                </>
+                            }
+                        >
+                            <CloneModal data={data} />
+                        </Modal>
                     );
                 })
             }

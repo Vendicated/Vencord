@@ -18,8 +18,9 @@
 
 import { SessionInfo } from "@plugins/betterSessions/types";
 import { getDefaultName, savedSessionsCache, saveSessionsToDataStore } from "@plugins/betterSessions/utils";
-import { ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot } from "@utils/modal";
+import { ModalProps } from "@utils/modal";
 import { Button, Forms, React, TextInput } from "@webpack/common";
+import { Modal } from "@webpack/common/modalV2";
 import { KeyboardEvent } from "react";
 
 export function RenameModal({ props, session, state }: { props: ModalProps, session: SessionInfo["session"], state: [string, React.Dispatch<React.SetStateAction<string>>]; }) {
@@ -39,12 +40,23 @@ export function RenameModal({ props, session, state }: { props: ModalProps, sess
     }
 
     return (
-        <ModalRoot {...props}>
-            <ModalHeader>
-                <Forms.FormTitle tag="h4">Rename</Forms.FormTitle>
-            </ModalHeader>
-
-            <ModalContent>
+        <Modal
+            {...props}
+            title={<Forms.FormTitle tag="h4">Rename</Forms.FormTitle>}
+            actions={[
+                {
+                    text: "Cancel",
+                    variant: "secondary",
+                    onClick: () => props.onClose()
+                },
+                {
+                    text: "Save",
+                    variant: "primary",
+                    onClick: onSaveClick
+                }
+            ]}
+        >
+            <div>
                 <Forms.FormTitle tag="h5" style={{ marginTop: "10px" }}>New device name</Forms.FormTitle>
                 <TextInput
                     style={{ marginBottom: "10px" }}
@@ -71,24 +83,7 @@ export function RenameModal({ props, session, state }: { props: ModalProps, sess
                 >
                     Reset Name
                 </Button>
-            </ModalContent>
-
-            <ModalFooter>
-                <div className="vc-betterSessions-footer-buttons">
-                    <Button
-                        color={Button.Colors.PRIMARY}
-                        onClick={() => props.onClose()}
-                    >
-                        Cancel
-                    </Button>
-                    <Button
-                        color={Button.Colors.BRAND}
-                        onClick={onSaveClick}
-                    >
-                        Save
-                    </Button>
-                </div>
-            </ModalFooter>
-        </ModalRoot >
+            </div>
+        </Modal>
     );
 }

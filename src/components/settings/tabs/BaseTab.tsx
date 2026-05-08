@@ -19,8 +19,9 @@
 import { BaseText } from "@components/BaseText";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { handleComponentFailed } from "@components/handleComponentFailed";
-import { ModalCloseButton, ModalContent, ModalHeader, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
+import { ModalProps, openModal } from "@utils/modal";
 import { onlyOnce } from "@utils/onlyOnce";
+import { Modal } from "@webpack/common/modalV2";
 import type { ComponentType, PropsWithChildren } from "react";
 
 export function SettingsTab({ children }: PropsWithChildren) {
@@ -44,16 +45,16 @@ export function wrapTab(component: ComponentType<any>, tab: string) {
 export function openSettingsTabModal(Tab: ComponentType<any>) {
     try {
         openModal(wrapTab((modalProps: ModalProps) => (
-            <ModalRoot {...modalProps} size={ModalSize.MEDIUM} className="vc-settings-modal-root">
-                <ModalHeader>
-                    <BaseText size="lg" weight="semibold" style={{ flexGrow: 1 }}>{Tab.displayName?.replace("SettingsTab", "") || "Settings"}</BaseText>
-                    <ModalCloseButton onClick={modalProps.onClose} />
-                </ModalHeader>
-
-                <ModalContent className="vc-settings-modal">
+            <Modal
+                {...modalProps}
+                size="md"
+                className="vc-settings-modal-root"
+                title={<BaseText size="lg" weight="semibold">{Tab.displayName?.replace("SettingsTab", "") || "Settings"}</BaseText>}
+            >
+                <div className="vc-settings-modal">
                     <Tab />
-                </ModalContent>
-            </ModalRoot>
+                </div>
+            </Modal>
         ), Tab.displayName || "SettingsTab"));
     } catch {
         handleSettingsTabError();

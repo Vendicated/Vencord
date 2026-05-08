@@ -9,9 +9,10 @@ import { TooltipContainer } from "@components/TooltipContainer";
 import { classNameFactory } from "@utils/css";
 import { Margins } from "@utils/margins";
 import { classes } from "@utils/misc";
-import { ModalCloseButton, ModalContent, ModalHeader, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
+import { ModalProps, openModal } from "@utils/modal";
 import { findCssClassesLazy } from "@webpack";
 import { TabBar, Text, Timestamp, useState } from "@webpack/common";
+import { Modal } from "@webpack/common/modalV2";
 
 import { parseEditContent } from ".";
 
@@ -37,13 +38,12 @@ export function HistoryModal({ modalProps, message }: { modalProps: ModalProps; 
     const contents = [...message.editHistory.map(m => m.content), message.content];
 
     return (
-        <ModalRoot {...modalProps} size={ModalSize.LARGE}>
-            <ModalHeader className={cl("head")}>
-                <Text variant="heading-lg/semibold" style={{ flexGrow: 1 }}>Message Edit History</Text>
-                <ModalCloseButton onClick={modalProps.onClose} />
-            </ModalHeader>
-
-            <ModalContent className={cl("contents")}>
+        <Modal
+            {...modalProps}
+            size="lg"
+            title={<Text variant="heading-lg/semibold">Message Edit History</Text>}
+        >
+            <div className={cl("contents")}>
                 <TabBar
                     type="top"
                     look="brand"
@@ -87,7 +87,7 @@ export function HistoryModal({ modalProps, message }: { modalProps: ModalProps; 
                 <div className={classes(CodeContainerClasses.markup, MiscClasses.messageContent, Margins.top20)}>
                     {parseEditContent(contents[currentTab], message)}
                 </div>
-            </ModalContent>
-        </ModalRoot>
+            </div>
+        </Modal>
     );
 }

@@ -10,9 +10,11 @@ import { Flex } from "@components/Flex";
 import { Link } from "@components/Link";
 import { Margins } from "@utils/margins";
 import { classes } from "@utils/misc";
+import { openModal } from "@utils/modal";
 import { relaunch } from "@utils/native";
 import { changes, checkForUpdates, update, updateError } from "@utils/updater";
-import { Alerts, Button, Forms, React, Toasts, useState } from "@webpack/common";
+import { Button, Forms, React, Toasts, useState } from "@webpack/common";
+import { ConfirmModal } from "@webpack/common/modalV2";
 
 import { runWithDispatch } from "./runWithDispatch";
 
@@ -100,17 +102,21 @@ export function Updatable(props: CommonProps) {
                                 setUpdates([]);
 
                                 await new Promise<void>(r => {
-                                    Alerts.show({
-                                        title: "Update Success!",
-                                        body: "Successfully updated. Restart now to apply the changes?",
-                                        confirmText: "Restart",
-                                        cancelText: "Not now!",
-                                        onConfirm() {
-                                            relaunch();
-                                            r();
-                                        },
-                                        onCancel: r
-                                    });
+                                    openModal(props => (
+                                        <ConfirmModal
+                                            {...props}
+                                            title="Update Success!"
+                                            subtitle="Successfully updated. Restart now to apply the changes?"
+                                            confirmText="Restart"
+                                            cancelText="Not now!"
+                                            variant="primary"
+                                            onConfirm={() => {
+                                                relaunch();
+                                                r();
+                                            }}
+                                            onCancel={r}
+                                        />
+                                    ));
                                 });
                             }
                         })}

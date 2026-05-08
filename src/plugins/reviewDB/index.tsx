@@ -25,11 +25,13 @@ import { Paragraph } from "@components/Paragraph";
 import { Span } from "@components/Span";
 import { Devs } from "@utils/constants";
 import { classes } from "@utils/misc";
+import { openModal } from "@utils/modal";
 import { useAwaiter } from "@utils/react";
 import definePlugin from "@utils/types";
 import { Guild, User } from "@vencord/discord-types";
 import { findCssClassesLazy } from "@webpack";
-import { Alerts, Clickable, IconUtils, Menu, Parser } from "@webpack/common";
+import { Clickable, IconUtils, Menu, Parser } from "@webpack/common";
+import { ConfirmModal } from "@webpack/common/modalV2";
 
 import { Auth, initAuth, updateAuth } from "./auth";
 import { openReviewsModal } from "./components/ReviewModal";
@@ -140,16 +142,22 @@ export default definePlugin({
                         )
                 } : {};
 
-                Alerts.show({
-                    title: user.notification.title,
-                    body: (
-                        Parser.parse(
+                openModal(modalProps => (
+                    <ConfirmModal
+                        {...modalProps}
+                        title={user.notification.title}
+                        confirmText={props.confirmText ?? "OK"}
+                        cancelText={props.cancelText}
+                        variant="primary"
+                        onConfirm={() => { }}
+                        onCancel={props.onCancel}
+                    >
+                        {Parser.parse(
                             user.notification.content,
                             false
-                        )
-                    ),
-                    ...props
-                });
+                        )}
+                    </ConfirmModal>
+                ));
 
                 readNotification(user.notification.id);
             }

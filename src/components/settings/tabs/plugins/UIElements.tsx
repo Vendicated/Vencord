@@ -17,9 +17,10 @@ import { Switch } from "@components/Switch";
 import { classNameFactory } from "@utils/css";
 import { Margins } from "@utils/margins";
 import { classes } from "@utils/misc";
-import { ModalContent, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
+import { ModalProps, openModal } from "@utils/modal";
 import { IconComponent } from "@utils/types";
 import { Clickable } from "@webpack/common";
+import { Modal } from "@webpack/common/modalV2";
 
 
 const cl = classNameFactory("vc-plugin-ui-elements-");
@@ -94,8 +95,8 @@ function UIElementsModal(props: ModalProps) {
     const { uiElements } = useSettings(["uiElements.*"]);
 
     return (
-        <ModalRoot {...props} size={ModalSize.MEDIUM}>
-            <ModalContent className={cl("modal-content")}>
+        <Modal {...props} size="md" title="Manage plugin UI elements">
+            <div className={cl("modal-content")}>
                 <Section
                     title="Chatbar Buttons"
                     description="These are the buttons on the right side of the chat input bar"
@@ -108,7 +109,7 @@ function UIElementsModal(props: ModalProps) {
                     buttonMap={MessagePopoverButtonMap}
                     settings={uiElements.messagePopoverButtons}
                 />
-            </ModalContent>
-        </ModalRoot>
+            </div>
+        </Modal>
     );
 }

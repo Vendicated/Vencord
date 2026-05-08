@@ -13,9 +13,10 @@ import { DevsById } from "@utils/constants";
 import { classNameFactory } from "@utils/css";
 import { fetchUserProfile } from "@utils/discord";
 import { classes, pluralise } from "@utils/misc";
-import { ModalContent, ModalRoot, openModal } from "@utils/modal";
+import { openModal } from "@utils/modal";
 import { User } from "@vencord/discord-types";
 import { Forms, showToast, useEffect, useMemo, UserProfileStore, useStateFromStores } from "@webpack/common";
+import { Modal } from "@webpack/common/modalV2";
 
 import Plugins from "~plugins";
 
@@ -26,13 +27,13 @@ const cl = classNameFactory("vc-author-modal-");
 
 export function openContributorModal(user: User) {
     openModal(modalProps =>
-        <ModalRoot {...modalProps}>
+        <Modal {...modalProps} title="">
             <ErrorBoundary>
-                <ModalContent className={cl("root")}>
+                <div className={cl("root")}>
                     <ContributorModal user={user} />
-                </ModalContent>
+                </div>
             </ErrorBoundary>
-        </ModalRoot>
+        </Modal>
     );
 }
 

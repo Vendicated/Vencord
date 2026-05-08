@@ -4,35 +4,39 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { Flex } from "@components/Flex";
 import { Link } from "@components/Link";
 import { settings } from "@plugins/decor/settings";
 import { cl, DecorationModalClasses, requireAvatarDecorationModal } from "@plugins/decor/ui";
-import { ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
-import { Button, Forms, Text } from "@webpack/common";
+import { ModalProps, openModal } from "@utils/modal";
+import { Forms, Text } from "@webpack/common";
+import { Modal } from "@webpack/common/modalV2";
 
 import { openCreateDecorationModal } from "./CreateDecorationModal";
 
 function GuidelinesModal(props: ModalProps) {
-    return <ModalRoot
+    return <Modal
         {...props}
-        size={ModalSize.SMALL}
+        size="sm"
         className={DecorationModalClasses.modal}
+        title={<Text color="text-strong" variant="heading-lg/semibold" tag="h1">Hold on</Text>}
+        actions={[
+            {
+                text: "Continue",
+                variant: "primary",
+                onClick: () => {
+                    settings.store.agreedToGuidelines = true;
+                    props.onClose();
+                    openCreateDecorationModal();
+                }
+            },
+            {
+                text: "Go Back",
+                variant: "secondary",
+                onClick: props.onClose
+            }
+        ]}
     >
-        <ModalHeader separator={false} className={cl("modal-header")}>
-            <Text
-                color="text-strong"
-                variant="heading-lg/semibold"
-                tag="h1"
-                style={{ flexGrow: 1 }}
-            >
-                Hold on
-            </Text>
-            <ModalCloseButton onClick={props.onClose} />
-        </ModalHeader>
-        <ModalContent
-            scrollbarType="none"
-        >
+        <div>
             <Forms.FormText>
                 By submitting a decoration, you agree to <Link
                     href="https://github.com/decor-discord/.github/blob/main/GUIDELINES.md"
@@ -40,28 +44,8 @@ function GuidelinesModal(props: ModalProps) {
                     the guidelines
                 </Link>. Not reading these guidelines may get your account suspended from creating more decorations in the future.
             </Forms.FormText>
-        </ModalContent>
-        <ModalFooter className={cl("modal-footer")}>
-            <Flex gap="4px">
-                <Button
-                    onClick={() => {
-                        settings.store.agreedToGuidelines = true;
-                        props.onClose();
-                        openCreateDecorationModal();
-                    }}
-                >
-                    Continue
-                </Button>
-                <Button
-                    onClick={props.onClose}
-                    color={Button.Colors.PRIMARY}
-                    look={Button.Looks.LINK}
-                >
-                    Go Back
-                </Button>
-            </Flex>
-        </ModalFooter>
-    </ModalRoot>;
+        </div>
+    </Modal>;
 }
 
 export const openGuidelinesModal = () =>

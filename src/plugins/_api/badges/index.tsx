@@ -29,9 +29,10 @@ import { copyWithToast } from "@utils/discord";
 import { Logger } from "@utils/Logger";
 import { Margins } from "@utils/margins";
 import { shouldShowContributorBadge } from "@utils/misc";
-import { closeModal, ModalContent, ModalFooter, ModalHeader, ModalRoot, openModal } from "@utils/modal";
+import { openModal } from "@utils/modal";
 import definePlugin from "@utils/types";
 import { ContextMenuApi, Forms, Menu, Toasts, UserStore } from "@webpack/common";
+import { Modal } from "@webpack/common/modalV2";
 
 const CONTRIBUTOR_BADGE = "https://cdn.discordapp.com/emojis/1092089799109775453.png?size=64";
 
@@ -190,13 +191,14 @@ export default definePlugin({
                 ContextMenuApi.openContextMenu(event, () => <BadgeContextMenu badge={badge} />);
             },
             onClick() {
-                const modalKey = openModal(props => (
+                openModal(props => (
                     <ErrorBoundary noop onError={() => {
-                        closeModal(modalKey);
+                        props.onClose();
                         VencordNative.native.openExternal("https://github.com/sponsors/Vendicated");
                     }}>
-                        <ModalRoot {...props}>
-                            <ModalHeader>
+                        <Modal
+                            {...props}
+                            title={
                                 <Forms.FormTitle
                                     tag="h2"
                                     style={{
@@ -210,8 +212,9 @@ export default definePlugin({
                                         Vencord Donor
                                     </Flex>
                                 </Forms.FormTitle>
-                            </ModalHeader>
-                            <ModalContent>
+                            }
+                        >
+                            <div>
                                 <Flex>
                                     <img
                                         role="presentation"
@@ -234,13 +237,13 @@ export default definePlugin({
                                         Please consider supporting the development of Vencord by becoming a donor. It would mean a lot!!
                                     </Forms.FormText>
                                 </div>
-                            </ModalContent>
-                            <ModalFooter>
+                            </div>
+                            <div>
                                 <Flex justifyContent="center" style={{ width: "100%" }}>
                                     <DonateButton />
                                 </Flex>
-                            </ModalFooter>
-                        </ModalRoot>
+                            </div>
+                        </Modal>
                     </ErrorBoundary>
                 ));
             },

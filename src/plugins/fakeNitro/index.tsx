@@ -22,11 +22,13 @@ import { ApngBlendOp, ApngDisposeOp, parseAPNG } from "@utils/apng";
 import { Devs } from "@utils/constants";
 import { getCurrentGuild } from "@utils/discord";
 import { Logger } from "@utils/Logger";
+import { openModal } from "@utils/modal";
 import definePlugin, { OptionType } from "@utils/types";
 import type { Emoji, Message, Sticker } from "@vencord/discord-types";
 import { StickerFormatType } from "@vencord/discord-types/enums";
 import { findByCodeLazy, findByPropsLazy, proxyLazyWebpack } from "@webpack";
-import { Alerts, ChannelStore, DraftType, EmojiStore, FluxDispatcher, Forms, GuildMemberStore, IconUtils, lodash, Parser, PermissionsBits, PermissionStore, StickersStore, UploadHandler, UserSettingsActionCreators, UserSettingsProtoStore, UserStore } from "@webpack/common";
+import { ChannelStore, DraftType, EmojiStore, FluxDispatcher, Forms, GuildMemberStore, IconUtils, lodash, Parser, PermissionsBits, PermissionStore, StickersStore, UploadHandler, UserSettingsActionCreators, UserSettingsProtoStore, UserStore } from "@webpack/common";
+import { ConfirmModal } from "@webpack/common/modalV2";
 import { applyPalette, GIFEncoder, quantize } from "gifenc";
 import type { ReactElement, ReactNode } from "react";
 
@@ -801,28 +803,32 @@ export default definePlugin({
 
         function cannotEmbedNotice() {
             return new Promise<boolean>(resolve => {
-                Alerts.show({
-                    title: "Hold on!",
-                    body: <div>
-                        <Forms.FormText>
-                            You are trying to send/edit a message that contains a FakeNitro emoji or sticker,
-                            however you do not have permissions to embed links in the current channel.
-                            Are you sure you want to send this message? Your FakeNitro items will appear as a link only.
-                        </Forms.FormText>
-                        <Forms.FormText>
-                            You can disable this notice in the plugin settings.
-                        </Forms.FormText>
-                    </div>,
-                    confirmText: "Send Anyway",
-                    cancelText: "Cancel",
-                    secondaryConfirmText: "Do not show again",
-                    onConfirm: () => resolve(true),
-                    onCloseCallback: () => setImmediate(() => resolve(false)),
-                    onConfirmSecondary() {
-                        settings.store.disableEmbedPermissionCheck = true;
-                        resolve(true);
-                    }
-                });
+                openModal(props => (
+                    <ConfirmModal
+                        {...props}
+                        title="Hold on!"
+                        confirmText="Send Anyway"
+                        cancelText="Cancel"
+                        onConfirm={() => resolve(true)}
+                        onCloseCallback={() => setImmediate(() => resolve(false))}
+                        checkboxProps={{
+                            label: "Do not show again",
+                            checked: false,
+                            onChange: checked => settings.store.disableEmbedPermissionCheck = checked
+                        }}
+                    >
+                        <div>
+                            <Forms.FormText>
+                                You are trying to send/edit a message that contains a FakeNitro emoji or sticker,
+                                however you do not have permissions to embed links in the current channel.
+                                Are you sure you want to send this message? Your FakeNitro items will appear as a link only.
+                            </Forms.FormText>
+                            <Forms.FormText>
+                                You can disable this notice in the plugin settings.
+                            </Forms.FormText>
+                        </div>
+                    </ConfirmModal>
+                ));
             });
         }
 
@@ -851,15 +857,22 @@ export default definePlugin({
 
                 if (sticker.format_type === StickerFormatType.APNG) {
                     if (!hasAttachmentPerms(channelId)) {
-                        Alerts.show({
-                            title: "Hold on!",
-                            body: <div>
-                                <Forms.FormText>
-                                    You cannot send this message because it contains an animated FakeNitro sticker,
-                                    and you do not have permissions to attach files in the current channel. Please remove the sticker to proceed.
-                                </Forms.FormText>
-                            </div>
-                        });
+                        openModal(props => (
+                            <ConfirmModal
+                                {...props}
+                                title="Hold on!"
+                                confirmText="OK"
+                                variant="primary"
+                                onConfirm={() => { }}
+                            >
+                                <div>
+                                    <Forms.FormText>
+                                        You cannot send this message because it contains an animated FakeNitro sticker,
+                                        and you do not have permissions to attach files in the current channel. Please remove the sticker to proceed.
+                                    </Forms.FormText>
+                                </div>
+                            </ConfirmModal>
+                        ));
                     } else {
                         this.sendAnimatedSticker(link, sticker.id, channelId);
                     }

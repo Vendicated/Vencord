@@ -8,9 +8,10 @@ import { Divider } from "@components/Divider";
 import { DEFAULT_COLOR, SWATCHES } from "@plugins/pinDms/constants";
 import { categoryLen, createCategory, getCategory } from "@plugins/pinDms/data";
 import { classNameFactory } from "@utils/css";
-import { ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, openModalLazy } from "@utils/modal";
+import { ModalProps, openModalLazy } from "@utils/modal";
 import { extractAndLoadChunksLazy, findComponentByCodeLazy } from "@webpack";
-import { Button, ColorPicker, Forms, Text, TextInput, Toasts, useMemo, useState } from "@webpack/common";
+import { ColorPicker, Forms, Text, TextInput, Toasts, useMemo, useState } from "@webpack/common";
+import { Modal } from "@webpack/common/modalV2";
 
 interface ColorPickerWithSwatchesProps {
     defaultColor: number;
@@ -59,9 +60,7 @@ export function NewCategoryModal({ categoryId, modalProps, initialChannelId }: P
     const [name, setName] = useState(category.name);
     const [color, setColor] = useState(category.color);
 
-    const onSave = (e: React.FormEvent<HTMLFormElement> | React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-        e.preventDefault();
-
+    const onSave = () => {
         category.name = name;
         category.color = color;
 
@@ -73,14 +72,17 @@ export function NewCategoryModal({ categoryId, modalProps, initialChannelId }: P
     };
 
     return (
-        <ModalRoot {...modalProps}>
-            <ModalHeader>
-                <Text variant="heading-lg/semibold" style={{ flexGrow: 1 }}>{categoryId ? "Edit" : "New"} Category</Text>
-            </ModalHeader>
-
-            {/* form is here so when you press enter while in the text input it submits */}
-            <form onSubmit={onSave}>
-                <ModalContent className={cl("content")}>
+        <Modal
+            {...modalProps}
+            title={<Text variant="heading-lg/semibold">{categoryId ? "Edit" : "New"} Category</Text>}
+            actions={[{
+                text: categoryId ? "Save" : "Create",
+                variant: "primary",
+                onClick: onSave,
+                disabled: !name
+            }]}
+        >
+            <div className={cl("content")}>
                     <section>
                         <Forms.FormTitle>Name</Forms.FormTitle>
                         <TextInput
@@ -108,12 +110,8 @@ export function NewCategoryModal({ categoryId, modalProps, initialChannelId }: P
                             )}
                         />
                     </section>
-                </ModalContent>
-                <ModalFooter>
-                    <Button type="submit" onClick={onSave} disabled={!name}>{categoryId ? "Save" : "Create"}</Button>
-                </ModalFooter>
-            </form>
-        </ModalRoot>
+            </div>
+        </Modal>
     );
 }
 
@@ -122,4 +120,3 @@ export const openCategoryModal = (categoryId: string | null, channelId: string |
         await requireSettingsModal();
         return modalProps => <NewCategoryModal categoryId={categoryId} modalProps={modalProps} initialChannelId={channelId} />;
     });
-
