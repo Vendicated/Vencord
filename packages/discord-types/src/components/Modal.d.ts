@@ -59,7 +59,7 @@ export interface OpenModalProps {
 /** Wrapper around Modal */
 export interface ConfirmModalProps extends ModalProps {
     /** Variant for the confirm button, defaults to critical */
-    variant: ModalActionVariant;
+    variant?: ModalActionVariant;
     confirmText: ModalAction["text"];
     /** Defaults to "Cancel" */
     cancelText?: ModalAction["text"];
@@ -73,6 +73,13 @@ export interface ConfirmModalProps extends ModalProps {
     /** Optional callback that runs when the user cancels the action. Whether provided or not, the Modal will close when user clicks Cancel. */
     onCancel?(): void;
     onCloseCallback?(): void;
+    /** Checkbox that shows before the action buttons */
+    checkboxProps?: {
+        /** Defaults to "Don't show again" */
+        label?: string;
+        checked: boolean;
+        onChange(checked: boolean): void;
+    };
 
     /** Custom Modal content */
     children?: ReactNode;

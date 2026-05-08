@@ -19,8 +19,10 @@
 import { ChatBarButton, ChatBarButtonFactory } from "@api/ChatButtons";
 import { TooltipContainer } from "@components/TooltipContainer";
 import { classes } from "@utils/misc";
+import { openModal } from "@utils/modal";
 import { IconComponent } from "@utils/types";
-import { Alerts, Forms, useEffect, useState } from "@webpack/common";
+import { useEffect, useState } from "@webpack/common";
+import { ConfirmModal } from "@webpack/common/modalV2";
 
 import { settings } from "./settings";
 import { openTranslateModal } from "./TranslateModal";
@@ -56,21 +58,21 @@ export const TranslateChatBarIcon: ChatBarButtonFactory = ({ isMainChat }) => {
         const newState = !autoTranslate;
         settings.store.autoTranslate = newState;
         if (newState && settings.store.showAutoTranslateAlert !== false)
-            Alerts.show({
-                title: "Vencord Auto-Translate Enabled",
-                body: <>
-                    <Forms.FormText>
-                        You just enabled Auto Translate! Any message <b>will automatically be translated</b> before being sent.
-                    </Forms.FormText>
-                </>,
-                confirmText: "Disable Auto-Translate",
-                cancelText: "Got it",
-                secondaryConfirmText: "Don't show again",
-                onConfirmSecondary: () => settings.store.showAutoTranslateAlert = false,
-                onConfirm: () => settings.store.autoTranslate = false,
-                // troll
-                confirmColor: "vc-notification-log-danger-btn",
-            });
+            openModal(props =>
+                <ConfirmModal
+                    {...props}
+                    title="Vencord Auto-Translate Enabled"
+                    subtitle="You just enabled Auto Translate! Any message will automatically be translated before being sent."
+                    confirmText="Disable Auto-Translate"
+                    onConfirm={() => settings.store.autoTranslate = false}
+                    cancelText="Got it"
+                    variant="primary"
+                    checkboxProps={{
+                        checked: false,
+                        onChange: checked => settings.store.showAutoTranslateAlert = !checked,
+                    }}
+                />
+            );
     };
 
     const button = (

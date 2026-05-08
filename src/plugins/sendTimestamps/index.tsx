@@ -24,9 +24,10 @@ import { Devs } from "@utils/constants";
 import { classNameFactory } from "@utils/css";
 import { getTheme, insertTextIntoChatInputBox, Theme } from "@utils/discord";
 import { Margins } from "@utils/margins";
-import { closeModal, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, openModal } from "@utils/modal";
+import { ModalProps, openModal } from "@utils/modal";
 import definePlugin, { IconComponent, OptionType } from "@utils/types";
-import { Button, Forms, Parser, Select, useMemo, useState } from "@webpack/common";
+import { Forms, Parser, Select, useMemo, useState } from "@webpack/common";
+import { Modal } from "@webpack/common/modalV2";
 
 const settings = definePluginSettings({
     replaceMessageContents: {
@@ -53,7 +54,7 @@ type Format = typeof Formats[number];
 
 const cl = classNameFactory("vc-st-");
 
-function PickerModal({ rootProps, close }: { rootProps: ModalProps, close(): void; }) {
+function PickerModal(props: ModalProps) {
     const [value, setValue] = useState<string>();
     const [format, setFormat] = useState<Format>("");
     const time = Math.round((new Date(value!).getTime() || Date.now()) / 1000);
@@ -66,62 +67,54 @@ function PickerModal({ rootProps, close }: { rootProps: ModalProps, close(): voi
     }, [time, format]);
 
     return (
-        <ModalRoot {...rootProps}>
-            <ModalHeader className={cl("modal-header")}>
-                <Forms.FormTitle tag="h2" className={cl("modal-title")}>
-                    Timestamp Picker
-                </Forms.FormTitle>
+        <Modal
+            {...props}
+            title="Timestamp Picker"
+            actions={[{
+                text: "Insert",
+                variant: "primary",
+                onClick() {
+                    insertTextIntoChatInputBox(formatted + " ");
+                    props.onClose();
+                }
+            }]}
+        >
+            <input
+                className={cl("date-picker")}
+                type="datetime-local"
+                value={value}
+                onChange={e => setValue(e.currentTarget.value)}
+                style={{
+                    colorScheme: getTheme() === Theme.Light ? "light" : "dark",
+                }}
+            />
 
-                <ModalCloseButton onClick={close} className={cl("modal-close-button")} />
-            </ModalHeader>
-
-            <ModalContent className={cl("modal-content")}>
-                <input
-                    className={cl("date-picker")}
-                    type="datetime-local"
-                    value={value}
-                    onChange={e => setValue(e.currentTarget.value)}
-                    style={{
-                        colorScheme: getTheme() === Theme.Light ? "light" : "dark",
-                    }}
+            <Forms.FormTitle>Timestamp Format</Forms.FormTitle>
+            <div className={cl("format-select")}>
+                <Select
+                    options={
+                        Formats.map(m => ({
+                            label: m,
+                            value: m
+                        }))
+                    }
+                    isSelected={v => v === format}
+                    select={v => setFormat(v)}
+                    serialize={v => v}
+                    renderOptionLabel={o => (
+                        <div className={cl("format-label")}>
+                            {Parser.parse(formatTimestamp(time, o.value))}
+                        </div>
+                    )}
+                    renderOptionValue={() => rendered}
                 />
+            </div>
 
-                <Forms.FormTitle>Timestamp Format</Forms.FormTitle>
-                <div className={cl("format-select")}>
-                    <Select
-                        options={
-                            Formats.map(m => ({
-                                label: m,
-                                value: m
-                            }))
-                        }
-                        isSelected={v => v === format}
-                        select={v => setFormat(v)}
-                        serialize={v => v}
-                        renderOptionLabel={o => (
-                            <div className={cl("format-label")}>
-                                {Parser.parse(formatTimestamp(time, o.value))}
-                            </div>
-                        )}
-                        renderOptionValue={() => rendered}
-                    />
-                </div>
-
-                <Forms.FormTitle className={Margins.bottom8}>Preview</Forms.FormTitle>
-                <Forms.FormText className={cl("preview-text")}>
-                    {rendered} ({formatted})
-                </Forms.FormText>
-            </ModalContent>
-
-            <ModalFooter>
-                <Button
-                    onClick={() => {
-                        insertTextIntoChatInputBox(formatted + " ");
-                        close();
-                    }}
-                >Insert</Button>
-            </ModalFooter>
-        </ModalRoot>
+            <Forms.FormTitle className={Margins.bottom8}>Preview</Forms.FormTitle>
+            <Forms.FormText className={cl("preview-text")}>
+                {rendered} ({formatted})
+            </Forms.FormText>
+        </Modal>
     );
 }
 
@@ -150,14 +143,7 @@ const SendTimestampButton: ChatBarButtonFactory = ({ isAnyChat }) => {
     return (
         <ChatBarButton
             tooltip="Insert Timestamp"
-            onClick={() => {
-                const key = openModal(props => (
-                    <PickerModal
-                        rootProps={props}
-                        close={() => closeModal(key)}
-                    />
-                ));
-            }}
+            onClick={() => openModal(props => <PickerModal {...props} />)}
             buttonProps={{ "aria-haspopup": "dialog" }}
         >
             <SendTimestampIcon />
