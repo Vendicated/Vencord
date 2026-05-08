@@ -76,7 +76,7 @@ function Section(props: {
 
     return (
         <section>
-            <BaseText tag="h3" size="xl" weight="bold">{title}</BaseText>
+            <BaseText tag="h3" size="lg" weight="semibold">{title}</BaseText>
             <Paragraph size="sm" className={classes(Margins.top8, Margins.bottom20)}>{description}</Paragraph>
 
             <div className={cl("switches")}>

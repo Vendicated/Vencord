@@ -11,7 +11,7 @@ import { Flex } from "@components/Flex";
 import { Margins } from "@utils/margins";
 import { identity } from "@utils/misc";
 import { openModal } from "@utils/modal";
-import { Button, Forms, Select, Slider, Text } from "@webpack/common";
+import { Button, Forms, Select, Slider } from "@webpack/common";
 import { Modal } from "@webpack/common/modalV2";
 
 export function NotificationSection() {
@@ -38,12 +38,10 @@ export function openNotificationSettingsModal() {
     openModal(props => (
         <Modal
             {...props}
-            size="md"
-            title={<Text variant="heading-lg/semibold">Notification Settings</Text>}
+            size="lg"
+            title="Notification Settings"
         >
-            <div>
-                <NotificationSettings />
-            </div>
+            <NotificationSettings />
         </Modal>
     ));
 }

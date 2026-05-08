@@ -8,43 +8,35 @@ import { Link } from "@components/Link";
 import { settings } from "@plugins/decor/settings";
 import { DecorationModalClasses, requireAvatarDecorationModal } from "@plugins/decor/ui";
 import { ModalProps, openModal } from "@utils/modal";
-import { Forms, Text } from "@webpack/common";
-import { Modal } from "@webpack/common/modalV2";
+import { Forms } from "@webpack/common";
+import { ConfirmModal } from "@webpack/common/modalV2";
 
 import { openCreateDecorationModal } from "./CreateDecorationModal";
 
 function GuidelinesModal(props: ModalProps) {
-    return <Modal
-        {...props}
-        size="sm"
-        title={<Text color="text-strong" variant="heading-lg/semibold" tag="h1">Hold on</Text>}
-        actions={[
-            {
-                text: "Continue",
-                variant: "primary",
-                onClick: () => {
-                    settings.store.agreedToGuidelines = true;
-                    props.onClose();
-                    openCreateDecorationModal();
-                }
-            },
-            {
-                text: "Go Back",
-                variant: "secondary",
-                onClick: props.onClose
-            }
-        ]}
-    >
-        <div className={DecorationModalClasses.modal}>
-            <Forms.FormText>
-                By submitting a decoration, you agree to <Link
-                    href="https://github.com/decor-discord/.github/blob/main/GUIDELINES.md"
-                >
-                    the guidelines
-                </Link>. Not reading these guidelines may get your account suspended from creating more decorations in the future.
-            </Forms.FormText>
-        </div>
-    </Modal>;
+    return (
+        <ConfirmModal
+            {...props}
+            title="Hold on"
+            confirmText="Continue"
+            variant="primary"
+            onConfirm={() => {
+                settings.store.agreedToGuidelines = true;
+                props.onClose();
+                openCreateDecorationModal();
+            }}
+        >
+            <div className={DecorationModalClasses.modal}>
+                <Forms.FormText>
+                    By submitting a decoration, you agree to <Link
+                        href="https://github.com/decor-discord/.github/blob/main/GUIDELINES.md"
+                    >
+                        the guidelines
+                    </Link>. Not reading these guidelines may get your account suspended from creating more decorations in the future.
+                </Forms.FormText>
+            </div>
+        </ConfirmModal>
+    );
 }
 
 export const openGuidelinesModal = () =>

@@ -17,7 +17,6 @@
 .vc-pindms-modal-content {
     display: grid;
     justify-content: center;
-    padding: 1rem;
     gap: 1.5rem;
 }
 

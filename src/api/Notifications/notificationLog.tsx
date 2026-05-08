@@ -130,7 +130,7 @@ function NotificationEntry({ data }: { data: PersistentNotificationData; }) {
 export function NotificationLog({ log, pending }: { log: PersistentNotificationData[], pending: boolean; }) {
     if (!log.length && !pending)
         return (
-            <div className={cl("container")}>
+            <div>
                 <div className={cl("empty")} />
                 <Forms.FormText style={{ textAlign: "center" }}>
                     No notifications yet
@@ -156,7 +156,7 @@ function LogModal(props: ModalProps) {
     return (
         <Modal
             {...props}
-            size="lg"
+            size="xxl"
             title="Notification Log"
             actions={[
                 {
@@ -184,9 +184,7 @@ function LogModal(props: ModalProps) {
                 }
             ]}
         >
-            <div className={cl("modal")} style={{ width: "100%" }}>
-                <NotificationLog log={log} pending={pending} />
-            </div>
+            <NotificationLog log={log} pending={pending} />
         </Modal>
     );
 }

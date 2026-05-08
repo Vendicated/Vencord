@@ -2,7 +2,7 @@ import { ComponentType, ReactNode } from "react";
 import { LiteralUnion } from "type-fest";
 
 export type ModalActionVariant = LiteralUnion<"primary" | "secondary" | "critical-primary", string>;
-export type ModalSize = LiteralUnion<"sm" | "md", string>;
+export type ModalSize = LiteralUnion<"sm" | "md" | "lg" | "xl" | "xxl", string>;
 
 export interface ModalAction {
     text: string;

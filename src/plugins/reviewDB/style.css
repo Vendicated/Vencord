@@ -78,14 +78,7 @@
     cursor: pointer;
 }
 
-.vc-rdb-block-modal-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
 .vc-rdb-block-modal {
-    padding: 1em;
     display: grid;
     gap: 0.75em;
 }

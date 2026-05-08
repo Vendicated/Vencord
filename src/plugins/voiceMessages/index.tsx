@@ -211,7 +211,7 @@ function VoiceMessageModal({ modalProps }: { modalProps: ModalProps; }) {
     return (
         <Modal
             {...modalProps}
-            title={<Forms.FormTitle>Record Voice Message</Forms.FormTitle>}
+            title="Record Voice Message"
             actions={[{
                 text: "Send",
                 variant: "primary",

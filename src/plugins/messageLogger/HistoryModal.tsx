@@ -11,7 +11,7 @@ import { Margins } from "@utils/margins";
 import { classes } from "@utils/misc";
 import { ModalProps, openModal } from "@utils/modal";
 import { findCssClassesLazy } from "@webpack";
-import { TabBar, Text, Timestamp, useState } from "@webpack/common";
+import { TabBar, Timestamp, useState } from "@webpack/common";
 import { Modal } from "@webpack/common/modalV2";
 
 import { parseEditContent } from ".";
@@ -41,52 +41,50 @@ export function HistoryModal({ modalProps, message }: { modalProps: ModalProps; 
         <Modal
             {...modalProps}
             size="lg"
-            title={<Text variant="heading-lg/semibold">Message Edit History</Text>}
+            title="Message Edit History"
         >
-            <div className={cl("contents")}>
-                <TabBar
-                    type="top"
-                    look="brand"
-                    className={classes("vc-settings-tab-bar", cl("tab-bar"))}
-                    selectedItem={currentTab}
-                    onItemSelect={setCurrentTab}
-                >
-                    {message.firstEditTimestamp.getTime() !== message.timestamp.getTime() && (
-                        <TooltipContainer text="This edit state was not logged so it can't be displayed.">
-                            <TabBar.Item
-                                className="vc-settings-tab-bar-item"
-                                id={-1}
-                                disabled
-                            >
-                                <Timestamp
-                                    className={cl("timestamp")}
-                                    timestamp={message.timestamp}
-                                    isEdited={true}
-                                    isInline={false}
-                                />
-                            </TabBar.Item>
-                        </TooltipContainer>
-                    )}
-
-                    {timestamps.map((timestamp, index) => (
+            <TabBar
+                type="top"
+                look="brand"
+                className={classes("vc-settings-tab-bar", cl("tab-bar"))}
+                selectedItem={currentTab}
+                onItemSelect={setCurrentTab}
+            >
+                {message.firstEditTimestamp.getTime() !== message.timestamp.getTime() && (
+                    <TooltipContainer text="This edit state was not logged so it can't be displayed.">
                         <TabBar.Item
-                            key={index}
                             className="vc-settings-tab-bar-item"
-                            id={index}
+                            id={-1}
+                            disabled
                         >
                             <Timestamp
                                 className={cl("timestamp")}
-                                timestamp={timestamp}
+                                timestamp={message.timestamp}
                                 isEdited={true}
                                 isInline={false}
                             />
                         </TabBar.Item>
-                    ))}
-                </TabBar>
+                    </TooltipContainer>
+                )}
 
-                <div className={classes(CodeContainerClasses.markup, MiscClasses.messageContent, Margins.top20)}>
-                    {parseEditContent(contents[currentTab], message)}
-                </div>
+                {timestamps.map((timestamp, index) => (
+                    <TabBar.Item
+                        key={index}
+                        className="vc-settings-tab-bar-item"
+                        id={index}
+                    >
+                        <Timestamp
+                            className={cl("timestamp")}
+                            timestamp={timestamp}
+                            isEdited={true}
+                            isInline={false}
+                        />
+                    </TabBar.Item>
+                ))}
+            </TabBar>
+
+            <div className={classes(CodeContainerClasses.markup, MiscClasses.messageContent, Margins.top20)}>
+                {parseEditContent(contents[currentTab], message)}
             </div>
         </Modal>
     );

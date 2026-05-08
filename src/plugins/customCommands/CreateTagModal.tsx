@@ -4,7 +4,6 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { BaseText } from "@components/BaseText";
 import { Card } from "@components/Card";
 import { InlineCode } from "@components/CodeBlock";
 import { ExpandableSection } from "@components/ExpandableCard";
@@ -39,7 +38,7 @@ function CreateTagDialog({ initialValue, modalProps }: { initialValue: Tag; moda
     return (
         <Modal
             {...modalProps}
-            title={<BaseText size="lg" weight="semibold">Create Tag</BaseText>}
+            title="Create Tag"
             actions={[
                 {
                     text: "Cancel",
@@ -58,68 +57,68 @@ function CreateTagDialog({ initialValue, modalProps }: { initialValue: Tag; moda
                 }
             ]}
         >
-                <Flex flexDirection="column" gap={12}>
-                    <Paragraph>Create a new tag which will be registered as a slash command.</Paragraph>
+            <Flex flexDirection="column" gap={12}>
+                <Paragraph>Create a new tag which will be registered as a slash command.</Paragraph>
 
-                    <section className={Margins.top8}>
-                        <HeadingSecondary>Name</HeadingSecondary>
-                        <TextInput value={name} onChange={setName} placeholder="greet" />
-                    </section>
+                <section className={Margins.top8}>
+                    <HeadingSecondary>Name</HeadingSecondary>
+                    <TextInput value={name} onChange={setName} placeholder="greet" />
+                </section>
 
+                <section>
+                    <HeadingSecondary>Response</HeadingSecondary>
+                    <TextArea value={message} onChange={setMessage} placeholder={EXAMPLE_RESPONSE} />
+                </section>
+
+                {detectedArguments.length > 0 && (
                     <section>
-                        <HeadingSecondary>Response</HeadingSecondary>
-                        <TextArea value={message} onChange={setMessage} placeholder={EXAMPLE_RESPONSE} />
+                        <HeadingSecondary>Detected Arguments</HeadingSecondary>
+                        <Paragraph>
+                            <ul>
+                                {detectedArguments.map(arg => (
+                                    <li key={arg.name}>
+                                        &mdash; <b>{arg.name}</b>{arg.defaultValue ? ` (default: ${arg.defaultValue})` : ""}
+                                    </li>
+                                ))}
+                            </ul>
+                        </Paragraph>
                     </section>
+                )}
 
-                    {detectedArguments.length > 0 && (
-                        <section>
-                            <HeadingSecondary>Detected Arguments</HeadingSecondary>
+                <ExpandableSection
+                    renderContent={() => (
+                        <Flex flexDirection="column" gap={12}>
                             <Paragraph>
-                                <ul>
-                                    {detectedArguments.map(arg => (
-                                        <li key={arg.name}>
-                                            &mdash; <b>{arg.name}</b>{arg.defaultValue ? ` (default: ${arg.defaultValue})` : ""}
-                                        </li>
-                                    ))}
-                                </ul>
+                                Your response can include variables wrapped in double curly braces which will become command arguments, for example <InlineCode>{"Hello {{user}}"}</InlineCode>.
                             </Paragraph>
-                        </section>
-                    )}
+                            <Paragraph>
+                                You can specify arguments with default values by using an equals sign, for example <InlineCode>{"Hello {{user = pal}}"}</InlineCode>.
+                            </Paragraph>
 
-                    <ExpandableSection
-                        renderContent={() => (
-                            <Flex flexDirection="column" gap={12}>
-                                <Paragraph>
-                                    Your response can include variables wrapped in double curly braces which will become command arguments, for example <InlineCode>{"Hello {{user}}"}</InlineCode>.
-                                </Paragraph>
-                                <Paragraph>
-                                    You can specify arguments with default values by using an equals sign, for example <InlineCode>{"Hello {{user = pal}}"}</InlineCode>.
-                                </Paragraph>
-
-                                <section>
-                                    <Paragraph><b>Example Command response:</b> <InlineCode>{EXAMPLE_RESPONSE}</InlineCode></Paragraph>
-                                    <Paragraph><b>Example usage:</b> <InlineCode>{"/greet user:@Clyde"}</InlineCode></Paragraph>
-                                    <Paragraph><b>Example output:</b> <InlineCode>{"Hello @Clyde! I am feeling great."}</InlineCode></Paragraph>
-                                </section>
-                            </Flex>
-                        )}
-                    >
-                        <Flex alignItems="center" gap={8}>
-                            <InfoIcon color="var(--text-muted)" height={16} width={16} />
-                            View Arguments guide
+                            <section>
+                                <Paragraph><b>Example Command response:</b> <InlineCode>{EXAMPLE_RESPONSE}</InlineCode></Paragraph>
+                                <Paragraph><b>Example usage:</b> <InlineCode>{"/greet user:@Clyde"}</InlineCode></Paragraph>
+                                <Paragraph><b>Example output:</b> <InlineCode>{"Hello @Clyde! I am feeling great."}</InlineCode></Paragraph>
+                            </section>
                         </Flex>
-                    </ExpandableSection>
-                    {hasReservedEphemeral &&
-                        <Card variant="danger" className={Margins.top8} defaultPadding>
-                            <Paragraph>The argument name "ephemeral" is reserved and cannot be used.</Paragraph>
-                        </Card>
-                    }
-                    {nameAlreadyExists &&
-                        <Card variant="warning" className={Margins.top8} defaultPadding>
-                            <Paragraph>A tag with the name <InlineCode>{name}</InlineCode> already exists and will be overwritten.</Paragraph>
-                        </Card>
-                    }
-                </Flex>
+                    )}
+                >
+                    <Flex alignItems="center" gap={8}>
+                        <InfoIcon color="var(--text-muted)" height={16} width={16} />
+                        View Arguments guide
+                    </Flex>
+                </ExpandableSection>
+                {hasReservedEphemeral &&
+                    <Card variant="danger" className={Margins.top8} defaultPadding>
+                        <Paragraph>The argument name "ephemeral" is reserved and cannot be used.</Paragraph>
+                    </Card>
+                }
+                {nameAlreadyExists &&
+                    <Card variant="warning" className={Margins.top8} defaultPadding>
+                        <Paragraph>A tag with the name <InlineCode>{name}</InlineCode> already exists and will be overwritten.</Paragraph>
+                    </Card>
+                }
+            </Flex>
         </Modal>
     );
 }

@@ -16,7 +16,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { BaseText } from "@components/BaseText";
 import { Divider } from "@components/Divider";
 import { FormSwitch } from "@components/FormSwitch";
 import { Margins } from "@utils/margins";
@@ -25,7 +24,7 @@ import { Forms, SearchableSelect, useMemo } from "@webpack/common";
 import { Modal } from "@webpack/common/modalV2";
 
 import { settings } from "./settings";
-import { cl, getLanguages } from "./utils";
+import { getLanguages } from "./utils";
 
 const LanguageSettingKeys = ["receivedInput", "receivedOutput", "sentInput", "sentOutput"] as const;
 
@@ -79,21 +78,19 @@ function TranslateModal({ rootProps }: { rootProps: ModalProps; }) {
     return (
         <Modal
             {...rootProps}
-            title={<BaseText tag="h2" size="lg" weight="semibold" className={cl("modal-title")}>Translate</BaseText>}
+            title="Translate"
         >
-            <div className={cl("modal-content")}>
-                {LanguageSettingKeys.map(s => (
-                    <LanguageSelect
-                        key={s}
-                        settingsKey={s}
-                        includeAuto={s.endsWith("Input")}
-                    />
-                ))}
+            {LanguageSettingKeys.map(s => (
+                <LanguageSelect
+                    key={s}
+                    settingsKey={s}
+                    includeAuto={s.endsWith("Input")}
+                />
+            ))}
 
-                <Divider className={Margins.bottom16} />
+            <Divider className={Margins.bottom16} />
 
-                <AutoTranslateToggle />
-            </div>
+            <AutoTranslateToggle />
         </Modal>
     );
 }

@@ -139,7 +139,7 @@ function ChangeDecorationModal(props: ModalProps) {
 
     return <Modal
         {...props}
-        title={<Text color="text-strong" variant="heading-lg/semibold" tag="h1">Change Decoration</Text>}
+        title="Change Decoration"
         actions={[
             {
                 text: "Cancel",

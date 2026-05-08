@@ -61,7 +61,7 @@ function CreateDecorationModal(props: ModalProps) {
     return <Modal
         {...props}
         size="md"
-        title={<Text color="text-strong" variant="heading-lg/semibold" tag="h1">Create Decoration</Text>}
+        title="Create Decoration"
         actions={[
             {
                 text: "Cancel",

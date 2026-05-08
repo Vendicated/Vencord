@@ -16,7 +16,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { BaseText } from "@components/BaseText";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { handleComponentFailed } from "@components/handleComponentFailed";
 import { ModalProps, openModal } from "@utils/modal";
@@ -47,12 +46,10 @@ export function openSettingsTabModal(Tab: ComponentType<any>) {
         openModal(wrapTab((modalProps: ModalProps) => (
             <Modal
                 {...modalProps}
-                size="md"
-                title={<BaseText size="lg" weight="semibold">{Tab.displayName?.replace("SettingsTab", "") || "Settings"}</BaseText>}
+                size="lg"
+                title={Tab.displayName?.replace("SettingsTab", "") || "Settings"}
             >
-                <div className="vc-settings-modal-root vc-settings-modal">
-                    <Tab />
-                </div>
+                <Tab />
             </Modal>
         ), Tab.displayName || "SettingsTab"));
     } catch {

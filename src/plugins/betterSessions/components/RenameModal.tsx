@@ -42,7 +42,7 @@ export function RenameModal({ props, session, state }: { props: ModalProps, sess
     return (
         <Modal
             {...props}
-            title={<Forms.FormTitle tag="h4">Rename</Forms.FormTitle>}
+            title="Rename"
             actions={[
                 {
                     text: "Cancel",

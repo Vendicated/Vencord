@@ -88,7 +88,7 @@ export function openBlockModal() {
     openModal(modalProps => (
         <Modal
             {...modalProps}
-            title={<Forms.FormTitle style={{ margin: 0 }}>Blocked Users</Forms.FormTitle>}
+            title="Blocked Users"
         >
             <div className={cl("block-modal")}>
                 {Auth.token ? <BlockedUsersList /> : <Forms.FormText>You are not logged into ReviewDB!</Forms.FormText>}

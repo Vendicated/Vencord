@@ -10,7 +10,7 @@ import { categoryLen, createCategory, getCategory } from "@plugins/pinDms/data";
 import { classNameFactory } from "@utils/css";
 import { ModalProps, openModalLazy } from "@utils/modal";
 import { extractAndLoadChunksLazy, findComponentByCodeLazy } from "@webpack";
-import { ColorPicker, Forms, Text, TextInput, Toasts, useMemo, useState } from "@webpack/common";
+import { ColorPicker, Forms, TextInput, Toasts, useMemo, useState } from "@webpack/common";
 import { Modal } from "@webpack/common/modalV2";
 
 interface ColorPickerWithSwatchesProps {
@@ -74,7 +74,7 @@ export function NewCategoryModal({ categoryId, modalProps, initialChannelId }: P
     return (
         <Modal
             {...modalProps}
-            title={<Text variant="heading-lg/semibold">{categoryId ? "Edit" : "New"} Category</Text>}
+            title={`${categoryId ? "Edit" : "New"} Category`}
             actions={[{
                 text: categoryId ? "Save" : "Create",
                 variant: "primary",
@@ -83,33 +83,33 @@ export function NewCategoryModal({ categoryId, modalProps, initialChannelId }: P
             }]}
         >
             <div className={cl("content")}>
-                    <section>
-                        <Forms.FormTitle>Name</Forms.FormTitle>
-                        <TextInput
-                            value={name}
-                            onChange={e => setName(e)}
-                        />
-                    </section>
-                    <Divider />
-                    <section>
-                        <Forms.FormTitle>Color</Forms.FormTitle>
-                        <ColorPickerWithSwatches
-                            key={category.id}
-                            defaultColor={DEFAULT_COLOR}
-                            colors={SWATCHES}
-                            onChange={c => setColor(c!)}
-                            value={color}
-                            renderDefaultButton={() => null}
-                            renderCustomButton={() => (
-                                <ColorPicker
-                                    color={color}
-                                    onChange={c => setColor(c!)}
-                                    key={category.id}
-                                    showEyeDropper={false}
-                                />
-                            )}
-                        />
-                    </section>
+                <section>
+                    <Forms.FormTitle>Name</Forms.FormTitle>
+                    <TextInput
+                        value={name}
+                        onChange={e => setName(e)}
+                    />
+                </section>
+                <Divider />
+                <section>
+                    <Forms.FormTitle>Color</Forms.FormTitle>
+                    <ColorPickerWithSwatches
+                        key={category.id}
+                        defaultColor={DEFAULT_COLOR}
+                        colors={SWATCHES}
+                        onChange={c => setColor(c!)}
+                        value={color}
+                        renderDefaultButton={() => null}
+                        renderCustomButton={() => (
+                            <ColorPicker
+                                color={color}
+                                onChange={c => setColor(c!)}
+                                key={category.id}
+                                showEyeDropper={false}
+                            />
+                        )}
+                    />
+                </section>
             </div>
         </Modal>
     );
