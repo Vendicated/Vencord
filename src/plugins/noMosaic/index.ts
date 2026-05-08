@@ -37,7 +37,7 @@ export default definePlugin({
         {
             find: "return{visualMediaItems:",
             replacement: {
-                match: /return{visualMediaItems:.*?props:(\i)/,
+                match: /return{visualMediaItems:.+?props:(\i)(?=.{0,20}?\1\.item\.uniqueId)/,
                 replace: '$&,useFullWidth:["IMAGE","VIDEO","CLIP"].includes($1.item?.type)?false:undefined'
             }
         },
