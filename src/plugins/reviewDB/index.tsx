@@ -44,7 +44,6 @@ const DMSideBarClasses = findCssClassesLazy("widgetPreviews");
 const ProfileCardClasses = findCssClassesLazy("cardsList", "firstCardContainer", "card", "container");
 const ProfileCardContainerClasses = findCssClassesLazy("innerContainer", "icons", "icon", "displayCount", "displayCountText", "displayCountTextColor", "breadcrumb");
 const ProfileCardOverlayClasses = findCssClassesLazy("overlay", "isPrivate", "outer");
-const NO_OP = () => { };
 
 const guildPopoutPatch: NavContextMenuPatchCallback = (children, { guild }: { guild: Guild, onClose(): void; }) => {
     if (!guild) return;
@@ -151,7 +150,6 @@ export default definePlugin({
                         confirmText={props.confirmText ?? "OK"}
                         cancelText={props.cancelText}
                         variant="primary"
-                        onConfirm={NO_OP}
                         onCancel={props.onCancel}
                     >
                         {Parser.parse(

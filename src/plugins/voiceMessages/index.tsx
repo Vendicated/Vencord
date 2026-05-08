@@ -223,51 +223,48 @@ function VoiceMessageModal({ modalProps }: { modalProps: ModalProps; }) {
                 disabled: !blob
             }]}
         >
-            <div className={cl("modal")}>
-                <div className={cl("buttons")}>
-                    <VoiceRecorder
-                        setAudioBlob={blob => {
-                            setBlob(blob);
-                            setBlobUrl(blob);
-                        }}
-                        onRecordingChange={setRecording}
+            <div className={cl("buttons")}>
+                <VoiceRecorder
+                    setAudioBlob={blob => {
+                        setBlob(blob);
+                        setBlobUrl(blob);
+                    }}
+                    onRecordingChange={setRecording}
+                />
+
+                <Button
+                    onClick={async () => {
+                        const file = await chooseFile("audio/*");
+                        if (file) {
+                            setBlob(file);
+                            setBlobUrl(file);
+                        }
+                    }}
+                >
+                    Upload File
+                </Button>
+            </div>
+
+            <Forms.FormTitle>Preview</Forms.FormTitle>
+            {metaError
+                ? <Paragraph className={cl("error")}>Failed to parse selected audio file: {metaError.message}</Paragraph>
+                : (
+                    <VoicePreview
+                        src={blobUrl}
+                        waveform={meta.waveform}
+                        recording={isRecording}
                     />
-
-                    <Button
-                        onClick={async () => {
-                            const file = await chooseFile("audio/*");
-                            if (file) {
-                                setBlob(file);
-                                setBlobUrl(file);
-                            }
-                        }}
-                    >
-                        Upload File
-                    </Button>
-                </div>
-
-                <Forms.FormTitle>Preview</Forms.FormTitle>
-                {metaError
-                    ? <Paragraph className={cl("error")}>Failed to parse selected audio file: {metaError.message}</Paragraph>
-                    : (
-                        <VoicePreview
-                            src={blobUrl}
-                            waveform={meta.waveform}
-                            recording={isRecording}
-                        />
-                    )}
-
-                {isUnsupportedFormat && (
-                    <Card variant="warning" className={Margins.top16} defaultPadding>
-                        <Forms.FormText>Voice Messages have to be OggOpus to be playable on iOS. This file is <code>{blob.type}</code> so it will not be playable on iOS.</Forms.FormText>
-
-                        <Forms.FormText className={Margins.top8}>
-                            To fix it, first convert it to OggOpus, for example using the <Link href="https://convertio.co/mp3-opus/">convertio web converter</Link>
-                        </Forms.FormText>
-                    </Card>
                 )}
 
-            </div>
+            {isUnsupportedFormat && (
+                <Card variant="warning" className={Margins.top16} defaultPadding>
+                    <Forms.FormText>Voice Messages have to be OggOpus to be playable on iOS. This file is <code>{blob.type}</code> so it will not be playable on iOS.</Forms.FormText>
+
+                    <Forms.FormText className={Margins.top8}>
+                        To fix it, first convert it to OggOpus, for example using the <Link href="https://convertio.co/mp3-opus/">convertio web converter</Link>
+                    </Forms.FormText>
+                </Card>
+            )}
         </Modal>
     );
 }
