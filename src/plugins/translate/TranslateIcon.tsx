@@ -45,7 +45,7 @@ export const TranslateIcon: IconComponent = ({ height = 20, width = 20, classNam
 export let setShouldShowTranslateEnabledTooltip: undefined | ((show: boolean) => void);
 
 function AutoTranslateConfirmModal(props: OpenModalProps) {
-    const s = settings.use(["showAutoTranslateAlert"]);
+    const s = settings.use(["dismissedAutoTranslateAlert"]);
 
     return (
         <ConfirmModal
@@ -57,8 +57,8 @@ function AutoTranslateConfirmModal(props: OpenModalProps) {
             cancelText="Got it"
             variant="primary"
             checkboxProps={{
-                checked: s.showAutoTranslateAlert === false,
-                onChange: checked => s.showAutoTranslateAlert = !checked,
+                checked: s.dismissedAutoTranslateAlert === true,
+                onChange: checked => s.dismissedAutoTranslateAlert = checked,
             }}
         />
     );
@@ -78,7 +78,7 @@ export const TranslateChatBarIcon: ChatBarButtonFactory = ({ isMainChat }) => {
     const toggle = () => {
         const newState = !autoTranslate;
         settings.store.autoTranslate = newState;
-        if (newState && settings.store.showAutoTranslateAlert !== false)
+        if (newState && !settings.store.dismissedAutoTranslateAlert)
             openModal(props => <AutoTranslateConfirmModal {...props} />);
     };
 
