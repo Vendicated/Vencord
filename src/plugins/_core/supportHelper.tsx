@@ -182,7 +182,7 @@ export default definePlugin({
                 await checkForUpdatesOnce().catch(() => { });
 
                 if (isOutdated) {
-                    return openModal(props => (
+                    openModal(props => (
                         <ConfirmModal
                             {...props}
                             title="Hold on!"
@@ -204,6 +204,7 @@ export default definePlugin({
                             </div>
                         </ConfirmModal>
                     ));
+                    return;
                 }
             }
 
@@ -211,7 +212,7 @@ export default definePlugin({
             if (!roles || TrustedRolesIds.some(id => roles.includes(id))) return;
 
             if (!IS_WEB && IS_UPDATER_DISABLED) {
-                return openModal(props => (
+                openModal(props => (
                     <ConfirmModal
                         {...props}
                         title="Hold on!"
@@ -228,10 +229,11 @@ export default definePlugin({
                         </div>
                     </ConfirmModal>
                 ));
+                return;
             }
 
             if (!IS_STANDALONE && !settings.store.dismissedDevBuildWarning) {
-                return openModal(props => (
+                openModal(props => (
                     <ConfirmModal
                         {...props}
                         title="Hold on!"
@@ -255,6 +257,7 @@ export default definePlugin({
                         </div>
                     </ConfirmModal>
                 ));
+                return;
             }
         }
     },

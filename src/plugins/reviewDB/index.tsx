@@ -128,8 +128,9 @@ export default definePlugin({
                 }
             }
 
-            if (user.notification) {
-                const props = user.notification.type === NotificationType.Ban ? {
+            const { notification } = user;
+            if (notification) {
+                const props = notification.type === NotificationType.Ban ? {
                     cancelText: "Appeal",
                     confirmText: "Ok",
                     onCancel: async () =>
@@ -145,7 +146,7 @@ export default definePlugin({
                 openModal(modalProps => (
                     <ConfirmModal
                         {...modalProps}
-                        title={user.notification.title}
+                        title={notification.title}
                         confirmText={props.confirmText ?? "OK"}
                         cancelText={props.cancelText}
                         variant="primary"
@@ -153,13 +154,13 @@ export default definePlugin({
                         onCancel={props.onCancel}
                     >
                         {Parser.parse(
-                            user.notification.content,
+                            notification.content,
                             false
                         )}
                     </ConfirmModal>
                 ));
 
-                readNotification(user.notification.id);
+                readNotification(notification.id);
             }
         }, 4000);
     },

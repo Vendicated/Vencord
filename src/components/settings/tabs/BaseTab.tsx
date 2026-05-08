@@ -48,10 +48,9 @@ export function openSettingsTabModal(Tab: ComponentType<any>) {
             <Modal
                 {...modalProps}
                 size="md"
-                className="vc-settings-modal-root"
                 title={<BaseText size="lg" weight="semibold">{Tab.displayName?.replace("SettingsTab", "") || "Settings"}</BaseText>}
             >
-                <div className="vc-settings-modal">
+                <div className="vc-settings-modal-root vc-settings-modal">
                     <Tab />
                 </div>
             </Modal>

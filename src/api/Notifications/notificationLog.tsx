@@ -158,7 +158,6 @@ function LogModal(props: ModalProps) {
             {...props}
             size="lg"
             title="Notification Log"
-            className={cl("modal")}
             actions={[
                 {
                     text: "Notification Settings",
@@ -185,7 +184,7 @@ function LogModal(props: ModalProps) {
                 }
             ]}
         >
-            <div style={{ width: "100%" }}>
+            <div className={cl("modal")} style={{ width: "100%" }}>
                 <NotificationLog log={log} pending={pending} />
             </div>
         </Modal>

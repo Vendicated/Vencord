@@ -6,7 +6,7 @@
 
 import { Link } from "@components/Link";
 import { settings } from "@plugins/decor/settings";
-import { cl, DecorationModalClasses, requireAvatarDecorationModal } from "@plugins/decor/ui";
+import { DecorationModalClasses, requireAvatarDecorationModal } from "@plugins/decor/ui";
 import { ModalProps, openModal } from "@utils/modal";
 import { Forms, Text } from "@webpack/common";
 import { Modal } from "@webpack/common/modalV2";
@@ -17,7 +17,6 @@ function GuidelinesModal(props: ModalProps) {
     return <Modal
         {...props}
         size="sm"
-        className={DecorationModalClasses.modal}
         title={<Text color="text-strong" variant="heading-lg/semibold" tag="h1">Hold on</Text>}
         actions={[
             {
@@ -36,7 +35,7 @@ function GuidelinesModal(props: ModalProps) {
             }
         ]}
     >
-        <div>
+        <div className={DecorationModalClasses.modal}>
             <Forms.FormText>
                 By submitting a decoration, you agree to <Link
                     href="https://github.com/decor-discord/.github/blob/main/GUIDELINES.md"
