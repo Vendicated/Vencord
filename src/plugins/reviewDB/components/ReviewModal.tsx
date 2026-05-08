@@ -16,7 +16,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import ErrorBoundary from "@components/ErrorBoundary";
 import { Auth } from "@plugins/reviewDB/auth";
 import { ReviewType } from "@plugins/reviewDB/entities";
 import { REVIEWS_PER_PAGE, UserReviewsData } from "@plugins/reviewDB/reviewDbApi";
@@ -47,32 +46,16 @@ function ReviewsModal({ modalProps, modalKey, discordId, name, type }: { modalPr
     const ownReview = data?.reviews.find(r => r.sender.discordID === Auth.user?.discordID);
 
     return (
-        <ErrorBoundary>
-            <Modal
-                {...modalProps}
-                size="md"
-                title={
-                    <Text variant="heading-lg/semibold" className={cl("modal-header")}>
-                        {name}'s Reviews
-                        {!!reviewCount && <span> ({reviewCount} Reviews)</span>}
-                    </Text>
-                }
-            >
-                <div ref={ref}>
-                    <div className={cl("modal-reviews")}>
-                        <ReviewsView
-                            discordId={discordId}
-                            name={name}
-                            page={page}
-                            refetchSignal={signal}
-                            onFetchReviews={setData}
-                            scrollToTop={() => ref.current?.scrollTo({ top: 0, behavior: "smooth" })}
-                            hideOwnReview
-                            type={type}
-                        />
-                    </div>
-                </div>
-
+        <Modal
+            {...modalProps}
+            size="lg"
+            title={
+                <Text variant="heading-lg/semibold" className={cl("modal-header")}>
+                    {name}'s Reviews
+                    {!!reviewCount && <span> ({reviewCount} Reviews)</span>}
+                </Text>
+            }
+            preview={
                 <div className={cl("modal-footer")}>
                     <div className={cl("modal-footer-wrapper")}>
                         {ownReview && (
@@ -101,8 +84,23 @@ function ReviewsModal({ modalProps, modalKey, discordId, name, type }: { modalPr
                         )}
                     </div>
                 </div>
-            </Modal>
-        </ErrorBoundary>
+            }
+        >
+            <div ref={ref}>
+                <div className={cl("modal-reviews")}>
+                    <ReviewsView
+                        discordId={discordId}
+                        name={name}
+                        page={page}
+                        refetchSignal={signal}
+                        onFetchReviews={setData}
+                        scrollToTop={() => ref.current?.scrollTo({ top: 0, behavior: "smooth" })}
+                        hideOwnReview
+                        type={type}
+                    />
+                </div>
+            </div>
+        </Modal>
     );
 }
 
@@ -117,7 +115,8 @@ export function openReviewsModal(discordId: string, name: string, type: ReviewTy
                 modalProps={props}
                 discordId={discordId}
                 name={name}
-                type={type} />
+                type={type}
+            />
         );
     }, { modalKey });
 }

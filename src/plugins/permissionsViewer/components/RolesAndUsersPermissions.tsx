@@ -78,7 +78,7 @@ function RolesAndUsersPermissionsComponent({ permissions, guild, modalProps, hea
     return (
         <Modal
             {...modalProps}
-            size="lg"
+            size="xl"
             title={`${header} Permissions`}
         >
             {!selectedItem && (

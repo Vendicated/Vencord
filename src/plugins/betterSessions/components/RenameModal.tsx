@@ -16,10 +16,11 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { TextButton } from "@components/Button";
 import { SessionInfo } from "@plugins/betterSessions/types";
 import { getDefaultName, savedSessionsCache, saveSessionsToDataStore } from "@plugins/betterSessions/utils";
 import { ModalProps } from "@utils/modal";
-import { Button, Forms, React, TextInput } from "@webpack/common";
+import { Forms, React, TextInput } from "@webpack/common";
 import { Modal } from "@webpack/common/modalV2";
 import { KeyboardEvent } from "react";
 
@@ -57,7 +58,7 @@ export function RenameModal({ props, session, state }: { props: ModalProps, sess
             ]}
         >
             <div>
-                <Forms.FormTitle tag="h5" style={{ marginTop: "10px" }}>New device name</Forms.FormTitle>
+                <Forms.FormTitle tag="h5">New device name</Forms.FormTitle>
                 <TextInput
                     style={{ marginBottom: "10px" }}
                     placeholder={getDefaultName(session.client_info)}
@@ -69,20 +70,15 @@ export function RenameModal({ props, session, state }: { props: ModalProps, sess
                         }
                     }}
                 />
-                <Button
+                <TextButton
                     style={{
-                        marginBottom: "20px",
                         paddingLeft: "1px",
-                        paddingRight: "1px",
                         opacity: 0.6
                     }}
-                    look={Button.Looks.LINK}
-                    color={Button.Colors.LINK}
-                    size={Button.Sizes.NONE}
                     onClick={() => setValue("")}
                 >
                     Reset Name
-                </Button>
+                </TextButton>
             </div>
         </Modal>
     );

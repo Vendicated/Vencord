@@ -50,7 +50,7 @@ function NotificationSettings() {
     const settings = useSettings(["notifications.*"]).notifications;
 
     return (
-        <div style={{ padding: "1em 0" }}>
+        <>
             <Forms.FormTitle tag="h5">Notification Style</Forms.FormTitle>
             {settings.useNative !== "never" && Notification?.permission === "denied" && (
                 <ErrorCard style={{ padding: "1em" }} className={Margins.bottom8}>
@@ -120,6 +120,6 @@ function NotificationSettings() {
                 onValueRender={v => v === 200 ? "∞" : v}
                 onMarkerRender={v => v === 200 ? "∞" : v}
             />
-        </div>
+        </>
     );
 }

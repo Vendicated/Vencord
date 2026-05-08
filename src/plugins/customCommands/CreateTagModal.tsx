@@ -4,13 +4,11 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { Card } from "@components/Card";
 import { InlineCode } from "@components/CodeBlock";
 import { ExpandableSection } from "@components/ExpandableCard";
 import { Flex } from "@components/Flex";
 import { HeadingSecondary } from "@components/Heading";
 import { InfoIcon } from "@components/Icons";
-import { Margins } from "@components/margins";
 import { Paragraph } from "@components/Paragraph";
 import { ModalProps, openModal } from "@utils/modal";
 import { TextArea, TextInput, useState } from "@webpack/common";
@@ -31,14 +29,23 @@ function CreateTagDialog({ initialValue, modalProps }: { initialValue: Tag; moda
     const [name, setName] = useState(initialValue.name);
     const [message, setMessage] = useState(initialValue.message.replaceAll("\\n", "\n"));
 
+    const isEdit = Boolean(initialValue.name);
+
     const detectedArguments = parseTagArguments(message);
     const hasReservedEphemeral = detectedArguments.some(arg => arg.name === "ephemeral");
     const nameAlreadyExists = name !== initialValue.name && getTag(name);
 
+    const notice = hasReservedEphemeral
+        ? 'The argument name "ephemeral" is reserved and cannot be used.'
+        : nameAlreadyExists
+            ? `A tag with the name "${name}" already exists and will be overwritten.`
+            : undefined;
+
     return (
         <Modal
             {...modalProps}
-            title="Create Tag"
+            title={isEdit ? "Edit Tag" : "Create New Tag"}
+            subtitle={isEdit ? "Edit your custom command." : "Create a new tag which will be registered as a slash command."}
             actions={[
                 {
                     text: "Cancel",
@@ -46,7 +53,7 @@ function CreateTagDialog({ initialValue, modalProps }: { initialValue: Tag; moda
                     onClick: modalProps.onClose
                 },
                 {
-                    text: "Create",
+                    text: isEdit ? "Save" : "Create",
                     variant: "primary",
                     onClick: () => {
                         const tag = { name, message };
@@ -56,18 +63,17 @@ function CreateTagDialog({ initialValue, modalProps }: { initialValue: Tag; moda
                     disabled: !name || !message || hasReservedEphemeral
                 }
             ]}
+            notice={notice ? { message: notice, type: "critical" } : undefined}
         >
             <Flex flexDirection="column" gap={12}>
-                <Paragraph>Create a new tag which will be registered as a slash command.</Paragraph>
-
-                <section className={Margins.top8}>
+                <section>
                     <HeadingSecondary>Name</HeadingSecondary>
                     <TextInput value={name} onChange={setName} placeholder="greet" />
                 </section>
 
                 <section>
                     <HeadingSecondary>Response</HeadingSecondary>
-                    <TextArea value={message} onChange={setMessage} placeholder={EXAMPLE_RESPONSE} />
+                    <TextArea value={message} onChange={setMessage} placeholder={EXAMPLE_RESPONSE} autosize />
                 </section>
 
                 {detectedArguments.length > 0 && (
@@ -108,16 +114,6 @@ function CreateTagDialog({ initialValue, modalProps }: { initialValue: Tag; moda
                         View Arguments guide
                     </Flex>
                 </ExpandableSection>
-                {hasReservedEphemeral &&
-                    <Card variant="danger" className={Margins.top8} defaultPadding>
-                        <Paragraph>The argument name "ephemeral" is reserved and cannot be used.</Paragraph>
-                    </Card>
-                }
-                {nameAlreadyExists &&
-                    <Card variant="warning" className={Margins.top8} defaultPadding>
-                        <Paragraph>A tag with the name <InlineCode>{name}</InlineCode> already exists and will be overwritten.</Paragraph>
-                    </Card>
-                }
             </Flex>
         </Modal>
     );

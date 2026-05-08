@@ -14,14 +14,17 @@
     cursor: pointer;
 }
 
-.vc-pindms-modal-content {
-    display: grid;
-    justify-content: center;
-    gap: 1.5rem;
+.vc-pindms-modal-color-picker {
+    margin-inline-end: 0;
+
+    [class*="defaultContainer"] {
+        display: none;
+    }
 }
 
-.vc-pindms-modal-content [class*="defaultContainer"] {
-    display: none;
+.vc-pindms-modal-content {
+    display: grid;
+    gap: 1.5em;
 }
 
 .vc-pindms-collapse-icon {

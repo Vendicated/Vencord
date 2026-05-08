@@ -4,7 +4,6 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { Divider } from "@components/Divider";
 import { DEFAULT_COLOR, SWATCHES } from "@plugins/pinDms/constants";
 import { categoryLen, createCategory, getCategory } from "@plugins/pinDms/data";
 import { classNameFactory } from "@utils/css";
@@ -14,6 +13,7 @@ import { ColorPicker, Forms, TextInput, Toasts, useMemo, useState } from "@webpa
 import { Modal } from "@webpack/common/modalV2";
 
 interface ColorPickerWithSwatchesProps {
+    className?: string;
     defaultColor: number;
     colors: number[];
     value: number;
@@ -90,10 +90,10 @@ export function NewCategoryModal({ categoryId, modalProps, initialChannelId }: P
                         onChange={e => setName(e)}
                     />
                 </section>
-                <Divider />
                 <section>
                     <Forms.FormTitle>Color</Forms.FormTitle>
                     <ColorPickerWithSwatches
+                        className={cl("color-picker")}
                         key={category.id}
                         defaultColor={DEFAULT_COLOR}
                         colors={SWATCHES}

@@ -23,6 +23,7 @@ import { Divider } from "@components/Divider";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import { copyWithToast, getCurrentGuild, getIntlMessage } from "@utils/discord";
+import { isTruthy } from "@utils/guards";
 import { Margins } from "@utils/margins";
 import { openModal } from "@utils/modal";
 import definePlugin, { IconComponent, OptionType } from "@utils/types";
@@ -76,32 +77,30 @@ function openViewRawModal(json: string, type: string, msgContent?: string) {
             <Modal
                 {...props}
                 title="View Raw"
-                size="lg"
+                size="xl"
                 actions={[
                     {
                         text: `Copy ${type} JSON`,
                         variant: "primary",
                         onClick: () => copyWithToast(json, `${type} data copied to clipboard!`)
                     },
-                    ...(msgContent ? [{
+                    msgContent && {
                         text: "Copy Raw Content",
                         variant: "secondary",
                         onClick: () => copyWithToast(msgContent, "Content copied to clipboard!")
-                    }] : [])
-                ]}
+                    }
+                ].filter(isTruthy)}
             >
-                <div style={{ padding: "16px 0" }}>
-                    {!!msgContent && (
-                        <>
-                            <Forms.FormTitle tag="h5">Content</Forms.FormTitle>
-                            <CodeBlock content={msgContent} lang="" />
-                            <Divider className={Margins.bottom20} />
-                        </>
-                    )}
+                {!!msgContent && (
+                    <>
+                        <Forms.FormTitle tag="h5">Content</Forms.FormTitle>
+                        <CodeBlock content={msgContent} lang="" />
+                        <Divider className={Margins.bottom20} />
+                    </>
+                )}
 
-                    <Forms.FormTitle tag="h5">{type} Data</Forms.FormTitle>
-                    <CodeBlock content={json} lang="json" />
-                </div>
+                <Forms.FormTitle tag="h5">{type} Data</Forms.FormTitle>
+                <CodeBlock content={json} lang="json" />
             </Modal>
         </ErrorBoundary >
     ));
