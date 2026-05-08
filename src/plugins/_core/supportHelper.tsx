@@ -58,6 +58,7 @@ const TrustedRolesIds = [
 ];
 
 const AsyncFunction = async function () { }.constructor;
+const NO_OP = () => { };
 
 const ShowCurrentGame = getUserSettingLazy<boolean>("status", "showCurrentGame")!;
 
@@ -211,13 +212,13 @@ export default definePlugin({
 
             if (!IS_WEB && IS_UPDATER_DISABLED) {
                 openModal(props => (
-                    <ConfirmModal
-                        {...props}
-                        title="Hold on!"
-                        confirmText="OK"
-                        variant="primary"
-                        onConfirm={() => { }}
-                    >
+                        <ConfirmModal
+                            {...props}
+                            title="Hold on!"
+                            confirmText="OK"
+                            variant="primary"
+                            onConfirm={NO_OP}
+                        >
                         <div>
                             <Forms.FormText>You are using an externally updated Vencord version, which we do not provide support for!</Forms.FormText>
                             <Forms.FormText className={Margins.top8}>
@@ -232,13 +233,13 @@ export default definePlugin({
 
             if (!IS_STANDALONE && !settings.store.dismissedDevBuildWarning) {
                 openModal(props => (
-                    <ConfirmModal
-                        {...props}
-                        title="Hold on!"
-                        confirmText="Understood"
-                        variant="primary"
-                        onConfirm={() => { }}
-                        checkboxProps={{
+                        <ConfirmModal
+                            {...props}
+                            title="Hold on!"
+                            confirmText="Understood"
+                            variant="primary"
+                            onConfirm={NO_OP}
+                            checkboxProps={{
                             checked: Boolean(settings.store.dismissedDevBuildWarning),
                             onChange: checked => settings.store.dismissedDevBuildWarning = checked
                         }}

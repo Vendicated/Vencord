@@ -74,6 +74,7 @@ const fakeNitroEmojiRegex = /\/emojis\/(\d+?)\.(png|webp|gif)/;
 const fakeNitroStickerRegex = /\/stickers\/(\d+?)\./;
 const fakeNitroGifStickerRegex = /\/attachments\/\d+?\/\d+?\/(\d+?)\.gif/;
 const hyperLinkRegex = /\[.+?\]\((https?:\/\/.+?)\)/;
+const NO_OP = () => { };
 
 const settings = definePluginSettings({
     enableEmojiBypass: {
@@ -863,7 +864,7 @@ export default definePlugin({
                                 title="Hold on!"
                                 confirmText="OK"
                                 variant="primary"
-                                onConfirm={() => { }}
+                                onConfirm={NO_OP}
                             >
                                 <div>
                                     <Forms.FormText>

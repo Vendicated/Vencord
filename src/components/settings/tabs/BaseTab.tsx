@@ -47,11 +47,10 @@ export function openSettingsTabModal(Tab: ComponentType<any>) {
         openModal(wrapTab((modalProps: ModalProps) => (
             <Modal
                 {...modalProps}
-                {...({ className: "vc-settings-modal-root" } as any)}
                 size="md"
                 title={<BaseText size="lg" weight="semibold">{Tab.displayName?.replace("SettingsTab", "") || "Settings"}</BaseText>}
             >
-                <div className="vc-settings-modal">
+                <div className="vc-settings-modal-root vc-settings-modal">
                     <Tab />
                 </div>
             </Modal>
