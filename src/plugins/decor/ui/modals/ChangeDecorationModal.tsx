@@ -139,6 +139,7 @@ function ChangeDecorationModal(props: ModalProps) {
 
     return <Modal
         {...props}
+        {...({ className: DecorationModalClasses.modal } as any)}
         title={<Text color="text-strong" variant="heading-lg/semibold" tag="h1">Change Decoration</Text>}
         actions={[
             {
@@ -156,7 +157,7 @@ function ChangeDecorationModal(props: ModalProps) {
             }
         ]}
     >
-        <div className={cl("change-decoration-modal-content", DecorationModalClasses.modal)}>
+        <div className={cl("change-decoration-modal-content")}>
             <ErrorBoundary>
                 <SectionedGridList
                     renderItem={item => {

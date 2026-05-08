@@ -16,6 +16,7 @@ import { openCreateDecorationModal } from "./CreateDecorationModal";
 function GuidelinesModal(props: ModalProps) {
     return <Modal
         {...props}
+        {...({ className: DecorationModalClasses.modal } as any)}
         size="sm"
         title={<Text color="text-strong" variant="heading-lg/semibold" tag="h1">Hold on</Text>}
         actions={[
@@ -35,7 +36,7 @@ function GuidelinesModal(props: ModalProps) {
             }
         ]}
     >
-        <div className={DecorationModalClasses.modal}>
+        <div>
             <Forms.FormText>
                 By submitting a decoration, you agree to <Link
                     href="https://github.com/decor-discord/.github/blob/main/GUIDELINES.md"

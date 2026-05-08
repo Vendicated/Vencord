@@ -813,7 +813,7 @@ export default definePlugin({
                         onCloseCallback={() => setImmediate(() => resolve(false))}
                         checkboxProps={{
                             label: "Do not show again",
-                            checked: false,
+                            checked: settings.store.disableEmbedPermissionCheck,
                             onChange: checked => settings.store.disableEmbedPermissionCheck = checked
                         }}
                     >

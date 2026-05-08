@@ -190,16 +190,14 @@ export default definePlugin({
                             cancelText="View Updates"
                             confirmText="Update & Restart Now"
                             onConfirm={forceUpdate}
-                            checkboxProps={{
-                                label: "I know what I'm doing or I can't update",
-                                checked: false,
-                                onChange: () => { }
-                            }}
                         >
                             <div>
                                 <Forms.FormText>You are using an outdated version of Vencord! Chances are, your issue is already fixed.</Forms.FormText>
                                 <Forms.FormText className={Margins.top8}>
                                     Please first update before asking for support!
+                                </Forms.FormText>
+                                <Forms.FormText className={Margins.top8}>
+                                    If you know what you're doing or cannot update, you can dismiss this prompt.
                                 </Forms.FormText>
                             </div>
                         </ConfirmModal>
@@ -241,7 +239,7 @@ export default definePlugin({
                         variant="primary"
                         onConfirm={() => { }}
                         checkboxProps={{
-                            checked: settings.store.dismissedDevBuildWarning ?? false,
+                            checked: Boolean(settings.store.dismissedDevBuildWarning),
                             onChange: checked => settings.store.dismissedDevBuildWarning = checked
                         }}
                     >

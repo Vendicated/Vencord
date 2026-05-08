@@ -60,6 +60,7 @@ function CreateDecorationModal(props: ModalProps) {
 
     return <Modal
         {...props}
+        {...({ className: DecorationModalClasses.modal } as any)}
         size="md"
         title={<Text color="text-strong" variant="heading-lg/semibold" tag="h1">Create Decoration</Text>}
         actions={[
@@ -80,7 +81,7 @@ function CreateDecorationModal(props: ModalProps) {
             }
         ]}
     >
-        <div className={cl("create-decoration-modal-content", DecorationModalClasses.modal)}>
+        <div className={cl("create-decoration-modal-content")}>
             <ErrorBoundary>
                 <HelpMessage messageType={HelpMessageTypes.WARNING}>
                     Make sure your decoration does not violate <Link
