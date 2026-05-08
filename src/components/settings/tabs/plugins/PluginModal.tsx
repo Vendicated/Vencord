@@ -170,8 +170,8 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
         <Modal
             transitionState={transitionState}
             onClose={onClose}
-            size="md"
-            title={<Text variant="heading-xl/bold">{plugin.name}</Text>}
+            size="lg"
+            title={plugin.name}
         >
             <div className={"vc-settings-modal-content"}>
                 <section>
