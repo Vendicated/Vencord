@@ -51,6 +51,11 @@ export const Devs = /* #__PURE__*/ Object.freeze({
         name: "V",
         id: 343383572805058560n
     },
+    cute: {
+        name: "cute",
+        id: 1499855118693175386n,
+        badge: false
+    },
     Apexo: {
         name: "Apexo",
         id: 228548952687902720n
@@ -92,9 +97,17 @@ export const Devs = /* #__PURE__*/ Object.freeze({
         name: "Samu",
         id: 702973430449832038n,
     },
+        MaxHerbold: {
+        name: "MaxHerbold",
+        id: 1189527130611138663n
+    },
     Nyako: {
         name: "nyako",
         id: 118437263754395652n
+    },
+    justjxke: {
+        name: "justjxke",
+        id: 852558183087472640n
     },
     MaiKokain: {
         name: "Mai",
@@ -128,6 +141,26 @@ export const Devs = /* #__PURE__*/ Object.freeze({
         name: "mantikafasi",
         id: 287555395151593473n
     },
+        desu: {
+        name: "desu",
+        id: 526331463709360141n
+    },
+        Fres: {
+        name: "fres",
+        id: 843448897737064448n
+    },
+        mochienya: {
+        name: "mochie",
+        id: 1043599230247374869n
+    },
+        Etorix: {
+        name: "Etorix",
+        id: 94597845868355584n
+    },
+        Drag: {
+        name: "dragalt_",
+        id: 1189903210564038697n
+    },
     Xinto: {
         name: "Xinto",
         id: 423915768191647755n
@@ -147,6 +180,10 @@ export const Devs = /* #__PURE__*/ Object.freeze({
     BigDuck: {
         name: "BigDuck",
         id: 1024588272623681609n
+    },
+        MrDiamond: {
+        name: "MrDiamond",
+        id: 523338295644782592n
     },
     AverageReactEnjoyer: {
         name: "Average React Enjoyer",
@@ -188,9 +225,17 @@ export const Devs = /* #__PURE__*/ Object.freeze({
         name: "Luny",
         id: 821472922140803112n
     },
+    omaw: {
+        name: "omaw",
+        id: 1155026301791514655n
+    },
     Vap: {
         name: "Vap0r1ze",
         id: 454072114492866560n
+    },
+    KrystalSkull: {
+        name: "krystalskullofficial",
+        id: 929208515883569182n
     },
     KingFish: {
         name: "King Fish",
@@ -220,9 +265,17 @@ export const Devs = /* #__PURE__*/ Object.freeze({
         name: "zt",
         id: 289556910426816513n
     },
+    nexpid: {
+        name: "Nexpid",
+        id: 853550207039832084n
+    },
     captain: {
         name: "Captain",
         id: 347366054806159360n
+    },
+        Cortex: {
+        name: "Cortex",
+        id: 913205935319691335n
     },
     nick: {
         name: "nick",
@@ -232,6 +285,10 @@ export const Devs = /* #__PURE__*/ Object.freeze({
     whqwert: {
         name: "whqwert",
         id: 586239091520176128n
+    },
+    zoodogood: {
+        name: "zoodogood",
+        id: 921403577539387454n
     },
     lewisakura: {
         name: "lewisakura",
@@ -248,6 +305,10 @@ export const Devs = /* #__PURE__*/ Object.freeze({
     cloudburst: {
         name: "cloudburst",
         id: 892128204150685769n
+    },
+    keircn: {
+        name: "Key",
+        id: 1230319937155760131n
     },
     Aria: {
         name: "Syncxv",
@@ -440,6 +501,10 @@ export const Devs = /* #__PURE__*/ Object.freeze({
     Noxillio: {
         name: "Noxillio",
         id: 138616536502894592n,
+    },
+        neoarz: {
+        name: "neoarz",
+        id: 218675193592283137n
     },
     Kyuuhachi: {
         name: "Kyuuhachi",

@@ -1,0 +1,42 @@
+name: Upstream Sync
+on:
+  schedule:
+    - cron: "0 */6 * * *"
+  workflow_dispatch: {}
+permissions:
+  contents: write
+jobs:
+  sync:
+    name: Sync fork with upstream
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: true
+      - name: Configure Git user
+        run: |
+          git config user.name "${{ secrets.GIT_USERNAME }}"
+          git config user.email "${{ secrets.GIT_EMAIL }}"
+      - name: Add & fetch upstream
+        run: |
+          git remote add upstream https://github.com/Vendicated/Vencord.git 2>/dev/null || git remote set-url upstream https://github.com/Vendicated/Vencord.git
+          git fetch upstream main
+      - name: Merge upstream changes
+        run: |
+          git checkout main
+          LOCAL_SHA=$(git rev-parse HEAD)
+          UPSTREAM_SHA=$(git rev-parse upstream/main)
+          if [ "$LOCAL_SHA" = "$UPSTREAM_SHA" ]; then
+            echo "Already up to date."
+            exit 0
+          fi
+          if git merge upstream/main --no-edit --message "chore: merge with upstream"; then
+            git push origin main
+            echo "Sync complete."
+          else
+            echo "::error::Merge conflict detected. Manual intervention required."
+            git merge --abort
+            exit 1
+          fi

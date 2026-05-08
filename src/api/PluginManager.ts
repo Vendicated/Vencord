@@ -25,6 +25,7 @@ import { addMessageAccessory, removeMessageAccessory } from "@api/MessageAccesso
 import { addMessageDecoration, removeMessageDecoration } from "@api/MessageDecorations";
 import { addMessageClickListener, addMessagePreEditListener, addMessagePreSendListener, removeMessageClickListener, removeMessagePreEditListener, removeMessagePreSendListener } from "@api/MessageEvents";
 import { addMessagePopoverButton, removeMessagePopoverButton } from "@api/MessagePopover";
+import { addNicknameIcon, removeNicknameIcon } from "@api/NicknameIcons";
 import { Settings, SettingsStore } from "@api/Settings";
 import { disableStyle, enableStyle } from "@api/Styles";
 import { traceFunction } from "@debug/Tracer";
@@ -38,6 +39,12 @@ import { patches } from "@webpack/patcher";
 
 import Plugins from "~plugins";
 export { Plugins as plugins };
+
+import { addAudioProcessor, removeAudioProcessor } from "./AudioPlayer";
+import { addChannelToolbarButton, addHeaderBarButton, removeChannelToolbarButton, removeHeaderBarButton } from "./HeaderBar";
+import { addProfileCollection, removeProfileCollection } from "./ProfileCollections";
+import { addUserAreaButton, removeUserAreaButton } from "./UserArea";
+
 const logger = new Logger("PluginManager", "#a6d189");
 
 export const PMLogger = logger;
@@ -77,6 +84,7 @@ export function hasAnyVisibleSettings({ settings }: Plugin) {
 export function addPatch(newPatch: Omit<Patch, "plugin">, pluginName: string, pluginPath = `Vencord.Plugins.plugins[${JSON.stringify(pluginName)}]`) {
     // TODO: this causes crashes
     if (pluginName === "Vesktop" && newPatch.find === ".STREAMING_AUTO_STREAMER_MODE,") return;
+    if (pluginName === "Equibop" && newPatch.find === ".STREAMING_AUTO_STREAMER_MODE,") return;
 
     const patch = newPatch as Patch;
     patch.plugin = pluginName;
@@ -165,6 +173,7 @@ export function subscribePluginFluxEvents(p: Plugin, fluxDispatcher: typeof Flux
         logger.debug("Subscribing to flux events of plugin", p.name);
         for (const [event, handler] of Object.entries(p.flux)) {
             const wrappedHandler = p.flux[event] = function () {
+                if (p.name === "Encryptcord" && event === "MESSAGE_CREATE") return;
                 try {
                     const res = handler!.apply(p, arguments as any);
                     return res instanceof Promise
@@ -202,9 +211,11 @@ export function subscribeAllPluginsFluxEvents(fluxDispatcher: typeof FluxDispatc
 
 export const startPlugin = traceFunction("startPlugin", function startPlugin(p: Plugin) {
     const {
-        name, commands, contextMenus, managedStyle, userProfileBadge,
+        name, commands, contextMenus, managedStyle, userProfileBadges,
         onBeforeMessageEdit, onBeforeMessageSend, onMessageClick,
-        chatBarButton, renderMemberListDecorator, renderMessageAccessory, renderMessageDecoration, messagePopoverButton
+        chatBarButton, renderMemberListDecorator, renderMessageAccessory, renderMessageDecoration, messagePopoverButton,
+        // Custom
+        renderNicknameIcon, headerBarButton, audioProcessor, userAreaButton, renderProfileCollection
     } = p;
 
     if (p.start) {
@@ -248,7 +259,7 @@ export const startPlugin = traceFunction("startPlugin", function startPlugin(p: 
 
     if (managedStyle) enableStyle(managedStyle);
 
-    if (userProfileBadge) addProfileBadge(userProfileBadge);
+    if (userProfileBadges) userProfileBadges.forEach(e => addProfileBadge(e));
 
     if (onBeforeMessageEdit) addMessagePreEditListener(onBeforeMessageEdit);
     if (onBeforeMessageSend) addMessagePreSendListener(onBeforeMessageSend);
@@ -260,14 +271,29 @@ export const startPlugin = traceFunction("startPlugin", function startPlugin(p: 
     if (renderMessageAccessory) addMessageAccessory(name, renderMessageAccessory);
     if (messagePopoverButton) addMessagePopoverButton(name, messagePopoverButton.render, messagePopoverButton.icon);
 
+    // Custom
+    if (renderNicknameIcon) addNicknameIcon(name, renderNicknameIcon);
+    if (headerBarButton) {
+        if (headerBarButton.location === "channeltoolbar") {
+            addChannelToolbarButton(name, headerBarButton.render, headerBarButton.priority);
+        } else {
+            addHeaderBarButton(name, headerBarButton.render, headerBarButton.priority);
+        }
+    }
+    if (audioProcessor) addAudioProcessor(name, audioProcessor);
+    if (userAreaButton) addUserAreaButton(name, userAreaButton.render, userAreaButton.priority);
+    if (renderProfileCollection) addProfileCollection(name, renderProfileCollection);
+
     return true;
 }, p => `startPlugin ${p.name}`);
 
 export const stopPlugin = traceFunction("stopPlugin", function stopPlugin(p: Plugin) {
     const {
-        name, commands, contextMenus, managedStyle, userProfileBadge,
+        name, commands, contextMenus, managedStyle, userProfileBadges,
         onBeforeMessageEdit, onBeforeMessageSend, onMessageClick,
-        chatBarButton, renderMemberListDecorator, renderMessageAccessory, renderMessageDecoration, messagePopoverButton
+        chatBarButton, renderMemberListDecorator, renderMessageAccessory, renderMessageDecoration, messagePopoverButton,
+        // Custom
+        renderNicknameIcon, headerBarButton, audioProcessor, userAreaButton, renderProfileCollection
     } = p;
 
     if (p.stop) {
@@ -309,7 +335,7 @@ export const stopPlugin = traceFunction("stopPlugin", function stopPlugin(p: Plu
 
     if (managedStyle) disableStyle(managedStyle);
 
-    if (userProfileBadge) removeProfileBadge(userProfileBadge);
+    if (userProfileBadges) userProfileBadges.forEach(e => removeProfileBadge(e));
 
     if (onBeforeMessageEdit) removeMessagePreEditListener(onBeforeMessageEdit);
     if (onBeforeMessageSend) removeMessagePreSendListener(onBeforeMessageSend);
@@ -321,6 +347,19 @@ export const stopPlugin = traceFunction("stopPlugin", function stopPlugin(p: Plu
     if (renderMessageAccessory) removeMessageAccessory(name);
     if (messagePopoverButton) removeMessagePopoverButton(name);
 
+    // Custom
+    if (renderNicknameIcon) removeNicknameIcon(name);
+    if (headerBarButton) {
+        if (headerBarButton.location === "channeltoolbar") {
+            removeChannelToolbarButton(name);
+        } else {
+            removeHeaderBarButton(name);
+        }
+    }
+    if (audioProcessor) removeAudioProcessor(name);
+    if (userAreaButton) removeUserAreaButton(name);
+    if (renderProfileCollection) removeProfileCollection(name);
+
     return true;
 }, p => `stopPlugin ${p.name}`);
 
@@ -330,7 +369,9 @@ export const initPluginManager = onlyOnce(function init() {
 
     const pluginKeysToBind: Array<keyof PluginDef & `${"on" | "render"}${string}`> = [
         "onBeforeMessageEdit", "onBeforeMessageSend", "onMessageClick",
-        "renderMemberListDecorator", "renderMessageAccessory", "renderMessageDecoration"
+        "renderMemberListDecorator", "renderMessageAccessory", "renderMessageDecoration",
+        // Custom
+        "renderNicknameIcon", "renderProfileCollection"
     ];
 
     const neededApiPlugins = new Set<string>();
@@ -366,6 +407,13 @@ export const initPluginManager = onlyOnce(function init() {
         if (p.renderMessageDecoration) neededApiPlugins.add("MessageDecorationsAPI");
         if (p.messagePopoverButton) neededApiPlugins.add("MessagePopoverAPI");
         if (p.userProfileBadge) neededApiPlugins.add("BadgeAPI");
+
+        // Custom
+        if (p.renderNicknameIcon) neededApiPlugins.add("NicknameIconsAPI");
+        if (p.headerBarButton) neededApiPlugins.add("HeaderBarAPI");
+        if (p.audioProcessor) neededApiPlugins.add("AudioPlayerAPI");
+        if (p.userAreaButton) neededApiPlugins.add("UserAreaAPI");
+        if (p.renderProfileCollection) neededApiPlugins.add("ProfileCollectionsAPI");
 
         for (const key of pluginKeysToBind) {
             p[key] &&= p[key].bind(p) as any;

@@ -78,7 +78,7 @@ const enum SearchStatus {
     DISABLED,
     NEW,
     USER_PLUGINS,
-    API_PLUGINS
+    API_PLUGINS,
 }
 
 function ExcludedPluginsList({ search }: { search: string; }) {
@@ -193,7 +193,7 @@ function PluginSettings() {
 
         return (
             plugin.name.toLowerCase().includes(search) ||
-            plugin.name.match(/[A-Z]/g)?.join("").toLowerCase().includes(search) || // acronyms like BF for BetterFolders
+            plugin.name.match(/[A-Z]/g)?.join("").toLowerCase().includes(search) ||
             plugin.description.toLowerCase().includes(search) ||
             plugin.searchTerms?.some(t => t.toLowerCase().includes(search))
         );
@@ -289,7 +289,7 @@ function PluginSettings() {
                             { label: "Show Disabled", value: SearchStatus.DISABLED },
                             { label: "Show New", value: SearchStatus.NEW },
                             hasUserPlugins && { label: "Show UserPlugins", value: SearchStatus.USER_PLUGINS },
-                            { label: "Show API Plugins", value: SearchStatus.API_PLUGINS },
+                            { label: "Show API Plugins", value: SearchStatus.API_PLUGINS }, 
                         ].filter(isTruthy)}
                         serialize={String}
                         select={status => setSearchValue(prev => ({ ...prev, status }))}

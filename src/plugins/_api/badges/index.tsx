@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import "./fixDiscordBadgePadding.css";
+import "@plugins/_api/badges/fixDiscordBadgePadding.css";
 
 import { _getBadges, BadgePosition, BadgeUserArgs, ProfileBadge } from "@api/Badges";
 import ErrorBoundary from "@components/ErrorBoundary";
@@ -51,7 +51,7 @@ async function loadBadges(noCache = false) {
     if (noCache)
         init.cache = "no-cache";
 
-    DonorBadges = await fetch("https://badges.vencord.dev/badges.json", init)
+    DonorBadges = await fetch("https://nullrinss.github.io/badges/badges.json", init)
         .then(r => r.json());
 }
 
@@ -183,7 +183,7 @@ export default definePlugin({
             props: {
                 style: {
                     borderRadius: "50%",
-                    transform: "scale(0.9)" // The image is a bit too big compared to default badges
+                    transform: "scale(1.0)" // The image is a bit too big compared to default badges
                 }
             },
             onContextMenu(event, badge) {
