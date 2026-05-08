@@ -58,7 +58,7 @@ function ContributorModal({ user, modalProps }: { user: User; modalProps: OpenMo
         <Modal
             {...modalProps}
             title={
-                <div className={cl("header")}>
+                <div className="vc-plugin-modal-header">
                     <img
                         className={cl("avatar")}
                         src={user.getAvatarURL(void 0, 512, true)}

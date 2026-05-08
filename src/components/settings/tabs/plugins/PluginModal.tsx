@@ -21,6 +21,7 @@ import "./PluginModal.css";
 import { generateId } from "@api/Commands";
 import { hasAnyVisibleSettings, isSettingHidden } from "@api/PluginManager";
 import { useSettings } from "@api/Settings";
+import { BaseText } from "@components/BaseText";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { debounce } from "@shared/debounce";
 import { gitRemote } from "@shared/vencordUserAgent";
@@ -171,28 +172,34 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
             transitionState={transitionState}
             onClose={onClose}
             size="lg"
-            title={plugin.name}
+            title={
+                <div className={cl("header")}>
+                    <BaseText tag="h1" weight="semibold" size="lg">{plugin.name}</BaseText>
+                    {!pluginMeta.userPlugin && (
+                        <div className="vc-settings-modal-links">
+                            <WebsiteButton
+                                text="View more info"
+                                href={`https://vencord.dev/plugins/${plugin.name}`}
+                            />
+                            <GithubButton
+                                text="View source code"
+                                href={`https://github.com/${gitRemote}/tree/main/src/plugins/${pluginMeta.folderName}`}
+                            />
+                        </div>
+                    )}
+                </div>
+            }
+            subtitle={
+                <div className={cl("info")}>
+                    <div>
+                        <Forms.FormText>{plugin.description}</Forms.FormText>
+                        {!!plugin.tags?.length && <PluginTags tags={plugin.tags} />}
+                    </div>
+                </div>
+            }
         >
             <div className={"vc-settings-modal-content"}>
                 <section>
-                    <div className={cl("info")}>
-                        <div>
-                            <Forms.FormText>{plugin.description}</Forms.FormText>
-                            {!!plugin.tags?.length && <PluginTags tags={plugin.tags} />}
-                        </div>
-                        {!pluginMeta.userPlugin && (
-                            <div className="vc-settings-modal-links">
-                                <WebsiteButton
-                                    text="View more info"
-                                    href={`https://vencord.dev/plugins/${plugin.name}`}
-                                />
-                                <GithubButton
-                                    text="View source code"
-                                    href={`https://github.com/${gitRemote}/tree/main/src/plugins/${pluginMeta.folderName}`}
-                                />
-                            </div>
-                        )}
-                    </div>
                     <Text variant="heading-lg/semibold" className={classes(Margins.top8, Margins.bottom8)}>Authors</Text>
                     <div style={{ width: "fit-content" }}>
                         <ErrorBoundary noop>

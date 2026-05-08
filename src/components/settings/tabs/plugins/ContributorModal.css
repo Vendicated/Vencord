@@ -1,13 +1,3 @@
-.vc-author-modal-root {
-    padding: 1em;
-}
-
-.vc-author-modal-header {
-    display: flex;
-    align-items: center;
-    margin-bottom: 1em;
-}
-
 .vc-author-modal-name {
     text-transform: none;
     flex-grow: 0;
