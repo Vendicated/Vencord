@@ -60,7 +60,7 @@ function CreateDecorationModal(props: ModalProps) {
 
     return <Modal
         {...props}
-        size="md"
+        size="lg"
         title="Create Decoration"
         actions={[
             {

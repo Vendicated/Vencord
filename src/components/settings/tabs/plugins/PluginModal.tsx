@@ -133,6 +133,7 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
                         onChange={debounce(onChange)}
                         pluginSettings={pluginSettings}
                         definedSettings={settings}
+                        closePluginSettings={onClose}
                     />
                 </ErrorBoundary>
             );

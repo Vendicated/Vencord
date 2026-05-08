@@ -5,7 +5,6 @@
  */
 
 import { Button as NewButton } from "@components/Button";
-import ErrorBoundary from "@components/ErrorBoundary";
 import { Flex } from "@components/Flex";
 import { Decoration, getPresets, Preset } from "@plugins/decor/lib/api";
 import { GUILD_ID, INVITE_KEY } from "@plugins/decor/lib/constants";
@@ -140,6 +139,7 @@ function ChangeDecorationModal(props: ModalProps) {
     return <Modal
         {...props}
         title="Change Decoration"
+        size="lg"
         actions={[
             {
                 text: "Cancel",
@@ -155,114 +155,116 @@ function ChangeDecorationModal(props: ModalProps) {
                 disabled: !isTryingDecoration
             }
         ]}
+        preview={
+            <div className={cl("modal-footer-btn-container", Margins.top8)}>
+                <Tooltip text="Join Decor's Discord Server for notifications on your decoration's review, and when new presets are released">
+                    {tooltipProps => <NewButton
+                        {...tooltipProps}
+                        onClick={async () => {
+                            if (!GuildStore.getGuild(GUILD_ID)) {
+                                const inviteAccepted = await openInviteModal(INVITE_KEY);
+                                if (inviteAccepted) {
+                                    closeAllModals();
+                                    FluxDispatcher.dispatch({ type: "LAYER_POP_ALL" });
+                                }
+                            } else {
+                                props.onClose();
+                                FluxDispatcher.dispatch({ type: "LAYER_POP_ALL" });
+                                NavigationRouter.transitionToGuild(GUILD_ID);
+                            }
+                        }}
+                        variant="link"
+                    >
+                        Discord Server
+                    </NewButton>}
+                </Tooltip>
+                <NewButton
+                    onClick={() => openModal(modalProps => (
+                        <ConfirmModal
+                            {...modalProps}
+                            title="Log Out"
+                            subtitle="Are you sure you want to log out of Decor?"
+                            confirmText="Log Out"
+                            cancelText="Cancel"
+                            onConfirm={() => {
+                                useAuthorizationStore.getState().remove(UserStore.getCurrentUser().id);
+                                props.onClose();
+                            }}
+                        />
+                    ))}
+                    variant="dangerSecondary"
+                >
+                    Log Out
+                </NewButton>
+            </div>
+        }
     >
         <div className={cl("change-decoration-modal-content", DecorationModalClasses.modal)}>
-            <ErrorBoundary>
-                <SectionedGridList
-                    renderItem={item => {
-                        if (typeof item === "string") {
-                            switch (item) {
-                                case "none":
-                                    return <DecorationGridNone
+            <SectionedGridList
+                renderItem={item => {
+                    if (typeof item === "string") {
+                        switch (item) {
+                            case "none":
+                                return <DecorationGridNone
+                                    className={cl("change-decoration-modal-decoration")}
+                                    isSelected={activeSelectedDecoration === null}
+                                    onSelect={() => setTryingDecoration(null)}
+                                />;
+                            case "create":
+                                return <Tooltip text="You already have a decoration pending review" shouldShow={hasDecorationPendingReview}>
+                                    {tooltipProps => <DecorationGridCreate
                                         className={cl("change-decoration-modal-decoration")}
-                                        isSelected={activeSelectedDecoration === null}
-                                        onSelect={() => setTryingDecoration(null)}
-                                    />;
-                                case "create":
-                                    return <Tooltip text="You already have a decoration pending review" shouldShow={hasDecorationPendingReview}>
-                                        {tooltipProps => <DecorationGridCreate
-                                            className={cl("change-decoration-modal-decoration")}
-                                            {...tooltipProps}
-                                            onSelect={!hasDecorationPendingReview ? (settings.store.agreedToGuidelines ? openCreateDecorationModal : openGuidelinesModal) : () => { }}
-                                        />}
-                                    </Tooltip>;
-                            }
-                        } else {
-                            return <Tooltip text={"Pending review"} shouldShow={item.reviewed === false}>
-                                {tooltipProps => (
-                                    <DecorDecorationGridDecoration
                                         {...tooltipProps}
-                                        className={cl("change-decoration-modal-decoration")}
-                                        onSelect={item.reviewed !== false ? () => setTryingDecoration(item) : () => { }}
-                                        isSelected={activeSelectedDecoration?.hash === item.hash}
-                                        decoration={item}
-                                    />
-                                )}
-                            </Tooltip>;
+                                        onSelect={!hasDecorationPendingReview ? (settings.store.agreedToGuidelines ? openCreateDecorationModal : openGuidelinesModal) : () => { }}
+                                    />}
+                                </Tooltip>;
                         }
-                    }}
-                    getItemKey={item => typeof item === "string" ? item : item.hash}
-                    getSectionKey={section => section.sectionKey}
-                    renderSectionHeader={section => <SectionHeader section={section} />}
-                    sections={data}
-                />
-                <div className={cl("change-decoration-modal-preview")}>
-                    <AvatarDecorationModalPreview
-                        avatarDecoration={avatarDecoration}
-                        user={UserStore.getCurrentUser()}
-                    />
-                    {isActiveDecorationPreset && <Forms.FormTitle className="">Part of the {activeDecorationPreset.name} Preset</Forms.FormTitle>}
-                    {typeof activeSelectedDecoration === "object" &&
-                        <Text
-                            variant="text-sm/semibold"
-                            color="text-strong"
-                        >
-                            {activeSelectedDecoration?.alt}
-                        </Text>
+                    } else {
+                        return <Tooltip text={"Pending review"} shouldShow={item.reviewed === false}>
+                            {tooltipProps => (
+                                <DecorDecorationGridDecoration
+                                    {...tooltipProps}
+                                    className={cl("change-decoration-modal-decoration")}
+                                    onSelect={item.reviewed !== false ? () => setTryingDecoration(item) : () => { }}
+                                    isSelected={activeSelectedDecoration?.hash === item.hash}
+                                    decoration={item}
+                                />
+                            )}
+                        </Tooltip>;
                     }
-                    {activeDecorationHasAuthor && (
-                        <Text key={`createdBy-${activeSelectedDecoration.authorId}`}>
-                            Created by {Parser.parse(`<@${activeSelectedDecoration.authorId}>`)}
-                        </Text>
-                    )}
-                    {isActiveDecorationPreset && (
-                        <Button onClick={() => copyWithToast(activeDecorationPreset.id)}>
-                            Copy Preset ID
-                        </Button>
-                    )}
-                </div>
-                <div className={cl("modal-footer-btn-container", Margins.top8)}>
-                    <Tooltip text="Join Decor's Discord Server for notifications on your decoration's review, and when new presets are released">
-                        {tooltipProps => <NewButton
-                            {...tooltipProps}
-                            onClick={async () => {
-                                if (!GuildStore.getGuild(GUILD_ID)) {
-                                    const inviteAccepted = await openInviteModal(INVITE_KEY);
-                                    if (inviteAccepted) {
-                                        closeAllModals();
-                                        FluxDispatcher.dispatch({ type: "LAYER_POP_ALL" });
-                                    }
-                                } else {
-                                    props.onClose();
-                                    FluxDispatcher.dispatch({ type: "LAYER_POP_ALL" });
-                                    NavigationRouter.transitionToGuild(GUILD_ID);
-                                }
-                            }}
-                            variant="link"
-                        >
-                            Discord Server
-                        </NewButton>}
-                    </Tooltip>
-                    <NewButton
-                        onClick={() => openModal(modalProps => (
-                            <ConfirmModal
-                                {...modalProps}
-                                title="Log Out"
-                                subtitle="Are you sure you want to log out of Decor?"
-                                confirmText="Log Out"
-                                cancelText="Cancel"
-                                onConfirm={() => {
-                                    useAuthorizationStore.getState().remove(UserStore.getCurrentUser().id);
-                                    props.onClose();
-                                }}
-                            />
-                        ))}
-                        variant="dangerSecondary"
+                }}
+                getItemKey={item => typeof item === "string" ? item : item.hash}
+                getSectionKey={section => section.sectionKey}
+                renderSectionHeader={section => <SectionHeader section={section} />}
+                sections={data}
+            />
+
+            <div className={cl("change-decoration-modal-preview")}>
+                <AvatarDecorationModalPreview
+                    avatarDecoration={avatarDecoration}
+                    user={UserStore.getCurrentUser()}
+                />
+                {isActiveDecorationPreset && <Forms.FormTitle className="">Part of the {activeDecorationPreset.name} Preset</Forms.FormTitle>}
+                {typeof activeSelectedDecoration === "object" &&
+                    <Text
+                        variant="text-sm/semibold"
+                        color="text-strong"
                     >
-                        Log Out
-                    </NewButton>
-                </div>
-            </ErrorBoundary>
+                        {activeSelectedDecoration?.alt}
+                    </Text>
+                }
+                {activeDecorationHasAuthor && (
+                    <Text key={`createdBy-${activeSelectedDecoration.authorId}`}>
+                        Created by {Parser.parse(`<@${activeSelectedDecoration.authorId}>`)}
+                    </Text>
+                )}
+                {isActiveDecorationPreset && (
+                    <Button onClick={() => copyWithToast(activeDecorationPreset.id)}>
+                        Copy Preset ID
+                    </Button>
+                )}
+            </div>
+
         </div>
     </Modal>;
 }
