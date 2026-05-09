@@ -29,8 +29,7 @@ import { useAwaiter } from "@utils/react";
 import definePlugin from "@utils/types";
 import { Guild, User } from "@vencord/discord-types";
 import { findCssClassesLazy } from "@webpack";
-import { Clickable, IconUtils, Menu, openModal, Parser } from "@webpack/common";
-import { ConfirmModal } from "@webpack/common/modalV2";
+import { Clickable, ConfirmModal,IconUtils, Menu, openModal, Parser } from "@webpack/common";
 
 import { Auth, initAuth, updateAuth } from "./auth";
 import { openReviewsModal } from "./components/ReviewModal";

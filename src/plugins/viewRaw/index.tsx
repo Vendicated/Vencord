@@ -27,8 +27,7 @@ import { isTruthy } from "@utils/guards";
 import { Margins } from "@utils/margins";
 import definePlugin, { IconComponent, OptionType } from "@utils/types";
 import { Message } from "@vencord/discord-types";
-import { ChannelStore, Forms, GuildRoleStore, Menu,openModal } from "@webpack/common";
-import { Modal } from "@webpack/common/modalV2";
+import { ChannelStore, Forms, GuildRoleStore, Menu, Modal,openModal } from "@webpack/common";
 
 
 const CopyIcon: IconComponent = ({ height = 20, width = 20, className }) => {

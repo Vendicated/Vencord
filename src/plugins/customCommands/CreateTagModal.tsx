@@ -11,8 +11,7 @@ import { HeadingSecondary } from "@components/Heading";
 import { InfoIcon } from "@components/Icons";
 import { Paragraph } from "@components/Paragraph";
 import { RenderModalProps } from "@vencord/discord-types";
-import { openModal, TextArea, TextInput, useState } from "@webpack/common";
-import { Modal } from "@webpack/common/modalV2";
+import { Modal,openModal, TextArea, TextInput, useState } from "@webpack/common";
 
 import { parseTagArguments } from ".";
 import { addTag, getTag, Tag } from "./settings";

@@ -34,8 +34,7 @@ import { SettingsTab, wrapTab } from "@components/settings/tabs/BaseTab";
 import { Margins } from "@utils/margins";
 import { classes } from "@utils/misc";
 import { IconComponent } from "@utils/types";
-import { openModal, Select, Tooltip, useState } from "@webpack/common";
-import { ConfirmModal } from "@webpack/common/modalV2";
+import { ConfirmModal,openModal, Select, Tooltip, useState } from "@webpack/common";
 
 function validateUrl(url: string) {
     try {

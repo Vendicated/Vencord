@@ -6,8 +6,7 @@
 
 import { ErrorCard } from "@components/ErrorCard";
 import { UpdateLogger } from "@utils/updater";
-import { openModal, Parser } from "@webpack/common";
-import { ConfirmModal } from "@webpack/common/modalV2";
+import { ConfirmModal,openModal, Parser } from "@webpack/common";
 
 function getErrorMessage(e: any) {
     if (!e?.code || !e.cmd)

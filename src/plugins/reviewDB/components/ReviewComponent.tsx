@@ -24,8 +24,7 @@ import { canBlockReviewAuthor, canDeleteReview, canReportReview, cl, showToast }
 import { openUserProfile } from "@utils/discord";
 import { classes } from "@utils/misc";
 import { findCssClassesLazy } from "@webpack";
-import { IconUtils, openModal as openVencordModal, Parser, Timestamp, useState } from "@webpack/common";
-import { ConfirmModal } from "@webpack/common/modalV2";
+import { ConfirmModal,IconUtils, openModal as openVencordModal, Parser, Timestamp, useState } from "@webpack/common";
 
 import { openBlockModal } from "./BlockedUserModal";
 import { BlockButton, DeleteButton, ReportButton } from "./MessageButton";

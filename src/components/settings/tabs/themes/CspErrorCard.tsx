@@ -12,8 +12,7 @@ import { Margins } from "@utils/margins";
 import { classes } from "@utils/misc";
 import { relaunch } from "@utils/native";
 import { useForceUpdater } from "@utils/react";
-import { Button, Forms, openModal } from "@webpack/common";
-import { ConfirmModal } from "@webpack/common/modalV2";
+import { Button, ConfirmModal,Forms, openModal } from "@webpack/common";
 
 export function CspErrorCard() {
     if (IS_WEB) return null;

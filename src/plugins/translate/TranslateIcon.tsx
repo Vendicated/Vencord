@@ -21,8 +21,7 @@ import { TooltipContainer } from "@components/TooltipContainer";
 import { classes } from "@utils/misc";
 import { IconComponent } from "@utils/types";
 import { RenderModalProps } from "@vencord/discord-types";
-import { openModal, useEffect, useState } from "@webpack/common";
-import { ConfirmModal } from "@webpack/common/modalV2";
+import { ConfirmModal,openModal, useEffect, useState } from "@webpack/common";
 
 import { settings } from "./settings";
 import { openTranslateModal } from "./TranslateModal";

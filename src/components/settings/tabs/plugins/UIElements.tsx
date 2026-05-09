@@ -19,8 +19,7 @@ import { Margins } from "@utils/margins";
 import { classes } from "@utils/misc";
 import { IconComponent } from "@utils/types";
 import { RenderModalProps } from "@vencord/discord-types";
-import { Clickable, openModal } from "@webpack/common";
-import { Modal } from "@webpack/common/modalV2";
+import { Clickable, Modal,openModal } from "@webpack/common";
 
 
 const cl = classNameFactory("vc-plugin-ui-elements-");

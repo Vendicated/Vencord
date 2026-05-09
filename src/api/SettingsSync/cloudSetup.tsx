@@ -9,8 +9,7 @@ import { showNotification } from "@api/Notifications";
 import { Settings } from "@api/Settings";
 import { Logger } from "@utils/Logger";
 import { relaunch } from "@utils/native";
-import { OAuth2AuthorizeModal, openModal, UserStore } from "@webpack/common";
-import { ConfirmModal } from "@webpack/common/modalV2";
+import { ConfirmModal,OAuth2AuthorizeModal, openModal, UserStore } from "@webpack/common";
 
 export const logger = new Logger("SettingsSync:CloudSetup", "#39b7e0");
 

@@ -8,8 +8,7 @@ import { Link } from "@components/Link";
 import { settings } from "@plugins/decor/settings";
 import { DecorationModalClasses, requireAvatarDecorationModal } from "@plugins/decor/ui";
 import { RenderModalProps } from "@vencord/discord-types";
-import { Forms,openModal } from "@webpack/common";
-import { ConfirmModal } from "@webpack/common/modalV2";
+import { ConfirmModal, Forms, openModal } from "@webpack/common";
 
 import { openCreateDecorationModal } from "./CreateDecorationModal";
 

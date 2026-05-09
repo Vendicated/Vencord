@@ -20,8 +20,7 @@ import { TextButton } from "@components/Button";
 import { SessionInfo } from "@plugins/betterSessions/types";
 import { getDefaultName, savedSessionsCache, saveSessionsToDataStore } from "@plugins/betterSessions/utils";
 import { RenderModalProps } from "@vencord/discord-types";
-import { Forms, React, TextInput } from "@webpack/common";
-import { Modal } from "@webpack/common/modalV2";
+import { Forms, Modal,React, TextInput } from "@webpack/common";
 import { KeyboardEvent } from "react";
 
 export function RenameModal({ props, session, state }: { props: RenderModalProps, session: SessionInfo["session"], state: [string, React.Dispatch<React.SetStateAction<string>>]; }) {

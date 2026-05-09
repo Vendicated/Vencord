@@ -9,8 +9,7 @@ import { categoryLen, createCategory, getCategory } from "@plugins/pinDms/data";
 import { classNameFactory } from "@utils/css";
 import { RenderModalProps } from "@vencord/discord-types";
 import { extractAndLoadChunksLazy, findComponentByCodeLazy } from "@webpack";
-import { ColorPicker, Forms, openModalLazy, TextInput, Toasts, useMemo, useState } from "@webpack/common";
-import { Modal } from "@webpack/common/modalV2";
+import { ColorPicker, Forms, Modal,openModalLazy, TextInput, Toasts, useMemo, useState } from "@webpack/common";
 
 interface ColorPickerWithSwatchesProps {
     className?: string;

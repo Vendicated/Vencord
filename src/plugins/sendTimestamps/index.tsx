@@ -26,8 +26,7 @@ import { getTheme, insertTextIntoChatInputBox, Theme } from "@utils/discord";
 import { Margins } from "@utils/margins";
 import definePlugin, { IconComponent, OptionType } from "@utils/types";
 import { RenderModalProps } from "@vencord/discord-types";
-import { Forms, openModal, Parser, Select, useMemo, useState } from "@webpack/common";
-import { Modal } from "@webpack/common/modalV2";
+import { Forms, Modal,openModal, Parser, Select, useMemo, useState } from "@webpack/common";
 
 const settings = definePluginSettings({
     replaceMessageContents: {

@@ -20,8 +20,7 @@ import { Divider } from "@components/Divider";
 import { FormSwitch } from "@components/FormSwitch";
 import { Margins } from "@utils/margins";
 import { RenderModalProps } from "@vencord/discord-types";
-import { Forms, openModal, SearchableSelect, useMemo } from "@webpack/common";
-import { Modal } from "@webpack/common/modalV2";
+import { Forms, Modal,openModal, SearchableSelect, useMemo } from "@webpack/common";
 
 import { settings } from "./settings";
 import { getLanguages } from "./utils";
