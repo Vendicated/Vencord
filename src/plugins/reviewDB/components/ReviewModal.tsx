@@ -86,7 +86,6 @@ function ReviewsModal({ modalProps, modalKey, discordId, name, type }: { modalPr
                 </div>
             }
             scrollerRef={ref}
-            onScroll={(...args) => console.log("SCROLL", args)}
         >
             <div className={cl("modal-reviews")}>
                 <ReviewsView
