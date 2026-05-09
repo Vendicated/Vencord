@@ -24,9 +24,9 @@ import { Devs } from "@utils/constants";
 import { classNameFactory } from "@utils/css";
 import { getTheme, insertTextIntoChatInputBox, Theme } from "@utils/discord";
 import { Margins } from "@utils/margins";
-import { ModalProps, openModal } from "@utils/modal";
 import definePlugin, { IconComponent, OptionType } from "@utils/types";
-import { Forms, Parser, Select, useMemo, useState } from "@webpack/common";
+import { RenderModalProps } from "@vencord/discord-types";
+import { Forms, openModal, Parser, Select, useMemo, useState } from "@webpack/common";
 import { Modal } from "@webpack/common/modalV2";
 
 const settings = definePluginSettings({
@@ -54,7 +54,7 @@ type Format = typeof Formats[number];
 
 const cl = classNameFactory("vc-st-");
 
-function PickerModal(props: ModalProps) {
+function PickerModal(props: RenderModalProps) {
     const [value, setValue] = useState<string>();
     const [format, setFormat] = useState<Format>("");
     const time = Math.round((new Date(value!).getTime() || Date.now()) / 1000);

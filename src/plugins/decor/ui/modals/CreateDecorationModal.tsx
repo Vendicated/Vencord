@@ -12,9 +12,9 @@ import { cl, DecorationModalClasses, requireAvatarDecorationModal, requireCreate
 import { AvatarDecorationModalPreview } from "@plugins/decor/ui/components";
 import { openInviteModal } from "@utils/discord";
 import { Margins } from "@utils/margins";
-import { closeAllModals, ModalProps, openModal } from "@utils/modal";
+import { RenderModalProps } from "@vencord/discord-types";
 import { filters, findComponentByCodeLazy, mapMangledModuleLazy } from "@webpack";
-import { FluxDispatcher, Forms, GuildStore, NavigationRouter, Text, TextInput, useEffect, useMemo, UserStore, useState } from "@webpack/common";
+import { closeAllModals, FluxDispatcher, Forms, GuildStore, NavigationRouter, openModal, Text, TextInput, useEffect, useMemo, UserStore, useState } from "@webpack/common";
 import { Modal } from "@webpack/common/modalV2";
 
 const FileUpload = findComponentByCodeLazy(".currentTarget.files", "lineClamp:1");
@@ -42,7 +42,7 @@ function useObjectURL(object: Blob | MediaSource | null) {
     return url;
 }
 
-function CreateDecorationModal(props: ModalProps) {
+function CreateDecorationModal(props: RenderModalProps) {
     const [name, setName] = useState("");
     const [file, setFile] = useState<File | null>(null);
     const [submitting, setSubmitting] = useState(false);

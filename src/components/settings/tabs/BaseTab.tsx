@@ -18,8 +18,8 @@
 
 import ErrorBoundary from "@components/ErrorBoundary";
 import { handleComponentFailed } from "@components/handleComponentFailed";
-import { ModalProps, openModal } from "@utils/modal";
 import { onlyOnce } from "@utils/onlyOnce";
+import { openModal } from "@webpack/common";
 import { Modal } from "@webpack/common/modalV2";
 import type { ComponentType, PropsWithChildren } from "react";
 
@@ -42,16 +42,18 @@ export function wrapTab(component: ComponentType<any>, tab: string) {
 }
 
 export function openSettingsTabModal(Tab: ComponentType<any>) {
+    Tab = wrapTab(Tab, Tab.displayName || "SettingsTab");
+
     try {
-        openModal(wrapTab((modalProps: ModalProps) => (
+        openModal(props => (
             <Modal
-                {...modalProps}
+                {...props}
                 size="lg"
                 title={Tab.displayName?.replace("SettingsTab", "") || "Settings"}
             >
                 <Tab />
             </Modal>
-        ), Tab.displayName || "SettingsTab"));
+        ));
     } catch {
         handleSettingsTabError();
     }

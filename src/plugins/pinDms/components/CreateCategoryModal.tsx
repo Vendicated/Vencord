@@ -7,9 +7,9 @@
 import { DEFAULT_COLOR, SWATCHES } from "@plugins/pinDms/constants";
 import { categoryLen, createCategory, getCategory } from "@plugins/pinDms/data";
 import { classNameFactory } from "@utils/css";
-import { ModalProps, openModalLazy } from "@utils/modal";
+import { RenderModalProps } from "@vencord/discord-types";
 import { extractAndLoadChunksLazy, findComponentByCodeLazy } from "@webpack";
-import { ColorPicker, Forms, TextInput, Toasts, useMemo, useState } from "@webpack/common";
+import { ColorPicker, Forms, openModalLazy, TextInput, Toasts, useMemo, useState } from "@webpack/common";
 import { Modal } from "@webpack/common/modalV2";
 
 interface ColorPickerWithSwatchesProps {
@@ -32,7 +32,7 @@ const cl = classNameFactory("vc-pindms-modal-");
 interface Props {
     categoryId: string | null;
     initialChannelId: string | null;
-    modalProps: ModalProps;
+    modalProps: RenderModalProps;
 }
 
 function useCategory(categoryId: string | null, initalChannelId: string | null) {

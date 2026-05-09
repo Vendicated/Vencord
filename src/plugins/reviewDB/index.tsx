@@ -25,12 +25,11 @@ import { Paragraph } from "@components/Paragraph";
 import { Span } from "@components/Span";
 import { Devs } from "@utils/constants";
 import { classes } from "@utils/misc";
-import { openModal } from "@utils/modal";
 import { useAwaiter } from "@utils/react";
 import definePlugin from "@utils/types";
 import { Guild, User } from "@vencord/discord-types";
 import { findCssClassesLazy } from "@webpack";
-import { Clickable, IconUtils, Menu, Parser } from "@webpack/common";
+import { Clickable, IconUtils, Menu, openModal, Parser } from "@webpack/common";
 import { ConfirmModal } from "@webpack/common/modalV2";
 
 import { Auth, initAuth, updateAuth } from "./auth";

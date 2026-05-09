@@ -22,12 +22,11 @@ import { ApngBlendOp, ApngDisposeOp, parseAPNG } from "@utils/apng";
 import { Devs } from "@utils/constants";
 import { getCurrentGuild } from "@utils/discord";
 import { Logger } from "@utils/Logger";
-import { openModal } from "@utils/modal";
 import definePlugin, { OptionType } from "@utils/types";
-import type { Emoji, Message, OpenModalProps, Sticker } from "@vencord/discord-types";
+import type { Emoji, Message, RenderModalProps, Sticker } from "@vencord/discord-types";
 import { StickerFormatType } from "@vencord/discord-types/enums";
 import { findByCodeLazy, findByPropsLazy, proxyLazyWebpack } from "@webpack";
-import { ChannelStore, DraftType, EmojiStore, FluxDispatcher, Forms, GuildMemberStore, IconUtils, lodash, Parser, PermissionsBits, PermissionStore, StickersStore, UploadHandler, UserSettingsActionCreators, UserSettingsProtoStore, UserStore } from "@webpack/common";
+import { ChannelStore, DraftType, EmojiStore, FluxDispatcher, Forms, GuildMemberStore, IconUtils, lodash, openModal, Parser, PermissionsBits, PermissionStore, StickersStore, UploadHandler, UserSettingsActionCreators, UserSettingsProtoStore, UserStore } from "@webpack/common";
 import { ConfirmModal } from "@webpack/common/modalV2";
 import { applyPalette, GIFEncoder, quantize } from "gifenc";
 import type { ReactElement, ReactNode } from "react";
@@ -157,7 +156,7 @@ function getWordBoundary(origStr: string, offset: number) {
     return (!origStr[offset] || /\s/.test(origStr[offset])) ? "" : " ";
 }
 
-function CannotEmbedNoticeModal({ modalProps, resolve }: { modalProps: OpenModalProps; resolve: (value: boolean) => void; }) {
+function CannotEmbedNoticeModal({ modalProps, resolve }: { modalProps: RenderModalProps; resolve: (value: boolean) => void; }) {
     const s = settings.use(["disableEmbedPermissionCheck"]);
     return (
         <ConfirmModal

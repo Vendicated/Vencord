@@ -29,9 +29,8 @@ import { copyWithToast } from "@utils/discord";
 import { Logger } from "@utils/Logger";
 import { Margins } from "@utils/margins";
 import { shouldShowContributorBadge } from "@utils/misc";
-import { openModal } from "@utils/modal";
 import definePlugin from "@utils/types";
-import { ContextMenuApi, Forms, Menu, Toasts, UserStore } from "@webpack/common";
+import { ContextMenuApi, Forms, Menu, openModal, Toasts, UserStore } from "@webpack/common";
 import { Modal } from "@webpack/common/modalV2";
 
 const CONTRIBUTOR_BADGE = "https://cdn.discordapp.com/emojis/1092089799109775453.png?size=64";

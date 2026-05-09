@@ -9,9 +9,8 @@ import { ReviewDBUser } from "@plugins/reviewDB/entities";
 import { fetchBlocks, unblockUser } from "@plugins/reviewDB/reviewDbApi";
 import { cl } from "@plugins/reviewDB/utils";
 import { Logger } from "@utils/Logger";
-import { openModal } from "@utils/modal";
 import { useAwaiter } from "@utils/react";
-import { Forms, Tooltip, useState } from "@webpack/common";
+import { Forms, openModal, Tooltip, useState } from "@webpack/common";
 import { Modal } from "@webpack/common/modalV2";
 
 function UnblockButton(props: { onClick?(): void; }) {

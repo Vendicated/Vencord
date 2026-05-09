@@ -26,14 +26,13 @@ import { Paragraph } from "@components/Paragraph";
 import { Devs } from "@utils/constants";
 import { classNameFactory } from "@utils/css";
 import { Margins } from "@utils/margins";
-import { ModalProps, openModal } from "@utils/modal";
 import { useAwaiter } from "@utils/react";
 import definePlugin from "@utils/types";
 import { chooseFile } from "@utils/web";
-import { CloudUpload as TCloudUpload } from "@vencord/discord-types";
+import { CloudUpload as TCloudUpload, RenderModalProps } from "@vencord/discord-types";
 import { CloudUploadPlatform } from "@vencord/discord-types/enums";
 import { findLazy } from "@webpack";
-import { Button, Constants, FluxDispatcher, Forms, lodash, Menu, MessageActions, PendingReplyStore, PermissionsBits, PermissionStore, RestAPI, SelectedChannelStore, showToast, SnowflakeUtils, Toasts, useEffect, useState } from "@webpack/common";
+import { Button, Constants, FluxDispatcher, Forms, lodash, Menu, MessageActions, openModal, PendingReplyStore, PermissionsBits, PermissionStore, RestAPI, SelectedChannelStore, showToast, SnowflakeUtils, Toasts, useEffect, useState } from "@webpack/common";
 import { Modal } from "@webpack/common/modalV2";
 import { ComponentType } from "react";
 
@@ -158,7 +157,7 @@ function useObjectUrl() {
     return [url, setWithFree] as const;
 }
 
-function VoiceMessageModal({ modalProps }: { modalProps: ModalProps; }) {
+function VoiceMessageModal({ modalProps }: { modalProps: RenderModalProps; }) {
     const [isRecording, setRecording] = useState(false);
     const [blob, setBlob] = useState<Blob>();
     const [blobUrl, setBlobUrl] = useObjectUrl();

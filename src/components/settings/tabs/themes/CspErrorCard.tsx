@@ -10,10 +10,9 @@ import { Link } from "@components/Link";
 import { CspBlockedUrls, useCspErrors } from "@utils/cspViolations";
 import { Margins } from "@utils/margins";
 import { classes } from "@utils/misc";
-import { openModal } from "@utils/modal";
 import { relaunch } from "@utils/native";
 import { useForceUpdater } from "@utils/react";
-import { Button, Forms } from "@webpack/common";
+import { Button, Forms, openModal } from "@webpack/common";
 import { ConfirmModal } from "@webpack/common/modalV2";
 
 export function CspErrorCard() {

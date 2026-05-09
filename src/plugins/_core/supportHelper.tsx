@@ -29,14 +29,13 @@ import { sendMessage } from "@utils/discord";
 import { Logger } from "@utils/Logger";
 import { Margins } from "@utils/margins";
 import { isPluginDev, tryOrElse } from "@utils/misc";
-import { openModal } from "@utils/modal";
 import { relaunch } from "@utils/native";
 import { onlyOnce } from "@utils/onlyOnce";
 import { makeCodeblock } from "@utils/text";
 import definePlugin from "@utils/types";
 import { checkForUpdates, isOutdated, update } from "@utils/updater";
-import { Channel, OpenModalProps } from "@vencord/discord-types";
-import { Button, ChannelStore, Forms, GuildMemberStore, Parser, PermissionsBits, PermissionStore, RelationshipStore, showToast, Text, Toasts, UserStore } from "@webpack/common";
+import { Channel, RenderModalProps } from "@vencord/discord-types";
+import { Button, ChannelStore, Forms, GuildMemberStore, openModal, Parser, PermissionsBits, PermissionStore, RelationshipStore, showToast, Text, Toasts, UserStore } from "@webpack/common";
 import { ConfirmModal } from "@webpack/common/modalV2";
 import { JSX } from "react";
 
@@ -138,7 +137,7 @@ const settings = definePluginSettings({}).withPrivateSettings<{
     dismissedDevBuildWarning?: boolean;
 }>();
 
-function DevBuildConfirmModal(props: OpenModalProps) {
+function DevBuildConfirmModal(props: RenderModalProps) {
     const s = settings.use(["dismissedDevBuildWarning"]);
 
     return (

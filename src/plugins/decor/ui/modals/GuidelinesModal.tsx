@@ -7,13 +7,13 @@
 import { Link } from "@components/Link";
 import { settings } from "@plugins/decor/settings";
 import { DecorationModalClasses, requireAvatarDecorationModal } from "@plugins/decor/ui";
-import { ModalProps, openModal } from "@utils/modal";
-import { Forms } from "@webpack/common";
+import { RenderModalProps } from "@vencord/discord-types";
+import { Forms,openModal } from "@webpack/common";
 import { ConfirmModal } from "@webpack/common/modalV2";
 
 import { openCreateDecorationModal } from "./CreateDecorationModal";
 
-function GuidelinesModal(props: ModalProps) {
+function GuidelinesModal(props: RenderModalProps) {
     return (
         <ConfirmModal
             {...props}

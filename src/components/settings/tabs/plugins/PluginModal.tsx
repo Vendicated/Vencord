@@ -29,11 +29,10 @@ import { classNameFactory } from "@utils/css";
 import { proxyLazy } from "@utils/lazy";
 import { Margins } from "@utils/margins";
 import { classes } from "@utils/misc";
-import { ModalProps, openModal } from "@utils/modal";
 import { OptionType, Plugin, PluginTag } from "@utils/types";
-import { User } from "@vencord/discord-types";
+import { RenderModalProps, User } from "@vencord/discord-types";
 import { findCssClassesLazy } from "@webpack";
-import { Clickable, FluxDispatcher, Forms, React, Text, Tooltip, useEffect, useMemo, UserStore, UserSummaryItem, UserUtils, useState } from "@webpack/common";
+import { Clickable, FluxDispatcher, Forms, openModal, React, Text, Tooltip, useEffect, useMemo, UserStore, UserSummaryItem, UserUtils, useState } from "@webpack/common";
 import { Modal } from "@webpack/common/modalV2";
 import { Constructor } from "type-fest";
 
@@ -48,7 +47,7 @@ const cl = classNameFactory("vc-plugin-modal-");
 const AvatarStyles = findCssClassesLazy("moreUsers", "avatar", "clickableAvatar");
 const UserRecord: Constructor<Partial<User>> = proxyLazy(() => UserStore.getCurrentUser().constructor) as any;
 
-interface PluginModalProps extends ModalProps {
+interface PluginModalProps extends RenderModalProps {
     plugin: Plugin;
     onRestartNeeded(key: string): void;
 }

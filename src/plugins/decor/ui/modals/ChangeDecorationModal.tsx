@@ -20,10 +20,9 @@ import DecorDecorationGridDecoration from "@plugins/decor/ui/components/DecorDec
 import SectionedGridList from "@plugins/decor/ui/components/SectionedGridList";
 import { copyWithToast, openInviteModal } from "@utils/discord";
 import { Margins } from "@utils/margins";
-import { closeAllModals, ModalProps, openModal } from "@utils/modal";
 import { Queue } from "@utils/Queue";
-import { User } from "@vencord/discord-types";
-import { Button, FluxDispatcher, Forms, GuildStore, NavigationRouter, Parser, Text, Tooltip, useEffect, UserStore, UserSummaryItem, UserUtils, useState } from "@webpack/common";
+import { RenderModalProps, User } from "@vencord/discord-types";
+import { Button, closeAllModals, FluxDispatcher, Forms, GuildStore, NavigationRouter, openModal, Parser, Text, Tooltip, useEffect, UserStore, UserSummaryItem, UserUtils, useState } from "@webpack/common";
 import { ConfirmModal, Modal } from "@webpack/common/modalV2";
 
 import { openCreateDecorationModal } from "./CreateDecorationModal";
@@ -90,7 +89,7 @@ function SectionHeader({ section }: SectionHeaderProps) {
     </div>;
 }
 
-function ChangeDecorationModal(props: ModalProps) {
+function ChangeDecorationModal(props: RenderModalProps) {
     // undefined = not trying, null = none, Decoration = selected
     const [tryingDecoration, setTryingDecoration] = useState<Decoration | null | undefined>(undefined);
     const isTryingDecoration = typeof tryingDecoration !== "undefined";

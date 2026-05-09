@@ -15,7 +15,7 @@ export interface ModalAction {
 /**
  * Modal with all options: https://files.catbox.moe/c8qxt0.png
  */
-export interface ModalProps extends OpenModalProps {
+export interface ModalProps extends RenderModalProps {
     size?: ModalSize;
     role?: "alertdialog" | "dialog";
 
@@ -45,7 +45,7 @@ export interface ModalProps extends OpenModalProps {
     };
 }
 
-export interface OpenModalProps {
+export interface RenderModalProps {
     transitionState: number;
     onClose(): void;
 }
@@ -79,7 +79,58 @@ export interface ConfirmModalProps extends ModalProps {
     children?: ReactNode;
 }
 
-
 export type Modal = ComponentType<ModalProps>;
 export type ConfirmModal = ComponentType<ConfirmModalProps>;
-export type openModal = (render: (props: OpenModalProps) => ReactNode) => string;
+
+export type RenderModal = (props: RenderModalProps) => ReactNode;
+
+export interface ModalOptions {
+    modalKey?: string;
+    onCloseRequest?(): void;
+    onCloseCallback?(): void;
+}
+
+export interface ModalAPI {
+    /**
+     * Wait for the render promise to resolve, then open a modal with it.
+     * This is usually preferable to render().then(openModal), because it shows a Loading modal
+     */
+    openModalLazy: (renderModal: () => Promise<RenderModal>, options?: ModalOptions & { contextKey?: string; }) => Promise<string>;
+    /**
+     * Open a Modal with the given render function.
+     */
+    openModal: (renderModal: RenderModal, options?: ModalOptions, contextKey?: string) => string;
+    /**
+     * Close a modal by its key
+     */
+    closeModal: (modalKey: string, contextKey?: string) => void;
+    /**
+     * Close all open modals
+     */
+    closeAllModals: () => void;
+}
+
+export interface MediaModalItem {
+    url: string;
+    type: "IMAGE" | "VIDEO" | "CLIP";
+    original?: string;
+    alt?: string;
+    width?: number;
+    height?: number;
+    animated?: boolean;
+    maxWidth?: number;
+    maxHeight?: number;
+}
+
+export interface MediaModalProps {
+    location?: string;
+    contextKey?: string;
+    onCloseCallback?: () => void;
+    className?: string;
+    items: MediaModalItem[];
+    startingIndex?: number;
+    onIndexChange?: (...args: any[]) => void;
+    fit?: string;
+    shouldRedactExplicitContent?: boolean;
+    shouldHideMediaOptions?: boolean;
+}

@@ -20,11 +20,10 @@ import { Auth } from "@plugins/reviewDB/auth";
 import { ReviewType } from "@plugins/reviewDB/entities";
 import { REVIEWS_PER_PAGE, UserReviewsData } from "@plugins/reviewDB/reviewDbApi";
 import { cl } from "@plugins/reviewDB/utils";
-import { ModalProps, openModalLazy } from "@utils/modal";
 import { useForceUpdater } from "@utils/react";
 import * as t from "@vencord/discord-types";
 import { DefaultExtractAndLoadChunksRegex, extractAndLoadChunksLazy, findComponentByCodeLazy } from "@webpack";
-import { Text, useRef, useState } from "@webpack/common";
+import { openModalLazy, Text, useRef, useState } from "@webpack/common";
 import { Modal } from "@webpack/common/modalV2";
 import { ComponentProps } from "react";
 
@@ -35,7 +34,7 @@ const Paginator = findComponentByCodeLazy<ComponentProps<t.Paginator>>('rel:"pre
 // This matches a massive module with ~230k chars so we need an anchor before to prevent REDOS
 const requirePaginator = extractAndLoadChunksLazy(['name:"SearchResults"'], new RegExp(`name:"StageChannelCall",renderLoader:.+?(?:${DefaultExtractAndLoadChunksRegex.source}).{0,30}?name:"SearchResults"`));
 
-function ReviewsModal({ modalProps, modalKey, discordId, name, type }: { modalProps: ModalProps; modalKey: string, discordId: string; name: string; type: ReviewType; }) {
+function ReviewsModal({ modalProps, modalKey, discordId, name, type }: { modalProps: t.RenderModalProps; modalKey: string, discordId: string; name: string; type: ReviewType; }) {
     const [data, setData] = useState<UserReviewsData>();
     const [signal, refetch] = useForceUpdater(true);
     const [page, setPage] = useState(1);

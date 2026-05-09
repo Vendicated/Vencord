@@ -12,9 +12,8 @@ import { DevsById } from "@utils/constants";
 import { classNameFactory } from "@utils/css";
 import { fetchUserProfile } from "@utils/discord";
 import { classes, pluralise } from "@utils/misc";
-import { openModal } from "@utils/modal";
-import { OpenModalProps, User } from "@vencord/discord-types";
-import { Forms, showToast, useEffect, useMemo, UserProfileStore, useStateFromStores } from "@webpack/common";
+import { RenderModalProps, User } from "@vencord/discord-types";
+import { Forms, openModal, showToast, useEffect, useMemo, UserProfileStore, useStateFromStores } from "@webpack/common";
 import { Modal } from "@webpack/common/modalV2";
 
 import Plugins from "~plugins";
@@ -28,7 +27,7 @@ export function openContributorModal(user: User) {
     openModal(modalProps => <ContributorModal user={user} modalProps={modalProps} />);
 }
 
-function ContributorModal({ user, modalProps }: { user: User; modalProps: OpenModalProps; }) {
+function ContributorModal({ user, modalProps }: { user: User; modalProps: RenderModalProps; }) {
     useSettings();
 
     const profile = useStateFromStores([UserProfileStore], () => UserProfileStore.getUserProfile(user.id));

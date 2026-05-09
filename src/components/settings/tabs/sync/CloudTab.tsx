@@ -33,9 +33,8 @@ import { Paragraph } from "@components/Paragraph";
 import { SettingsTab, wrapTab } from "@components/settings/tabs/BaseTab";
 import { Margins } from "@utils/margins";
 import { classes } from "@utils/misc";
-import { openModal } from "@utils/modal";
 import { IconComponent } from "@utils/types";
-import { Select, Tooltip, useState } from "@webpack/common";
+import { openModal, Select, Tooltip, useState } from "@webpack/common";
 import { ConfirmModal } from "@webpack/common/modalV2";
 
 function validateUrl(url: string) {

@@ -23,9 +23,8 @@ import { settings } from "@plugins/reviewDB/settings";
 import { canBlockReviewAuthor, canDeleteReview, canReportReview, cl, showToast } from "@plugins/reviewDB/utils";
 import { openUserProfile } from "@utils/discord";
 import { classes } from "@utils/misc";
-import { openModal as openVencordModal } from "@utils/modal";
 import { findCssClassesLazy } from "@webpack";
-import { IconUtils, Parser, Timestamp, useState } from "@webpack/common";
+import { IconUtils, openModal as openVencordModal, Parser, Timestamp, useState } from "@webpack/common";
 import { ConfirmModal } from "@webpack/common/modalV2";
 
 import { openBlockModal } from "./BlockedUserModal";

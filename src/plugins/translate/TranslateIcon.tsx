@@ -19,10 +19,9 @@
 import { ChatBarButton, ChatBarButtonFactory } from "@api/ChatButtons";
 import { TooltipContainer } from "@components/TooltipContainer";
 import { classes } from "@utils/misc";
-import { openModal } from "@utils/modal";
 import { IconComponent } from "@utils/types";
-import { OpenModalProps } from "@vencord/discord-types";
-import { useEffect, useState } from "@webpack/common";
+import { RenderModalProps } from "@vencord/discord-types";
+import { openModal, useEffect, useState } from "@webpack/common";
 import { ConfirmModal } from "@webpack/common/modalV2";
 
 import { settings } from "./settings";
@@ -44,7 +43,7 @@ export const TranslateIcon: IconComponent = ({ height = 20, width = 20, classNam
 
 export let setShouldShowTranslateEnabledTooltip: undefined | ((show: boolean) => void);
 
-function AutoTranslateConfirmModal(props: OpenModalProps) {
+function AutoTranslateConfirmModal(props: RenderModalProps) {
     const s = settings.use(["dismissedAutoTranslateAlert"]);
 
     return (

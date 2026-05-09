@@ -10,8 +10,7 @@ import { ErrorCard } from "@components/ErrorCard";
 import { Flex } from "@components/Flex";
 import { Margins } from "@utils/margins";
 import { identity } from "@utils/misc";
-import { openModal } from "@utils/modal";
-import { Button, Forms, Select, Slider } from "@webpack/common";
+import { Button, Forms, openModal, Select, Slider } from "@webpack/common";
 import { Modal } from "@webpack/common/modalV2";
 
 export function NotificationSection() {

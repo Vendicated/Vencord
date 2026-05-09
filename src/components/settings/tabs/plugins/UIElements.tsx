@@ -17,9 +17,9 @@ import { Switch } from "@components/Switch";
 import { classNameFactory } from "@utils/css";
 import { Margins } from "@utils/margins";
 import { classes } from "@utils/misc";
-import { ModalProps, openModal } from "@utils/modal";
 import { IconComponent } from "@utils/types";
-import { Clickable } from "@webpack/common";
+import { RenderModalProps } from "@vencord/discord-types";
+import { Clickable, openModal } from "@webpack/common";
 import { Modal } from "@webpack/common/modalV2";
 
 
@@ -91,7 +91,7 @@ function Section(props: {
     );
 }
 
-function UIElementsModal(props: ModalProps) {
+function UIElementsModal(props: RenderModalProps) {
     const { uiElements } = useSettings(["uiElements.*"]);
 
     return (

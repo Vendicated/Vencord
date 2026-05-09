@@ -9,11 +9,10 @@ import "./styles.css";
 import { classNameFactory } from "@utils/css";
 import { getGuildAcronym, openImageModal, openUserProfile } from "@utils/discord";
 import { classes } from "@utils/misc";
-import { openModal } from "@utils/modal";
 import { useAwaiter } from "@utils/react";
-import { Guild, OpenModalProps, User } from "@vencord/discord-types";
+import { Guild, RenderModalProps, User } from "@vencord/discord-types";
 import { findComponentByCodeLazy, findCssClassesLazy } from "@webpack";
-import { FluxDispatcher, Forms, GuildChannelStore, GuildMemberStore, GuildRoleStore, IconUtils, Parser, PresenceStore, RelationshipStore, ScrollerThin, SnowflakeUtils, TabBar, Timestamp, useEffect, UserStore, UserUtils, useState, useStateFromStores } from "@webpack/common";
+import { FluxDispatcher, Forms, GuildChannelStore, GuildMemberStore, GuildRoleStore, IconUtils, openModal, Parser, PresenceStore, RelationshipStore, ScrollerThin, SnowflakeUtils, TabBar, Timestamp, useEffect, UserStore, UserUtils, useState, useStateFromStores } from "@webpack/common";
 import { Modal } from "@webpack/common/modalV2";
 
 const IconClasses = findCssClassesLazy("icon", "acronym", "childWrapper");
@@ -52,7 +51,7 @@ function renderTimestamp(timestamp: number) {
     );
 }
 
-function GuildInfoModal({ guild, modalProps }: GuildProps & { modalProps: OpenModalProps; }) {
+function GuildInfoModal({ guild, modalProps }: GuildProps & { modalProps: RenderModalProps; }) {
     const [friendCount, setFriendCount] = useState<number>();
     const [blockedCount, setBlockedCount] = useState<number>();
     const [ignoredCount, setIgnoredCount] = useState<number>();

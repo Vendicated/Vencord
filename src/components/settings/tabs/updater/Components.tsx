@@ -10,10 +10,9 @@ import { Flex } from "@components/Flex";
 import { Link } from "@components/Link";
 import { Margins } from "@utils/margins";
 import { classes } from "@utils/misc";
-import { openModal } from "@utils/modal";
 import { relaunch } from "@utils/native";
 import { changes, checkForUpdates, update, updateError } from "@utils/updater";
-import { Button, Forms, React, Toasts, useState } from "@webpack/common";
+import { Button, Forms, openModal, React, Toasts, useState } from "@webpack/common";
 import { ConfirmModal } from "@webpack/common/modalV2";
 
 import { runWithDispatch } from "./runWithDispatch";

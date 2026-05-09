@@ -9,8 +9,7 @@ import { Decoration } from "@plugins/decor/lib/api";
 import { useCurrentUserDecorationsStore } from "@plugins/decor/lib/stores/CurrentUserDecorationsStore";
 import { cl } from "@plugins/decor/ui";
 import { copyToClipboard } from "@utils/clipboard";
-import { openModal } from "@utils/modal";
-import { ContextMenuApi, Menu, UserStore } from "@webpack/common";
+import { ContextMenuApi, Menu, openModal, UserStore } from "@webpack/common";
 import { ConfirmModal } from "@webpack/common/modalV2";
 
 export default function DecorationContextMenu({ decoration }: { decoration: Decoration; }) {

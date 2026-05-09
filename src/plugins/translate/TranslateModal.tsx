@@ -19,8 +19,8 @@
 import { Divider } from "@components/Divider";
 import { FormSwitch } from "@components/FormSwitch";
 import { Margins } from "@utils/margins";
-import { ModalProps, openModal } from "@utils/modal";
-import { Forms, SearchableSelect, useMemo } from "@webpack/common";
+import { RenderModalProps } from "@vencord/discord-types";
+import { Forms, openModal, SearchableSelect, useMemo } from "@webpack/common";
 import { Modal } from "@webpack/common/modalV2";
 
 import { settings } from "./settings";
@@ -74,7 +74,7 @@ function AutoTranslateToggle() {
 }
 
 
-function TranslateModal({ rootProps }: { rootProps: ModalProps; }) {
+function TranslateModal({ rootProps }: { rootProps: RenderModalProps; }) {
     return (
         <Modal
             {...rootProps}

@@ -10,8 +10,8 @@ import { Flex } from "@components/Flex";
 import { HeadingSecondary } from "@components/Heading";
 import { InfoIcon } from "@components/Icons";
 import { Paragraph } from "@components/Paragraph";
-import { ModalProps, openModal } from "@utils/modal";
-import { TextArea, TextInput, useState } from "@webpack/common";
+import { RenderModalProps } from "@vencord/discord-types";
+import { openModal, TextArea, TextInput, useState } from "@webpack/common";
 import { Modal } from "@webpack/common/modalV2";
 
 import { parseTagArguments } from ".";
@@ -25,7 +25,7 @@ export function openCreateTagModal(initialValue: Tag = { name: "", message: "" }
 
 const EXAMPLE_RESPONSE = "Hello {{user}}! I am feeling {{mood = great}}.";
 
-function CreateTagDialog({ initialValue, modalProps }: { initialValue: Tag; modalProps: ModalProps; }) {
+function CreateTagDialog({ initialValue, modalProps }: { initialValue: Tag; modalProps: RenderModalProps; }) {
     const [name, setName] = useState(initialValue.name);
     const [message, setMessage] = useState(initialValue.message.replaceAll("\\n", "\n"));
 

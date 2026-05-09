@@ -20,9 +20,9 @@ import * as DataStore from "@api/DataStore";
 import { Settings } from "@api/Settings";
 import { openNotificationSettingsModal } from "@components/settings/tabs/vencord/NotificationSettings";
 import { classNameFactory } from "@utils/css";
-import { ModalProps, openModal } from "@utils/modal";
 import { useAwaiter } from "@utils/react";
-import { Forms, ListScrollerThin, React, Timestamp, useEffect, useReducer, useState } from "@webpack/common";
+import { RenderModalProps } from "@vencord/discord-types";
+import { Forms, ListScrollerThin, openModal, React, Timestamp, useEffect, useReducer, useState } from "@webpack/common";
 import { ConfirmModal, Modal } from "@webpack/common/modalV2";
 import { nanoid } from "nanoid";
 import type { DispatchWithoutAction } from "react";
@@ -150,7 +150,7 @@ export function NotificationLog({ log, pending }: { log: PersistentNotificationD
     );
 }
 
-function LogModal(props: ModalProps) {
+function LogModal(props: RenderModalProps) {
     const [log, pending] = useLogs();
 
     return (

@@ -19,12 +19,12 @@
 import { TextButton } from "@components/Button";
 import { SessionInfo } from "@plugins/betterSessions/types";
 import { getDefaultName, savedSessionsCache, saveSessionsToDataStore } from "@plugins/betterSessions/utils";
-import { ModalProps } from "@utils/modal";
+import { RenderModalProps } from "@vencord/discord-types";
 import { Forms, React, TextInput } from "@webpack/common";
 import { Modal } from "@webpack/common/modalV2";
 import { KeyboardEvent } from "react";
 
-export function RenameModal({ props, session, state }: { props: ModalProps, session: SessionInfo["session"], state: [string, React.Dispatch<React.SetStateAction<string>>]; }) {
+export function RenameModal({ props, session, state }: { props: RenderModalProps, session: SessionInfo["session"], state: [string, React.Dispatch<React.SetStateAction<string>>]; }) {
     const [title, setTitle] = state;
     const [value, setValue] = React.useState(savedSessionsCache.get(session.id_hash)?.name ?? "");
 

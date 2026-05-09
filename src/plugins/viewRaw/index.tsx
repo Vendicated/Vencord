@@ -25,10 +25,9 @@ import { Devs } from "@utils/constants";
 import { copyWithToast, getCurrentGuild, getIntlMessage } from "@utils/discord";
 import { isTruthy } from "@utils/guards";
 import { Margins } from "@utils/margins";
-import { openModal } from "@utils/modal";
 import definePlugin, { IconComponent, OptionType } from "@utils/types";
 import { Message } from "@vencord/discord-types";
-import { ChannelStore, Forms, GuildRoleStore, Menu } from "@webpack/common";
+import { ChannelStore, Forms, GuildRoleStore, Menu,openModal } from "@webpack/common";
 import { Modal } from "@webpack/common/modalV2";
 
 

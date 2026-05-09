@@ -9,9 +9,9 @@ import { TooltipContainer } from "@components/TooltipContainer";
 import { classNameFactory } from "@utils/css";
 import { Margins } from "@utils/margins";
 import { classes } from "@utils/misc";
-import { ModalProps, openModal } from "@utils/modal";
+import { RenderModalProps } from "@vencord/discord-types";
 import { findCssClassesLazy } from "@webpack";
-import { TabBar, Timestamp, useState } from "@webpack/common";
+import { openModal, TabBar, Timestamp, useState } from "@webpack/common";
 import { Modal } from "@webpack/common/modalV2";
 
 import { parseEditContent } from ".";
@@ -32,7 +32,7 @@ export function openHistoryModal(message: any) {
     );
 }
 
-export function HistoryModal({ modalProps, message }: { modalProps: ModalProps; message: any; }) {
+export function HistoryModal({ modalProps, message }: { modalProps: RenderModalProps; message: any; }) {
     const [currentTab, setCurrentTab] = useState(message.editHistory.length);
     const timestamps = [message.firstEditTimestamp, ...message.editHistory.map(m => m.timestamp)];
     const contents = [...message.editHistory.map(m => m.content), message.content];
