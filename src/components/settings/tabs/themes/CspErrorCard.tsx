@@ -12,7 +12,7 @@ import { Margins } from "@utils/margins";
 import { classes } from "@utils/misc";
 import { relaunch } from "@utils/native";
 import { useForceUpdater } from "@utils/react";
-import { Button, ConfirmModal,Forms, openModal } from "@webpack/common";
+import { Button, ConfirmModal, Forms, openModal } from "@webpack/common";
 
 export function CspErrorCard() {
     if (IS_WEB) return null;
@@ -54,7 +54,7 @@ export function CspErrorCard() {
     const hasImgurHtmlDomain = errors.some(isImgurHtmlDomain);
 
     return (
-        <ErrorCard className={Margins.bottom16}>
+        <ErrorCard>
             <Forms.FormTitle tag="h5">Blocked Resources</Forms.FormTitle>
             <Forms.FormText>Some images, styles, or fonts were blocked because they come from disallowed domains.</Forms.FormText>
             <Forms.FormText>It is highly recommended to move them to GitHub or Imgur. But you may also allow domains if you fully trust them.</Forms.FormText>
