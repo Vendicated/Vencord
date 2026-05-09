@@ -214,10 +214,10 @@ export default definePlugin({
                         <ConfirmModal
                             {...props}
                             title="Hold on!"
-                            onCancel={() => openSettingsTabModal(UpdaterTab!)}
-                            cancelText="View Updates"
                             confirmText="Update & Restart Now"
+                            cancelText="View Updates"
                             onConfirm={forceUpdate}
+                            onCancel={() => openSettingsTabModal(UpdaterTab!)}
                         >
                             <div>
                                 <Forms.FormText>You are using an outdated version of Vencord! Chances are, your issue is already fixed.</Forms.FormText>
