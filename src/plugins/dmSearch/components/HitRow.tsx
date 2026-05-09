@@ -76,9 +76,8 @@ export function HitRow({ hit, query, tab, channel_meta, on_keep_open }: Props) {
 }
 
 function Body({ hit, query, tab }: { hit: MessageHit; query: string; tab: SearchTab; }) {
-    if (tab === "media") return <MediaBody hit={hit} />;
+    if (tab === "media") return <MediaBody hit={hit} query={query} />;
     if (tab === "files") return <FilesBody hit={hit} query={query} />;
-    if (tab === "links") return <LinksBody hit={hit} query={query} />;
     return <TextBody content={hit.content} query={query} />;
 }
 
@@ -89,7 +88,7 @@ function TextBody({ content, query }: { content: string; query: string; }) {
     return <div className="vc-dms-text">{highlight(content, query)}</div>;
 }
 
-function MediaBody({ hit }: { hit: MessageHit; }) {
+function MediaBody({ hit, query }: { hit: MessageHit; query: string; }) {
     const items = (hit.attachments ?? []).filter(a =>
         a.content_type?.startsWith?.("image/") || a.content_type?.startsWith?.("video/")
     );
@@ -103,7 +102,7 @@ function MediaBody({ hit }: { hit: MessageHit; }) {
                     )}
                 </div>
             )}
-            {hit.content && <TextBody content={hit.content} query="" />}
+            {hit.content && <TextBody content={hit.content} query={query} />}
         </div>
     );
 }
@@ -122,16 +121,6 @@ function FilesBody({ hit, query }: { hit: MessageHit; query: string; }) {
                     <span className="vc-dms-file-meta">{`${f.content_type ?? "file"} · ${fmt_bytes(f.size ?? 0)}`}</span>
                 </div>
             ))}
-            {hit.content && <TextBody content={hit.content} query={query} />}
-        </div>
-    );
-}
-
-function LinksBody({ hit, query }: { hit: MessageHit; query: string; }) {
-    const urls = (hit.content ?? "").match(/https?:\/\/[^\s<>"]+/g) ?? [];
-    return (
-        <div className="vc-dms-links">
-            {urls.slice(0, 5).map((u, i) => <span key={i} className="vc-dms-link">{u}</span>)}
             {hit.content && <TextBody content={hit.content} query={query} />}
         </div>
     );

@@ -166,6 +166,7 @@ export function Overlay({ query: raw_query, discord_matches, default_results, pr
         <>
             <Tabs query={query} totals={bag.totals} loading={loading} active={tab} on_pick={pick_tab} />
             <TabContent
+                key={focused}
                 tab={focused}
                 query={query}
                 hits={bag.hits[focused]}
