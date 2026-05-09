@@ -213,6 +213,7 @@ export default definePlugin({
                     openModal(props => (
                         <ConfirmModal
                             {...props}
+                            variant="primary"
                             title="Hold on!"
                             confirmText="Update & Restart Now"
                             cancelText="View Updates"
