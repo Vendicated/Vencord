@@ -1,0 +1,66 @@
+.vc-custom-sounds-main {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25em;
+}
+
+.vc-custom-sounds-section {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5em;
+}
+
+.vc-custom-sounds-section * {
+    margin-bottom: 0;
+}
+
+.vc-custom-sounds-card {
+    padding: 1em;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5em;
+}
+
+.vc-custom-sounds-card > * {
+    margin-bottom: 0;
+}
+
+.vc-custom-sounds-card-content {
+    display: flex;
+    flex-direction: column;
+    gap: 1em;
+}
+
+.vc-custom-sounds-card-option {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5em;
+}
+
+.vc-custom-sounds-card-option * {
+    margin-bottom: 0;
+}
+
+.vc-custom-sounds-buttons {
+    display: flex;
+    gap: 8px;
+}
+
+.vc-custom-sounds-search {
+    margin-bottom: 0;
+}
+
+.vc-custom-sounds-search input {
+    width: 100%;
+    padding: 8px;
+    background: var(--input-background);
+    border: none;
+    border-radius: 3px;
+    color: var(--text-normal);
+}
+
+.vc-custom-sounds-sounds-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
