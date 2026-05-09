@@ -85,20 +85,20 @@ function ReviewsModal({ modalProps, modalKey, discordId, name, type }: { modalPr
                     </div>
                 </div>
             }
+            scrollerRef={ref}
+            onScroll={(...args) => console.log("SCROLL", args)}
         >
-            <div ref={ref}>
-                <div className={cl("modal-reviews")}>
-                    <ReviewsView
-                        discordId={discordId}
-                        name={name}
-                        page={page}
-                        refetchSignal={signal}
-                        onFetchReviews={setData}
-                        scrollToTop={() => ref.current?.scrollTo({ top: 0, behavior: "smooth" })}
-                        hideOwnReview
-                        type={type}
-                    />
-                </div>
+            <div className={cl("modal-reviews")}>
+                <ReviewsView
+                    discordId={discordId}
+                    name={name}
+                    page={page}
+                    refetchSignal={signal}
+                    onFetchReviews={setData}
+                    scrollToTop={() => ref.current?.scrollTo({ top: 0, behavior: "smooth" })}
+                    hideOwnReview
+                    type={type}
+                />
             </div>
         </Modal>
     );

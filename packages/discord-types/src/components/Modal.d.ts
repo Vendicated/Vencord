@@ -1,4 +1,4 @@
-import { ComponentType, ReactNode } from "react";
+import { ComponentType, ReactNode, Ref, RefObject } from "react";
 import { LiteralUnion } from "type-fest";
 
 export type ModalActionVariant = LiteralUnion<"primary" | "secondary" | "critical-primary", string>;
@@ -25,18 +25,12 @@ export interface ModalProps extends OpenModalProps {
 
     /** Optional Modal content */
     children?: ReactNode;
-
-    /**
-     * Component that shows above the content. Seems like it's meant for some sort of lazy list rendering. listProps, onScroll and scrollerRef belong to this
-     * I'd just avoid using this unless you know what you're doing
-     */
     input?: ReactNode;
-    listProps?: unknown;
-    onScroll?: unknown;
-    scrollerRef?: unknown;
-
-    /** Component that shows below the content (children) and above the actions */
     preview?: ReactNode;
+
+    listProps?: any;
+    onScroll?(): void;
+    scrollerRef?: Ref<HTMLDivElement>;
 
     /** Action buttons at the bottom of the Modal */
     actions?: ModalAction[];

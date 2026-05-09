@@ -156,7 +156,7 @@ function LogModal(props: ModalProps) {
     return (
         <Modal
             {...props}
-            size="xxl"
+            size="xl"
             title="Notification Log"
             actions={[
                 {
@@ -167,6 +167,7 @@ function LogModal(props: ModalProps) {
                 {
                     text: "Clear Notification Log",
                     variant: "critical-primary",
+                    disabled: !log.length,
                     onClick() {
                         openModal(props =>
                             <ConfirmModal

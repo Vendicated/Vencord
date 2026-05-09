@@ -82,7 +82,13 @@ export function NewCategoryModal({ categoryId, modalProps, initialChannelId }: P
                 disabled: !name
             }]}
         >
-            <div className={cl("content")}>
+            <form
+                className={cl("content")}
+                onSubmit={e => {
+                    e.preventDefault();
+                    onSave();
+                }}
+            >
                 <section>
                     <Forms.FormTitle>Name</Forms.FormTitle>
                     <TextInput
@@ -110,7 +116,7 @@ export function NewCategoryModal({ categoryId, modalProps, initialChannelId }: P
                         )}
                     />
                 </section>
-            </div>
+            </form>
         </Modal>
     );
 }
