@@ -17,7 +17,7 @@
 */
 
 import { ProfileBadge } from "@api/Badges";
-import { ChatBarButtonData } from "@api/ChatButtons";
+import { ChatBarButtonData, ChatBarButtonWrapperData } from "@api/ChatButtons";
 import { NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { HeaderBarButtonData } from "@api/HeaderBar";
 import { MemberListDecoratorFactory } from "@api/MemberListDecorators";
@@ -25,7 +25,8 @@ import { MessageAccessoryFactory } from "@api/MessageAccessories";
 import { MessageDecorationFactory } from "@api/MessageDecorations";
 import { MessageClickListener, MessageEditListener, MessageSendListener } from "@api/MessageEvents";
 import { MessagePopoverButtonData } from "@api/MessagePopover";
-import { ProfileCollectionFactory } from "@api/ProfileCollections";
+import { ProfileCollectionData } from "@api/ProfileCollections";
+import { ProfileSectionData } from "@api/ProfileSections";
 import { UserAreaButtonData } from "@api/UserArea";
 import { Command, FluxEvents } from "@vencord/discord-types";
 import { ReactNode } from "react";
@@ -224,7 +225,9 @@ export interface PluginDef {
 
     headerBarButton?: HeaderBarButtonData;
     userAreaButton?: UserAreaButtonData;
-    renderProfileCollection?: ProfileCollectionFactory;
+    renderProfileCollection?: ProfileCollectionData;
+    chatBarButtonWrapper?: ChatBarButtonWrapperData;
+    renderProfileSection?: ProfileSectionData;
 }
 
 export const enum StartAt {
