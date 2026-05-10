@@ -139,7 +139,7 @@ export default definePlugin({
                     "renderInviteButton",
                 ].map(func => ({
                     match: new RegExp(`(?<=${func}\\(\\){)`, "g"), // Global because Discord has multiple declarations of the same functions
-                    replace: "if($self.isHiddenChannel(this.props.channel))return null;"
+                    replace: "if($self.isHiddenChannel(this?.props?.channel))return null;"
                 }))
             ]
         },
@@ -149,7 +149,7 @@ export default definePlugin({
             // Render null instead of the buttons if the channel is hidden
             replacement: {
                 match: /(?<=renderOpenChatButton(?:",|=)\(\)=>{)/,
-                replace: "if($self.isHiddenChannel(this.props.channel))return null;"
+                replace: "if($self.isHiddenChannel(this?.props?.channel))return null;"
             }
         },
         {
@@ -245,11 +245,11 @@ export default definePlugin({
                 },
                 {
                     match: /(?<=renderSidebar\(\){)/,
-                    replace: "if($self.isHiddenChannel(this.props.channel))return null;"
+                    replace: "if($self.isHiddenChannel(this?.props?.channel))return null;"
                 },
                 {
                     match: /(?<=renderChat\(\){)/,
-                    replace: "if($self.isHiddenChannel(this.props.channel))return $self.HiddenChannelLockScreen(this.props.channel);"
+                    replace: "if($self.isHiddenChannel(this?.props?.channel))return $self.HiddenChannelLockScreen(this?.props?.channel);"
                 }
             ]
         },
@@ -355,22 +355,22 @@ export default definePlugin({
                 {
                     // Render our HiddenChannelLockScreen component instead of the main voice channel component
                     match: /renderContent\(\i\){.+?this\.renderVoiceChannelEffects.+?children:/,
-                    replace: "$&!this.props.inCall&&$self.isHiddenChannel(this.props.channel,true)?$self.HiddenChannelLockScreen(this.props.channel):"
+                    replace: "$&!this?.props?.inCall&&$self.isHiddenChannel(this?.props?.channel,true)?$self.HiddenChannelLockScreen(this?.props?.channel):"
                 },
                 {
                     // Disable gradients for the HiddenChannelLockScreen of voice channels
                     match: /renderContent\(\i\){.+?disableGradients:/,
-                    replace: "$&!this.props.inCall&&$self.isHiddenChannel(this.props.channel,true)||"
+                    replace: "$&!this?.props?.inCall&&$self.isHiddenChannel(this?.props?.channel,true)||"
                 },
                 {
                     // Disable useless components for the HiddenChannelLockScreen of voice channels
                     match: /(?:{|,)render(?!Header|ExternalHeader).{0,30}?:/g,
-                    replace: "$&!this.props.inCall&&$self.isHiddenChannel(this.props.channel,true)?()=>null:"
+                    replace: "$&!this?.props?.inCall&&$self.isHiddenChannel(this?.props?.channel,true)?()=>null:"
                 },
                 {
                     // Disable bad CSS class which mess up hidden voice channels styling
                     match: /(?=\i\|\|\i!==\i\.\i\.FULL_SCREEN.{0,100}?this\._callContainerRef)/,
-                    replace: '$&!this.props.inCall&&$self.isHiddenChannel(this.props.channel,true)?"":'
+                    replace: '$&!this?.props?.inCall&&$self.isHiddenChannel(this?.props?.channel,true)?"":'
                 }
             ]
         },

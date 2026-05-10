@@ -114,7 +114,7 @@ export default definePlugin({
                 {
                     // Override scrollToChannel to properly account for pinned channels
                     match: /(?<=scrollTo\(\{to:\i\}\):\(\i\+=)(\d+)\*\(.+?(?=,)/,
-                    replace: "$self.getScrollOffset(arguments[0],$1,this.props.padding,this.state.preRenderedChildren,$&)"
+                    replace: "$self.getScrollOffset(arguments[0],$1,this?.props?.padding,this?.state?.preRenderedChildren,$&)"
                 },
                 {
                     match: /(scrollToChannel\(\i\){.{1,300})(this\.props\.privateChannelIds)/,
