@@ -1,5 +1,5 @@
-.vc-settings-modal-content {
-    padding-bottom: 24px;
+.vc-plugin-modal-header {
+    display: flex;
 }
 
 .vc-plugin-modal-info {
@@ -13,7 +13,7 @@
     display: flex;
     flex-wrap: wrap;
     gap: 4px;
-    margin-block: 8px 16px;
+    margin-top: 8px;
 }
 
 .vc-plugin-modal-tag {

@@ -26,14 +26,13 @@ import { Paragraph } from "@components/Paragraph";
 import { Devs } from "@utils/constants";
 import { classNameFactory } from "@utils/css";
 import { Margins } from "@utils/margins";
-import { ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, openModal } from "@utils/modal";
 import { useAwaiter } from "@utils/react";
 import definePlugin from "@utils/types";
 import { chooseFile } from "@utils/web";
-import { CloudUpload as TCloudUpload } from "@vencord/discord-types";
+import { CloudUpload as TCloudUpload, RenderModalProps } from "@vencord/discord-types";
 import { CloudUploadPlatform } from "@vencord/discord-types/enums";
 import { findLazy } from "@webpack";
-import { Button, Constants, FluxDispatcher, Forms, lodash, Menu, MessageActions, PendingReplyStore, PermissionsBits, PermissionStore, RestAPI, SelectedChannelStore, showToast, SnowflakeUtils, Toasts, useEffect, useState } from "@webpack/common";
+import { Button, Constants, FluxDispatcher, Forms, lodash, Menu, MessageActions, Modal,openModal, PendingReplyStore, PermissionsBits, PermissionStore, RestAPI, SelectedChannelStore, showToast, SnowflakeUtils, Toasts, useEffect, useState } from "@webpack/common";
 import { ComponentType } from "react";
 
 import { VoiceRecorderDesktop } from "./DesktopRecorder";
@@ -69,7 +68,7 @@ const ctxMenuPatch: NavContextMenuPatchCallback = (children, props) => {
                 icon: Microphone
             }}
             label="Send Voice Message"
-            action={() => openModal(modalProps => <Modal modalProps={modalProps} />)}
+            action={() => openModal(modalProps => <VoiceMessageModal modalProps={modalProps} />)}
         />
     );
 };
@@ -157,7 +156,7 @@ function useObjectUrl() {
     return [url, setWithFree] as const;
 }
 
-function Modal({ modalProps }: { modalProps: ModalProps; }) {
+function VoiceMessageModal({ modalProps }: { modalProps: RenderModalProps; }) {
     const [isRecording, setRecording] = useState(false);
     const [blob, setBlob] = useState<Blob>();
     const [blobUrl, setBlobUrl] = useObjectUrl();
@@ -208,69 +207,62 @@ function Modal({ modalProps }: { modalProps: ModalProps; }) {
     );
 
     return (
-        <ModalRoot {...modalProps}>
-            <ModalHeader>
-                <Forms.FormTitle>Record Voice Message</Forms.FormTitle>
-            </ModalHeader>
+        <Modal
+            {...modalProps}
+            title="Record Voice Message"
+            actions={[{
+                text: "Send",
+                variant: "primary",
+                onClick: () => {
+                    sendAudio(blob!, meta ?? EMPTY_META);
+                    modalProps.onClose();
+                    showToast("Now sending voice message... Please be patient", Toasts.Type.MESSAGE);
+                },
+                disabled: !blob
+            }]}
+        >
+            <div className={cl("buttons")}>
+                <VoiceRecorder
+                    setAudioBlob={blob => {
+                        setBlob(blob);
+                        setBlobUrl(blob);
+                    }}
+                    onRecordingChange={setRecording}
+                />
 
-            <ModalContent className={cl("modal")}>
-                <div className={cl("buttons")}>
-                    <VoiceRecorder
-                        setAudioBlob={blob => {
-                            setBlob(blob);
-                            setBlobUrl(blob);
-                        }}
-                        onRecordingChange={setRecording}
-                    />
-
-                    <Button
-                        onClick={async () => {
-                            const file = await chooseFile("audio/*");
-                            if (file) {
-                                setBlob(file);
-                                setBlobUrl(file);
-                            }
-                        }}
-                    >
-                        Upload File
-                    </Button>
-                </div>
-
-                <Forms.FormTitle>Preview</Forms.FormTitle>
-                {metaError
-                    ? <Paragraph className={cl("error")}>Failed to parse selected audio file: {metaError.message}</Paragraph>
-                    : (
-                        <VoicePreview
-                            src={blobUrl}
-                            waveform={meta.waveform}
-                            recording={isRecording}
-                        />
-                    )}
-
-                {isUnsupportedFormat && (
-                    <Card variant="warning" className={Margins.top16} defaultPadding>
-                        <Forms.FormText>Voice Messages have to be OggOpus to be playable on iOS. This file is <code>{blob.type}</code> so it will not be playable on iOS.</Forms.FormText>
-
-                        <Forms.FormText className={Margins.top8}>
-                            To fix it, first convert it to OggOpus, for example using the <Link href="https://convertio.co/mp3-opus/">convertio web converter</Link>
-                        </Forms.FormText>
-                    </Card>
-                )}
-
-            </ModalContent>
-
-            <ModalFooter>
                 <Button
-                    disabled={!blob}
-                    onClick={() => {
-                        sendAudio(blob!, meta ?? EMPTY_META);
-                        modalProps.onClose();
-                        showToast("Now sending voice message... Please be patient", Toasts.Type.MESSAGE);
+                    onClick={async () => {
+                        const file = await chooseFile("audio/*");
+                        if (file) {
+                            setBlob(file);
+                            setBlobUrl(file);
+                        }
                     }}
                 >
-                    Send
+                    Upload File
                 </Button>
-            </ModalFooter>
-        </ModalRoot>
+            </div>
+
+            <Forms.FormTitle>Preview</Forms.FormTitle>
+            {metaError
+                ? <Paragraph className={cl("error")}>Failed to parse selected audio file: {metaError.message}</Paragraph>
+                : (
+                    <VoicePreview
+                        src={blobUrl}
+                        waveform={meta.waveform}
+                        recording={isRecording}
+                    />
+                )}
+
+            {isUnsupportedFormat && (
+                <Card variant="warning" className={Margins.top16} defaultPadding>
+                    <Forms.FormText>Voice Messages have to be OggOpus to be playable on iOS. This file is <code>{blob.type}</code> so it will not be playable on iOS.</Forms.FormText>
+
+                    <Forms.FormText className={Margins.top8}>
+                        To fix it, first convert it to OggOpus, for example using the <Link href="https://convertio.co/mp3-opus/">convertio web converter</Link>
+                    </Forms.FormText>
+                </Card>
+            )}
+        </Modal>
     );
 }
