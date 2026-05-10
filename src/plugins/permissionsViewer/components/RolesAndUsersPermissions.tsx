@@ -33,6 +33,7 @@ import { ContextMenuApi, FluxDispatcher, GuildMemberStore, GuildRoleStore, i18n,
 import { settings } from "..";
 import { PermissionAllowedIcon, PermissionDefaultIcon, PermissionDeniedIcon } from "./icons";
 
+type GetRoleIconData = (role: Role, size: number) => { customIconSrc?: string; unicodeEmoji?: UnicodeEmoji; };
 const getRoleIconData: GetRoleIconData = findByCodeLazy("convertSurrogateToName", "customIconSrc", "unicodeEmoji");
 
 function getRoleIconSrc(role: Role) {
