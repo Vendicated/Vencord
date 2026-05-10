@@ -192,6 +192,7 @@ export type TextInput = ComponentType<PropsWithChildren<{
 export type TextArea = ComponentType<Omit<HTMLProps<HTMLTextAreaElement>, "onChange"> & {
     onChange(v: string): void;
     inputRef?: Ref<HTMLTextAreaElement>;
+    autosize?: boolean;
 }>;
 
 export interface SelectOption {
@@ -331,6 +332,15 @@ declare enum PopoutAnimation {
 
 type PopoutPosition = "top" | "bottom" | "left" | "right" | "center" | "window_center";
 
+export interface PopoutProps {
+    position: PopoutPosition;
+    nudge: number;
+    isPositioned: boolean;
+    setPopoutRef(ref: any): void;
+    closePopout(): void;
+    updatePosition(): void;
+}
+
 export type Popout = ComponentType<{
     children(
         thing: {
@@ -347,14 +357,8 @@ export type Popout = ComponentType<{
     ): ReactNode;
     shouldShow?: boolean;
     targetElementRef: RefObject<any>;
-    renderPopout(args: {
-        closePopout(): void;
-        isPositioned: boolean;
-        nudge: number;
-        position: PopoutPosition;
-        setPopoutRef(ref: any): void;
-        updatePosition(): void;
-    }): ReactNode;
+    renderPopout(props: PopoutProps): ReactNode;
+    preload?(): Promise<any>;
 
     onRequestOpen?(): void;
     onRequestClose?(): void;

@@ -12,7 +12,7 @@ import { Margins } from "@utils/margins";
 import { classes } from "@utils/misc";
 import { relaunch } from "@utils/native";
 import { useForceUpdater } from "@utils/react";
-import { Alerts, Button, Forms } from "@webpack/common";
+import { Button, ConfirmModal, Forms, openModal } from "@webpack/common";
 
 export function CspErrorCard() {
     if (IS_WEB) return null;
@@ -38,19 +38,23 @@ export function CspErrorCard() {
 
         forceUpdate();
 
-        Alerts.show({
-            title: "Restart Required",
-            body: "A restart is required to apply this change",
-            confirmText: "Restart now",
-            cancelText: "Later!",
-            onConfirm: relaunch
-        });
+        openModal(props => (
+            <ConfirmModal
+                {...props}
+                title="Restart Required"
+                subtitle="A restart is required to apply this change"
+                confirmText="Restart now"
+                cancelText="Later!"
+                variant="primary"
+                onConfirm={relaunch}
+            />
+        ));
     };
 
     const hasImgurHtmlDomain = errors.some(isImgurHtmlDomain);
 
     return (
-        <ErrorCard className={Margins.bottom16}>
+        <ErrorCard>
             <Forms.FormTitle tag="h5">Blocked Resources</Forms.FormTitle>
             <Forms.FormText>Some images, styles, or fonts were blocked because they come from disallowed domains.</Forms.FormText>
             <Forms.FormText>It is highly recommended to move them to GitHub or Imgur. But you may also allow domains if you fully trust them.</Forms.FormText>
