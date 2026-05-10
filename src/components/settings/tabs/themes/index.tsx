@@ -18,9 +18,12 @@
 
 import "./styles.css";
 
+import { BaseText } from "@components/BaseText";
 import { Card } from "@components/Card";
+import { Flex } from "@components/Flex";
 import { Heading } from "@components/Heading";
 import { Link } from "@components/Link";
+import { Margins } from "@components/margins";
 import { Paragraph } from "@components/Paragraph";
 import { SettingsTab, wrapTab } from "@components/settings/tabs/BaseTab";
 import { getStylusWebStoreUrl } from "@utils/web";
@@ -61,10 +64,20 @@ function ThemesTab() {
                 </TabBar.Item>
             </TabBar>
 
-            <CspErrorCard />
+            <Flex flexDirection="column" gap="1em">
+                <CspErrorCard />
 
-            {currentTab === ThemeTab.LOCAL && <LocalThemesTab />}
-            {currentTab === ThemeTab.ONLINE && <OnlineThemesTab />}
+                <Card variant="warning">
+                    <BaseText tag="h3" size="md" weight="medium" className={Margins.bottom8}>Theme Performance</BaseText>
+                    <Paragraph>
+                        Themes and custom CSS have the potential to cause major lag! If you experience performance issues, try
+                        disabling your themes and CSS to see if they're the cause. The most common cause of lag is the <code>:has()</code> operator.
+                    </Paragraph>
+                </Card>
+
+                {currentTab === ThemeTab.LOCAL && <LocalThemesTab />}
+                {currentTab === ThemeTab.ONLINE && <OnlineThemesTab />}
+            </Flex>
         </SettingsTab>
     );
 }

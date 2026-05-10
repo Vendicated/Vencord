@@ -7,17 +7,15 @@
 import "./ContributorModal.css";
 
 import { useSettings } from "@api/Settings";
-import ErrorBoundary from "@components/ErrorBoundary";
+import { BaseText } from "@components/BaseText";
 import { HeadingPrimary } from "@components/Heading";
 import { Link } from "@components/Link";
-import { Paragraph } from "@components/Paragraph";
 import { DevsById } from "@utils/constants";
 import { classNameFactory } from "@utils/css";
 import { fetchUserProfile } from "@utils/discord";
 import { classes, pluralise } from "@utils/misc";
-import { ModalContent, ModalRoot, openModal } from "@utils/modal";
-import { User } from "@vencord/discord-types";
-import { showToast, useEffect, useMemo, UserProfileStore, useStateFromStores } from "@webpack/common";
+import { RenderModalProps, User } from "@vencord/discord-types";
+import { Modal, openModal, showToast, useEffect, useMemo, UserProfileStore, useStateFromStores } from "@webpack/common";
 
 import Plugins from "~plugins";
 
@@ -27,18 +25,10 @@ import { PluginCard } from "./PluginCard";
 const cl = classNameFactory("vc-author-modal-");
 
 export function openContributorModal(user: User) {
-    openModal(modalProps =>
-        <ModalRoot {...modalProps}>
-            <ErrorBoundary>
-                <ModalContent className={cl("root")}>
-                    <ContributorModal user={user} />
-                </ModalContent>
-            </ErrorBoundary>
-        </ModalRoot>
-    );
+    openModal(modalProps => <ContributorModal user={user} modalProps={modalProps} />);
 }
 
-function ContributorModal({ user }: { user: User; }) {
+function ContributorModal({ user, modalProps }: { user: User; modalProps: RenderModalProps; }) {
     useSettings();
 
     const profile = useStateFromStores([UserProfileStore], () => UserProfileStore.getUserProfile(user.id));
@@ -65,53 +55,61 @@ function ContributorModal({ user }: { user: User; }) {
     const ContributedHyperLink = <Link href="https://vencord.dev/source">contributed</Link>;
 
     return (
-        <>
-            <div className={cl("header")}>
-                <img
-                    className={cl("avatar")}
-                    src={user.getAvatarURL(void 0, 512, true)}
-                    alt=""
-                />
-                <HeadingPrimary className={cl("name")}>{user.username}</HeadingPrimary>
+        <Modal
+            {...modalProps}
+            title={
+                <div className="vc-plugin-modal-header">
+                    <img
+                        className={cl("avatar")}
+                        src={user.getAvatarURL(void 0, 512, true)}
+                        alt=""
+                    />
+                    <HeadingPrimary className={cl("name")}>{user.username}</HeadingPrimary>
 
-                <div className={classes("vc-settings-modal-links", cl("links"))}>
-                    {website && (
-                        <WebsiteButton
-                            text={website}
-                            href={`https://${website}`}
-                        />
-                    )}
-                    {githubName && (
-                        <GithubButton
-                            text={githubName}
-                            href={`https://github.com/${githubName}`}
-                        />
-                    )}
+                    <div className={classes("vc-settings-modal-links", cl("links"))}>
+                        {website && (
+                            <WebsiteButton
+                                text={website}
+                                href={`https://${website}`}
+                            />
+                        )}
+                        {githubName && (
+                            <GithubButton
+                                text={githubName}
+                                href={`https://github.com/${githubName}`}
+                            />
+                        )}
+                    </div>
                 </div>
-            </div>
-
-            {plugins.length ? (
-                <Paragraph>
-                    This person has {ContributedHyperLink} to {pluralise(plugins.length, "plugin")}!
-                </Paragraph>
-            ) : (
-                <Paragraph>
-                    This person has not made any plugins. They likely {ContributedHyperLink} to Vencord in other ways!
-                </Paragraph>
-            )}
-
-            {!!plugins.length && (
-                <div className={cl("plugins")}>
-                    {plugins.map(p =>
-                        <PluginCard
-                            key={p.name}
-                            plugin={p}
-                            disabled={p.required ?? false}
-                            onRestartNeeded={() => showToast("Restart to apply changes!")}
-                        />
-                    )}
-                </div>
-            )}
-        </>
+            }
+            subtitle={
+                plugins.length
+                    ? (
+                        <BaseText>
+                            This person has {ContributedHyperLink} to {pluralise(plugins.length, "plugin")}!
+                        </BaseText>
+                    )
+                    : (
+                        <BaseText>
+                            This person has not made any plugins. They likely {ContributedHyperLink} to Vencord in other ways!
+                        </BaseText>
+                    )
+            }
+        >
+            {
+                !!plugins.length && (
+                    <div className={cl("plugins")}>
+                        {plugins.map(p =>
+                            <PluginCard
+                                key={p.name}
+                                plugin={p}
+                                disabled={p.required ?? false}
+                                onRestartNeeded={() => showToast("Restart to apply changes!")}
+                            />
+                        )}
+                    </div>
+                )
+            }
+        </Modal >
     );
 }

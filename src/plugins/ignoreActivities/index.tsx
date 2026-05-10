@@ -4,13 +4,14 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { definePluginSettings, Settings } from "@api/Settings";
+import { definePluginSettings } from "@api/Settings";
 import { getUserSettingLazy } from "@api/UserSettings";
 import { Button } from "@components/Button";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Flex } from "@components/Flex";
 import { HeadingSecondary } from "@components/Heading";
 import { Paragraph } from "@components/Paragraph";
+import CustomRpcPlugin from "@plugins/customRPC";
 import { Devs } from "@utils/constants";
 import { Margins } from "@utils/margins";
 import definePlugin, { OptionType } from "@utils/types";
@@ -86,7 +87,7 @@ function ImportCustomRPCComponent() {
             <div>
                 <Button
                     onClick={() => {
-                        const id = Settings.plugins.CustomRPC?.appID as string | undefined;
+                        const id = CustomRpcPlugin.settings.store.appID;
                         if (!id) {
                             return showToast("CustomRPC application ID is not set.", Toasts.Type.FAILURE);
                         }

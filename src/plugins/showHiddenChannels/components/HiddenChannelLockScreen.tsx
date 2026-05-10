@@ -17,7 +17,6 @@
 */
 
 import { isPluginEnabled } from "@api/PluginManager";
-import { Settings } from "@api/Settings";
 import { BaseText } from "@components/BaseText";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Heading, HeadingPrimary } from "@components/Heading";
@@ -148,7 +147,7 @@ function HiddenChannelLockScreen({ channel }: { channel: Channel; }) {
             });
         }
 
-        if (Settings.plugins.PermissionsViewer.enabled) {
+        if (isPluginEnabled(PermissionsViewerPlugin.name)) {
             setPermissions(sortPermissionOverwrites(Object.values(permissionOverwrites).map(overwrite => ({
                 type: overwrite.type,
                 id: overwrite.id,
@@ -186,7 +185,7 @@ function HiddenChannelLockScreen({ channel }: { channel: Channel; }) {
                 </div>
 
                 {(!channel.isGuildVoice() && !channel.isGuildStageVoice()) && (
-                    <BaseText size="lg">
+                    <BaseText tag="h2" size="lg">
                         You can not see the {channel.isForumChannel() ? "posts" : "messages"} of this channel.
                         {channel.isForumChannel() && topic && topic.length > 0 && " However you may see its guidelines:"}
                     </BaseText >

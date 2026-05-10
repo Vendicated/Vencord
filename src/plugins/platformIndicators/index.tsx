@@ -21,7 +21,7 @@ import "./style.css";
 import { addProfileBadge, BadgePosition, BadgeUserArgs, ProfileBadge, removeProfileBadge } from "@api/Badges";
 import { addMemberListDecorator, removeMemberListDecorator } from "@api/MemberListDecorators";
 import { addMessageDecoration, removeMessageDecoration } from "@api/MessageDecorations";
-import { Settings } from "@api/Settings";
+import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { DiscordPlatform, OnlineStatus, User } from "@vencord/discord-types";
@@ -51,6 +51,63 @@ const platformMap = {
     vr: "VR"
 };
 
+const badge: ProfileBadge = {
+    id: "vc_platform_indicator_wrapper",
+    getBadges,
+    position: BadgePosition.START,
+};
+
+const indicatorLocations = {
+    list: {
+        description: "In the member list",
+        onEnable: () => addMemberListDecorator("platform-indicator", ({ user }) =>
+            user && !user.bot ? <PlatformIndicator user={user} small={true} /> : null
+        ),
+        onDisable: () => removeMemberListDecorator("platform-indicator")
+    },
+    badges: {
+        description: "In user profiles, as badges",
+        onEnable: () => addProfileBadge(badge),
+        onDisable: () => removeProfileBadge(badge)
+    },
+    messages: {
+        description: "Inside messages",
+        onEnable: () => addMessageDecoration("platform-indicator", props => {
+            const user = props.message?.author;
+            return user && !user.bot ? <PlatformIndicator user={props.message?.author} /> : null;
+        }),
+        onDisable: () => removeMessageDecoration("platform-indicator")
+    }
+};
+
+const Icons = {
+    desktop: Icon("M4 2.5c-1.103 0-2 .897-2 2v11c0 1.104.897 2 2 2h7v2H7v2h10v-2h-4v-2h7c1.103 0 2-.896 2-2v-11c0-1.103-.897-2-2-2H4Zm16 2v9H4v-9h16Z"),
+    web: Icon("M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2Zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93Zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39Z"),
+    mobile: Icon("M 187 0 L 813 0 C 916.277 0 1000 83.723 1000 187 L 1000 1313 C 1000 1416.277 916.277 1500 813 1500 L 187 1500 C 83.723 1500 0 1416.277 0 1313 L 0 187 C 0 83.723 83.723 0 187 0 Z M 125 1000 L 875 1000 L 875 250 L 125 250 Z M 500 1125 C 430.964 1125 375 1180.964 375 1250 C 375 1319.036 430.964 1375 500 1375 C 569.036 1375 625 1319.036 625 1250 C 625 1180.964 569.036 1125 500 1125 Z", { viewBox: "0 0 1000 1500", height: 17, width: 17 }),
+    embedded: Icon("M14.8 2.7 9 3.1V47h3.3c1.7 0 6.2.3 10 .7l6.7.6V2l-4.2.2c-2.4.1-6.9.3-10 .5zm1.8 6.4c1 1.7-1.3 3.6-2.7 2.2C12.7 10.1 13.5 8 15 8c.5 0 1.2.5 1.6 1.1zM16 33c0 6-.4 10-1 10s-1-4-1-10 .4-10 1-10 1 4 1 10zm15-8v23.3l3.8-.7c2-.3 4.7-.6 6-.6H43V3h-2.2c-1.3 0-4-.3-6-.6L31 1.7V25z", { viewBox: "0 0 50 50" }),
+    vr: Icon("M8.46 8.64a1 1 0 0 1 1 1c0 .44-.3.8-.72.92l-.11.07c-.08.06-.2.19-.2.41a.99.99 0 0 1-.98.86h-.06a1 1 0 0 1-.94-1.05l.02-.32c.05-1.06.92-1.9 1.99-1.9ZM15.55 5a5.5 5.5 0 0 1 5.15 3.67h.3a2 2 0 0 1 2 2v3.18a2 2 0 0 1-2 1.99h-.2A4.54 4.54 0 0 1 16.55 19a4.45 4.45 0 0 1-3.6-1.83 1.2 1.2 0 0 0-1.9 0 4.44 4.44 0 0 1-3.9 1.82 4.54 4.54 0 0 1-3.94-3.15H3a2 2 0 0 1-2-2v-3.18c0-1.1.9-1.99 2-1.99h.3A5.5 5.5 0 0 1 8.46 5h7.09Zm-7.1 2C6.6 7 5.06 8.5 4.97 10.41l-.02.66v3.18c0 1.43 1.05 2.66 2.34 2.74.85.06 1.63-.32 2.14-1.01a3.2 3.2 0 0 1 2.57-1.3c1 0 1.97.48 2.57 1.3.5.69 1.3 1.08 2.14 1.01 1.3-.08 2.34-1.31 2.34-2.74l-.02-3.84a3.54 3.54 0 0 0-3.49-3.43H8.45Z", { viewBox: "0 4 24 16", height: 20, width: 20 }),
+} satisfies Record<DiscordPlatform, any>;
+
+const settings = definePluginSettings({
+    ...Object.fromEntries(
+        Object.entries(indicatorLocations).map(([key, value]) => {
+            return [key, {
+                type: OptionType.BOOLEAN,
+                description: `Show indicators ${value.description.toLowerCase()}`,
+                // onChange doesn't give any way to know which setting was changed, so restart required
+                restartNeeded: true,
+                default: true
+            }];
+        })
+    ),
+    colorMobileIndicator: {
+        type: OptionType.BOOLEAN,
+        description: "Whether to make the mobile indicator match the color of the user status.",
+        default: true,
+        restartNeeded: true
+    }
+});
+
 function Icon(path: string, opts?: { viewBox?: string; width?: number; height?: number; }) {
     return ({ color, tooltip, small }: { color: string; tooltip: string; small: boolean; }) => (
         <Tooltip text={tooltip}>
@@ -68,14 +125,6 @@ function Icon(path: string, opts?: { viewBox?: string; width?: number; height?: 
         </Tooltip>
     );
 }
-
-const Icons = {
-    desktop: Icon("M4 2.5c-1.103 0-2 .897-2 2v11c0 1.104.897 2 2 2h7v2H7v2h10v-2h-4v-2h7c1.103 0 2-.896 2-2v-11c0-1.103-.897-2-2-2H4Zm16 2v9H4v-9h16Z"),
-    web: Icon("M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2Zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93Zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39Z"),
-    mobile: Icon("M 187 0 L 813 0 C 916.277 0 1000 83.723 1000 187 L 1000 1313 C 1000 1416.277 916.277 1500 813 1500 L 187 1500 C 83.723 1500 0 1416.277 0 1313 L 0 187 C 0 83.723 83.723 0 187 0 Z M 125 1000 L 875 1000 L 875 250 L 125 250 Z M 500 1125 C 430.964 1125 375 1180.964 375 1250 C 375 1319.036 430.964 1375 500 1375 C 569.036 1375 625 1319.036 625 1250 C 625 1180.964 569.036 1125 500 1125 Z", { viewBox: "0 0 1000 1500", height: 17, width: 17 }),
-    embedded: Icon("M14.8 2.7 9 3.1V47h3.3c1.7 0 6.2.3 10 .7l6.7.6V2l-4.2.2c-2.4.1-6.9.3-10 .5zm1.8 6.4c1 1.7-1.3 3.6-2.7 2.2C12.7 10.1 13.5 8 15 8c.5 0 1.2.5 1.6 1.1zM16 33c0 6-.4 10-1 10s-1-4-1-10 .4-10 1-10 1 4 1 10zm15-8v23.3l3.8-.7c2-.3 4.7-.6 6-.6H43V3h-2.2c-1.3 0-4-.3-6-.6L31 1.7V25z", { viewBox: "0 0 50 50" }),
-    vr: Icon("M8.46 8.64a1 1 0 0 1 1 1c0 .44-.3.8-.72.92l-.11.07c-.08.06-.2.19-.2.41a.99.99 0 0 1-.98.86h-.06a1 1 0 0 1-.94-1.05l.02-.32c.05-1.06.92-1.9 1.99-1.9ZM15.55 5a5.5 5.5 0 0 1 5.15 3.67h.3a2 2 0 0 1 2 2v3.18a2 2 0 0 1-2 1.99h-.2A4.54 4.54 0 0 1 16.55 19a4.45 4.45 0 0 1-3.6-1.83 1.2 1.2 0 0 0-1.9 0 4.44 4.44 0 0 1-3.9 1.82 4.54 4.54 0 0 1-3.94-3.15H3a2 2 0 0 1-2-2v-3.18c0-1.1.9-1.99 2-1.99h.3A5.5 5.5 0 0 1 8.46 5h7.09Zm-7.1 2C6.6 7 5.06 8.5 4.97 10.41l-.02.66v3.18c0 1.43 1.05 2.66 2.34 2.74.85.06 1.63-.32 2.14-1.01a3.2 3.2 0 0 1 2.57-1.3c1 0 1.97.48 2.57 1.3.5.69 1.3 1.08 2.14 1.01 1.3-.08 2.34-1.31 2.34-2.74l-.02-3.84a3.54 3.54 0 0 0-3.49-3.43H8.45Z", { viewBox: "0 4 24 16", height: 20, width: 20 }),
-} satisfies Record<DiscordPlatform, any>;
 
 function getPlatformTooltip(platform: DiscordPlatform): string {
     return platformMap[platform] ?? platform.charAt(0).toUpperCase() + platform.slice(1);
@@ -166,46 +215,17 @@ const PlatformIndicator = ({ user, small = false }: { user: User; small?: boolea
     );
 };
 
-const badge: ProfileBadge = {
-    id: "vc_platform_indicator_wrapper",
-    getBadges,
-    position: BadgePosition.START,
-};
-
-const indicatorLocations = {
-    list: {
-        description: "In the member list",
-        onEnable: () => addMemberListDecorator("platform-indicator", ({ user }) =>
-            user && !user.bot ? <PlatformIndicator user={user} small={true} /> : null
-        ),
-        onDisable: () => removeMemberListDecorator("platform-indicator")
-    },
-    badges: {
-        description: "In user profiles, as badges",
-        onEnable: () => addProfileBadge(badge),
-        onDisable: () => removeProfileBadge(badge)
-    },
-    messages: {
-        description: "Inside messages",
-        onEnable: () => addMessageDecoration("platform-indicator", props => {
-            const user = props.message?.author;
-            return user && !user.bot ? <PlatformIndicator user={props.message?.author} /> : null;
-        }),
-        onDisable: () => removeMessageDecoration("platform-indicator")
-    }
-};
-
 export default definePlugin({
     name: "PlatformIndicators",
     description: "Adds platform indicators (Desktop, Mobile, Web...) to users",
     tags: ["Appearance"],
     authors: [Devs.kemo, Devs.TheSun, Devs.Nuckyz, Devs.Ven],
     dependencies: ["MessageDecorationsAPI", "MemberListDecoratorsAPI"],
+    settings,
 
     start() {
-        const settings = Settings.plugins.PlatformIndicators;
         Object.entries(indicatorLocations).forEach(([key, value]) => {
-            if (settings[key]) value.onEnable();
+            if (settings.store[key]) value.onEnable();
         });
     },
 
@@ -218,7 +238,7 @@ export default definePlugin({
     patches: [
         {
             find: ".Masks.STATUS_ONLINE_MOBILE",
-            predicate: () => Settings.plugins.PlatformIndicators.colorMobileIndicator,
+            predicate: () => settings.store.colorMobileIndicator,
             replacement: [
                 {
                     // Return the STATUS_ONLINE_MOBILE mask if the user is on mobile, no matter the status
@@ -234,7 +254,7 @@ export default definePlugin({
         },
         {
             find: ".AVATAR_STATUS_MOBILE_16;",
-            predicate: () => Settings.plugins.PlatformIndicators.colorMobileIndicator,
+            predicate: () => settings.store.colorMobileIndicator,
             replacement: [
                 {
                     // Return the AVATAR_STATUS_MOBILE size mask if the user is on mobile, no matter the status
@@ -255,32 +275,12 @@ export default definePlugin({
         },
         {
             find: "}isMobileOnline(",
-            predicate: () => Settings.plugins.PlatformIndicators.colorMobileIndicator,
+            predicate: () => settings.store.colorMobileIndicator,
             replacement: {
                 // Make isMobileOnline return true no matter what is the user status
                 match: /(?<=\i\[\i\.\i\.MOBILE\])===\i\.\i\.ONLINE/,
                 replace: "!= null"
             }
         }
-    ],
-
-    options: {
-        ...Object.fromEntries(
-            Object.entries(indicatorLocations).map(([key, value]) => {
-                return [key, {
-                    type: OptionType.BOOLEAN,
-                    description: `Show indicators ${value.description.toLowerCase()}`,
-                    // onChange doesn't give any way to know which setting was changed, so restart required
-                    restartNeeded: true,
-                    default: true
-                }];
-            })
-        ),
-        colorMobileIndicator: {
-            type: OptionType.BOOLEAN,
-            description: "Whether to make the mobile indicator match the color of the user status.",
-            default: true,
-            restartNeeded: true
-        }
-    }
+    ]
 });

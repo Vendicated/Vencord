@@ -21,7 +21,7 @@ import "./fixDiscordBadgePadding.css";
 import { _getBadges, BadgePosition, BadgeUserArgs, ProfileBadge } from "@api/Badges";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Flex } from "@components/Flex";
-import { HeadingPrimary } from "@components/Heading";
+import { Heading } from "@components/Heading";
 import { Heart } from "@components/Heart";
 import { Paragraph } from "@components/Paragraph";
 import DonateButton from "@components/settings/DonateButton";
@@ -31,9 +31,8 @@ import { copyWithToast } from "@utils/discord";
 import { Logger } from "@utils/Logger";
 import { Margins } from "@utils/margins";
 import { shouldShowContributorBadge } from "@utils/misc";
-import { closeModal, ModalContent, ModalFooter, ModalHeader, ModalRoot, openModal } from "@utils/modal";
 import definePlugin from "@utils/types";
-import { ContextMenuApi, Menu, Toasts, UserStore } from "@webpack/common";
+import { ContextMenuApi, Menu, Modal, openModal, Toasts, UserStore } from "@webpack/common";
 
 const CONTRIBUTOR_BADGE = "https://cdn.discordapp.com/emojis/1092089799109775453.png?size=64";
 
@@ -192,14 +191,16 @@ export default definePlugin({
                 ContextMenuApi.openContextMenu(event, () => <BadgeContextMenu badge={badge} />);
             },
             onClick() {
-                const modalKey = openModal(props => (
+                openModal(props => (
                     <ErrorBoundary noop onError={() => {
-                        closeModal(modalKey);
+                        props.onClose();
                         VencordNative.native.openExternal("https://github.com/sponsors/Vendicated");
                     }}>
-                        <ModalRoot {...props}>
-                            <ModalHeader>
-                                <HeadingPrimary
+                        <Modal
+                            {...props}
+                            title={
+                                <Heading
+                                    tag="h2"
                                     style={{
                                         width: "100%",
                                         textAlign: "center",
@@ -210,9 +211,10 @@ export default definePlugin({
                                         <Heart />
                                         Vencord Donor
                                     </Flex>
-                                </HeadingPrimary>
-                            </ModalHeader>
-                            <ModalContent>
+                                </Heading>
+                            }
+                        >
+                            <div>
                                 <Flex>
                                     <img
                                         role="presentation"
@@ -235,13 +237,13 @@ export default definePlugin({
                                         Please consider supporting the development of Vencord by becoming a donor. It would mean a lot!!
                                     </Paragraph>
                                 </div>
-                            </ModalContent>
-                            <ModalFooter>
+                            </div>
+                            <div>
                                 <Flex justifyContent="center" style={{ width: "100%" }}>
                                     <DonateButton />
                                 </Flex>
-                            </ModalFooter>
-                        </ModalRoot>
+                            </div>
+                        </Modal>
                     </ErrorBoundary>
                 ));
             },

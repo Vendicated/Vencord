@@ -14,7 +14,7 @@ import { Margins } from "@utils/margins";
 import { classes } from "@utils/misc";
 import { relaunch } from "@utils/native";
 import { changes, checkForUpdates, update, updateError } from "@utils/updater";
-import { Alerts, React, Toasts, useState } from "@webpack/common";
+import { ConfirmModal, openModal, React, Toasts, useState } from "@webpack/common";
 
 import { runWithDispatch } from "./runWithDispatch";
 
@@ -102,17 +102,21 @@ export function Updatable(props: CommonProps) {
                                 setUpdates([]);
 
                                 await new Promise<void>(r => {
-                                    Alerts.show({
-                                        title: "Update Success!",
-                                        body: "Successfully updated. Restart now to apply the changes?",
-                                        confirmText: "Restart",
-                                        cancelText: "Not now!",
-                                        onConfirm() {
-                                            relaunch();
-                                            r();
-                                        },
-                                        onCancel: r
-                                    });
+                                    openModal(props => (
+                                        <ConfirmModal
+                                            {...props}
+                                            title="Update Success!"
+                                            subtitle="Successfully updated. Restart now to apply the changes?"
+                                            confirmText="Restart"
+                                            cancelText="Not now!"
+                                            variant="primary"
+                                            onConfirm={() => {
+                                                relaunch();
+                                                r();
+                                            }}
+                                            onCancel={r}
+                                        />
+                                    ));
                                 });
                             }
                         })}

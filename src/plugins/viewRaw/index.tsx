@@ -18,20 +18,17 @@
 
 import { findGroupChildrenByChildId, NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { definePluginSettings } from "@api/Settings";
-import { BaseText } from "@components/BaseText";
-import { Button } from "@components/Button";
 import { CodeBlock } from "@components/CodeBlock";
 import { Divider } from "@components/Divider";
 import ErrorBoundary from "@components/ErrorBoundary";
-import { Flex } from "@components/Flex";
 import { Heading } from "@components/Heading";
 import { Devs } from "@utils/constants";
 import { copyWithToast, getCurrentGuild, getIntlMessage } from "@utils/discord";
+import { isTruthy } from "@utils/guards";
 import { Margins } from "@utils/margins";
-import { closeModal, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalRoot, ModalSize, openModal } from "@utils/modal";
 import definePlugin, { IconComponent, OptionType } from "@utils/types";
 import { Message } from "@vencord/discord-types";
-import { ChannelStore, GuildRoleStore, Menu } from "@webpack/common";
+import { ChannelStore, GuildRoleStore, Menu, Modal, openModal } from "@webpack/common";
 
 
 const CopyIcon: IconComponent = ({ height = 20, width = 20, className }) => {
@@ -74,40 +71,36 @@ function cleanMessage(msg: Message) {
 }
 
 function openViewRawModal(json: string, type: string, msgContent?: string) {
-    const key = openModal(props => (
+    openModal(props => (
         <ErrorBoundary>
-            <ModalRoot {...props} size={ModalSize.LARGE}>
-                <ModalHeader>
-                    <BaseText size="lg" weight="semibold" style={{ flexGrow: 1 }}>View Raw</BaseText>
-                    <ModalCloseButton onClick={() => closeModal(key)} />
-                </ModalHeader>
-                <ModalContent>
-                    <div style={{ padding: "16px 0" }}>
-                        {!!msgContent && (
-                            <>
-                                <Heading>Content</Heading>
-                                <CodeBlock content={msgContent} lang="" />
-                                <Divider className={Margins.bottom20} />
-                            </>
-                        )}
+            <Modal
+                {...props}
+                title="View Raw"
+                size="xl"
+                actions={[
+                    {
+                        text: `Copy ${type} JSON`,
+                        variant: "primary",
+                        onClick: () => copyWithToast(json, `${type} data copied to clipboard!`)
+                    },
+                    msgContent && {
+                        text: "Copy Raw Content",
+                        variant: "secondary",
+                        onClick: () => copyWithToast(msgContent, "Content copied to clipboard!")
+                    }
+                ].filter(isTruthy)}
+            >
+                {!!msgContent && (
+                    <>
+                        <Heading tag="h5">Content</Heading>
+                        <CodeBlock content={msgContent} lang="" />
+                        <Divider className={Margins.bottom20} />
+                    </>
+                )}
 
-                        <Heading>{type} Data</Heading>
-                        <CodeBlock content={json} lang="json" />
-                    </div>
-                </ModalContent >
-                <ModalFooter>
-                    <Flex>
-                        <Button onClick={() => copyWithToast(json, `${type} data copied to clipboard!`)}>
-                            Copy {type} JSON
-                        </Button>
-                        {!!msgContent && (
-                            <Button onClick={() => copyWithToast(msgContent, "Content copied to clipboard!")}>
-                                Copy Raw Content
-                            </Button>
-                        )}
-                    </Flex>
-                </ModalFooter>
-            </ModalRoot >
+                <Heading tag="h5">{type} Data</Heading>
+                <CodeBlock content={json} lang="json" />
+            </Modal>
         </ErrorBoundary >
     ));
 }

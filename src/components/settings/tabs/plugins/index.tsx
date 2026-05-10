@@ -36,7 +36,7 @@ import { Margins } from "@utils/margins";
 import { classes } from "@utils/misc";
 import { useAwaiter, useCleanupEffect } from "@utils/react";
 import { PluginTag, PluginTags } from "@utils/types";
-import { Alerts, lodash, Parser, React, SearchableSelect, Select, TextInput, Tooltip, useMemo, useRef, useState } from "@webpack/common";
+import { ConfirmModal, lodash, openModal, Parser, React, SearchableSelect, Select, TextInput, Tooltip, useMemo, useRef, useState } from "@webpack/common";
 import { JSX } from "react";
 
 import Plugins, { ExcludedPlugins, PluginMeta } from "~plugins";
@@ -122,9 +122,15 @@ function PluginSettings() {
 
     useCleanupEffect(() => {
         if (changes.hasChanges)
-            Alerts.show({
-                title: "Restart required",
-                body: (
+            openModal(props => (
+                <ConfirmModal
+                    {...props}
+                    title="Restart required"
+                    confirmText="Restart now"
+                    cancelText="Later!"
+                    variant="primary"
+                    onConfirm={() => location.reload()}
+                >
                     <>
                         <p>The following plugins require a restart:</p>
                         <div>{changes.map((s, i) => (
@@ -134,11 +140,8 @@ function PluginSettings() {
                             </>
                         ))}</div>
                     </>
-                ),
-                confirmText: "Restart now",
-                cancelText: "Later!",
-                onConfirm: () => location.reload()
-            });
+                </ConfirmModal>
+            ));
     }, []);
 
     const depMap = useMemo(() => {
@@ -222,7 +225,7 @@ function PluginSettings() {
 
     const showApi = searchValue.status === SearchStatus.API_PLUGINS;
     for (const p of sortedPlugins) {
-        if (p.hidden || (!p.options && p.name.endsWith("API") && !showApi))
+        if (p.hidden || (!p.settings && p.name.endsWith("API") && !showApi))
             continue;
 
         if (!pluginFilter(p)) continue;

@@ -28,12 +28,13 @@ import { SpecialCard } from "@components/settings/SpecialCard";
 import { SettingsTab, wrapTab } from "@components/settings/tabs/BaseTab";
 import { openContributorModal } from "@components/settings/tabs/plugins/ContributorModal";
 import { openPluginModal } from "@components/settings/tabs/plugins/PluginModal";
+import SettingsPlugin from "@plugins/_core/settings";
 import { gitRemote } from "@shared/vencordUserAgent";
 import { IS_MAC, IS_WINDOWS } from "@utils/constants";
 import { Margins } from "@utils/margins";
 import { isPluginDev } from "@utils/misc";
 import { relaunch } from "@utils/native";
-import { Alerts, React, useMemo, UserStore } from "@webpack/common";
+import { ConfirmModal, openModal, React, useMemo, UserStore } from "@webpack/common";
 
 import { DonateButtonComponent, isDonor } from "./DonateButton";
 import { VibrancySettings } from "./MacVibrancySettings";
@@ -112,13 +113,17 @@ function Switches() {
                     settings[key] = v;
 
                     if (restartRequired) {
-                        Alerts.show({
-                            title: "Restart Required",
-                            body: "A restart is required to apply this change",
-                            confirmText: "Restart now",
-                            cancelText: "Later!",
-                            onConfirm: relaunch
-                        });
+                        openModal(props => (
+                            <ConfirmModal
+                                {...props}
+                                title="Restart Required"
+                                subtitle="A restart is required to apply this change"
+                                confirmText="Restart now"
+                                cancelText="Later!"
+                                variant="primary"
+                                onConfirm={relaunch}
+                            />
+                        ));
                     }
                 }}
             />
@@ -219,7 +224,7 @@ function VencordSettings() {
                 <Heading>Settings</Heading>
                 <Paragraph className={Margins.bottom20} style={{ color: "var(--text-muted)" }}>
                     Hint: You can change the position of this settings section in the{" "}
-                    <a onClick={() => openPluginModal(Vencord.Plugins.plugins.Settings)}>
+                    <a onClick={() => openPluginModal(SettingsPlugin)}>
                         settings of the Settings plugin
                     </a>!
                 </Paragraph>

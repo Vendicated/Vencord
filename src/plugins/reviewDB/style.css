@@ -14,11 +14,6 @@
     box-sizing: border-box;
 }
 
-.vc-rdb-modal-footer-wrapper {
-    width: 100%;
-    margin: 6px 16px;
-}
-
 .vc-rdb-placeholder {
     margin-bottom: 4px;
     font-weight: bold;
@@ -41,14 +36,7 @@
 
 .vc-rdb-modal-footer [class*="pageControlContainer"] {
     margin-top: 0;
-}
-
-.vc-rdb-modal-header {
-    flex-grow: 1;
-}
-
-.vc-rdb-modal-reviews {
-    margin-top: 16px;
+    white-space: nowrap;
 }
 
 .vc-rdb-review {
@@ -78,14 +66,7 @@
     cursor: pointer;
 }
 
-.vc-rdb-block-modal-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
 .vc-rdb-block-modal {
-    padding: 1em;
     display: grid;
     gap: 0.75em;
 }

@@ -9,17 +9,17 @@ import "./UIElements.css";
 import { ChatBarButtonMap } from "@api/ChatButtons";
 import { MessagePopoverButtonMap } from "@api/MessagePopover";
 import { SettingsPluginUiElements, useSettings } from "@api/Settings";
+import { BaseText } from "@components/BaseText";
 import { Card } from "@components/Card";
-import { HeadingSecondary } from "@components/Heading";
 import { PlaceholderIcon } from "@components/Icons";
 import { Paragraph } from "@components/Paragraph";
 import { Switch } from "@components/Switch";
 import { classNameFactory } from "@utils/css";
 import { Margins } from "@utils/margins";
 import { classes } from "@utils/misc";
-import { ModalContent, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
 import { IconComponent } from "@utils/types";
-import { Clickable } from "@webpack/common";
+import { RenderModalProps } from "@vencord/discord-types";
+import { Clickable, Modal, openModal } from "@webpack/common";
 
 
 const cl = classNameFactory("vc-plugin-ui-elements-");
@@ -75,7 +75,7 @@ function Section(props: {
 
     return (
         <section>
-            <HeadingSecondary>{title}</HeadingSecondary>
+            <BaseText tag="h3" size="lg" weight="semibold">{title}</BaseText>
             <Paragraph size="sm" className={classes(Margins.top8, Margins.bottom20)}>{description}</Paragraph>
 
             <div className={cl("switches")}>
@@ -90,12 +90,12 @@ function Section(props: {
     );
 }
 
-function UIElementsModal(props: ModalProps) {
+function UIElementsModal(props: RenderModalProps) {
     const { uiElements } = useSettings(["uiElements.*"]);
 
     return (
-        <ModalRoot {...props} size={ModalSize.MEDIUM}>
-            <ModalContent className={cl("modal-content")}>
+        <Modal {...props} size="md" title="Manage plugin UI elements">
+            <div className={cl("modal-content")}>
                 <Section
                     title="Chatbar Buttons"
                     description="These are the buttons on the right side of the chat input bar"
@@ -108,7 +108,7 @@ function UIElementsModal(props: ModalProps) {
                     buttonMap={MessagePopoverButtonMap}
                     settings={uiElements.messagePopoverButtons}
                 />
-            </ModalContent>
-        </ModalRoot>
+            </div>
+        </Modal>
     );
 }

@@ -37,8 +37,8 @@ import { onlyOnce } from "@utils/onlyOnce";
 import { makeCodeblock } from "@utils/text";
 import definePlugin from "@utils/types";
 import { checkForUpdates, isOutdated, update } from "@utils/updater";
-import { Channel } from "@vencord/discord-types";
-import { Alerts, ChannelStore, GuildMemberStore, Parser, PermissionsBits, PermissionStore, RelationshipStore, showToast, Toasts, UserStore } from "@webpack/common";
+import { Channel, RenderModalProps } from "@vencord/discord-types";
+import { ChannelStore, ConfirmModal, GuildMemberStore, openModal, Parser, PermissionsBits, PermissionStore, RelationshipStore, showToast, Toasts, UserStore } from "@webpack/common";
 import { JSX } from "react";
 
 import gitHash from "~git-hash";
@@ -139,6 +139,34 @@ const settings = definePluginSettings({}).withPrivateSettings<{
     dismissedDevBuildWarning?: boolean;
 }>();
 
+function DevBuildConfirmModal(props: RenderModalProps) {
+    const s = settings.use(["dismissedDevBuildWarning"]);
+
+    return (
+        <ConfirmModal
+            {...props}
+            title="Hold on!"
+            confirmText="Understood"
+            variant="primary"
+            checkboxProps={{
+                checked: s.dismissedDevBuildWarning === true,
+                onChange: checked => s.dismissedDevBuildWarning = checked
+            }}
+        >
+            <div>
+                <Paragraph>You are using a custom build of Vencord, which we do not provide support for!</Paragraph>
+
+                <Paragraph className={Margins.top8}>
+                    We only provide support for <Link href="https://vencord.dev/download">official builds</Link>.
+                    Either <Link href="https://vencord.dev/download">switch to an official build</Link> or figure your issue out yourself.
+                </Paragraph>
+
+                <BaseText size="md" weight="bold" className={Margins.top8}>You will be banned from receiving support if you ignore this rule.</BaseText>
+            </div>
+        </ConfirmModal>
+    );
+}
+
 export default definePlugin({
     name: "SupportHelper",
     required: true,
@@ -183,20 +211,28 @@ export default definePlugin({
                 await checkForUpdatesOnce().catch(() => { });
 
                 if (isOutdated) {
-                    return Alerts.show({
-                        title: "Hold on!",
-                        body: <div>
-                            <Paragraph>You are using an outdated version of Vencord! Chances are, your issue is already fixed.</Paragraph>
-                            <Paragraph className={Margins.top8}>
-                                Please first update before asking for support!
-                            </Paragraph>
-                        </div>,
-                        onCancel: () => openSettingsTabModal(UpdaterTab!),
-                        cancelText: "View Updates",
-                        confirmText: "Update & Restart Now",
-                        onConfirm: forceUpdate,
-                        secondaryConfirmText: "I know what I'm doing or I can't update"
-                    });
+                    openModal(props => (
+                        <ConfirmModal
+                            {...props}
+                            variant="primary"
+                            title="Hold on!"
+                            confirmText="Update & Restart Now"
+                            cancelText="View Updates"
+                            onConfirm={forceUpdate}
+                            onCancel={() => openSettingsTabModal(UpdaterTab!)}
+                        >
+                            <div>
+                                <Paragraph>You are using an outdated version of Vencord! Chances are, your issue is already fixed.</Paragraph>
+                                <Paragraph className={Margins.top8}>
+                                    Please first update before asking for support!
+                                </Paragraph>
+                                <Paragraph className={Margins.top8}>
+                                    If you know what you're doing or cannot update, you can dismiss this prompt.
+                                </Paragraph>
+                            </div>
+                        </ConfirmModal>
+                    ));
+                    return;
                 }
             }
 
@@ -204,35 +240,28 @@ export default definePlugin({
             if (!roles || TrustedRolesIds.some(id => roles.includes(id))) return;
 
             if (!IS_WEB && IS_UPDATER_DISABLED) {
-                return Alerts.show({
-                    title: "Hold on!",
-                    body: <div>
-                        <Paragraph>You are using an externally updated Vencord version, which we do not provide support for!</Paragraph>
-                        <Paragraph className={Margins.top8}>
-                            Please either switch to an <Link href="https://vencord.dev/download">officially supported version of Vencord</Link>, or
-                            contact your package maintainer for support instead.
-                        </Paragraph>
-                    </div>
-                });
+                openModal(props => (
+                    <ConfirmModal
+                        {...props}
+                        title="Hold on!"
+                        confirmText="OK"
+                        variant="primary"
+                    >
+                        <div>
+                            <Paragraph>You are using an externally updated Vencord version, which we do not provide support for!</Paragraph>
+                            <Paragraph className={Margins.top8}>
+                                Please either switch to an <Link href="https://vencord.dev/download">officially supported version of Vencord</Link>, or
+                                contact your package maintainer for support instead.
+                            </Paragraph>
+                        </div>
+                    </ConfirmModal>
+                ));
+                return;
             }
 
             if (!IS_STANDALONE && !settings.store.dismissedDevBuildWarning) {
-                return Alerts.show({
-                    title: "Hold on!",
-                    body: <div>
-                        <Paragraph>You are using a custom build of Vencord, which we do not provide support for!</Paragraph>
-
-                        <Paragraph className={Margins.top8}>
-                            We only provide support for <Link href="https://vencord.dev/download">official builds</Link>.
-                            Either <Link href="https://vencord.dev/download">switch to an official build</Link> or figure your issue out yourself.
-                        </Paragraph>
-
-                        <BaseText weight="bold" className={Margins.top8}>You will be banned from receiving support if you ignore this rule.</BaseText>
-                    </div>,
-                    confirmText: "Understood",
-                    secondaryConfirmText: "Don't show again",
-                    onConfirmSecondary: () => settings.store.dismissedDevBuildWarning = true
-                });
+                openModal(props => <DevBuildConfirmModal {...props} />);
+                return;
             }
         }
     },
