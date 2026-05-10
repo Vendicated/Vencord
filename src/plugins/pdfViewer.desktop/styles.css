@@ -22,6 +22,12 @@
     min-width: 0;
     min-height: 48px;
     padding: 8px 10px;
+    color: var(--text-default, var(--text-normal, #dbdee1));
+}
+
+.vc-pdfViewer-fileBar > svg {
+    color: var(--text-link, var(--brand-360, #00a8fc));
+    flex: 0 0 auto;
 }
 
 .vc-pdfViewer-fileMeta {
@@ -33,7 +39,7 @@
 
 .vc-pdfViewer-fileName {
     overflow: hidden;
-    color: var(--text-normal);
+    color: var(--text-default, var(--text-normal, #dbdee1));
     font-size: 14px;
     font-weight: 600;
     line-height: 18px;
@@ -42,7 +48,7 @@
 }
 
 .vc-pdfViewer-fileSize {
-    color: var(--text-muted);
+    color: var(--text-muted, var(--text-secondary, #b5bac1));
     font-size: 12px;
     line-height: 16px;
 }
@@ -62,10 +68,14 @@
     padding: 0;
     border: 0;
     border-radius: 6px;
-    color: var(--interactive-normal);
+    color: var(--interactive-icon-default, var(--interactive-normal, #b5bac1));
     background: transparent;
     cursor: pointer;
     transition: color 120ms ease, background-color 120ms ease;
+}
+
+.vc-pdfViewer-button svg {
+    color: inherit;
 }
 
 .vc-pdfViewer-button:disabled {
@@ -74,20 +84,25 @@
 }
 
 .vc-pdfViewer-button:hover:not(:disabled) {
-    color: var(--interactive-hover);
-    background: var(--background-modifier-hover);
+    color: var(--interactive-icon-hover, var(--interactive-hover, #dbdee1));
+    background: var(--background-mod-subtle, var(--background-modifier-hover, rgb(255 255 255 / 8%)));
 }
 
 .vc-pdfViewer-button:active:not(:disabled) {
-    background: var(--background-modifier-active);
+    background: var(--background-mod-strong, var(--background-modifier-active, rgb(255 255 255 / 12%)));
 }
 
 .vc-pdfViewer-button-active {
-    color: var(--interactive-active, var(--text-link));
-    background: var(--background-modifier-selected, var(--background-modifier-active));
+    color: var(--text-link, var(--interactive-icon-active, var(--interactive-active, #00a8fc)));
+    background: var(--background-mod-strong, var(--background-modifier-selected, rgb(88 101 242 / 18%)));
+}
+
+.vc-pdfViewer-button-active:hover:not(:disabled) {
+    color: var(--text-link, var(--interactive-icon-active, var(--interactive-active, #00a8fc)));
 }
 
 .vc-pdfViewer-document {
+    position: relative;
     display: flex;
     flex-direction: column;
     border-top: 1px solid var(--border-subtle, var(--background-modifier-accent));
@@ -95,6 +110,25 @@
     height: clamp(420px, 60vh, 720px);
     resize: vertical;
     overflow: hidden;
+}
+
+.vc-pdfViewer-document::after {
+    content: "";
+    position: absolute;
+    right: 10px;
+    bottom: 5px;
+    width: 36px;
+    height: 6px;
+    pointer-events: none;
+    background-image: radial-gradient(circle, var(--interactive-icon-default, var(--text-muted, #b5bac1)) 1.3px, transparent 1.5px);
+    background-repeat: repeat-x;
+    background-size: 8px 6px;
+    opacity: 0.55;
+    transition: opacity 120ms ease;
+}
+
+.vc-pdfViewer-document:hover::after {
+    opacity: 0.85;
 }
 
 .vc-pdfViewer-toolbar {
@@ -113,22 +147,16 @@
 
 .vc-pdfViewer-pageCount {
     font-size: 12px;
-    color: var(--text-muted);
+    color: var(--text-muted, var(--text-secondary, #b5bac1));
     font-variant-numeric: tabular-nums;
 }
 
 .vc-pdfViewer-zoomLabel {
     font-size: 12px;
-    color: var(--text-normal);
+    color: var(--text-default, var(--text-normal, #dbdee1));
     min-width: 40px;
     text-align: center;
     font-variant-numeric: tabular-nums;
-}
-
-.vc-pdfViewer-fitLabel {
-    font-size: 11px;
-    font-weight: 600;
-    letter-spacing: 0.02em;
 }
 
 .vc-pdfViewer-pages {
@@ -142,12 +170,36 @@
 }
 
 .vc-pdfViewer-page {
+    position: relative;
     background: white;
     box-shadow: 0 4px 12px rgb(0 0 0 / 25%);
     display: flex;
     align-items: center;
     justify-content: center;
     flex: 0 0 auto;
+}
+
+.vc-pdfViewer-pageBadge {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    z-index: 1;
+    padding: 4px 7px;
+    border-radius: 6px;
+    color: white;
+    background: rgb(0 0 0 / 70%);
+    font-size: 11px;
+    font-weight: 600;
+    line-height: 1;
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(-4px);
+    transition: opacity 120ms ease, transform 120ms ease;
+}
+
+.vc-pdfViewer-page:hover .vc-pdfViewer-pageBadge {
+    opacity: 1;
+    transform: translateY(0);
 }
 
 .vc-pdfViewer-page canvas {
@@ -173,7 +225,7 @@
     gap: 10px;
     min-height: 160px;
     padding: 24px 16px;
-    color: var(--text-muted);
+    color: var(--text-muted, var(--text-secondary, #b5bac1));
     text-align: center;
     border-top: 1px solid var(--border-subtle, var(--background-modifier-accent));
 }
@@ -189,7 +241,7 @@
     padding: 6px 12px;
     border: 1px solid var(--border-subtle, var(--background-modifier-accent));
     border-radius: 6px;
-    color: var(--text-normal);
+    color: var(--text-default, var(--text-normal, #dbdee1));
     background: var(--background-secondary-alt, var(--background-tertiary));
     font-size: 13px;
     font-weight: 500;
@@ -205,8 +257,8 @@
 .vc-pdfViewer-spinner {
     width: 20px;
     height: 20px;
-    border: 2px solid var(--background-modifier-accent);
-    border-top-color: var(--interactive-active, var(--text-link));
+    border: 2px solid var(--background-modifier-accent, rgb(255 255 255 / 16%));
+    border-top-color: var(--text-link, var(--interactive-icon-active, #00a8fc));
     border-radius: 50%;
     animation: vc-pdf-viewer-spin 800ms linear infinite;
 }

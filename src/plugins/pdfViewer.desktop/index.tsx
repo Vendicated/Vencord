@@ -278,6 +278,18 @@ const ZoomOutIcon = (props: SvgIconProps) => (
     </SvgIcon>
 );
 
+const FitWidthIcon = (props: SvgIconProps) => (
+    <SvgIcon {...props}>
+        <path d="M4 5v14" />
+        <path d="M20 5v14" />
+        <path d="M8 12h8" />
+        <path d="m8 12 3-3" />
+        <path d="m8 12 3 3" />
+        <path d="m16 12-3-3" />
+        <path d="m16 12-3 3" />
+    </SvgIcon>
+);
+
 function Spinner() {
     return <span aria-hidden="true" className="vc-pdfViewer-spinner" />;
 }
@@ -383,6 +395,7 @@ function PdfPage({
             {shouldRender
                 ? <canvas ref={canvasRef} />
                 : <div className="vc-pdfViewer-pagePlaceholder"><Spinner /></div>}
+            <div aria-hidden="true" className="vc-pdfViewer-pageBadge">page {state.pageNumber}</div>
         </div>
     );
 }
@@ -578,7 +591,7 @@ function PdfDocumentView({ bytes }: { bytes: Uint8Array; }) {
                     <ZoomInIcon />
                 </IconButton>
                 <IconButton label="Fit width" active={scale == null} onClick={() => setScale(null)}>
-                    <span className="vc-pdfViewer-fitLabel">Fit</span>
+                    <FitWidthIcon />
                 </IconButton>
             </div>
             <div className="vc-pdfViewer-pages" ref={containerRef}>
