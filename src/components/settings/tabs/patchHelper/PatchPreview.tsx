@@ -130,7 +130,7 @@ export function PatchPreview({ module, match, replacement, setReplacementError }
                         try {
                             const isArrowFunction = patchedCode.startsWith("(");
                             const wrappedCode = "0," + (!isArrowFunction ? "function" : "") + patchedCode.slice(patchedCode.indexOf("("));
-                            Function(wrappedCode.replace(/^(?=function\()/, "0,"));
+                            Function(wrappedCode);
 
                             setCompileResult([true, "Compiled successfully"]);
                         } catch (err) {
