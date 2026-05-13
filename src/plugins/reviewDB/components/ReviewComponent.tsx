@@ -24,7 +24,7 @@ import { canBlockReviewAuthor, canDeleteReview, canReportReview, cl, showToast }
 import { openUserProfile } from "@utils/discord";
 import { classes } from "@utils/misc";
 import { findCssClassesLazy } from "@webpack";
-import { Alerts, IconUtils, Parser, Timestamp, useState } from "@webpack/common";
+import { Alerts, IconUtils, Parser, Timestamp, useEffect, useState } from "@webpack/common";
 
 import { openBlockModal } from "./BlockedUserModal";
 import { BlockButton, DeleteButton, ReportButton, VoteButton } from "./MessageButton";
@@ -42,6 +42,12 @@ export default function ReviewComponent({ review, refetch, profileId }: { review
     const [showAll, setShowAll] = useState(false);
     const [localVote, setLocalVote] = useState<boolean | null>(review.userVote ?? null);
     const [score, setScore] = useState(review.score ?? 0);
+    const [isVoting, setIsVoting] = useState(false);
+
+    useEffect(() => {
+        setLocalVote(review.userVote ?? null);
+        setScore(review.score ?? 0);
+    }, [review.score, review.userVote]);
 
     function openModal() {
         openUserProfile(review.sender.discordID);
@@ -107,6 +113,8 @@ export default function ReviewComponent({ review, refetch, profileId }: { review
     }
 
     async function submitVote(isUpvote: boolean) {
+        if (isVoting) return;
+
         if (review.sender.discordID === Auth.user?.discordID) {
             return showToast("You cannot vote on your own review.");
         }
@@ -115,13 +123,19 @@ export default function ReviewComponent({ review, refetch, profileId }: { review
             return showToast(`You already ${isUpvote ? "upvoted" : "downvoted"} this review.`);
         }
 
-        if (await voteReview(review.id, isUpvote)) {
-            const delta = localVote == null
-                ? isUpvote ? 1 : -1
-                : isUpvote ? 2 : -2;
+        setIsVoting(true);
 
-            setLocalVote(isUpvote);
-            setScore(score + delta);
+        try {
+            if (await voteReview(review.id, isUpvote)) {
+                const delta = localVote == null
+                    ? isUpvote ? 1 : -1
+                    : isUpvote ? 2 : -2;
+
+                setLocalVote(isUpvote);
+                setScore(currentScore => currentScore + delta);
+            }
+        } finally {
+            setIsVoting(false);
         }
     }
 
@@ -203,8 +217,8 @@ export default function ReviewComponent({ review, refetch, profileId }: { review
                         {canReportReview(review) && <ReportButton onClick={reportRev} />}
                         {canBlockReviewAuthor(profileId, review) && <BlockButton isBlocked={isAuthorBlocked} onClick={blockReviewSender} />}
                         {canDeleteReview(profileId, review) && <DeleteButton onClick={delReview} />}
-                        <VoteButton isUpvote isSelected={localVote === true} onClick={() => submitVote(true)} />
-                        <VoteButton isUpvote={false} isSelected={localVote === false} onClick={() => submitVote(false)} />
+                        <VoteButton isUpvote isSelected={localVote === true} disabled={isVoting} onClick={() => submitVote(true)} />
+                        <VoteButton isUpvote={false} isSelected={localVote === false} disabled={isVoting} onClick={() => submitVote(false)} />
                     </div>
                 </div>
             )}

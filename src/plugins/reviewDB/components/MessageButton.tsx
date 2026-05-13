@@ -84,14 +84,19 @@ export function BlockButton({ onClick, isBlocked }: { onClick(): void; isBlocked
     );
 }
 
-export function VoteButton({ isUpvote, isSelected, onClick }: { isUpvote: boolean; isSelected: boolean; onClick(): void; }) {
+export function VoteButton({ isUpvote, isSelected, disabled, onClick }: { isUpvote: boolean; isSelected: boolean; disabled?: boolean; onClick(): void; }) {
     return (
         <Tooltip text={isUpvote ? "Upvote Review" : "Downvote Review"}>
             {props => (
                 <div
                     {...props}
-                    className={classes(iconClasses.button, isSelected && (isUpvote ? "vc-rdb-vote-up-selected" : "vc-rdb-vote-down-selected"))}
-                    onClick={onClick}
+                    className={classes(
+                        iconClasses.button,
+                        disabled && iconClasses.disabled,
+                        isSelected && (isUpvote ? "vc-rdb-vote-up-selected" : "vc-rdb-vote-down-selected")
+                    )}
+                    onClick={disabled ? undefined : onClick}
+                    aria-disabled={disabled}
                     role="button"
                 >
                     <svg height="20" viewBox="0 0 24 24" width="20" fill="currentColor">
