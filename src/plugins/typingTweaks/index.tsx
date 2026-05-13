@@ -95,6 +95,7 @@ const TypingUser = ErrorBoundary.wrap(function TypingUser({ user, guildId }: Typ
 export default definePlugin({
     name: "TypingTweaks",
     description: "Show avatars and role colours in the typing indicator",
+    tags: ["Appearance", "Customisation"],
     authors: [Devs.zt, Devs.sadan],
     settings,
 
@@ -102,7 +103,7 @@ export default definePlugin({
 
     patches: [
         {
-            find: "#{intl::THREE_USERS_TYPING}",
+            find: "#{intl::SEVERAL_USERS_TYPING_STRONG}",
             group: true,
             replacement: [
                 {
@@ -111,7 +112,7 @@ export default definePlugin({
                     replace: "$self.renderTypingUsers({ users: arguments[0]?.typingUserObjects, guildId: arguments[0]?.channel?.guild_id, children: $& })"
                 },
                 {
-                    match: /(?<=function \i\(\i\)\{)(?=[^}]+?\{channel:\i,isThreadCreation:\i=!1\})/,
+                    match: /(?<=function \i\(\i\)\{)(?=[^}]+?\{channel:\i,isThreadCreation:\i=!1,\.\.\.\i\})/,
                     replace: "let typingUserObjects = $self.useTypingUsers(arguments[0]?.channel);"
                 },
                 {

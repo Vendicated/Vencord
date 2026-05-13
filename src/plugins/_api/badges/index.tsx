@@ -29,13 +29,13 @@ import { copyWithToast } from "@utils/discord";
 import { Logger } from "@utils/Logger";
 import { Margins } from "@utils/margins";
 import { shouldShowContributorBadge } from "@utils/misc";
-import { closeModal, ModalContent, ModalFooter, ModalHeader, ModalRoot, openModal } from "@utils/modal";
 import definePlugin from "@utils/types";
-import { ContextMenuApi, Forms, Menu, Toasts, UserStore } from "@webpack/common";
+import { ContextMenuApi, Forms, Menu, Modal,openModal, Toasts, UserStore } from "@webpack/common";
 
 const CONTRIBUTOR_BADGE = "https://cdn.discordapp.com/emojis/1092089799109775453.png?size=64";
 
 const ContributorBadge: ProfileBadge = {
+    id: "vencord_contributor_badge",
     description: "Vencord Contributor",
     iconSrc: CONTRIBUTOR_BADGE,
     position: BadgePosition.START,
@@ -56,7 +56,7 @@ async function loadBadges(noCache = false) {
 
 let intervalId: any;
 
-function BadgeContextMenu({ badge }: { badge: ProfileBadge & BadgeUserArgs; }) {
+function BadgeContextMenu({ badge }: { badge: Omit<ProfileBadge, "id"> & BadgeUserArgs; }) {
     return (
         <Menu.Menu
             navId="vc-badge-context"
@@ -95,7 +95,7 @@ export default definePlugin({
                     replace: "...$1.props,$&"
                 },
                 {
-                    match: /(?<=forceOpen:.{0,40}?\i\((\i)\.id\).{0,100}?)children:/,
+                    match: /(?<=forceOpen:.{0,40}?ariaHidden:!0,)children:(?=.{0,50}?(\i)\.id)/,
                     replace: "children:$1.component?$self.renderBadgeComponent({...$1}) :"
                 },
                 // handle onClick and onContextMenu
@@ -174,7 +174,8 @@ export default definePlugin({
     },
 
     getDonorBadges(userId: string) {
-        return DonorBadges[userId]?.map(badge => ({
+        return DonorBadges[userId]?.map((badge, idx) => ({
+            id: `vencord_donor_badge_${idx}`,
             iconSrc: badge.badge,
             description: badge.tooltip,
             position: BadgePosition.START,
@@ -188,13 +189,14 @@ export default definePlugin({
                 ContextMenuApi.openContextMenu(event, () => <BadgeContextMenu badge={badge} />);
             },
             onClick() {
-                const modalKey = openModal(props => (
+                openModal(props => (
                     <ErrorBoundary noop onError={() => {
-                        closeModal(modalKey);
+                        props.onClose();
                         VencordNative.native.openExternal("https://github.com/sponsors/Vendicated");
                     }}>
-                        <ModalRoot {...props}>
-                            <ModalHeader>
+                        <Modal
+                            {...props}
+                            title={
                                 <Forms.FormTitle
                                     tag="h2"
                                     style={{
@@ -208,8 +210,9 @@ export default definePlugin({
                                         Vencord Donor
                                     </Flex>
                                 </Forms.FormTitle>
-                            </ModalHeader>
-                            <ModalContent>
+                            }
+                        >
+                            <div>
                                 <Flex>
                                     <img
                                         role="presentation"
@@ -232,13 +235,13 @@ export default definePlugin({
                                         Please consider supporting the development of Vencord by becoming a donor. It would mean a lot!!
                                     </Forms.FormText>
                                 </div>
-                            </ModalContent>
-                            <ModalFooter>
+                            </div>
+                            <div>
                                 <Flex justifyContent="center" style={{ width: "100%" }}>
                                     <DonateButton />
                                 </Flex>
-                            </ModalFooter>
-                        </ModalRoot>
+                            </div>
+                        </Modal>
                     </ErrorBoundary>
                 ));
             },

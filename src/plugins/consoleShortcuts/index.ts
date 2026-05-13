@@ -16,19 +16,18 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { loadLazyChunks } from "@debug/loadLazyChunks";
 import { Devs } from "@utils/constants";
 import { getCurrentChannel, getCurrentGuild } from "@utils/discord";
 import { runtimeHashMessageKey } from "@utils/intlHash";
 import { SYM_LAZY_CACHED, SYM_LAZY_GET } from "@utils/lazy";
 import { sleep } from "@utils/misc";
-import { ModalAPI } from "@utils/modal";
 import { relaunch } from "@utils/native";
 import { canonicalizeMatch, canonicalizeReplace, canonicalizeReplacement } from "@utils/patches";
 import definePlugin, { PluginNative, StartAt } from "@utils/types";
 import * as Webpack from "@webpack";
 import { extract, filters, findAll, findModuleId, search } from "@webpack";
 import * as Common from "@webpack/common";
-import { loadLazyChunks } from "debug/loadLazyChunks";
 import type { ComponentType } from "react";
 
 const DESKTOP_ONLY = (f: string) => () => {
@@ -176,8 +175,8 @@ function makeShortcuts() {
         me: { getter: () => Common.UserStore.getCurrentUser(), preload: false },
         meId: { getter: () => Common.UserStore.getCurrentUser().id, preload: false },
         messages: { getter: () => Common.MessageStore.getMessages(Common.SelectedChannelStore.getChannelId()), preload: false },
-        openModal: { getter: () => ModalAPI.openModal },
-        openModalLazy: { getter: () => ModalAPI.openModalLazy },
+        openModal: { getter: () => Common.openModal },
+        openModalLazy: { getter: () => Common.openModalLazy },
 
         Stores: { getter: () => Object.fromEntries(Webpack.fluxStores) },
 
@@ -243,15 +242,18 @@ export default definePlugin({
     name: "ConsoleShortcuts",
     description: "Adds shorter Aliases for many things on the window. Run `shortcutList` for a list.",
     authors: [Devs.Ven],
+    tags: ["Developers", "Console", "Shortcuts", "Utility"],
     startAt: StartAt.Init,
 
     patches: [
         {
-            find: 'this,"_changeCallbacks",',
-            replacement: {
-                match: /\i\(this,"_changeCallbacks",/,
-                replace: "Reflect.defineProperty(this,Symbol.toStringTag,{value:this.getName(),configurable:!0,writable:!0,enumerable:!1}),$&"
-            }
+            find: "&&this.initializeIfNeeded()",
+            replacement: [
+                {
+                    match: /\i&&this\.initializeIfNeeded\(\)/,
+                    replace: "$&,Reflect.defineProperty(this,Symbol.toStringTag,{value:this.getName(),configurable:!0,writable:!0,enumerable:!1})"
+                }
+            ]
         }
     ],
 

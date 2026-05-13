@@ -97,3 +97,8 @@ export function tryOrElse<T>(func: () => T, fallback: T): T {
         return fallback;
     }
 }
+
+export function removeFromArray<T>(arr: T[], predicate: (e: T) => boolean) {
+    const idx = arr.findIndex(predicate);
+    if (idx !== -1) arr.splice(idx, 1);
+}

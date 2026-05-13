@@ -4,14 +4,15 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { definePluginSettings, Settings } from "@api/Settings";
+import { definePluginSettings } from "@api/Settings";
 import { getUserSettingLazy } from "@api/UserSettings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Flex } from "@components/Flex";
+import CustomRpcPlugin from "@plugins/customRPC";
 import { Devs } from "@utils/constants";
 import { Margins } from "@utils/margins";
 import definePlugin, { OptionType } from "@utils/types";
-import { Button, Forms, RunningGameStore, showToast, TextInput, Toasts, Tooltip, useEffect, useState } from "@webpack/common";
+import { Button, Forms, RunningGameStore, showToast, TextArea, Toasts, Tooltip, useEffect, useState } from "@webpack/common";
 
 const enum ActivitiesTypes {
     Game,
@@ -83,7 +84,7 @@ function ImportCustomRPCComponent() {
             <div>
                 <Button
                     onClick={() => {
-                        const id = Settings.plugins.CustomRPC?.appID as string | undefined;
+                        const id = CustomRpcPlugin.settings.store.appID;
                         if (!id) {
                             return showToast("CustomRPC application ID is not set.", Toasts.Type.FAILURE);
                         }
@@ -131,7 +132,7 @@ function IdsListComponent(props: { setValue: (value: string) => void; }) {
         <section>
             <Forms.FormTitle tag="h3">Filter List</Forms.FormTitle>
             <Forms.FormText className={Margins.bottom8}>Comma separated list of activity IDs to filter (Useful for filtering specific RPC activities and CustomRPC</Forms.FormText>
-            <TextInput
+            <TextArea
                 type="text"
                 value={idsList}
                 onChange={handleChange}
@@ -229,6 +230,7 @@ export default definePlugin({
     name: "IgnoreActivities",
     authors: [Devs.Nuckyz, Devs.Kylie],
     description: "Ignore activities from showing up on your status ONLY. You can configure which ones are specifically ignored from the Registered Games and Activities tabs, or use the general settings below",
+    tags: ["Activity", "Privacy", "Customisation"],
     dependencies: ["UserSettingsAPI"],
 
     settings,
@@ -253,7 +255,7 @@ export default definePlugin({
         {
             find: "#{intl::SETTINGS_GAMES_TOGGLE_OVERLAY}",
             replacement: {
-                match: /(\i)&&!\i\|\|\i\?null(?<=return (\i)\.verified.+?)/,
+                match: /(\i)&&!\i\|\|\i\?null(?<=(\i)\.verified&&.+?)/,
                 replace: "$self.renderToggleGameActivityButton($2,$1),$&"
             }
         },

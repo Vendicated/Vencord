@@ -1,7 +1,3 @@
-.vc-vmsg-modal {
-    padding: 1em;
-}
-
 .vc-vmsg-buttons {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -21,7 +17,7 @@
 }
 
 .vc-vmsg-preview-indicator {
-    background: var(--redesign-button-secondary-background);
+    background: var(--control-secondary-background-default);
     width: 16px;
     height: 16px;
     border-radius: 50%;
