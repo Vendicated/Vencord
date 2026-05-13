@@ -83,3 +83,26 @@ export function BlockButton({ onClick, isBlocked }: { onClick(): void; isBlocked
         </Tooltip>
     );
 }
+
+export function VoteButton({ isUpvote, isSelected, onClick }: { isUpvote: boolean; isSelected: boolean; onClick(): void; }) {
+    return (
+        <Tooltip text={isUpvote ? "Upvote Review" : "Downvote Review"}>
+            {props => (
+                <div
+                    {...props}
+                    className={classes(iconClasses.button, isSelected && (isUpvote ? "vc-rdb-vote-up-selected" : "vc-rdb-vote-down-selected"))}
+                    onClick={onClick}
+                    role="button"
+                >
+                    <svg height="20" viewBox="0 0 24 24" width="20" fill="currentColor">
+                        <path
+                            d={isUpvote
+                                ? "M12 3 4 11h5v10h6V11h5L12 3Z"
+                                : "M12 21 4 13h5V3h6v10h5l-8 8Z"}
+                        />
+                    </svg>
+                </div>
+            )}
+        </Tooltip>
+    );
+}

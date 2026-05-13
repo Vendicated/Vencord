@@ -18,7 +18,7 @@
 
 import { Auth, getToken } from "@plugins/reviewDB/auth";
 import { Review, ReviewType } from "@plugins/reviewDB/entities";
-import { blockUser, deleteReview, reportReview, unblockUser } from "@plugins/reviewDB/reviewDbApi";
+import { blockUser, deleteReview, reportReview, unblockUser, voteReview } from "@plugins/reviewDB/reviewDbApi";
 import { settings } from "@plugins/reviewDB/settings";
 import { canBlockReviewAuthor, canDeleteReview, canReportReview, cl, showToast } from "@plugins/reviewDB/utils";
 import { openUserProfile } from "@utils/discord";
@@ -27,7 +27,7 @@ import { findCssClassesLazy } from "@webpack";
 import { Alerts, IconUtils, Parser, Timestamp, useState } from "@webpack/common";
 
 import { openBlockModal } from "./BlockedUserModal";
-import { BlockButton, DeleteButton, ReportButton } from "./MessageButton";
+import { BlockButton, DeleteButton, ReportButton, VoteButton } from "./MessageButton";
 import ReviewBadge from "./ReviewBadge";
 
 const MessageClasses = findCssClassesLazy("cozyMessage", "message", "groupStart", "buttons", "buttonsInner");
@@ -40,6 +40,8 @@ const dateFormat = new Intl.DateTimeFormat();
 
 export default function ReviewComponent({ review, refetch, profileId }: { review: Review; refetch(): void; profileId: string; }) {
     const [showAll, setShowAll] = useState(false);
+    const [localVote, setLocalVote] = useState<boolean | null>(review.userVote ?? null);
+    const [score, setScore] = useState(review.score ?? 0);
 
     function openModal() {
         openUserProfile(review.sender.discordID);
@@ -104,6 +106,25 @@ export default function ReviewComponent({ review, refetch, profileId }: { review
         });
     }
 
+    async function submitVote(isUpvote: boolean) {
+        if (review.sender.discordID === Auth.user?.discordID) {
+            return showToast("You cannot vote on your own review.");
+        }
+
+        if (localVote === isUpvote) {
+            return showToast(`You already ${isUpvote ? "upvoted" : "downvoted"} this review.`);
+        }
+
+        if (await voteReview(review.id, isUpvote)) {
+            const delta = localVote == null
+                ? isUpvote ? 1 : -1
+                : isUpvote ? 2 : -2;
+
+            setLocalVote(isUpvote);
+            setScore(score + delta);
+        }
+    }
+
     return (
         <div className={classes(cl("review"), MessageClasses.cozyMessage, AvatarClasses.wrapper, MessageClasses.message, MessageClasses.groupStart, AvatarClasses.cozy)} style={
             {
@@ -156,6 +177,11 @@ export default function ReviewComponent({ review, refetch, profileId }: { review
                         {dateFormat.format(review.timestamp * 1000)}
                     </Timestamp>)
             }
+            {review.id !== 0 && (
+                <span className={cl("vote-score")}>
+                    {score}
+                </span>
+            )}
 
             <div className={cl("review-comment")}>
                 {(review.comment.length > 200 && !showAll)
@@ -177,6 +203,8 @@ export default function ReviewComponent({ review, refetch, profileId }: { review
                         {canReportReview(review) && <ReportButton onClick={reportRev} />}
                         {canBlockReviewAuthor(profileId, review) && <BlockButton isBlocked={isAuthorBlocked} onClick={blockReviewSender} />}
                         {canDeleteReview(profileId, review) && <DeleteButton onClick={delReview} />}
+                        <VoteButton isUpvote isSelected={localVote === true} onClick={() => submitVote(true)} />
+                        <VoteButton isUpvote={false} isSelected={localVote === false} onClick={() => submitVote(false)} />
                     </div>
                 </div>
             )}

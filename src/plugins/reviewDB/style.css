@@ -136,3 +136,19 @@
     opacity: 0.4;
     cursor: not-allowed;
 }
+
+.vc-rdb-vote-score {
+    margin-left: 8px;
+    color: var(--text-muted);
+    font-size: 0.75rem;
+    line-height: 1.375rem;
+    vertical-align: baseline;
+}
+
+.vc-rdb-vote-up-selected {
+    color: var(--status-positive);
+}
+
+.vc-rdb-vote-down-selected {
+    color: var(--status-danger);
+}

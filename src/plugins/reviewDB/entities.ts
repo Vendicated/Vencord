@@ -93,8 +93,10 @@ export interface ReviewAuthor {
 export interface Review {
     comment: string,
     id: number,
+    score?: number,
     star: number,
     sender: ReviewAuthor,
     timestamp: number;
     type?: ReviewType;
+    userVote?: boolean | null;
 }

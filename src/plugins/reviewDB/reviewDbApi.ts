@@ -36,6 +36,16 @@ export interface UserReviewsData {
     hasOptedOut: boolean;
 }
 
+export interface ReviewVote {
+    reviewID: number;
+    isUpvote: boolean;
+}
+
+interface ReviewVotesData {
+    message?: string;
+    votes: ReviewVote[];
+}
+
 const WarningFlag = 0b00000010;
 
 async function rdbRequest(path: string, options: RequestInit = {}) {
@@ -48,7 +58,7 @@ async function rdbRequest(path: string, options: RequestInit = {}) {
     });
 }
 
-export async function getReviews(id: string, { limit, offset = 0 }: { limit?: number; offset?: number; } = {}): Promise<UserReviewsData> {
+export async function getReviews(id: string, { limit, offset = 0, fetchVotes = false }: { limit?: number; offset?: number; fetchVotes?: boolean } = {}): Promise<UserReviewsData> {
     let flags = 0;
     if (!settings.store.showWarning) flags |= WarningFlag;
 
@@ -93,7 +103,34 @@ export async function getReviews(id: string, { limit, offset = 0 }: { limit?: nu
         };
     }
 
+    if (!fetchVotes || res.reviews.length === 0) return res;
+
+    const votes = await getReviewVotes(id);
+    if (votes.length === 0) return res;
+
+    const voteByReviewId = new Map(votes.map(vote => [vote.reviewID, vote.isUpvote]));
+    res.reviews = res.reviews.map(review => ({
+        ...review,
+        userVote: voteByReviewId.get(review.id) ?? null,
+    }));
+
     return res;
+}
+
+export async function getReviewVotes(id: string): Promise<ReviewVote[]> {
+    const token = await getToken();
+    if (!token) return [];
+
+    const req = await rdbRequest(`/users/${id}/reviews/votes`, {
+        headers: {
+            Accept: "application/json",
+        }
+    });
+
+    if (!req.ok) return [];
+
+    const res = await req.json() as ReviewVotesData;
+    return res.votes ?? [];
 }
 
 export async function addReview(review: any): Promise<UserReviewsData | null> {
@@ -148,6 +185,28 @@ export async function reportReview(id: number) {
     }).then(r => r.json()) as UserReviewsData;
 
     showToast(res.message);
+}
+
+export async function voteReview(id: number, isUpvote: boolean) {
+    const token = await getToken();
+    if (!token) {
+        showToast("Please authorize to vote on reviews.");
+        authorize();
+        return false;
+    }
+
+    const res = await rdbRequest(`/reviews/${id}/vote`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+        },
+        body: JSON.stringify({ isUpvote })
+    });
+
+    const data = await res.json() as { message?: string; };
+    showToast(data.message ?? (res.ok ? "Vote recorded" : "Failed to vote"), res.ok ? Toasts.Type.SUCCESS : Toasts.Type.FAILURE);
+    return res.ok;
 }
 
 async function patchBlock(action: "block" | "unblock", userId: string) {
