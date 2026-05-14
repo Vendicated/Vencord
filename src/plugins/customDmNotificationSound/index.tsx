@@ -16,7 +16,7 @@ import { ChannelType } from "@vencord/discord-types/enums";
 import { Button, ChannelStore, Forms, Menu, showToast, Toasts, UserStore } from "@webpack/common";
 
 const MAX_CUSTOM_SOUNDS = 10;
-const MAX_SOUND_FILE_SIZE = 2 * 1024 * 1024;
+const MAX_SOUND_FILE_SIZE = 512 * 1024;
 
 const markedMessages = new Set<string>();
 let currentAudio: HTMLAudioElement | undefined;
