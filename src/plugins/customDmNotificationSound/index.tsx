@@ -4,14 +4,14 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { NavContextMenuPatchCallback } from "@api/ContextMenu";
+import { findGroupChildrenByChildId, NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { definePluginSettings } from "@api/Settings";
 import { CloudUploadIcon, DeleteIcon } from "@components/Icons";
 import { Devs } from "@utils/constants";
 import { Margins } from "@utils/margins";
 import definePlugin, { makeRange, OptionType } from "@utils/types";
 import { chooseFile } from "@utils/web";
-import { MessageJSON, User } from "@vencord/discord-types";
+import { Channel, MessageJSON, User } from "@vencord/discord-types";
 import { ChannelType } from "@vencord/discord-types/enums";
 import { Button, ChannelStore, Forms, Menu, showToast, Toasts, UserStore } from "@webpack/common";
 
@@ -199,31 +199,33 @@ interface UserContextProps {
     user?: User;
 }
 
-const userContextPatch: NavContextMenuPatchCallback = (children, { user }: UserContextProps) => {
-    if (!user || user.id === UserStore.getCurrentUser().id) return;
+interface GroupDmContextProps {
+    channel?: Channel;
+}
 
+function buildUserSoundMenuItem(user: User) {
     const customSound = settings.store.customSounds[user.id];
 
-    children.push(
+    return (
         <Menu.MenuItem
-            id="vc-custom-dm-notification-sound"
-            label={customSound ? "Custom DM Sound" : "Add Custom DM Sound"}
+            id={`vc-custom-dm-notification-sound-${user.id}`}
+            label={customSound ? `${user.username}: Custom DM Sound` : `Add Custom DM Sound for ${user.username}`}
             action={customSound ? undefined : () => void addOrChangeSound(user)}
         >
             {customSound && (
                 <>
                     <Menu.MenuItem
-                        id="vc-custom-dm-notification-sound-change"
+                        id={`vc-custom-dm-notification-sound-change-${user.id}`}
                         label="Change Sound"
                         action={() => void addOrChangeSound(user)}
                     />
                     <Menu.MenuItem
-                        id="vc-custom-dm-notification-sound-preview"
+                        id={`vc-custom-dm-notification-sound-preview-${user.id}`}
                         label="Preview Sound"
                         action={() => playSound(customSound.soundData, settings.store.volume / 100)}
                     />
                     <Menu.MenuItem
-                        id="vc-custom-dm-notification-sound-remove"
+                        id={`vc-custom-dm-notification-sound-remove-${user.id}`}
                         label="Remove Sound"
                         color="danger"
                         action={() => {
@@ -233,6 +235,34 @@ const userContextPatch: NavContextMenuPatchCallback = (children, { user }: UserC
                     />
                 </>
             )}
+        </Menu.MenuItem>
+    );
+}
+
+const userContextPatch: NavContextMenuPatchCallback = (children, { user }: UserContextProps) => {
+    if (!user || user.id === UserStore.getCurrentUser().id) return;
+
+    children.push(buildUserSoundMenuItem(user));
+};
+
+const groupDmContextPatch: NavContextMenuPatchCallback = (children, { channel }: GroupDmContextProps) => {
+    if (!channel || channel.type !== ChannelType.GROUP_DM) return;
+
+    const currentUserId = UserStore.getCurrentUser().id;
+    const recipients = channel.recipients
+        .filter(userId => userId !== currentUserId)
+        .map(userId => UserStore.getUser(userId))
+        .filter(Boolean);
+
+    if (!recipients.length) return;
+
+    const container = findGroupChildrenByChildId("leave-channel", children) ?? children;
+    container.unshift(
+        <Menu.MenuItem
+            id="vc-custom-dm-notification-sound"
+            label="Custom DM Sounds"
+        >
+            {recipients.map(user => buildUserSoundMenuItem(user))}
         </Menu.MenuItem>
     );
 };
@@ -267,7 +297,8 @@ export default definePlugin({
     contextMenus: {
         "user-context": userContextPatch,
         "user-profile-actions": userContextPatch,
-        "user-profile-overflow-menu": userContextPatch
+        "user-profile-overflow-menu": userContextPatch,
+        "gdm-context": groupDmContextPatch
     },
 
     patches: [
