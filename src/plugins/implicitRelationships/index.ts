@@ -163,7 +163,8 @@ export default definePlugin({
             FluxDispatcher.dispatch({
                 type: "GUILD_MEMBERS_REQUEST",
                 guildIds: allGuildIds,
-                userIds: toRequest.slice(i, i + 100),
+                // The argument below actually requires a list of user ids, not a list of objects containing user ids, tested and now it won't reload constantly when you click implicit
+                userIds: toRequest.slice(i, i + 100).map(e => e.otherUserId),
                 presences: true,
                 nonce: sentNonce,
             });
