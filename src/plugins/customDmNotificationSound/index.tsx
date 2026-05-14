@@ -7,6 +7,7 @@
 import { NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { definePluginSettings } from "@api/Settings";
 import { CloudUploadIcon, DeleteIcon } from "@components/Icons";
+import { Devs } from "@utils/constants";
 import { Margins } from "@utils/margins";
 import definePlugin, { makeRange, OptionType } from "@utils/types";
 import { chooseFile } from "@utils/web";
@@ -14,8 +15,18 @@ import { MessageJSON, User } from "@vencord/discord-types";
 import { ChannelType } from "@vencord/discord-types/enums";
 import { Button, ChannelStore, Forms, Menu, showToast, Toasts, UserStore } from "@webpack/common";
 
+const MAX_CUSTOM_SOUNDS = 10;
+const MAX_SOUND_FILE_SIZE = 2 * 1024 * 1024;
+
 const markedMessages = new Set<string>();
 let currentAudio: HTMLAudioElement | undefined;
+
+interface CustomSound {
+    soundData: string;
+    fileName: string;
+}
+
+type CustomSounds = Record<string, CustomSound>;
 
 function readFileAsDataUrl(file: File) {
     return new Promise<string>((resolve, reject) => {
@@ -38,66 +49,141 @@ function playSound(src: string, volume: number) {
     });
 }
 
-function SoundPicker({ setValue }: { setValue(value: string): void; }) {
-    const { soundData } = settings.store;
+function getErrorMessage(error: unknown) {
+    return error instanceof Error ? error.message : String(error);
+}
+
+function cloneCustomSounds(customSounds: CustomSounds) {
+    return Object.fromEntries(
+        Object.entries(customSounds).map(([userId, sound]) => [
+            userId,
+            {
+                soundData: sound.soundData,
+                fileName: sound.fileName
+            }
+        ])
+    ) as CustomSounds;
+}
+
+async function chooseSound() {
+    const file = await chooseFile("audio/*");
+    if (!file) return null;
+
+    if (file.size > MAX_SOUND_FILE_SIZE) {
+        showToast("Audio file is too large. Please choose a file under 2 MB.", Toasts.Type.FAILURE);
+        return null;
+    }
+
+    return {
+        soundData: await readFileAsDataUrl(file),
+        fileName: file.name
+    };
+}
+
+async function addOrChangeSound(user: User) {
+    try {
+        const customSounds = cloneCustomSounds(settings.store.customSounds);
+
+        if (!customSounds[user.id] && Object.keys(customSounds).length >= MAX_CUSTOM_SOUNDS) {
+            showToast(`You can only add up to ${MAX_CUSTOM_SOUNDS} custom DM sounds.`, Toasts.Type.FAILURE);
+            return;
+        }
+
+        const sound = await chooseSound();
+        if (!sound) return;
+
+        settings.store.customSounds = {
+            ...customSounds,
+            [user.id]: sound
+        };
+
+        showToast(`Selected ${sound.fileName} for ${user.username}`, Toasts.Type.SUCCESS);
+    } catch (error) {
+        showToast(`Failed to load audio file: ${getErrorMessage(error)}`, Toasts.Type.FAILURE);
+    }
+}
+
+function removeSound(userId: string) {
+    const customSounds = cloneCustomSounds(settings.store.customSounds);
+    delete customSounds[userId];
+    settings.store.customSounds = customSounds;
+}
+
+function CustomSoundsManager({ setValue }: { setValue(value: CustomSounds): void; }) {
+    const { customSounds } = settings.use(["customSounds"]);
+    const entries = Object.entries(customSounds);
+
+    function updateSound(userId: string, sound: CustomSound) {
+        setValue({
+            ...cloneCustomSounds(customSounds),
+            [userId]: sound
+        });
+    }
+
+    function remove(userId: string) {
+        const nextCustomSounds = cloneCustomSounds(customSounds);
+        delete nextCustomSounds[userId];
+        setValue(nextCustomSounds);
+        currentAudio?.pause();
+    }
 
     return (
         <div className={Margins.top8}>
-            <Forms.FormTitle>Custom Sound</Forms.FormTitle>
-            <div style={{ display: "flex", gap: "8px", flexWrap: "wrap", alignItems: "center" }}>
-                <Button
-                    onClick={async () => {
-                        const file = await chooseFile("audio/*");
-                        if (!file) return;
+            <Forms.FormTitle>Custom User Sounds</Forms.FormTitle>
+            {entries.length === 0 ? (
+                <Forms.FormText>Right click a user and choose Add Custom DM Sound to pick a sound for them.</Forms.FormText>
+            ) : entries.map(([userId, sound]) => {
+                const user = UserStore.getUser(userId);
 
-                        const dataUrl = await readFileAsDataUrl(file);
-                        setValue(dataUrl);
-                        showToast(`Selected ${file.name}`, Toasts.Type.SUCCESS);
-                    }}
-                >
-                    <CloudUploadIcon height={16} width={16} />
-                    Select Sound
-                </Button>
-                <Button
-                    disabled={!soundData}
-                    onClick={() => playSound(soundData, settings.store.volume / 100)}
-                >
-                    Preview
-                </Button>
-                <Button
-                    disabled={!soundData}
-                    color={Button.Colors.RED}
-                    onClick={() => {
-                        setValue("");
-                        currentAudio?.pause();
-                    }}
-                >
-                    <DeleteIcon height={16} width={16} />
-                    Clear
-                </Button>
-            </div>
+                return (
+                    <div
+                        key={userId}
+                        style={{ display: "flex", gap: "8px", flexWrap: "wrap", alignItems: "center", marginBottom: 8 }}
+                    >
+                        <Forms.FormText style={{ minWidth: 180, flex: "1 1 180px" }}>
+                            {user?.username ?? userId} - {sound.fileName}
+                        </Forms.FormText>
+                        <Button
+                            onClick={async () => {
+                                try {
+                                    const nextSound = await chooseSound();
+                                    if (!nextSound) return;
+
+                                    updateSound(userId, nextSound);
+                                    showToast(`Selected ${nextSound.fileName}`, Toasts.Type.SUCCESS);
+                                } catch (error) {
+                                    showToast(`Failed to load audio file: ${getErrorMessage(error)}`, Toasts.Type.FAILURE);
+                                }
+                            }}
+                        >
+                            <CloudUploadIcon height={16} width={16} />
+                            Change
+                        </Button>
+                        <Button onClick={() => playSound(sound.soundData, settings.store.volume / 100)}>
+                            Preview
+                        </Button>
+                        <Button
+                            color={Button.Colors.RED}
+                            onClick={() => remove(userId)}
+                        >
+                            <DeleteIcon height={16} width={16} />
+                            Remove
+                        </Button>
+                    </div>
+                );
+            })}
             <Forms.FormText className={Margins.top8}>
-                Pick any audio file Discord can play. The file is stored in Vencord settings as a data URL.
+                Pick audio files Discord can play. Files are stored in Vencord settings as data URLs. Limit: {MAX_CUSTOM_SOUNDS} users, 2 MB per file.
             </Forms.FormText>
         </div>
     );
 }
 
 const settings = definePluginSettings({
-    userId: {
-        type: OptionType.STRING,
-        description: "User ID to use the custom DM notification sound for",
-        default: "",
-        placeholder: "Right click a user and choose Mark for Custom DM Sound",
-        isValid(value: string) {
-            if (!value || /^\d{17,20}$/.test(value)) return true;
-            return "Must be a valid Discord user ID.";
-        }
-    },
-    soundData: {
+    customSounds: {
         type: OptionType.COMPONENT,
-        component: SoundPicker,
-        default: ""
+        component: CustomSoundsManager,
+        default: {} as CustomSounds
     },
     volume: {
         type: OptionType.SLIDER,
@@ -106,7 +192,10 @@ const settings = definePluginSettings({
         default: 100,
         stickToMarkers: false
     }
-});
+}).withPrivateSettings<{
+    userId?: string;
+    soundData?: string;
+}>();
 
 interface UserContextProps {
     user?: User;
@@ -115,31 +204,65 @@ interface UserContextProps {
 const userContextPatch: NavContextMenuPatchCallback = (children, { user }: UserContextProps) => {
     if (!user || user.id === UserStore.getCurrentUser().id) return;
 
-    const isMarked = settings.store.userId === user.id;
+    const customSound = settings.store.customSounds[user.id];
 
     children.push(
         <Menu.MenuItem
             id="vc-custom-dm-notification-sound"
-            label={isMarked ? "Unmark Custom DM Sound" : "Mark for Custom DM Sound"}
-            action={() => {
-                settings.store.userId = isMarked ? "" : user.id;
-                showToast(
-                    isMarked
-                        ? `Removed custom DM sound marker from ${user.username}`
-                        : `Marked ${user.username} for custom DM sounds`,
-                    Toasts.Type.SUCCESS
-                );
-            }}
-        />
+            label={customSound ? "Custom DM Sound" : "Add Custom DM Sound"}
+            action={customSound ? undefined : () => void addOrChangeSound(user)}
+        >
+            {customSound && (
+                <>
+                    <Menu.MenuItem
+                        id="vc-custom-dm-notification-sound-change"
+                        label="Change Sound"
+                        action={() => void addOrChangeSound(user)}
+                    />
+                    <Menu.MenuItem
+                        id="vc-custom-dm-notification-sound-preview"
+                        label="Preview Sound"
+                        action={() => playSound(customSound.soundData, settings.store.volume / 100)}
+                    />
+                    <Menu.MenuItem
+                        id="vc-custom-dm-notification-sound-remove"
+                        label="Remove Sound"
+                        color="danger"
+                        action={() => {
+                            removeSound(user.id);
+                            showToast(`Removed custom DM sound for ${user.username}`, Toasts.Type.SUCCESS);
+                        }}
+                    />
+                </>
+            )}
+        </Menu.MenuItem>
     );
 };
 
 export default definePlugin({
     name: "CustomDMNotificationSound",
-    description: "Replaces Discord's default DM notification sound for one marked user with a selected custom sound",
+    description: "Replaces Discord's default DM notification sound for marked users with selected custom sounds",
     tags: ["Notifications", "Customisation"],
-    authors: [{ name: "chase", id: 0n }],
+    authors: [Devs.Xlite],
     settings,
+
+    start() {
+        if (!settings.store.userId || !settings.store.soundData || settings.store.customSounds[settings.store.userId]) return;
+
+        settings.store.customSounds = {
+            ...cloneCustomSounds(settings.store.customSounds),
+            [settings.store.userId]: {
+                soundData: settings.store.soundData,
+                fileName: "Migrated custom sound"
+            }
+        };
+    },
+
+    stop() {
+        currentAudio?.pause();
+        currentAudio = undefined;
+        markedMessages.clear();
+    },
 
     contextMenus: {
         "user-context": userContextPatch,
@@ -158,22 +281,24 @@ export default definePlugin({
     ],
 
     getSound(defaultSound: unknown, message?: MessageJSON, volume = 1) {
-        if (!this.shouldReplaceSound(message)) return defaultSound;
+        const customSound = this.getCustomSound(message);
+        if (!customSound) return defaultSound;
 
-        playSound(settings.store.soundData, settings.store.volume / 100 * volume);
+        playSound(customSound.soundData, settings.store.volume / 100 * volume);
         return undefined;
     },
 
-    shouldReplaceSound(message?: MessageJSON) {
-        if (!message?.id || markedMessages.has(message.id)) return false;
-        if (!settings.store.userId || !settings.store.soundData) return false;
-        if (message.author?.id !== settings.store.userId) return false;
+    getCustomSound(message?: MessageJSON) {
+        if (!message?.id || markedMessages.has(message.id)) return null;
+
+        const customSound = message.author?.id ? settings.store.customSounds[message.author.id] : null;
+        if (!customSound?.soundData) return null;
 
         const channel = ChannelStore.getChannel(message.channel_id);
-        if (channel?.type !== ChannelType.DM) return false;
+        if (channel?.type !== ChannelType.DM) return null;
 
         if (markedMessages.size > 500) markedMessages.clear();
         markedMessages.add(message.id);
-        return true;
+        return customSound;
     }
 });
