@@ -70,7 +70,7 @@ async function chooseSound() {
     if (!file) return null;
 
     if (file.size > MAX_SOUND_FILE_SIZE) {
-        showToast("Audio file is too large. Please choose a file under 2 MB.", Toasts.Type.FAILURE);
+        showToast("Audio file is too large. Please choose a file under 512 KB.", Toasts.Type.FAILURE);
         return null;
     }
 
@@ -82,9 +82,7 @@ async function chooseSound() {
 
 async function addOrChangeSound(user: User) {
     try {
-        const customSounds = cloneCustomSounds(settings.store.customSounds);
-
-        if (!customSounds[user.id] && Object.keys(customSounds).length >= MAX_CUSTOM_SOUNDS) {
+        if (!settings.store.customSounds[user.id] && Object.keys(settings.store.customSounds).length >= MAX_CUSTOM_SOUNDS) {
             showToast(`You can only add up to ${MAX_CUSTOM_SOUNDS} custom DM sounds.`, Toasts.Type.FAILURE);
             return;
         }
@@ -93,7 +91,7 @@ async function addOrChangeSound(user: User) {
         if (!sound) return;
 
         settings.store.customSounds = {
-            ...customSounds,
+            ...cloneCustomSounds(settings.store.customSounds),
             [user.id]: sound
         };
 
@@ -173,7 +171,7 @@ function CustomSoundsManager({ setValue }: { setValue(value: CustomSounds): void
                 );
             })}
             <Forms.FormText className={Margins.top8}>
-                Pick audio files Discord can play. Files are stored in Vencord settings as data URLs. Limit: {MAX_CUSTOM_SOUNDS} users, 2 MB per file.
+                Pick audio files Discord can play. Files are stored in Vencord settings as data URLs. Limit: {MAX_CUSTOM_SOUNDS} users, 512 KB per file.
             </Forms.FormText>
         </div>
     );
@@ -256,6 +254,8 @@ export default definePlugin({
                 fileName: "Migrated custom sound"
             }
         };
+        delete settings.store.userId;
+        delete settings.store.soundData;
     },
 
     stop() {
@@ -281,24 +281,19 @@ export default definePlugin({
     ],
 
     getSound(defaultSound: unknown, message?: MessageJSON, volume = 1) {
-        const customSound = this.getCustomSound(message);
-        if (!customSound) return defaultSound;
-
-        playSound(customSound.soundData, settings.store.volume / 100 * volume);
-        return undefined;
-    },
-
-    getCustomSound(message?: MessageJSON) {
-        if (!message?.id || markedMessages.has(message.id)) return null;
-
-        const customSound = message.author?.id ? settings.store.customSounds[message.author.id] : null;
-        if (!customSound?.soundData) return null;
+        const authorId = message?.author?.id;
+        const customSound = authorId ? settings.store.customSounds[authorId] : null;
+        if (!customSound?.soundData || !message?.id) return defaultSound;
 
         const channel = ChannelStore.getChannel(message.channel_id);
-        if (channel?.type !== ChannelType.DM) return null;
+        if (channel?.type !== ChannelType.DM && channel?.type !== ChannelType.GROUP_DM) return defaultSound;
 
-        if (markedMessages.size > 500) markedMessages.clear();
-        markedMessages.add(message.id);
-        return customSound;
+        if (!markedMessages.has(message.id)) {
+            if (markedMessages.size > 500) markedMessages.clear();
+            markedMessages.add(message.id);
+            playSound(customSound.soundData, settings.store.volume / 100 * volume);
+        }
+
+        return undefined;
     }
 });
