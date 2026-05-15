@@ -1,0 +1,186 @@
+.vc-baseconv-modal-content {
+    padding: 1em;
+}
+
+.vc-baseconv-modal-header {
+    place-content: center space-between;
+}
+
+.vc-baseconv-modal-title {
+    margin: 0;
+}
+
+.vc-baseconv-accessory {
+    color: inherit;
+    font-style: normal;
+    font-weight: inherit;
+    line-height: 1.375;
+    white-space: break-spaces;
+}
+
+.vc-baseconv-accessory-icon {
+    margin-right: 0.25em;
+    vertical-align: text-bottom;
+    opacity: 0.5;
+}
+
+.vc-baseconv-decoded-text {
+    color: inherit;
+}
+
+.vc-baseconv-meta {
+    display: inline;
+    color: var(--text-muted);
+    font-size: 0.8125rem;
+    font-style: italic;
+}
+
+.vc-baseconv-encoding-label {
+    color: var(--interactive-active);
+    font-weight: 600;
+    font-style: normal;
+}
+
+.vc-baseconv-toggle-original {
+    all: unset;
+    cursor: pointer;
+    color: var(--text-link);
+}
+
+.vc-baseconv-toggle-original:is(:hover, :focus) {
+    text-decoration: underline;
+}
+
+.vc-baseconv-dismiss {
+    all: unset;
+    cursor: pointer;
+    color: var(--text-link);
+}
+
+.vc-baseconv-dismiss:is(:hover, :focus) {
+    text-decoration: underline;
+}
+
+.vc-baseconv-auto-encode {
+    color: var(--green-360);
+}
+
+.vc-baseconv-chat-button {
+    scale: 1.085;
+}
+
+/* AES secret row */
+.vc-baseconv-secret-row {
+    display: flex;
+    gap: 0.5em;
+    align-items: center;
+}
+
+.vc-baseconv-secret-input {
+    flex: 1;
+    padding: 0.5em 0.75em;
+    background: var(--input-background);
+    border: 1px solid var(--input-background);
+    border-radius: 3px;
+    color: var(--text-normal);
+    font-size: 1rem;
+    outline: none;
+    box-sizing: border-box;
+    font-family: var(--font-code);
+}
+
+.vc-baseconv-secret-input:focus {
+    border-color: var(--brand-experiment);
+}
+
+.vc-baseconv-secret-input::placeholder {
+    color: var(--text-muted);
+}
+
+.vc-baseconv-secret-toggle {
+    all: unset;
+    cursor: pointer;
+    padding: 0.5em 0.75em;
+    background: var(--button-secondary-background);
+    border-radius: 3px;
+    color: var(--text-normal);
+    font-size: 0.875rem;
+    white-space: nowrap;
+}
+
+.vc-baseconv-secret-toggle:hover {
+    background: var(--button-secondary-background-hover);
+}
+
+/* Per-user key modal actions */
+.vc-baseconv-user-key-actions {
+    display: flex;
+    gap: 0.5em;
+    flex-wrap: wrap;
+}
+
+.vc-baseconv-user-key-btn {
+    all: unset;
+    cursor: pointer;
+    padding: 0.45em 1em;
+    border-radius: 3px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+.vc-baseconv-user-key-save {
+    background: var(--button-positive-background);
+    color: #fff;
+}
+
+.vc-baseconv-user-key-save:hover {
+    background: var(--button-positive-background-hover, var(--button-positive-background));
+}
+
+.vc-baseconv-user-key-save:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.vc-baseconv-user-key-clear {
+    background: var(--button-danger-background);
+    color: #fff;
+}
+
+.vc-baseconv-user-key-clear:hover {
+    background: var(--button-danger-background-hover, var(--button-danger-background));
+}
+
+.vc-baseconv-user-key-cancel {
+    background: var(--button-secondary-background);
+    color: var(--text-normal);
+}
+
+.vc-baseconv-user-key-cancel:hover {
+    background: var(--button-secondary-background-hover);
+}
+
+.vc-baseconv-user-key-edit {
+    background: var(--button-secondary-background);
+    color: var(--text-normal);
+}
+
+.vc-baseconv-user-key-edit:hover {
+    background: var(--button-secondary-background-hover);
+}
+
+/* Per-user key list rows in the main modal */
+.vc-baseconv-user-key-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5em;
+    margin-bottom: 0.5em;
+}
+
+.vc-baseconv-user-key-name {
+    flex: 1;
+    font-family: var(--font-code);
+    font-size: 0.875rem;
+    color: var(--text-normal);
+}
