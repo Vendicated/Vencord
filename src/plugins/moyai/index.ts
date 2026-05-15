@@ -101,7 +101,7 @@ export default definePlugin({
             if (optimistic || type !== "MESSAGE_CREATE") return;
             if (message.state === "SENDING") return;
             if (settings.store.ignoreBots && message.author?.bot) return;
-            if (settings.store.ignoreBlocked && RelationshipStore.isBlocked(message.author?.id)) return;
+            if (settings.store.ignoreBlocked && message.author && RelationshipStore.isBlocked(message.author.id)) return;
             if (!message.content) return;
             if (channelId !== SelectedChannelStore.getChannelId()) return;
 
@@ -148,11 +148,7 @@ function countMatches(sourceString: string, pattern: RegExp) {
     if (!pattern.global)
         throw new Error("pattern must be global");
 
-    let i = 0;
-    while (pattern.test(sourceString))
-        i++;
-
-    return i;
+    return sourceString.match(pattern)?.length ?? 0;
 }
 
 const customMoyaiRe = /<a?:\w*moy?ai\w*:\d{17,20}>/gi;
@@ -173,5 +169,5 @@ function boom() {
         : MOYAI_URL;
 
     audioElement.volume = settings.store.volume;
-    audioElement.play();
+    audioElement.play().catch(() => { });
 }
