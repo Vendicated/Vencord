@@ -37,7 +37,7 @@ interface IReactionAdd {
     channelId: string;
     messageId: string;
     messageAuthorId: string;
-    userId: "195136840355807232";
+    userId: string;
     emoji: ReactionEmoji;
 }
 
