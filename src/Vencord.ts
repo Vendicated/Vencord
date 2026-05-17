@@ -40,8 +40,7 @@ import { get as dsGet } from "./api/DataStore";
 import { NotificationData, showNotification } from "./api/Notifications";
 import { initPluginManager, PMLogger, startAllPlugins } from "./api/PluginManager";
 import { PlainSettings, Settings, SettingsStore } from "./api/Settings";
-import { getCloudSettings, putCloudSettings, shouldCloudSync } from "./api/SettingsSync/cloudSync";
-import { localStorage } from "./utils/localStorage";
+import { areLocalSettingsDirty, getCloudSettings, getCloudSyncDirection, markLocalSettingsDirty, putCloudSettings, shouldCloudSync } from "./api/SettingsSync/cloudSync";
 import { relaunch } from "./utils/native";
 import { checkForUpdates, update, UpdateLogger } from "./utils/updater";
 import { onceReady } from "./webpack";
@@ -52,11 +51,6 @@ if (IS_REPORTER) {
 }
 
 async function syncSettings() {
-    if (localStorage.Vencord_cloudSyncDirection === undefined) {
-        // by default, sync bi-directionally
-        localStorage.Vencord_cloudSyncDirection = "both";
-    }
-
     // pre-check for local shared settings
     if (
         Settings.cloud.authenticated &&
@@ -76,9 +70,9 @@ async function syncSettings() {
     if (
         Settings.cloud.settingsSync && // if it's enabled
         Settings.cloud.authenticated && // if cloud integrations are enabled
-        localStorage.Vencord_cloudSyncDirection !== "manual" // if we're not in manual mode
+        getCloudSyncDirection() !== "manual" // if we're not in manual mode
     ) {
-        if (localStorage.Vencord_settingsDirty && shouldCloudSync("push")) {
+        if (areLocalSettingsDirty() && shouldCloudSync("push")) {
             await putCloudSettings();
         } else if (shouldCloudSync("pull") && await getCloudSettings(false)) { // if we synchronized something (false means no sync)
             // we show a notification here instead of allowing getCloudSettings() to show one to declutter the amount of
@@ -101,7 +95,7 @@ async function syncSettings() {
     }, 60_000);
 
     SettingsStore.addGlobalChangeListener(() => {
-        localStorage.Vencord_settingsDirty = true;
+        markLocalSettingsDirty();
         saveSettingsOnFrequentAction();
     });
 }
