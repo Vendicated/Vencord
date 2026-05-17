@@ -65,7 +65,7 @@ export const settings = definePluginSettings({
 });
 
 function isUncategorized(objChannel: { channel: Channel; comparator: number; }) {
-    return objChannel.channel.id === "null" && objChannel.channel.name === "Uncategorized" && objChannel.comparator === -1;
+    return (objChannel.channel.id === "null" || objChannel.channel.id === null) && objChannel.channel.name === "Uncategorized" && objChannel.comparator === -1;
 }
 
 export default definePlugin({
