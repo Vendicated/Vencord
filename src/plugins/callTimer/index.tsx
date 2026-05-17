@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Settings } from "@api/Settings";
+import { definePluginSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import { useTimer } from "@utils/react";
@@ -25,9 +25,27 @@ import { React } from "@webpack/common";
 
 import alignedChatInputFix from "./alignedChatInputFix.css?managed";
 
+const settings = definePluginSettings({
+    format: {
+        type: OptionType.SELECT,
+        description: "The timer format. This can be any valid moment.js format",
+        options: [
+            {
+                label: "30d 23:00:42",
+                value: "stopwatch",
+                default: true
+            },
+            {
+                label: "30d 23h 00m 42s",
+                value: "human"
+            }
+        ]
+    }
+});
+
 function formatDuration(ms: number) {
     // here be dragons (moment fucking sucks)
-    const human = Settings.plugins.CallTimer.format === "human";
+    const human = settings.store.format === "human";
 
     const format = (n: number) => human ? n : n.toString().padStart(2, "0");
     const unit = (s: string) => human ? s : "";
@@ -48,54 +66,35 @@ function formatDuration(ms: number) {
     return res;
 }
 
+
+
 export default definePlugin({
     name: "CallTimer",
     description: "Adds a timer to vcs",
     tags: ["Voice", "Utility"],
     authors: [Devs.Ven],
     managedStyle: alignedChatInputFix,
+    settings,
 
     startTime: 0,
     interval: void 0 as NodeJS.Timeout | undefined,
-
-    options: {
-        format: {
-            type: OptionType.SELECT,
-            description: "The timer format. This can be any valid moment.js format",
-            options: [
-                {
-                    label: "30d 23:00:42",
-                    value: "stopwatch",
-                    default: true
-                },
-                {
-                    label: "30d 23h 00m 42s",
-                    value: "human"
-                }
-            ]
-        }
-    },
 
     patches: [{
         find: "renderConnectionStatus(){",
         replacement: {
             // in renderConnectionStatus()
-            match: /(lineClamp:1,children:)(\i)(?=,|}\))/,
-            replace: "$1[$2,$self.renderTimer(this.props.channel.id)]"
+            match: /(renderConnectionStatus\(\).{0,1000}?lineClamp:1,children:)(\i)(?=,|}\))/,
+            replace: "$1[$2,$self.renderTimer({ channelId: this?.props?.channel?.id })]"
         }
     }],
 
-    renderTimer(channelId: string) {
-        return <ErrorBoundary noop>
-            <this.Timer channelId={channelId} />
-        </ErrorBoundary>;
-    },
+    renderTimer: ErrorBoundary.wrap(({ channelId }: { channelId: string; }) => {
+        const time = useTimer({ deps: [channelId] });
 
-    Timer({ channelId }: { channelId: string; }) {
-        const time = useTimer({
-            deps: [channelId]
-        });
-
-        return <p style={{ margin: 0, fontFamily: "var(--font-code)" }}>{formatDuration(time)}</p>;
-    }
+        return (
+            <p style={{ margin: 0, fontFamily: "var(--font-code)" }}>
+                {formatDuration(time)}
+            </p>
+        );
+    }, { noop: true }),
 });

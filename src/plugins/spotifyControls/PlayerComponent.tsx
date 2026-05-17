@@ -18,7 +18,6 @@
 
 import "./spotifyStyles.css";
 
-import { Settings } from "@api/Settings";
 import { Flex } from "@components/Flex";
 import { CopyIcon, ImageIcon, LinkIcon, OpenExternalIcon } from "@components/Icons";
 import { Paragraph } from "@components/Paragraph";
@@ -29,6 +28,7 @@ import { copyWithToast, openImageModal } from "@utils/discord";
 import { classes } from "@utils/misc";
 import { ContextMenuApi, FluxDispatcher, Menu, React, useEffect, useState, useStateFromStores } from "@webpack/common";
 
+import { settings } from ".";
 import { SeekBar } from "./SeekBar";
 import { SpotifyStore, Track } from "./SpotifyStore";
 
@@ -132,7 +132,7 @@ function Controls() {
                 <Shuffle />
             </Button>
             <Button onClick={() => {
-                Settings.plugins.SpotifyControls.previousButtonRestartsTrack && SpotifyStore.position > 3000 ? SpotifyStore.seek(0) : SpotifyStore.prev();
+                settings.store.previousButtonRestartsTrack && SpotifyStore.position > 3000 ? SpotifyStore.seek(0) : SpotifyStore.prev();
             }}>
                 <SkipPrev />
             </Button>
