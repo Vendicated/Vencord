@@ -578,6 +578,15 @@ export default definePlugin({
                 },
             ],
             predicate: () => settings.store.collapseDeleted
+        },
+
+        {
+            // Remove deleted attachments from the patchMessageAttachments request
+            find: "async patchMessageAttachments",
+            replacement: {
+                match: /(?<=unarchiveThreadIfNecessary\(\i\).+?)attachments:(\i)/,
+                replace: "attachments:$1.filter(v=>!v.deleted)"
+            }
         }
     ]
 });
