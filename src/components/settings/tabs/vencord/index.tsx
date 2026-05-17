@@ -36,8 +36,8 @@ import { Alerts, Forms, React, useMemo, UserStore } from "@webpack/common";
 
 import { DonateButtonComponent, isDonor } from "./DonateButton";
 import { VibrancySettings } from "./MacVibrancySettings";
-import { WinMaterialSettings } from "./WinMaterialSettings";
 import { NotificationSection } from "./NotificationSettings";
+import { WinMaterialSettings } from "./WinMaterialSettings";
 
 const DEFAULT_DONATE_IMAGE = "https://cdn.discordapp.com/emojis/1026533090627174460.png";
 const SHIGGY_DONATE_IMAGE = "https://media.discordapp.net/stickers/1039992459209490513.png";
