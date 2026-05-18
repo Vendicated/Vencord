@@ -13,7 +13,8 @@ import { Forms, Select } from "@webpack/common";
 
 export function MacOSVibrancySettings() {
     const settings = useSettings(["macosVibrancyStyle"]);
-    if (!IS_MAC) return null;
+
+    if (!IS_MAC || IS_WEB) return null;
 
     return (
         <ErrorBoundary noop>

@@ -15,7 +15,7 @@ import { Select } from "@webpack/common";
 export function WindowsMaterialSettings() {
     const settings = useSettings(["windowsMaterial"]);
 
-    if (!IS_WINDOWS || !VencordNative.native.supportsWindowsMaterial()) return null;
+    if (!IS_WINDOWS || IS_WEB || !VencordNative.native.supportsWindowsMaterial()) return null;
 
     return (
         <ErrorBoundary noop>
