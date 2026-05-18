@@ -1,0 +1,108 @@
+/*
+* Vencord, a Discord client mod
+* Copyright (c) 2026 Vendicated and contributors
+* SPDX-License-Identifier: GPL-3.0-or-later
+*/
+
+import { definePluginSettings } from "@api/Settings";
+import ErrorBoundary from "@components/ErrorBoundary";
+import { Devs } from "@utils/constants";
+import definePlugin, { OptionType } from "@utils/types";
+import { findComponentByCodeLazy } from "@webpack";
+
+const GuildTagComponent = findComponentByCodeLazy("badgeSize", "guildBadge", "guildId", "guildTag", "inline");
+
+const settings = definePluginSettings({
+  serverTooltip: {
+    type: OptionType.BOOLEAN,
+    description: "Show Server Tag in server tooltip.",
+    default: true,
+    restartNeeded: true
+  },
+  serverHeader: {
+    type: OptionType.BOOLEAN,
+    description: "Show Server Tag in server header.",
+    default: true,
+    restartNeeded: true
+  },
+  appTitleBar: {
+    type: OptionType.BOOLEAN,
+    description: "Show Server Tag in title bar.",
+    default: true,
+    restartNeeded: true
+  },
+  // Thing in the bottom-left.
+  userNameTag: {
+    type: OptionType.BOOLEAN,
+    description: "Show Server Tag in current user name tag (in the bottom-left corner).",
+    default: true,
+    restartNeeded: true
+  },
+});
+
+export default definePlugin({
+  name: "ServerTagEverywhere",
+  description: "Shows server tag everywhere plausible.",
+  authors: [Devs.oatsfx],
+  tags: ["Appearance"],
+  settings,
+  patches: [
+    {
+      find: "GuildTooltip - ",
+      replacement: {
+        match: /,children:(\i).name\}\)/,
+        replace: "$&,$self.renderTooltip($1)"
+      },
+      predicate: () => settings.store.serverTooltip
+    },
+    {
+      find: "favorite-guild-header-add-context",
+      replacement: {
+        match: /guild:(\i)\}\)\]\}\),/,
+        replace: "$&$self.renderDefault($1),"
+      },
+      predicate: () => settings.store.serverHeader
+    },
+    {
+      find: "?\"BACK_FORWARD_NAVIGATION\":",
+      replacement: {
+        match: /guild_id,(\i)=(.+?)getGuild\((\i)\),\[(\i)\]\),/,
+        replace: "$&vcGuild = $1,"
+      },
+      predicate: () => settings.store.appTitleBar
+    },
+    {
+      find: "?\"BACK_FORWARD_NAVIGATION\":",
+      replacement: {
+        match: /children:(\i)\}\)\]/,
+        replace: "style:{display:\"flex\",alignItems:\"center\"},children:[$1, $self.renderTitleBar(vcGuild)]})]"
+      },
+      predicate: () => settings.store.appTitleBar
+    },
+    {
+      find: ".DISPLAY_NAME_STYLES_COACHMARK)",
+      replacement: {
+        match: /children:\(0,(\i).jsx\)\((\i).(\i),\{userN(.+?)\}\)/,
+        replace: "children:[(0,$1.jsx)($2.$3,{userN$4}),$self.renderUser(this.props.currentUser)]"
+      },
+      predicate: () => settings.store.userNameTag
+    }
+  ],
+
+  renderTooltip: ErrorBoundary.wrap((guild) =>
+    guild.profile &&
+    <div style={{ marginLeft: "4px" }}>
+      <GuildTagComponent guildTag={guild.profile.tag} guildId={guild.id} guildBadge={guild.profile.badge} inline />
+    </div>, { noop: true }),
+  renderTitleBar: ErrorBoundary.wrap(guild =>
+    guild.profile &&
+    <div style={{ marginLeft: "6px" }}>
+      <GuildTagComponent guildTag={guild.profile.tag} guildId={guild.id} guildBadge={guild.profile.badge} inline />
+    </div>, { noop: true }),
+  renderDefault: ErrorBoundary.wrap(guild =>
+    guild.profile &&
+    <GuildTagComponent guildTag={guild.profile.tag} guildId={guild.id} guildBadge={guild.profile.badge} inline />, { noop: true }),
+  renderUser: ErrorBoundary.wrap(user =>
+    user.primaryGuild?.identityEnabled &&
+    <GuildTagComponent guildTag={user.primaryGuild.tag} guildId={user.primaryGuild.identityGuildId} guildBadge={user.primaryGuild.badge} inline />, { noop: true }),
+});
