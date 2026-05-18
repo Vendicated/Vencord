@@ -14,7 +14,7 @@ export default definePlugin({
     patches: [
         // dm user sidebar
         {
-            find: "#{intl::PREMIUM_GIFTING_BUTTON}),action:",
+            find: '"UserProfileSidebar"',
             replacement: {
                 match: /(#{intl::USER_PROFILE_MEMBER_SINCE}\),.{0,100}userId:(\i\.id)}\)}\))/,
                 replace: "$1,Vencord.Api.ProfileSections.renderProfileSections({userId:$2,isSideBar:true})",
