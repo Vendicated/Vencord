@@ -178,8 +178,7 @@ function LogModal(props: RenderModalProps) {
                                 onConfirm={async () => {
                                     await DataStore.set(KEY, []);
                                     signals.forEach(x => x());
-                                }
-                                }
+                                }}
                             />
                         );
                     }
