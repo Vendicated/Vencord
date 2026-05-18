@@ -179,5 +179,5 @@ if (IS_DISCORD_DESKTOP) {
 }
 
 ipcMain.on(IpcEvents.SUPPORTS_WINDOWS_MATERIAL, e => {
-    e.returnValue = process.platform === "win32" && Number(release().split(".").pop()) >= 22621;
+    e.returnValue = process.platform === "win32" && Number(release().split(".")[2]) >= 22621;
 });
