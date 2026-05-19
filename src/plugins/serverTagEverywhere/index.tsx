@@ -101,21 +101,34 @@ export default definePlugin({
       },
       predicate: () => settings.store.friendsList
     },
+    // {
+    //   find: "location:\"DiscordTag\"",
+    //   replacement: {
+    //     match: /let{primary:(\i),secondary:(\i)/,
+    //     replace: "let{primary:$1,secondary:secondary,user:user"
+    //   }
+    // },
     {
       find: "location:\"DiscordTag\"",
       replacement: {
-        match: /let{primary:(\i),secondary:(\i)/,
-        replace: "$&,user:user"
-      },
-      predicate: () => settings.store.friendsList
+        match: /let{primary:(\i),secondary:(\i)(.+?);/,
+        replace: "let{primary:$1,secondary:$2,user:user$3;let second=$2;"
+      }
     },
+    // {
+    //   find: "location:\"DiscordTag\"",
+    //   replacement: {
+    //     match: /,children:\[(.+?),null/,
+    //     replace: ",children:[$1,secondary!==undefined?$self.renderFriendsList(user):undefined,null"
+    //   },
+    //   predicate: () => settings.store.friendsList
+    // },
     {
       find: "location:\"DiscordTag\"",
       replacement: {
-        match: /,children:\[(.+?),null/,
-        replace: ",children:[$1,$self.renderFriendsList(user),null"
-      },
-      predicate: () => settings.store.friendsList
+        match: /,children:\[(.+?),null(.+?)]/,
+        replace: ",children:second!==undefined?[$1,$self.renderFriendsList(user),null$2]:[$1,null$2]"
+      }
     }
   ],
 
