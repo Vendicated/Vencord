@@ -38,6 +38,12 @@ const settings = definePluginSettings({
     default: true,
     restartNeeded: true
   },
+  friendsList: {
+    type: OptionType.BOOLEAN,
+    description: "Show Server Tag in friends list.",
+    default: true,
+    restartNeeded: true
+  },
 });
 
 export default definePlugin({
@@ -86,6 +92,30 @@ export default definePlugin({
         replace: "children:[(0,$1.jsx)($2.$3,{userN$4}),$self.renderUser(this.props.currentUser)]"
       },
       predicate: () => settings.store.userNameTag
+    },
+    {
+      find: "location:\"DiscordTag\"",
+      replacement: {
+        match: /(\i).displayNameStyles:null,displayNameStylesType:(\i)/,
+        replace: "$&,user:$1"
+      },
+      predicate: () => settings.store.friendsList
+    },
+    {
+      find: "location:\"DiscordTag\"",
+      replacement: {
+        match: /let{primary:(\i),secondary:(\i)/,
+        replace: "$&,user:user"
+      },
+      predicate: () => settings.store.friendsList
+    },
+    {
+      find: "location:\"DiscordTag\"",
+      replacement: {
+        match: /,children:\[(.+?),null/,
+        replace: ",children:[$1,$self.renderFriendsList(user),null"
+      },
+      predicate: () => settings.store.friendsList
     }
   ],
 
@@ -105,4 +135,9 @@ export default definePlugin({
   renderUser: ErrorBoundary.wrap(user =>
     user.primaryGuild?.identityEnabled &&
     <GuildTagComponent guildTag={user.primaryGuild.tag} guildId={user.primaryGuild.identityGuildId} guildBadge={user.primaryGuild.badge} inline />, { noop: true }),
+  renderFriendsList: ErrorBoundary.wrap(user =>
+    user.primaryGuild?.identityEnabled &&
+    <div style={{ marginLeft: "5px" }}>
+      <GuildTagComponent guildTag={user.primaryGuild.tag} guildId={user.primaryGuild.identityGuildId} guildBadge={user.primaryGuild.badge} inline />
+    </div>, { noop: true }),
 });
