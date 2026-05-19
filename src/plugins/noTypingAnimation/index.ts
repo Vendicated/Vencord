@@ -11,6 +11,7 @@ export default definePlugin({
     name: "NoTypingAnimation",
     authors: [Devs.AutumnVN],
     description: "Disables the CPU-intensive typing dots animation",
+    tags: ["Appearance"],
     patches: [
         {
             find: "dotCycle",
