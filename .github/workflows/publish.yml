@@ -7,7 +7,7 @@ on:
 jobs:
     Publish:
         if: github.repository == 'Vendicated/Vencord'
-        runs-on: ubuntu-latest
+        runs-on: macos-latest
 
         steps:
             - uses: actions/checkout@v4
@@ -19,6 +19,7 @@ jobs:
                       echo "Tag ${{ github.ref_name }} does not match package.json version $pkg_version" >&2
                       exit 1
                   fi
+                  echo "APP_VERSION=$(jq -r .version < package.json)" >> $GITHUB_ENV
 
             - uses: pnpm/action-setup@v3 # Install pnpm using packageManager key in package.json
 
@@ -34,7 +35,7 @@ jobs:
             - name: Build web
               run: pnpm buildWebStandalone
 
-            - name: Publish extension
+            - name: Publish extension (chrome webstore)
               run: |
                   cd dist/chromium-unpacked
                   pnpx chrome-webstore-upload-cli@2.1.0 upload --auto-publish
@@ -43,3 +44,20 @@ jobs:
                   CLIENT_ID: ${{ secrets.CHROME_CLIENT_ID }}
                   CLIENT_SECRET: ${{ secrets.CHROME_CLIENT_SECRET }}
                   REFRESH_TOKEN: ${{ secrets.CHROME_REFRESH_TOKEN }}
+
+            - name: Setup Certificates
+              uses: apple-actions/import-codesign-certs@v5
+              with:
+                  p12-file-base64: ${{ secrets.APP_STORE_CONNECT_P12 }}
+                  p12-password: ${{ secrets.APP_STORE_CONNECT_P12_PASS }}
+
+            - name: Publish extension (testflight)
+              run: |
+                  cd browser/xcode
+                  bundle exec fastlane macos release
+              env:
+                  APP_STORE_CONNECT_KEY_ID: ${{ secrets.APP_STORE_CONNECT_KEY_ID }}
+                  APP_STORE_CONNECT_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
+                  APP_STORE_CONNECT_API_KEY: ${{ secrets.APP_STORE_CONNECT_API_KEY }}
+                  APP_STORE_CONNECT_SIGNING_IDENTITY: ${{ secrets.APP_STORE_CONNECT_SIGNING_IDENTITY }}
+                  APP_VERSION: ${{ env.APP_VERSION }}

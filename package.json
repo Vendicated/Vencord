@@ -18,7 +18,6 @@
         "buildStandalone": "pnpm build --standalone",
         "buildWeb": "node --require=./scripts/suppressExperimentalWarnings.js scripts/build/buildWeb.mjs",
         "buildWebStandalone": "pnpm buildWeb --standalone",
-        "buildWebStandaloneXcode": "pnpm buildWebStandalone && cd browser/xcode && make",
         "buildReporter": "pnpm buildWebStandalone --reporter --skip-extension",
         "buildReporterDesktop": "pnpm build --reporter",
         "watch": "pnpm build --watch",
