@@ -9,9 +9,12 @@ body:
           value: |
               GitHub Issues are for development, not support!
 
+              Some plugins may sometimes break, but we have automatic tracking for that. So please **do not report broken plugins**, it is useless.
+              However, if a plugin works fine, but has a bug in its functionality, then you can report that here.
+
               If you are experiencing any of the following issues, go to our [Discord server](https://discord.gg/D9uwnFnqmd) for support:
               - Vencord doesn't work or crashes
-              - A plugin doesn't work
+              - A plugin doesn't work anymore
               - You are having issues installing Vencord
               - You want to ask a question about Vencord or one of its plugins
 
