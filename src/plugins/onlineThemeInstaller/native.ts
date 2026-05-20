@@ -82,5 +82,5 @@ export async function saveThemeFile(_: IpcMainInvokeEvent, fileName: string, con
 
 export async function deleteThemeFile(_: IpcMainInvokeEvent, fileName: string): Promise<void> {
     const path = ensureSafeThemePath(fileName);
-    await unlink(path).catch(() => { });
+await unlink(path).catch(err => { if (err.code !== "ENOENT") throw err; });
 }
