@@ -381,6 +381,10 @@ export const Devs = /* #__PURE__*/ Object.freeze({
         name: "blahaj.zip",
         id: 683954422241427471n,
     },
+    bulwarked: {
+        name: "0xbulwarked",
+        id: 148190966929424385n,
+    },
     archeruwu: {
         name: "archer_uwu",
         id: 160068695383736320n

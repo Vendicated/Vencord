@@ -1,0 +1,114 @@
+.vc-oti-root {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    color: var(--header-primary);
+    font-family: var(--font-primary);
+}
+
+.vc-oti-intro {
+    margin-bottom: 0;
+}
+
+.vc-oti-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+}
+
+.vc-oti-search-input {
+    flex: 1 1 200px;
+    min-width: 160px;
+    height: 40px;
+    box-sizing: border-box;
+    margin: 0;
+    color-scheme: dark;
+    background-color: var(--input-background-default);
+    border: 1px solid var(--input-border-default);
+    border-radius: 4px;
+    color: var(--header-primary);
+    font-family: var(--font-primary);
+    font-size: 13px;
+    font-weight: 400;
+    line-height: 20px;
+    padding: 10px 16px;
+    transition: border-color 0.15s ease, background-color 0.15s ease;
+}
+
+.vc-oti-search-input:focus {
+    border-color: var(--input-border-focused, var(--brand-500));
+    outline: none;
+}
+
+.vc-oti-search-input::placeholder {
+    color: var(--text-muted);
+    font-family: var(--font-primary);
+    font-size: 13px;
+}
+
+.vc-oti-meta {
+    color: var(--text-muted);
+    font-size: 12px;
+}
+
+.vc-oti-list {
+    display: flex;
+    flex-direction: column;
+    border: 1px solid var(--background-modifier-accent);
+    border-radius: 8px;
+}
+
+.vc-oti-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--background-modifier-accent);
+}
+
+.vc-oti-row:last-child {
+    border-bottom: none;
+}
+
+.vc-oti-row:hover {
+    background: var(--background-modifier-hover);
+}
+
+.vc-oti-text {
+    flex: 1;
+    min-width: 0;
+}
+
+.vc-oti-name {
+    color: var(--header-primary);
+    font-family: var(--font-primary);
+    font-weight: 600;
+    font-size: 13px;
+    line-height: 1.25;
+    margin-bottom: 4px;
+}
+
+.vc-oti-desc {
+    color: var(--text-muted);
+    font-size: 12px;
+    line-height: 1.4;
+}
+
+.vc-oti-row > button {
+    flex-shrink: 0;
+    margin-top: 2px;
+    min-width: 72px;
+}
+
+.vc-oti-empty,
+.vc-oti-error,
+.vc-oti-loading {
+    padding: 20px;
+    text-align: center;
+    color: var(--text-muted);
+}
+
+.vc-oti-error {
+    color: var(--text-danger);
+}
