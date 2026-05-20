@@ -19,7 +19,8 @@ Contributions can be sent via pull requests. If you're new to Git, check [this g
 Pull requests can be made either to the `main` or the `dev` branch. However, unless you're an advanced user, I recommend sticking to `main`.
 This is because the dev branch might contain unstable changes and be force pushed frequently, which could cause conflicts in your pull request.
 
-Before working on a major change, I highly recommend opening an issue and discussing it with us. Alternatively, you can also do so in our Discord server's development
+Before working on a major change, I highly recommend opening a feature request for it, making sure to check "I am willing to work on this myself",
+so we can discuss before you invest time. Alternatively, you can also do so in our Discord server's development
 channels. This saves you a lot of time in case your feature is considered too niche or rejected for any other reason.
 
 ## Write a plugin
