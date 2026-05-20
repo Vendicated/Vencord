@@ -71,3 +71,4 @@ body:
               - label: I am using Discord Stable or tried on Stable and this bug happens there as well
               - label: I installed Vencord via an official method (download from vencord.dev or from source), not via something like AUR or Nix packages
               - label: This is not a support request
+              - label: I am willing to submit a fix for this myself
