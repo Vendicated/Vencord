@@ -449,7 +449,7 @@ function createObserver(): MutationObserver {
                     partialReload();
                     return;
                 }
-                if (m.layers?.layer && node.classList?.contains(m.layers.layer)) {
+                if (node.classList?.contains(m.layers?.layer || "layer_bc663c")) {
                     reload();
                     return;
                 }
