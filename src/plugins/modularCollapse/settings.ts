@@ -91,11 +91,32 @@ const DEFAULTS: CUISettings = {
 
 // In-memory settings cache
 let _settings: CUISettings | null = null;
+let _shortcutSets: Set<string>[] | null = null;
+
+type SettingsListener = () => void;
+const _listeners = new Set<SettingsListener>();
+
+/** Listen to settings changes */
+export function addSettingsListener(listener: SettingsListener): () => void {
+    _listeners.add(listener);
+    return () => { _listeners.delete(listener); };
+}
+
+function notifySettingsListeners(): void {
+    for (const listener of _listeners) {
+        try {
+            listener();
+        } catch (e) {
+            console.error("[ModularCollapse] Error in settings listener:", e);
+        }
+    }
+}
 
 /** Load settings from DataStore (async, call once at start) */
 export async function loadSettings(): Promise<CUISettings> {
     const stored = await DataStore.get(STORE_KEY) as Partial<CUISettings> | undefined;
     _settings = { ...DEFAULTS, ...(stored ?? {}) };
+    _shortcutSets = null; // Reset shortcut sets cache on load
     return _settings;
 }
 
@@ -109,7 +130,9 @@ export function getSettings(): CUISettings {
 export async function setSetting<K extends keyof CUISettings>(key: K, value: CUISettings[K]): Promise<void> {
     const s = getSettings();
     s[key] = value;
+    if (key === "shortcutList") _shortcutSets = null;
     await DataStore.set(STORE_KEY, { ...s });
+    notifySettingsListeners();
 }
 
 /** Update a single index in an array setting */
@@ -122,12 +145,18 @@ export async function setSettingArrayIndex<K extends keyof CUISettings>(
     const arr = s[key] as any[];
     if (Array.isArray(arr)) {
         arr[index] = value;
+        if (key === "shortcutList") _shortcutSets = null;
         await DataStore.set(STORE_KEY, { ...s });
+        notifySettingsListeners();
     }
 }
 
 /** Get the parsed shortcut list as Sets (for matching) */
 export function getShortcutSets(): Set<string>[] {
-    const s = getSettings();
-    return s.shortcutList.map(keys => new Set(keys));
+    if (!_shortcutSets) {
+        const s = getSettings();
+        _shortcutSets = s.shortcutList.map(keys => new Set(keys));
+    }
+    return _shortcutSets;
 }
+

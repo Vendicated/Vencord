@@ -71,26 +71,6 @@ export const game = findCssClassesLazy("openOnHover", "userSection", "container"
 export const callButtons = findCssClassesLazy("controlButton");
 export const userAreaButtons = findCssClassesLazy("actionButtons");
 export const threads = findCssClassesLazy("uploadArea", "newMemberBanner", "grid", "list", "headerRow");
+export const layers = findCssClassesLazy("layer", "layers");
 export const profileWrappers = findCssClassesLazy("header", "footerButton");
 
-// Debug helper — run __modularCollapse_modules() in Discord console
-(globalThis as any).__modularCollapse_modules = () => {
-    const mods: Record<string, any> = {
-        sidebar, guilds, icons, input, scroller, members, toolbar,
-        search, channels, panel, frame, calls, social, user, popout,
-        effects, tooltip, preview, activity, game, callButtons,
-        userAreaButtons, threads, profileWrappers,
-    };
-    for (const [name, mod] of Object.entries(mods)) {
-        try {
-            const keys = mod ? Object.keys(mod) : [];
-            const found = keys.length > 0;
-            console.log(
-                `[CUI] ${name}: ${found ? "✓" : "✗"} (${keys.length} keys)`,
-                found ? keys.slice(0, 8).join(", ") : "(empty)"
-            );
-        } catch (e) {
-            console.log(`[CUI] ${name}: ✗ (error)`, e);
-        }
-    }
-};
