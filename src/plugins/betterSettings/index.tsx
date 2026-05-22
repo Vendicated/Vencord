@@ -6,7 +6,7 @@
 
 import { definePluginSettings } from "@api/Settings";
 import { disableStyle, enableStyle } from "@api/Styles";
-import { AchievementsIcon, AppsIcon, CreditCardIcon, GameControllerIcon, HammerAndChiselIcon, HammerIcon, MainSettingsIcon, PencilSparkleIcon, UserIcon, VencordIcon } from "@components/Icons";
+import { AchievementsIcon, AppsIcon, CreditCardIcon, GameControllerIcon, HammerAndChiselIcon, MainSettingsIcon, PencilSparkleIcon, UserIcon, VencordIcon } from "@components/Icons";
 import { buildPluginMenuEntries, buildThemeMenuEntries } from "@equicordplugins/equicordToolbox/menu";
 import { Devs } from "@utils/constants";
 import { classNameFactory } from "@utils/css";
@@ -32,8 +32,7 @@ const SECTION_ICONS: Record<string, Icon> = {
     activity_section: GameControllerIcon,
     developer_section: HammerAndChiselIcon,
     utility_section: MainSettingsIcon,
-    playgrounds_section: AchievementsIcon,
-    build_overrides_section: HammerIcon,
+    playgrounds: AchievementsIcon,
 };
 
 const settings = definePluginSettings({
@@ -171,22 +170,10 @@ export default definePlugin({
             predicate: () => settings.store.organizeMenu,
             replacement: [
                 {
-                    match: /"clear-build-override"\)\]\}/,
-                    replace: '$&,"build_overrides_section"'
-                },
-                {
                     match: /children:\[(\i),null!=(\i).{0,30}\}\),(\i)\](?<=\1=(?:function|.{0,30}\.openUserSettings).+?)/, // TODO .{0,30}\.openUserSettings is stable compat
                     replace: "children:$self.transformSettingsEntries([$1,$2,$3])",
                 }
             ]
-        },
-        {
-            find: '},"design-systems")',
-            predicate: () => settings.store.organizeMenu,
-            replacement: {
-                match: /\},"playgrounds"\)/,
-                replace: '},"playgrounds_section")'
-            }
         },
     ],
 
@@ -208,7 +195,7 @@ export default definePlugin({
     transformSettingsEntries(list) {
         const items: ReactNode[] = [];
         const SECTION_NAMES: Record<string, string> = {
-            user_section: getIntlMessage("ACCOUNT_SETTINGS"),
+            user_section: getIntlMessage("USER_SETTINGS"),
             utility_section: getIntlMessage("USER_SETTINGS_KEYBINDS_MISCELLANEOUS_SECTION_TITLE")
         };
 
@@ -229,7 +216,7 @@ export default definePlugin({
                         {children}
                     </Menu.MenuItem>
                 );
-            } else if (key?.endsWith("_section") && (props.label ?? SECTION_NAMES[key])) {
+            } else if ((key?.endsWith("_section") || key === "playgrounds") && (props.label ?? SECTION_NAMES[key])) {
                 const iconLeft = SECTION_ICONS[key];
                 const children: any = [].concat(props.children ?? []).flat(Infinity);
                 const logoutItem = children.find(c => c?.key === "logout_sidebar_item");
