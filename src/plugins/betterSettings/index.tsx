@@ -32,7 +32,6 @@ const SECTION_ICONS: Record<string, Icon> = {
     staff_only_section: ShieldIcon,
 };
 
-
 const settings = definePluginSettings({
     disableFade: {
         description: "Disable the crossfade animation",
