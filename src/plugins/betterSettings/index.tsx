@@ -6,10 +6,11 @@
 
 import { definePluginSettings } from "@api/Settings";
 import { disableStyle, enableStyle } from "@api/Styles";
-import { AppsIcon, CreditCardIcon, GameControllerIcon, HammerAndChiselIcon, MainSettingsIcon, ShieldIcon, VencordIcon } from "@components/Icons";
+import { AppsIcon, CreditCardIcon, GameControllerIcon, HammerAndChiselIcon, MainSettingsIcon, PencilSparkleIcon, ShieldIcon, UserIcon, VencordIcon } from "@components/Icons";
 import { buildPluginMenuEntries, buildThemeMenuEntries } from "@plugins/vencordToolbox/menu";
 import { Devs } from "@utils/constants";
 import { classNameFactory } from "@utils/css";
+import { getIntlMessage } from "@utils/discord";
 import { Logger } from "@utils/Logger";
 import definePlugin, { OptionType } from "@utils/types";
 import { Icon } from "@vencord/discord-types";
@@ -23,13 +24,15 @@ const cl = classNameFactory("");
 const Classes = findCssClassesLazy("animating", "baseLayer", "bg", "layer", "layers");
 
 const SECTION_ICONS: Record<string, Icon> = {
-    user_section: MainSettingsIcon,
+    profile_section: PencilSparkleIcon,
+    user_section: UserIcon,
     vencord_section: VencordIcon,
     billing_section: CreditCardIcon,
     app_section: AppsIcon,
     activity_section: GameControllerIcon,
     developer_section: HammerAndChiselIcon,
     staff_only_section: ShieldIcon,
+    utility_section: MainSettingsIcon,
 };
 
 const settings = definePluginSettings({
@@ -191,6 +194,11 @@ export default definePlugin({
 
     transformSettingsEntries(list) {
         const items: ReactNode[] = [];
+        const SECTION_NAMES: Record<string, string> = {
+            profile_section: getIntlMessage("EDIT_PROFILES"),
+            user_section: getIntlMessage("ACCOUNT_SETTINGS"),
+            utility_section: getIntlMessage("USER_SETTINGS_KEYBINDS_MISCELLANEOUS_SECTION_TITLE")
+        };
 
         for (const item of list) {
             const { key, props } = item;
@@ -206,13 +214,13 @@ export default definePlugin({
                         {children}
                     </Menu.MenuItem>
                 );
-            } else if (key.endsWith("_section") && props.label) {
+            } else if (key.endsWith("_section") && (props.label ?? SECTION_NAMES[key])) {
                 const iconLeft = SECTION_ICONS[key];
                 items.push(
                     <Menu.MenuItem
                         key={key}
-                        label={props.label}
-                        id={props.label}
+                        label={props.label ?? SECTION_NAMES[key]}
+                        id={props.label ?? SECTION_NAMES[key]}
                         {...(iconLeft && { iconLeft })}
                     >
                         {this.transformSettingsEntries(props.children)}
