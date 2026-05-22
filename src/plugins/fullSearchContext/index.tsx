@@ -85,7 +85,7 @@ export default definePlugin({
     authors: [Devs.Ven, Devs.Aria],
 
     patches: [{
-        find: "`Listbox navigator was given",
+        find: "Listbox navigator was given an unhandled action",
         replacement: {
             match: /this(?=\.handleContextMenu\(\i,\i\))/,
             replace: "$self"
