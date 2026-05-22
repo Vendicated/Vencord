@@ -102,7 +102,7 @@ export function HeaderBarButton(props: HeaderBarButtonProps & { ref?: React.RefO
                 <Clickable
                     {...{ innerRef: ref } as any}
                     className={classes(HeaderBarClasses.clickable, className)}
-                    style={{ width: iconSize, boxSizing: "content-box", justifyContent: "center" }}
+                    style={{ width: Math.max(iconSize, 24), height: Math.max(iconSize, 24), boxSizing: "content-box", justifyContent: "center" }}
                     onClick={onClick}
                     onContextMenu={onContextMenu}
                     onMouseEnter={onMouseEnter}
