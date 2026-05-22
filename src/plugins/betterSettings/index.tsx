@@ -6,7 +6,7 @@
 
 import { definePluginSettings } from "@api/Settings";
 import { disableStyle, enableStyle } from "@api/Styles";
-import { AppsIcon, CreditCardIcon, GameControllerIcon, HammerAndChiselIcon, MainSettingsIcon, PencilSparkleIcon, ShieldIcon, UserIcon, VencordIcon } from "@components/Icons";
+import { AppsIcon, CreditCardIcon, GameControllerIcon, HammerAndChiselIcon, MainSettingsIcon, PencilSparkleIcon, UserIcon, VencordIcon } from "@components/Icons";
 import { buildPluginMenuEntries, buildThemeMenuEntries } from "@plugins/vencordToolbox/menu";
 import { Devs } from "@utils/constants";
 import { classNameFactory } from "@utils/css";
@@ -31,7 +31,6 @@ const SECTION_ICONS: Record<string, Icon> = {
     app_section: AppsIcon,
     activity_section: GameControllerIcon,
     developer_section: HammerAndChiselIcon,
-    staff_only_section: ShieldIcon,
     utility_section: MainSettingsIcon,
 };
 
