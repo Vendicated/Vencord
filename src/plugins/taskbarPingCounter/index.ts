@@ -30,6 +30,7 @@ export default definePlugin({
     name: "TaskbarPingCounter",
     description: "Adds the unread ping counter as a prefix to the window title. Useful for taskbar setups where the window title is visible but not the badge.",
     authors: [Devs.Nekro],
+    tags: ["Notifications", "Appearance"],
     hidden: !IS_DISCORD_DESKTOP,
 
     start() {
