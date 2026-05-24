@@ -13,7 +13,7 @@ const GuildReadStateStore = findStoreLazy("GuildReadStateStore") as {
     getTotalMentionCount(): number;
 };
 
-const EVENTS = ["MESSAGE_CREATE", "MESSAGE_ACK", "CHANNEL_SELECT", "GUILD_SELECT"];
+const EVENTS = ["MESSAGE_CREATE", "MESSAGE_ACK", "MESSAGE_DELETE", "MESSAGE_DELETE_BULK", "MESSAGE_UPDATE", "BULK_ACK", "CHANNEL_SELECT", "GUILD_SELECT"];
 
 function getPrefix() {
     const count: number = GuildReadStateStore.getTotalMentionCount?.() ?? 0;
