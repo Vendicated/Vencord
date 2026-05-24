@@ -73,6 +73,10 @@ const fakeNitroStickerRegex = /\/stickers\/(\d+?)\./;
 const fakeNitroGifStickerRegex = /\/attachments\/\d+?\/\d+?\/(\d+?)\.gif/;
 const hyperLinkRegex = /\[.+?\]\((https?:\/\/.+?)\)/;
 
+function hasNitroSubscription() {
+    return (UserStore?.getCurrentUser?.()?.premiumType ?? 0) > 0;
+}
+
 const settings = definePluginSettings({
     enableEmojiBypass: {
         description: "Allows sending fake emojis (also bypasses missing permission to use custom emojis)",
@@ -192,6 +196,7 @@ export default definePlugin({
     patches: [
         {
             find: "canUseCustomStickersEverywhere:",
+            predicate: () => !hasNitroSubscription(),
             replacement: [
                 {
                     match: /(?<=canUseCustomStickersEverywhere:function\(\i\)\{)/,
@@ -221,7 +226,7 @@ export default definePlugin({
         // Patch the emoji picker in voice calls to not be bypassed by fake nitro
         {
             find: '.getByName("fork_and_knife")',
-            predicate: () => settings.store.enableEmojiBypass,
+            predicate: () => settings.store.enableEmojiBypass && !hasNitroSubscription(),
             replacement: {
                 match: ".CHAT",
                 replace: ".STATUS"
@@ -230,7 +235,7 @@ export default definePlugin({
         {
             find: ".GUILD_SUBSCRIPTION_UNAVAILABLE;",
             group: true,
-            predicate: () => settings.store.enableEmojiBypass,
+            predicate: () => settings.store.enableEmojiBypass && !hasNitroSubscription(),
             replacement: [
                 {
                     // Create a variable for the intention of using the emoji
@@ -262,6 +267,7 @@ export default definePlugin({
         // Allows the usage of subscription-locked emojis
         {
             find: ".getUserIsAdmin(",
+            predicate: () => !hasNitroSubscription(),
             replacement: {
                 match: /(function \i\(\i,\i)\){(.{0,250}.getUserIsAdmin\(.+?return!1})/,
                 replace: (_, rest1, rest2) => `${rest1},fakeNitroOriginal){if(!fakeNitroOriginal)return false;${rest2}`
@@ -270,7 +276,7 @@ export default definePlugin({
         // Make stickers always available
         {
             find: '"SENDABLE"',
-            predicate: () => settings.store.enableStickerBypass,
+            predicate: () => settings.store.enableStickerBypass && !hasNitroSubscription(),
             replacement: {
                 match: /\i\.available\?/,
                 replace: "true?"
@@ -279,7 +285,7 @@ export default definePlugin({
         // Remove boost requirements to stream with high quality
         {
             find: "#{intl::STREAM_FPS_OPTION}",
-            predicate: () => settings.store.enableStreamQualityBypass,
+            predicate: () => settings.store.enableStreamQualityBypass && !hasNitroSubscription(),
             replacement: {
                 match: /guildPremiumTier:\i\.\i\.TIER_\d,?/g,
                 replace: ""
@@ -287,6 +293,7 @@ export default definePlugin({
         },
         {
             find: '"UserSettingsProtoStore"',
+            predicate: () => !hasNitroSubscription(),
             replacement: [
                 {
                     // Overwrite incoming connection settings proto with our local settings
@@ -303,6 +310,7 @@ export default definePlugin({
         // Call our function to handle changing the gradient theme when selecting a new one
         {
             find: ",updateTheme(",
+            predicate: () => !hasNitroSubscription(),
             replacement: {
                 match: /(function \i\(\i\){let{backgroundGradientPresetId:(\i).+?)(\i\.\i\.updateAsync.+?theme=(.+?),.+?},\i\))/,
                 replace: (_, rest, backgroundGradientPresetId, originalCall, theme) => `${rest}$self.handleGradientThemeSelect(${backgroundGradientPresetId},${theme},()=>${originalCall});`
@@ -313,6 +321,7 @@ export default definePlugin({
             find: "customUserThemeSettings:{",
             // Discord has two separate modules for treatments 1 and 2
             all: true,
+            predicate: () => !hasNitroSubscription(),
             replacement: {
                 match: /(?<=\i=)\(0,\i\.\i\)\(\i\.\i\.TIER_2\)(?=,|;)/g,
                 replace: "true"
@@ -320,6 +329,7 @@ export default definePlugin({
         },
         {
             find: '["strong","em","u","text","inlineCode","s","spoiler"]',
+            predicate: () => !hasNitroSubscription(),
             replacement: [
                 {
                     // Call our function to decide whether the emoji link should be kept or not
@@ -337,6 +347,7 @@ export default definePlugin({
         },
         {
             find: "}renderStickersAccessories(",
+            predicate: () => !hasNitroSubscription(),
             replacement: [
                 {
                     // Call our function to decide whether the embed should be ignored or not
@@ -360,7 +371,7 @@ export default definePlugin({
         },
         {
             find: "#{intl::STICKER_POPOUT_UNJOINED_PRIVATE_GUILD_DESCRIPTION}",
-            predicate: () => settings.store.transformStickers,
+            predicate: () => settings.store.transformStickers && !hasNitroSubscription(),
             replacement: [
                 {
                     // Export the renderable sticker to be used in the fake nitro sticker notice
@@ -376,7 +387,7 @@ export default definePlugin({
         },
         {
             find: ".EMOJI_UPSELL_POPOUT_MORE_EMOJIS_OPENED,",
-            predicate: () => settings.store.transformEmojis,
+            predicate: () => settings.store.transformEmojis && !hasNitroSubscription(),
             replacement: {
                 // Export the emoji node to be used in the fake nitro emoji notice
                 match: /isDiscoverable:\i,shouldHideRoleSubscriptionCTA:\i,(?<={node:(\i),.+?)/,
@@ -385,7 +396,7 @@ export default definePlugin({
         },
         {
             find: "#{intl::EMOJI_POPOUT_UNJOINED_DISCOVERABLE_GUILD_DESCRIPTION}",
-            predicate: () => settings.store.transformEmojis,
+            predicate: () => settings.store.transformEmojis && !hasNitroSubscription(),
             replacement: {
                 // Add the fake nitro emoji notice
                 match: /(?<=emojiDescription:)(\i)(?<=\1=\(\i=>\{.+?\}\)\((\i)\)[,;].+?)/,
@@ -395,6 +406,7 @@ export default definePlugin({
         // Separate patch for allowing using custom app icons
         {
             find: "getCurrentDesktopIcon(),",
+            predicate: () => !hasNitroSubscription(),
             replacement: {
                 match: /\i\.\i\.isPremium\(\i\.\i\.getCurrentUser\(\)\)/,
                 replace: "true"
@@ -403,6 +415,7 @@ export default definePlugin({
         // Make all Soundboard sounds available
         {
             find: 'type:"GUILD_SOUNDBOARD_SOUND_CREATE"',
+            predicate: () => !hasNitroSubscription(),
             replacement: {
                 match: /(?<=type:"(?:SOUNDBOARD_SOUNDS_RECEIVED|GUILD_SOUNDBOARD_SOUND_CREATE|GUILD_SOUNDBOARD_SOUND_UPDATE|GUILD_SOUNDBOARD_SOUNDS_UPDATE)".+?available:)\i\.available/g,
                 replace: "true"
@@ -415,15 +428,20 @@ export default definePlugin({
     },
 
     get canUseEmotes() {
-        return (UserStore.getCurrentUser().premiumType ?? 0) > 0;
+        return hasNitroSubscription();
     },
 
     get canUseStickers() {
-        return (UserStore.getCurrentUser().premiumType ?? 0) > 1;
+        return (UserStore?.getCurrentUser?.()?.premiumType ?? 0) > 1;
+    },
+
+    isActive() {
+        return !hasNitroSubscription();
     },
 
     handleProtoChange(proto: any, user: any) {
         try {
+            if (!this.isActive()) return;
             if (proto == null || typeof proto === "string") return;
 
             const premiumType: number = user?.premium_type ?? UserStore?.getCurrentUser()?.premiumType ?? 0;
@@ -447,6 +465,8 @@ export default definePlugin({
     },
 
     handleGradientThemeSelect(backgroundGradientPresetId: number | undefined, theme: number, original: () => void) {
+        if (!this.isActive()) return original();
+
         const premiumType = UserStore?.getCurrentUser()?.premiumType ?? 0;
         if (premiumType === 2 || backgroundGradientPresetId == null) return original();
 
@@ -513,6 +533,8 @@ export default definePlugin({
     },
 
     patchFakeNitroEmojisOrRemoveStickersLinks(content: Array<any>, inline: boolean) {
+        if (!this.isActive()) return content;
+
         // If content has more than one child or it's a single ReactElement like a header, list or span
         if ((content.length > 1 || typeof content[0]?.type === "string") && !settings.store.transformCompoundSentence) return content;
 
@@ -616,6 +638,8 @@ export default definePlugin({
     },
 
     patchFakeNitroStickers(stickers: Array<any>, message: Message) {
+        if (!this.isActive()) return stickers;
+
         const itemsToMaybePush: Array<string> = [];
 
         const contentItems = message.content.split(/\s/);
@@ -663,6 +687,8 @@ export default definePlugin({
     },
 
     shouldIgnoreEmbed(embed: Message["embeds"][number], message: Message) {
+        if (!this.isActive()) return false;
+
         try {
             const contentItems = message.content.split(/\s/);
             if (contentItems.length > 1 && !settings.store.transformCompoundSentence) return false;
@@ -701,6 +727,8 @@ export default definePlugin({
     },
 
     filterAttachments(attachments: Message["attachments"]) {
+        if (!this.isActive()) return attachments;
+
         return attachments.filter(attachment => {
             if (attachment.content_type !== "image/gif") return true;
 
@@ -715,10 +743,13 @@ export default definePlugin({
     },
 
     shouldKeepEmojiLink(link: any) {
+        if (!this.isActive()) return false;
+
         return link.target && fakeNitroEmojiRegex.test(link.target);
     },
 
     addFakeNotice(type: FakeNoticeType, node: Array<ReactNode>, fake: boolean) {
+        if (!this.isActive()) return node;
         if (!fake) return node;
 
         node = Array.isArray(node) ? node : [node];
@@ -800,6 +831,8 @@ export default definePlugin({
     },
 
     canUseEmote(e: Emoji, channelId: string) {
+        if (!this.isActive()) return true;
+
         if (e.type === 0) return true;
         if (e.available === false) return false;
 
@@ -818,6 +851,8 @@ export default definePlugin({
     },
 
     start() {
+        if (!this.isActive()) return;
+
         const s = settings.store;
 
         if (!s.enableEmojiBypass && !s.enableStickerBypass) {
@@ -825,6 +860,8 @@ export default definePlugin({
         }
 
         this.preSend = addMessagePreSendListener(async (channelId, messageObj, extra) => {
+            if (!this.isActive()) return { cancel: false };
+
             const { guildId } = this;
 
             let hasBypass = false;
@@ -914,6 +951,7 @@ export default definePlugin({
         });
 
         this.preEdit = addMessagePreEditListener(async (channelId, __, messageObj) => {
+            if (!this.isActive()) return { cancel: false };
             if (!s.enableEmojiBypass) return;
 
             let hasBypass = false;
