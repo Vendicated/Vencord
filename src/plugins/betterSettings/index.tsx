@@ -203,8 +203,8 @@ export default definePlugin({
         let logout: ReactNode = null;
 
         for (const item of flat) {
+            if (!item?.props) continue;
             const { key, props } = item;
-            if (!props) continue;
 
             if (key === "vencord_plugins" || key === "vencord_themes") {
                 const children = key === "vencord_plugins"
