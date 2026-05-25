@@ -27,17 +27,26 @@ const normalizeWord = w => w.replace(/0/g, 'o').replace(/1/g, 'i').replace(/l/g,
 const normalizeMsg = s => s.replace(/0/g, 'o').replace(/1/g, 'i').replace(/l/g, 'i');
 
 const robloxVersion = (e, patterns) => {
-    const parts = e.message.content.split(/([^a-zA-Z0-9]+)/);
-    for (let i = 0; i < parts.length; i += 2) {
-        const norm = normalizeMsg(parts[i]);
-        for (const re of patterns) {
-            if (re.test(norm)) {
-                parts[i] = "#".repeat(parts[i].length);
-                break;
+    const content = e.message.content;
+    const norm = normalizeMsg(content);
+    const censorPositions = new Set();
+
+    for (const re of patterns) {
+        re.lastIndex = 0;
+        let match;
+        while ((match = re.exec(norm)) !== null) {
+            for (let i = match.index; i < match.index + match[0].length; i++) {
+                censorPositions.add(i);
             }
+            if (re.lastIndex === match.index) re.lastIndex++;
         }
     }
-    e.message.content = parts.join("");
+
+    let result = "";
+    for (let i = 0; i < content.length; i++) {
+        result += censorPositions.has(i) ? "#" : content[i];
+    }
+    e.message.content = result;
 
 };
 
