@@ -4,19 +4,58 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
-import definePlugin from "@utils/types";
+import definePlugin, { OptionType } from "@utils/types";
 import { findStoreLazy } from "@webpack";
-import { FluxDispatcher } from "@webpack/common";
+import { FluxDispatcher, RelationshipStore } from "@webpack/common";
 
 const GuildReadStateStore = findStoreLazy("GuildReadStateStore") as {
     getTotalMentionCount(): number;
 };
 
-const EVENTS = ["MESSAGE_CREATE", "MESSAGE_ACK", "MESSAGE_DELETE", "MESSAGE_DELETE_BULK", "MESSAGE_UPDATE", "BULK_ACK", "CHANNEL_SELECT", "GUILD_SELECT"];
+const MessageRequestStore = findStoreLazy("MessageRequestStore") as {
+    getMessageRequestsCount(): number;
+};
+
+const EVENTS = [
+    "MESSAGE_CREATE",
+    "MESSAGE_ACK",
+    "MESSAGE_DELETE",
+    "MESSAGE_DELETE_BULK",
+    "MESSAGE_UPDATE",
+    "RELATIONSHIP_ADD",
+    "RELATIONSHIP_REMOVE",
+    "BULK_ACK",
+    "CHANNEL_SELECT",
+    "CHANNEL_DELETE",
+    "GUILD_SELECT"
+];
+
+const settings = definePluginSettings({
+    includeFriendRequests: {
+        type: OptionType.BOOLEAN,
+        description: "Includes friend requests in the counter",
+        default: true
+    },
+    includeMessageRequests: {
+        type: OptionType.BOOLEAN,
+        description: "Includes messages requests in the counter",
+        default: true
+    }
+});
 
 function getPrefix() {
-    const count: number = GuildReadStateStore.getTotalMentionCount?.() ?? 0;
+    let count: number = GuildReadStateStore.getTotalMentionCount?.() ?? 0;
+
+    if (settings.store.includeFriendRequests) {
+        count += RelationshipStore.getPendingCount();
+    }
+
+    if (settings.store.includeMessageRequests) {
+        count += MessageRequestStore.getMessageRequestsCount();
+    }
+
     return count > 0 ? `(${count}) ` : "";
 }
 
@@ -32,8 +71,11 @@ export default definePlugin({
     authors: [Devs.Nekro],
     tags: ["Notifications", "Appearance"],
     hidden: !IS_DISCORD_DESKTOP,
+    settings,
 
     start() {
+        FluxDispatcher.addInterceptor(e => { console.log(e.type); return false; });
+
         const titleDescriptor = Object.getOwnPropertyDescriptor(Document.prototype, "title");
         if (!titleDescriptor?.set) return;
 
