@@ -44,6 +44,28 @@ function getRoleIconSrc(role: Role) {
 
 function RolesAndUsersPermissionsComponent({ permissions, guild, modalProps, header }: { permissions: Array<RoleOrUserPermission>; guild: Guild; modalProps: RenderModalProps; header: string; }) {
     const guildPermissionSpecMap = useMemo(() => getGuildPermissionSpecMap(guild), [guild.id]);
+    const modalScrollerRef = useRef<HTMLDivElement>(null);
+    const containerRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        const container = containerRef.current;
+        const modalScroller = (modalScrollerRef.current as HTMLDivElement & {
+            getScrollerNode?: () => HTMLDivElement | null;
+        } | null)?.getScrollerNode?.() ?? modalScrollerRef.current;
+
+        if (!container || !modalScroller) return;
+
+        const syncContainerHeight = () => {
+            container.style.height = `${modalScroller.clientHeight}px`;
+        };
+
+        syncContainerHeight();
+
+        const resizeObserver = new ResizeObserver(syncContainerHeight);
+        resizeObserver.observe(modalScroller);
+
+        return () => resizeObserver.disconnect();
+    }, []);
 
     useStateFromStores(
         [GuildMemberStore],
@@ -78,6 +100,7 @@ function RolesAndUsersPermissionsComponent({ permissions, guild, modalProps, hea
             {...modalProps}
             size="xl"
             title={`${header} Permissions`}
+            scrollerRef={modalScrollerRef}
         >
             {!selectedItem && (
                 <div className={cl("modal-no-perms")}>
@@ -86,7 +109,7 @@ function RolesAndUsersPermissionsComponent({ permissions, guild, modalProps, hea
             )}
 
             {selectedItem && (
-                <div className={cl("modal-container")}>
+                <div className={cl("modal-container")} ref={containerRef}>
                     <ScrollerThin className={cl("modal-list")} orientation="auto">
                         {permissions.map((permission, index) => {
                             const user: User | undefined = UserStore.getUser(permission.id ?? "");
