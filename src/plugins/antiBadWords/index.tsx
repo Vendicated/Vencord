@@ -18,24 +18,15 @@ const settings = definePluginSettings({
         options: [
             { label: "None", value: -1 },
             { label: "Roblox Version", value: 1 },
-            { label: "Hard Version", value: 2 }
+            { label: "Hard Version", value: 1 }
         ]
     }
 });
 
-const robloxVersion = e => {
+const normalizeWord = w => w.replace(/0/g, 'o').replace(/1/g, 'i').replace(/l/g, 'i');
+const normalizeMsg = s => s.replace(/0/g, 'o').replace(/1/g, 'i').replace(/l/g, 'i');
 
-    const normalizeWord = w => w.replace(/0/g, 'o').replace(/1/g, 'i').replace(/l/g, 'i');
-    const normalizeMsg = s => s.replace(/0/g, 'o').replace(/1/g, 'i').replace(/l/g, 'i');
-
-    const clean = {};
-    for (const w of banlist) {
-        const n = normalizeWord(w);
-        clean[n] = true;
-    }
-    const cleanWords = Object.keys(clean).sort((a, b) => b.length - a.length);
-    const patterns = cleanWords.map(w => new RegExp(w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replace(/\\\*/g, '\\w*?'), 'gi'));
-
+const robloxVersion = (e, patterns) => {
     if (e.type === "MESSAGE_CREATE" || e.type === "MESSAGE_UPDATE") {
         const parts = e.message.content.split(/([^a-zA-Z0-9]+)/);
         for (let i = 0; i < parts.length; i += 2) {
@@ -51,19 +42,7 @@ const robloxVersion = e => {
     }
 };
 
-const hardVersion = e => {
-
-    const normalizeWord = w => w.replace(/0/g, 'o').replace(/1/g, 'i').replace(/l/g, 'i');
-    const normalizeMsg = s => s.replace(/0/g, 'o').replace(/1/g, 'i').replace(/l/g, 'i');
-
-    const clean = {};
-    for (const w of banlist) {
-        const n = normalizeWord(w);
-        clean[n] = true;
-    }
-    const cleanWords = Object.keys(clean).sort((a, b) => b.length - a.length);
-    const patterns = cleanWords.map(w => new RegExp(w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replace(/\\\*/g, '\\w*?'), 'gi'));
-
+const hardVersion = (e, patterns) => {
     if (e.type === "MESSAGE_CREATE" || e.type === "MESSAGE_UPDATE") {
         const n = normalizeMsg(e.message.content);
         for (const re of patterns) {
@@ -83,14 +62,22 @@ export default definePlugin({
     dependencies: ["UserSettingsAPI"],
     settings,
     start: () => {
+        const clean = {};
+        for (const w of banlist) {
+            const n = normalizeWord(w);
+            clean[n] = true;
+        }
+        const cleanWords = Object.keys(clean).sort((a, b) => b.length - a.length);
+        const patterns = cleanWords.map(w => new RegExp(w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replace(/\\\*/g, '\\w*?'), 'gi'));
+
         findByProps("_dispatch").addInterceptor(e => {
             switch (settings.store.version) {
                 case -1:
                     break;
                 case 1:
-                    return robloxVersion(e);
+                    return robloxVersion(e, patterns);
                 case 2:
-                    return hardVersion(e);
+                    return hardVersion(e, patterns);
             }
         });
     }
