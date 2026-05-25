@@ -66,16 +66,14 @@ function refreshTitle() {
 }
 
 export default definePlugin({
-    name: "TaskbarPingCounter",
-    description: "Adds the unread ping counter as a prefix to the window title. Useful for taskbar setups where the window title is visible but not the badge.",
+    name: "WindowTitleMentionCount",
+    description: "Adds the mention count as a prefix to the window title. Useful for setups where the mention badge isn't visible.",
     authors: [Devs.Nekro],
     tags: ["Notifications", "Appearance"],
     hidden: !IS_DISCORD_DESKTOP,
     settings,
 
     start() {
-        FluxDispatcher.addInterceptor(e => { console.log(e.type); return false; });
-
         const titleDescriptor = Object.getOwnPropertyDescriptor(Document.prototype, "title");
         if (!titleDescriptor?.set) return;
 
