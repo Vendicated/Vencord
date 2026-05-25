@@ -34,6 +34,17 @@ import { PermissionAllowedIcon, PermissionDefaultIcon, PermissionDeniedIcon } fr
 type GetRoleIconData = (role: Role, size: number) => { customIconSrc?: string; unicodeEmoji?: UnicodeEmoji; };
 const getRoleIconData: GetRoleIconData = findByCodeLazy("convertSurrogateToName", "customIconSrc", "unicodeEmoji");
 
+type ModalScrollerRefTarget = HTMLDivElement | {
+    getScrollerNode?(): HTMLDivElement | null;
+};
+
+function getModalScrollerNode(target: ModalScrollerRefTarget | null) {
+    if (target instanceof Element)
+        return target;
+
+    return target?.getScrollerNode?.() ?? null;
+}
+
 function getRoleIconSrc(role: Role) {
     const icon = getRoleIconData(role, 20);
     if (!icon) return;
@@ -46,17 +57,28 @@ function RolesAndUsersPermissionsComponent({ permissions, guild, modalProps, hea
     const guildPermissionSpecMap = useMemo(() => getGuildPermissionSpecMap(guild), [guild.id]);
     const modalScrollerRef = useRef<HTMLDivElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
+    const [selectedItemIndex, selectItem] = useState(0);
+    const selectedItem = permissions[selectedItemIndex];
+    const hasSelectedItem = selectedItem != null;
 
     useEffect(() => {
         const container = containerRef.current;
-        const modalScroller = (modalScrollerRef.current as HTMLDivElement & {
-            getScrollerNode?: () => HTMLDivElement | null;
-        } | null)?.getScrollerNode?.() ?? modalScrollerRef.current;
+        const modalScroller = getModalScrollerNode(modalScrollerRef.current as ModalScrollerRefTarget | null);
 
-        if (!container || !modalScroller) return;
+        if (!container || !(modalScroller instanceof Element)) return;
+
+        let frameId = 0;
 
         const syncContainerHeight = () => {
-            container.style.height = `${modalScroller.clientHeight}px`;
+            const nextHeight = `${modalScroller.clientHeight}px`;
+            if (container.style.height === nextHeight)
+                return;
+
+            cancelAnimationFrame(frameId);
+            frameId = requestAnimationFrame(() => {
+                if (container.isConnected && container.style.height !== nextHeight)
+                    container.style.height = nextHeight;
+            });
         };
 
         syncContainerHeight();
@@ -64,8 +86,11 @@ function RolesAndUsersPermissionsComponent({ permissions, guild, modalProps, hea
         const resizeObserver = new ResizeObserver(syncContainerHeight);
         resizeObserver.observe(modalScroller);
 
-        return () => resizeObserver.disconnect();
-    }, []);
+        return () => {
+            cancelAnimationFrame(frameId);
+            resizeObserver.disconnect();
+        };
+    }, [hasSelectedItem]);
 
     useStateFromStores(
         [GuildMemberStore],
@@ -89,9 +114,6 @@ function RolesAndUsersPermissionsComponent({ permissions, guild, modalProps, hea
             userIds: usersToRequest
         });
     }, []);
-
-    const [selectedItemIndex, selectItem] = useState(0);
-    const selectedItem = permissions[selectedItemIndex];
 
     const roles = GuildRoleStore.getRolesSnapshot(guild.id);
 
