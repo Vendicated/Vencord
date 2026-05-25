@@ -1,3 +1,7 @@
 [class*="panels"] [class*="avatarWrapper"] {
     min-width: 0;
 }
+
+[class*="panels"] [class*="accountButtons"] {
+    flex-shrink: 0;
+}
