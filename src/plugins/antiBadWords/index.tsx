@@ -18,7 +18,7 @@ const settings = definePluginSettings({
         options: [
             { label: "None", value: -1 },
             { label: "Roblox Version", value: 1 },
-            { label: "Hard Version", value: 1 }
+            { label: "Hard Version", value: 2 }
         ]
     }
 });
