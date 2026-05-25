@@ -21,13 +21,14 @@ import { definePluginSettings } from "@api/Settings";
 import { CodeBlock } from "@components/CodeBlock";
 import { Divider } from "@components/Divider";
 import ErrorBoundary from "@components/ErrorBoundary";
+import { Heading } from "@components/Heading";
 import { Devs } from "@utils/constants";
 import { copyWithToast, getCurrentGuild, getIntlMessage } from "@utils/discord";
 import { isTruthy } from "@utils/guards";
 import { Margins } from "@utils/margins";
 import definePlugin, { IconComponent, OptionType } from "@utils/types";
 import { Message } from "@vencord/discord-types";
-import { ChannelStore, Forms, GuildRoleStore, Menu, Modal,openModal } from "@webpack/common";
+import { ChannelStore, GuildRoleStore, Menu, Modal, openModal } from "@webpack/common";
 
 
 const CopyIcon: IconComponent = ({ height = 20, width = 20, className }) => {
@@ -91,13 +92,13 @@ function openViewRawModal(json: string, type: string, msgContent?: string) {
             >
                 {!!msgContent && (
                     <>
-                        <Forms.FormTitle tag="h5">Content</Forms.FormTitle>
+                        <Heading tag="h5">Content</Heading>
                         <CodeBlock content={msgContent} lang="" />
                         <Divider className={Margins.bottom20} />
                     </>
                 )}
 
-                <Forms.FormTitle tag="h5">{type} Data</Forms.FormTitle>
+                <Heading tag="h5">{type} Data</Heading>
                 <CodeBlock content={json} lang="json" />
             </Modal>
         </ErrorBoundary >

@@ -17,13 +17,12 @@
 */
 
 import { definePluginSettings } from "@api/Settings";
-import { BackupRestoreIcon, CloudIcon, MainSettingsIcon, PaintbrushIcon, PatchHelperIcon, PlaceholderIcon, PluginsIcon, UpdaterIcon, VesktopSettingsIcon } from "@components/Icons";
+import { BackupRestoreIcon, CloudIcon, MainSettingsIcon, PaintbrushIcon, PatchHelperIcon, PluginsIcon, UpdaterIcon } from "@components/Icons";
 import { BackupAndRestoreTab, CloudTab, PatchHelperTab, PluginsTab, ThemesTab, UpdaterTab, VencordTab } from "@components/settings/tabs";
 import { Devs } from "@utils/constants";
 import { isTruthy } from "@utils/guards";
 import definePlugin, { IconProps, OptionType } from "@utils/types";
 import { waitFor } from "@webpack";
-import { React } from "@webpack/common";
 import type { ComponentType, PropsWithChildren, ReactNode } from "react";
 
 import gitHash from "~git-hash";
@@ -36,13 +35,6 @@ let LayoutTypes = {
     CUSTOM: 19,
 };
 waitFor(["SECTION", "SIDEBAR_ITEM", "PANEL", "CUSTOM"], v => LayoutTypes = v);
-
-const FallbackSectionTypes = {
-    HEADER: "HEADER",
-    DIVIDER: "DIVIDER",
-    CUSTOM: "CUSTOM"
-};
-type SectionTypes = typeof FallbackSectionTypes;
 
 type SettingsLocation =
     | "top"
@@ -214,19 +206,7 @@ export default definePlugin({
                 Component: PatchHelperTab,
                 Icon: PatchHelperIcon
             }),
-            ...this.customEntries.map(buildEntry),
-            // TODO: Remove deprecated customSections in a future update
-            ...this.customSections.map((func, i) => {
-                const { section, element, label } = func(FallbackSectionTypes);
-                if (Object.values(FallbackSectionTypes).includes(section)) return null;
-
-                return buildEntry({
-                    key: `vencord_deprecated_custom_${section}`,
-                    title: label,
-                    Component: element,
-                    Icon: section === "Vesktop" ? VesktopSettingsIcon : PlaceholderIcon
-                });
-            })
+            ...this.customEntries.map(buildEntry)
         ].filter(isTruthy);
 
         const vencordSection: SettingsLayoutNode = {
@@ -260,9 +240,6 @@ export default definePlugin({
 
         return layout;
     },
-
-    /** @deprecated Use customEntries */
-    customSections: [] as ((SectionTypes: SectionTypes) => any)[],
     customEntries: [] as EntryOptions[],
 
     get electronVersion() {

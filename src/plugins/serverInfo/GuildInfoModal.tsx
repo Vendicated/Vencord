@@ -4,15 +4,17 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { Paragraph } from "@components/Paragraph";
 import "./styles.css";
 
+import { Heading } from "@components/Heading";
 import { classNameFactory } from "@utils/css";
 import { getGuildAcronym, openImageModal, openUserProfile } from "@utils/discord";
 import { classes } from "@utils/misc";
 import { useAwaiter } from "@utils/react";
 import { Guild, RenderModalProps, User } from "@vencord/discord-types";
 import { findComponentByCodeLazy, findCssClassesLazy } from "@webpack";
-import { FluxDispatcher, Forms, GuildChannelStore, GuildMemberStore, GuildRoleStore, IconUtils, Modal,openModal, Parser, PresenceStore, RelationshipStore, ScrollerThin, SnowflakeUtils, TabBar, Timestamp, useEffect, UserStore, UserUtils, useState, useStateFromStores } from "@webpack/common";
+import { FluxDispatcher, GuildChannelStore, GuildMemberStore, GuildRoleStore, IconUtils, Modal, openModal, Parser, PresenceStore, RelationshipStore, ScrollerThin, SnowflakeUtils, TabBar, Timestamp, useEffect, UserStore, UserUtils, useState, useStateFromStores } from "@webpack/common";
 
 const IconClasses = findCssClassesLazy("icon", "acronym", "childWrapper");
 const FriendRow = findComponentByCodeLazy("discriminatorClass:", ".isMobileOnline", "avatarSrc:");
@@ -93,8 +95,8 @@ function GuildInfoModal({ guild, modalProps }: GuildProps & { modalProps: Render
                     }
 
                     <div className={cl("name-and-description")}>
-                        <Forms.FormTitle tag="h5" className={cl("name")}>{guild.name}</Forms.FormTitle>
-                        {guild.description && <Forms.FormText>{guild.description}</Forms.FormText>}
+                        <Heading tag="h5" className={cl("name")}>{guild.name}</Heading>
+                        {guild.description && <Paragraph>{guild.description}</Paragraph>}
                     </div>
                 </div>
             }
@@ -206,7 +208,7 @@ function ServerInfoTab({ guild }: GuildProps) {
         <div className={cl("info")}>
             {Object.entries(Fields).map(([name, node]) =>
                 <div className={cl("server-info-pair")} key={name}>
-                    <Forms.FormTitle tag="h5">{name}</Forms.FormTitle>
+                    <Heading tag="h5">{name}</Heading>
                     {typeof node === "string" ? <span>{node}</span> : node}
                 </div>
             )}

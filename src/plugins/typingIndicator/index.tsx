@@ -104,7 +104,7 @@ function TypingIndicator({ channelId, guildId }: { channelId: string; guildId: s
                                     e.stopPropagation();
                                     e.preventDefault();
                                 }}
-                                onKeyPress={e => e.stopPropagation()}
+                                onKeyDown={e => e.stopPropagation()}
                             >
                                 <UserSummaryItem
                                     users={typingUsersArray.map(id => UserStore.getUser(id))}

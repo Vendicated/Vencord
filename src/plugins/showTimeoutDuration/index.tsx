@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { BaseText } from "@components/BaseText";
 import "./styles.css";
 
 import { definePluginSettings } from "@api/Settings";
@@ -15,7 +16,7 @@ import { canonicalizeMatch } from "@utils/patches";
 import definePlugin, { OptionType } from "@utils/types";
 import { Message } from "@vencord/discord-types";
 import { findComponentLazy } from "@webpack";
-import { ChannelStore, GuildMemberStore, Text } from "@webpack/common";
+import { ChannelStore, GuildMemberStore } from "@webpack/common";
 import { ReactNode } from "react";
 
 const countDownFilter = canonicalizeMatch(/#{intl::MAX_AGE_NEVER}/);
@@ -92,9 +93,9 @@ export default definePlugin({
         return (
             <div className="vc-std-wrapper">
                 <TooltipContainer text={text}>{children}</TooltipContainer>
-                <Text variant="text-md/normal" color="status-danger">
+                <BaseText size="md" color="status-danger">
                     {renderTimeout(message, true)} timeout remaining
-                </Text>
+                </BaseText>
             </div>
         );
     }, { noop: true })

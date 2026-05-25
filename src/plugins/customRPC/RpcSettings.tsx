@@ -13,9 +13,10 @@ import { resolveError } from "@components/settings/tabs/plugins/components/Commo
 import { debounce } from "@shared/debounce";
 import { classNameFactory } from "@utils/css";
 import { ActivityType } from "@vencord/discord-types/enums";
-import { Select, Text, TextInput, useState } from "@webpack/common";
+import { Select, TextInput, useState } from "@webpack/common";
 
 import CustomRPCPlugin, { setRpc, settings, TimestampMode } from ".";
+import { BaseText } from "@components/BaseText";
 
 const cl = classNameFactory("vc-customRPC-settings-");
 
@@ -125,7 +126,7 @@ function SingleSetting<T>({ settingsKey, label, disabled, isValid, transform }: 
                 onChange={handleChange}
                 disabled={disabled}
             />
-            {error && <Text className={cl("error")} variant="text-sm/normal">{error}</Text>}
+            {error && <BaseText size="sm" className={cl("error")}>{error}</BaseText>}
         </div>
     );
 }

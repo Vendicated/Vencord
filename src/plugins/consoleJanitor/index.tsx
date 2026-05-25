@@ -5,6 +5,7 @@
  */
 
 import { definePluginSettings } from "@api/Settings";
+import { BaseText } from "@components/BaseText";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { SettingsSection } from "@components/settings/tabs/plugins/components/Common";
 import { Devs } from "@utils/constants";
@@ -50,7 +51,7 @@ function AllowLevelSetting({ settingKey }: AllowLevelSettingProps) {
             onChange={(_, newValue) => settings.store.allowLevel[settingKey] = newValue}
             size={20}
         >
-            <Text variant="text-sm/normal">{settingKey[0].toUpperCase() + settingKey.slice(1)}</Text>
+            <BaseText size="sm">{settingKey[0].toUpperCase() + settingKey.slice(1)}</BaseText>
         </Checkbox>
     );
 }

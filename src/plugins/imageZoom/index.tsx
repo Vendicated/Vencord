@@ -217,7 +217,7 @@ export default definePlugin({
     },
 
     // to stop from rendering twice /shrug
-    currentMagnifierElement: null as React.FunctionComponentElement<MagnifierProps & JSX.IntrinsicAttributes> | null,
+    currentMagnifierElement: null as React.ReactElement<MagnifierProps & JSX.IntrinsicAttributes> | null,
     element: null as HTMLDivElement | null,
 
     Magnifier,

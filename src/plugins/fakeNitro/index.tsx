@@ -18,6 +18,7 @@
 
 import { addMessagePreEditListener, addMessagePreSendListener, removeMessagePreEditListener, removeMessagePreSendListener } from "@api/MessageEvents";
 import { definePluginSettings } from "@api/Settings";
+import { Paragraph } from "@components/Paragraph";
 import { ApngBlendOp, ApngDisposeOp, parseAPNG } from "@utils/apng";
 import { Devs } from "@utils/constants";
 import { getCurrentGuild } from "@utils/discord";
@@ -26,7 +27,7 @@ import definePlugin, { OptionType } from "@utils/types";
 import type { Emoji, Message, RenderModalProps, Sticker } from "@vencord/discord-types";
 import { StickerFormatType } from "@vencord/discord-types/enums";
 import { findByCodeLazy, findByPropsLazy, proxyLazyWebpack } from "@webpack";
-import { ChannelStore, ConfirmModal,DraftType, EmojiStore, FluxDispatcher, Forms, GuildMemberStore, IconUtils, lodash, openModal, Parser, PermissionsBits, PermissionStore, StickersStore, UploadHandler, UserSettingsActionCreators, UserSettingsProtoStore, UserStore } from "@webpack/common";
+import { ChannelStore, ConfirmModal, DraftType, EmojiStore, FluxDispatcher, GuildMemberStore, IconUtils, lodash, openModal, Parser, PermissionsBits, PermissionStore, StickersStore, UploadHandler, UserSettingsActionCreators, UserSettingsProtoStore, UserStore } from "@webpack/common";
 import { applyPalette, GIFEncoder, quantize } from "gifenc";
 import type { ReactElement, ReactNode } from "react";
 
@@ -857,10 +858,10 @@ export default definePlugin({
                                 variant="primary"
                             >
                                 <div>
-                                    <Forms.FormText>
+                                    <Paragraph>
                                         You cannot send this message because it contains an animated FakeNitro sticker,
                                         and you do not have permissions to attach files in the current channel. Please remove the sticker to proceed.
-                                    </Forms.FormText>
+                                    </Paragraph>
                                 </div>
                             </ConfirmModal>
                         ));

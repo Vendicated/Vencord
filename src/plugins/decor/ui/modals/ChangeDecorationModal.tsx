@@ -22,8 +22,12 @@ import { copyWithToast, openInviteModal } from "@utils/discord";
 import { Margins } from "@utils/margins";
 import { Queue } from "@utils/Queue";
 import { RenderModalProps, User } from "@vencord/discord-types";
-import { Button, closeAllModals, ConfirmModal, FluxDispatcher, Forms, GuildStore, Modal, NavigationRouter, openModal, Parser, Text, Tooltip, useEffect, UserStore, UserSummaryItem, UserUtils, useState } from "@webpack/common";
+import { closeAllModals, ConfirmModal, FluxDispatcher, GuildStore, Modal, NavigationRouter, openModal, Parser, Tooltip, useEffect, UserStore, UserSummaryItem, UserUtils, useState } from "@webpack/common";
 
+import { BaseText } from "@components/BaseText";
+import { Button } from '@components/Button';
+import { Heading } from "@components/Heading";
+import { Paragraph } from "@components/Paragraph";
 import { openCreateDecorationModal } from "./CreateDecorationModal";
 import { openGuidelinesModal } from "./GuidelinesModal";
 
@@ -68,7 +72,7 @@ function SectionHeader({ section }: SectionHeaderProps) {
 
     return <div>
         <Flex>
-            <Forms.FormTitle style={{ flexGrow: 1 }}>{section.title}</Forms.FormTitle>
+            <Heading style={{ flexGrow: 1 }}>{section.title}</Heading>
             {hasAuthorIds && <UserSummaryItem
                 users={authors}
                 guildId={undefined}
@@ -81,9 +85,9 @@ function SectionHeader({ section }: SectionHeaderProps) {
             />}
         </Flex>
         {hasSubtitle &&
-            <Forms.FormText className={Margins.bottom8}>
+            <Paragraph className={Margins.bottom8}>
                 {section.subtitle}
-            </Forms.FormText>
+            </Paragraph>
         }
     </div>;
 }
@@ -242,19 +246,20 @@ function ChangeDecorationModal(props: RenderModalProps) {
                     avatarDecoration={avatarDecoration}
                     user={UserStore.getCurrentUser()}
                 />
-                {isActiveDecorationPreset && <Forms.FormTitle className="">Part of the {activeDecorationPreset.name} Preset</Forms.FormTitle>}
+                {isActiveDecorationPreset && <Heading className="">Part of the {activeDecorationPreset.name} Preset</Heading>}
                 {typeof activeSelectedDecoration === "object" &&
-                    <Text
-                        variant="text-sm/semibold"
+                    <BaseText
+                        size="sm"
+                        weight="semibold"
                         color="text-strong"
                     >
                         {activeSelectedDecoration?.alt}
-                    </Text>
+                    </BaseText>
                 }
                 {activeDecorationHasAuthor && (
-                    <Text key={`createdBy-${activeSelectedDecoration.authorId}`}>
+                    <BaseText key={`createdBy-${activeSelectedDecoration.authorId}`}>
                         Created by {Parser.parse(`<@${activeSelectedDecoration.authorId}>`)}
-                    </Text>
+                    </BaseText>
                 )}
                 {isActiveDecorationPreset && (
                     <Button onClick={() => copyWithToast(activeDecorationPreset.id)}>

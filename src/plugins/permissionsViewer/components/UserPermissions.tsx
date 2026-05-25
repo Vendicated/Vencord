@@ -28,6 +28,7 @@ import { PermissionsBits, Text, Tooltip, useMemo, UserStore } from "@webpack/com
 
 import { PermissionsSortOrder, settings } from "..";
 import openRolesAndUsersPermissionsModal from "./RolesAndUsersPermissions";
+import { BaseText } from "@components/BaseText";
 
 interface UserPermission {
     permission: string;
@@ -56,12 +57,13 @@ function FakeRole({ text, color, ...props }: FakeRoleProps) {
                 />
             </div>
             <div className={RoleClasses.roleName}>
-                <Text
+                <BaseText
                     className={RoleClasses.roleNameOverflow}
-                    variant="text-xs/medium"
+                    size="xs"
+                    weight="medium"
                 >
                     {text}
-                </Text>
+                </BaseText>
             </div>
         </div>
     );
@@ -75,7 +77,7 @@ interface GrantedByTooltipProps {
 function GrantedByTooltip({ roleName, roleColor }: GrantedByTooltipProps) {
     return (
         <>
-            <Text variant="text-sm/medium">Granted By</Text>
+            <BaseText size="sm" weight="medium">Granted By</BaseText>
             <FakeRole text={roleName} color={roleColor} />
         </>
     );
