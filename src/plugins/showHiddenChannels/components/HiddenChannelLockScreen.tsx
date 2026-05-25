@@ -119,6 +119,10 @@ function HiddenChannelLockScreen({ channel }: { channel: Channel; }) {
         guild_id
     } = channel;
 
+    const permissionOverwriteSignature = Object.values(permissionOverwrites)
+        .map(({ id, type, allow, deny }) => `${id}:${type}:${allow}:${deny}`)
+        .join(",");
+
     useEffect(() => {
         const membersToFetch: Array<string> = [];
 
@@ -149,7 +153,7 @@ function HiddenChannelLockScreen({ channel }: { channel: Channel; }) {
                 overwriteDeny: overwrite.deny
             })), guild_id));
         }
-    }, [channelId, guild_id, permissionOverwrites]);
+    }, [channelId, guild_id, permissionOverwriteSignature]);
 
     return (
         <div className={classes(ChatScrollClasses.auto, ChatScrollClasses.customTheme, ChatScrollClasses.managedReactiveScroller)}>
