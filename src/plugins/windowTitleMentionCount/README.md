@@ -4,5 +4,5 @@ Adds the mention count as a prefix to the window title. Useful for setups where 
 
 ## Example Use Cases
 
-On Windows 10 (and Windows 11 26H2) turn on Small Taskbar Buttons and set Combine taskbar buttons to something other than always hide labels.
+On Windows turn on Small Taskbar Buttons and set Combine taskbar buttons to something other than always hide labels.
 Since the taskbar is small, the badge doesn't appear, so we're reliant on the window title.
