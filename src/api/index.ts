@@ -30,14 +30,15 @@ import * as $MessagePopover from "./MessagePopover";
 import * as $MessageUpdater from "./MessageUpdater";
 import * as $Notices from "./Notices";
 import * as $Notifications from "./Notifications";
-import * as $UserArea from "./UserArea";
-export * as PluginManager from "./PluginManager";
 import * as $ProfileCollections from "./ProfileCollections";
 import * as $ServerList from "./ServerList";
 import * as $Settings from "./Settings";
 import * as $Styles from "./Styles";
 import * as $Themes from "./Themes";
+import * as $UserArea from "./UserArea";
 import * as $UserSettings from "./UserSettings";
+
+export * as PluginManager from "./PluginManager";
 
 /**
  * An API allowing you to listen to Message Clicks or run your own logic
