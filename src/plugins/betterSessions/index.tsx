@@ -101,7 +101,7 @@ export default definePlugin({
     }, { noop: true }),
 
     renderDescription: ErrorBoundary.wrap(({ session, description }: { session: Session, description: string; }) => {
-        const [label, timeLabel] = description.split(" \\xb7 ");
+        const [label, timeLabel] = description.split(" \xb7 ");
 
         return (
             <div className={cl("description")}>
