@@ -21,6 +21,7 @@ import "./styles.css";
 import { showNotification } from "@api/Notifications";
 import { definePluginSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
+import { Paragraph } from "@components/Paragraph";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { findComponentByCodeLazy, findCssClassesLazy, findStoreLazy } from "@webpack";
@@ -28,13 +29,10 @@ import { Constants, React, RestAPI, SettingsRouter, Tooltip } from "@webpack/com
 
 import { NewButton, RenameButton } from "./components/RenameButton";
 import { Session, SessionInfo } from "./types";
-import { fetchNamesFromDataStore, getDefaultName, GetOsColor, GetPlatformIcon, savedSessionsCache, saveSessionsToDataStore } from "./utils";
+import { cl, fetchNamesFromDataStore, getDefaultName, GetOsColor, GetPlatformIcon, savedSessionsCache, saveSessionsToDataStore } from "./utils";
 
 const AuthSessionsStore = findStoreLazy("AuthSessionsStore");
-
 const TimestampClasses = findCssClassesLazy("timestamp", "blockquoteContainer");
-const SessionIconClasses = findCssClassesLazy("sessionIcon");
-
 const BlobMask = findComponentByCodeLazy("!1,lowerBadgeSize:");
 
 const settings = definePluginSettings({
@@ -61,24 +59,26 @@ export default definePlugin({
 
     patches: [
         {
-            find: "#{intl::AUTH_SESSIONS_SESSION_LOG_OUT}",
+            find: "#{intl::AUTH_SESSIONS_OS_UNKNOWN}",
             replacement: [
-                // Replace children with a single label with state
                 {
-                    match: /({variant:"eyebrow",className:\i\.\i,children:).{70,110}{children:"\\xb7"}\),\(0,\i\.\i\)\("span",{children:\i\[\d+\]}\)\]}\)\]/,
+                    match: /Icon:(\i)(?=.{0,85}gap:"xxs",children:\[)/,
+                    replace: "Icon:()=>$self.renderIcon({...arguments[0],DeviceIcon:$1})"
+                },
+                {
+                    match: /(\.ICON_MUTED:"currentColor".{0,250}gap:"xs",children:)\[.*?"text-subtle",children:\i\}\)\]/,
                     replace: "$1$self.renderName(arguments[0])"
                 },
                 {
-                    match: /({variant:"text-sm\/medium",className:\i\.\i,children:.{70,110}{children:"\\xb7"}\),\(0,\i\.\i\)\("span",{children:)(\i\[\d+\])}/,
-                    replace: "$1$self.renderTimestamp({...arguments[0],timeLabel:$2})}"
+                    match: /("text-muted",children:)\i(?=\}\)\]\}\),\i\])/,
+                    replace: "$1$self.renderDescription({...arguments[0]})"
                 },
-                // Replace the icon
                 {
-                    match: /(?<=Icon:(\i).{0,250}className:\i\.\i,children:\[)/,
-                    replace: "$self.renderIcon({...arguments[0],DeviceIcon:$1}),false&&"
-                }
+                    match: /:\i\(\i\.approx_last_used_time\).{0,50}\.jsxs?\)\(\i,\{/,
+                    replace: "$&session:arguments[0]?.session,"
+                },
             ]
-        }
+        },
     ],
 
     renderName: ErrorBoundary.wrap(({ session }: SessionInfo) => {
@@ -86,7 +86,6 @@ export default definePlugin({
 
         const state = React.useState(savedSession?.name ? `${savedSession.name}*` : getDefaultName(session.client_info));
         const [title, setTitle] = state;
-
         // Show a "NEW" badge if the session is seen for the first time
         return (
             <>
@@ -99,15 +98,26 @@ export default definePlugin({
         );
     }, { noop: true }),
 
-    renderTimestamp: ErrorBoundary.wrap(({ session, timeLabel }: { session: Session, timeLabel: string; }) => {
+    renderDescription: ErrorBoundary.wrap(({ session, description }: { session: Session, description: string; }) => {
+        const label = description.split(" \xb7 ")[0];
+        const timeLabel = description.split(" \xb7 ")[1];
+
         return (
-            <Tooltip text={session.approx_last_used_time.toLocaleString()}>
-                {props => (
-                    <span {...props} className={TimestampClasses.timestamp}>
-                        {timeLabel}
-                    </span>
+            <div className={cl("description")}>
+                <Paragraph size="sm" weight="normal" color="text-muted">{label}</Paragraph>
+                {timeLabel && (
+                    <>
+                        {" \xb7 "}
+                        <Tooltip text={session.approx_last_used_time.toLocaleString()}>
+                            {props => (
+                                <span {...props} className={TimestampClasses.timestamp}>
+                                    {timeLabel}
+                                </span>
+                            )}
+                        </Tooltip>
+                    </>
                 )}
-            </Tooltip>
+            </div>
         );
     }, { noop: true }),
 
@@ -120,22 +130,8 @@ export default definePlugin({
                 style={{ cursor: "unset" }}
                 selected={false}
                 lowerBadge={
-                    <div
-                        style={{
-                            width: "20px",
-                            height: "20px",
-
-                            display: "flex",
-                            justifyContent: "center",
-                            alignItems: "center",
-                            overflow: "hidden",
-
-                            borderRadius: "50%",
-                            backgroundColor: "var(--interactive-icon-default)",
-                            color: "var(--background-base-lower)",
-                        }}
-                    >
-                        <PlatformIcon width={14} height={14} />
+                    <div className={cl("lowerBadge")}>
+                        <PlatformIcon width={14} height={14} className={cl("lowerBadge-icon")} />
                     </div>
                 }
                 lowerBadgeSize={{
@@ -144,7 +140,7 @@ export default definePlugin({
                 }}
             >
                 <div
-                    className={SessionIconClasses.sessionIcon}
+                    className={cl("icon")}
                     style={{ backgroundColor: GetOsColor(session.client_info.os) }}
                 >
                     <DeviceIcon size="md" color="currentColor" />
