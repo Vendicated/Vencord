@@ -6,9 +6,9 @@
 
 import { Button } from "@components/Button";
 import { SessionInfo } from "@plugins/betterSessions/types";
+import { cl } from "@plugins/betterSessions/utils";
 import { openModal } from "@webpack/common";
 
-import { cl } from "../utils";
 import { RenameModal } from "./RenameModal";
 
 export function RenameButton({ session, state }: { session: SessionInfo["session"], state: [string, React.Dispatch<React.SetStateAction<string>>]; }) {

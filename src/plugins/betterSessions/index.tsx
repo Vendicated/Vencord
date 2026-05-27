@@ -62,19 +62,19 @@ export default definePlugin({
             find: "#{intl::AUTH_SESSIONS_OS_UNKNOWN}",
             replacement: [
                 {
-                    match: /Icon:(\i)(?=.{0,85}gap:"xxs",children:\[)/,
-                    replace: "Icon:()=>$self.renderIcon({...arguments[0],DeviceIcon:$1})"
+                    match: /(?<=#{intl::AUTH_SESSIONS_ACTIVE_RECENTLY}.{0,230}role:"listitem",children:\[.{0,15},\{Icon:)(\i)/,
+                    replace: "()=>$self.renderIcon({...arguments[0],DeviceIcon:$1})"
                 },
                 {
-                    match: /(\.ICON_MUTED:"currentColor".{0,250}gap:"xs",children:)\[.*?"text-subtle",children:\i\}\)\]/,
-                    replace: "$1$self.renderName(arguments[0])"
+                    match: /("horizontal",gap:"xs",children:)\[.*?"text-subtle",children:\i\}\)\]\}\),/,
+                    replace: "$1$self.renderName(arguments[0])}),"
                 },
                 {
-                    match: /("text-muted",children:)\i(?=\}\)\]\}\),\i\])/,
+                    match: /("text-muted",children:)\i(?=\}\)\]\}\),.{0,120}\.client_info\?\.location)/,
                     replace: "$1$self.renderDescription({...arguments[0]})"
                 },
                 {
-                    match: /:\i\(\i\.approx_last_used_time\).{0,50}\.jsxs?\)\(\i,\{/,
+                    match: /:\i\(\i\.approx_last_used_time\).{0,40}\(0,\i\.jsxs?\)\(\i,\{/,
                     replace: "$&session:arguments[0]?.session,"
                 },
             ]
@@ -89,18 +89,19 @@ export default definePlugin({
         // Show a "NEW" badge if the session is seen for the first time
         return (
             <>
-                <span>{title}</span>
-                {(savedSession == null || savedSession.isNew) && (
-                    <NewButton />
-                )}
-                <RenameButton session={session} state={state} />
+                <Paragraph size="md" weight="semibold" color="text-strong">{title}</Paragraph>
+                <div className={cl("footer-buttons")}>
+                    {(savedSession == null || savedSession.isNew) && (
+                        <NewButton />
+                    )}
+                    <RenameButton session={session} state={state} />
+                </div>
             </>
         );
     }, { noop: true }),
 
     renderDescription: ErrorBoundary.wrap(({ session, description }: { session: Session, description: string; }) => {
-        const label = description.split(" \xb7 ")[0];
-        const timeLabel = description.split(" \xb7 ")[1];
+        const [label, timeLabel] = description.split(" \\xb7 ");
 
         return (
             <div className={cl("description")}>
