@@ -50,13 +50,14 @@ const settings = definePluginSettings({
 export default definePlugin({
     name: "USRBG",
     description: "Displays user banners from USRBG, allowing anyone to get a banner without Nitro",
+    tags: ["Appearance", "Customisation"],
     authors: [Devs.AutumnVN, Devs.katlyn, Devs.pylix, Devs.TheKodeToad],
     settings,
     patches: [
         {
-            find: '.banner)==null?"COMPLETE"',
+            find: ':"SHOULD_LOAD");',
             replacement: {
-                match: /(?<=void 0:)\i.getPreviewBanner\(\i,\i,\i\)/,
+                match: /\i(?:\?)?.getPreviewBanner\(\i,\i,\i\)(?=.{0,100}"COMPLETE")/,
                 replace: "$self.patchBannerUrl(arguments[0])||$&"
 
             }

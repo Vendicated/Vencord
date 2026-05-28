@@ -1,6 +1,6 @@
 .vc-card-base {
     background: var(--card-background-default);
-    border-radius: var(--radius-sm, 8px)
+    border-radius: var(--radius-sm, 8px);
 }
 
 .vc-card-normal {
@@ -8,11 +8,23 @@
 }
 
 .vc-card-warning {
-    border: 1px solid var(--icon-status-idle);
+    background-color: var(--background-feedback-warning);
+    border: 1px solid var(--icon-feedback-warning);
 }
 
 .vc-card-danger {
-    border: 1px solid var(--icon-status-dnd);
+    background-color: var(--background-feedback-critical);
+    border: 1px solid var(--icon-feedback-critical);
+}
+
+.vc-card-success {
+    background-color: var(--background-feedback-positive);
+    border: 1px solid var(--icon-feedback-positive);
+}
+
+.vc-card-info {
+    background: var(--background-feedback-info);
+    border: 1px solid var(--icon-feedback-info);
 }
 
 .vc-card-defaultPadding {

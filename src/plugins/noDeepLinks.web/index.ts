@@ -10,6 +10,7 @@ import definePlugin from "@utils/types";
 export default definePlugin({
     name: "DisableDeepLinks",
     description: "Disables Discord's stupid deep linking feature which tries to force you to use their Desktop App",
+    tags: ["Utility"],
     authors: [Devs.Ven],
     required: true,
 

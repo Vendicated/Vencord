@@ -46,8 +46,6 @@ export const Constants: t.Constants = mapMangledModuleLazy('ME:"/users/@me"', {
 export const RestAPI: t.RestAPI = findLazy(m => typeof m === "object" && m.del && m.put);
 export const moment: typeof import("moment") = findByPropsLazy("parseTwoDigitYear");
 
-export const hljs: typeof import("highlight.js").default = findByPropsLazy("highlight", "registerLanguage");
-
 export const { match, P }: { match: typeof TSPattern["match"], P: typeof TSPattern["P"]; } = mapMangledModuleLazy("@ts-pattern/matcher", {
     match: filters.byCode("return new"),
     P: filters.byProps("when")
@@ -79,6 +77,7 @@ const ToastType = {
     BOOKMARK: "bookmark",
     CLOCK: "clock"
 };
+
 const ToastPosition = {
     TOP: 0,
     BOTTOM: 1
@@ -103,27 +102,34 @@ export interface ToastOptions {
     duration?: number;
 }
 
+interface ToastsExports {
+    showToast: (data: ToastData) => void;
+    popToast(): void;
+}
+
+const ToastsExports = mapMangledModuleLazy(".currentToastMap.has(", {
+    showToast: filters.byCode(".currentToastMap.has("),
+    popToast: filters.byCode(".delete(")
+});
+
+export function createToast(message: string, type: string, options?: ToastOptions): ToastData {
+    return {
+        message,
+        id: Toasts.genId(),
+        type,
+        options
+    };
+}
+
 export const Toasts = {
     Type: ToastType,
     Position: ToastPosition,
-    // what's less likely than getting 0 from Math.random()? Getting it twice in a row
     genId: () => (Math.random() || Math.random()).toString(36).slice(2),
 
-    // hack to merge with the following interface, dunno if there's a better way
-    ...{} as {
-        show(data: ToastData): void;
-        pop(): void;
-        create(message: string, type: string, options?: ToastOptions): ToastData;
-    }
+    show: ToastsExports.showToast,
+    pop: ToastsExports.popToast,
+    create: createToast,
 };
-
-// This is the same module but this is easier
-waitFor("showToast", m => {
-    Toasts.show = m.showToast;
-    Toasts.pop = m.popToast;
-    Toasts.create = m.createToast;
-});
-
 
 /**
  * Show a simple toast. If you need more options, use Toasts.show manually
@@ -143,7 +149,7 @@ export const UploadHandler = {
 
 export const ApplicationAssetUtils = mapMangledModuleLazy("getAssetImage: size must === [", {
     fetchAssetIds: filters.byCode('.startsWith("http:")', ".dispatch({"),
-    getAssetFromImageURL: filters.byCode("].serialize(", ',":"'),
+    getAssetFromImageURL: filters.byCode("].serialize(", ":null"),
     getAssetImage: filters.byCode("getAssetImage: size must === ["),
     getAssets: filters.byCode(".assets")
 });
@@ -160,7 +166,7 @@ export const ChannelRouter: t.ChannelRouter = mapMangledModuleLazy('"Thread must
 });
 
 export let SettingsRouter: any;
-waitFor(["open", "saveAccountChanges"], m => SettingsRouter = m);
+waitFor(["openUserSettings", "USER_SETTINGS_MODAL_KEY"], m => SettingsRouter = m);
 
 export const PermissionsBits: t.PermissionsBits = findLazy(m => typeof m.ADMINISTRATOR === "bigint");
 
@@ -203,8 +209,8 @@ export const DisplayProfileUtils: t.DisplayProfileUtils = mapMangledModuleLazy(/
 });
 
 export const DateUtils: t.DateUtils = mapMangledModuleLazy("millisecondsInUnit:", {
-    calendarFormat: filters.byCode("sameElse"),
-    dateFormat: filters.byCode('":'),
+    calendarFormat: filters.byCode('<-1?"sameElse":'),
+    dateFormat: filters.byCode('<2?"nextDay":"sameElse";'),
     isSameDay: filters.byCode(/Math\.abs\(\i-\i\)/),
     diffAsUnits: filters.byCode("days:0", "millisecondsInUnit")
 });

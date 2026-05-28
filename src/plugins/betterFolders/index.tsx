@@ -21,6 +21,7 @@ import "./style.css";
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import { getIntlMessage } from "@utils/discord";
+import { Logger } from "@utils/Logger";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByPropsLazy, findStoreLazy } from "@webpack";
 import { FluxDispatcher } from "@webpack/common";
@@ -137,7 +138,7 @@ export default definePlugin({
     name: "BetterFolders",
     description: "Shows server folders on dedicated sidebar and adds folder related improvements",
     authors: [Devs.juby, Devs.AutumnVN, Devs.Nuckyz],
-
+    tags: ["Organisation", "Servers", "Appearance"],
     settings,
 
     patches: [
@@ -148,7 +149,7 @@ export default definePlugin({
                 // Create the isBetterFolders and betterFoldersExpandedIds variables in the GuildsBar component
                 // Needed because we access this from a non-arrow closure so we can't use arguments[0]
                 {
-                    match: /let{disableAppDownload:\i=\i\.isPlatformEmbedded,isOverlay:.+?(?=}=\i,)/,
+                    match: /let{disableAppDownload:\i=\i\.isPlatformEmbedded,isOverlay:.+?(?=}=\i)/,
                     replace: "$&,isBetterFolders,betterFoldersExpandedIds"
                 },
                 // Export the isBetterFolders and betterFoldersExpandedIds variable to the Guild List component
@@ -196,7 +197,7 @@ export default definePlugin({
                 {
                     // Modify the expanded prop to use the boolean if the above patch fails, or check if the folder is expanded from the list if it succeeds
                     // Also export the list of expanded folders to the child folder component if the patch above succeeds, else export undefined
-                    match: /(?<=folderNode:(\i),expanded:)\i(?=,)/,
+                    match: /(?<=\.\.\.\i,folderNode:(\i),expanded:)\i(?=,)/,
                     replace: (isExpandedOrExpandedIds, folderNote) => ""
                         + `typeof ${isExpandedOrExpandedIds}==="boolean"?${isExpandedOrExpandedIds}:${isExpandedOrExpandedIds}.has(${folderNote}.id),`
                         + `betterFoldersExpandedIds:${isExpandedOrExpandedIds} instanceof Set?${isExpandedOrExpandedIds}:void 0`
@@ -341,7 +342,13 @@ export default definePlugin({
             }
 
             try {
-                return child?.props?.["aria-label"] === getIntlMessage("SERVERS");
+                // can cause hang if intl message is not found
+                const serversIntlMsg = getIntlMessage("SERVERS");
+                if (!serversIntlMsg) {
+                    new Logger("BetterFolders").error("Failed to get SERVERS intl message");
+                    return true;
+                }
+                return child?.props?.["aria-label"] === serversIntlMsg;
             } catch (e) {
                 console.error(e);
                 return true;

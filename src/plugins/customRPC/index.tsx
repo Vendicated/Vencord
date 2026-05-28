@@ -213,6 +213,7 @@ export async function setRpc(disable?: boolean) {
 export default definePlugin({
     name: "CustomRPC",
     description: "Add a fully customisable Rich Presence (Game status) to your Discord profile",
+    tags: ["Activity", "Customisation"],
     authors: [Devs.captain, Devs.AutumnVN, Devs.nin0dev],
     dependencies: ["UserSettingsAPI"],
     // This plugin's patch is not important for functionality, so don't require a restart
@@ -225,7 +226,7 @@ export default definePlugin({
     // Discord hides buttons on your own Rich Presence for some reason. This patch disables that behaviour
     patches: [
         {
-            find: ".buttons.length)>=1",
+            find: ".USER_PROFILE_ACTIVITY_BUTTONS),",
             replacement: {
                 match: /.getId\(\)===\i.id/,
                 replace: "$& && false"

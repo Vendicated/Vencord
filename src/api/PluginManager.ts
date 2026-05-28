@@ -27,19 +27,17 @@ import { addMessageClickListener, addMessagePreEditListener, addMessagePreSendLi
 import { addMessagePopoverButton, removeMessagePopoverButton } from "@api/MessagePopover";
 import { Settings, SettingsStore } from "@api/Settings";
 import { disableStyle, enableStyle } from "@api/Styles";
+import { traceFunction } from "@debug/Tracer";
 import { Logger } from "@utils/Logger";
 import { onlyOnce } from "@utils/onlyOnce";
 import { canonicalizeFind, canonicalizeReplacement } from "@utils/patches";
-import { Patch, Plugin, PluginDef, ReporterTestable, StartAt } from "@utils/types";
+import { DefinedSettings, Patch, Plugin, PluginDef, PluginSettingDef, ReporterTestable, StartAt } from "@utils/types";
 import { FluxEvents } from "@vencord/discord-types";
 import { FluxDispatcher } from "@webpack/common";
 import { patches } from "@webpack/patcher";
 
 import Plugins from "~plugins";
 export { Plugins as plugins };
-
-import { traceFunction } from "../debug/Tracer";
-
 const logger = new Logger("PluginManager", "#a6d189");
 
 export const PMLogger = logger;
@@ -56,7 +54,30 @@ export function isPluginEnabled(p: string) {
     ) ?? false;
 }
 
+export function isSettingHidden(settings: DefinedSettings, setting: PluginSettingDef) {
+    if (!("hidden" in setting)) return false;
+
+    return typeof setting.hidden === "function"
+        ? setting.hidden.call(settings)
+        : Boolean(setting.hidden);
+}
+
+export function isSettingDisabled(settings: DefinedSettings, setting: PluginSettingDef) {
+    if (!("disabled" in setting)) return false;
+
+    return typeof setting.disabled === "function"
+        ? setting.disabled.call(settings)
+        : Boolean(setting.disabled);
+}
+
+export function hasAnyVisibleSettings({ settings }: Plugin) {
+    return !!settings && Object.values(settings.def).some(s => !isSettingHidden(settings, s));
+}
+
 export function addPatch(newPatch: Omit<Patch, "plugin">, pluginName: string, pluginPath = `Vencord.Plugins.plugins[${JSON.stringify(pluginName)}]`) {
+    // TODO: this causes crashes
+    if (pluginName === "Vesktop" && newPatch.find === ".STREAMING_AUTO_STREAMER_MODE,") return;
+
     const patch = newPatch as Patch;
     patch.plugin = pluginName;
 
@@ -183,7 +204,7 @@ export const startPlugin = traceFunction("startPlugin", function startPlugin(p: 
     const {
         name, commands, contextMenus, managedStyle, userProfileBadge,
         onBeforeMessageEdit, onBeforeMessageSend, onMessageClick,
-        renderChatBarButton, chatBarButton, renderMemberListDecorator, renderMessageAccessory, renderMessageDecoration, renderMessagePopoverButton, messagePopoverButton
+        chatBarButton, renderMemberListDecorator, renderMessageAccessory, renderMessageDecoration, messagePopoverButton
     } = p;
 
     if (p.start) {
@@ -234,14 +255,10 @@ export const startPlugin = traceFunction("startPlugin", function startPlugin(p: 
     if (onMessageClick) addMessageClickListener(onMessageClick);
 
     if (chatBarButton) addChatBarButton(name, chatBarButton.render, chatBarButton.icon);
-    // @ts-expect-error: legacy code doesn't have icon
-    else if (renderChatBarButton) addChatBarButton(name, renderChatBarButton);
     if (renderMemberListDecorator) addMemberListDecorator(name, renderMemberListDecorator);
     if (renderMessageDecoration) addMessageDecoration(name, renderMessageDecoration);
     if (renderMessageAccessory) addMessageAccessory(name, renderMessageAccessory);
     if (messagePopoverButton) addMessagePopoverButton(name, messagePopoverButton.render, messagePopoverButton.icon);
-    // @ts-expect-error: legacy code doesn't have icon
-    else if (renderMessagePopoverButton) addMessagePopoverButton(name, renderMessagePopoverButton);
 
     return true;
 }, p => `startPlugin ${p.name}`);
@@ -250,7 +267,7 @@ export const stopPlugin = traceFunction("stopPlugin", function stopPlugin(p: Plu
     const {
         name, commands, contextMenus, managedStyle, userProfileBadge,
         onBeforeMessageEdit, onBeforeMessageSend, onMessageClick,
-        renderChatBarButton, chatBarButton, renderMemberListDecorator, renderMessageAccessory, renderMessageDecoration, renderMessagePopoverButton, messagePopoverButton
+        chatBarButton, renderMemberListDecorator, renderMessageAccessory, renderMessageDecoration, messagePopoverButton
     } = p;
 
     if (p.stop) {
@@ -298,11 +315,11 @@ export const stopPlugin = traceFunction("stopPlugin", function stopPlugin(p: Plu
     if (onBeforeMessageSend) removeMessagePreSendListener(onBeforeMessageSend);
     if (onMessageClick) removeMessageClickListener(onMessageClick);
 
-    if (chatBarButton || renderChatBarButton) removeChatBarButton(name);
+    if (chatBarButton) removeChatBarButton(name);
     if (renderMemberListDecorator) removeMemberListDecorator(name);
     if (renderMessageDecoration) removeMessageDecoration(name);
     if (renderMessageAccessory) removeMessageAccessory(name);
-    if (messagePopoverButton || renderMessagePopoverButton) removeMessagePopoverButton(name);
+    if (messagePopoverButton) removeMessagePopoverButton(name);
 
     return true;
 }, p => `stopPlugin ${p.name}`);
@@ -313,7 +330,7 @@ export const initPluginManager = onlyOnce(function init() {
 
     const pluginKeysToBind: Array<keyof PluginDef & `${"on" | "render"}${string}`> = [
         "onBeforeMessageEdit", "onBeforeMessageSend", "onMessageClick",
-        "renderChatBarButton", "renderMemberListDecorator", "renderMessageAccessory", "renderMessageDecoration", "renderMessagePopoverButton"
+        "renderMemberListDecorator", "renderMessageAccessory", "renderMessageDecoration"
     ];
 
     const neededApiPlugins = new Set<string>();
@@ -343,11 +360,11 @@ export const initPluginManager = onlyOnce(function init() {
 
         if (p.commands?.length) neededApiPlugins.add("CommandsAPI");
         if (p.onBeforeMessageEdit || p.onBeforeMessageSend || p.onMessageClick) neededApiPlugins.add("MessageEventsAPI");
-        if (p.chatBarButton || p.renderChatBarButton) neededApiPlugins.add("ChatInputButtonAPI");
+        if (p.chatBarButton) neededApiPlugins.add("ChatInputButtonAPI");
         if (p.renderMemberListDecorator) neededApiPlugins.add("MemberListDecoratorsAPI");
         if (p.renderMessageAccessory) neededApiPlugins.add("MessageAccessoriesAPI");
         if (p.renderMessageDecoration) neededApiPlugins.add("MessageDecorationsAPI");
-        if (p.messagePopoverButton || p.renderMessagePopoverButton) neededApiPlugins.add("MessagePopoverAPI");
+        if (p.messagePopoverButton) neededApiPlugins.add("MessagePopoverAPI");
         if (p.userProfileBadge) neededApiPlugins.add("BadgeAPI");
 
         for (const key of pluginKeysToBind) {
@@ -362,22 +379,11 @@ export const initPluginManager = onlyOnce(function init() {
 
     for (const p of pluginsValues) {
         if (p.settings) {
-            p.options ??= {};
-
             p.settings.pluginName = p.name;
-            for (const name in p.settings.def) {
-                const def = p.settings.def[name];
-                const checks = p.settings.checks?.[name];
-                p.options[name] = { ...def, ...checks };
-            }
-        }
 
-        if (p.options) {
-            for (const name in p.options) {
-                const opt = p.options[name];
-                if (opt.onChange != null) {
-                    SettingsStore.addChangeListener(`plugins.${p.name}.${name}`, opt.onChange);
-                }
+            for (const [key, def] of Object.entries(p.settings.def)) {
+                if (def.onChange)
+                    SettingsStore.addChangeListener(`plugins.${p.name}.${key}`, def.onChange);
             }
         }
 

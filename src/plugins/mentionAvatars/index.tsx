@@ -45,12 +45,13 @@ function DefaultRoleIcon() {
 export default definePlugin({
     name: "MentionAvatars",
     description: "Shows user avatars and role icons inside mentions",
+    tags: ["Appearance", "Customisation"],
     authors: [Devs.Ven, Devs.SerStars],
 
     patches: [{
         find: ".USER_MENTION)",
         replacement: {
-            match: /children:"@"\.concat\((null!=\i\?\i:\i)\)(?<=\.useName\((\i)\).+?)/,
+            match: /children:`@\$\{(\i\?\?\i)\}`(?<=\.useName\((\i)\).+?)/,
             replace: "children:$self.renderUsername({username:$1,user:$2})"
         }
     },

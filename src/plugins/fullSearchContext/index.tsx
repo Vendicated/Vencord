@@ -34,7 +34,7 @@ interface CopyIdMenuItemProps {
 }
 
 let CopyIdMenuItem: (props: CopyIdMenuItemProps) => React.ReactElement | null = NoopComponent;
-waitFor(filters.componentByCode('"devmode-copy-id-".concat'), m => CopyIdMenuItem = m);
+waitFor(filters.componentByCode('"cannot copy null text"'), m => CopyIdMenuItem = m);
 
 function MessageMenu({ message, channel, onHeightUpdate }) {
     const canReport = message.author &&
@@ -81,6 +81,7 @@ migratePluginSettings("FullSearchContext", "SearchReply");
 export default definePlugin({
     name: "FullSearchContext",
     description: "Makes the message context menu in message search results have all options you'd expect",
+    tags: ["Utility"],
     authors: [Devs.Ven, Devs.Aria],
 
     patches: [{

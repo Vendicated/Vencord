@@ -57,6 +57,7 @@ const settings = definePluginSettings({
 export default definePlugin({
     name: "LoadingQuotes",
     description: "Replace Discords loading quotes",
+    tags: ["Appearance", "Fun", "Customisation"],
     authors: [Devs.Ven, Devs.KraXen72, Devs.UlyssesZhan],
 
     settings,
@@ -66,11 +67,11 @@ export default definePlugin({
             find: "#{intl::LOADING_DID_YOU_KNOW}",
             replacement: [
                 {
-                    match: /"_loadingText".+?(?=(\i)\[.{0,10}\.random)/,
+                    match: /_loadingText.+?(?=(\i)\[.{0,10}\.random)/,
                     replace: "$&$self.mutateQuotes($1),"
                 },
                 {
-                    match: /"_eventLoadingText".+?(?=(\i)\[.{0,10}\.random)/,
+                    match: /_eventLoadingText.+?(?=(\i)\[.{0,10}\.random)/,
                     replace: "$&$self.mutateQuotes($1),",
                     predicate: () => settings.store.replaceEvents
                 }
