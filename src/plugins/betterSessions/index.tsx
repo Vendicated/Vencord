@@ -122,9 +122,8 @@ export default definePlugin({
         );
     }, { noop: true }),
 
-    renderIcon: ErrorBoundary.wrap(({ session, icon }: { session: Session, icon: React.ComponentType<any>; }) => {
+    renderIcon: ErrorBoundary.wrap(({ session, icon: DeviceIcon }: { session: Session; icon: React.ComponentType<any>; }) => {
         const PlatformIcon = GetPlatformIcon(session.client_info.platform);
-        const DeviceIcon = icon;
 
         return (
             <BlobMask
