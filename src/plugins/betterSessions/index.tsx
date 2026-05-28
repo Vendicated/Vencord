@@ -66,12 +66,12 @@ export default definePlugin({
                     replace: "()=>$self.renderIcon({...arguments[0],DeviceIcon:$1})"
                 },
                 {
-                    match: /("horizontal",gap:"xs",children:)\[.*?"text-subtle",children:\i\}\)\]\}\),/,
+                    match: /("horizontal",gap:"xs",children:)\[.{0,250}"text-subtle",children:\i\}\)\]\}\),/,
                     replace: "$1$self.renderName(arguments[0])}),"
                 },
                 {
                     match: /("text-muted",children:)\i(?=\}\)\]\}\),.{0,120}\.client_info\?\.location)/,
-                    replace: "$1$self.renderDescription({...arguments[0]})"
+                    replace: "$1$self.renderDescription(arguments[0])"
                 },
                 {
                     match: /:\i\(\i\.approx_last_used_time\).{0,40}\(0,\i\.jsxs?\)\(\i,\{/,
