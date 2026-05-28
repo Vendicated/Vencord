@@ -62,8 +62,8 @@ export default definePlugin({
             find: "#{intl::AUTH_SESSIONS_OS_UNKNOWN}",
             replacement: [
                 {
-                    match: /(?<=#{intl::AUTH_SESSIONS_ACTIVE_RECENTLY}.{0,230}role:"listitem",children:\[.{0,15},\{Icon:)(\i)/,
-                    replace: "()=>$self.renderIcon({...arguments[0],DeviceIcon:$1})"
+                    match: /(#{intl::AUTH_SESSIONS_ACTIVE_RECENTLY}.{0,230}role:"listitem",children:\[.{0,15},\{Icon:)\i/,
+                    replace: "$1()=>$self.renderIcon(arguments[0])"
                 },
                 {
                     match: /("horizontal",gap:"xs",children:)\[.{0,250}"text-subtle",children:\i\}\)\]\}\),/,
@@ -122,8 +122,9 @@ export default definePlugin({
         );
     }, { noop: true }),
 
-    renderIcon: ErrorBoundary.wrap(({ session, DeviceIcon }: { session: Session, DeviceIcon: React.ComponentType<any>; }) => {
+    renderIcon: ErrorBoundary.wrap(({ session, icon }: { session: Session, icon: React.ComponentType<any>; }) => {
         const PlatformIcon = GetPlatformIcon(session.client_info.platform);
+        const DeviceIcon = icon;
 
         return (
             <BlobMask
