@@ -60,11 +60,3 @@
 .vc-cloud-button-icon {
     height: 1.25em;
 }
-
-.vc-settings-modal-root {
-    background: var(--background-base-low);
-}
-
-.vc-settings-modal {
-    padding-bottom: 1em;
-}

@@ -5,12 +5,11 @@
  */
 
 import { definePluginSettings } from "@api/Settings";
-import { Link } from "@components/Link";
+import { TextButton } from "@components/Button";
 import { Margins } from "@utils/margins";
 import { classes } from "@utils/misc";
-import { closeAllModals } from "@utils/modal";
 import { OptionType } from "@utils/types";
-import { FluxDispatcher, Forms } from "@webpack/common";
+import { Forms, SettingsRouter } from "@webpack/common";
 
 import DecorPlugin from ".";
 import DecorSection from "./ui/components/DecorSection";
@@ -18,7 +17,7 @@ import DecorSection from "./ui/components/DecorSection";
 export const settings = definePluginSettings({
     changeDecoration: {
         type: OptionType.COMPONENT,
-        component() {
+        component({ closePluginSettings }) {
             if (!DecorPlugin.started) return <Forms.FormText>
                 Enable Decor and restart your client to change your avatar decoration.
             </Forms.FormText>;
@@ -26,14 +25,13 @@ export const settings = definePluginSettings({
             return <div>
                 <DecorSection hideTitle hideDivider noMargin />
                 <Forms.FormText className={classes(Margins.top8, Margins.bottom8)}>
-                    You can also access Decor decorations from the <Link
-                        href="/settings/profile-customization"
-                        onClick={e => {
-                            e.preventDefault();
-                            closeAllModals();
-                            FluxDispatcher.dispatch({ type: "USER_SETTINGS_MODAL_SET_SECTION", section: "Profile Customization" });
+                    You can also access Decor decorations from the <TextButton
+                        variant="link"
+                        onClick={async () => {
+                            closePluginSettings();
+                            SettingsRouter.openUserSettings("profile_panel");
                         }}
-                    >Profiles</Link> page.
+                    >Profiles</TextButton> page.
                 </Forms.FormText>
             </div>;
         }

@@ -22,6 +22,7 @@ interface SettingBaseProps<T> {
     };
     id: string;
     definedSettings: DefinedSettings;
+    closePluginSettings(): void;
 }
 
 export type SettingProps<T extends PluginSettingDefCommon> = SettingBaseProps<T>;
