@@ -67,16 +67,19 @@ function buildAsar(files) {
     const headerJson = JSON.stringify({ files: fileEntries });
     const headerBuf = Buffer.from(headerJson, "utf-8");
 
-    // Chromium Pickle format: [4-LE: 4][4-LE: headerBlockSize][4-LE: 4][4-LE: headerJsonLen][json]
-    const headerJsonLen = headerBuf.byteLength;
-    const headerBlockSize = 8 + headerJsonLen; // inner pickle (4+4+json)
+    // Chromium Pickle format — JSON payload must be padded to 4-byte alignment
+    // Layout: [4][headerPickleSize][headerPicklePayloadSize][jsonLen][json+padding][fileData]
+    const jsonLen = headerBuf.byteLength;
+    const alignedJsonLen = (jsonLen + 3) & ~3;
+    const headerPicklePayloadSize = 4 + alignedJsonLen; // jsonLen field + json data (padded)
+    const headerPickleSize = 4 + headerPicklePayloadSize; // payload_size field + payload
 
-    const header = Buffer.alloc(8 + 4 + 4 + headerJsonLen);
-    header.writeUInt32LE(4, 0);                  // size of next field
-    header.writeUInt32LE(headerBlockSize, 4);    // total header block size
-    header.writeUInt32LE(4, 8);                  // size of next field
-    header.writeUInt32LE(headerJsonLen, 12);     // json length
-    headerBuf.copy(header, 16);
+    const header = Buffer.alloc(4 + 4 + 4 + 4 + alignedJsonLen);
+    header.writeUInt32LE(4, 0);                        // sizePickle.payload_size
+    header.writeUInt32LE(headerPickleSize, 4);         // sizePickle.payload = headerPickle total size
+    header.writeUInt32LE(headerPicklePayloadSize, 8);  // headerPickle.payload_size
+    header.writeUInt32LE(jsonLen, 12);                 // actual JSON string length
+    headerBuf.copy(header, 16);                        // JSON bytes (rest is zero-padded)
 
     return Buffer.concat([header, ...chunks]);
 }
@@ -137,7 +140,7 @@ function scanInstalls(winUser) {
             const patcherPath = readRequireFromAsar(appAsarPath);
 
             if (patcherPath) {
-                const winDistPath = patcherPath.replace(/[\\\/]patcher\.js$/, "");
+                const winDistPath = patcherPath.replace(/[\\\/]+patcher\.js$/, "");
                 const wslDistPath = winPathToWsl(winDistPath);
                 results.push({
                     variant, appDir, winUser, resourcesDir,
@@ -218,7 +221,8 @@ function inject(target, winDistPath) {
         }
     }
 
-    const requireLine = `require("${winDistPath}\\\\patcher.js");`;
+    const normalizedDistPath = winDistPath.replace(/[\\\/]+/g, "/").replace(/\/$/, "");
+    const requireLine = `require("${normalizedDistPath}/patcher.js");`;
     const packageJson = `{\n\t"name": "discord",\n\t"main": "index.js"\n}`;
 
     // Write a minimal ASAR file (works across all Electron versions)
