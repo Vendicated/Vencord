@@ -11,7 +11,7 @@ import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { Channel, Message, User } from "@vencord/discord-types";
-import { RelationshipStore, StreamerModeStore } from "@webpack/common";
+import { AuthenticationStore, React, RelationshipStore, StreamerModeStore, TypingStore, UserStore } from "@webpack/common";
 
 interface UsernameProps {
     author: { nick: string; authorId: string; };
@@ -57,7 +57,7 @@ export default definePlugin({
     name: "ShowMeYourName",
     description: "Display usernames next to nicks, or no nicks at all",
     tags: ["Appearance", "Customisation"],
-    authors: [Devs.Rini, Devs.TheKodeToad, Devs.rae],
+    authors: [Devs.Rini, Devs.TheKodeToad, Devs.rae, Devs.Omar],
     patches: [
         {
             find: '="SYSTEM_TAG"',
@@ -67,6 +67,13 @@ export default definePlugin({
                 replace: "$self.renderUsername(arguments[0]),_oldChildren:$&"
             }
         },
+        {
+            find: "#{intl::SEVERAL_USERS_TYPING_STRONG}",
+            replacement: {
+                match: /(?<="aria-atomic":!0,children:)\i/,
+                replace: "$self.patchTypingIndicator({ children: $&, channel: arguments[0]?.channel })"
+            }
+        }
     ],
     settings,
 
@@ -112,4 +119,39 @@ export default definePlugin({
             return <>{author?.nick}</>;
         }
     }, { noop: true }),
+
+    patchTypingIndicator: ErrorBoundary.wrap(({ children, channel }: { children: any, channel: Channel | undefined }) => {
+        if (!channel || !Array.isArray(children)) return children;
+
+        const { mode, displayNames } = settings.store;
+
+        const typingUsers = TypingStore.getTypingUsers(channel.id);
+        const myId = AuthenticationStore.getId();
+        const userIds = Object.keys(typingUsers).filter(id => id && id !== myId && !RelationshipStore.isBlockedOrIgnored(id));
+
+        let index = 0;
+        return children.map(c => {
+            if (c.type !== "strong" && !(typeof c !== "string" && !React.isValidElement(c))) return c;
+
+            const userId = userIds[index++];
+            if (!userId) return c;
+
+            const user = UserStore.getUser(userId);
+            if (!user) return c;
+
+            let name = user.username;
+            if (displayNames) name = user.globalName || name;
+            if (StreamerModeStore.enabled) name = name[0] + "…";
+
+            if (mode === "user") {
+                return <strong {...c.props}>{name}</strong>;
+            } else if (mode === "user-nick") {
+                return <strong {...c.props}>{name} <span className="vc-smyn-suffix">{c.props?.children}</span></strong>;
+            } else if (mode === "nick-user") {
+                return <strong {...c.props}>{c.props?.children} <span className="vc-smyn-suffix">{name}</span></strong>;
+            }
+
+            return c;
+        });
+    }, { noop: true })
 });
