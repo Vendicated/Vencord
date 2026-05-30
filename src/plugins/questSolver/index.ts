@@ -1,6 +1,6 @@
 import { definePluginSettings } from "@api/Settings";
 import definePlugin, { OptionType } from "@utils/types";
-import { findByPropsLazy, findLazy, findStoreLazy } from "@webpack";
+import { findByPropsLazy, waitFor } from "@webpack";
 import {
     ApplicationStreamingStore,
     ChannelStore,
@@ -10,7 +10,7 @@ import {
     RunningGameStore
 } from "@webpack/common";
 
-const questsStore = findStoreLazy("QuestsStore") as any;
+let questsStore: any;
 
 const supportedTasks = ["WATCH_VIDEO", "PLAY_ON_DESKTOP", "STREAM_ON_DESKTOP", "PLAY_ACTIVITY", "WATCH_VIDEO_ON_MOBILE"] as const;
 
@@ -38,27 +38,17 @@ const settings = definePluginSettings({
 });
 
 const cleanups: Array<() => void> = [];
-const isApp = typeof DiscordNative !== "undefined";
+const isApp = IS_DISCORD_DESKTOP;
+let checkInterval: ReturnType<typeof setInterval> | null = null;
+const processedQuestIds = new Set<string>();
 
 function getActiveQuests(): any[] {
     try {
-        const qs = questsStore?.quests;
-        if (!qs || !(qs instanceof Map)) {
-            console.log("[Quest Solver] QuestsStore not found or quests is not a Map", { qs, keys: qs ? Object.keys(qs) : null });
-            // Fallback: try to find via findByProps
-            const fallback = findByPropsLazy("quests", "getQuest") as any;
-            const qs2 = fallback?.quests;
-            if (qs2 instanceof Map) {
-                return [...qs2.values()].filter((quest: any) =>
-                    quest.userStatus?.enrolledAt &&
-                    !quest.userStatus?.completedAt &&
-                    new Date(quest.config.expiresAt).getTime() > Date.now() &&
-                    supportedTasks.some(t => Object.keys((quest.config.taskConfig ?? quest.config.taskConfigV2).tasks).includes(t))
-                );
-            }
+        if (!questsStore?.quests) {
+            console.log("[Quest Solver] QuestsStore not available or empty");
             return [];
         }
-        return [...qs.values()].filter((quest: any) =>
+        return [...questsStore.quests.values()].filter((quest: any) =>
             quest.userStatus?.enrolledAt &&
             !quest.userStatus?.completedAt &&
             new Date(quest.config.expiresAt).getTime() > Date.now() &&
@@ -337,19 +327,28 @@ export default definePlugin({
 
     start() {
         console.log("[Quest Solver] Starting...");
-        console.log("[Quest Solver] QuestsStore available:", !!questsStore);
-        console.log("[Quest Solver] QuestsStore keys:", questsStore ? Object.keys(questsStore) : []);
-        if (questsStore?.quests) {
-            console.log("[Quest Solver] quests is Map:", questsStore.quests instanceof Map);
-            console.log("[Quest Solver] quests size:", questsStore.quests instanceof Map ? questsStore.quests.size : "N/A");
-        }
 
-        const quests = getActiveQuests();
-        if (!quests.length) {
-            console.log("[Quest Solver] No active uncompleted quests found.");
-            return;
-        }
-        console.log(`[Quest Solver] Found ${quests.length} quest(s). Starting...`);
+        waitFor(["quests", "getQuest"], (m: any) => {
+            questsStore = m;
+            console.log("[Quest Solver] QuestsStore found!");
+            this.solveNewQuests();
+        }, { isIndirect: true });
+
+        checkInterval = setInterval(() => {
+            if (questsStore) {
+                this.solveNewQuests();
+            }
+        }, 60000);
+        cleanups.push(() => {
+            if (checkInterval) clearInterval(checkInterval);
+        });
+    },
+
+    solveNewQuests() {
+        const quests = getActiveQuests().filter(q => !processedQuestIds.has(q.id));
+        if (!quests.length) return;
+
+        console.log(`[Quest Solver] Found ${quests.length} new quest(s).`);
 
         (async () => {
             for (const quest of quests) {
@@ -369,6 +368,7 @@ export default definePlugin({
                     continue;
                 }
 
+                processedQuestIds.add(quest.id);
                 console.log(`[Quest Solver] Solving: ${quest.config.messages.questName} (${taskName})`);
 
                 try {
@@ -391,13 +391,13 @@ export default definePlugin({
                     console.error(`[Quest Solver] Failed on ${quest.config.messages.questName}:`, e);
                 }
             }
-            console.log("[Quest Solver] All quests processed.");
         })();
     },
 
     stop() {
         cleanups.forEach(fn => fn());
         cleanups.length = 0;
+        processedQuestIds.clear();
         console.log("[Quest Solver] Stopped and cleaned up.");
     },
 });
