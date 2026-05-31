@@ -1,0 +1,8 @@
+{
+    "name": "discordkit",
+    "version": "1.0.0",
+    "private": true,
+    "dependencies": {
+        "pkapi.js": "^7.5.1"
+    }
+}

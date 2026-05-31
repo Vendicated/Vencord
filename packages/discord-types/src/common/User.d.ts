@@ -71,7 +71,7 @@ export class User extends DiscordRecord {
     removeGuildAvatarHash(guildId: string): this;
     toJS(): object;
     toString(): string;
-    update(props: Partial<User>): this;
+    update(props: Partial<User>, callback: () => boolean): this;
 }
 
 export interface UserJSON {
