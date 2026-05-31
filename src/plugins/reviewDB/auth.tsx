@@ -6,8 +6,7 @@
 
 import * as DataStore from "@api/DataStore";
 import { Logger } from "@utils/Logger";
-import { openModal } from "@utils/modal";
-import { OAuth2AuthorizeModal, showToast, Toasts, UserStore } from "@webpack/common";
+import { OAuth2AuthorizeModal, openModal, showToast, Toasts, UserStore } from "@webpack/common";
 
 import { ReviewDBAuth } from "./entities";
 

@@ -1,15 +1,3 @@
-.vc-trans-modal-content {
-    padding: 1em;
-}
-
-.vc-trans-modal-header {
-    place-content: center space-between;
-}
-
-.vc-trans-modal-title {
-    margin: 0;
-}
-
 .vc-trans-accessory {
     color: var(--text-muted);
     margin-top: 0.5em;

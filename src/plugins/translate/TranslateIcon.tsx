@@ -20,7 +20,8 @@ import { ChatBarButton, ChatBarButtonFactory } from "@api/ChatButtons";
 import { TooltipContainer } from "@components/TooltipContainer";
 import { classes } from "@utils/misc";
 import { IconComponent } from "@utils/types";
-import { Alerts, Forms, useEffect, useState } from "@webpack/common";
+import { RenderModalProps } from "@vencord/discord-types";
+import { ConfirmModal,openModal, useEffect, useState } from "@webpack/common";
 
 import { settings } from "./settings";
 import { openTranslateModal } from "./TranslateModal";
@@ -41,6 +42,26 @@ export const TranslateIcon: IconComponent = ({ height = 20, width = 20, classNam
 
 export let setShouldShowTranslateEnabledTooltip: undefined | ((show: boolean) => void);
 
+function AutoTranslateConfirmModal(props: RenderModalProps) {
+    const s = settings.use(["dismissedAutoTranslateAlert"]);
+
+    return (
+        <ConfirmModal
+            {...props}
+            title="Vencord Auto-Translate Enabled"
+            subtitle="You just enabled Auto Translate! Any message will automatically be translated before being sent."
+            confirmText="Disable Auto-Translate"
+            onConfirm={() => settings.store.autoTranslate = false}
+            cancelText="Got it"
+            variant="primary"
+            checkboxProps={{
+                checked: s.dismissedAutoTranslateAlert === true,
+                onChange: checked => s.dismissedAutoTranslateAlert = checked,
+            }}
+        />
+    );
+}
+
 export const TranslateChatBarIcon: ChatBarButtonFactory = ({ isMainChat }) => {
     const { autoTranslate } = settings.use(["autoTranslate"]);
 
@@ -55,22 +76,8 @@ export const TranslateChatBarIcon: ChatBarButtonFactory = ({ isMainChat }) => {
     const toggle = () => {
         const newState = !autoTranslate;
         settings.store.autoTranslate = newState;
-        if (newState && settings.store.showAutoTranslateAlert !== false)
-            Alerts.show({
-                title: "Vencord Auto-Translate Enabled",
-                body: <>
-                    <Forms.FormText>
-                        You just enabled Auto Translate! Any message <b>will automatically be translated</b> before being sent.
-                    </Forms.FormText>
-                </>,
-                confirmText: "Disable Auto-Translate",
-                cancelText: "Got it",
-                secondaryConfirmText: "Don't show again",
-                onConfirmSecondary: () => settings.store.showAutoTranslateAlert = false,
-                onConfirm: () => settings.store.autoTranslate = false,
-                // troll
-                confirmColor: "vc-notification-log-danger-btn",
-            });
+        if (newState && !settings.store.dismissedAutoTranslateAlert)
+            openModal(props => <AutoTranslateConfirmModal {...props} />);
     };
 
     const button = (

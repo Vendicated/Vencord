@@ -21,14 +21,6 @@
 
 /*  RolesAndUsersPermissions Component */
 
-.vc-permviewer-modal-content {
-    padding: 16px 4px 16px 16px;
-}
-
-.vc-permviewer-modal-title {
-    flex-grow: 1;
-}
-
 .vc-permviewer-modal-no-perms {
     width: 100%;
     height: 100%;
