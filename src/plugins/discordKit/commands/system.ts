@@ -5,26 +5,23 @@
  */
 
 import { PKCache } from "@plugins/discordKit/utils";
-import PKAPI from "pkapi.js";
+import { CommandReturnValue } from "@vencord/discord-types";
+import PKAPI, { SystemFetchOptions } from "pkapi.js";
 
-export default async function (pkClient: PKAPI, cache: PKCache, args: Record<string, any>) {
+export default async function (pkClient: PKAPI, cache: PKCache, args: Record<string, any>): Promise<CommandReturnValue> {
+    if (!cache.isReady) return { content: "DiscordKit is not ready." };
+
     const id = args.id === undefined ? "@me" :
-        args.id.startsWith("<@") ? args.id.replace(/[<@>]/g, "") :
-            args.id;
+        args.id.startsWith("<@") ? args.id.replace(/[<@>]/g, "") : args.id;
     const token = id === "@me" ? cache.token() : undefined;
+    const fetch = [id === "@me" ? "config" : "", "fronters", "group members", "groups", "members", "switches"];
 
     try {
-        const system_temp = Object.entries(id === "@me" || id === cache.userId ? cache.system :
-            await pkClient.getSystem(
-                {
-                    system: id,
-                    fetch: [id === "@me" ? "config" : "", "fronters", "group members", "groups", "members", "switches"],
-                    token
-                }
-            )
-        ).filter(v => v[1] !== null && v[1] !== undefined);
+        const system_temp = Object.entries(id === "@me" || id === cache.userId ?
+            cache.system : await pkClient.getSystem({ system: id, fetch: fetch as SystemFetchOptions[], token })
+        ).filter(v => v[1] !== null && v[1] !== undefined); // Required because API throws both types
 
-        const system: any[] = [];
+        const system: Array<[string, any]> = [];
         const contentLines: string[] = [];
 
         system_temp.forEach(v => {
@@ -93,7 +90,6 @@ export default async function (pkClient: PKAPI, cache: PKCache, args: Record<str
 
         return { content: contentLines.join("\n") };
     } catch (error) {
-        console.error("Failed to fetch PluralKit system info:", error);
-        return { content: `❌ Failed to fetch system info: \`${(error as Error).message}\`` };
+        return { content: (error as Error).message };
     }
 }
