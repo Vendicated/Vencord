@@ -1,12 +1,7 @@
 /*
- * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2024 Vendicated and contributors
+ * Vencord, a Discord client mod
+ * Copyright (c) 2026 Vendicated and contributors
  * SPDX-License-Identifier: GPL-3.0-or-later
- *
- * English local corrections — spelling, contractions, and basic
- * punctuation for casual English chat.
- *
- * This is experimental. More languages coming soon.
  */
 
 // Common English typos and misspellings
@@ -204,20 +199,18 @@ export function applyEnglishCorrections(text: string): string {
         const t = tokens[i];
         if (/^\s*$/.test(t)) continue;
 
-        const lower = t.toLowerCase();
-
-        // Try abbreviations (multi-word, so we replace the token)
-        if (EN_ABBREV[lower]) {
-            // Preserve surrounding punctuation
-            const punctPre = t.match(/^\W+/)?.[0] || "";
-            const punctSuf = t.match(/\W+$/)?.[0] || "";
-            tokens[i] = punctPre + EN_ABBREV[lower] + punctSuf;
-            continue;
-        }
-
         // Strip punctuation for dictionary lookup
         const clean = t.replace(/^[^a-zA-Z0-9]+|[^a-zA-Z0-9]+$/g, "").toLowerCase();
         if (!clean) continue;
+
+        // Try abbreviations (multi-word, so we replace the token)
+        if (EN_ABBREV[clean]) {
+            // Preserve surrounding punctuation
+            const punctPre = t.match(/^\W+/)?.[0] || "";
+            const punctSuf = t.match(/\W+$/)?.[0] || "";
+            tokens[i] = punctPre + EN_ABBREV[clean] + punctSuf;
+            continue;
+        }
 
         // Try contractions
         if (EN_CONTRACTIONS[clean]) {
@@ -233,8 +226,8 @@ export function applyEnglishCorrections(text: string): string {
             const match = t.match(/^([^a-zA-Z0-9]*)([a-zA-Z0-9]+)([^a-zA-Z0-9]*)$/);
             if (match) {
                 const replacement = EN_SPELLING[clean];
-                // Preserve capitalisation
-                const isCap = clean[0] === clean[0].toUpperCase() && clean.length > 0;
+                // Preserve capitalisation (match[2] is the original case)
+                const isCap = match[2][0] === match[2][0].toUpperCase();
                 const finalWord = isCap
                     ? replacement.charAt(0).toUpperCase() + replacement.slice(1)
                     : replacement;
