@@ -41,6 +41,7 @@ export default definePlugin({
     name: "QuickMention",
     authors: [Devs.kemo],
     description: "Adds a quick mention button to the message actions bar",
+    tags: ["Chat", "Shortcuts"],
 
     messagePopoverButton: {
         icon: Icon,

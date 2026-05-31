@@ -45,6 +45,7 @@ function DefaultRoleIcon() {
 export default definePlugin({
     name: "MentionAvatars",
     description: "Shows user avatars and role icons inside mentions",
+    tags: ["Appearance", "Customisation"],
     authors: [Devs.Ven, Devs.SerStars],
 
     patches: [{

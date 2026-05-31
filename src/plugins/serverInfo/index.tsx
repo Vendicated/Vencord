@@ -27,9 +27,10 @@ const Patch: NavContextMenuPatchCallback = (children, { guild }: { guild: Guild;
 export default definePlugin({
     name: "ServerInfo",
     description: "Allows you to view info about a server",
+    tags: ["Servers", "Utility"],
     authors: [Devs.Ven, Devs.Nuckyz],
     dependencies: ["DynamicImageModalAPI"],
-    tags: ["guild", "info", "ServerProfile"],
+    searchTerms: ["guild", "info", "ServerProfile"],
 
     contextMenus: {
         "guild-context": Patch,
