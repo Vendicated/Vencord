@@ -37,7 +37,7 @@ interface connectionLink {
 export default definePlugin({
     name: "ExtraConnectionLinks",
     description: "Allows you to open more connections in browser!",
-    authors: [Devs.coopeeo],
+    authors: [Devs.auggeeo],
     patches: connectionLinks
         .map(link => {
             return {
