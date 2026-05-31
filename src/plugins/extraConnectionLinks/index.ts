@@ -7,7 +7,6 @@
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 
-
 const connectionLinks: connectionLink[] = [
     {
         name: "Xbox",
@@ -16,7 +15,7 @@ const connectionLinks: connectionLink[] = [
     {
         name: "Epic Games",
         uri: "https://store.epicgames.com/u/${id}",
-    }
+    },
 ];
 
 interface connectionLink {
@@ -38,14 +37,16 @@ export default definePlugin({
     name: "ExtraConnectionLinks",
     description: "Allows you to open more connections in browser!",
     authors: [Devs.auggeeo],
-    patches: connectionLinks
-        .map(link => {
-            return {
-                find: "getPlatformUserUrl:",
-                replacement: {
+    patches: [
+        {
+            find: "getPlatformUserUrl:",
+            replacement: connectionLinks.map((link) => {
+                return {
                     match: new RegExp(`(?<=${link.name}",.*},.+)(?=},)`),
-                    replace: `, getPlatformUserUrl:e=>{let {name, id} = e; return \`${link.uri}\`;}`
-                }
-            };
-        }),
+                    replace:
+                        `, getPlatformUserUrl:e=>{let {name, id} = e; return \`${link.uri}\`;}`,
+                };
+            }),
+        },
+    ],
 });
