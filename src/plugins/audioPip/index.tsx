@@ -113,7 +113,7 @@ const trackedBois = new Set<WeakRef<HTMLAudioElement>>();
 let originalPlay: typeof HTMLAudioElement.prototype.play | null = null;
 
 const trackedAudios = new WeakSet<HTMLAudioElement>();
-const metadataCache = new WeakMap<HTMLAudioElement, { title: string; author: string }>();
+const metadataCache = new WeakMap<HTMLAudioElement, { title: string; author: string; }>();
 
 function trackAndListenToAudio(audio: HTMLAudioElement) {
     if (!audio || trackedAudios.has(audio)) return;
@@ -727,7 +727,7 @@ const AudioPipUI = () => {
 
 // register plugin
 export default definePlugin({
-    name: "AudioPip",
+    name: "AudioPiP",
     description: "Adds a floating Picture-in-Picture window for playing audio and voice messages.",
     authors: [Devs.OKISO],
 
