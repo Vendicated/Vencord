@@ -302,7 +302,7 @@ function isDiscordMediaAudio(src) {
 }
 
 // player ui
-const AudioPipUI = () => {
+const AudioPiPUI = () => {
     const { src, title, isPlaying, currentTime, duration, author, isOpen, volume } = useAudioState();
     const baseWidth = 280;
     const baseHeight = 84;
@@ -743,9 +743,9 @@ export default definePlugin({
             this.element.id = "vc-audio-pip-container";
             document.body.appendChild(this.element);
             this.root = createRoot(this.element);
-            this.root.render(<AudioPipUI />);
+            this.root.render(<AudioPiPUI />);
         } catch (e) {
-            console.error("Error mounting AudioPipUI root:", e);
+            console.error("Error mounting AudioPiPUI root:", e);
         }
 
         originalPlay = HTMLAudioElement.prototype.play;
