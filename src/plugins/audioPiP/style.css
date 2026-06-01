@@ -100,7 +100,7 @@
 .vc-style-desktop .vc-audio-pip-title {
     font-size: 13px;
     font-weight: 600;
-    color: var(--text-normal, #060607);
+    color: var(--text-default, var(--text-normal, #dbdee1));
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -110,7 +110,7 @@
 .vc-style-desktop .vc-audio-pip-author {
     font-size: 11px;
     font-weight: 400;
-    color: var(--text-muted, #4e5058);
+    color: var(--text-muted, #949ba4);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -119,7 +119,7 @@
 .vc-style-horizontal .vc-audio-pip-author {
     font-size: 11px;
     font-weight: 400;
-    color: var(--text-muted, #4e5058);
+    color: var(--text-muted, #949ba4);
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
