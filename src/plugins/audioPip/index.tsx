@@ -321,7 +321,6 @@ const AudioPipUI = () => {
     const scaledWidth = baseWidth * scale;
     const scaledHeight = baseHeight * scale;
 
-    // saved corner
     const [corner, setCorner] = useState<CornerName>(() => {
         try {
             const saved = localStorage.getItem("vc-audio-pip-corner");
@@ -334,19 +333,16 @@ const AudioPipUI = () => {
 
     const windowRef = useRef<HTMLDivElement>(null);
 
-    // layout position
     const [posX, setPosX] = useState<number | null>(null);
     const [posY, setPosY] = useState<number | null>(null);
     const [isDragging, setIsDragging] = useState(false);
     const [isSnapping, setIsSnapping] = useState(false);
 
-    // resize watch yuh
     const [resizeTick, setResizeTick] = useState(0);
 
     const dragRef = useRef({ isDragging: false, startX: 0, startY: 0, initialX: 0, initialY: 0 });
     const resizeRef = useRef({ isResizing: false, startX: 0, startY: 0, initialScale: 1 });
 
-    // sync position
     useEffect(() => {
         if (!isDragging) {
             const coords = getCornerCoordinates(corner, scaledWidth, scaledHeight);
@@ -430,23 +426,18 @@ const AudioPipUI = () => {
             const snapCoords = getCornerCoordinates(nextCorner, scaledWidth, scaledHeight);
 
             if (windowRef.current) {
-                // swap drag classes
                 windowRef.current.classList.remove("vc-dragging");
                 windowRef.current.classList.add("vc-snapping");
-                // force reflow
                 void windowRef.current.offsetWidth;
-                // animate to corner
                 windowRef.current.style.transform = `translate(${snapCoords.x}px, ${snapCoords.y}px)`;
             }
 
-            // sync state
             setIsSnapping(true);
             setIsDragging(false);
             setPosX(null);
             setPosY(null);
             setCorner(nextCorner);
 
-            // reset snap state
             setTimeout(() => {
                 if (windowRef.current) windowRef.current.classList.remove("vc-snapping");
                 setIsSnapping(false);
@@ -463,7 +454,7 @@ const AudioPipUI = () => {
     };
 
     const handleResizeMouseDown = (e: React.MouseEvent) => {
-        e.stopPropagation(); // stop the damn drag when resizing
+        e.stopPropagation(); // prevent drag handler from triggering
 
         resizeRef.current = {
             isResizing: true,
@@ -485,11 +476,10 @@ const AudioPipUI = () => {
             else if (corner === "top-right") delta = (-dx + dy) / 2;
             else if (corner === "bottom-left") delta = (dx - dy) / 2;
 
-            let newScale = resizeRef.current.initialScale + (delta / 150); // drag math
-            newScale = Math.max(1, Math.min(newScale, 1.4)); // bounds
+            let newScale = resizeRef.current.initialScale + (delta / 150);
+            newScale = Math.max(1, Math.min(newScale, 1.4));
 
             if (windowRef.current) {
-                // apply style
                 const currentCoords = getCornerCoordinates(corner, baseWidth * newScale, baseHeight * newScale);
                 windowRef.current.style.transform = `translate(${currentCoords.x}px, ${currentCoords.y}px)`;
                 windowRef.current.style.width = `${baseWidth * newScale}px`;
@@ -520,7 +510,6 @@ const AudioPipUI = () => {
 
             setScale(newScale);
 
-            // let layout handle anchor
             setPosX(null);
             setPosY(null);
 
