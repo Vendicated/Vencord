@@ -9,7 +9,8 @@ import "./style.css";
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { createRoot, React, SelectedChannelStore, useEffect, useRef, useState } from "@webpack/common";
+import type { Message } from "@vencord/discord-types";
+import { createRoot, MessageStore, React, SelectedChannelStore, useEffect, useRef, useState } from "@webpack/common";
 import type { Root } from "react-dom/client";
 
 // clean cdn urls
@@ -118,48 +119,55 @@ const store = {
 const pipAudioPlayer = new Audio();
 let globalPlayListener: ((e: Event) => void) | null = null;
 
-function getFiber(node: Node): any {
-    const key = Object.keys(node).find(key => key.startsWith("__reactFiber$"));
-    return key ? (node as any)[key] : null;
+const metadataCache = new WeakMap<HTMLAudioElement, { title: string; author: string }>();
+
+function findMessageByMediaUrl(src: string) {
+    try {
+        const clean = cleanUrl(src);
+        const currentChannel = SelectedChannelStore.getChannelId();
+        const messages = MessageStore.getMessages(currentChannel) as { _array: Message[] } | undefined;
+        if (messages && messages._array) {
+            for (let i = messages._array.length - 1; i >= 0; i--) {
+                const msg = messages._array.at(i);
+                if (!msg || !msg.attachments) continue;
+                const attachment = msg.attachments.find(
+                    a => cleanUrl(a.url) === clean || cleanUrl(a.proxy_url) === clean
+                );
+                if (attachment) return { msg, attachment };
+            }
+        }
+    } catch (e) {
+        console.error("AudioPiP: Error finding message by media URL", e);
+    }
+    return null;
 }
 
-function getAudioMetadataFromFiber(audio: HTMLAudioElement) {
+function resolveAudioMetadata(audio: HTMLAudioElement) {
     let title = "Audio File";
     let author = "";
 
     try {
-        let curr = getFiber(audio);
-        let message: any = null;
-        let attachment: any = null;
-
-        while (curr) {
-            if (curr.memoizedProps?.message && !message) message = curr.memoizedProps.message;
-            if (curr.memoizedProps?.attachment && !attachment) attachment = curr.memoizedProps.attachment;
-            if (message && attachment) break;
-            curr = curr.return;
-        }
-
-        if (message) {
-            author = message.author?.username || message.author?.globalName || "";
-        }
-        if (attachment && attachment.filename) {
-            title = attachment.filename;
-        } else {
-            // fallback to url parsing
-            const src = audio.src || audio.currentSrc;
-            if (src) {
+        const src = audio.src || audio.currentSrc;
+        if (src) {
+            const match = findMessageByMediaUrl(src);
+            if (match) {
+                author = match.msg.author?.username || match.msg.author?.globalName || "";
+                if (match.attachment.filename) {
+                    title = match.attachment.filename;
+                }
+            } else {
+                // fallback to URL parsing
                 const parts = new URL(src).pathname.split("/");
                 const lastPart = parts.at(-1);
                 if (lastPart?.includes(".")) title = decodeURIComponent(lastPart);
             }
-        }
 
-        const src = audio.src || audio.currentSrc || "";
-        if (src.includes("voice-message") || src.includes(".ogg") || title.toLowerCase().includes("voice-message")) {
-            title = "Voice Message";
+            if (src.includes("voice-message") || src.includes(".ogg") || title.toLowerCase().includes("voice-message")) {
+                title = "Voice Message";
+            }
         }
     } catch (e) {
-        console.error("AudioPiP: Error walking fiber tree", e);
+        console.error("AudioPiP: Error resolving audio metadata", e);
     }
 
     return { title, author };
@@ -168,8 +176,8 @@ function getAudioMetadataFromFiber(audio: HTMLAudioElement) {
 function isDiscordMediaAudio(src: string) {
     if (!src) return false;
     if (src.includes("/assets/")) return false;
-    if (src.includes("discordapp.com/attachments/") || src.includes("discordapp.net/attachments/")) return true;
-    return false;
+    const urlStr = src.toLowerCase();
+    return urlStr.includes("/attachments/") || urlStr.includes("/ephemeral-attachments/");
 }
 
 // hijack playing audio and spawn pip
@@ -179,7 +187,18 @@ function createPipFromLocal(local: HTMLAudioElement) {
     const src = local.src || local.currentSrc;
     if (!src || !isDiscordMediaAudio(src)) return;
 
-    const { title, author } = getAudioMetadataFromFiber(local);
+    let title = "Audio File";
+    let author = "";
+
+    const cached = metadataCache.get(local);
+    if (cached) {
+        title = cached.title;
+        author = cached.author;
+    } else {
+        const resolved = resolveAudioMetadata(local);
+        title = resolved.title;
+        author = resolved.author;
+    }
 
     // hand off playback to our global player
     pipAudioPlayer.src = src;
@@ -207,6 +226,12 @@ function handleGlobalPlay(e: Event) {
 
     const src = target.src || target.currentSrc;
     if (!src || !isDiscordMediaAudio(src)) return;
+
+    // Resolve and cache metadata immediately while in channel context
+    try {
+        const resolved = resolveAudioMetadata(target);
+        metadataCache.set(target, resolved);
+    } catch (e) { }
 
     // close the pip if it's currently open since user is playing audio in chat
     if (store.getState().isOpen) {
@@ -681,12 +706,13 @@ const AudioPiPUI = () => {
 export default definePlugin({
     name: "AudioPiP",
     description: "Adds a floating Picture-in-Picture window for playing audio and voice messages.",
+    tags: ["Media", "Utility"],
     authors: [Devs.OKISO],
     settings,
 
     element: null as HTMLDivElement | null,
     root: null as Root | null,
-    channelSelectHandler: null as any,
+    channelSelectHandler: null as (() => void) | null,
 
     patches: [],
 
