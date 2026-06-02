@@ -6,9 +6,10 @@
 
 import "./style.css";
 
+import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
-import definePlugin from "@utils/types";
-import { createRoot, MessageStore, React, SelectedChannelStore, useEffect, useRef, useState } from "@webpack/common";
+import definePlugin, { OptionType } from "@utils/types";
+import { createRoot, React, SelectedChannelStore, useEffect, useRef, useState } from "@webpack/common";
 import type { Root } from "react-dom/client";
 
 // clean cdn urls
@@ -22,8 +23,6 @@ function cleanUrl(url: string): string {
     }
 }
 
-
-
 const icons = {
     voice: "M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5.3-3c0 3-2.54 5.1-5.3 5.1S6.7 14 6.7 11H5c0 3.41 2.72 6.23 6 6.72V21h2v-3.28c3.28-.48 6-3.3 6-6.72h-1.7z",
     audio: "M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z",
@@ -35,6 +34,15 @@ const icons = {
     volumeLow: "M18.5 12c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM5 9v6h4l5 5V4L9 9H5z",
     volumeHigh: "M3 9v6h4l5 5V4L9 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"
 };
+
+const settings = definePluginSettings({
+    alwaysShow: {
+        description: "Always show the Picture-in-Picture window immediately when an audio file starts playing.",
+        type: OptionType.BOOLEAN,
+        default: false,
+        restartNeeded: false
+    }
+});
 
 type CornerName = "top-left" | "top-right" | "bottom-left" | "bottom-right";
 
@@ -108,42 +116,70 @@ const store = {
 };
 
 const pipAudioPlayer = new Audio();
-const trackedBois = new Set<WeakRef<HTMLAudioElement>>();
+let globalPlayListener: ((e: Event) => void) | null = null;
 
-let originalPlay: typeof HTMLAudioElement.prototype.play | null = null;
-
-const trackedAudios = new WeakSet<HTMLAudioElement>();
-const metadataCache = new WeakMap<HTMLAudioElement, { title: string; author: string; }>();
-
-function trackAndListenToAudio(audio: HTMLAudioElement) {
-    if (!audio || trackedAudios.has(audio)) return;
-    trackedAudios.add(audio);
-
-    audio.addEventListener("play", () => handleLocalPlay(audio));
-    trackAudioElement(audio);
+function getFiber(node: Node): any {
+    const key = Object.keys(node).find(key => key.startsWith("__reactFiber$"));
+    return key ? (node as any)[key] : null;
 }
 
-function pruneDeadAudios() {
-    for (const ref of trackedBois) {
-        if (!ref.deref()) trackedBois.delete(ref);
+function getAudioMetadataFromFiber(audio: HTMLAudioElement) {
+    let title = "Audio File";
+    let author = "";
+
+    try {
+        let curr = getFiber(audio);
+        let message: any = null;
+        let attachment: any = null;
+
+        while (curr) {
+            if (curr.memoizedProps?.message && !message) message = curr.memoizedProps.message;
+            if (curr.memoizedProps?.attachment && !attachment) attachment = curr.memoizedProps.attachment;
+            if (message && attachment) break;
+            curr = curr.return;
+        }
+
+        if (message) {
+            author = message.author?.username || message.author?.globalName || "";
+        }
+        if (attachment && attachment.filename) {
+            title = attachment.filename;
+        } else {
+            // fallback to url parsing
+            const src = audio.src || audio.currentSrc;
+            if (src) {
+                const parts = new URL(src).pathname.split("/");
+                const lastPart = parts.at(-1);
+                if (lastPart?.includes(".")) title = decodeURIComponent(lastPart);
+            }
+        }
+
+        const src = audio.src || audio.currentSrc || "";
+        if (src.includes("voice-message") || src.includes(".ogg") || title.toLowerCase().includes("voice-message")) {
+            title = "Voice Message";
+        }
+    } catch (e) {
+        console.error("AudioPiP: Error walking fiber tree", e);
     }
+
+    return { title, author };
+}
+
+function isDiscordMediaAudio(src: string) {
+    if (!src) return false;
+    if (src.includes("/assets/")) return false;
+    if (src.includes("discordapp.com/attachments/") || src.includes("discordapp.net/attachments/")) return true;
+    return false;
 }
 
 // hijack playing audio and spawn pip
-function createPipFromLocal(local) {
+function createPipFromLocal(local: HTMLAudioElement) {
     if (store.getState().isOpen) return;
 
     const src = local.src || local.currentSrc;
-    if (!src) return;
+    if (!src || !isDiscordMediaAudio(src)) return;
 
-    const cached = metadataCache.get(local);
-    let title = cached?.title || "";
-    let author = cached?.author || "";
-    if (!title || !author) {
-        const meta = getAudioMetadata(local);
-        title = title || meta.title;
-        author = author || meta.author;
-    }
+    const { title, author } = getAudioMetadataFromFiber(local);
 
     // hand off playback to our global player
     pipAudioPlayer.src = src;
@@ -164,33 +200,13 @@ function createPipFromLocal(local) {
     });
 }
 
-function trackAudioElement(audio) {
-    if (!audio) return;
-    let isTracked = false;
-    for (const ref of trackedBois) {
-        if (ref.deref() === audio) {
-            isTracked = true;
-            break;
-        }
-    }
-    if (!isTracked) trackedBois.add(new WeakRef(audio));
-}
-
-function handleLocalPlay(target) {
-    pruneDeadAudios();
+function handleGlobalPlay(e: Event) {
+    const target = e.target as HTMLAudioElement;
     if (!target || target.tagName !== "AUDIO") return;
     if (target === pipAudioPlayer) return;
 
     const src = target.src || target.currentSrc;
     if (!src || !isDiscordMediaAudio(src)) return;
-
-    trackAudioElement(target);
-
-    // cache metadata when it starts playing in chat so we have it after switching channels
-    try {
-        const meta = getAudioMetadata(target);
-        metadataCache.set(target, { title: meta.title, author: meta.author });
-    } catch (e) { }
 
     // close the pip if it's currently open since user is playing audio in chat
     if (store.getState().isOpen) {
@@ -200,18 +216,20 @@ function handleLocalPlay(target) {
             store.setState({ isOpen: false, isPlaying: false, src: "", title: "", author: "" });
         } catch (e) { }
     }
+
+    if (settings.store.alwaysShow) {
+        createPipFromLocal(target);
+    }
 }
 
 // blast the volume to all discord volume keys so it saves properly
-function persistVolume(volume) {
+function persistVolume(volume: number) {
     try {
         const strVol = String(volume);
         ["mediaVolume", "media-player-volume", "video-volume", "audio-volume", "MediaPlayerVolume", "mediaPlayerVolume", "media-volume"]
             .forEach(key => window.localStorage.setItem(key, strVol));
     } catch (e) { }
 }
-
-
 
 pipAudioPlayer.addEventListener("play", () => store.setState({ isPlaying: true }));
 pipAudioPlayer.addEventListener("pause", () => store.setState({ isPlaying: false }));
@@ -223,9 +241,7 @@ pipAudioPlayer.addEventListener("volumechange", () => {
         store.setState({ volume: sliderVal });
     }
 });
-pipAudioPlayer.addEventListener("ended", () => {
-    store.setState({ isPlaying: false });
-});
+pipAudioPlayer.addEventListener("ended", () => store.setState({ isPlaying: false }));
 
 function useAudioState() {
     const [currentState, setCurrentState] = useState(store.getState());
@@ -235,70 +251,6 @@ function useAudioState() {
         });
     }, []);
     return currentState;
-}
-
-function findMessageByMediaUrl(src) {
-    try {
-        const clean = cleanUrl(src);
-        const currentChannel = SelectedChannelStore.getChannelId();
-        const messages = MessageStore.getMessages(currentChannel);
-
-        if (messages && messages._array) {
-            for (let i = messages._array.length - 1; i >= 0; i--) {
-                const msg = messages._array.at(i);
-                if (!msg.attachments) continue;
-
-                const attachment = msg.attachments.find(a => cleanUrl(a.url) === clean || cleanUrl(a.proxy_url) === clean);
-                if (attachment) return { msg, attachment };
-            }
-        }
-    } catch (e) { }
-    return null;
-}
-
-// pull file info strictly using vencord's react stores
-function getAudioMetadata(audioElement) {
-    let title = "Audio File";
-    let author = "";
-
-    try {
-        const src = audioElement?.src || audioElement?.currentSrc;
-        if (!src) return { title, author };
-
-        const match = findMessageByMediaUrl(src);
-        if (match) {
-            author = match.msg.author?.username || match.msg.author?.globalName || "";
-            if (match.attachment.filename) title = match.attachment.filename;
-        }
-
-        // fallback to url parsing
-        if (title === "Audio File") {
-            const parts = new URL(src).pathname.split("/");
-            const lastPart = parts.at(-1);
-            if (lastPart?.includes(".")) title = decodeURIComponent(lastPart);
-        }
-
-        // detect voice messages
-        if (src.includes("voice-message") || src.includes(".ogg") || title.toLowerCase().includes("voice-message")) {
-            title = "Voice Message";
-        }
-    } catch { }
-
-    return { title, author };
-}
-
-function isDiscordMediaAudio(src) {
-    try {
-        if (!src) return false;
-        if (src.includes("/assets/")) return false; // ignore internal discord notification sounds
-
-        // if its from discords cdn, its definitely media
-        if (src.includes("discordapp.com/attachments/") || src.includes("discordapp.net/attachments/")) return true;
-
-        // check if its bound to a message
-        if (findMessageByMediaUrl(src)) return true;
-    } catch (e) { }
-    return false;
 }
 
 // player ui
@@ -730,6 +682,7 @@ export default definePlugin({
     name: "AudioPiP",
     description: "Adds a floating Picture-in-Picture window for playing audio and voice messages.",
     authors: [Devs.OKISO],
+    settings,
 
     element: null as HTMLDivElement | null,
     root: null as Root | null,
@@ -748,13 +701,10 @@ export default definePlugin({
             console.error("Error mounting AudioPiPUI root:", e);
         }
 
-        originalPlay = HTMLAudioElement.prototype.play;
-        HTMLAudioElement.prototype.play = function () {
-            trackAndListenToAudio(this);
-            return originalPlay!.apply(this, arguments as any);
-        };
-
-        document.querySelectorAll("audio").forEach(trackAndListenToAudio);
+        if (!globalPlayListener) {
+            globalPlayListener = handleGlobalPlay.bind(this);
+            document.addEventListener("play", globalPlayListener, true);
+        }
 
         let lastChannelId = SelectedChannelStore.getChannelId();
         this.channelSelectHandler = () => {
@@ -763,9 +713,9 @@ export default definePlugin({
             lastChannelId = currentChannelId;
 
             // tabbed out to another channel so pip it
-            for (const ref of trackedBois) {
-                const el = ref.deref();
-                if (el && !el.paused && isDiscordMediaAudio(el.src || el.currentSrc)) {
+            const audios = document.querySelectorAll("audio");
+            for (const el of audios) {
+                if (el && !el.paused && isDiscordMediaAudio(el.src || el.currentSrc) && el !== pipAudioPlayer) {
                     createPipFromLocal(el);
                     break;
                 }
@@ -779,9 +729,9 @@ export default definePlugin({
             SelectedChannelStore.removeChangeListener(this.channelSelectHandler);
         }
 
-        if (originalPlay) {
-            HTMLAudioElement.prototype.play = originalPlay;
-            originalPlay = null;
+        if (globalPlayListener) {
+            document.removeEventListener("play", globalPlayListener, true);
+            globalPlayListener = null;
         }
 
         try {
@@ -799,8 +749,6 @@ export default definePlugin({
         } catch (e) {
             console.error("Error unmounting root in stop():", e);
         }
-
-        trackedBois.clear();
 
         store.setState({
             src: "",
