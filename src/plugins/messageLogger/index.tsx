@@ -390,6 +390,10 @@ export default definePlugin({
                     // fix up key (edit last message) attempting to edit a deleted message
                     match: /(?<=getLastEditableMessage\(\i\)\{.{0,200}\.find\((\i)=>)/,
                     replace: "!$1.deleted &&"
+                },
+                {
+                    match: /(?<=getLastChatCommandMessage\(\i\)\{.{0,200}\.find\((\i)=>)/,
+                    replace: "!$1.deleted &&"
                 }
             ]
         },
