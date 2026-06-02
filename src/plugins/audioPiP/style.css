@@ -46,7 +46,7 @@
 
 .vc-audio-pip-container {
     position: relative;
-    background: var(--background-secondary-alt, #1b1c1e) !important;
+    background: var(--background-floating, var(--background-secondary-alt, #1b1c1e)) !important;
     border: 1px solid var(--border-subtle, rgb(255 255 255 / 8%));
     border-radius: 8px;
     padding: 8px 12px;

@@ -7,6 +7,7 @@
 import "./style.css";
 
 import { definePluginSettings } from "@api/Settings";
+import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import type { Message } from "@vencord/discord-types";
@@ -712,32 +713,11 @@ export default definePlugin({
 
     element: null as HTMLDivElement | null,
     root: null as Root | null,
-    channelSelectHandler: null as (() => void) | null,
 
     patches: [],
 
-    start() {
-        try {
-            this.element = document.createElement("div");
-            this.element.id = "vc-audio-pip-container";
-            document.body.appendChild(this.element);
-            this.root = createRoot(this.element);
-            this.root.render(<AudioPiPUI />);
-        } catch (e) {
-            console.error("Error mounting AudioPiPUI root:", e);
-        }
-
-        if (!globalPlayListener) {
-            globalPlayListener = handleGlobalPlay.bind(this);
-            document.addEventListener("play", globalPlayListener, true);
-        }
-
-        let lastChannelId = SelectedChannelStore.getChannelId();
-        this.channelSelectHandler = () => {
-            const currentChannelId = SelectedChannelStore.getChannelId();
-            if (currentChannelId === lastChannelId) return; // ignore spurious store updates
-            lastChannelId = currentChannelId;
-
+    flux: {
+        CHANNEL_SELECT() {
             // tabbed out to another channel so pip it
             const audios = document.querySelectorAll("audio");
             for (const el of audios) {
@@ -746,15 +726,31 @@ export default definePlugin({
                     break;
                 }
             }
-        };
-        SelectedChannelStore.addChangeListener(this.channelSelectHandler);
+        }
+    },
+
+    start() {
+        try {
+            this.element = document.createElement("div");
+            this.element.id = "vc-audio-pip-container";
+            document.body.appendChild(this.element);
+            this.root = createRoot(this.element);
+            this.root.render(
+                <ErrorBoundary>
+                    <AudioPiPUI />
+                </ErrorBoundary>
+            );
+        } catch (e) {
+            console.error("Error mounting AudioPiPUI root:", e);
+        }
+
+        if (!globalPlayListener) {
+            globalPlayListener = handleGlobalPlay.bind(this);
+            document.addEventListener("play", globalPlayListener, true);
+        }
     },
 
     stop() {
-        if (this.channelSelectHandler) {
-            SelectedChannelStore.removeChangeListener(this.channelSelectHandler);
-        }
-
         if (globalPlayListener) {
             document.removeEventListener("play", globalPlayListener, true);
             globalPlayListener = null;
