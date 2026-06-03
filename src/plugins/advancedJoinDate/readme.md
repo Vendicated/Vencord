@@ -15,9 +15,3 @@ Shows the exact join date and time on user popouts, sidebars and full profiles. 
 - if a guild has no icon, shows initials instead (just like Discord does)
 - optional warning for accounts newer than a configurable threshold
 - all formatting respects the user's locale and 12h/24h preference automatically
-
-## Notes
-
-The server join date is only available when you have access to the member data for that guild. In DMs or when the member data hasn't loaded yet, only the account creation date (from the snowflake) is shown.
-
-The relative time on hover strips the "ago" suffix since it combines multiple units, so instead of "3 years ago, 47 days ago" you get a clean "3 years, 47 days, 12 hours, 50 minutes".
