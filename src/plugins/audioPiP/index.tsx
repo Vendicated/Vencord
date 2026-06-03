@@ -14,7 +14,6 @@ import type { Message } from "@vencord/discord-types";
 import { createRoot, MessageStore, React, SelectedChannelStore, useEffect, useRef, useState } from "@webpack/common";
 import type { Root } from "react-dom/client";
 
-// clean cdn urls
 function cleanUrl(url: string): string {
     try {
         if (!url) return "";
@@ -48,7 +47,6 @@ const settings = definePluginSettings({
 
 type CornerName = "top-left" | "top-right" | "bottom-left" | "bottom-right";
 
-// grab all 4 corners based on screen size
 const getCorners = (w: number, h: number) => {
     const sw = window.innerWidth, sh = window.innerHeight;
     return {
@@ -59,22 +57,14 @@ const getCorners = (w: number, h: number) => {
     };
 };
 
-const getCornerCoordinates = (c: CornerName, w: number, h: number) => {
-    const corners = getCorners(w, h);
-    if (c === "top-left") return corners["top-left"];
-    if (c === "top-right") return corners["top-right"];
-    if (c === "bottom-left") return corners["bottom-left"];
-    return corners["bottom-right"];
-};
+const getCornerCoordinates = (c: CornerName, w: number, h: number) => getCorners(w, h)[c];
 
-// figure out which corner is closest when you drop the pip
 const getClosestCornerName = (x: number, y: number, w: number, h: number): CornerName => {
     return Object.entries(getCorners(w, h)).reduce((closest, [name, coords]) => {
         const dist = Math.hypot(coords.x - x, coords.y - y);
         return dist < closest.dist ? { name: name as CornerName, dist } : closest;
     }, { name: "bottom-right" as CornerName, dist: Infinity }).name;
 };
-
 
 interface AudioState {
     src: string;
@@ -87,6 +77,15 @@ interface AudioState {
     isOpen: boolean;
 }
 
+let initialVolume = 1.0;
+try {
+    const saved = localStorage.getItem("vc-audio-pip-volume");
+    if (saved) {
+        const parsed = parseFloat(saved);
+        if (!isNaN(parsed) && parsed >= 0 && parsed <= 1) initialVolume = parsed;
+    }
+} catch { }
+
 const listeners = new Set<() => void>();
 let state: AudioState = {
     src: "",
@@ -94,7 +93,7 @@ let state: AudioState = {
     isPlaying: false,
     currentTime: 0,
     duration: 0,
-    volume: 1.0,
+    volume: initialVolume,
     author: "",
     isOpen: false
 };
@@ -103,13 +102,12 @@ const store = {
     getState() { return state; },
     setState(newState: Partial<AudioState>) {
         state = { ...state, ...newState };
-        for (const listener of listeners) {
+        if (newState.volume !== undefined) {
             try {
-                listener();
-            } catch (e) {
-                console.error("Error in store listener:", e);
-            }
+                localStorage.setItem("vc-audio-pip-volume", newState.volume.toString());
+            } catch { }
         }
+        for (const listener of listeners) listener();
     },
     subscribe(listener: () => void) {
         listeners.add(listener);
@@ -118,27 +116,24 @@ const store = {
 };
 
 const pipAudioPlayer = new Audio();
+pipAudioPlayer.volume = Math.pow(initialVolume, 3);
 let globalPlayListener: ((e: Event) => void) | null = null;
 
 const metadataCache = new WeakMap<HTMLAudioElement, { title: string; author: string }>();
 
 function findMessageByMediaUrl(src: string) {
-    try {
-        const clean = cleanUrl(src);
-        const currentChannel = SelectedChannelStore.getChannelId();
-        const messages = MessageStore.getMessages(currentChannel) as { _array: Message[] } | undefined;
-        if (messages && messages._array) {
-            for (let i = messages._array.length - 1; i >= 0; i--) {
-                const msg = messages._array.at(i);
-                if (!msg || !msg.attachments) continue;
-                const attachment = msg.attachments.find(
-                    a => cleanUrl(a.url) === clean || cleanUrl(a.proxy_url) === clean
-                );
-                if (attachment) return { msg, attachment };
-            }
+    const clean = cleanUrl(src);
+    const currentChannel = SelectedChannelStore.getChannelId();
+    const messages = MessageStore.getMessages(currentChannel) as { _array: Message[] } | undefined;
+    if (messages && messages._array) {
+        for (let i = messages._array.length - 1; i >= 0; i--) {
+            const msg = messages._array.at(i);
+            if (!msg || !msg.attachments) continue;
+            const attachment = msg.attachments.find(
+                a => cleanUrl(a.url) === clean || cleanUrl(a.proxy_url) === clean
+            );
+            if (attachment) return { msg, attachment };
         }
-    } catch (e) {
-        console.error("AudioPiP: Error finding message by media URL", e);
     }
     return null;
 }
@@ -147,28 +142,24 @@ function resolveAudioMetadata(audio: HTMLAudioElement) {
     let title = "Audio File";
     let author = "";
 
-    try {
-        const src = audio.src || audio.currentSrc;
-        if (src) {
-            const match = findMessageByMediaUrl(src);
-            if (match) {
-                author = match.msg.author?.username || match.msg.author?.globalName || "";
-                if (match.attachment.filename) {
-                    title = match.attachment.filename;
-                }
-            } else {
-                // fallback to URL parsing
-                const parts = new URL(src).pathname.split("/");
-                const lastPart = parts.at(-1);
-                if (lastPart?.includes(".")) title = decodeURIComponent(lastPart);
-            }
+    const src = audio.src || audio.currentSrc;
+    if (!src) return { title, author };
 
-            if (src.includes("voice-message") || src.includes(".ogg") || title.toLowerCase().includes("voice-message")) {
-                title = "Voice Message";
-            }
+    const match = findMessageByMediaUrl(src);
+    if (match) {
+        author = match.msg.author?.username || match.msg.author?.globalName || "";
+        if (match.attachment.filename) {
+            title = match.attachment.filename;
         }
-    } catch (e) {
-        console.error("AudioPiP: Error resolving audio metadata", e);
+    } else {
+        try {
+            const lastPart = new URL(src).pathname.split("/").at(-1);
+            if (lastPart?.includes(".")) title = decodeURIComponent(lastPart);
+        } catch { }
+    }
+
+    if (src.includes("voice-message") || src.includes(".ogg") || title.toLowerCase().includes("voice-message")) {
+        title = "Voice Message";
     }
 
     return { title, author };
@@ -181,7 +172,6 @@ function isDiscordMediaAudio(src: string) {
     return urlStr.includes("/attachments/") || urlStr.includes("/ephemeral-attachments/");
 }
 
-// hijack playing audio and spawn pip
 function createPipFromLocal(local: HTMLAudioElement) {
     if (store.getState().isOpen) return;
 
@@ -201,13 +191,12 @@ function createPipFromLocal(local: HTMLAudioElement) {
         author = resolved.author;
     }
 
-    // hand off playback to our global player
     pipAudioPlayer.src = src;
     pipAudioPlayer.currentTime = local.currentTime;
-    pipAudioPlayer.volume = local.volume || 1.0;
+    pipAudioPlayer.volume = Math.pow(store.getState().volume, 3);
 
-    local.pause(); // hush the original
-    pipAudioPlayer.play().catch(() => { }); // let it rip
+    local.pause();
+    pipAudioPlayer.play().catch(() => { });
 
     store.setState({
         src,
@@ -215,10 +204,11 @@ function createPipFromLocal(local: HTMLAudioElement) {
         author,
         currentTime: pipAudioPlayer.currentTime,
         isPlaying: true,
-        isOpen: true,
-        volume: Math.pow(pipAudioPlayer.volume, 1 / 3)
+        isOpen: true
     });
 }
+
+const attachedAudioElements = new WeakSet<HTMLAudioElement>();
 
 function handleGlobalPlay(e: Event) {
     const target = e.target as HTMLAudioElement;
@@ -228,33 +218,32 @@ function handleGlobalPlay(e: Event) {
     const src = target.src || target.currentSrc;
     if (!src || !isDiscordMediaAudio(src)) return;
 
-    // Resolve and cache metadata immediately while in channel context
-    try {
-        const resolved = resolveAudioMetadata(target);
-        metadataCache.set(target, resolved);
-    } catch (e) { }
+    target.volume = Math.pow(store.getState().volume, 3);
 
-    // close the pip if it's currently open since user is playing audio in chat
+    if (!attachedAudioElements.has(target)) {
+        attachedAudioElements.add(target);
+        target.addEventListener("volumechange", () => {
+            const sliderVal = Math.pow(target.volume, 1 / 3);
+            if (Math.abs(store.getState().volume - sliderVal) > 0.01) {
+                store.setState({ volume: sliderVal });
+            }
+        });
+    }
+
+    const resolved = resolveAudioMetadata(target);
+    metadataCache.set(target, resolved);
+
     if (store.getState().isOpen) {
         try {
             pipAudioPlayer.pause();
             pipAudioPlayer.src = "";
             store.setState({ isOpen: false, isPlaying: false, src: "", title: "", author: "" });
-        } catch (e) { }
+        } catch { }
     }
 
     if (settings.store.alwaysShow) {
         createPipFromLocal(target);
     }
-}
-
-// blast the volume to all discord volume keys so it saves properly
-function persistVolume(volume: number) {
-    try {
-        const strVol = String(volume);
-        ["mediaVolume", "media-player-volume", "video-volume", "audio-volume", "MediaPlayerVolume", "mediaPlayerVolume", "media-volume"]
-            .forEach(key => window.localStorage.setItem(key, strVol));
-    } catch (e) { }
 }
 
 pipAudioPlayer.addEventListener("play", () => store.setState({ isPlaying: true }));
@@ -279,7 +268,7 @@ function useAudioState() {
     return currentState;
 }
 
-// player ui
+
 const AudioPiPUI = () => {
     const { src, title, isPlaying, currentTime, duration, author, isOpen, volume } = useAudioState();
     const baseWidth = 280;
@@ -337,13 +326,12 @@ const AudioPiPUI = () => {
         return () => window.removeEventListener("resize", handleResize);
     }, []);
 
-    const [prevVolume, setPrevVolume] = useState(1.0);
+    const [prevVolume, setPrevVolume] = useState(() => store.getState().volume);
 
 
     if (!isOpen || !src) return null;
 
     const handleMouseDown = (e: React.MouseEvent) => {
-        // ignore interactive parts
         if ((e.target as HTMLElement).closest("button, svg, path, input, .vc-audio-pip-resizer")) return;
 
         const startCoords = getCornerCoordinates(corner, scaledWidth, scaledHeight);
@@ -393,7 +381,7 @@ const AudioPiPUI = () => {
 
             const paddingX = 16;
             const paddingTop = 72;
-            const paddingBottom = 48;
+            const paddingBottom = 16;
             const maxX = window.innerWidth - scaledWidth - paddingX;
             const maxY = window.innerHeight - scaledHeight - paddingBottom;
 
@@ -432,7 +420,7 @@ const AudioPiPUI = () => {
     };
 
     const handleResizeMouseDown = (e: React.MouseEvent) => {
-        e.stopPropagation(); // prevent drag handler from triggering
+        e.stopPropagation();
 
         resizeRef.current = {
             isResizing: true,
@@ -448,7 +436,7 @@ const AudioPiPUI = () => {
             const dy = moveEvent.clientY - resizeRef.current.startY;
 
             let delta = 0;
-            // scale based on drag direction
+
             if (corner === "bottom-right") delta = (-dx - dy) / 2;
             else if (corner === "top-left") delta = (dx + dy) / 2;
             else if (corner === "top-right") delta = (-dx + dy) / 2;
@@ -502,67 +490,44 @@ const AudioPiPUI = () => {
     };
 
     const handlePlayPause = () => {
-        try {
-            const state = store.getState();
-            if (state.isPlaying) {
-                pipAudioPlayer.pause();
-                store.setState({ isPlaying: false });
-            } else {
-                if (pipAudioPlayer.currentTime >= (pipAudioPlayer.duration || 1) - 0.2) {
-                    pipAudioPlayer.currentTime = 0;
-                    store.setState({ currentTime: 0 });
-                }
-                pipAudioPlayer.play().catch(() => { });
-                store.setState({ isPlaying: true });
+        if (store.getState().isPlaying) {
+            pipAudioPlayer.pause();
+            store.setState({ isPlaying: false });
+        } else {
+            if (pipAudioPlayer.currentTime >= (pipAudioPlayer.duration || 1) - 0.2) {
+                pipAudioPlayer.currentTime = 0;
+                store.setState({ currentTime: 0 });
             }
-        } catch (e) {
-            console.error("Error handling play/pause:", e);
+            pipAudioPlayer.play().catch(() => { });
+            store.setState({ isPlaying: true });
         }
     };
 
     const handleClose = () => {
-        try {
-            pipAudioPlayer.pause();
-            pipAudioPlayer.src = "";
-            store.setState({ isOpen: false, isPlaying: false, src: "", title: "", author: "" });
-        } catch (e) {
-            console.error("Error handling close:", e);
-        }
+        pipAudioPlayer.pause();
+        pipAudioPlayer.src = "";
+        store.setState({ isOpen: false, isPlaying: false, src: "", title: "", author: "" });
     };
 
     const handleSeek = (e: React.ChangeEvent<HTMLInputElement>) => {
         const val = parseFloat(e.target.value);
         if (isNaN(val)) return;
-        try {
-            pipAudioPlayer.currentTime = val;
-            store.setState({ currentTime: val });
-        } catch (err) {
-            console.error("Error seeking audio:", err);
-        }
+        pipAudioPlayer.currentTime = val;
+        store.setState({ currentTime: val });
     };
 
     const handleVolumeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const val = parseFloat(e.target.value);
         if (isNaN(val)) return;
-        try {
-            pipAudioPlayer.volume = Math.pow(val, 3);
-            persistVolume(val);
-            store.setState({ volume: val });
-        } catch (err) {
-            console.error("Error changing volume:", err);
-        }
+        pipAudioPlayer.volume = Math.pow(val, 3);
+        store.setState({ volume: val });
     };
 
     const handleMuteToggle = () => {
-        try {
-            const newVol = volume > 0 ? 0 : (prevVolume > 0 ? prevVolume : 1.0);
-            if (volume > 0) setPrevVolume(volume);
-            pipAudioPlayer.volume = Math.pow(newVol, 3);
-            persistVolume(newVol);
-            store.setState({ volume: newVol });
-        } catch (err) {
-            console.error("Error toggling mute:", err);
-        }
+        const newVol = volume > 0 ? 0 : (prevVolume > 0 ? prevVolume : 1.0);
+        if (volume > 0) setPrevVolume(volume);
+        pipAudioPlayer.volume = Math.pow(newVol, 3);
+        store.setState({ volume: newVol });
     };
 
     const formatTime = (time: number) => {
@@ -580,7 +545,6 @@ const AudioPiPUI = () => {
 
     const classList = [
         "vc-audio-pip-window",
-        "vc-style-desktop",
         isDragging ? "vc-dragging" : "",
         isSnapping ? "vc-snapping" : ""
     ].filter(Boolean).join(" ");
@@ -703,7 +667,6 @@ const AudioPiPUI = () => {
     );
 };
 
-// register plugin
 export default definePlugin({
     name: "AudioPiP",
     description: "Adds a floating Picture-in-Picture window for playing audio and voice messages.",
@@ -714,11 +677,8 @@ export default definePlugin({
     element: null as HTMLDivElement | null,
     root: null as Root | null,
 
-    patches: [],
-
     flux: {
         CHANNEL_SELECT() {
-            // tabbed out to another channel so pip it
             const audios = document.querySelectorAll("audio");
             for (const el of audios) {
                 if (el && !el.paused && isDiscordMediaAudio(el.src || el.currentSrc) && el !== pipAudioPlayer) {
@@ -730,19 +690,15 @@ export default definePlugin({
     },
 
     start() {
-        try {
-            this.element = document.createElement("div");
-            this.element.id = "vc-audio-pip-container";
-            document.body.appendChild(this.element);
-            this.root = createRoot(this.element);
-            this.root.render(
-                <ErrorBoundary>
-                    <AudioPiPUI />
-                </ErrorBoundary>
-            );
-        } catch (e) {
-            console.error("Error mounting AudioPiPUI root:", e);
-        }
+        this.element = document.createElement("div");
+        this.element.id = "vc-audio-pip-container";
+        document.body.appendChild(this.element);
+        this.root = createRoot(this.element);
+        this.root.render(
+            <ErrorBoundary>
+                <AudioPiPUI />
+            </ErrorBoundary>
+        );
 
         if (!globalPlayListener) {
             globalPlayListener = handleGlobalPlay.bind(this);
@@ -761,16 +717,8 @@ export default definePlugin({
             pipAudioPlayer.src = "";
         } catch { }
 
-        try {
-            if (this.root) {
-                this.root.unmount();
-            }
-            if (this.element) {
-                this.element.remove();
-            }
-        } catch (e) {
-            console.error("Error unmounting root in stop():", e);
-        }
+        if (this.root) this.root.unmount();
+        if (this.element) this.element.remove();
 
         store.setState({
             src: "",
@@ -778,7 +726,6 @@ export default definePlugin({
             isPlaying: false,
             currentTime: 0,
             duration: 0,
-            volume: 1.0,
             author: "",
             isOpen: false
         });
