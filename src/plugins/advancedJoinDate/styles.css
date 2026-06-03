@@ -1,0 +1,69 @@
+/* sidebar profile */
+
+[class*="overlay_b32ca4"] > [class*="section_bf424d"]:has(
+    > div[data-text-variant]:not([class*="vc-"])
+) {
+    display: none;
+}
+ 
+[class*="overlay_b32ca4"] > [class*="section_bf424d"]:has(
+    > div[class*="vc-"]
+) {
+    order: 2;
+}
+
+[class*="overlay_b32ca4"] > .vc-more-user-info-join-date {
+    order: 1;
+}
+ 
+/* full profile */
+
+[class*="profileBody"] > [class*="section_be87fd"]:not([class*="vc-"]):has(
+    > div[data-text-variant]:not([class*="vc-"])
+) {
+    display: none;
+}
+ 
+[class*="profileBody"] > [class*="vc-friendsSince"] {
+    order: 2;
+}
+ 
+[class*="profileBody"] > .vc-more-user-info-join-date {
+    order: 1;
+}
+
+/* your own profile idk */
+
+.vc-more-user-info-account-popup {
+    display: none;
+}
+ 
+
+[class*="body_ce8328"] .vc-more-user-info-account-popup {
+    display: block;
+    order: 2;
+}
+ 
+[class*="body_ce8328"] [class*="menus_ce8328"] {
+    order: 3;
+}
+
+/* full profile but from server side egruioogreiojgre */
+
+[class*="profileBody"] > [class*="section_be87fd"]:not([class*="vc-"]):has(
+    > div[data-text-variant]:not([class*="vc-"])
+),
+[class*="profileBody"] > [class*="section_be87fd"]:not([class*="vc-"]):has(
+    > [class*="memberSinceWrapper"]
+) {
+    display: none;
+}
+
+[class*="profileBody"] > [class*="vc-friendsSince"] {
+    order: 2;
+}
+ 
+[class*="profileBody"] > .vc-more-user-info-join-date {
+    order: 0;
+}
+
