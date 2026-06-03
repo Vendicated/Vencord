@@ -20,4 +20,4 @@ Shows the exact join date and time on user popouts, sidebars and full profiles. 
 
 The server join date is only available when you have access to the member data for that guild. In DMs or when the member data hasn't loaded yet, only the account creation date (from the snowflake) is shown.
 
-The relative time on hover strips the "ago" suffix since it combines multiple units — so instead of "3 years ago, 47 days ago" you get a clean "3 years, 47 days, 12 hours, 50 minutes".
+The relative time on hover strips the "ago" suffix since it combines multiple units, so instead of "3 years ago, 47 days ago" you get a clean "3 years, 47 days, 12 hours, 50 minutes".
