@@ -65,45 +65,8 @@ const settings = definePluginSettings({
     }
 });
 
-// translations (all discord languages)
 function getUserLocale(): string {
     try { return locale.getLocale(); } catch { return "en-GB"; }
-}
-
-const TRANSLATIONS: Record<string, { accountCreated: string; memberSince: string }> = {
-    en: { accountCreated: "Account Created", memberSince: "Member Since" },
-    pl: { accountCreated: "Konto utworzone", memberSince: "Członek od" },
-    de: { accountCreated: "Konto erstellt", memberSince: "Mitglied seit" },
-    da: { accountCreated: "Konto oprettet", memberSince: "Medlem siden" },
-    es: { accountCreated: "Cuenta creada", memberSince: "Miembro desde" },
-    fr: { accountCreated: "Compte créé", memberSince: "Membre depuis" },
-    hr: { accountCreated: "Račun kreiran", memberSince: "Član od" },
-    it: { accountCreated: "Account creato", memberSince: "Membro dal" },
-    lt: { accountCreated: "Paskyra sukurta", memberSince: "Narys nuo" },
-    hu: { accountCreated: "Fiók létrehozva", memberSince: "Tag ekkortól" },
-    nl: { accountCreated: "Account aangemaakt", memberSince: "Lid sinds" },
-    no: { accountCreated: "Konto opprettet", memberSince: "Medlem siden" },
-    pt: { accountCreated: "Conta criada", memberSince: "Membro desde" },
-    ro: { accountCreated: "Cont creat", memberSince: "Membru din" },
-    fi: { accountCreated: "Tili luotu", memberSince: "Jäsen alkaen" },
-    sv: { accountCreated: "Konto skapat", memberSince: "Medlem sedan" },
-    vi: { accountCreated: "Đã tạo tài khoản", memberSince: "Thành viên từ" },
-    tr: { accountCreated: "Hesap oluşturuldu", memberSince: "Şu tarihten beri üye" },
-    cs: { accountCreated: "Účet vytvořen", memberSince: "Člen od" },
-    el: { accountCreated: "Λογαριασμός δημιουργήθηκε", memberSince: "Μέλος από" },
-    bg: { accountCreated: "Акаунтът е създаден", memberSince: "Член от" },
-    ru: { accountCreated: "Аккаунт создан", memberSince: "Участник с" },
-    uk: { accountCreated: "Обліковий запис створено", memberSince: "Учасник з" },
-    hi: { accountCreated: "खाता बनाया गया", memberSince: "तब से सदस्य" },
-    th: { accountCreated: "สร้างบัญชีเมื่อ", memberSince: "เป็นสมาชิกตั้งแต่" },
-    zh: { accountCreated: "账号创建于", memberSince: "成员自" },
-    ja: { accountCreated: "アカウント作成日", memberSince: "登録日" },
-    ko: { accountCreated: "계정 생성일", memberSince: "가입일" }
-};
-
-function getTranslation(key: "accountCreated" | "memberSince"): string {
-    const lang = getUserLocale().split("-")[0];
-    return (TRANSLATIONS[lang] || TRANSLATIONS.en)[key];
 }
 
 function formatDate(date: Date): string {
@@ -158,7 +121,7 @@ function formatRelative(date: Date): string {
     const remHours = hours - days * 24;
     const remMinutes = minutes - hours * 60;
 
-    // strips "ago" and equivalents from the end since we're combining multiple units
+    // strips "ago" and equivalents from the end since we're combining multiple units (very important)
     function fmt(value: number, unit: Intl.RelativeTimeFormatUnit): string {
         const parts = rtf.formatToParts(-value, unit);
         return parts.map(p => {
@@ -307,7 +270,7 @@ const PopupJoinDate = ErrorBoundary.wrap(({ user, guildId }: PopupJoinDateProps)
         return (
             <div style={{ padding: "0 16px 16px" }}>
                 <Section
-                    heading={getTranslation("accountCreated")}
+                    heading="Account Created"
                     headingVariant="text-xs/medium"
                     headingColor="text-default"
                 >
@@ -322,7 +285,7 @@ const PopupJoinDate = ErrorBoundary.wrap(({ user, guildId }: PopupJoinDateProps)
     return (
         <div style={{ padding: "0 16px 16px" }}>
             <Section
-                heading={getTranslation("memberSince")}
+                heading="Member Since"
                 headingVariant="text-xs/medium"
                 headingColor="text-default"
             >
@@ -369,7 +332,7 @@ const SidebarJoinDate = ErrorBoundary.wrap(({ userId, guildId, isSidebar }: Side
         return (
             <div className="vc-more-user-info-join-date">
                 <Section
-                    heading={getTranslation("accountCreated")}
+                    heading="Account Created"
                     headingVariant={isSidebar ? "text-xs/semibold" : "text-xs/medium"}
                     headingColor={isSidebar ? "text-strong" : "text-default"}
                 >
@@ -384,7 +347,7 @@ const SidebarJoinDate = ErrorBoundary.wrap(({ userId, guildId, isSidebar }: Side
     return (
         <div className="vc-more-user-info-join-date">
             <Section
-                heading={getTranslation("memberSince")}
+                heading="Member Since"
                 headingVariant={isSidebar ? "text-xs/semibold" : "text-xs/medium"}
                 headingColor={isSidebar ? "text-strong" : "text-default"}
             >
