@@ -19,10 +19,12 @@
 import { classNameFactory } from "@utils/css";
 import { Guild, GuildMember, Role } from "@vencord/discord-types";
 import { PermissionOverwriteType } from "@vencord/discord-types/enums";
-import { findByPropsLazy } from "@webpack";
+import { extractAndLoadChunksLazy, findByPropsLazy } from "@webpack";
 import { GuildRoleStore } from "@webpack/common";
 
 import { PermissionsSortOrder, settings } from ".";
+
+export const loadGetGuildPermissionSpecMap = extractAndLoadChunksLazy([".PRIMARY,badgeTooltipDelay:"]);
 export const { getGuildPermissionSpecMap } = findByPropsLazy("getGuildPermissionSpecMap");
 
 export const cl = classNameFactory("vc-permviewer-");
