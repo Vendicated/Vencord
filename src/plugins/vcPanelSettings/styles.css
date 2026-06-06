@@ -1,0 +1,7 @@
+.vc-panelsettings-button {
+    color: var(--header-secondary);
+
+    &:hover {
+        text-decoration: underline;
+    }
+}
