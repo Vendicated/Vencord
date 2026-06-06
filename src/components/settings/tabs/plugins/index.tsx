@@ -52,12 +52,12 @@ function ReloadRequiredCard({ required }: { required: boolean; }) {
             {required
                 ? (
                     <>
-                        <HeadingTertiary>Restart required!</HeadingTertiary>
+                        <HeadingTertiary>Reload required</HeadingTertiary>
                         <Paragraph className={cl("dep-text")}>
-                            Restart now to apply new plugins and their settings
+                            Reload Discord to apply this plugin. This refreshes the app window — you do not need to quit Discord entirely.
                         </Paragraph>
                         <Button onClick={() => location.reload()} className={cl("restart-button")}>
-                            Restart
+                            Reload Discord
                         </Button>
                     </>
                 )

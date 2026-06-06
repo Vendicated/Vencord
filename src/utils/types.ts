@@ -215,6 +215,8 @@ export interface PluginDef {
     onBeforeMessageEdit?: MessageEditListener;
 
     renderMessageAccessory?: MessageAccessoryFactory;
+    /** Index passed to MessageAccessories.addMessageAccessory (e.g. 4 = just above embeds). */
+    messageAccessoryPosition?: number;
     renderMessageDecoration?: MessageDecorationFactory;
 
     renderMemberListDecorator?: MemberListDecoratorFactory;

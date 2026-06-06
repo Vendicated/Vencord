@@ -112,7 +112,13 @@ function isReporterTestable(p: Plugin, part: ReporterTestable) {
         : (p.reporterTestable & part) === part;
 }
 
+/** API plugins only install webpack hooks; consumers register at runtime. */
+function isApiPlugin(p: Plugin) {
+    return p.name.endsWith("API");
+}
+
 export function pluginRequiresRestart(p: Plugin) {
+    if (isApiPlugin(p)) return false;
     return p.requiresRestart !== false && (p.requiresRestart || !!p.patches?.length);
 }
 
@@ -257,7 +263,7 @@ export const startPlugin = traceFunction("startPlugin", function startPlugin(p: 
     if (chatBarButton) addChatBarButton(name, chatBarButton.render, chatBarButton.icon);
     if (renderMemberListDecorator) addMemberListDecorator(name, renderMemberListDecorator);
     if (renderMessageDecoration) addMessageDecoration(name, renderMessageDecoration);
-    if (renderMessageAccessory) addMessageAccessory(name, renderMessageAccessory);
+    if (renderMessageAccessory) addMessageAccessory(name, renderMessageAccessory, p.messageAccessoryPosition);
     if (messagePopoverButton) addMessagePopoverButton(name, messagePopoverButton.render, messagePopoverButton.icon);
 
     return true;
@@ -387,7 +393,7 @@ export const initPluginManager = onlyOnce(function init() {
             }
         }
 
-        if (p.patches && isPluginEnabled(p.name)) {
+        if (p.patches && (isPluginEnabled(p.name) || isApiPlugin(p))) {
             if (!IS_REPORTER || isReporterTestable(p, ReporterTestable.Patches)) {
                 for (const patch of p.patches) {
                     addPatch(patch, p.name);
