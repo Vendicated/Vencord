@@ -79,14 +79,21 @@ export default definePlugin({
     startTime: 0,
     interval: void 0 as NodeJS.Timeout | undefined,
 
-    patches: [{
-        find: "renderConnectionStatus(){",
-        replacement: {
-            // in renderConnectionStatus()
-            match: /(renderConnectionStatus\(\).{0,1000}?lineClamp:1,children:)(\i)(?=,|}\))/,
-            replace: "$1[$2,$self.renderTimer({ channelId: this?.props?.channel?.id })]"
-        }
-    }],
+    patches: [
+        {
+            find: "renderConnectionStatus(){",
+            replacement: [
+                {
+                    match: /(renderConnectionStatus\(\).{0,1000}?lineClamp:1,children:)(\i)(?=,|}\))/,
+                    replace: "$1[$2,$self.renderTimer({ channelId: this?.props?.channel?.id })]"
+                },
+                {
+                    match: /("RTCConnectionMenu".{0,200}?lineClamp:1,children:)(\i)(?=,|}\))/,
+                    replace: "$1[$2,$self.renderTimer({ channelId: this?.props?.channel?.id })]"
+                }
+            ]
+        },
+    ],
 
     renderTimer: ErrorBoundary.wrap(({ channelId }: { channelId: string; }) => {
         const time = useTimer({ deps: [channelId] });
