@@ -46,7 +46,7 @@ import SettingsPlugin from "./settings";
 const CodeBlockRe = /```js\n(.+?)```/s;
 
 const AdditionalAllowedChannelIds = [
-    "1024286218801926184", // Vencord > #bot-spam
+    "1024286218801926184", // Vencord > #bot-commands
 ];
 
 const TrustedRolesIds = [
@@ -317,7 +317,7 @@ export default definePlugin({
             }
         }
 
-        if (props.message.author.id === VENBOT_USER_ID) {
+        if (props.message.author.id === VENBOT_USER_ID && (props.channel.parent_id === KNOWN_ISSUES_CHANNEL_ID || props.channel.parent_id === SUPPORT_CATEGORY_ID)) {
             const match = CodeBlockRe.exec(props.message.content || props.message.embeds[0]?.rawDescription || "");
             if (match) {
                 buttons.push(
