@@ -1,0 +1,103 @@
+.vc-retime-modal-content {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding: 8px 0;
+}
+
+.vc-retime-input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.vc-retime-input-group label {
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    color: var(--text-muted);
+}
+
+.vc-retime-input {
+    background: var(--background-secondary);
+    border: 1px solid var(--border-medium);
+    border-radius: 8px;
+    color: var(--text-normal);
+    padding: 10px;
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.vc-retime-input:focus {
+    border-color: var(--brand-experiment);
+    box-shadow: 0 0 0 2px rgba(114, 137, 218, 0.2);
+}
+
+.vc-retime-select-container {
+    background: var(--background-secondary);
+    border-radius: 8px;
+    padding: 4px;
+}
+
+.vc-retime-preview-card {
+    background: var(--background-secondary-alt);
+    border: 1px dashed var(--brand-experiment);
+    border-radius: 8px;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    transition: border-color 0.2s;
+}
+
+.vc-retime-preview-title {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: var(--brand-experiment);
+    letter-spacing: 0.5px;
+}
+
+.vc-retime-preview-value {
+    font-size: 16px;
+    font-weight: 500;
+    color: var(--text-normal);
+}
+
+.vc-retime-preview-code {
+    font-family: var(--font-code);
+    font-size: 12px;
+    color: var(--text-muted);
+    background: rgba(0, 0, 0, 0.1);
+    padding: 2px 6px;
+    border-radius: 4px;
+}
+
+.vc-retime-checkbox-container {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    color: var(--text-normal);
+    margin-top: 8px;
+}
+
+.vc-retime-checkbox {
+    cursor: pointer;
+    width: 18px;
+    height: 18px;
+    accent-color: var(--brand-experiment);
+}
+
+.vc-retime-switch-container {
+    background: var(--background-secondary);
+    border-radius: 8px;
+    padding: 8px 12px;
+    margin-top: 4px;
+    border: 1px solid var(--border-medium);
+}
