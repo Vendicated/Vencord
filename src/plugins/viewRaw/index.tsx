@@ -27,7 +27,8 @@ import { isTruthy } from "@utils/guards";
 import { Margins } from "@utils/margins";
 import definePlugin, { IconComponent, OptionType } from "@utils/types";
 import { Message } from "@vencord/discord-types";
-import { ChannelStore, Forms, GuildRoleStore, Menu, Modal,openModal } from "@webpack/common";
+import { ChannelStore, Forms, GuildRoleStore, Menu, Modal, openModal, UserProfileStore } from "@webpack/common";
+import { MouseEventHandler } from "react";
 
 
 const CopyIcon: IconComponent = ({ height = 20, width = 20, className }) => {
@@ -127,9 +128,9 @@ const settings = definePluginSettings({
     }
 });
 
-function MakeContextCallback(name: "Guild" | "Role" | "User" | "Channel" | "Message"): NavContextMenuPatchCallback {
+function MakeContextCallback(name: "Guild" | "Role" | "User" | "Channel" | "Message" | "Profile", getData?: (props: any) => any): NavContextMenuPatchCallback {
     return (children, props) => {
-        const value = props[name.toLowerCase()];
+        const value = getData ? getData(props) : props[name.toLowerCase()];
         if (!value) return;
         if (props.label === getIntlMessage("CHANNEL_ACTIONS_MENU_LABEL")) return; // random shit like notification settings
         const isMessage = name === "Message";
@@ -188,6 +189,7 @@ export default definePlugin({
         "user-context": MakeContextCallback("User"),
         "dev-context": devContextCallback,
         "message": MakeContextCallback("Message"),
+        "user-profile-overflow-menu": MakeContextCallback("Profile", props => UserProfileStore.getGuildMemberProfile(props.user?.id, props.guildId) ?? UserProfileStore.getUserProfile(props.user?.id))
     },
 
     messagePopoverButton: {
@@ -201,7 +203,7 @@ export default definePlugin({
                 }
             };
 
-            const handleContextMenu = e => {
+            const handleContextMenu: MouseEventHandler<HTMLButtonElement> = e => {
                 if (settings.store.clickMethod === "Left") {
                     e.preventDefault();
                     e.stopPropagation();
