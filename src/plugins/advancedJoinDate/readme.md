@@ -1,17 +1,37 @@
 # AdvancedJoinDate
 
-Shows the exact join date and time on user popouts, sidebars and full profiles. Way more useful than what Discord shows by default.
+> Discord's Member Since is basically useless. This fixes that.
 
-## Screenshots
+Displays exact join dates and times across user popups, DM sidebar, and full profile modals with server icon, account creation date, hover-to-relative, and more.
 
-![Server popup](screenshots/popup.png)
+![popup preview](screenshots/popup.png)
 
-## Features
+---
 
-- shows the exact date and time a user joined a server, with the server icon next to it
-- shows account creation date calculated from the Discord snowflake ID
-- hover over any date to see how long ago it was (e.g. "3 years, 47 days, 12 hours, 50 minutes")
-- works in user popups, DM sidebar, and full profile modals
-- if a guild has no icon, shows initials instead (just like Discord does)
-- optional warning for accounts newer than a configurable threshold
-- all formatting respects the user's locale and 12h/24h preference automatically
+## what it does
+
+- **server join date** — shown with the server's icon (or initials if there's no icon)
+- **account creation date** — calculated from the snowflake ID, no API needed
+- **hover to see relative time** — e.g. `3 years, 47 days, 12 hours`
+- **right-click to copy** — formatted date, relative time, or unix timestamp
+- **new account warning** — optional flag for accounts younger than X days
+- works in popups, DM sidebar, full profiles, and the overflow menu
+
+---
+
+## settings
+
+| option | description |
+|---|---|
+| Date style | `15 Jan` / `15 January` / locale numeric / ISO 8601 |
+| Time | toggle on/off, seconds, milliseconds, timezone |
+| Hour cycle | locale default, 12h, or 24h |
+| Hover relative | show relative time on hover |
+| New account threshold | warn if account is younger than N days |
+| Show/hide per location | popups, sidebar, full profile independently |
+
+---
+
+## authors
+
+[ZanuZoss](https://github.com/ZanuZoss)
