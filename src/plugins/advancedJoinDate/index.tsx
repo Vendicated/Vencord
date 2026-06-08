@@ -6,13 +6,15 @@
 
 import "./styles.css";
 
+import { addContextMenuPatch, NavContextMenuPatchCallback, removeContextMenuPatch } from "@api/ContextMenu";
 import { definePluginSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
+import { copyToClipboard } from "@utils/clipboard";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { User } from "@vencord/discord-types";
 import { findByPropsLazy, findComponentByCodeLazy } from "@webpack";
-import { GuildMemberStore, GuildStore, React, SelectedGuildStore, Text } from "@webpack/common";
+import { GuildMemberStore, GuildStore, Menu, React, SelectedGuildStore, Text } from "@webpack/common";
 
 const Section = findComponentByCodeLazy("headingVariant:", '"section"', "headingIcon:");
 const locale = findByPropsLazy("getLocale");
@@ -369,6 +371,82 @@ const SidebarJoinDate = ErrorBoundary.wrap(({ userId, guildId, isSidebar }: Side
     );
 }, { noop: true });
 
+// context menu patch, adds copy date options next to copy user id
+interface UserContextProps {
+    user: User;
+    guildId?: string;
+}
+
+const userContextMenuPatch: NavContextMenuPatchCallback = (children, { user, guildId }: UserContextProps) => {
+    if (!user) return;
+
+    const resolvedGuildId = guildId ?? SelectedGuildStore.getGuildId() ?? null;
+    const accountDate = getAccountDate(user.id);
+
+    let serverDate: Date | null = null;
+    if (resolvedGuildId) {
+        const member = GuildMemberStore.getMember(resolvedGuildId, user.id);
+        if (member?.joinedAt) serverDate = new Date(member.joinedAt);
+    }
+
+    if (!accountDate && !serverDate) return;
+
+    const items: React.ReactElement[] = [];
+
+    // server join date submenu
+    if (serverDate) {
+        items.push(
+            <Menu.MenuItem id="vc-ajd-server" label="Copy Server Join Date">
+                <Menu.MenuItem
+                    id="vc-ajd-server-date"
+                    label="Formatted"
+                    action={() => copyToClipboard(formatDate(serverDate!))}
+                />
+                <Menu.MenuItem
+                    id="vc-ajd-server-relative"
+                    label="Relative"
+                    action={() => copyToClipboard(formatRelative(serverDate!))}
+                />
+                <Menu.MenuItem
+                    id="vc-ajd-server-unix"
+                    label="Unix Timestamp"
+                    action={() => copyToClipboard(String(Math.floor(serverDate!.getTime() / 1000)))}
+                />
+            </Menu.MenuItem>
+        );
+    }
+
+    // account created submenu
+    if (accountDate) {
+        items.push(
+            <Menu.MenuItem id="vc-ajd-account" label="Copy Account Created">
+                <Menu.MenuItem
+                    id="vc-ajd-account-date"
+                    label="Formatted"
+                    action={() => copyToClipboard(formatDate(accountDate))}
+                />
+                <Menu.MenuItem
+                    id="vc-ajd-account-relative"
+                    label="Relative"
+                    action={() => copyToClipboard(formatRelative(accountDate))}
+                />
+                <Menu.MenuItem
+                    id="vc-ajd-account-unix"
+                    label="Unix Timestamp"
+                    action={() => copyToClipboard(String(Math.floor(accountDate.getTime() / 1000)))}
+                />
+            </Menu.MenuItem>
+        );
+    }
+
+    children.push(
+        <Menu.MenuSeparator />,
+        <Menu.MenuGroup>
+            {...items}
+        </Menu.MenuGroup>
+    );
+};
+
 export default definePlugin({
     name: "AdvancedJoinDate",
     description: "Shows the exact join date and time on user popouts and profiles, with relative time on hover",
@@ -410,6 +488,12 @@ export default definePlugin({
             }
         }
     ],
+
+    contextMenus: {
+        "user-context": userContextMenuPatch,
+        "user-profile-actions": userContextMenuPatch,
+        "user-profile-overflow-menu": userContextMenuPatch
+    },
 
     renderPopupJoinDate(user: User, guildId: string | null) {
         if (!settings.store.showInPopup || !user?.id) return null;
