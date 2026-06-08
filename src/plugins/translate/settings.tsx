@@ -95,7 +95,7 @@ export const settings = definePluginSettings({
         hidden() { return this.store.service !== "kagi"; }
     }
 }).withPrivateSettings<{
-    showAutoTranslateAlert: boolean;
+    dismissedAutoTranslateAlert?: boolean;
 }>();
 
 export function resetLanguageDefaults() {
