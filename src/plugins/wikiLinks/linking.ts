@@ -20,6 +20,7 @@
 // https://github.com/stjohann/DiscordWikiBot/blob/master/DiscordWikiBot/Linking.cs
 
 import { Logger } from "@utils/Logger";
+
 import { getExistingTitles, getReadySiteInfo, getSiteInfo, type MagicWord, type NamespaceInfo, normalizeKey, type SiteInfo } from "./siteinfo";
 
 const logger = new Logger("WikiLinks");
