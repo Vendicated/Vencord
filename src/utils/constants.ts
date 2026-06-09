@@ -51,6 +51,10 @@ export const Devs = /* #__PURE__*/ Object.freeze({
         name: "V",
         id: 343383572805058560n
     },
+    hxe3: {
+        name: "hxe3",
+        id: 1383056240174960700n
+    },
     Apexo: {
         name: "Apexo",
         id: 228548952687902720n
