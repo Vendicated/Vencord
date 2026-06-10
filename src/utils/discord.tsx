@@ -90,7 +90,7 @@ export function getCurrentGuild(): Guild | undefined {
     return GuildStore.getGuild(getCurrentChannel()?.guild_id!);
 }
 
-export function openPrivateChannel(options: { recipientIds: string[]; navigateToChannel?: boolean; }) {
+export function openPrivateChannel(options: { recipientIds: string[]; joinCall?: boolean; joinCallVideo?: boolean; location?: string; onBeforeTransition?: () => void; navigateToChannel?: boolean; }) {
     ChannelActionCreators.openPrivateChannel(options);
 }
 
