@@ -79,8 +79,8 @@ export default definePlugin({
     name: "MoreAccounts",
     description: "removes the 5 account cap on the switcher",
     authors: [Devs.hxe3],
+    tags: ["Customisation"],
     settings,
-
 
     get max() {
         const n = Math.floor(Number(settings.store.maxAccounts));
