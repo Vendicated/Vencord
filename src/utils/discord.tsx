@@ -90,8 +90,8 @@ export function getCurrentGuild(): Guild | undefined {
     return GuildStore.getGuild(getCurrentChannel()?.guild_id!);
 }
 
-export function openPrivateChannel(userId: string) {
-    ChannelActionCreators.openPrivateChannel(userId);
+export function openPrivateChannel(options: { recipientIds: string[]; navigateToChannel?: boolean; }) {
+    ChannelActionCreators.openPrivateChannel(options);
 }
 
 export const enum Theme {
