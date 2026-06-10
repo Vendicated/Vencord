@@ -1,0 +1,47 @@
+.vc-ttb-list {
+    max-height: 350px;
+    margin-top: 10px;
+    margin-bottom: 15px;
+    border: 1px solid var(--background-modifier-accent);
+    border-radius: 8px;
+    padding: 8px;
+    background-color: var(--background-secondary-alt);
+}
+
+.vc-ttb-thread-row {
+    display: flex;
+    align-items: center;
+    padding: 8px 12px;
+    border-radius: 4px;
+    transition: background-color 0.15s ease;
+}
+
+.vc-ttb-thread-row:hover {
+    background-color: var(--background-modifier-hover);
+}
+
+.vc-ttb-thread-info {
+    display: flex;
+    flex-direction: column;
+    margin-left: 10px;
+    flex-grow: 1;
+}
+
+.vc-ttb-thread-meta {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 2px;
+}
+
+.vc-ttb-btn {
+    color: var(--interactive-normal);
+}
+
+.vc-ttb-btn:hover {
+    color: var(--interactive-hover);
+}
+
+.vc-ttb-btn-active {
+    color: var(--interactive-active);
+}
