@@ -20,6 +20,7 @@ export default definePlugin({
     name: "MoreQuickReactions",
     description: "Increases the number of reactions available in the Quick React hover menu",
     authors: [Devs.iamme],
+    tags: ["Emotes", "Reactions", "Customisation", "Shortcuts"],
     settings,
 
     get reactionCount() {

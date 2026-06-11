@@ -24,7 +24,7 @@ import definePlugin, { ReporterTestable } from "@utils/types";
 import previewExampleText from "file://previewExample.tsx";
 
 import { shiki } from "./api/shiki";
-import { createHighlighter } from "./components/Highlighter";
+import { HighlighterContainer } from "./components/Highlighter";
 import deviconStyle from "./devicon.css?managed";
 import { settings } from "./settings";
 import { DeviconSetting } from "./types";
@@ -33,6 +33,7 @@ import { clearStyles } from "./utils/createStyle";
 export default definePlugin({
     name: "ShikiCodeblocks",
     description: "Brings vscode-style codeblocks into Discord, powered by Shiki",
+    tags: ["Appearance", "Chat", "Customisation"],
     authors: [Devs.Vap],
     reporterTestable: ReporterTestable.Patches,
     settings,
@@ -53,6 +54,7 @@ export default definePlugin({
             }
         }
     ],
+
     start: async () => {
         if (settings.store.useDevIcon !== DeviconSetting.Disabled)
             enableStyle(deviconStyle);
@@ -63,20 +65,12 @@ export default definePlugin({
         shiki.destroy();
         clearStyles();
     },
-    settingsAboutComponent: () => createHighlighter({
-        lang: "tsx",
-        content: previewExampleText,
-        isPreview: true
-    }),
+
+    settingsAboutComponent: () => <HighlighterContainer lang="tsx" content={previewExampleText} isPreview />,
 
     // exports
     shiki,
-    createHighlighter,
     renderHighlighter: ({ lang, content }: { lang: string; content: string; }) => {
-        return createHighlighter({
-            lang: lang?.toLowerCase(),
-            content,
-            isPreview: false,
-        });
+        return <HighlighterContainer lang={lang?.toLowerCase()} content={content} isPreview={false} />;
     },
 });

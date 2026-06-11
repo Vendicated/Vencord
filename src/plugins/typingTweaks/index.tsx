@@ -19,6 +19,7 @@
 import { definePluginSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
+import { classNameFactory } from "@utils/css";
 import { openUserProfile } from "@utils/discord";
 import { isNonNullish } from "@utils/guards";
 import { Logger } from "@utils/Logger";
@@ -29,6 +30,7 @@ import { PropsWithChildren } from "react";
 
 import managedStyle from "./style.css?managed";
 
+const cl = classNameFactory("vc-typing-tweaks-");
 const settings = definePluginSettings({
     showAvatars: {
         type: OptionType.BOOLEAN,
@@ -69,7 +71,7 @@ interface TypingUserProps {
 const TypingUser = ErrorBoundary.wrap(function TypingUser({ user, guildId }: TypingUserProps) {
     return (
         <strong
-            className="vc-typing-user"
+            className={cl("user")}
             role="button"
             onClick={() => {
                 openUserProfile(user.id);
@@ -80,6 +82,7 @@ const TypingUser = ErrorBoundary.wrap(function TypingUser({ user, guildId }: Typ
         >
             {settings.store.showAvatars && (
                 <Avatar
+                    className={cl("avatar")}
                     size="SIZE_16"
                     src={user.getAvatarURL(guildId, 128)} />
             )}
@@ -95,6 +98,7 @@ const TypingUser = ErrorBoundary.wrap(function TypingUser({ user, guildId }: Typ
 export default definePlugin({
     name: "TypingTweaks",
     description: "Show avatars and role colours in the typing indicator",
+    tags: ["Appearance", "Customisation"],
     authors: [Devs.zt, Devs.sadan],
     settings,
 
@@ -102,12 +106,12 @@ export default definePlugin({
 
     patches: [
         {
-            find: "#{intl::THREE_USERS_TYPING}",
+            find: "#{intl::SEVERAL_USERS_TYPING_STRONG}",
             group: true,
             replacement: [
                 {
                     // Style the indicator and add function call to modify the children before rendering
-                    match: /(?<="aria-atomic":!0,children:)\i/,
+                    match: /(?<="aria-hidden":!0,children:)\i/,
                     replace: "$self.renderTypingUsers({ users: arguments[0]?.typingUserObjects, guildId: arguments[0]?.channel?.guild_id, children: $& })"
                 },
                 {
@@ -150,7 +154,6 @@ export default definePlugin({
         }
     },
 
-
     buildSeveralUsers,
 
     renderTypingUsers: ErrorBoundary.wrap(({ guildId, users, children }: PropsWithChildren<{ guildId: string, users: User[]; }>) => {
@@ -162,8 +165,7 @@ export default definePlugin({
             let element = 0;
 
             return children.map(c => {
-                if (c.type !== "strong" && !(typeof c !== "string" && !React.isValidElement(c)))
-                    return c;
+                if (c.type !== "strong" && !(typeof c !== "string" && !React.isValidElement(c))) return c;
 
                 const user = users[element++];
                 return <TypingUser key={user.id} guildId={guildId} user={user} />;
