@@ -5,7 +5,7 @@ import definePlugin, { makeRange, OptionType } from "@utils/types";
 import { React, ReactDOM, showToast, Toasts, useCallback, useEffect, useRef, UserStore, useState } from "@webpack/common";
 import type { CSSProperties, PointerEvent as ReactPointerEvent, ReactNode } from "react";
 
-const STORE_KEY = "StreamQoL_users";
+const STORE_KEY = "bitStream_users";
 
 interface TileState {
     rotation: number;
