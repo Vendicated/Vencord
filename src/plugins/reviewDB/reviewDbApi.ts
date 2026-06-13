@@ -1,20 +1,8 @@
 /*
- * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2022 Vendicated and contributors
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
-*/
+ * Vencord, a Discord client mod
+ * Copyright (c) 2026 Vendicated and contributors
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
 
 import { Toasts } from "@webpack/common";
 
@@ -48,14 +36,36 @@ interface ReviewVotesData {
 
 const WarningFlag = 0b00000010;
 
-async function rdbRequest(path: string, options: RequestInit = {}) {
-    return fetch(API_URL + path, {
+async function rdbRequest<T = any>(path: string, options: RequestInit = {}): Promise<T | null> {
+    const headers: Record<string, string> = {
+        Accept: "application/json",
+        Authorization: await getToken() || "",
+        ...options.headers as Record<string, string>,
+    };
+
+    if (options.body) {
+        headers["Content-Type"] = "application/json";
+    }
+
+    const res = await fetch(API_URL + path, {
         ...options,
-        headers: {
-            ...options.headers,
-            Authorization: await getToken() || "",
-        }
+        headers,
+    }).catch(err => {
+        showToast("Network error: Failed to connect to ReviewDB.", Toasts.Type.FAILURE);
+        return null;
     });
+
+    if (!res) return null;
+
+    const data = await res.json().catch(() => null);
+
+    if (!res.ok) {
+        const message = data?.message ?? `ReviewDB: Request failed with status ${res.status}`;
+        showToast(message, Toasts.Type.FAILURE);
+        return null;
+    }
+
+    return data ?? {} as any;
 }
 
 export async function getReviews(id: string, { limit, offset = 0, fetchVotes = false }: { limit?: number; offset?: number; fetchVotes?: boolean } = {}): Promise<UserReviewsData> {
@@ -126,16 +136,8 @@ export async function getReviewVotes(id: string): Promise<ReviewVote[]> {
     const token = await getToken();
     if (!token) return [];
 
-    const req = await rdbRequest(`/users/${id}/reviews/votes`, {
-        headers: {
-            Accept: "application/json",
-        }
-    });
-
-    if (!req.ok) return [];
-
-    const res = await req.json() as ReviewVotesData;
-    return res.votes ?? [];
+    const res = await rdbRequest<ReviewVotesData>(`/users/${id}/reviews/votes`);
+    return res?.votes ?? [];
 }
 
 export async function addReview(review: any): Promise<UserReviewsData | null> {
@@ -147,49 +149,33 @@ export async function addReview(review: any): Promise<UserReviewsData | null> {
         return null;
     }
 
-    return await rdbRequest(`/users/${review.userid}/reviews`, {
+    const data = await rdbRequest<UserReviewsData>(`/users/${review.userid}/reviews`, {
         method: "PUT",
         body: JSON.stringify(review),
-        headers: {
-            "Content-Type": "application/json",
-        }
-    }).then(async r => {
-        const data = await r.json() as UserReviewsData;
-        showToast(data.message);
-        return r.ok ? data : null;
     });
+    if (data?.message) showToast(data.message);
+    return data;
 }
 
 export async function deleteReview(id: number): Promise<UserReviewsData | null> {
-    return await rdbRequest(`/users/${id}/reviews`, {
+    const data = await rdbRequest<UserReviewsData>(`/users/${id}/reviews`, {
         method: "DELETE",
-        headers: {
-            "Content-Type": "application/json",
-            Accept: "application/json",
-        },
         body: JSON.stringify({
             reviewid: id
         })
-    }).then(async r => {
-        const data = await r.json() as UserReviewsData;
-        showToast(data.message);
-        return r.ok ? data : null;
     });
+    if (data?.message) showToast(data.message);
+    return data;
 }
 
 export async function reportReview(id: number) {
-    const res = await rdbRequest("/reports", {
+    const data = await rdbRequest<UserReviewsData>("/reports", {
         method: "PUT",
-        headers: {
-            "Content-Type": "application/json",
-            Accept: "application/json",
-        },
         body: JSON.stringify({
             reviewid: id,
         })
-    }).then(r => r.json()) as UserReviewsData;
-
-    showToast(res.message);
+    });
+    if (data?.message) showToast(data.message);
 }
 
 export async function voteReview(id: number, isUpvote: boolean) {
@@ -200,25 +186,16 @@ export async function voteReview(id: number, isUpvote: boolean) {
         return false;
     }
 
-    try {
-        const res = await rdbRequest(`/reviews/${id}/vote`, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                Accept: "application/json",
-            },
-            body: JSON.stringify({ isUpvote })
-        });
+    const data = await rdbRequest<{ message?: string }>(`/reviews/${id}/vote`, {
+        method: "POST",
+        body: JSON.stringify({ isUpvote })
+    });
 
-        const data = await res.json().catch(() => null);
-        const message = data?.message;
+    if (!data) return false;
 
-        showToast(message ?? (res.ok ? "Vote recorded" : "Failed to vote"), res.ok ? Toasts.Type.SUCCESS : Toasts.Type.FAILURE);
-        return res.ok;
-    } catch {
-        showToast("Failed to vote", Toasts.Type.FAILURE);
-        return false;
-    }
+    const message = data.message ?? "Vote recorded";
+    showToast(message, Toasts.Type.SUCCESS);
+    return true;
 }
 
 export async function deleteReviewVote(id: number) {
@@ -229,49 +206,35 @@ export async function deleteReviewVote(id: number) {
         return false;
     }
 
-    try {
-        const res = await rdbRequest(`/reviews/${id}/vote`, {
-            method: "DELETE",
-            headers: {
-                Accept: "application/json",
-            },
-        });
+    const data = await rdbRequest<{ message?: string }>(`/reviews/${id}/vote`, {
+        method: "DELETE",
+    });
 
-        const data = await res.json().catch(() => null);
-        const message = data?.message;
+    if (!data) return false;
 
-        showToast(message ?? (res.ok ? "Vote removed" : "Failed to remove vote"), res.ok ? Toasts.Type.SUCCESS : Toasts.Type.FAILURE);
-        return res.ok;
-    } catch {
-        showToast("Failed to remove vote", Toasts.Type.FAILURE);
-        return false;
-    }
+    const message = data.message ?? "Vote removed";
+    showToast(message, Toasts.Type.SUCCESS);
+    return true;
 }
 
 async function patchBlock(action: "block" | "unblock", userId: string) {
-    const res = await rdbRequest("/blocks", {
+    const data = await rdbRequest("/blocks", {
         method: "PATCH",
-        headers: {
-            "Content-Type": "application/json",
-            Accept: "application/json",
-        },
         body: JSON.stringify({
             action: action,
             discordId: userId
         })
     });
 
-    if (!res.ok) {
-        showToast(`Failed to ${action} user`, Toasts.Type.FAILURE);
-    } else {
-        showToast(`Successfully ${action}ed user`, Toasts.Type.SUCCESS);
+    if (!data) return;
 
-        if (Auth?.user?.blockedUsers) {
-            const newBlockedUsers = action === "block"
-                ? [...Auth.user.blockedUsers, userId]
-                : Auth.user.blockedUsers.filter(id => id !== userId);
-            updateAuth({ user: { ...Auth.user, blockedUsers: newBlockedUsers } });
-        }
+    showToast(`Successfully ${action}ed user`, Toasts.Type.SUCCESS);
+
+    if (Auth?.user?.blockedUsers) {
+        const newBlockedUsers = action === "block"
+            ? [...Auth.user.blockedUsers, userId]
+            : Auth.user.blockedUsers.filter(id => id !== userId);
+        updateAuth({ user: { ...Auth.user, blockedUsers: newBlockedUsers } });
     }
 }
 
@@ -279,25 +242,17 @@ export const blockUser = (userId: string) => patchBlock("block", userId);
 export const unblockUser = (userId: string) => patchBlock("unblock", userId);
 
 export async function fetchBlocks(): Promise<ReviewDBUser[]> {
-    const res = await rdbRequest("/blocks", {
-        method: "GET",
-        headers: {
-            Accept: "application/json",
-        }
-    });
-
-    if (!res.ok) throw new Error(`${res.status}: ${res.statusText}`);
-    return res.json();
+    return await rdbRequest<ReviewDBUser[]>("/blocks") ?? [];
 }
 
-export function getCurrentUserInfo(token: string): Promise<ReviewDBCurrentUser> {
-    return rdbRequest("/users", {
+export function getCurrentUserInfo(): Promise<ReviewDBCurrentUser | null> {
+    return rdbRequest<ReviewDBCurrentUser>("/users", {
         method: "POST",
-    }).then(r => r.json());
+    });
 }
 
 export async function readNotification(id: number) {
-    return rdbRequest(`/notifications?id=${id}`, {
+    return await rdbRequest(`/notifications?id=${id}`, {
         method: "PATCH"
     });
 }

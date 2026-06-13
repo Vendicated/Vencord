@@ -115,49 +115,51 @@ export default definePlugin({
         setTimeout(async () => {
             if (!Auth.token) return;
 
-            const user = await getCurrentUserInfo(Auth.token);
-            updateAuth({ user });
+            const user = await getCurrentUserInfo();
+            if (user) {
+                updateAuth({ user });
 
-            if (notifyReviews) {
-                if (lastReviewId && lastReviewId < user.lastReviewID) {
-                    s.lastReviewId = user.lastReviewID;
-                    if (user.lastReviewID !== 0)
-                        showToast("You have new reviews on your profile!");
+                if (notifyReviews) {
+                    if (lastReviewId && lastReviewId < user.lastReviewID) {
+                        s.lastReviewId = user.lastReviewID;
+                        if (user.lastReviewID !== 0)
+                            showToast("You have new reviews on your profile!");
+                    }
                 }
-            }
 
-            const { notification } = user;
-            if (notification) {
-                const props = notification.type === NotificationType.Ban ? {
-                    cancelText: "Appeal",
-                    confirmText: "Ok",
-                    onCancel: async () =>
-                        VencordNative.native.openExternal(
-                            "https://reviewdb.mantikafasi.dev/api/redirect?"
-                            + new URLSearchParams({
-                                token: Auth.token!,
-                                page: "dashboard/appeal"
-                            })
-                        )
-                } : {};
+                const { notification } = user;
+                if (notification) {
+                    const props = notification.type === NotificationType.Ban ? {
+                        cancelText: "Appeal",
+                        confirmText: "Ok",
+                        onCancel: async () =>
+                            VencordNative.native.openExternal(
+                                "https://reviewdb.mantikafasi.dev/api/redirect?"
+                                + new URLSearchParams({
+                                    token: Auth.token!,
+                                    page: "dashboard/appeal"
+                                })
+                            )
+                    } : {};
 
-                openModal(modalProps => (
-                    <ConfirmModal
-                        {...modalProps}
-                        title={notification.title}
-                        confirmText={props.confirmText ?? "OK"}
-                        cancelText={props.cancelText}
-                        variant="primary"
-                        onCancel={props.onCancel}
-                    >
-                        {Parser.parse(
-                            notification.content,
-                            false
-                        )}
-                    </ConfirmModal>
-                ));
+                    openModal(modalProps => (
+                        <ConfirmModal
+                            {...modalProps}
+                            title={notification.title}
+                            confirmText={props.confirmText ?? "OK"}
+                            cancelText={props.cancelText}
+                            variant="primary"
+                            onCancel={props.onCancel}
+                        >
+                            {Parser.parse(
+                                notification.content,
+                                false
+                            )}
+                        </ConfirmModal>
+                    ));
 
-                readNotification(notification.id);
+                    readNotification(notification.id);
+                }
             }
         }, 4000);
     },
