@@ -24,7 +24,7 @@ import { canBlockReviewAuthor, canDeleteReview, canReportReview, cl, showToast }
 import { openUserProfile } from "@utils/discord";
 import { classes } from "@utils/misc";
 import { findCssClassesLazy } from "@webpack";
-import { Alerts, IconUtils, Parser, Timestamp, useEffect, useState } from "@webpack/common";
+import { ConfirmModal, IconUtils, openModal as openVencordModal, Parser, Timestamp, useEffect, useState } from "@webpack/common";
 
 import { openBlockModal } from "./BlockedUserModal";
 import { BlockButton, DeleteButton, ReportButton, VoteButton } from "./MessageButton";
@@ -54,40 +54,45 @@ export default function ReviewComponent({ review, refetch, profileId }: { review
     }
 
     function delReview() {
-        Alerts.show({
-            title: "Are you sure?",
-            body: "Do you really want to delete this review?",
-            confirmText: "Delete",
-            cancelText: "Nevermind",
-            onConfirm: async () => {
-                if (!(await getToken())) {
-                    return showToast("You must be logged in to delete reviews.");
-                } else {
-                    deleteReview(review.id).then(res => {
-                        if (res) {
-                            refetch();
-                        }
-                    });
-                }
-            }
-        });
+        openVencordModal(props => (
+            <ConfirmModal
+                {...props}
+                title="Are you sure?"
+                subtitle="Do you really want to delete this review?"
+                confirmText="Delete"
+                cancelText="Nevermind"
+                onConfirm={async () => {
+                    if (!(await getToken())) {
+                        return showToast("You must be logged in to delete reviews.");
+                    } else {
+                        deleteReview(review.id).then(res => {
+                            if (res) {
+                                refetch();
+                            }
+                        });
+                    }
+                }}
+            />
+        ));
     }
 
     function reportRev() {
-        Alerts.show({
-            title: "Are you sure?",
-            body: "Do you really you want to report this review?",
-            confirmText: "Report",
-            cancelText: "Nevermind",
-            // confirmColor: "red", this just adds a class name and breaks the submit button guh
-            onConfirm: async () => {
-                if (!(await getToken())) {
-                    return showToast("You must be logged in to report reviews.");
-                } else {
-                    reportReview(review.id);
-                }
-            }
-        });
+        openVencordModal(props => (
+            <ConfirmModal
+                {...props}
+                title="Are you sure?"
+                subtitle="Do you really want to report this review?"
+                confirmText="Report"
+                cancelText="Nevermind"
+                onConfirm={async () => {
+                    if (!(await getToken())) {
+                        return showToast("You must be logged in to report reviews.");
+                    } else {
+                        reportReview(review.id);
+                    }
+                }}
+            />
+        ));
     }
 
     const isAuthorBlocked = Auth?.user?.blockedUsers?.includes(review.sender.discordID) ?? false;
@@ -96,20 +101,22 @@ export default function ReviewComponent({ review, refetch, profileId }: { review
         if (isAuthorBlocked)
             return unblockUser(review.sender.discordID);
 
-        Alerts.show({
-            title: "Are you sure?",
-            body: "Do you really you want to block this user? They will be unable to leave further reviews on your profile. You can unblock users in the plugin settings.",
-            confirmText: "Block",
-            cancelText: "Nevermind",
-            // confirmColor: "red", this just adds a class name and breaks the submit button guh
-            onConfirm: async () => {
-                if (!(await getToken())) {
-                    return showToast("You must be logged in to block users.");
-                } else {
-                    blockUser(review.sender.discordID);
-                }
-            }
-        });
+        openVencordModal(props => (
+            <ConfirmModal
+                {...props}
+                title="Are you sure?"
+                subtitle="Do you really want to block this user? They will be unable to leave further reviews on your profile. You can unblock users in the plugin settings."
+                confirmText="Block"
+                cancelText="Nevermind"
+                onConfirm={async () => {
+                    if (!(await getToken())) {
+                        return showToast("You must be logged in to block users.");
+                    } else {
+                        blockUser(review.sender.discordID);
+                    }
+                }}
+            />
+        ));
     }
 
     async function submitVote(isUpvote: boolean) {
@@ -191,12 +198,6 @@ export default function ReviewComponent({ review, refetch, profileId }: { review
                         {dateFormat.format(review.timestamp * 1000)}
                     </Timestamp>)
             }
-            {review.id !== 0 && (
-                <span className={cl("vote-score")}>
-                    {score}
-                </span>
-            )}
-
             <div className={cl("review-comment")}>
                 {(review.comment.length > 200 && !showAll)
                     ? (
@@ -208,6 +209,36 @@ export default function ReviewComponent({ review, refetch, profileId }: { review
                     )
                     : Parser.parseGuildEventDescription(review.comment)}
             </div>
+
+            {review.id !== 0 && score !== 0 && (
+                <div className={cl("vote-reactions")}>
+                    {score > 0 ? (
+                        <button
+                            className={classes(cl("vote-reaction"), localVote === true && cl("vote-reaction-up-selected"))}
+                            disabled={isVoting}
+                            onClick={() => submitVote(true)}
+                            type="button"
+                        >
+                            <svg className={cl("vote-reaction-icon")} height="16" viewBox="0 0 24 24" width="16" fill="currentColor">
+                                <path d="M12 3 4 11h5v10h6V11h5L12 3Z" />
+                            </svg>
+                            <span>{score}</span>
+                        </button>
+                    ) : (
+                        <button
+                            className={classes(cl("vote-reaction"), localVote === false && cl("vote-reaction-down-selected"))}
+                            disabled={isVoting}
+                            onClick={() => submitVote(false)}
+                            type="button"
+                        >
+                            <svg className={cl("vote-reaction-icon")} height="16" viewBox="0 0 24 24" width="16" fill="currentColor">
+                                <path d="M12 21 4 13h5V3h6v10h5l-8 8Z" />
+                            </svg>
+                            <span>{Math.abs(score)}</span>
+                        </button>
+                    )}
+                </div>
+            )}
 
             {review.id !== 0 && (
                 <div className={classes(ContainerClasses.container, ContainerClasses.isHeader, MessageClasses.buttons)} style={{

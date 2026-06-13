@@ -14,11 +14,6 @@
     box-sizing: border-box;
 }
 
-.vc-rdb-modal-footer-wrapper {
-    width: 100%;
-    margin: 6px 16px;
-}
-
 .vc-rdb-placeholder {
     margin-bottom: 4px;
     font-weight: bold;
@@ -41,14 +36,7 @@
 
 .vc-rdb-modal-footer [class*="pageControlContainer"] {
     margin-top: 0;
-}
-
-.vc-rdb-modal-header {
-    flex-grow: 1;
-}
-
-.vc-rdb-modal-reviews {
-    margin-top: 16px;
+    white-space: nowrap;
 }
 
 .vc-rdb-review {
@@ -78,14 +66,7 @@
     cursor: pointer;
 }
 
-.vc-rdb-block-modal-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
 .vc-rdb-block-modal {
-    padding: 1em;
     display: grid;
     gap: 0.75em;
 }
@@ -137,18 +118,73 @@
     cursor: not-allowed;
 }
 
-.vc-rdb-vote-score {
-    margin-left: 8px;
-    color: var(--text-muted);
-    font-size: 0.75rem;
-    line-height: 1.375rem;
-    vertical-align: baseline;
-}
-
 .vc-rdb-vote-up-selected {
     color: var(--status-positive);
 }
 
 .vc-rdb-vote-down-selected {
+    color: var(--status-danger);
+}
+
+.vc-rdb-vote-reactions {
+    display: flex;
+    gap: 4px;
+    margin-top: 4px;
+}
+
+.vc-rdb-vote-reaction {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    min-width: 34px;
+    height: 24px;
+    padding: 0 8px;
+    border: 1px solid transparent;
+    border-radius: 8px;
+    background: var(--background-modifier-accent);
+    color: var(--interactive-normal);
+    font: inherit;
+    font-size: 0.875rem;
+    font-weight: 600;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.vc-rdb-vote-reaction:disabled {
+    cursor: default;
+    opacity: 0.65;
+}
+
+.vc-rdb-vote-reaction:hover:not(:disabled) {
+    border-color: var(--border-subtle);
+    background: var(--background-modifier-hover);
+    color: var(--interactive-hover);
+}
+
+.vc-rdb-vote-reaction-icon {
+    flex: 0 0 auto;
+}
+
+.vc-rdb-vote-reaction-up-selected {
+    border-color: color-mix(in srgb, var(--status-positive) 45%, transparent);
+    background: color-mix(in srgb, var(--status-positive) 16%, transparent);
+    color: var(--status-positive);
+}
+
+.vc-rdb-vote-reaction-up-selected:hover:not(:disabled) {
+    border-color: color-mix(in srgb, var(--status-positive) 60%, transparent);
+    background: color-mix(in srgb, var(--status-positive) 22%, transparent);
+    color: var(--status-positive);
+}
+
+.vc-rdb-vote-reaction-down-selected {
+    border-color: color-mix(in srgb, var(--status-danger) 45%, transparent);
+    background: color-mix(in srgb, var(--status-danger) 16%, transparent);
+    color: var(--status-danger);
+}
+
+.vc-rdb-vote-reaction-down-selected:hover:not(:disabled) {
+    border-color: color-mix(in srgb, var(--status-danger) 60%, transparent);
+    background: color-mix(in srgb, var(--status-danger) 22%, transparent);
     color: var(--status-danger);
 }
