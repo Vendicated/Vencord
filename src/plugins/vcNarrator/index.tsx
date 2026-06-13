@@ -43,7 +43,8 @@ interface VoiceStateChangeEvent {
 // not say the second mute, which would lead you to believe they're unmuted
 
 function speak(text: string) {
-    if (!text) return;
+    // Don't narrate in the overlay window, otherwise everything is said twice (#2717)
+    if (!text || window.__OVERLAY__) return;
 
     const { volume, rate } = settings.store;
 
