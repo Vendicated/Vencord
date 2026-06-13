@@ -223,6 +223,35 @@ export async function voteReview(id: number, isUpvote: boolean) {
     }
 }
 
+export async function deleteReviewVote(id: number) {
+    const token = await getToken();
+    if (!token) {
+        showToast("Please authorize to vote on reviews.");
+        authorize();
+        return false;
+    }
+
+    try {
+        const res = await rdbRequest(`/reviews/${id}/vote`, {
+            method: "DELETE",
+            headers: {
+                Accept: "application/json",
+            },
+        });
+
+        let message: string | undefined;
+        try {
+            message = ((await res.json()) as { message?: string; }).message;
+        } catch { }
+
+        showToast(message ?? (res.ok ? "Vote removed" : "Failed to remove vote"), res.ok ? Toasts.Type.SUCCESS : Toasts.Type.FAILURE);
+        return res.ok;
+    } catch {
+        showToast("Failed to remove vote", Toasts.Type.FAILURE);
+        return false;
+    }
+}
+
 async function patchBlock(action: "block" | "unblock", userId: string) {
     const res = await rdbRequest("/blocks", {
         method: "PATCH",

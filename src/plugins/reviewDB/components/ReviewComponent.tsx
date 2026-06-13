@@ -18,7 +18,7 @@
 
 import { Auth, getToken } from "@plugins/reviewDB/auth";
 import { Review, ReviewType } from "@plugins/reviewDB/entities";
-import { blockUser, deleteReview, reportReview, unblockUser, voteReview } from "@plugins/reviewDB/reviewDbApi";
+import { blockUser, deleteReview, deleteReviewVote, reportReview, unblockUser, voteReview } from "@plugins/reviewDB/reviewDbApi";
 import { settings } from "@plugins/reviewDB/settings";
 import { canBlockReviewAuthor, canDeleteReview, canReportReview, cl, showToast } from "@plugins/reviewDB/utils";
 import { openUserProfile } from "@utils/discord";
@@ -128,13 +128,17 @@ export default function ReviewComponent({ review, refetch, profileId }: { review
             return showToast("You cannot vote on your own review.");
         }
 
-        if (localVote === isUpvote) {
-            return showToast(`You already ${isUpvote ? "upvoted" : "downvoted"} this review.`);
-        }
-
         setIsVoting(true);
 
         try {
+            if (localVote === isUpvote) {
+                if (await deleteReviewVote(review.id)) {
+                    setLocalVote(null);
+                    setScore(currentScore => currentScore + (isUpvote ? -1 : 1));
+                }
+                return;
+            }
+
             if (await voteReview(review.id, isUpvote)) {
                 const delta = localVote == null
                     ? isUpvote ? 1 : -1
