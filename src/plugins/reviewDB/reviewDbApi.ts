@@ -39,7 +39,7 @@ const WarningFlag = 0b00000010;
 async function rdbRequest<T = unknown>(path: string, options: RequestInit = {}): Promise<T | null> {
     const headers: Record<string, string> = {
         Accept: "application/json",
-        Authorization: await getToken() || "",
+        Authorization: await getToken() ?? "",
         ...options.headers as Record<string, string>,
     };
 
@@ -140,7 +140,7 @@ export async function getReviewVotes(id: string): Promise<ReviewVote[]> {
     return res?.votes ?? [];
 }
 
-export async function addReview(review: any): Promise<UserReviewsData | null> {
+export async function addReview(review: { userid: string; comment: string }): Promise<UserReviewsData | null> {
 
     const token = await getToken();
     if (!token) {

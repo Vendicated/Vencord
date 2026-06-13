@@ -70,7 +70,7 @@ export interface ReviewDBUser {
     username: string;
     type: UserType;
     profilePhoto: string;
-    badges: any[];
+    badges: Badge[];
 }
 
 export interface ReviewDBCurrentUser extends ReviewDBUser {

@@ -65,13 +65,9 @@ export default function ReviewComponent({ review, refetch, profileId }: { review
                 onConfirm={async () => {
                     if (!(await getToken())) {
                         return showToast("You must be logged in to delete reviews.");
-                    } else {
-                        deleteReview(review.id).then(res => {
-                            if (res) {
-                                refetch();
-                            }
-                        });
                     }
+                    const res = await deleteReview(review.id);
+                    if (res) refetch();
                 }}
             />
         ));
@@ -88,9 +84,8 @@ export default function ReviewComponent({ review, refetch, profileId }: { review
                 onConfirm={async () => {
                     if (!(await getToken())) {
                         return showToast("You must be logged in to report reviews.");
-                    } else {
-                        reportReview(review.id);
                     }
+                    await reportReview(review.id);
                 }}
             />
         ));
@@ -112,9 +107,8 @@ export default function ReviewComponent({ review, refetch, profileId }: { review
                 onConfirm={async () => {
                     if (!(await getToken())) {
                         return showToast("You must be logged in to block users.");
-                    } else {
-                        blockUser(review.sender.discordID);
                     }
+                    await blockUser(review.sender.discordID);
                 }}
             />
         ));
@@ -163,7 +157,7 @@ export default function ReviewComponent({ review, refetch, profileId }: { review
             <img
                 className={classes(AvatarClasses.avatar, AvatarClasses.clickable)}
                 onClick={openModal}
-                src={review.sender.profilePhoto || IconUtils.getDefaultAvatarURL(review.sender.discordID)}
+                src={review.sender.profilePhoto ?? IconUtils.getDefaultAvatarURL(review.sender.discordID)}
                 style={{ left: "0px", zIndex: 0 }}
                 onError={e => e.currentTarget.src = IconUtils.getDefaultAvatarURL(review.sender.discordID)}
             />
