@@ -164,14 +164,6 @@
     flex: 0 0 auto;
 }
 
-.vc-rdb-vote-reaction-single {
-    gap: 4px;
-    width: auto;
-    min-width: 34px;
-    padding: 0 8px;
-    font-size: 0.875rem;
-    font-weight: 600;
-}
 
 .vc-rdb-vote-reaction-score {
     min-width: 2em;
