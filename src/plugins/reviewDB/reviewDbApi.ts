@@ -36,7 +36,7 @@ interface ReviewVotesData {
 
 const WarningFlag = 0b00000010;
 
-async function rdbRequest<T = any>(path: string, options: RequestInit = {}): Promise<T | null> {
+async function rdbRequest<T = unknown>(path: string, options: RequestInit = {}): Promise<T | null> {
     const headers: Record<string, string> = {
         Accept: "application/json",
         Authorization: await getToken() || "",
@@ -65,7 +65,7 @@ async function rdbRequest<T = any>(path: string, options: RequestInit = {}): Pro
         return null;
     }
 
-    return data ?? {} as any;
+    return data as T;
 }
 
 export async function getReviews(id: string, { limit, offset = 0, fetchVotes = false }: { limit?: number; offset?: number; fetchVotes?: boolean } = {}): Promise<UserReviewsData> {

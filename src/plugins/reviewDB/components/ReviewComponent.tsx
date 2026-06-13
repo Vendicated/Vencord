@@ -43,7 +43,7 @@ export default function ReviewComponent({ review, refetch, profileId }: { review
     const [localVote, setLocalVote] = useState<boolean | null>(review.userVote ?? null);
     const [score, setScore] = useState(review.score ?? 0);
     const [isVoting, setIsVoting] = useState(false);
-    const showVoteReaction = review.id !== 0 && (score !== 0 || localVote !== null);
+    const showVoteReaction = review.id !== 0 && (score !== 0 || localVote != null);
 
     useEffect(() => {
         setLocalVote(review.userVote ?? null);
@@ -218,7 +218,7 @@ export default function ReviewComponent({ review, refetch, profileId }: { review
             {showVoteReaction && (
                 <div className={cl("vote-reactions")}>
                     <button
-                        className={classes(cl("vote-reaction"), localVote === true && cl("vote-reaction-up-selected"))}
+                        className={classes(cl("vote-reaction"), localVote && cl("vote-reaction-up-selected"))}
                         disabled={isVoting}
                         onClick={() => submitVote(true)}
                         type="button"
@@ -251,7 +251,7 @@ export default function ReviewComponent({ review, refetch, profileId }: { review
                         {canReportReview(review) && <ReportButton onClick={reportRev} />}
                         {canBlockReviewAuthor(profileId, review) && <BlockButton isBlocked={isAuthorBlocked} onClick={blockReviewSender} />}
                         {canDeleteReview(profileId, review) && <DeleteButton onClick={delReview} />}
-                        <VoteButton isUpvote isSelected={localVote === true} disabled={isVoting} onClick={() => submitVote(true)} />
+                        <VoteButton isUpvote isSelected={!!localVote} disabled={isVoting} onClick={() => submitVote(true)} />
                         <VoteButton isUpvote={false} isSelected={localVote === false} disabled={isVoting} onClick={() => submitVote(false)} />
                     </div>
                 </div>
