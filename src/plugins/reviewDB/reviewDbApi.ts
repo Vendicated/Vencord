@@ -210,7 +210,8 @@ export async function voteReview(id: number, isUpvote: boolean) {
             body: JSON.stringify({ isUpvote })
         });
 
-        const message = await res.json().then(data => (data as { message?: string }).message).catch(() => undefined);
+        const data = await res.json().catch(() => null);
+        const message = data?.message;
 
         showToast(message ?? (res.ok ? "Vote recorded" : "Failed to vote"), res.ok ? Toasts.Type.SUCCESS : Toasts.Type.FAILURE);
         return res.ok;
