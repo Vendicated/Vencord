@@ -44,7 +44,7 @@ export default function ReviewComponent({ review, refetch, profileId }: { review
     const [score, setScore] = useState(review.score ?? 0);
     const [isVoting, setIsVoting] = useState(false);
     const showVoteReaction = review.id !== 0 && (score !== 0 || localVote !== null);
-    const voteReactionIsUpvote = localVote ?? score > 0;
+    const singleVoteReactionIsUpvote = score > 0;
 
     useEffect(() => {
         setLocalVote(review.userVote ?? null);
@@ -214,30 +214,48 @@ export default function ReviewComponent({ review, refetch, profileId }: { review
 
             {showVoteReaction && (
                 <div className={cl("vote-reactions")}>
-                    {voteReactionIsUpvote ? (
+                    {localVote == null ? (
                         <button
-                            className={classes(cl("vote-reaction"), localVote === true && cl("vote-reaction-up-selected"))}
+                            className={classes(cl("vote-reaction"), cl("vote-reaction-single"), singleVoteReactionIsUpvote ? cl("vote-reaction-up-selected") : cl("vote-reaction-down-selected"))}
                             disabled={isVoting}
-                            onClick={() => submitVote(true)}
+                            onClick={() => submitVote(singleVoteReactionIsUpvote)}
                             type="button"
                         >
                             <svg className={cl("vote-reaction-icon")} height="16" viewBox="0 0 24 24" width="16" fill="currentColor">
-                                <path d="M12 3 4 11h5v10h6V11h5L12 3Z" />
+                                <path
+                                    d={singleVoteReactionIsUpvote
+                                        ? "M12 3 4 11h5v10h6V11h5L12 3Z"
+                                        : "M12 21 4 13h5V3h6v10h5l-8 8Z"}
+                                />
                             </svg>
-                            <span>{Math.abs(score)}</span>
+                            <span>{score}</span>
                         </button>
                     ) : (
-                        <button
-                            className={classes(cl("vote-reaction"), localVote === false && cl("vote-reaction-down-selected"))}
-                            disabled={isVoting}
-                            onClick={() => submitVote(false)}
-                            type="button"
-                        >
-                            <svg className={cl("vote-reaction-icon")} height="16" viewBox="0 0 24 24" width="16" fill="currentColor">
-                                <path d="M12 21 4 13h5V3h6v10h5l-8 8Z" />
-                            </svg>
-                            <span>{Math.abs(score)}</span>
-                        </button>
+                        <>
+                            <button
+                                className={classes(cl("vote-reaction"), localVote === true && cl("vote-reaction-up-selected"))}
+                                disabled={isVoting}
+                                onClick={() => submitVote(true)}
+                                type="button"
+                            >
+                                <svg className={cl("vote-reaction-icon")} height="16" viewBox="0 0 24 24" width="16" fill="currentColor">
+                                    <path d="M12 3 4 11h5v10h6V11h5L12 3Z" />
+                                </svg>
+                            </button>
+                            <span className={classes(cl("vote-reaction-score"), score > 0 && cl("vote-reaction-score-positive"), score < 0 && cl("vote-reaction-score-negative"))}>
+                                {score}
+                            </span>
+                            <button
+                                className={classes(cl("vote-reaction"), localVote === false && cl("vote-reaction-down-selected"))}
+                                disabled={isVoting}
+                                onClick={() => submitVote(false)}
+                                type="button"
+                            >
+                                <svg className={cl("vote-reaction-icon")} height="16" viewBox="0 0 24 24" width="16" fill="currentColor">
+                                    <path d="M12 21 4 13h5V3h6v10h5l-8 8Z" />
+                                </svg>
+                            </button>
+                        </>
                     )}
                 </div>
             )}

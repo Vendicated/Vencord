@@ -109,7 +109,11 @@ export async function getReviews(id: string, { limit, offset = 0, fetchVotes = f
     const votes = await votesPromise;
     if (votes.length === 0) return res;
 
-    const voteByReviewId = new Map(votes.map(vote => [vote.reviewID, vote.isUpvote]));
+    const voteByReviewId = new Map<number, boolean>();
+    for (const vote of votes) {
+        voteByReviewId.set(vote.reviewID, vote.isUpvote);
+    }
+
     res.reviews = res.reviews.map(review => ({
         ...review,
         userVote: voteByReviewId.get(review.id) ?? null,
@@ -196,18 +200,27 @@ export async function voteReview(id: number, isUpvote: boolean) {
         return false;
     }
 
-    const res = await rdbRequest(`/reviews/${id}/vote`, {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-            Accept: "application/json",
-        },
-        body: JSON.stringify({ isUpvote })
-    });
+    try {
+        const res = await rdbRequest(`/reviews/${id}/vote`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                Accept: "application/json",
+            },
+            body: JSON.stringify({ isUpvote })
+        });
 
-    const data = await res.json() as { message?: string; };
-    showToast(data.message ?? (res.ok ? "Vote recorded" : "Failed to vote"), res.ok ? Toasts.Type.SUCCESS : Toasts.Type.FAILURE);
-    return res.ok;
+        let message: string | undefined;
+        try {
+            message = ((await res.json()) as { message?: string; }).message;
+        } catch { }
+
+        showToast(message ?? (res.ok ? "Vote recorded" : "Failed to vote"), res.ok ? Toasts.Type.SUCCESS : Toasts.Type.FAILURE);
+        return res.ok;
+    } catch {
+        showToast("Failed to vote", Toasts.Type.FAILURE);
+        return false;
+    }
 }
 
 async function patchBlock(action: "block" | "unblock", userId: string) {

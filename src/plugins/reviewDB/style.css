@@ -127,26 +127,26 @@
 }
 
 .vc-rdb-vote-reactions {
-    display: flex;
-    gap: 4px;
+    display: inline-flex;
+    align-items: center;
     margin-top: 4px;
+    border: 1px solid transparent;
+    border-radius: 8px;
+    background: var(--background-modifier-accent);
 }
 
 .vc-rdb-vote-reaction {
     display: inline-flex;
     align-items: center;
-    gap: 4px;
-    min-width: 34px;
+    justify-content: center;
+    width: 32px;
     height: 24px;
-    padding: 0 8px;
-    border: 1px solid transparent;
+    padding: 0;
+    border: 0;
     border-radius: 8px;
-    background: var(--background-modifier-accent);
+    background: transparent;
     color: var(--interactive-normal);
     font: inherit;
-    font-size: 0.875rem;
-    font-weight: 600;
-    line-height: 1;
     cursor: pointer;
 }
 
@@ -156,7 +156,6 @@
 }
 
 .vc-rdb-vote-reaction:hover:not(:disabled) {
-    border-color: var(--border-subtle);
     background: var(--background-modifier-hover);
     color: var(--interactive-hover);
 }
@@ -165,26 +164,48 @@
     flex: 0 0 auto;
 }
 
+.vc-rdb-vote-reaction-single {
+    gap: 4px;
+    width: auto;
+    min-width: 34px;
+    padding: 0 8px;
+    font-size: 0.875rem;
+    font-weight: 600;
+}
+
+.vc-rdb-vote-reaction-score {
+    min-width: 2em;
+    color: var(--text-muted);
+    font-size: 0.875rem;
+    font-weight: 600;
+    line-height: 24px;
+    text-align: center;
+}
+
+.vc-rdb-vote-reaction-score-positive {
+    color: var(--status-positive);
+}
+
+.vc-rdb-vote-reaction-score-negative {
+    color: var(--status-danger);
+}
+
 .vc-rdb-vote-reaction-up-selected {
-    border-color: color-mix(in srgb, var(--status-positive) 45%, transparent);
     background: color-mix(in srgb, var(--status-positive) 16%, transparent);
     color: var(--status-positive);
 }
 
 .vc-rdb-vote-reaction-up-selected:hover:not(:disabled) {
-    border-color: color-mix(in srgb, var(--status-positive) 60%, transparent);
     background: color-mix(in srgb, var(--status-positive) 22%, transparent);
     color: var(--status-positive);
 }
 
 .vc-rdb-vote-reaction-down-selected {
-    border-color: color-mix(in srgb, var(--status-danger) 45%, transparent);
     background: color-mix(in srgb, var(--status-danger) 16%, transparent);
     color: var(--status-danger);
 }
 
 .vc-rdb-vote-reaction-down-selected:hover:not(:disabled) {
-    border-color: color-mix(in srgb, var(--status-danger) 60%, transparent);
     background: color-mix(in srgb, var(--status-danger) 22%, transparent);
     color: var(--status-danger);
 }
