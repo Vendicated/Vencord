@@ -67,6 +67,7 @@ export async function getReviews(id: string, { limit, offset = 0, fetchVotes = f
     if (offset) params.append("offset", String(offset));
     if (limit) params.append("limit", String(limit));
 
+    const votesPromise = fetchVotes ? getReviewVotes(id).catch(() => []) : Promise.resolve([]);
     const req = await fetch(`${API_URL}/users/${id}/reviews?${params}`);
 
     const res = (req.ok)
@@ -105,7 +106,7 @@ export async function getReviews(id: string, { limit, offset = 0, fetchVotes = f
 
     if (!fetchVotes || res.reviews.length === 0) return res;
 
-    const votes = await getReviewVotes(id);
+    const votes = await votesPromise;
     if (votes.length === 0) return res;
 
     const voteByReviewId = new Map(votes.map(vote => [vote.reviewID, vote.isUpvote]));

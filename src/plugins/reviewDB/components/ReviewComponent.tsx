@@ -43,6 +43,8 @@ export default function ReviewComponent({ review, refetch, profileId }: { review
     const [localVote, setLocalVote] = useState<boolean | null>(review.userVote ?? null);
     const [score, setScore] = useState(review.score ?? 0);
     const [isVoting, setIsVoting] = useState(false);
+    const showVoteReaction = review.id !== 0 && (score !== 0 || localVote !== null);
+    const voteReactionIsUpvote = localVote ?? score > 0;
 
     useEffect(() => {
         setLocalVote(review.userVote ?? null);
@@ -210,9 +212,9 @@ export default function ReviewComponent({ review, refetch, profileId }: { review
                     : Parser.parseGuildEventDescription(review.comment)}
             </div>
 
-            {review.id !== 0 && score !== 0 && (
+            {showVoteReaction && (
                 <div className={cl("vote-reactions")}>
-                    {score > 0 ? (
+                    {voteReactionIsUpvote ? (
                         <button
                             className={classes(cl("vote-reaction"), localVote === true && cl("vote-reaction-up-selected"))}
                             disabled={isVoting}
@@ -222,7 +224,7 @@ export default function ReviewComponent({ review, refetch, profileId }: { review
                             <svg className={cl("vote-reaction-icon")} height="16" viewBox="0 0 24 24" width="16" fill="currentColor">
                                 <path d="M12 3 4 11h5v10h6V11h5L12 3Z" />
                             </svg>
-                            <span>{score}</span>
+                            <span>{Math.abs(score)}</span>
                         </button>
                     ) : (
                         <button

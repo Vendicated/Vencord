@@ -17,6 +17,7 @@
 */
 
 import { DeleteIcon } from "@components/Icons";
+import { cl } from "@plugins/reviewDB/utils";
 import { classes } from "@utils/misc";
 import { findCssClassesLazy } from "@webpack";
 import { Tooltip } from "@webpack/common";
@@ -93,7 +94,7 @@ export function VoteButton({ isUpvote, isSelected, disabled, onClick }: { isUpvo
                     className={classes(
                         iconClasses.button,
                         disabled && iconClasses.disabled,
-                        isSelected && (isUpvote ? "vc-rdb-vote-up-selected" : "vc-rdb-vote-down-selected")
+                        isSelected && cl(isUpvote ? "vote-up-selected" : "vote-down-selected")
                     )}
                     onClick={disabled ? undefined : onClick}
                     aria-disabled={disabled}
