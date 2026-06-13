@@ -236,7 +236,8 @@ export async function deleteReviewVote(id: number) {
             },
         });
 
-        const message = await res.json().then(data => (data as { message?: string }).message).catch(() => undefined);
+        const data = await res.json().catch(() => null);
+        const message = data?.message;
 
         showToast(message ?? (res.ok ? "Vote removed" : "Failed to remove vote"), res.ok ? Toasts.Type.SUCCESS : Toasts.Type.FAILURE);
         return res.ok;
