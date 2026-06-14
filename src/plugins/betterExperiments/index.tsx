@@ -55,6 +55,8 @@ function getTypedExperiment(experiment: Experiment): TypedExperiment {
 }
 
 const EXPERIMENTS: Map<string, Experiment> = new Map();
+let intervalId: ReturnType<typeof setInterval>;
+
 export default definePlugin({
     authors: [Devs.mantikafasi],
     name: "BetterExperiments",
@@ -73,20 +75,19 @@ export default definePlugin({
         },
     ],
     start: () => {
-        fetchExperiments().then(experiments => {
-            for (const experiment of experiments) {
-                EXPERIMENTS.set(experiment.data.id, experiment);
-            }
-        });
-
-        setInterval(() => {
+        const load = () => {
             fetchExperiments().then(experiments => {
                 for (const experiment of experiments) {
                     EXPERIMENTS.set(experiment.data.id, experiment);
                 }
             });
-        }, 25 * 60 * 1000); // every 25 minutes
-
+        };
+        load();
+        intervalId = setInterval(load, 25 * 60 * 1000);
+    },
+    stop: () => {
+        clearInterval(intervalId);
+        EXPERIMENTS.clear();
     },
     settings: definePluginSettings({
         apiProvider: {
@@ -108,18 +109,17 @@ export default definePlugin({
         const guilds = GuildStore.getGuilds();
         let exp = experiments[e.experimentId];
 
-        // bucket to description map
         const bucketMap = {};
 
         if (!exp) {
             exp = ApexExperimentStore.getRegisteredExperiments()[e.experimentId];
-            if (!exp) return;
+            if (!exp) return null;
 
             for (const k of Object.keys(exp.variations)) {
                 bucketMap[k] = "Variant " + k;
             }
 
-            exp.type = exp.kind; // CAN THEY BE CONSISTENT FOR A SECOND
+            exp.type = exp.kind;
         } else {
             for (const [i, v] of exp.buckets.entries()) {
                 bucketMap[v] = exp.description[i];
@@ -130,10 +130,9 @@ export default definePlugin({
         const userHash = mm3(e.experimentId + ":" + currentUser.id) % 10000;
         const expObject = EXPERIMENTS.get(e.experimentId);
 
-        // Get rollout ranges if available
         let ranges: ExperimentPopulationRollout[] = [];
 
-        if (!expObject) return;
+        if (!expObject) return null;
 
         const typedExp = getTypedExperiment(expObject);
         if (!typedExp.rollout.aaMode && typedExp.rollout.populations) {
@@ -196,10 +195,7 @@ export default definePlugin({
                         </div>;
                     } else if (exp.type === "user") {
                         const friends = RelationshipStore.getFriendIDs().map(id => ({ id, user: UserStore.getUser(id) }));
-                        const expObject = EXPERIMENTS.get(e.experimentId);
 
-                        // rollout[7] is AA-Mode
-                        // rollout[3] is populations
                         const ranges = typedExp.rollout.aaMode ? typedExp.rollout.populations.map(population => {
                             return population[0].filter(range => range[0] === parseInt(bucket)).map(range => range[1]);
                         }) : [];
