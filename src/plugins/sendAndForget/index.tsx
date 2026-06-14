@@ -17,7 +17,8 @@ export default definePlugin({
 
     patches: [
         {
-            find: ".ToastType.FORWARD",
+            // ,3e3,{leading:!0,trailing:!1})
+            find: ".FORWARD))},3e3",
             replacement: [
                 {
                     match: /(?<=transitionToDestination:)(1===\i\.length)(?=,|\})/,
@@ -29,8 +30,8 @@ export default definePlugin({
             // the event for clicking the final forward button is dispatched here
             find: "#{intl::MESSAGE_FORWARD_MESSAGE_PLACEHOLDER}",
             replacement: {
-                match: /(useCallback\(\()(\)=>\{)(\i\.\i\.clearDraft)/,
-                replace: (_, beforeParen, beforeBody, body) => `${beforeParen}vencordArg1${beforeBody}$self.setShift(vencordArg1);${body}`
+                match: /((\i)=\i\.useCallback\(\()(\)=>\{)(null!=\i&&\i\.\i\.clearDraft)(?=.{500,2000}onClick:\2)/,
+                replace: (_, beforeParen, _1, beforeBody, body) => `${beforeParen}vencordArg1${beforeBody}$self.setShift(vencordArg1);${body}`
             }
         }
     ],
