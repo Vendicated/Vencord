@@ -42,6 +42,7 @@
 .vc-rdb-review {
     padding-top: 8px !important;
     padding-bottom: 8px !important;
+    padding-right: 64px !important;
 }
 
 .vc-rdb-review:hover {

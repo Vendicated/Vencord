@@ -149,7 +149,6 @@ export default function ReviewComponent({ review, refetch, profileId }: { review
             {
                 marginLeft: "0px",
                 paddingLeft: "52px",
-                paddingRight: review.id !== 0 ? "64px" : "16px",
                 // nobody knows anymore
             }
         }>
