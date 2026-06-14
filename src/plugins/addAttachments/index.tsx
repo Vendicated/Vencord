@@ -6,9 +6,11 @@
 
 import { UploadIcon } from "@components/Icons";
 import { Devs } from "@utils/constants";
+import { getCurrentChannel } from "@utils/discord";
 import definePlugin from "@utils/types";
+import { MessageFlags, MessageType } from "@vencord/discord-types/enums";
 import { findByPropsLazy } from "@webpack";
-import { ChannelStore, MessageStore, PermissionsBits, PermissionStore, RestAPI, SelectedChannelStore, showToast, Toasts, UserStore } from "@webpack/common";
+import { ChannelStore, MessageStore, PermissionsBits, PermissionStore, RestAPI, showToast, Toasts, UserStore } from "@webpack/common";
 
 const { uniqueId } = findByPropsLazy("uniqueId");
 
@@ -81,15 +83,14 @@ export default definePlugin({
     messagePopoverButton: {
         icon: UploadIcon,
         render(msg) {
+            if (![MessageType.DEFAULT, MessageType.REPLY].includes(msg.type) || msg.hasFlag(MessageFlags.IS_VOICE_MESSAGE)) return null;
             if (UserStore.getCurrentUser().id !== msg.author.id || msg.attachments.length === 10) return null;
 
-            const currChannel = ChannelStore.getChannel(SelectedChannelStore.getChannelId());
-            if (currChannel.guild_id && !PermissionStore.can(PermissionsBits.SEND_MESSAGES, currChannel)) return null;
-
-            if (![0, 19].includes(msg.type) || msg.hasFlag(8192)) return null;
+            const currentChannel = getCurrentChannel()!;
+            if (!currentChannel.isPrivate() && !PermissionStore.can(PermissionsBits.SEND_MESSAGES, currentChannel)) return null;
 
             return {
-                label: "Add attachments",
+                label: "Add Attachments",
                 icon: UploadIcon,
                 message: msg,
                 channel: ChannelStore.getChannel(msg.channel_id),
