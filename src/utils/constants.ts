@@ -639,7 +639,7 @@ export const Devs = /* #__PURE__*/ Object.freeze({
         id: 390884143749136386n,
     },
     Noah: {
-        name: "Noah",
+        name: "Noah;",
         id: 459374864067723275n
     },
 } satisfies Record<string, Dev>);
