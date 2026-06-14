@@ -27,7 +27,7 @@ import { findCssClassesLazy } from "@webpack";
 import { ConfirmModal, IconUtils, openModal as openVencordModal, Parser, Timestamp, useEffect, useState } from "@webpack/common";
 
 import { openBlockModal } from "./BlockedUserModal";
-import { BlockButton, DeleteButton, ReportButton, VoteButton } from "./MessageButton";
+import { BlockButton, DeleteButton, ReportButton } from "./MessageButton";
 import ReviewBadge from "./ReviewBadge";
 
 const MessageClasses = findCssClassesLazy("cozyMessage", "message", "groupStart", "buttons", "buttonsInner");
@@ -43,7 +43,6 @@ export default function ReviewComponent({ review, refetch, profileId }: { review
     const [localVote, setLocalVote] = useState<boolean | null>(review.userVote ?? null);
     const [score, setScore] = useState(review.score ?? 0);
     const [isVoting, setIsVoting] = useState(false);
-    const showVoteReaction = review.id !== 0 && (score !== 0 || localVote != null);
 
     useEffect(() => {
         setLocalVote(review.userVote ?? null);
@@ -149,10 +148,41 @@ export default function ReviewComponent({ review, refetch, profileId }: { review
         <div className={classes(cl("review"), MessageClasses.cozyMessage, AvatarClasses.wrapper, MessageClasses.message, MessageClasses.groupStart, AvatarClasses.cozy)} style={
             {
                 marginLeft: "0px",
-                paddingLeft: "52px", // wth is this
+                paddingLeft: "52px",
+                paddingRight: review.id !== 0 ? "64px" : "16px",
                 // nobody knows anymore
             }
         }>
+
+            {review.id !== 0 && (
+                <div className={cl("vote-column")}>
+                    <span className={classes(cl("vote-column-score"), score > 0 && cl("vote-column-score-positive"), score < 0 && cl("vote-column-score-negative"))}>
+                        {score}
+                    </span>
+                    <div className={cl("vote-column-buttons")}>
+                        <button
+                            className={classes(cl("vote-column-button"), !!localVote && cl("vote-column-up-selected"))}
+                            disabled={isVoting}
+                            onClick={() => submitVote(true)}
+                            type="button"
+                        >
+                            <svg height="20" viewBox="0 0 12 12" width="20" fill="none">
+                                <path d="M3 7.5 6 4.5l3 3" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" />
+                            </svg>
+                        </button>
+                        <button
+                            className={classes(cl("vote-column-button"), localVote === false && cl("vote-column-down-selected"))}
+                            disabled={isVoting}
+                            onClick={() => submitVote(false)}
+                            type="button"
+                        >
+                            <svg height="20" viewBox="0 0 12 12" width="20" fill="none">
+                                <path d="M3 4.5 6 7.5l3-3" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            )}
 
             <img
                 className={classes(AvatarClasses.avatar, AvatarClasses.clickable)}
@@ -209,34 +239,6 @@ export default function ReviewComponent({ review, refetch, profileId }: { review
                     : Parser.parseGuildEventDescription(review.comment)}
             </div>
 
-            {showVoteReaction && (
-                <div className={cl("vote-reactions")}>
-                    <button
-                        className={classes(cl("vote-reaction"), localVote && cl("vote-reaction-up-selected"))}
-                        disabled={isVoting}
-                        onClick={() => submitVote(true)}
-                        type="button"
-                    >
-                        <svg className={cl("vote-reaction-icon")} height="16" viewBox="0 0 24 24" width="16" fill="currentColor">
-                            <path d="M12 3 4 11h5v10h6V11h5L12 3Z" />
-                        </svg>
-                    </button>
-                    <span className={classes(cl("vote-reaction-score"), score > 0 && cl("vote-reaction-score-positive"), score < 0 && cl("vote-reaction-score-negative"))}>
-                        {score}
-                    </span>
-                    <button
-                        className={classes(cl("vote-reaction"), localVote === false && cl("vote-reaction-down-selected"))}
-                        disabled={isVoting}
-                        onClick={() => submitVote(false)}
-                        type="button"
-                    >
-                        <svg className={cl("vote-reaction-icon")} height="16" viewBox="0 0 24 24" width="16" fill="currentColor">
-                            <path d="M12 21 4 13h5V3h6v10h5l-8 8Z" />
-                        </svg>
-                    </button>
-                </div>
-            )}
-
             {review.id !== 0 && (
                 <div className={classes(ContainerClasses.container, ContainerClasses.isHeader, MessageClasses.buttons)} style={{
                     padding: "0px",
@@ -245,8 +247,6 @@ export default function ReviewComponent({ review, refetch, profileId }: { review
                         {canReportReview(review) && <ReportButton onClick={reportRev} />}
                         {canBlockReviewAuthor(profileId, review) && <BlockButton isBlocked={isAuthorBlocked} onClick={blockReviewSender} />}
                         {canDeleteReview(profileId, review) && <DeleteButton onClick={delReview} />}
-                        <VoteButton isUpvote isSelected={!!localVote} disabled={isVoting} onClick={() => submitVote(true)} />
-                        <VoteButton isUpvote={false} isSelected={localVote === false} disabled={isVoting} onClick={() => submitVote(false)} />
                     </div>
                 </div>
             )}
