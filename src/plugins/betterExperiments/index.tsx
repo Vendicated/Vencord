@@ -7,12 +7,12 @@
 import "./styles.css";
 
 import { definePluginSettings } from "@api/Settings";
-import { classNameFactory } from "@utils/css";
+import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
+import { classNameFactory } from "@utils/css";
 import definePlugin, { OptionType } from "@utils/types";
 import { findLazy, findStoreLazy } from "@webpack";
 import { GuildStore, IconUtils, RelationshipStore, Tooltip, UserStore } from "@webpack/common";
-import ErrorBoundary from "@components/ErrorBoundary";
 
 import { Experiment, ExperimentPopulationRollout, fetchExperiments } from "./api";
 
@@ -64,8 +64,8 @@ let intervalId: ReturnType<typeof setInterval>;
 export default definePlugin({
     authors: [Devs.mantikafasi],
     name: "BetterExperiments",
-    description: "Makes guild experiments look better",
-
+    description: "Enhances the guild experiments panel with rollout info and bucket assignments.",
+    tags: ["Developers"],
     patches: [
         {
             find: "Guild Assignments",
