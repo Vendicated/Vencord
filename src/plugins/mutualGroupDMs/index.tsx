@@ -18,22 +18,25 @@
 
 import "./style.css";
 
+import { BaseText } from "@components/BaseText";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import { isNonNullish } from "@utils/guards";
 import { Logger } from "@utils/Logger";
 import definePlugin from "@utils/types";
-import { findByPropsLazy, findComponentByCodeLazy } from "@webpack";
-import { Avatar, ChannelStore, Clickable, IconUtils, RelationshipStore, ScrollerThin, useMemo, UserStore } from "@webpack/common";
-import { Channel, User } from "discord-types/general";
-import { JSX } from "react";
+import { Channel, User } from "@vencord/discord-types";
+import { findByPropsLazy, findCssClassesLazy } from "@webpack";
+import { Avatar, ChannelStore, Clickable, IconUtils, RelationshipStore, ScrollerThin, Text, useMemo, UserStore } from "@webpack/common";
+import { ComponentType, JSX } from "react";
 
 const SelectedChannelActionCreators = findByPropsLazy("selectPrivateChannel");
 const UserUtils = findByPropsLazy("getGlobalName");
 
-const ProfileListClasses = findByPropsLazy("emptyIconFriends", "emptyIconGuilds");
-const ExpandableList = findComponentByCodeLazy('"PRESS_SECTION"');
-const GuildLabelClasses = findByPropsLazy("guildNick", "guildAvatarWithoutIcon");
+const ProfileListClasses = findCssClassesLazy("empty", "textContainer", "connectionIcon");
+const TabBarClasses = findCssClassesLazy("tabPanelScroller", "tabBarPanel");
+const MutualsListClasses = findCssClassesLazy("row", "icon", "name", "details");
+
+let ExpandableList: ComponentType<any> = () => null;
 
 function getGroupDMName(channel: Channel) {
     return channel.name ||
@@ -59,7 +62,7 @@ function renderClickableGDMs(mutualDms: Channel[], onClose: () => void) {
     return mutualDms.map(c => (
         <Clickable
             key={c.id}
-            className={ProfileListClasses.listRow}
+            className={MutualsListClasses.row}
             onClick={() => {
                 onClose();
                 SelectedChannelActionCreators.selectPrivateChannel(c.id);
@@ -68,12 +71,12 @@ function renderClickableGDMs(mutualDms: Channel[], onClose: () => void) {
             <Avatar
                 src={IconUtils.getChannelIconURL({ id: c.id, icon: c.icon, size: 32 })}
                 size="SIZE_40"
-                className={ProfileListClasses.listAvatar}
+                className={MutualsListClasses.icon}
             >
             </Avatar>
-            <div className={ProfileListClasses.listRowContent}>
-                <div className={ProfileListClasses.listName}>{getGroupDMName(c)}</div>
-                <div className={GuildLabelClasses.guildNick}>{c.recipients.length + 1} Members</div>
+            <div className={MutualsListClasses.details}>
+                <div className={MutualsListClasses.name}>{getGroupDMName(c)}</div>
+                <Text variant="text-xs/medium">{c.recipients.length + 1} Members</Text>
             </div>
         </Clickable>
     ));
@@ -84,11 +87,13 @@ const IS_PATCHED = Symbol("MutualGroupDMs.Patched");
 export default definePlugin({
     name: "MutualGroupDMs",
     description: "Shows mutual group dms in profiles",
+    tags: ["Friends", "Appearance"],
     authors: [Devs.amia],
 
     patches: [
+        // User Profile Modal
         {
-            find: ".MUTUAL_FRIENDS?(",
+            find: ".BOT_DATA_ACCESS?(",
             replacement: [
                 {
                     match: /\i\.useEffect.{0,100}(\i)\[0\]\.section/,
@@ -101,9 +106,28 @@ export default definePlugin({
                 // Discord adds spacing between each item which pushes our tab off screen.
                 // set the gap to zero to ensure ours stays on screen
                 {
-                    match: /className:\i\.tabBar/,
-                    replace: "$& + ' vc-mutual-gdms-tab-bar'"
+                    match: /className:\i\.\i(?=,type:"top")/,
+                    replace: '$& + " vc-mutual-gdms-modal-tab-bar"'
                 }
+            ]
+        },
+        // User Profile Modal v2
+        {
+            find: ".WIDGETS?",
+            replacement: [
+                {
+                    match: /items:(\i),.+?(?=return\(0,\i\.jsxs?\)\("div)/,
+                    replace: "$&$self.pushSection($1,arguments[0].user);"
+                },
+                {
+                    match: /children:(?=.{0,100}?component:.+?section:(\i))/,
+                    replace: "$&$1==='MUTUAL_GDMS'?$self.renderMutualGDMs(arguments[0]):"
+                },
+                // Make the gap between each item smaller so our tab can fit.
+                {
+                    match: /type:"top",/,
+                    replace: '$&className:"vc-mutual-gdms-modal-v2-tab-bar",'
+                },
             ]
         },
         {
@@ -114,13 +138,21 @@ export default definePlugin({
                     replace: "$&||$self.getMutualGroupDms(arguments[0].user.id).length>0"
                 },
                 {
-                    match: /\.openUserProfileModal.+?\)}\)}\)(?<=,(\i)&&(\i)&&(\(0,\i\.jsxs?\)\(\i\.\i,{className:(\i)\.divider}\)).+?)/,
+                    match: /\.openUserProfileModal.+?\)}\)}\)(?<=,(\i)&&(\i)&&(\(0,\i\.jsxs?\)\(\i\.\i,{className:(\i)\.\i}\)).{0,50}?"MUTUAL_FRIENDS".+?)/,
                     replace: (m, hasMutualGuilds, hasMutualFriends, Divider, classes) => "" +
                         `${m},$self.renderDMPageList({user:arguments[0].user,hasDivider:${hasMutualGuilds}||${hasMutualFriends},Divider:${Divider},listStyle:${classes}.list})`
+                },
+                {
+                    match: /(?=function (\i)\(\i\){let{section:\i,header:\i[^}]+?onExpand:)/,
+                    replace: "$self.ExpandableList=$1;"
                 }
             ]
         }
     ],
+
+    set ExpandableList(value: any) {
+        ExpandableList = value;
+    },
 
     getMutualGroupDms(userId: string) {
         try {
@@ -138,8 +170,8 @@ export default definePlugin({
 
             sections[IS_PATCHED] = true;
             sections.push({
+                text: getMutualGDMCountText(user),
                 section: "MUTUAL_GDMS",
-                text: getMutualGDMCountText(user)
             });
         } catch (e) {
             new Logger("MutualGroupDMs").error("Failed to push mutual group dms section:", e);
@@ -152,7 +184,7 @@ export default definePlugin({
 
         return (
             <ScrollerThin
-                className={ProfileListClasses.listScroller}
+                className={TabBarClasses.tabPanelScroller}
                 fade={true}
                 onClose={onClose}
             >
@@ -160,8 +192,9 @@ export default definePlugin({
                     ? entries
                     : (
                         <div className={ProfileListClasses.empty}>
-                            <div className={ProfileListClasses.emptyIconFriends}></div>
-                            <div className={ProfileListClasses.emptyText}>No group dms in common</div>
+                            <div className={ProfileListClasses.textContainer}>
+                                <BaseText tag="h3" size="md" weight="medium" style={{ color: "var(--text-strong)" }}>You don't have any group chats in common</BaseText>
+                            </div>
                         </div>
                     )
                 }
@@ -184,5 +217,5 @@ export default definePlugin({
                 />
             </>
         );
-    })
+    }, { noop: true })
 });

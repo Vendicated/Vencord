@@ -24,9 +24,9 @@ import { saveFile } from "@utils/web";
 import { filters, mapMangledModuleLazy } from "@webpack";
 import { ComponentDispatch } from "@webpack/common";
 
-const ctxMenuCallbacks = mapMangledModuleLazy('.tagName)==="TEXTAREA"||', {
-    contextMenuCallbackWeb: filters.byCode('.tagName)==="INPUT"||'),
-    contextMenuCallbackNative: filters.byCode('.tagName)==="TEXTAREA"||')
+const ctxMenuCallbacks = mapMangledModuleLazy('closest("[contenteditable=true]")', {
+    contextMenuCallbackWeb: filters.byCode('"[contenteditable=true]"'),
+    contextMenuCallbackNative: filters.byCode('.getPropertyValue("-webkit-user-select")')
 });
 
 async function fetchImage(url: string) {
@@ -78,6 +78,7 @@ function fixImageUrl(urlString: string) {
 export default definePlugin({
     name: "WebContextMenus",
     description: "Re-adds context menus missing in the web version of Discord: Links & Images (Copy/Open Link/Image), Text Area (Copy, Cut, Paste, SpellCheck)",
+    tags: ["Utility"],
     authors: [Devs.Ven],
     enabledByDefault: true,
     required: IS_VESKTOP,
@@ -120,6 +121,19 @@ export default definePlugin({
             ]
         },
 
+        {
+            find: "Copy image not supported",
+            replacement: [
+                {
+                    match: /(?<=(?:canSaveImage|canCopyImage)\(.{0,120}?)!\i\.isPlatformEmbedded/g,
+                    replace: "false"
+                },
+                {
+                    match: /(?<=canCopyImage\(.+?)typeof \i\.clipboard\.copyImage/,
+                    replace: '"function"'
+                }
+            ]
+        },
         // Add back Copy & Save Image
         {
             find: 'id:"copy-image"',
@@ -130,16 +144,12 @@ export default definePlugin({
                     replace: "false"
                 },
                 {
-                    match: /return\s*?\[\i\.\i\.canCopyImage\(\)/,
-                    replace: "return [true"
+                    match: /(#{intl::COPY_IMAGE_MENU_ITEM}\),.{0,75}?)action:/,
+                    replace: "$1action:()=>$self.copyImage(arguments[0]),oldAction:"
                 },
                 {
-                    match: /(?<=#{intl::COPY_IMAGE_MENU_ITEM}\),)action:/,
-                    replace: "action:()=>$self.copyImage(arguments[0]),oldAction:"
-                },
-                {
-                    match: /(?<=#{intl::SAVE_IMAGE_MENU_ITEM}\),)action:/,
-                    replace: "action:()=>$self.saveImage(arguments[0]),oldAction:"
+                    match: /(#{intl::SAVE_IMAGE_MENU_ITEM}\),.{0,75}?)action:/,
+                    replace: "$1action:()=>$self.saveImage(arguments[0]),oldAction:"
                 },
             ]
         },

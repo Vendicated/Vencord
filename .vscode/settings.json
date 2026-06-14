@@ -13,11 +13,14 @@
     "typescript.format.semicolons": "insert",
     "typescript.preferences.quoteStyle": "double",
     "javascript.preferences.quoteStyle": "double",
-
     "gitlens.remotes": [
         {
             "domain": "codeberg.org",
             "type": "Gitea"
         }
-    ]
+    ],
+    "css.format.spaceAroundSelectorSeparator": true,
+    "[css]": {
+        "editor.defaultFormatter": "vscode.css-language-features"
+    }
 }

@@ -104,9 +104,7 @@ export default ErrorBoundary.wrap(function NotificationComponent({
                             </svg>
                         </button>
                     </div>
-                    <div>
-                        {richBody ?? <p className="vc-notification-p">{body}</p>}
-                    </div>
+                    {richBody ?? <p className="vc-notification-p">{body}</p>}
                 </div>
             </div>
             {image && <img className="vc-notification-img" src={image} alt="" />}

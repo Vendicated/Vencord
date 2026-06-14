@@ -4,22 +4,15 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { classNameFactory } from "@api/Styles";
-import { ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, openModalLazy } from "@utils/modal";
+import { DEFAULT_COLOR, SWATCHES } from "@plugins/pinDms/constants";
+import { categoryLen, createCategory, getCategory } from "@plugins/pinDms/data";
+import { classNameFactory } from "@utils/css";
+import { RenderModalProps } from "@vencord/discord-types";
 import { extractAndLoadChunksLazy, findComponentByCodeLazy } from "@webpack";
-import { Button, Forms, Text, TextInput, Toasts, useMemo, useState } from "@webpack/common";
-
-import { DEFAULT_COLOR, SWATCHES } from "../constants";
-import { categoryLen, createCategory, getCategory } from "../data";
-
-interface ColorPickerProps {
-    color: number | null;
-    showEyeDropper?: boolean;
-    suggestedColors?: string[];
-    onChange(value: number | null): void;
-}
+import { ColorPicker, Forms, Modal,openModalLazy, TextInput, Toasts, useMemo, useState } from "@webpack/common";
 
 interface ColorPickerWithSwatchesProps {
+    className?: string;
     defaultColor: number;
     colors: number[];
     value: number;
@@ -29,17 +22,16 @@ interface ColorPickerWithSwatchesProps {
     renderCustomButton?: () => React.ReactNode;
 }
 
-const ColorPicker = findComponentByCodeLazy<ColorPickerProps>("#{intl::USER_SETTINGS_PROFILE_COLOR_SELECT_COLOR}", ".BACKGROUND_PRIMARY)");
 const ColorPickerWithSwatches = findComponentByCodeLazy<ColorPickerWithSwatchesProps>('id:"color-picker"');
 
-export const requireSettingsMenu = extractAndLoadChunksLazy(['name:"UserSettings"'], /createPromise:.{0,20}(\i\.\i\("?.+?"?\).*?).then\(\i\.bind\(\i,"?(.+?)"?\)\).{0,50}"UserSettings"/);
+export const requireSettingsModal = extractAndLoadChunksLazy(['type:"USER_SETTINGS_MODAL_OPEN"']);
 
 const cl = classNameFactory("vc-pindms-modal-");
 
 interface Props {
     categoryId: string | null;
     initialChannelId: string | null;
-    modalProps: ModalProps;
+    modalProps: RenderModalProps;
 }
 
 function useCategory(categoryId: string | null, initalChannelId: string | null) {
@@ -67,9 +59,7 @@ export function NewCategoryModal({ categoryId, modalProps, initialChannelId }: P
     const [name, setName] = useState(category.name);
     const [color, setColor] = useState(category.color);
 
-    const onSave = (e: React.FormEvent<HTMLFormElement> | React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-        e.preventDefault();
-
+    const onSave = () => {
         category.name = name;
         category.color = color;
 
@@ -81,53 +71,57 @@ export function NewCategoryModal({ categoryId, modalProps, initialChannelId }: P
     };
 
     return (
-        <ModalRoot {...modalProps}>
-            <ModalHeader>
-                <Text variant="heading-lg/semibold" style={{ flexGrow: 1 }}>{categoryId ? "Edit" : "New"} Category</Text>
-            </ModalHeader>
-
-            {/* form is here so when you press enter while in the text input it submits */}
-            <form onSubmit={onSave}>
-                <ModalContent className={cl("content")}>
-                    <Forms.FormSection>
-                        <Forms.FormTitle>Name</Forms.FormTitle>
-                        <TextInput
-                            value={name}
-                            onChange={e => setName(e)}
-                        />
-                    </Forms.FormSection>
-                    <Forms.FormDivider />
-                    <Forms.FormSection>
-                        <Forms.FormTitle>Color</Forms.FormTitle>
-                        <ColorPickerWithSwatches
-                            key={category.id}
-                            defaultColor={DEFAULT_COLOR}
-                            colors={SWATCHES}
-                            onChange={c => setColor(c!)}
-                            value={color}
-                            renderDefaultButton={() => null}
-                            renderCustomButton={() => (
-                                <ColorPicker
-                                    color={color}
-                                    onChange={c => setColor(c!)}
-                                    key={category.id}
-                                    showEyeDropper={false}
-                                />
-                            )}
-                        />
-                    </Forms.FormSection>
-                </ModalContent>
-                <ModalFooter>
-                    <Button type="submit" onClick={onSave} disabled={!name}>{categoryId ? "Save" : "Create"}</Button>
-                </ModalFooter>
+        <Modal
+            {...modalProps}
+            title={`${categoryId ? "Edit" : "New"} Category`}
+            actions={[{
+                text: categoryId ? "Save" : "Create",
+                variant: "primary",
+                onClick: onSave,
+                disabled: !name
+            }]}
+        >
+            <form
+                className={cl("content")}
+                onSubmit={e => {
+                    e.preventDefault();
+                    onSave();
+                }}
+            >
+                <section>
+                    <Forms.FormTitle>Name</Forms.FormTitle>
+                    <TextInput
+                        value={name}
+                        onChange={e => setName(e)}
+                    />
+                </section>
+                <section>
+                    <Forms.FormTitle>Color</Forms.FormTitle>
+                    <ColorPickerWithSwatches
+                        className={cl("color-picker")}
+                        key={category.id}
+                        defaultColor={DEFAULT_COLOR}
+                        colors={SWATCHES}
+                        onChange={c => setColor(c!)}
+                        value={color}
+                        renderDefaultButton={() => null}
+                        renderCustomButton={() => (
+                            <ColorPicker
+                                color={color}
+                                onChange={c => setColor(c!)}
+                                key={category.id}
+                                showEyeDropper={false}
+                            />
+                        )}
+                    />
+                </section>
             </form>
-        </ModalRoot>
+        </Modal>
     );
 }
 
 export const openCategoryModal = (categoryId: string | null, channelId: string | null) =>
     openModalLazy(async () => {
-        await requireSettingsMenu();
+        await requireSettingsModal();
         return modalProps => <NewCategoryModal categoryId={categoryId} modalProps={modalProps} initialChannelId={channelId} />;
     });
-

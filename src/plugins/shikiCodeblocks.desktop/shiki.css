@@ -1,6 +1,6 @@
 .vc-shiki-container {
     border: 4px;
-    background-color: var(--background-secondary);
+    background-color: var(--background-base-lower);
 }
 
 .vc-shiki-root {

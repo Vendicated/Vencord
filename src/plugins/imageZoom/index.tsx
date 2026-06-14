@@ -18,11 +18,11 @@
 
 import { NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { definePluginSettings } from "@api/Settings";
-import { makeRange } from "@components/PluginSettings/components";
 import { debounce } from "@shared/debounce";
 import { Devs } from "@utils/constants";
+import { Logger } from "@utils/Logger";
 import definePlugin, { OptionType } from "@utils/types";
-import { Menu, ReactDOM } from "@webpack/common";
+import { createRoot, Menu } from "@webpack/common";
 import { JSX } from "react";
 import type { Root } from "react-dom/client";
 
@@ -58,14 +58,14 @@ export const settings = definePluginSettings({
     zoom: {
         description: "Zoom of the lens",
         type: OptionType.SLIDER,
-        markers: makeRange(1, 50, 4),
+        markers: [1, 5, 10, 20, 30, 40, 50],
         default: 2,
         stickToMarkers: false,
     },
     size: {
         description: "Radius / Size of the lens",
         type: OptionType.SLIDER,
-        markers: makeRange(50, 1000, 50),
+        markers: [50, 100, 250, 500, 750, 1000],
         default: 100,
         stickToMarkers: false,
     },
@@ -73,7 +73,7 @@ export const settings = definePluginSettings({
     zoomSpeed: {
         description: "How fast the zoom / lens size changes",
         type: OptionType.SLIDER,
-        markers: makeRange(0.1, 5, 0.2),
+        markers: [0.1, 0.5, 1, 2, 3, 4, 5],
         default: 0.5,
         stickToMarkers: false,
     },
@@ -156,35 +156,31 @@ const imageContextMenuPatch: NavContextMenuPatchCallback = (children, props) => 
 export default definePlugin({
     name: "ImageZoom",
     description: "Lets you zoom in to images and gifs. Use scroll wheel to zoom in and shift + scroll wheel to increase lens radius / size",
+    tags: ["Media", "Utility"],
     authors: [Devs.Aria],
-    tags: ["ImageUtilities"],
+    searchTerms: ["ImageUtilities"],
 
     managedStyle,
 
     patches: [
         {
-            find: ".dimensionlessImage,",
+            find: "disableArrowKeySeek:!0",
             replacement: [
                 {
-                    match: /className:\i\.media,/,
+                    match: /useFullWidth:!0,shouldLink:/,
                     replace: `id:"${ELEMENT_ID}",$&`
                 },
                 {
-                    // This patch needs to be above the next one as it uses the zoomed class as an anchor
-                    match: /\.zoomed]:.+?,(?=children:)/,
-                    replace: "$&onClick:()=>{},"
-                },
-                {
-                    match: /className:\i\(\)\(\i\.wrapper,.+?}\),/,
-                    replace: ""
-                },
+                    match: /(?<=null!=(\i)\?.{0,20})\i(?:\.\i)?,{children:\1/, // TODO: (?:\.\i)? is stable compat
+                    replace: "'div',{onClick:e=>e.stopPropagation(),children:$1"
+                }
             ]
         },
         // Make media viewer options not hide when zoomed in with the default Discord feature
         {
             find: '="FOCUS_SENSITIVE",',
             replacement: {
-                match: /(?<=\.hidden]:)\i/,
+                match: /(?<=\[\i\.\i]:)\i&&!\i&&"PINNED"!==\i/,
                 replace: "false"
             }
         },
@@ -237,12 +233,16 @@ export default definePlugin({
     },
 
     renderMagnifier(instance) {
-        if (instance.props.id === ELEMENT_ID) {
-            if (!this.currentMagnifierElement) {
-                this.currentMagnifierElement = <Magnifier size={settings.store.size} zoom={settings.store.zoom} instance={instance} />;
-                this.root = ReactDOM.createRoot(this.element!);
-                this.root.render(this.currentMagnifierElement);
+        try {
+            if (instance.props.id === ELEMENT_ID) {
+                if (!this.currentMagnifierElement) {
+                    this.currentMagnifierElement = <Magnifier size={settings.store.size} zoom={settings.store.zoom} instance={instance} />;
+                    this.root = createRoot(this.element!);
+                    this.root.render(this.currentMagnifierElement);
+                }
             }
+        } catch (error) {
+            new Logger("ImageZoom").error("Failed to render magnifier:", error);
         }
     },
 
