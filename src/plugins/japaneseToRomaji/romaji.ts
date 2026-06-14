@@ -4,8 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import * as wanakana from "wanakana";
-
+import { toRomaji } from "./kana";
 import { getKanjiReading } from "./kanji";
 
 const japaneseRegex = /[\u3040-\u30ff\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff]/;
@@ -53,11 +52,11 @@ function getCharReading(char: string, nextChar: string, isLastInBlock: boolean):
 
     if (char === "っ" || char === "ッ") {
         if (!nextChar || !kanaRegex.test(nextChar)) return "っ";
-        const nextReading = wanakana.toRomaji(nextChar);
+        const nextReading = toRomaji(nextChar);
         return nextReading ? nextReading[0] : "っ";
     }
 
-    const reading = wanakana.toRomaji(char);
+    const reading = toRomaji(char);
     return reading || char;
 }
 
@@ -114,7 +113,7 @@ export function renderRubyText(text: string, options: RenderOptions = {}): strin
                 if (j + 1 < jpBlock.length && isSmallKana(jpBlock[j + 1])) {
                     const digraph = c + jpBlock[j + 1];
                     if (annotateKana) {
-                        const reading = wanakana.toRomaji(digraph);
+                        const reading = toRomaji(digraph);
                         result += reading && reading !== digraph
                             ? `<ruby>${digraph}<rt>${reading}</rt></ruby>`
                             : escapeHtml(digraph);

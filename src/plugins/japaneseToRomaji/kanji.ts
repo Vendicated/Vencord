@@ -6,7 +6,7 @@
 
 // Source: scriptin/jmdict-simplified (kanjidic2-en)
 
-import * as wanakana from "wanakana";
+import { toRomaji } from "./kana";
 
 export interface KanjiInfo {
     on: string[];
@@ -74,23 +74,23 @@ export function getKanjiReading(char: string, preference: "kun" | "on" = "kun"):
 
     if (preference === "on") {
         if (info.o.length > 0) {
-            const reading = wanakana.toRomaji(info.o[0]);
+            const reading = toRomaji(info.o[0]);
             readingCache.set(key, reading);
             return reading;
         }
         if (info.k.length > 0) {
-            const reading = wanakana.toRomaji(info.k[0]);
+            const reading = toRomaji(info.k[0]);
             readingCache.set(key, reading);
             return reading;
         }
     } else {
         if (info.k.length > 0) {
-            const reading = wanakana.toRomaji(info.k[0]);
+            const reading = toRomaji(info.k[0]);
             readingCache.set(key, reading);
             return reading;
         }
         if (info.o.length > 0) {
-            const reading = wanakana.toRomaji(info.o[0]);
+            const reading = toRomaji(info.o[0]);
             readingCache.set(key, reading);
             return reading;
         }

@@ -28,9 +28,6 @@ importers:
       gifenc:
         specifier: github:mattdesl/gifenc#64842fca317b112a8590f8fef2bf3825da8f6fe3
         version: https://codeload.github.com/mattdesl/gifenc/tar.gz/64842fca317b112a8590f8fef2bf3825da8f6fe3
-      kuromoji:
-        specifier: ^0.1.2
-        version: 0.1.2
       monaco-editor:
         specifier: ^0.55.1
         version: 0.55.1
@@ -40,9 +37,6 @@ importers:
       virtual-merge:
         specifier: ^1.0.1
         version: 1.0.2
-      wanakana:
-        specifier: ^5.3.1
-        version: 5.3.1
     devDependencies:
       '@stylistic/eslint-plugin':
         specifier: ^5.10.0
@@ -1083,9 +1077,6 @@ packages:
   async@1.5.2:
     resolution: {integrity: sha512-nSVgobk4rv61R9PUSDtYt7mPVB2olxNR5RWJcAsH676/ef11bUZwvu7+RGYrYauVdDPcO519v68wRhXQtxsV9w==}
 
-  async@2.6.4:
-    resolution: {integrity: sha512-mzo5dfJYwAn29PeiJ0zvwTo04zj8HDJj0Mn8TD7sno7q12prdbnasKJHhkm2c1LgrhlJ0teaea8860oxi51mGA==}
-
   atob@2.1.2:
     resolution: {integrity: sha512-Wm6ukoaOGJi/73p/cl2GvLjTI5JM1k/O14isD73YML8StrH/7/lRFgmg8nICZgD3bZZvjwCGxtMOD3wWNAu8cg==}
     engines: {node: '>= 4.5.0'}
@@ -1419,9 +1410,6 @@ packages:
 
   dot-case@3.0.4:
     resolution: {integrity: sha512-Kv5nKlh6yRrdrGvxeJ2e5y2eRUpkUosIW4A2AS38zwSz27zu7ufDwQPi5Jhs3XAlGNetl3bmnGhQsMtkKJnj3w==}
-
-  doublearray@0.0.2:
-    resolution: {integrity: sha512-aw55FtZzT6AmiamEj2kvmR6BuFqvYgKZUkfQ7teqVRNqD5UE0rw8IeW/3gieHNKQ5sPuDKlljWEn4bzv5+1bHw==}
 
   dunder-proto@1.0.1:
     resolution: {integrity: sha512-KIN/nDJBQRcXw0MLVhZE9iQHmG68qAVIBg9CqmUYjmQIhgij9U5MFvrqkUL5FbtyyzZuOeOt0zdeRe4UY7ct+A==}
@@ -2205,9 +2193,6 @@ packages:
     resolution: {integrity: sha512-dcS1ul+9tmeD95T+x28/ehLgd9mENa3LsvDTtzm3vyBEO7RPptvAD+t44WVXaUjTBRcrpFeFlC8WCruUR456hw==}
     engines: {node: '>=0.10.0'}
 
-  kuromoji@0.1.2:
-    resolution: {integrity: sha512-V0dUf+C2LpcPEXhoHLMAop/bOht16Dyr+mDiIE39yX3vqau7p80De/koFqpiTcL1zzdZlc3xuHZ8u5gjYRfFaQ==}
-
   levn@0.4.1:
     resolution: {integrity: sha512-+bT2uH4E5LGE7h/n3evcS/sQlJXCpIp6ym8OWJ5eV6+67Dsql/LaaT7qJBAt2rzfoa/5QBGBhxDix1dMt2kQKQ==}
     engines: {node: '>= 0.8.0'}
@@ -2221,9 +2206,6 @@ packages:
 
   lodash.truncate@4.4.2:
     resolution: {integrity: sha512-jttmRe7bRse52OsWIMDLaXxWqRAmtIUccAQ3garviCqJjafXOfNMO0yMfNpdD6zbGaTU0P5Nz7e7gAT6cKmJRw==}
-
-  lodash@4.18.1:
-    resolution: {integrity: sha512-dMInicTPVE8d1e5otfwmmjlxkZoUpiVLwyeTdUsi/Caj/gfzzblBcCE5sRHV/AsjuCmxWrte2TNGSYuCeCq+0Q==}
 
   loose-envify@1.4.0:
     resolution: {integrity: sha512-lyuxPGr/Wfhrlem2CL/UcnUc1zcqKAImBDzukY7Y5F/yQiNdko6+fRLevlw1HgMySw7f611UIY408EtxRSoK3Q==}
@@ -3001,10 +2983,6 @@ packages:
   vscode-textmate@5.2.0:
     resolution: {integrity: sha512-Uw5ooOQxRASHgu6C7GVvUxisKXfSgW4oFlO+aa+PAkgmH89O3CXxEEzNRNtHSqtXFTl0nAC1uYj0GMSH27uwtQ==}
 
-  wanakana@5.3.1:
-    resolution: {integrity: sha512-OSDqupzTlzl2LGyqTdhcXcl6ezMiFhcUwLBP8YKaBIbMYW1wAwDvupw2T9G9oVaKT9RmaSpyTXjxddFPUcFFIw==}
-    engines: {node: '>=12'}
-
   webdriver-bidi-protocol@0.4.1:
     resolution: {integrity: sha512-ARrjNjtWRRs2w4Tk7nqrf2gBI0QXWuOmMCx2hU+1jUt6d00MjMxURrhxhGbrsoiZKJrhTSTzbIrc554iKI10qw==}
 
@@ -3094,9 +3072,6 @@ packages:
 
   zip-local@0.3.5:
     resolution: {integrity: sha512-GRV3D5TJY+/PqyeRm5CYBs7xVrKTKzljBoEXvocZu0HJ7tPEcgpSOYa2zFIsCZWgKWMuc4U3yMFgFkERGFIB9w==}
-
-  zlibjs@0.3.1:
-    resolution: {integrity: sha512-+J9RrgTKOmlxFSDHo0pI1xM6BLVUv+o0ZT9ANtCxGkjIVCCUdx9alUF8Gm+dGLKbkkkidWIHFDZHDMpfITt4+w==}
 
   zod@3.25.76:
     resolution: {integrity: sha512-gzUt/qt81nXsFGKIFcC3YnfEAx5NkunCfnDlvuBSSFS02bcXu4Lmea0AFIUwbLWxWPx3d9p8S5QoaujKcNQxcQ==}
@@ -3804,10 +3779,6 @@ snapshots:
 
   async@1.5.2: {}
 
-  async@2.6.4:
-    dependencies:
-      lodash: 4.18.1
-
   atob@2.1.2: {}
 
   available-typed-arrays@1.0.7:
@@ -4144,8 +4115,6 @@ snapshots:
     dependencies:
       no-case: 3.0.4
       tslib: 2.8.1
-
-  doublearray@0.0.2: {}
 
   dunder-proto@1.0.1:
     dependencies:
@@ -5181,12 +5150,6 @@ snapshots:
 
   kind-of@6.0.3: {}
 
-  kuromoji@0.1.2:
-    dependencies:
-      async: 2.6.4
-      doublearray: 0.0.2
-      zlibjs: 0.3.1
-
   levn@0.4.1:
     dependencies:
       prelude-ls: 1.2.1
@@ -5199,8 +5162,6 @@ snapshots:
       p-locate: 5.0.0
 
   lodash.truncate@4.4.2: {}
-
-  lodash@4.18.1: {}
 
   loose-envify@1.4.0:
     dependencies:
@@ -6154,8 +6115,6 @@ snapshots:
 
   vscode-textmate@5.2.0: {}
 
-  wanakana@5.3.1: {}
-
   webdriver-bidi-protocol@0.4.1: {}
 
   which-boxed-primitive@1.1.1:
@@ -6266,7 +6225,5 @@ snapshots:
       graceful-fs: 4.2.11
       jszip: 2.7.0
       q: 1.5.1
-
-  zlibjs@0.3.1: {}
 
   zod@3.25.76: {}

@@ -11,6 +11,7 @@ import ErrorBoundary from "@components/ErrorBoundary";
 import definePlugin, { OptionType } from "@utils/types";
 import { useLayoutEffect, useRef, useState } from "@webpack/common";
 
+import { loadKanaMap } from "./kana";
 import type { KanjiInfo } from "./kanji";
 // eslint-disable-next-line no-duplicate-imports
 import { isDictReady, loadDict, lookupKanji, onReady } from "./kanji";
@@ -60,6 +61,11 @@ const settings = definePluginSettings({
         default: "https://raw.githubusercontent.com/RaylaValdez/jp-kanji/refs/heads/main/kanji.json",
         description: "URL to fetch the kanji dictionary JSON from",
     },
+    kanaUrl: {
+        type: OptionType.STRING,
+        default: "https://raw.githubusercontent.com/RaylaValdez/jp-kanji/refs/heads/main/kana.json",
+        description: "URL to fetch the kana→romaji mapping JSON from",
+    },
 });
 
 interface RubyAnnotatorProps {
@@ -82,6 +88,7 @@ const RubyAnnotator: React.FC<RubyAnnotatorProps> = ({ message }) => {
 
     useLayoutEffect(() => {
         loadDict(settings.store.dictUrl);
+        loadKanaMap(settings.store.kanaUrl);
         onReady(() => setDictReady(true));
     }, []);
 
