@@ -70,6 +70,10 @@ window.VencordNative = {
         onRendererCssUpdate: NOOP,
     },
 
+    monaco: {
+        addContentChangeListener: () => NOOP,
+    },
+
     updater: {
         getRepo: async () => ({ ok: true, value: "https://github.com/Vendicated/Vencord" }),
         getUpdates: async () => ({ ok: true, value: [] }),

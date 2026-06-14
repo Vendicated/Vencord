@@ -1,0 +1,47 @@
+.vc-activityUserScripts-root {
+    width: 100%;
+}
+
+.vc-activityUserScripts-card {
+    padding: 12px;
+}
+
+.vc-activityUserScripts-row {
+    min-width: 0;
+}
+
+.vc-activityUserScripts-rowInfo {
+    min-width: 0;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.vc-activityUserScripts-rowInfo div,
+.vc-activityUserScripts-rowInfo span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.vc-activityUserScripts-switchLine {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--text-normal);
+}
+
+.vc-activityUserScripts-runAtGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 8px;
+}
+
+.vc-activityUserScripts-code textarea,
+.vc-activityUserScripts-code {
+    min-height: 340px;
+    font-family: var(--font-code);
+    font-size: 12px;
+    line-height: 1.45;
+}

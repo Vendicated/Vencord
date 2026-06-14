@@ -36,6 +36,13 @@ import { ensureSafePath } from "./utils/ensureSafePath";
 import { makeLinksOpenExternally } from "./utils/externalLinks";
 
 const RENDERER_CSS_PATH = join(__dirname, IS_VESKTOP ? "vencordDesktopRenderer.css" : "renderer.css");
+const monacoEditorConfigs = new Map<number, {
+    title: string;
+    language: string;
+    getContent(): Promise<string> | string;
+    setContent(content: string): Promise<void> | void;
+    onContentChanged?(content: string): void;
+}>();
 
 mkdirSync(THEMES_DIR, { recursive: true });
 
@@ -146,8 +153,39 @@ ipcMain.on(IpcEvents.GET_MONACO_THEME, e => {
     e.returnValue = nativeTheme.shouldUseDarkColors ? "vs-dark" : "vs-light";
 });
 
-ipcMain.handle(IpcEvents.OPEN_MONACO_EDITOR, async () => {
-    const title = "Vencord QuickCSS Editor";
+ipcMain.handle(IpcEvents.GET_MONACO_EDITOR_CONTENT, event => {
+    const config = monacoEditorConfigs.get(event.sender.id);
+    if (!config) throw new Error("No Monaco editor config found");
+    return config.getContent();
+});
+
+ipcMain.handle(IpcEvents.SET_MONACO_EDITOR_CONTENT, async (event, content: string) => {
+    const config = monacoEditorConfigs.get(event.sender.id);
+    if (!config) throw new Error("No Monaco editor config found");
+    await config.setContent(content);
+    config.onContentChanged?.(content);
+});
+
+ipcMain.handle(IpcEvents.GET_MONACO_EDITOR_LANGUAGE, event => {
+    const config = monacoEditorConfigs.get(event.sender.id);
+    if (!config) throw new Error("No Monaco editor config found");
+    return config.language;
+});
+
+ipcMain.handle(IpcEvents.GET_MONACO_EDITOR_TITLE, event => {
+    const config = monacoEditorConfigs.get(event.sender.id);
+    if (!config) throw new Error("No Monaco editor config found");
+    return config.title;
+});
+
+export async function openMonacoEditor(options: {
+    title: string;
+    language: string;
+    getContent: () => Promise<string> | string;
+    setContent: (content: string) => Promise<void> | void;
+    onContentChanged?: (content: string) => void;
+}) {
+    const { title } = options;
     const existingWindow = BrowserWindow.getAllWindows().find(w => w.title === title);
     if (existingWindow && !existingWindow.isDestroyed()) {
         existingWindow.focus();
@@ -169,8 +207,19 @@ ipcMain.handle(IpcEvents.OPEN_MONACO_EDITOR, async () => {
 
     makeLinksOpenExternally(win);
 
+    const webContentsId = win.webContents.id;
+    monacoEditorConfigs.set(webContentsId, options);
+    win.once("closed", () => monacoEditorConfigs.delete(webContentsId));
+
     await win.loadURL(`data:text/html;base64,${monacoHtml}`);
-});
+}
+
+ipcMain.handle(IpcEvents.OPEN_MONACO_EDITOR, () => openMonacoEditor({
+    title: "Vencord QuickCSS Editor",
+    language: "css",
+    getContent: readCss,
+    setContent: css => writeFileSync(QUICK_CSS_PATH, css),
+}));
 
 ipcMain.handle(IpcEvents.GET_RENDERER_CSS, () => readFile(RENDERER_CSS_PATH, "utf-8"));
 

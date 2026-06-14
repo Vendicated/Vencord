@@ -88,6 +88,16 @@ export default {
         }
     },
 
+    monaco: {
+        addContentChangeListener(cb: (editorId: string, content: string) => void) {
+            const listener = (_: Electron.IpcRendererEvent, editorId: string, content: string) => cb(editorId, content);
+            ipcRenderer.on(IpcEvents.MONACO_EDITOR_CONTENT_CHANGED, listener);
+            return () => {
+                ipcRenderer.off(IpcEvents.MONACO_EDITOR_CONTENT_CHANGED, listener);
+            };
+        },
+    },
+
     csp: {
         /**
          * Note: Only supports full explicit matches, not wildcards.

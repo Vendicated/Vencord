@@ -43,6 +43,11 @@ export const enum IpcEvents {
 
     OPEN_MONACO_EDITOR = "VencordOpenMonacoEditor",
     GET_MONACO_THEME = "VencordGetMonacoTheme",
+    GET_MONACO_EDITOR_CONTENT = "VencordGetMonacoEditorContent",
+    SET_MONACO_EDITOR_CONTENT = "VencordSetMonacoEditorContent",
+    GET_MONACO_EDITOR_LANGUAGE = "VencordGetMonacoEditorLanguage",
+    GET_MONACO_EDITOR_TITLE = "VencordGetMonacoEditorTitle",
+    MONACO_EDITOR_CONTENT_CHANGED = "VencordMonacoEditorContentChanged",
 
     GET_PLUGIN_IPC_METHOD_MAP = "VencordGetPluginIpcMethodMap",
 

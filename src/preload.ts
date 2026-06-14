@@ -16,11 +16,37 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { debounce } from "@shared/debounce";
 import { IpcEvents } from "@shared/IpcEvents";
 import { contextBridge, webFrame } from "electron/renderer";
 
 import VencordNative, { invoke, sendSync } from "./VencordNative";
+
+function debounceWithFlush<T extends (...args: any[]) => unknown>(func: T, delay = 300) {
+    let timeout: NodeJS.Timeout | undefined;
+    let lastArgs: Parameters<T> | undefined;
+
+    function flush() {
+        if (!timeout) return;
+
+        clearTimeout(timeout);
+        timeout = undefined;
+        func(...lastArgs!);
+        lastArgs = undefined;
+    }
+
+    function debounced(...args: Parameters<T>) {
+        lastArgs = args;
+        clearTimeout(timeout);
+        timeout = setTimeout(() => {
+            timeout = undefined;
+            func(...args);
+            lastArgs = undefined;
+        }, delay);
+    }
+
+    debounced.flush = flush;
+    return debounced;
+}
 
 contextBridge.exposeInMainWorld("VencordNative", VencordNative);
 
@@ -35,7 +61,12 @@ if (location.protocol !== "data:") {
     }
 } // Monaco popout
 else {
-    contextBridge.exposeInMainWorld("setCss", debounce(VencordNative.quickCss.set));
-    contextBridge.exposeInMainWorld("getCurrentCss", VencordNative.quickCss.get);
+    const setContent = debounceWithFlush((content: string) => invoke(IpcEvents.SET_MONACO_EDITOR_CONTENT, content));
+    window.addEventListener("beforeunload", setContent.flush);
+
+    contextBridge.exposeInMainWorld("setContent", setContent);
+    contextBridge.exposeInMainWorld("getCurrentContent", () => invoke<string>(IpcEvents.GET_MONACO_EDITOR_CONTENT));
+    contextBridge.exposeInMainWorld("getLanguage", () => invoke<string>(IpcEvents.GET_MONACO_EDITOR_LANGUAGE));
+    contextBridge.exposeInMainWorld("getTitle", () => invoke<string>(IpcEvents.GET_MONACO_EDITOR_TITLE));
     contextBridge.exposeInMainWorld("getTheme", VencordNative.quickCss.getEditorTheme);
 }

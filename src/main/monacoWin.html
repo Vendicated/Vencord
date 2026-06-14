@@ -2,7 +2,7 @@
 <html lang="en">
     <head>
         <meta charset="utf-8" />
-        <title>Vencord QuickCSS Editor</title>
+        <title>Vencord Editor</title>
         <link
             rel="stylesheet"
             href="https://cdn.jsdelivr.net/npm/monaco-editor@0.50.0/min/vs/editor/editor.main.css"
@@ -43,17 +43,19 @@
             });
 
             require(["vs/editor/editor.main"], () => {
-                getCurrentCss().then((css) => {
+                Promise.all([getTitle(), getCurrentContent(), getLanguage()]).then(([title, content, language]) => {
+                    document.title = title;
+
                     var editor = monaco.editor.create(
                         document.getElementById("container"),
                         {
-                            value: css,
-                            language: "css",
+                            value: content,
+                            language,
                             theme: getTheme(),
                         }
                     );
                     editor.onDidChangeModelContent(() =>
-                        setCss(editor.getValue())
+                        setContent(editor.getValue())
                     );
                     window.addEventListener("resize", () => {
                         // make monaco re-layout
