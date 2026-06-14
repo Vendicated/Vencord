@@ -68,7 +68,7 @@ const getFontSize = (s: string) => {
     return sizes[s.length] ?? 10;
 };
 
-function GuildIcon({ guild, tooltipProps }: { guild: Guild; tooltipProps: Record<string, unknown>; }) {
+function GuildIcon({ guild, tooltipProps }: { guild: Guild; tooltipProps: HTMLAttributes<HTMLElement>; }) {
     if (guild.icon) {
         return (
             <img
