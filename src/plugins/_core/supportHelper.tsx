@@ -317,7 +317,7 @@ export default definePlugin({
             }
         }
 
-        if (props.message.author.id === VENBOT_USER_ID && (props.channel.parent_id === KNOWN_ISSUES_CHANNEL_ID || props.channel.parent_id === SUPPORT_CATEGORY_ID)) {
+        if (props.channel.parent_id === KNOWN_ISSUES_CHANNEL_ID || (props.channel.parent_id === SUPPORT_CATEGORY_ID && props.message.author.id === VENBOT_USER_ID)) {
             const match = CodeBlockRe.exec(props.message.content || props.message.embeds[0]?.rawDescription || "");
             if (match) {
                 buttons.push(
