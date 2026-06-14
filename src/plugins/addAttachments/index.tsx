@@ -7,8 +7,8 @@
 import { UploadIcon } from "@components/Icons";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
-import { ChannelStore, MessageStore, PermissionsBits, PermissionStore, SelectedChannelStore, showToast, Toasts, UserStore } from "@webpack/common";
-import { Common, findByPropsLazy } from "@webpack";
+import { ChannelStore, MessageStore, PermissionsBits, PermissionStore, RestAPI, SelectedChannelStore, showToast, Toasts, UserStore } from "@webpack/common";
+import { findByPropsLazy } from "@webpack";
 
 const uniqueIdProp = findByPropsLazy("uniqueId");
 
@@ -58,7 +58,7 @@ export default definePlugin({
                 is_clip: false
             }));
 
-            const attachmentsReq = (await Common.RestAPI.post({
+            const attachmentsReq = (await RestAPI.post({
                 url: `/channels/${channelId}/attachments`,
                 body: { files }
             })).body.attachments as { id: string, upload_url: string, upload_filename: string }[];
