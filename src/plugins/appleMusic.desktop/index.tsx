@@ -5,11 +5,12 @@
  */
 
 import { definePluginSettings } from "@api/Settings";
+import { Paragraph } from "@components/Paragraph";
 import { Devs, IS_MAC } from "@utils/constants";
 import definePlugin, { OptionType, PluginNative, ReporterTestable } from "@utils/types";
 import { Activity, ActivityAssets, ActivityButton } from "@vencord/discord-types";
 import { ActivityFlags, ActivityStatusDisplayType, ActivityType } from "@vencord/discord-types/enums";
-import { ApplicationAssetUtils, FluxDispatcher, Forms } from "@webpack/common";
+import { ApplicationAssetUtils, FluxDispatcher } from "@webpack/common";
 
 const Native = VencordNative.pluginHelpers.AppleMusicRichPresence as PluginNative<typeof import("./native")>;
 
@@ -19,6 +20,7 @@ export interface TrackData {
     artist?: string;
 
     appleMusicLink?: string;
+    appleMusicArtistLink?: string;
     songLink?: string;
 
     albumArtwork?: string;
@@ -29,6 +31,12 @@ export interface TrackData {
 }
 
 const enum AssetImageType {
+    Album = "Album",
+    Artist = "Artist",
+    Disabled = "Disabled"
+}
+
+const enum LinkType {
     Album = "Album",
     Artist = "Artist",
     Disabled = "Disabled"
@@ -104,6 +112,24 @@ const settings = definePluginSettings({
         description: "Activity state format string",
         default: "{artist} · {album}"
     },
+    detailsLink: {
+        type: OptionType.SELECT,
+        description: "Activity details link",
+        options: [
+            { label: "Album", value: LinkType.Album, default: true },
+            { label: "Artist", value: LinkType.Artist },
+            { label: "Disabled", value: LinkType.Disabled }
+        ],
+    },
+    stateLink: {
+        type: OptionType.SELECT,
+        description: "Activity state link",
+        options: [
+            { label: "Album", value: LinkType.Album },
+            { label: "Artist", value: LinkType.Artist, default: true },
+            { label: "Disabled", value: LinkType.Disabled }
+        ],
+    },
     largeImageType: {
         type: OptionType.SELECT,
         description: "Activity assets large image type",
@@ -117,6 +143,15 @@ const settings = definePluginSettings({
         type: OptionType.STRING,
         description: "Activity assets large text format string",
         default: "{album}"
+    },
+    largeImageLink: {
+        type: OptionType.SELECT,
+        description: "Activity assets large image link",
+        options: [
+            { label: "Album", value: LinkType.Album, default: true },
+            { label: "Artist", value: LinkType.Artist },
+            { label: "Disabled", value: LinkType.Disabled }
+        ],
     },
     smallImageType: {
         type: OptionType.SELECT,
@@ -132,6 +167,15 @@ const settings = definePluginSettings({
         description: "Activity assets small text format string",
         default: "{artist}"
     },
+    smallImageLink: {
+        type: OptionType.SELECT,
+        description: "Activity assets small image link",
+        options: [
+            { label: "Album", value: LinkType.Album },
+            { label: "Artist", value: LinkType.Artist, default: true },
+            { label: "Disabled", value: LinkType.Disabled }
+        ],
+    },
 });
 
 function customFormat(formatStr: string, data: TrackData) {
@@ -139,6 +183,14 @@ function customFormat(formatStr: string, data: TrackData) {
         .replaceAll("{name}", data.name)
         .replaceAll("{album}", data.album ?? "")
         .replaceAll("{artist}", data.artist ?? "");
+}
+
+function getLink(type: LinkType, data: TrackData) {
+    return type === LinkType.Album
+        ? data.appleMusicLink
+        : type === LinkType.Artist
+            ? data.appleMusicArtistLink
+            : undefined;
 }
 
 function getImageAsset(type: AssetImageType, data: TrackData) {
@@ -161,10 +213,10 @@ export default definePlugin({
 
     settingsAboutComponent() {
         return <>
-            <Forms.FormText>
+            <Paragraph>
                 For the customizable activity format strings, you can use several special strings to include track data in activities!{" "}
                 <code>{"{name}"}</code> is replaced with the track name; <code>{"{artist}"}</code> is replaced with the artist(s)' name(s); and <code>{"{album}"}</code> is replaced with the album name.
-            </Forms.FormText>
+            </Paragraph>
         </>;
     },
 
@@ -200,11 +252,13 @@ export default definePlugin({
         if (settings.store.largeImageType !== AssetImageType.Disabled) {
             assets.large_image = largeImageAsset;
             if (!isRadio) assets.large_text = customFormat(settings.store.largeTextString, trackData);
+            assets.large_url = getLink(settings.store.largeImageLink, trackData);
         }
 
         if (settings.store.smallImageType !== AssetImageType.Disabled) {
             assets.small_image = smallImageAsset;
             if (!isRadio) assets.small_text = customFormat(settings.store.smallTextString, trackData);
+            assets.small_url = getLink(settings.store.smallImageLink, trackData);
         }
 
         const buttons: ActivityButton[] = [];
@@ -229,6 +283,8 @@ export default definePlugin({
             name: customFormat(settings.store.nameString, trackData),
             details: customFormat(settings.store.detailsString, trackData),
             state: isRadio ? undefined : customFormat(settings.store.stateString, trackData),
+            details_url: getLink(settings.store.detailsLink, trackData),
+            state_url: getLink(settings.store.stateLink, trackData),
 
             timestamps: (trackData.playerPosition && trackData.duration && settings.store.enableTimestamps) ? {
                 start: Date.now() - (trackData.playerPosition * 1000),
