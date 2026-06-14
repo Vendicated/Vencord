@@ -1,0 +1,99 @@
+.vc-codexpet-picker {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+.vc-codexpet-hint {
+    color: var(--text-muted);
+}
+
+.vc-codexpet-empty {
+    color: var(--text-muted);
+    font-size: 13px;
+}
+
+.vc-codexpet-desc {
+    color: var(--text-muted);
+    max-height: 72px;
+    overflow-y: auto;
+}
+
+.vc-plugin-modal-about-box:has(.vc-codexpet-about) {
+    margin: 0 !important;
+    padding: 0 !important;
+    border: none !important;
+}
+
+.vc-codexpet-about {
+    position: relative;
+    height: 0;
+}
+
+.vc-codexpet-floating {
+    position: absolute;
+    top: -4px;
+    right: 8px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    pointer-events: none;
+    z-index: 1;
+}
+
+.vc-codexpet-sprite {
+    background-repeat: no-repeat;
+}
+
+.vc-codexpet-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    margin-top: 8px;
+}
+
+.vc-codexpet-slider-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-height: 24px;
+}
+
+.vc-codexpet-slider-label {
+    width: 46px;
+    flex: 0 0 auto;
+    line-height: 1;
+    color: var(--header-secondary);
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.vc-codexpet-slider {
+    flex: 1;
+    margin: 0;
+}
+
+.vc-codexpet-slider-value {
+    width: 30px;
+    flex: 0 0 auto;
+    line-height: 1;
+    text-align: right;
+    white-space: nowrap;
+    color: var(--text-muted);
+    font-size: 13px;
+    font-variant-numeric: tabular-nums;
+}
+
+.vc-codexpet-toggles {
+    display: flex;
+    gap: 24px;
+    margin-top: 12px;
+}
+
+.vc-codexpet-check-label {
+    color: var(--text-normal);
+    font-size: 14px;
+}
