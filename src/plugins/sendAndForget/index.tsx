@@ -14,6 +14,7 @@ export default definePlugin({
     name: "NoFollowForwards",
     description: "After forwarding a single message, don't jump to it. Hold shift to ignore this behavior",
     authors: [Devs.Sqaaakoi, Devs.sadan],
+    tags: ["Chat", "Utility"],
 
     patches: [
         {
