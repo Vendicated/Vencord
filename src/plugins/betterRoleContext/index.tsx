@@ -219,7 +219,7 @@ export default definePlugin({
             }
         },
         // Conflicts with RoleColorEverywhere which changes the code at the end of our match. (and also uses same find & similar match)
-        // However, "BetterRoleContext" applies first (alphabetic order), so it's not an issue
+        // However, BetterRoleContext applies first (alphabetic order), so it's not an issue
         {
             find: 'tutorialId:"whos-online',
             replacement: {
