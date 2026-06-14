@@ -171,22 +171,15 @@ export function buildExtraRoleContextMenuItems(role: Role, guild: Guild, popoutR
     return { before, after };
 }
 
-export function openRoleContextMenu(event: React.MouseEvent<HTMLElement>, guildId: string, roleId: string) {
-    event.preventDefault();
-    event.stopPropagation();
-
+export function openRoleContextMenu(event: React.MouseEvent<HTMLElement>, { guildId, id: roleId }: { guildId: string; id: string; }) {
     const guild = getCurrentGuild();
-
     if (!guild || guild.id !== guildId) return;
 
-    const role = GuildRoleStore.getRole(guild.id, roleId);
+    const role = GuildRoleStore.getRole(guildId, roleId);
     if (!role) return;
 
-    const popoutRef = {
-        current: event.currentTarget
-    } as React.RefObject<HTMLElement>;
-
     ContextMenuApi.openContextMenu(event, () => {
+        const popoutRef = useRef(null);
         const { before, after } = buildExtraRoleContextMenuItems(role, guild, popoutRef);
 
         return (
@@ -225,11 +218,13 @@ export default definePlugin({
                 replace: "$self.RoleMembers=$1;$&"
             }
         },
+        // Conflicts with RoleColorEverywhere which changes the code at the end of our match. (and also uses same find & similar match)
+        // However, "BetterRoleContext" applies first (alphabetic order), so it's not an issue
         {
             find: 'tutorialId:"whos-online',
             replacement: {
-                match: /let\{id:(\i),title:(\i),count:(\i),guildId:(\i),className:(\i)\}=(\i),(.+?)("aria-hidden":!0,)children:/,
-                replace: "let{id:$1,title:$2,count:$3,guildId:$4,className:$5}=$6,$7$8onContextMenu:e=>$self.openRoleContextMenu(e,$4,$1),children:"
+                match: /(?<=#{intl::CHANNEL_MEMBERS_A11Y_LABEL}.{0,200}?"aria-hidden":!0,)children:.{0,200}?(?:—|\\u2014) ",\i\]\}\)\]/,
+                replace: "onContextMenu:e=>$self.openRoleContextMenu(e,arguments[0]),$&"
             }
         }
     ],
