@@ -367,6 +367,8 @@ export interface PluginSettingComponentProps {
      * The options object
      */
     option: PluginSettingComponentDef;
+    /** Close the plugin settings modal */
+    closePluginSettings(): void;
 }
 
 /** Maps a `PluginSettingDef` to its value type */
