@@ -22,6 +22,7 @@ import definePlugin from "@utils/types";
 export default definePlugin({
     name: "AlwaysAnimate",
     description: "Animates anything that can be animated",
+    tags: ["Appearance", "Fun"],
     authors: [Devs.FieryFlames],
 
     patches: [
@@ -43,16 +44,24 @@ export default definePlugin({
             // Status emojis
             find: "#{intl::GUILD_OWNER}),children:",
             replacement: {
-                match: /(\.CUSTOM_STATUS.+?animate:)\i/,
-                replace: (_, rest) => `${rest}!0`
+                match: /(\.CUSTOM_STATUS.+?animateEmoji:)\i/,
+                replace: "$1!0"
             }
         },
         {
             // Guild Banner
-            find: ".animatedBannerHoverLayer,onMouseEnter:",
+            find: "#{intl::DISCOVERABLE_GUILD_HEADER_PUBLIC_INFO}",
             replacement: {
-                match: /(?<=guildBanner:\i,animate:)\i(?=}\))/,
-                replace: "!0"
+                match: /(guildBanner:\i,animate:)\i(?=}\):null)/,
+                replace: "$1!0"
+            }
+        },
+        {
+            // Nameplates
+            find: ".MINI_PREVIEW,[",
+            replacement: {
+                match: /animate:\i,loop:/,
+                replace: "animate:true,loop:true,_loop:"
             }
         }
     ]

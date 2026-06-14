@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { get } from "@main/utils/simpleGet";
+import { fetchBuffer, fetchJson } from "@main/utils/http";
 import { IpcEvents } from "@shared/IpcEvents";
 import { VENCORD_USER_AGENT } from "@shared/vencordUserAgent";
 import { ipcMain } from "electron";
@@ -31,8 +31,8 @@ import { serializeErrors, VENCORD_FILES } from "./common";
 const API_BASE = `https://api.github.com/repos/${gitRemote}`;
 let PendingUpdates = [] as [string, string][];
 
-async function githubGet(endpoint: string) {
-    return get(API_BASE + endpoint, {
+async function githubGet<T = any>(endpoint: string) {
+    return fetchJson<T>(API_BASE + endpoint, {
         headers: {
             Accept: "application/vnd.github+json",
             // "All API requests MUST include a valid User-Agent header.
@@ -46,9 +46,8 @@ async function calculateGitChanges() {
     const isOutdated = await fetchUpdates();
     if (!isOutdated) return [];
 
-    const res = await githubGet(`/compare/${gitHash}...HEAD`);
+    const data = await githubGet(`/compare/${gitHash}...HEAD`);
 
-    const data = JSON.parse(res.toString("utf-8"));
     return data.commits.map((c: any) => ({
         // github api only sends the long sha
         hash: c.sha.slice(0, 7),
@@ -58,9 +57,8 @@ async function calculateGitChanges() {
 }
 
 async function fetchUpdates() {
-    const release = await githubGet("/releases/latest");
+    const data = await githubGet("/releases/latest");
 
-    const data = JSON.parse(release.toString());
     const hash = data.name.slice(data.name.lastIndexOf(" ") + 1);
     if (hash === gitHash)
         return false;
@@ -70,16 +68,20 @@ async function fetchUpdates() {
             PendingUpdates.push([name, browser_download_url]);
         }
     });
+
     return true;
 }
 
 async function applyUpdates() {
-    await Promise.all(PendingUpdates.map(
-        async ([name, data]) => writeFile(
-            join(__dirname, name),
-            await get(data)
-        )
-    ));
+    const fileContents = await Promise.all(PendingUpdates.map(async ([name, url]) => {
+        const contents = await fetchBuffer(url);
+        return [join(__dirname, name), contents] as const;
+    }));
+
+    await Promise.all(fileContents.map(async ([filename, contents]) =>
+        writeFile(filename, contents))
+    );
+
     PendingUpdates = [];
     return true;
 }

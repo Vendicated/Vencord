@@ -24,9 +24,9 @@ import { definePluginSettings } from "@api/Settings";
 import { CogWheel } from "@components/Icons";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
+import { Guild } from "@vencord/discord-types";
 import { findByCodeLazy, findByPropsLazy, mapMangledModuleLazy } from "@webpack";
-import { Menu } from "@webpack/common";
-import { Guild } from "discord-types/general";
+import { Menu, UserStore } from "@webpack/common";
 
 const { updateGuildNotificationSettings } = findByPropsLazy("updateGuildNotificationSettings");
 const { toggleShowAllChannels } = mapMangledModuleLazy(".onboardExistingMember(", {
@@ -118,7 +118,8 @@ function applyDefaultSettings(guildId: string | null) {
 export default definePlugin({
     name: "NewGuildSettings",
     description: "Automatically mute new servers and change various other settings upon joining",
-    tags: ["MuteNewGuild", "mute", "server"],
+    tags: ["Servers", "Customisation"],
+    searchTerms: ["MuteNewGuild", "mute", "server"],
     authors: [Devs.Glitch, Devs.Nuckyz, Devs.carince, Devs.Mopi, Devs.GabiRP],
     contextMenus: {
         "guild-context": makeContextMenuPatch(false),
@@ -128,7 +129,7 @@ export default definePlugin({
         {
             find: ",acceptInvite(",
             replacement: {
-                match: /INVITE_ACCEPT_SUCCESS.+?,(\i)=null!==.+?;/,
+                match: /INVITE_ACCEPT_SUCCESS.+?,(\i)=null!=.+?;/,
                 replace: (m, guildId) => `${m}$self.applyDefaultSettings(${guildId});`
             }
         },
@@ -141,5 +142,11 @@ export default definePlugin({
         }
     ],
     settings,
-    applyDefaultSettings
+    applyDefaultSettings,
+    flux: {
+        GUILD_JOIN_REQUEST_UPDATE({ guildId, request, status }) {
+            if (status === "APPROVED" && request.user_id === UserStore.getCurrentUser().id)
+                applyDefaultSettings(guildId);
+        }
+    }
 });

@@ -22,9 +22,9 @@ import { Devs } from "@utils/constants";
 import { getIntlMessage } from "@utils/discord";
 import { NoopComponent } from "@utils/react";
 import definePlugin from "@utils/types";
+import { Message } from "@vencord/discord-types";
 import { filters, findByCodeLazy, waitFor } from "@webpack";
 import { ChannelStore, ContextMenuApi, UserStore } from "@webpack/common";
-import { Message } from "discord-types/general";
 
 const useMessageMenu = findByCodeLazy(".MESSAGE,commandTargetId:");
 
@@ -34,7 +34,7 @@ interface CopyIdMenuItemProps {
 }
 
 let CopyIdMenuItem: (props: CopyIdMenuItemProps) => React.ReactElement | null = NoopComponent;
-waitFor(filters.componentByCode('"devmode-copy-id-".concat'), m => CopyIdMenuItem = m);
+waitFor(filters.componentByCode('"cannot copy null text"'), m => CopyIdMenuItem = m);
 
 function MessageMenu({ message, channel, onHeightUpdate }) {
     const canReport = message.author &&
@@ -81,10 +81,11 @@ migratePluginSettings("FullSearchContext", "SearchReply");
 export default definePlugin({
     name: "FullSearchContext",
     description: "Makes the message context menu in message search results have all options you'd expect",
+    tags: ["Utility"],
     authors: [Devs.Ven, Devs.Aria],
 
     patches: [{
-        find: "onClick:this.handleMessageClick,",
+        find: "Listbox navigator was given an unhandled action",
         replacement: {
             match: /this(?=\.handleContextMenu\(\i,\i\))/,
             replace: "$self"

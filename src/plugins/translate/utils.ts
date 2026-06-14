@@ -16,12 +16,12 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { classNameFactory } from "@api/Styles";
+import { classNameFactory } from "@utils/css";
 import { onlyOnce } from "@utils/onlyOnce";
 import { PluginNative } from "@utils/types";
 import { showToast, Toasts } from "@webpack/common";
 
-import { DeeplLanguages, deeplLanguageToGoogleLanguage, GoogleLanguages } from "./languages";
+import { DeeplLanguages, deeplLanguageToGoogleLanguage, GoogleLanguages, KagiLanguages } from "./languages";
 import { resetLanguageDefaults, settings } from "./settings";
 
 export const cl = classNameFactory("vc-trans-");
@@ -29,11 +29,8 @@ export const cl = classNameFactory("vc-trans-");
 const Native = VencordNative.pluginHelpers.Translate as PluginNative<typeof import("./native")>;
 
 interface GoogleData {
-    src: string;
-    sentences: {
-        // 🏳️‍⚧️
-        trans: string;
-    }[];
+    translation: string;
+    sourceLanguage: string;
 }
 
 interface DeeplData {
@@ -43,19 +40,43 @@ interface DeeplData {
     }[];
 }
 
+interface KagiData {
+    translation: string;
+    detected_language: {
+        label: string;
+    };
+}
+
 export interface TranslationValue {
     sourceLanguage: string;
     text: string;
 }
 
-export const getLanguages = () => IS_WEB || settings.store.service === "google"
-    ? GoogleLanguages
-    : DeeplLanguages;
+export const getLanguages = () => {
+    if (IS_WEB) {
+        return GoogleLanguages;
+    }
+    switch (settings.store.service) {
+        case "google":
+            return GoogleLanguages;
+        case "kagi":
+            return KagiLanguages;
+        default:
+            return DeeplLanguages;
+    }
+};
 
 export async function translate(kind: "received" | "sent", text: string): Promise<TranslationValue> {
-    const translate = IS_WEB || settings.store.service === "google"
-        ? googleTranslate
-        : deeplTranslate;
+    const translate = IS_WEB ? googleTranslate : (() => {
+        switch (settings.store.service) {
+            case "google":
+                return googleTranslate;
+            case "kagi":
+                return kagiTranslate;
+            default:
+                return deeplTranslate;
+        }
+    })();
 
     try {
         return await translate(
@@ -77,21 +98,13 @@ export async function translate(kind: "received" | "sent", text: string): Promis
 }
 
 async function googleTranslate(text: string, sourceLang: string, targetLang: string): Promise<TranslationValue> {
-    const url = "https://translate.googleapis.com/translate_a/single?" + new URLSearchParams({
-        // see https://stackoverflow.com/a/29537590 for more params
-        // holy shidd nvidia
-        client: "gtx",
-        // source language
-        sl: sourceLang,
-        // target language
-        tl: targetLang,
-        // what to return, t = translation probably
-        dt: "t",
-        // Send json object response instead of weird array
-        dj: "1",
-        source: "input",
-        // query, duh
-        q: text
+    const url = "https://translate-pa.googleapis.com/v1/translate?" + new URLSearchParams({
+        "params.client": "gtx",
+        "dataTypes": "TRANSLATION",
+        "key": "AIzaSyDLEeFI5OtFBwYBIoK_jj5m32rZK5CkCXA", // some google API key
+        "query.sourceLanguage": sourceLang,
+        "query.targetLanguage": targetLang,
+        "query.text": text,
     });
 
     const res = await fetch(url);
@@ -101,14 +114,11 @@ async function googleTranslate(text: string, sourceLang: string, targetLang: str
             + `\n${res.status} ${res.statusText}`
         );
 
-    const { src, sentences }: GoogleData = await res.json();
+    const { sourceLanguage, translation }: GoogleData = await res.json();
 
     return {
-        sourceLanguage: GoogleLanguages[src] ?? src,
-        text: sentences.
-            map(s => s?.trans).
-            filter(Boolean).
-            join("")
+        sourceLanguage: GoogleLanguages[sourceLanguage] ?? sourceLanguage,
+        text: translation
     };
 }
 
@@ -165,5 +175,27 @@ async function deeplTranslate(text: string, sourceLang: string, targetLang: stri
     return {
         sourceLanguage: DeeplLanguages[src] ?? src,
         text: translations[0].text
+    };
+}
+
+async function kagiTranslate(text: string, sourceLang: string, targetLang: string): Promise<TranslationValue> {
+    const { status, data } = await Native.makeKagiTranslateRequest(
+        settings.store.kagiSession, text, sourceLang, targetLang
+    );
+
+    switch (status) {
+        case 200:
+            break;
+        case 401:
+            throw "Invalid or expired Kagi session token";
+        default:
+            throw new Error(`Failed to translate "${text}" (${sourceLang} -> ${targetLang})\n${status} ${data}`);
+    }
+
+    const { detected_language, translation }: KagiData = data;
+
+    return {
+        sourceLanguage: detected_language.label,
+        text: translation
     };
 }

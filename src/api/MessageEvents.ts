@@ -17,9 +17,8 @@
 */
 
 import { Logger } from "@utils/Logger";
+import type { Channel, CloudUpload, CustomEmoji, Message } from "@vencord/discord-types";
 import { MessageStore } from "@webpack/common";
-import { CustomEmoji } from "@webpack/types";
-import type { Channel, Message } from "discord-types/general";
 import type { Promisable } from "type-fest";
 
 const MessageEventsLogger = new Logger("MessageEvents", "#e5c890");
@@ -31,30 +30,6 @@ export interface MessageObject {
     tts: boolean;
 }
 
-export interface Upload {
-    classification: string;
-    currentSize: number;
-    description: string | null;
-    filename: string;
-    id: string;
-    isImage: boolean;
-    isVideo: boolean;
-    item: {
-        file: File;
-        platform: number;
-    };
-    loaded: number;
-    mimeType: string;
-    preCompressionSize: number;
-    responseUrl: string;
-    sensitive: boolean;
-    showLargeMessageDialog: boolean;
-    spoiler: boolean;
-    status: "NOT_STARTED" | "STARTED" | "UPLOADING" | "ERROR" | "COMPLETED" | "CANCELLED";
-    uniqueId: string;
-    uploadedFilename: string;
-}
-
 export interface MessageReplyOptions {
     messageReference: Message["messageReference"];
     allowedMentions?: {
@@ -63,9 +38,9 @@ export interface MessageReplyOptions {
     };
 }
 
-export interface MessageExtra {
+export interface MessageOptions {
     stickers?: string[];
-    uploads?: Upload[];
+    uploads?: CloudUpload[];
     replyOptions: MessageReplyOptions;
     content: string;
     channel: Channel;
@@ -73,17 +48,17 @@ export interface MessageExtra {
     openWarningPopout: (props: any) => any;
 }
 
-export type MessageSendListener = (channelId: string, messageObj: MessageObject, extra: MessageExtra) => Promisable<void | { cancel: boolean; }>;
+export type MessageSendListener = (channelId: string, messageObj: MessageObject, options: MessageOptions) => Promisable<void | { cancel: boolean; }>;
 export type MessageEditListener = (channelId: string, messageId: string, messageObj: MessageObject) => Promisable<void | { cancel: boolean; }>;
 
 const sendListeners = new Set<MessageSendListener>();
 const editListeners = new Set<MessageEditListener>();
 
-export async function _handlePreSend(channelId: string, messageObj: MessageObject, extra: MessageExtra, replyOptions: MessageReplyOptions) {
-    extra.replyOptions = replyOptions;
+export async function _handlePreSend(channelId: string, messageObj: MessageObject, options: MessageOptions, replyOptions: MessageReplyOptions) {
+    options.replyOptions = replyOptions;
     for (const listener of sendListeners) {
         try {
-            const result = await listener(channelId, messageObj, extra);
+            const result = await listener(channelId, messageObj, options);
             if (result?.cancel) {
                 return true;
             }
