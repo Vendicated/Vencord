@@ -17,9 +17,8 @@
 */
 
 import { findGroupChildrenByChildId, NavContextMenuPatchCallback } from "@api/ContextMenu";
-import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
-import definePlugin, { OptionType } from "@utils/types";
+import definePlugin from "@utils/types";
 import { Channel } from "@vencord/discord-types";
 import { findByPropsLazy } from "@webpack";
 import { ChannelStore, ConfirmModal, Menu, openModal, PermissionsBits, PermissionStore, showToast, Toasts, UserStore, VoiceStateStore } from "@webpack/common";
@@ -31,14 +30,6 @@ interface VoiceStateChangeEvent {
 }
 
 const { selectVoiceChannel } = findByPropsLazy("selectVoiceChannel", "selectChannel");
-
-export const settings = definePluginSettings({
-    notifyOnQueue: {
-        type: OptionType.BOOLEAN,
-        description: "Show a toast when you are queued for a voice channel",
-        default: true
-    }
-});
 
 let queuedChannelId: string | null = null;
 
@@ -55,8 +46,7 @@ function openQueueModal(channel: Channel) {
             cancelText="Cancel"
             onConfirm={() => {
                 queuedChannelId = channel.id;
-                if (settings.store.notifyOnQueue)
-                    showToast(`Queued for ${channel.name}`, Toasts.Type.MESSAGE);
+                showToast(`Queued for ${channel.name}`, Toasts.Type.MESSAGE);
             }}
         />
     ));
@@ -95,7 +85,6 @@ export default definePlugin({
     tags: ["Voice", "Utility"],
     authors: [Devs.Noah],
     searchTerms: ["VoiceQueue", "FullVC", "voice queue", "vc queue"],
-    settings,
 
     patches: [
         {
