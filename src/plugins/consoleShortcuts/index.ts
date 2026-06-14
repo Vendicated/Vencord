@@ -139,14 +139,8 @@ function makeShortcuts() {
         runtimeHashMessageKey,
         mm3: { getter: () => mm3 },
         getAccountsHash: {
-            getter: () => (experiment: string, accountIds: string[]) => {
-                if (accountIds.length === 0) {
-                    // set from settings;
-                }
-                return accountIds.map(id => {
-                    return mm3(`${experiment}:${id}`);
-                });
-            }
+            getter: () => (experiment: string, accountIds: string[]) =>
+                accountIds.map(id => mm3(`${experiment}:${id}`))
         },
         fakeRender: (component: ComponentType, props: any) => {
             const prevWin = fakeRenderWin?.deref();

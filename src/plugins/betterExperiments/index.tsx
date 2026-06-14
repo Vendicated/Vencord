@@ -7,12 +7,16 @@
 import "./styles.css";
 
 import { definePluginSettings } from "@api/Settings";
+import { classNameFactory } from "@utils/css";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { findLazy, findStoreLazy } from "@webpack";
 import { GuildStore, IconUtils, RelationshipStore, Tooltip, UserStore } from "@webpack/common";
+import ErrorBoundary from "@components/ErrorBoundary";
 
 import { Experiment, ExperimentPopulationRollout, fetchExperiments } from "./api";
+
+const cl = classNameFactory("vc-better-experiments-");
 
 const mm3 = findLazy(m => m?.toString?.().includes?.("0xcc9e2d51"));
 const ExperimentStore = findStoreLazy("ExperimentStore");
@@ -60,7 +64,7 @@ let intervalId: ReturnType<typeof setInterval>;
 export default definePlugin({
     authors: [Devs.mantikafasi],
     name: "BetterExperiments",
-    description: "makes guild experiments look better",
+    description: "Makes guild experiments look better",
 
     patches: [
         {
@@ -92,17 +96,16 @@ export default definePlugin({
     settings: definePluginSettings({
         apiProvider: {
             type: OptionType.COMPONENT,
-            component: () => {
-                return <div className="vc-better-experiments-api-provider">
-                    <div className="vc-better-experiments-api-text">
+            component: () => (
+                <div className={cl("api-provider")}>
+                    <div className={cl("api-text")}>
                         API Provided by <a onClick={() => window.open("https://x.com/WumpusCentral")} href="https://x.com/WumpusCentral">WumpusCentral</a>
                     </div>
-                </div>;
-            }
+                </div>
+            )
         }
     }),
-    getExperimentsComponent: (e: { experimentId: string; }) => {
-
+    getExperimentsComponent: ErrorBoundary.wrap((e: { experimentId: string; }) => {
         const experiments = ExperimentStore.getRegisteredExperiments();
 
         const guildIds = GuildStore.getGuildIds();
@@ -130,111 +133,99 @@ export default definePlugin({
         const userHash = mm3(e.experimentId + ":" + currentUser.id) % 10000;
         const expObject = EXPERIMENTS.get(e.experimentId);
 
-        let ranges: ExperimentPopulationRollout[] = [];
-
         if (!expObject) return null;
 
         const typedExp = getTypedExperiment(expObject);
+        let ranges: ExperimentPopulationRollout[] = [];
+
         if (!typedExp.rollout.aaMode && typedExp.rollout.populations) {
-            const allRanges = typedExp.rollout.populations.flatMap(pop =>
-                pop[0].flatMap(range => range[1]?.flatMap(r => r) || [])
+            ranges = typedExp.rollout.populations.flatMap(pop =>
+                pop[0].flatMap(range => range[1]?.flatMap(r => r) ?? [])
             );
-            ranges = allRanges;
         }
 
-        return <div>
-            <div key={e.experimentId} className="vc-better-experiments-container">
-                {exp.type === "user" && (
-                    <div className="vc-experiment-info">
-                        <div className="vc-experiment-info-item">
-                            <span className="vc-experiment-info-label">Your Hash:</span>
-                            <span className="vc-experiment-info-value">{userHash}</span>
-                        </div>
-                        {ranges && (
-                            <div className="vc-experiment-info-item">
-                                <span className="vc-experiment-info-label">Rollout:</span>
-                                <span className="vc-experiment-info-value">
-                                    {
-                                        typedExp.rollout.aaMode ? "AA Mode (Testing)"
-                                            : ranges.map(r => `${r.s}-${r.e}`).join(", ")
-                                    }
-                                </span>
-                            </div>
-                        )}
+        return <div key={e.experimentId} className={cl("container")}>
+            {exp.type === "user" && (
+                <div className={cl("experiment-info")}>
+                    <div className={cl("experiment-info-item")}>
+                        <span className={cl("experiment-info-label")}>Your Hash:</span>
+                        <span className={cl("experiment-info-value")}>{userHash}</span>
                     </div>
-                )}
-                {Object.keys(bucketMap).map(bucket => {
-                    const description = bucketMap[bucket];
-
-                    if (exp.type === "guild") {
-                        const guildIcons = guildIds.map(guildId => {
-                            const descriptor = ExperimentStore.getGuildExperimentDescriptor(e.experimentId, guildId);
-                            const guild = guilds[guildId];
-                            if (!descriptor) return null;
-                            if (descriptor.bucket === parseInt(bucket)) return (
-                                <Tooltip text={guild.name} key={guild.id}>
-                                    {tooltipProps => (
-                                        <img
-                                            {...tooltipProps}
-                                            src={IconUtils.getGuildIconURL(guild)}
-                                            alt={guild.name}
-                                        />
-                                    )}
-                                </Tooltip>
-                            );
-                        }).filter(Boolean);
-
-                        return <div key={bucket} className="vc-guild-experiment-bucket">
-                            <div className="vc-guild-experiment-bucket-name">{description}</div>
-
-                            <div className="vc-experiment-bucket-icons">
+                    {ranges.length > 0 && (
+                        <div className={cl("experiment-info-item")}>
+                            <span className={cl("experiment-info-label")}>Rollout:</span>
+                            <span className={cl("experiment-info-value")}>
                                 {
-                                    guildIcons.length > 0 ? guildIcons : <div className="vc-experiment-bucket-empty">No guilds in this bucket</div>
+                                    typedExp.rollout.aaMode ? "AA Mode (Testing)"
+                                        : ranges.map(r => `${r.s}-${r.e}`).join(", ")
                                 }
-                            </div>
-                        </div>;
-                    } else if (exp.type === "user") {
-                        const friends = RelationshipStore.getFriendIDs().map(id => ({ id, user: UserStore.getUser(id) }));
+                            </span>
+                        </div>
+                    )}
+                </div>
+            )}
+            {Object.keys(bucketMap).map(bucket => {
+                const description = bucketMap[bucket];
 
-                        const ranges = typedExp.rollout.aaMode ? typedExp.rollout.populations.map(population => {
-                            return population[0].filter(range => range[0] === parseInt(bucket)).map(range => range[1]);
-                        }) : [];
+                if (exp.type === "guild") {
+                    const guildIcons = guildIds.map(guildId => {
+                        const descriptor = ExperimentStore.getGuildExperimentDescriptor(e.experimentId, guildId);
+                        const guild = guilds[guildId];
+                        if (!descriptor) return null;
+                        if (descriptor.bucket === parseInt(bucket)) return (
+                            <Tooltip text={guild.name} key={guild.id}>
+                                {tooltipProps => (
+                                    <img
+                                        {...tooltipProps}
+                                        src={IconUtils.getGuildIconURL(guild)}
+                                        alt={guild.name}
+                                    />
+                                )}
+                            </Tooltip>
+                        );
+                    }).filter(Boolean);
 
-                        const userIcons = friends.map(friend => {
-                            const hash = mm3(e.experimentId + ":" + friend.id) % 10000;
+                    return <div key={bucket} className={cl("guild-experiment-bucket")}>
+                        <div className={cl("guild-experiment-bucket-name")}>{description}</div>
+                        <div className={cl("experiment-bucket-icons")}>
+                            {guildIcons.length > 0 ? guildIcons : <div className={cl("experiment-bucket-empty")}>No guilds in this bucket</div>}
+                        </div>
+                    </div>;
+                } else if (exp.type === "user") {
+                    const friends = RelationshipStore.getFriendIDs().map(id => ({ id, user: UserStore.getUser(id) }));
 
-                            const inRange = ranges?.some(range =>
-                                range.some(r =>
-                                    r?.some(e => hash >= e.s && hash <= e.e)
-                                )
-                            ) ?? false;
+                    const bucketRanges = typedExp.rollout.aaMode ? typedExp.rollout.populations.map(population =>
+                        population[0].filter(range => range[0] === parseInt(bucket)).map(range => range[1])
+                    ) : [];
 
-                            if (inRange) return (
-                                <Tooltip text={friend.user.username} key={friend.id}>
-                                    {tooltipProps => (
-                                        <img
-                                            {...tooltipProps}
-                                            src={IconUtils.getUserAvatarURL(friend.user)}
-                                            alt={friend.user.username}
-                                        />
-                                    )}
-                                </Tooltip>
-                            );
-                        }).filter(Boolean);
+                    const userIcons = friends.map(friend => {
+                        const hash = mm3(e.experimentId + ":" + friend.id) % 10000;
+                        const inRange = bucketRanges.some(range =>
+                            range.some(r => r?.some(entry => hash >= entry.s && hash <= entry.e))
+                        );
 
-                        return <div key={bucket} className="vc-user-experiment-bucket">
-                            <div className="vc-user-experiment-bucket-name">{description}</div>
+                        if (inRange) return (
+                            <Tooltip text={friend.user.username} key={friend.id}>
+                                {tooltipProps => (
+                                    <img
+                                        {...tooltipProps}
+                                        src={IconUtils.getUserAvatarURL(friend.user)}
+                                        alt={friend.user.username}
+                                    />
+                                )}
+                            </Tooltip>
+                        );
+                    }).filter(Boolean);
 
-                            <div className="vc-experiment-bucket-icons">
-                                {
-                                    userIcons.length > 0 ? userIcons : <div className="vc-experiment-bucket-empty">No users in this bucket</div>
-                                }
-                            </div>
-                        </div>;
-                    }
-                })}
-            </div>
+                    return <div key={bucket} className={cl("user-experiment-bucket")}>
+                        <div className={cl("user-experiment-bucket-name")}>{description}</div>
+                        <div className={cl("experiment-bucket-icons")}>
+                            {userIcons.length > 0 ? userIcons : <div className={cl("experiment-bucket-empty")}>No users in this bucket</div>}
+                        </div>
+                    </div>;
+                }
+            })}
         </div>;
-    }
+    }, { noop: true })
 
 });
