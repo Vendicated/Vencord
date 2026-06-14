@@ -29,7 +29,7 @@ import { useAwaiter } from "@utils/react";
 import definePlugin from "@utils/types";
 import { Guild, User } from "@vencord/discord-types";
 import { findCssClassesLazy } from "@webpack";
-import { Clickable, ConfirmModal,IconUtils, Menu, openModal, Parser } from "@webpack/common";
+import { Clickable, ConfirmModal, IconUtils, Menu, openModal, Parser } from "@webpack/common";
 
 import { Auth, initAuth, updateAuth } from "./auth";
 import { openReviewsModal } from "./components/ReviewModal";
@@ -94,7 +94,7 @@ export default definePlugin({
         {
             // User popout
             // Same find as ShowConnections
-            find: "#{intl::USER_PROFILE_FRIEND_REQUEST_TOAST}",
+            find: '"UserProfilePopout");',
             replacement: {
                 match: /user:(\i),widgets:.{0,100}?\}\),/,
                 replace: "$&$self.renderProfileComponent({user:$1}),"
