@@ -74,6 +74,16 @@ export const settings = definePluginSettings({
         description: "Automatically translate your messages before sending. You can also Shift+click or right-click the translate button to toggle this",
         default: false
     },
+    autoTranslateReceived: {
+        type: OptionType.BOOLEAN,
+        description: "Automatically translate new received messages in the currently open channel",
+        default: false
+    },
+    autoTranslateReceivedLimit: {
+        type: OptionType.NUMBER,
+        description: "How many recent messages to auto-translate when you open a channel (0 = off)",
+        default: 0
+    },
     showAutoTranslateTooltip: {
         type: OptionType.BOOLEAN,
         description: "Show a tooltip on the chat bar button when a message is auto-translated",
