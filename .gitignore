@@ -22,4 +22,4 @@ lerna-debug.log*
 src/userplugins
 
 ExtensionCache/
-settings/
+/settings

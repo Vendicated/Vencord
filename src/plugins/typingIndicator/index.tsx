@@ -18,21 +18,17 @@
 
 import "./style.css";
 
-import { definePluginSettings, Settings } from "@api/Settings";
+import { isPluginEnabled } from "@api/PluginManager";
+import { definePluginSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
+import TypingTweaksPlugin, { buildSeveralUsers } from "@plugins/typingTweaks";
 import { Devs } from "@utils/constants";
 import { getIntlMessage } from "@utils/discord";
 import definePlugin, { OptionType } from "@utils/types";
-import { findComponentByCodeLazy, findStoreLazy } from "@webpack";
-import { GuildMemberStore, RelationshipStore, SelectedChannelStore, Tooltip, UserStore, useStateFromStores } from "@webpack/common";
+import { findComponentByCodeLazy } from "@webpack";
+import { GuildMemberStore, RelationshipStore, SelectedChannelStore, Tooltip, TypingStore, UserGuildSettingsStore, UserStore, UserSummaryItem, useStateFromStores } from "@webpack/common";
 
-import { buildSeveralUsers } from "../typingTweaks";
-
-const ThreeDots = findComponentByCodeLazy(".dots,", "dotRadius:");
-const UserSummaryItem = findComponentByCodeLazy("defaultRenderUser", "showDefaultAvatarsForNullUsers");
-
-const TypingStore = findStoreLazy("TypingStore");
-const UserGuildSettingsStore = findStoreLazy("UserGuildSettingsStore");
+const ThreeDots = findComponentByCodeLazy("Math.min(1,Math.max(", "dotRadius:");
 
 const enum IndicatorMode {
     Dots = 1 << 0,
@@ -47,7 +43,7 @@ function getDisplayName(guildId: string, userId: string) {
 function TypingIndicator({ channelId, guildId }: { channelId: string; guildId: string; }) {
     const typingUsers: Record<string, number> = useStateFromStores(
         [TypingStore],
-        () => ({ ...TypingStore.getTypingUsers(channelId) as Record<string, number> }),
+        () => ({ ...TypingStore.getTypingUsers(channelId) }),
         null,
         (old, current) => {
             const oldKeys = Object.keys(old);
@@ -56,7 +52,7 @@ function TypingIndicator({ channelId, guildId }: { channelId: string; guildId: s
             return oldKeys.length === currentKeys.length && currentKeys.every(key => old[key] != null);
         }
     );
-    const currentChannelId: string = useStateFromStores([SelectedChannelStore], () => SelectedChannelStore.getChannelId());
+    const currentChannelId = useStateFromStores([SelectedChannelStore], () => SelectedChannelStore.getChannelId());
 
     if (!settings.store.includeMutedChannels) {
         const isChannelMuted = UserGuildSettingsStore.isChannelMuted(guildId, channelId);
@@ -69,26 +65,29 @@ function TypingIndicator({ channelId, guildId }: { channelId: string; guildId: s
 
     const myId = UserStore.getCurrentUser()?.id;
 
-    const typingUsersArray = Object.keys(typingUsers).filter(id => id !== myId && !(RelationshipStore.isBlocked(id) && !settings.store.includeBlockedUsers));
+    const typingUsersArray = Object.keys(typingUsers).filter(id =>
+        id !== myId && !(RelationshipStore.isBlocked(id) && !settings.store.includeBlockedUsers)
+    );
+    const [a, b, c] = typingUsersArray;
     let tooltipText: string;
 
     switch (typingUsersArray.length) {
         case 0: break;
         case 1: {
-            tooltipText = getIntlMessage("ONE_USER_TYPING", { a: getDisplayName(guildId, typingUsersArray[0]) });
+            tooltipText = getIntlMessage("ONE_USER_TYPING", { a: getDisplayName(guildId, a) });
             break;
         }
         case 2: {
-            tooltipText = getIntlMessage("TWO_USERS_TYPING", { a: getDisplayName(guildId, typingUsersArray[0]), b: getDisplayName(guildId, typingUsersArray[1]) });
+            tooltipText = getIntlMessage("TWO_USERS_TYPING", { a: getDisplayName(guildId, a), b: getDisplayName(guildId, b) });
             break;
         }
         case 3: {
-            tooltipText = getIntlMessage("THREE_USERS_TYPING", { a: getDisplayName(guildId, typingUsersArray[0]), b: getDisplayName(guildId, typingUsersArray[1]), c: getDisplayName(guildId, typingUsersArray[2]) });
+            tooltipText = getIntlMessage("THREE_USERS_TYPING", { a: getDisplayName(guildId, a), b: getDisplayName(guildId, b), c: getDisplayName(guildId, c) });
             break;
         }
         default: {
-            tooltipText = Settings.plugins.TypingTweaks.enabled
-                ? buildSeveralUsers({ a: getDisplayName(guildId, typingUsersArray[0]), b: getDisplayName(guildId, typingUsersArray[1]), count: typingUsersArray.length - 2 })
+            tooltipText = isPluginEnabled(TypingTweaksPlugin.name)
+                ? buildSeveralUsers({ users: [a, b].map(UserStore.getUser), count: typingUsersArray.length - 2, guildId })
                 : getIntlMessage("SEVERAL_USERS_TYPING");
             break;
         }
@@ -163,6 +162,7 @@ const settings = definePluginSettings({
 export default definePlugin({
     name: "TypingIndicator",
     description: "Adds an indicator if someone is typing on a channel.",
+    tags: ["Notifications", "Appearance", "Servers"],
     authors: [Devs.Nuckyz, Devs.fawn, Devs.Sqaaakoi],
     settings,
 
@@ -171,7 +171,7 @@ export default definePlugin({
         {
             find: "UNREAD_IMPORTANT:",
             replacement: {
-                match: /\.name,{.{0,140}\.children.+?:null(?<=,channel:(\i).+?)/,
+                match: /\.Children\.count.+?:null(?<=,channel:(\i).+?)/,
                 replace: "$&,$self.TypingIndicator($1.id,$1.getGuildId())"
             }
         },

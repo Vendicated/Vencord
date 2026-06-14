@@ -20,7 +20,6 @@ import { onceDefined } from "@shared/onceDefined";
 import electron, { app, BrowserWindowConstructorOptions, Menu } from "electron";
 import { dirname, join } from "path";
 
-import { initIpc } from "./ipcMain";
 import { RendererSettings } from "./settings";
 import { IS_VANILLA } from "./utils/constants";
 
@@ -38,7 +37,7 @@ const asarPath = join(dirname(injectorPath), "..", asarName);
 const discordPkg = require(join(asarPath, "package.json"));
 require.main!.filename = join(asarPath, discordPkg.main);
 
-// @ts-ignore Untyped method? Dies from cringe
+// @ts-expect-error Untyped method? Dies from cringe
 app.setAppPath(asarPath);
 
 if (!IS_VANILLA) {
@@ -69,49 +68,51 @@ if (!IS_VANILLA) {
 
     class BrowserWindow extends electron.BrowserWindow {
         constructor(options: BrowserWindowConstructorOptions) {
-            if (options?.webPreferences?.preload && options.title) {
-                const original = options.webPreferences.preload;
-                options.webPreferences.preload = join(__dirname, IS_DISCORD_DESKTOP ? "preload.js" : "vencordDesktopPreload.js");
-                options.webPreferences.sandbox = false;
-                // work around discord unloading when in background
-                options.webPreferences.backgroundThrottling = false;
-
-                if (settings.frameless) {
-                    options.frame = false;
-                } else if (process.platform === "win32" && settings.winNativeTitleBar) {
-                    delete options.frame;
-                }
-
-                if (settings.transparent) {
-                    options.transparent = true;
-                    options.backgroundColor = "#00000000";
-                }
-
-                if (settings.disableMinSize) {
-                    options.minWidth = 0;
-                    options.minHeight = 0;
-                }
-
-                const needsVibrancy = process.platform === "darwin" && settings.macosVibrancyStyle;
-
-                if (needsVibrancy) {
-                    options.backgroundColor = "#00000000";
-                    if (settings.macosVibrancyStyle) {
-                        options.vibrancy = settings.macosVibrancyStyle;
-                    }
-                }
-
-                process.env.DISCORD_PRELOAD = original;
-
+            if (!options?.webPreferences?.preload || !options.title) {
                 super(options);
+                return;
+            }
 
-                if (settings.disableMinSize) {
-                    // Disable the Electron call entirely so that Discord can't dynamically change the size
-                    this.setMinimumSize = (width: number, height: number) => { };
-                }
+            const { frameless, winNativeTitleBar, disableMinSize, transparent, macosVibrancyStyle, windowsMaterial } = settings;
 
-                initIpc(this);
-            } else super(options);
+            const original = options.webPreferences.preload;
+            options.webPreferences.preload = join(__dirname, "preload.js");
+            options.webPreferences.sandbox = false;
+            // work around discord unloading when in background
+            options.webPreferences.backgroundThrottling = false;
+
+            if (frameless) {
+                options.frame = false;
+            } else if (process.platform === "win32" && winNativeTitleBar) {
+                delete options.frame;
+            }
+
+            if (disableMinSize) {
+                options.minWidth = 0;
+                options.minHeight = 0;
+            }
+
+            if (transparent) {
+                options.transparent = true;
+                options.backgroundColor = "#00000000";
+            }
+            if (process.platform === "darwin" && macosVibrancyStyle) {
+                options.vibrancy = macosVibrancyStyle;
+                options.backgroundColor = "#00000000";
+            }
+            if (process.platform === "win32" && windowsMaterial && windowsMaterial !== "none") {
+                options.backgroundMaterial = windowsMaterial;
+                options.backgroundColor = "#00000000";
+            }
+
+            process.env.DISCORD_PRELOAD = original;
+
+            super(options);
+
+            if (disableMinSize) {
+                // Disable the Electron call entirely so that Discord can't dynamically change the size
+                this.setMinimumSize = (_width: number, _height: number) => { };
+            }
         }
     }
     Object.assign(BrowserWindow, electron.BrowserWindow);

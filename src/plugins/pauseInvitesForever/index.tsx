@@ -18,7 +18,7 @@
 
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
-import { getIntlMessage } from "@utils/discord";
+import { getIntlMessage, hasGuildFeature } from "@utils/discord";
 import definePlugin from "@utils/types";
 import { Constants, GuildStore, PermissionStore, RestAPI } from "@webpack/common";
 
@@ -27,8 +27,7 @@ function showDisableInvites(guildId: string) {
     if (!guild) return false;
 
     return (
-        // @ts-ignore
-        !guild.hasFeature("INVITES_DISABLED") &&
+        !hasGuildFeature(guild, "INVITES_DISABLED") &&
         PermissionStore.getGuildPermissionProps(guild).canManageRoles
     );
 }
@@ -44,8 +43,9 @@ function disableInvites(guildId: string) {
 
 export default definePlugin({
     name: "PauseInvitesForever",
-    tags: ["DisableInvitesForever"],
+    searchTerms: ["DisableInvitesForever"],
     description: "Brings back the option to pause invites indefinitely that stupit Discord removed.",
+    tags: ["Servers"],
     authors: [Devs.Dolfies, Devs.amia],
 
     patches: [

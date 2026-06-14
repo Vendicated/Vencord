@@ -19,14 +19,18 @@
 import { definePluginSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
+import { classNameFactory } from "@utils/css";
 import { openUserProfile } from "@utils/discord";
+import { isNonNullish } from "@utils/guards";
+import { Logger } from "@utils/Logger";
 import definePlugin, { OptionType } from "@utils/types";
-import { Avatar, GuildMemberStore, React, RelationshipStore } from "@webpack/common";
-import { User } from "discord-types/general";
+import { Channel, User } from "@vencord/discord-types";
+import { AuthenticationStore, Avatar, GuildMemberStore, React, RelationshipStore, TypingStore, UserStore, useStateFromStores } from "@webpack/common";
 import { PropsWithChildren } from "react";
 
 import managedStyle from "./style.css?managed";
 
+const cl = classNameFactory("vc-typing-tweaks-");
 const settings = definePluginSettings({
     showAvatars: {
         type: OptionType.BOOLEAN,
@@ -45,24 +49,29 @@ const settings = definePluginSettings({
     }
 });
 
-export function buildSeveralUsers({ a, b, count }: { a: string, b: string, count: number; }) {
-    return [
-        <strong key="0">{a}</strong>,
-        ", ",
-        <strong key="1">{b}</strong>,
-        `, and ${count} others are typing...`
-    ];
-}
+export const buildSeveralUsers = ErrorBoundary.wrap(function buildSeveralUsers({ users, count, guildId }: { users: User[], count: number; guildId: string; }) {
+    return (
+        <>
+            {users.slice(0, count).map(user => (
+                <React.Fragment key={user.id}>
+                    <TypingUser user={user} guildId={guildId} />
+                    {", "}
+                </React.Fragment>
+            ))}
+            and {count} others are typing...
+        </>
+    );
+}, { noop: true });
 
-interface Props {
+interface TypingUserProps {
     user: User;
     guildId: string;
 }
 
-const TypingUser = ErrorBoundary.wrap(function ({ user, guildId }: Props) {
+const TypingUser = ErrorBoundary.wrap(function TypingUser({ user, guildId }: TypingUserProps) {
     return (
         <strong
-            className="vc-typing-user"
+            className={cl("user")}
             role="button"
             onClick={() => {
                 openUserProfile(user.id);
@@ -73,6 +82,7 @@ const TypingUser = ErrorBoundary.wrap(function ({ user, guildId }: Props) {
         >
             {settings.store.showAvatars && (
                 <Avatar
+                    className={cl("avatar")}
                     size="SIZE_16"
                     src={user.getAvatarURL(guildId, 128)} />
             )}
@@ -88,34 +98,61 @@ const TypingUser = ErrorBoundary.wrap(function ({ user, guildId }: Props) {
 export default definePlugin({
     name: "TypingTweaks",
     description: "Show avatars and role colours in the typing indicator",
-    authors: [Devs.zt],
+    tags: ["Appearance", "Customisation"],
+    authors: [Devs.zt, Devs.sadan],
     settings,
 
     managedStyle,
 
     patches: [
         {
-            find: "#{intl::THREE_USERS_TYPING}",
+            find: "#{intl::SEVERAL_USERS_TYPING_STRONG}",
+            group: true,
             replacement: [
                 {
                     // Style the indicator and add function call to modify the children before rendering
-                    match: /(?<=children:\[(\i)\.length>0.{0,200}?"aria-atomic":!0,children:)\i(?<=guildId:(\i).+?)/,
-                    replace: "$self.renderTypingUsers({ users: $1, guildId: $2, children: $& })"
+                    match: /(?<="aria-hidden":!0,children:)\i/,
+                    replace: "$self.renderTypingUsers({ users: arguments[0]?.typingUserObjects, guildId: arguments[0]?.channel?.guild_id, children: $& })"
                 },
                 {
-                    // Changes the indicator to keep the user object when creating the list of typing users
-                    match: /\.map\((\i)=>\i\.\i\.getName\(\i(?:\.guild_id)?,\i\.id,\1\)\)/,
-                    replace: ""
+                    match: /(?<=function \i\(\i\)\{)(?=[^}]+?\{channel:\i,isThreadCreation:\i=!1,\.\.\.\i\})/,
+                    replace: "let typingUserObjects = $self.useTypingUsers(arguments[0]?.channel);"
+                },
+                {
+                    // Get the typing users as user objects instead of names
+                    match: /typingUsers:(\i)\?\[\]:\i,/,
+                    // check by typeof so if the variable is not defined due to other patch failing, it won't throw a ReferenceError
+                    replace: "$&typingUserObjects: $1 || typeof typingUserObjects === 'undefined' ? [] : typingUserObjects,"
                 },
                 {
                     // Adds the alternative formatting for several users typing
-                    match: /(,{a:(\i),b:(\i),c:\i}\):\i\.length>3&&\(\i=)\i\.\i\.string\(\i\.\i#{intl::SEVERAL_USERS_TYPING}\)(?<=(\i)\.length.+?)/,
-                    replace: (_, rest, a, b, users) => `${rest}$self.buildSeveralUsers({ a: ${a}, b: ${b}, count: ${users}.length - 2 })`,
+                    // users.length > 3 && (component = intl(key))
+                    match: /(&&\(\i=)\i\.\i\.format\(\i\.\i#{intl::SEVERAL_USERS_TYPING_STRONG},\{\}\)/,
+                    replace: "$1$self.buildSeveralUsers({ users: arguments[0]?.typingUserObjects, count: arguments[0]?.typingUserObjects?.length - 2, guildId: arguments[0]?.channel?.guild_id })",
                     predicate: () => settings.store.alternativeFormatting
                 }
             ]
         }
     ],
+
+    useTypingUsers(channel: Channel | undefined): User[] {
+        try {
+            if (!channel) {
+                throw new Error("No channel");
+            }
+
+            const typingUsers = useStateFromStores([TypingStore], () => TypingStore.getTypingUsers(channel.id));
+            const myId = useStateFromStores([AuthenticationStore], () => AuthenticationStore.getId());
+
+            return Object.keys(typingUsers)
+                .filter(id => id && id !== myId && !RelationshipStore.isBlockedOrIgnored(id))
+                .map(id => UserStore.getUser(id))
+                .filter(isNonNullish);
+        } catch (e) {
+            new Logger("TypingTweaks").error("Failed to get typing users:", e);
+            return [];
+        }
+    },
 
     buildSeveralUsers,
 
@@ -128,14 +165,13 @@ export default definePlugin({
             let element = 0;
 
             return children.map(c => {
-                if (c.type !== "strong" && !(typeof c !== "string" && !React.isValidElement(c)))
-                    return c;
+                if (c.type !== "strong" && !(typeof c !== "string" && !React.isValidElement(c))) return c;
 
                 const user = users[element++];
                 return <TypingUser key={user.id} guildId={guildId} user={user} />;
             });
         } catch (e) {
-            console.error(e);
+            new Logger("TypingTweaks").error("Failed to render typing users:", e);
         }
 
         return children;

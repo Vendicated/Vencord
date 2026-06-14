@@ -9,12 +9,12 @@ import "./style.css";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
-import { findByPropsLazy } from "@webpack";
+import type { Message } from "@vencord/discord-types";
+import { findCssClassesLazy } from "@webpack";
 import { DateUtils, Timestamp } from "@webpack/common";
-import type { Message } from "discord-types/general";
 import type { HTMLAttributes } from "react";
 
-const MessageClasses = findByPropsLazy("separator", "latin24CompactTimeStamp");
+const MessageClasses = findCssClassesLazy("separator", "latin24CompactTimeStamp");
 
 function Sep(props: HTMLAttributes<HTMLElement>) {
     return <i className={MessageClasses.separator} aria-hidden={true} {...props} />;
@@ -58,11 +58,13 @@ function ReplyTimestamp({
 export default definePlugin({
     name: "ReplyTimestamp",
     description: "Shows a timestamp on replied-message previews",
+    tags: ["Chat", "Appearance"],
     authors: [Devs.Kyuuhachi],
 
     patches: [
         {
-            find: "#{intl::REPLY_QUOTE_MESSAGE_BLOCKED}",
+            // Same find as in ValidReply
+            find: "#{intl::REPLY_QUOTE_MESSAGE_NOT_LOADED}",
             replacement: {
                 match: /\.onClickReply,.+?}\),(?=\i,\i,\i\])/,
                 replace: "$&$self.ReplyTimestamp(arguments[0]),"

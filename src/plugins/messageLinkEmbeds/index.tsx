@@ -24,7 +24,8 @@ import { Devs } from "@utils/constants.js";
 import { classes } from "@utils/misc";
 import { Queue } from "@utils/Queue";
 import definePlugin, { OptionType } from "@utils/types";
-import { findByPropsLazy, findComponentByCodeLazy } from "@webpack";
+import { Channel, Message } from "@vencord/discord-types";
+import { findComponentByCodeLazy, findComponentLazy, findCssClassesLazy } from "@webpack";
 import {
     Button,
     ChannelStore,
@@ -39,20 +40,19 @@ import {
     Text,
     UserStore
 } from "@webpack/common";
-import { Channel, Message } from "discord-types/general";
-import { JSX } from "react";
+import { ComponentType, JSX } from "react";
 
 const messageCache = new Map<string, {
     message?: Message;
     fetched: boolean;
 }>();
 
-const Embed = findComponentByCodeLazy(".inlineMediaEmbed");
-const AutoModEmbed = findComponentByCodeLazy(".withFooter]:", "childrenMessageContent:");
+const Embed = findComponentLazy(m => m.prototype?.renderSuppressButton);
 const ChannelMessage = findComponentByCodeLazy("childrenExecutedCommand:", ".hideAccessories");
+let AutoModEmbed: ComponentType<any> = () => null;
 
-const SearchResultClasses = findByPropsLazy("message", "searchResult");
-const EmbedClasses = findByPropsLazy("embedAuthorIcon", "embedAuthor", "embedAuthor");
+const SearchResultClasses = findCssClassesLazy("message", "searchResult");
+const EmbedClasses = findCssClassesLazy("embedAuthorIcon", "embedAuthor", "embedAuthor", "embedMargin");
 
 const MessageDisplayCompact = getUserSettingLazy("textAndImages", "messageDisplayCompact")!;
 
@@ -113,9 +113,11 @@ const settings = definePluginSettings({
         ]
     },
     idList: {
+        displayName: "ID List",
         description: "Guild/channel/user IDs to blacklist or whitelist (separate with comma)",
         type: OptionType.STRING,
-        default: ""
+        default: "",
+        multiline: true,
     },
     clearMessageCache: {
         type: OptionType.COMPONENT,
@@ -217,7 +219,7 @@ function withEmbeddedBy(message: Message, embeddedBy: string[]) {
     return new Proxy(message, {
         get(_, prop) {
             if (prop === "vencordEmbeddedBy") return embeddedBy;
-            // @ts-ignore ts so bad
+            // @ts-expect-error ts so bad
             return Reflect.get(...arguments);
         }
     });
@@ -225,7 +227,7 @@ function withEmbeddedBy(message: Message, embeddedBy: string[]) {
 
 
 function MessageEmbedAccessory({ message }: { message: Message; }) {
-    // @ts-ignore
+    // @ts-expect-error
     const embeddedBy: string[] = message.vencordEmbeddedBy ?? [];
 
     const accessories = [] as (JSX.Element | null)[];
@@ -366,10 +368,25 @@ function AutomodEmbedAccessory(props: MessageEmbedProps): JSX.Element | null {
 export default definePlugin({
     name: "MessageLinkEmbeds",
     description: "Adds a preview to messages that link another message",
+    tags: ["Chat", "Appearance"],
     authors: [Devs.TheSun, Devs.Ven, Devs.RyanCaoDev],
     dependencies: ["MessageAccessoriesAPI", "MessageUpdaterAPI", "UserSettingsAPI"],
 
     settings,
+
+    patches: [
+        {
+            find: "!1,withFooter:",
+            replacement: {
+                match: /(?=function (\i)\(\i\){let{message:\i,channel:\i,[^}]+?withFooter:)/,
+                replace: "$self.AutoModEmbed=$1;"
+            }
+        }
+    ],
+
+    set AutoModEmbed(value: any) {
+        AutoModEmbed = value;
+    },
 
     start() {
         addMessageAccessory("MessageLinkEmbeds", props => {

@@ -16,18 +16,27 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { debounce } from "@shared/debounce";
 import { SettingsStore as SettingsStoreClass } from "@shared/SettingsStore";
-import { localStorage } from "@utils/localStorage";
 import { Logger } from "@utils/Logger";
 import { mergeDefaults } from "@utils/mergeDefaults";
-import { putCloudSettings } from "@utils/settingsSync";
 import { DefinedSettings, OptionType, SettingsChecks, SettingsDefinition } from "@utils/types";
 import { React, useEffect } from "@webpack/common";
 
 import plugins from "~plugins";
 
 const logger = new Logger("Settings");
+
+export interface SettingsPluginUiElement {
+    enabled: boolean;
+    // TODO
+    /** not implemented for now */
+    order?: number;
+}
+export type SettingsPluginUiElements = {
+    /** id will be whatever id the element was registered with. Usually, but not always, the plugin name */
+    [id: string]: SettingsPluginUiElement;
+};
+
 export interface Settings {
     autoUpdate: boolean;
     autoUpdateNotification: boolean,
@@ -53,6 +62,7 @@ export interface Settings {
     | "under-page"
     | "window"
     | undefined;
+    windowsMaterial: "none" | "mica" | "tabbed" | "acrylic";
     disableMinSize: boolean;
     winNativeTitleBar: boolean;
     plugins: {
@@ -61,6 +71,11 @@ export interface Settings {
             [setting: string]: any;
         };
     };
+
+    uiElements: {
+        messagePopoverButtons: SettingsPluginUiElements;
+        chatBarButtons: SettingsPluginUiElements;
+    },
 
     notifications: {
         timeout: number;
@@ -82,16 +97,22 @@ const DefaultSettings: Settings = {
     autoUpdateNotification: true,
     useQuickCss: true,
     themeLinks: [],
-    eagerPatches: IS_REPORTER,
+    eagerPatches: false, // Eagerly patching no longer works due to module factories with the same id being able to have different sources now.
     enabledThemes: [],
     enableReactDevtools: false,
     frameless: false,
     transparent: false,
     winCtrlQ: false,
     macosVibrancyStyle: undefined,
+    windowsMaterial: "none",
     disableMinSize: false,
     winNativeTitleBar: false,
     plugins: {},
+
+    uiElements: {
+        chatBarButtons: {},
+        messagePopoverButtons: {}
+    },
 
     notifications: {
         timeout: 5000,
@@ -110,14 +131,6 @@ const DefaultSettings: Settings = {
 
 const settings = !IS_REPORTER ? VencordNative.settings.get() : {} as Settings;
 mergeDefaults(settings, DefaultSettings);
-
-const saveSettingsOnFrequentAction = debounce(async () => {
-    if (Settings.cloud.settingsSync && Settings.cloud.authenticated) {
-        await putCloudSettings();
-        delete localStorage.Vencord_settingsDirty;
-    }
-}, 60_000);
-
 
 export const SettingsStore = new SettingsStoreClass(settings, {
     readOnly: true,
@@ -139,7 +152,7 @@ export const SettingsStore = new SettingsStoreClass(settings, {
         if (path.startsWith("plugins.")) {
             const plugin = path.slice("plugins.".length);
             if (plugin in plugins) {
-                const setting = plugins[plugin].options?.[key];
+                const setting = plugins[plugin].settings?.def[key];
                 if (!setting) return v;
 
                 if ("default" in setting)
@@ -161,8 +174,6 @@ export const SettingsStore = new SettingsStoreClass(settings, {
 if (!IS_REPORTER) {
     SettingsStore.addGlobalChangeListener((_, path) => {
         SettingsStore.plain.cloud.settingsSyncVersion = Date.now();
-        localStorage.Vencord_settingsDirty = true;
-        saveSettingsOnFrequentAction();
         VencordNative.settings.set(SettingsStore.plain, path);
     });
 }
@@ -171,7 +182,7 @@ if (!IS_REPORTER) {
  * Same as {@link Settings} but unproxied. You should treat this as readonly,
  * as modifying properties on this will not save to disk or call settings
  * listeners.
- * WARNING: default values specified in plugin.options will not be ensured here. In other words,
+ * WARNING: default values specified in plugin.settings will not be ensured here. In other words,
  * settings for which you specified a default value may be uninitialised. If you need proper
  * handling for default values, use {@link Settings}
  */
@@ -196,8 +207,21 @@ export function useSettings(paths?: UseSettings<Settings>[]) {
 
     useEffect(() => {
         if (paths) {
-            paths.forEach(p => SettingsStore.addChangeListener(p, forceUpdate));
-            return () => paths.forEach(p => SettingsStore.removeChangeListener(p, forceUpdate));
+            paths.forEach(p => {
+                if (p.endsWith(".*")) {
+                    SettingsStore.addPrefixChangeListener(p.slice(0, -2), forceUpdate);
+                } else {
+                    SettingsStore.addChangeListener(p, forceUpdate);
+                }
+            });
+
+            return () => paths.forEach(p => {
+                if (p.endsWith(".*")) {
+                    SettingsStore.removePrefixChangeListener(p.slice(0, -2), forceUpdate);
+                } else {
+                    SettingsStore.removeChangeListener(p, forceUpdate);
+                }
+            });
         } else {
             SettingsStore.addGlobalChangeListener(forceUpdate);
             return () => SettingsStore.removeGlobalChangeListener(forceUpdate);
@@ -238,7 +262,13 @@ export function definePluginSettings<
     Checks extends SettingsChecks<Def>,
     PrivateSettings extends object = {}
 >(def: Def, checks?: Checks) {
-    const definedSettings: DefinedSettings<Def, Checks, PrivateSettings> = {
+    if (checks) {
+        for (const [name, check] of Object.entries(checks)) {
+            Object.assign(def[name], check);
+        }
+    }
+
+    const definedSettings: DefinedSettings<Def, PrivateSettings> = {
         get store() {
             if (!definedSettings.pluginName) throw new Error("Cannot access settings before plugin is initialized");
             return Settings.plugins[definedSettings.pluginName] as any;
@@ -247,15 +277,16 @@ export function definePluginSettings<
             if (!definedSettings.pluginName) throw new Error("Cannot access settings before plugin is initialized");
             return PlainSettings.plugins[definedSettings.pluginName] as any;
         },
-        use: settings => useSettings(
-            settings?.map(name => `plugins.${definedSettings.pluginName}.${name}`) as UseSettings<Settings>[]
-        ).plugins[definedSettings.pluginName] as any,
+        use: settings => useSettings((
+            settings
+                ? settings.map(name => `plugins.${definedSettings.pluginName}.${name}`)
+                : [`plugins.${definedSettings.pluginName}.*`]
+        ) as UseSettings<Settings>[]).plugins[definedSettings.pluginName] as any,
         def,
-        checks: checks ?? {} as any,
         pluginName: "",
 
         withPrivateSettings<T extends object>() {
-            return this as DefinedSettings<Def, Checks, T>;
+            return this as DefinedSettings<Def, T>;
         }
     };
 
@@ -268,8 +299,8 @@ type ResolveUseSettings<T extends object> = {
     [Key in keyof T]:
     Key extends string
     ? T[Key] extends Record<string, unknown>
-    // @ts-ignore "Type instantiation is excessively deep and possibly infinite"
-    ? UseSettings<T[Key]> extends string ? `${Key}.${UseSettings<T[Key]>}` : never
+    // @ts-expect-error "Type instantiation is excessively deep and possibly infinite"
+    ? `${Key}.*` | (ResolveUseSettings<T[Key]> extends Record<string, string> ? `${Key}.${ResolveUseSettings<T[Key]>[keyof T[Key]]}` : never)
     : Key
     : never;
 };
