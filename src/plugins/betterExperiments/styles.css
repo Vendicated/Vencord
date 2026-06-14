@@ -46,10 +46,22 @@
     flex-flow: row wrap;
 }
 
-.vc-better-experiments-experiment-bucket-icons img {
+.vc-better-experiments-experiment-bucket-icons img,
+.vc-better-experiments-guild-acronym {
     border-radius: 50%;
     width: 32px;
     height: 32px;
+}
+
+.vc-better-experiments-guild-acronym {
+    background-color: var(--background-base-lower);
+    color: var(--text-normal);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    white-space: nowrap;
+    font-weight: 500;
 }
 
 .vc-better-experiments-experiment-bucket-empty {

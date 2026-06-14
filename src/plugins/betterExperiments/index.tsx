@@ -10,7 +10,9 @@ import { definePluginSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import { classNameFactory } from "@utils/css";
+import { getGuildAcronym } from "@utils/discord";
 import definePlugin, { OptionType } from "@utils/types";
+import type { Guild } from "@vencord/discord-types";
 import { findLazy, findStoreLazy } from "@webpack";
 import { GuildStore, IconUtils, RelationshipStore, Tooltip, UserStore } from "@webpack/common";
 
@@ -60,6 +62,37 @@ function getTypedExperiment(experiment: Experiment): TypedExperiment {
 
 const EXPERIMENTS: Map<string, Experiment> = new Map();
 let intervalId: ReturnType<typeof setInterval>;
+
+const getFontSize = (s: string) => {
+    const sizes = [20, 20, 18, 18, 16, 14, 12];
+    return sizes[s.length] ?? 10;
+};
+
+function GuildIcon({ guild, tooltipProps }: { guild: Guild; tooltipProps: Record<string, unknown>; }) {
+    if (guild.icon) {
+        return (
+            <img
+                {...tooltipProps}
+                className={cl("guild-icon")}
+                src={IconUtils.getGuildIconURL(guild)}
+                alt={guild.name}
+            />
+        );
+    }
+
+    const acronym = getGuildAcronym(guild);
+
+    return (
+        <div
+            {...tooltipProps}
+            aria-label={guild.name}
+            className={cl("guild-acronym")}
+            style={{ fontSize: getFontSize(acronym) }}
+        >
+            {acronym}
+        </div>
+    );
+}
 
 export default definePlugin({
     authors: [Devs.mantikafasi],
@@ -175,11 +208,7 @@ export default definePlugin({
                         if (descriptor.bucket === parseInt(bucket)) return (
                             <Tooltip text={guild.name} key={guild.id}>
                                 {tooltipProps => (
-                                    <img
-                                        {...tooltipProps}
-                                        src={IconUtils.getGuildIconURL(guild)}
-                                        alt={guild.name}
-                                    />
+                                    <GuildIcon guild={guild} tooltipProps={tooltipProps} />
                                 )}
                             </Tooltip>
                         );
