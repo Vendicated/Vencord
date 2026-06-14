@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { Divider } from "@components/Divider";
 import { ErrorCard } from "@components/ErrorCard";
 import { Link } from "@components/Link";
 import { CspBlockedUrls, useCspErrors } from "@utils/cspViolations";
@@ -11,7 +12,7 @@ import { Margins } from "@utils/margins";
 import { classes } from "@utils/misc";
 import { relaunch } from "@utils/native";
 import { useForceUpdater } from "@utils/react";
-import { Alerts, Button, Forms } from "@webpack/common";
+import { Button, ConfirmModal, Forms, openModal } from "@webpack/common";
 
 export function CspErrorCard() {
     if (IS_WEB) return null;
@@ -37,19 +38,23 @@ export function CspErrorCard() {
 
         forceUpdate();
 
-        Alerts.show({
-            title: "Restart Required",
-            body: "A restart is required to apply this change",
-            confirmText: "Restart now",
-            cancelText: "Later!",
-            onConfirm: relaunch
-        });
+        openModal(props => (
+            <ConfirmModal
+                {...props}
+                title="Restart Required"
+                subtitle="A restart is required to apply this change"
+                confirmText="Restart now"
+                cancelText="Later!"
+                variant="primary"
+                onConfirm={relaunch}
+            />
+        ));
     };
 
     const hasImgurHtmlDomain = errors.some(isImgurHtmlDomain);
 
     return (
-        <ErrorCard className="vc-settings-card">
+        <ErrorCard>
             <Forms.FormTitle tag="h5">Blocked Resources</Forms.FormTitle>
             <Forms.FormText>Some images, styles, or fonts were blocked because they come from disallowed domains.</Forms.FormText>
             <Forms.FormText>It is highly recommended to move them to GitHub or Imgur. But you may also allow domains if you fully trust them.</Forms.FormText>
@@ -61,7 +66,7 @@ export function CspErrorCard() {
             <div className="vc-settings-csp-list">
                 {errors.map((url, i) => (
                     <div key={url}>
-                        {i !== 0 && <Forms.FormDivider className={Margins.bottom8} />}
+                        {i !== 0 && <Divider className={Margins.bottom8} />}
                         <div className="vc-settings-csp-row">
                             <Link href={url}>{url}</Link>
                             <Button color={Button.Colors.PRIMARY} onClick={() => allowUrl(url)} disabled={isImgurHtmlDomain(url)}>
@@ -74,7 +79,7 @@ export function CspErrorCard() {
 
             {hasImgurHtmlDomain && (
                 <>
-                    <Forms.FormDivider className={classes(Margins.top8, Margins.bottom16)} />
+                    <Divider className={classes(Margins.top8, Margins.bottom16)} />
                     <Forms.FormText>
                         Imgur links should be direct links in the form of <code>https://i.imgur.com/...</code>
                     </Forms.FormText>

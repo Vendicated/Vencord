@@ -19,20 +19,20 @@
 import "./PluginModal.css";
 
 import { generateId } from "@api/Commands";
+import { hasAnyVisibleSettings, isSettingHidden } from "@api/PluginManager";
 import { useSettings } from "@api/Settings";
-import { classNameFactory } from "@api/Styles";
+import { BaseText } from "@components/BaseText";
 import ErrorBoundary from "@components/ErrorBoundary";
-import { Flex } from "@components/Flex";
 import { debounce } from "@shared/debounce";
 import { gitRemote } from "@shared/vencordUserAgent";
+import { classNameFactory } from "@utils/css";
 import { proxyLazy } from "@utils/lazy";
 import { Margins } from "@utils/margins";
-import { classes, isObjectEmpty } from "@utils/misc";
-import { ModalCloseButton, ModalContent, ModalHeader, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
-import { OptionType, Plugin } from "@utils/types";
-import { User } from "@vencord/discord-types";
-import { findByPropsLazy } from "@webpack";
-import { Clickable, FluxDispatcher, Forms, React, Text, Tooltip, useEffect, UserStore, UserSummaryItem, UserUtils, useState } from "@webpack/common";
+import { classes } from "@utils/misc";
+import { OptionType, Plugin, PluginTag } from "@utils/types";
+import { RenderModalProps, User } from "@vencord/discord-types";
+import { findCssClassesLazy } from "@webpack";
+import { Clickable, FluxDispatcher, Forms, Modal,openModal, React, Text, Tooltip, useEffect, useMemo, UserStore, UserSummaryItem, UserUtils, useState } from "@webpack/common";
 import { Constructor } from "type-fest";
 
 import { PluginMeta } from "~plugins";
@@ -43,10 +43,10 @@ import { GithubButton, WebsiteButton } from "./LinkIconButton";
 
 const cl = classNameFactory("vc-plugin-modal-");
 
-const AvatarStyles = findByPropsLazy("moreUsers", "emptyUser", "avatarContainer", "clickableAvatar");
+const AvatarStyles = findCssClassesLazy("moreUsers", "avatar", "clickableAvatar");
 const UserRecord: Constructor<Partial<User>> = proxyLazy(() => UserStore.getCurrentUser().constructor) as any;
 
-interface PluginModalProps extends ModalProps {
+interface PluginModalProps extends RenderModalProps {
     plugin: Plugin;
     onRestartNeeded(key: string): void;
 }
@@ -68,34 +68,53 @@ function makeDummyUser(user: { username: string; id?: string; avatar?: string; }
     return newUser;
 }
 
-export default function PluginModal({ plugin, onRestartNeeded, onClose, transitionState }: PluginModalProps) {
-    const pluginSettings = useSettings().plugins[plugin.name];
-    const hasSettings = Boolean(pluginSettings && plugin.options && !isObjectEmpty(plugin.options));
+function PluginTags({ tags }: { tags: PluginTag[]; }) {
+    return (
+        <div className={cl("tags")}>
+            {tags.map(tag => (
+                <div key={tag} className={cl("tag")}>{tag}</div>
+            ))}
+        </div>
+    );
+}
 
+export default function PluginModal({ plugin, onRestartNeeded, onClose, transitionState }: PluginModalProps) {
+    const pluginSettings = useSettings([`plugins.${plugin.name}.*`]).plugins[plugin.name];
+    const hasSettings = hasAnyVisibleSettings(plugin);
+
+    // avoid layout shift by showing dummy users while loading users
+    const fallbackAuthors = useMemo(() => [makeDummyUser({ username: "Loading...", id: "-1465912127305809920" })], []);
     const [authors, setAuthors] = useState<Partial<User>[]>([]);
 
     useEffect(() => {
         (async () => {
             for (const user of plugin.authors.slice(0, 6)) {
-                const author = user.id
-                    ? await UserUtils.getUser(`${user.id}`)
-                        .catch(() => makeDummyUser({ username: user.name }))
-                    : makeDummyUser({ username: user.name });
+                try {
+                    const author = user.id
+                        ? await UserUtils.getUser(String(user.id))
+                            .catch(() => makeDummyUser({ username: user.name }))
+                        : makeDummyUser({ username: user.name });
 
-                setAuthors(a => [...a, author]);
+                    setAuthors(a => [...a, author]);
+                } catch (e) {
+                    continue;
+                }
             }
         })();
     }, [plugin.authors]);
 
     function renderSettings() {
-        if (!hasSettings || !plugin.options)
+        const { settings } = plugin;
+        if (!hasSettings || !settings)
             return <Forms.FormText>There are no settings for this plugin.</Forms.FormText>;
 
-        const options = Object.entries(plugin.options).map(([key, setting]) => {
-            if (setting.type === OptionType.CUSTOM || setting.hidden) return null;
+        const options = Object.entries(settings.def).map(([key, setting]) => {
+            if (setting.type === OptionType.CUSTOM) return null;
+
+            if (isSettingHidden(settings, setting)) return null;
 
             function onChange(newValue: any) {
-                const option = plugin.options?.[key];
+                const option = plugin.settings!.def[key];
                 if (!option || option.type === OptionType.CUSTOM) return;
 
                 pluginSettings[key] = newValue;
@@ -105,14 +124,16 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
 
             const Component = OptionComponentMap[setting.type];
             return (
-                <Component
-                    id={key}
-                    key={key}
-                    option={setting}
-                    onChange={debounce(onChange)}
-                    pluginSettings={pluginSettings}
-                    definedSettings={plugin.settings}
-                />
+                <ErrorBoundary noop key={key}>
+                    <Component
+                        id={key}
+                        setting={setting}
+                        onChange={debounce(onChange)}
+                        pluginSettings={pluginSettings}
+                        definedSettings={settings}
+                        closePluginSettings={onClose}
+                    />
+                </ErrorBoundary>
             );
         });
 
@@ -146,71 +167,82 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
     const pluginMeta = PluginMeta[plugin.name];
 
     return (
-        <ModalRoot transitionState={transitionState} size={ModalSize.MEDIUM}>
-            <ModalHeader separator={false} className={Margins.bottom8}>
-                <Text variant="heading-xl/bold" style={{ flexGrow: 1 }}>{plugin.name}</Text>
-                <ModalCloseButton onClick={onClose} />
-            </ModalHeader>
-
-            <ModalContent className={Margins.bottom16}>
-                <Forms.FormSection>
-                    <Flex className={cl("info")}>
-                        <Forms.FormText className={cl("description")}>{plugin.description}</Forms.FormText>
-                        {!pluginMeta.userPlugin && (
-                            <div className="vc-settings-modal-links">
-                                <WebsiteButton
-                                    text="View more info"
-                                    href={`https://vencord.dev/plugins/${plugin.name}`}
-                                />
-                                <GithubButton
-                                    text="View source code"
-                                    href={`https://github.com/${gitRemote}/tree/main/src/plugins/${pluginMeta.folderName}`}
-                                />
-                            </div>
-                        )}
-                    </Flex>
+        <Modal
+            transitionState={transitionState}
+            onClose={onClose}
+            size="lg"
+            title={
+                <div className={cl("header")}>
+                    <BaseText tag="h1" weight="semibold" size="lg">{plugin.name}</BaseText>
+                    {!pluginMeta.userPlugin && (
+                        <div className="vc-settings-modal-links">
+                            <WebsiteButton
+                                text="View more info"
+                                href={`https://vencord.dev/plugins/${plugin.name}`}
+                            />
+                            <GithubButton
+                                text="View source code"
+                                href={`https://github.com/${gitRemote}/tree/main/src/plugins/${pluginMeta.folderName}`}
+                            />
+                        </div>
+                    )}
+                </div>
+            }
+            subtitle={
+                <div className={cl("info")}>
+                    <div>
+                        <Forms.FormText>{plugin.description}</Forms.FormText>
+                        {!!plugin.tags?.length && <PluginTags tags={plugin.tags} />}
+                    </div>
+                </div>
+            }
+        >
+            <div className={"vc-settings-modal-content"}>
+                <section>
                     <Text variant="heading-lg/semibold" className={classes(Margins.top8, Margins.bottom8)}>Authors</Text>
                     <div style={{ width: "fit-content" }}>
-                        <UserSummaryItem
-                            users={authors}
-                            guildId={undefined}
-                            renderIcon={false}
-                            max={6}
-                            showDefaultAvatarsForNullUsers
-                            renderMoreUsers={renderMoreUsers}
-                            renderUser={(user: User) => (
-                                <Clickable
-                                    className={AvatarStyles.clickableAvatar}
-                                    onClick={() => openContributorModal(user)}
-                                >
-                                    <img
-                                        className={AvatarStyles.avatar}
-                                        src={user.getAvatarURL(void 0, 80, true)}
-                                        alt={user.username}
-                                        title={user.username}
-                                    />
-                                </Clickable>
-                            )}
-                        />
+                        <ErrorBoundary noop>
+                            <UserSummaryItem
+                                users={authors.length ? authors : fallbackAuthors}
+                                guildId={undefined}
+                                renderIcon={false}
+                                max={6}
+                                showDefaultAvatarsForNullUsers
+                                renderMoreUsers={renderMoreUsers}
+                                renderUser={(user: User) => (
+                                    <Clickable
+                                        className={AvatarStyles.clickableAvatar}
+                                        onClick={() => openContributorModal(user)}
+                                    >
+                                        <img
+                                            className={AvatarStyles.avatar}
+                                            src={user.getAvatarURL(void 0, 80, true)}
+                                            alt={user.username}
+                                            title={user.username}
+                                        />
+                                    </Clickable>
+                                )}
+                            />
+                        </ErrorBoundary>
                     </div>
-                </Forms.FormSection>
+                </section>
 
                 {!!plugin.settingsAboutComponent && (
                     <div className={Margins.top16}>
-                        <Forms.FormSection>
+                        <section>
                             <ErrorBoundary message="An error occurred while rendering this plugin's custom Info Component">
                                 <plugin.settingsAboutComponent />
                             </ErrorBoundary>
-                        </Forms.FormSection>
+                        </section>
                     </div>
                 )}
 
-                <Forms.FormSection>
+                <section>
                     <Text variant="heading-lg/semibold" className={classes(Margins.top16, Margins.bottom8)}>Settings</Text>
                     {renderSettings()}
-                </Forms.FormSection>
-            </ModalContent>
-        </ModalRoot>
+                </section>
+            </div>
+        </Modal>
     );
 }
 

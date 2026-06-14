@@ -49,6 +49,7 @@ const settings = definePluginSettings({
         default: false
     },
     applyColorOnlyInDms: {
+        displayName: "Apply Color Only In DMs",
         description: "Apply colors only in direct messages; do not apply colors in servers.",
         restartNeeded: false,
         type: OptionType.BOOLEAN,
@@ -59,6 +60,7 @@ const settings = definePluginSettings({
 export default definePlugin({
     name: "IrcColors",
     description: "Makes username colors in chat unique, like in IRC clients",
+    tags: ["Appearance", "Customisation"],
     authors: [Devs.Grzesiek11, Devs.jamesbt365],
     settings,
 
@@ -127,7 +129,7 @@ export default definePlugin({
             const colorString = context?.colorString;
             const color = calculateNameColorForUser(id);
 
-            if (settings.store.applyColorOnlyInDms && !context?.channel?.isPrivate()) {
+            if (settings.store.applyColorOnlyInDms && context?.guildId !== undefined) {
                 return colorString;
             }
 
