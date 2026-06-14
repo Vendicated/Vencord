@@ -1,13 +1,12 @@
 .vc-decor-danger-btn {
-    color: var(--white-500);
-    background-color: var(--button-danger-background);
+    color: var(--control-critical-primary-text-default);
+    background-color: var(--control-critical-primary-background-default);
 }
 
 .vc-decor-change-decoration-modal-content {
     position: relative;
     display: flex;
     border-radius: 5px 5px 0 0;
-    padding: 0 16px;
     gap: 4px;
 }
 
@@ -32,7 +31,6 @@
     display: flex;
     flex-direction: column;
     gap: 20px;
-    padding: 0 16px;
 }
 
 .vc-decor-create-decoration-modal-form-preview-container {

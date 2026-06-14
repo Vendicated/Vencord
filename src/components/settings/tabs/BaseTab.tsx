@@ -16,27 +16,44 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { BaseText } from "@components/BaseText";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { handleComponentFailed } from "@components/handleComponentFailed";
-import { Margins } from "@utils/margins";
 import { onlyOnce } from "@utils/onlyOnce";
+import { Modal,openModal } from "@webpack/common";
 import type { ComponentType, PropsWithChildren } from "react";
 
-export function SettingsTab({ title, children }: PropsWithChildren<{ title: string; }>) {
+export function SettingsTab({ children }: PropsWithChildren) {
     return (
-        <section>
-            <BaseText tag="h2" size="xl" weight="semibold" className={Margins.bottom16}>{title}</BaseText>
-            {children}
-        </section>
+        <section className="vc-settings-tab">{children}</section>
     );
 }
 
 export const handleSettingsTabError = onlyOnce(handleComponentFailed);
 
 export function wrapTab(component: ComponentType<any>, tab: string) {
-    return ErrorBoundary.wrap(component, {
+    const wrapped = ErrorBoundary.wrap(component, {
+        displayName: `${tab}SettingsTab`,
         message: `Failed to render the ${tab} tab. If this issue persists, try using the installer to reinstall!`,
         onError: handleSettingsTabError,
     });
+
+    return wrapped;
+}
+
+export function openSettingsTabModal(Tab: ComponentType<any>) {
+    Tab = wrapTab(Tab, Tab.displayName || "SettingsTab");
+
+    try {
+        openModal(props => (
+            <Modal
+                {...props}
+                size="lg"
+                title={Tab.displayName?.replace("SettingsTab", "") || "Settings"}
+            >
+                <Tab />
+            </Modal>
+        ));
+    } catch {
+        handleSettingsTabError();
+    }
 }
