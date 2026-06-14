@@ -371,9 +371,6 @@ function ScriptEditor({ script: initialScript, onBack }: { script: ActivityUserS
                     <Forms.FormTitle tag="h3">Code</Forms.FormTitle>
                     <Flex className={Margins.top8} gap={8} alignItems="center">
                         <Button variant="secondary" onClick={openCodeEditor}>Open Code Editor</Button>
-                        <Text variant="text-sm/normal" color="text-muted">
-                            {script.code.trim() ? `${script.code.length} characters` : "No code"}
-                        </Text>
                     </Flex>
                 </section>
             </Flex>
