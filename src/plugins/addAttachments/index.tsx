@@ -8,7 +8,7 @@ import { UploadIcon } from "@components/Icons";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 import { ChannelStore, MessageStore, PermissionsBits, PermissionStore, SelectedChannelStore, showToast, Toasts, UserStore } from "@webpack/common";
-import { Common, findByPropsLazy } from "webpack";
+import { Common, findByPropsLazy } from "@webpack";
 
 const uniqueIdProp = findByPropsLazy("uniqueId");
 
