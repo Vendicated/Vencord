@@ -57,6 +57,7 @@
 .vc-rdb-review-comment {
     overflow-y: hidden;
     margin-top: 1px;
+    line-height: 1.2;
     margin-bottom: 8px;
     color: var(--text-default);
     font-size: 15px;
@@ -118,13 +119,6 @@
     cursor: not-allowed;
 }
 
-.vc-rdb-vote-up-selected {
-    color: var(--status-positive);
-}
-
-.vc-rdb-vote-down-selected {
-    color: var(--status-danger);
-}
 
 .vc-rdb-vote-column {
     position: absolute;
@@ -148,8 +142,8 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 15px;
-    height: 15px;
+    width: 20px;
+    height: 20px;
     padding: 0;
     border: 0;
     border-radius: 4px;
@@ -170,7 +164,6 @@
 
 .vc-rdb-vote-column-score {
     min-width: 15px;
-    max-width: 20px;
     color: var(--text-muted);
     font-size: 1rem;
     font-weight: 700;

@@ -193,8 +193,6 @@ export async function voteReview(id: number, isUpvote: boolean) {
 
     if (!data) return false;
 
-    const message = data.message ?? "Vote recorded";
-    showToast(message, Toasts.Type.SUCCESS);
     return true;
 }
 
@@ -212,8 +210,6 @@ export async function deleteReviewVote(id: number) {
 
     if (!data) return false;
 
-    const message = data.message ?? "Vote removed";
-    showToast(message, Toasts.Type.SUCCESS);
     return true;
 }
 
