@@ -12,7 +12,7 @@ import { Devs } from "@utils/constants";
 import { classNameFactory } from "@utils/css";
 import { getGuildAcronym } from "@utils/discord";
 import definePlugin, { OptionType } from "@utils/types";
-import type { Guild } from "@vencord/discord-types";
+import type { Guild, TooltipChildrenProps } from "@vencord/discord-types";
 import { findLazy, findStoreLazy } from "@webpack";
 import { GuildStore, IconUtils, RelationshipStore, Tooltip, UserStore } from "@webpack/common";
 
@@ -68,7 +68,7 @@ const getFontSize = (s: string) => {
     return sizes[s.length] ?? 10;
 };
 
-function GuildIcon({ guild, tooltipProps }: { guild: Guild; tooltipProps: HTMLAttributes<HTMLElement>; }) {
+function GuildIcon({ guild, tooltipProps }: { guild: Guild; tooltipProps: TooltipChildrenProps; }) {
     if (guild.icon) {
         return (
             <img
