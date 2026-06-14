@@ -161,7 +161,7 @@ export default definePlugin({
     name: "PermissionsViewer",
     description: "View the permissions a user or channel has, and the roles of a server",
     tags: ["Servers", "Roles", "Utility"],
-    authors: [Devs.Nuckyz, Devs.Ven],
+    authors: [Devs.Nuckyz, Devs.Ven, Devs.Vexify],
     settings,
 
     patches: [

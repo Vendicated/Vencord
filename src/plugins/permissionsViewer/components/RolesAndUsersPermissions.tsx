@@ -26,7 +26,7 @@ import { getIntlMessage, getUniqueUsername } from "@utils/discord";
 import { Guild, RenderModalProps, Role, RoleOrUserPermission, UnicodeEmoji, User } from "@vencord/discord-types";
 import { PermissionOverwriteType } from "@vencord/discord-types/enums";
 import { findByCodeLazy } from "@webpack";
-import { ContextMenuApi, FluxDispatcher, GuildMemberStore, GuildRoleStore, i18n, Menu, Modal,openModalLazy, PermissionsBits, ScrollerThin, Text, Tooltip, useEffect, useMemo, useRef, UserStore, useState, useStateFromStores } from "@webpack/common";
+import { ContextMenuApi, FluxDispatcher, GuildMemberStore, GuildRoleStore, i18n, Menu, Modal, openModalLazy, PermissionsBits, ScrollerThin, Text, Tooltip, useEffect, useMemo, useRef, UserStore, useState, useStateFromStores } from "@webpack/common";
 
 import { settings } from "..";
 import { PermissionAllowedIcon, PermissionDefaultIcon, PermissionDeniedIcon } from "./icons";
@@ -45,16 +45,32 @@ function getRoleIconSrc(role: Role) {
 function RolesAndUsersPermissionsComponent({ permissions, guild, modalProps, header }: { permissions: Array<RoleOrUserPermission>; guild: Guild; modalProps: RenderModalProps; header: string; }) {
     const guildPermissionSpecMap = useMemo(() => getGuildPermissionSpecMap(guild), [guild.id]);
 
-    useStateFromStores(
+    const memberIds = useStateFromStores(
         [GuildMemberStore],
         () => GuildMemberStore.getMemberIds(guild.id),
         null,
         (old, current) => old.length === current.length
     );
 
-    useEffect(() => {
-        permissions.sort((a, b) => a.type - b.type);
-    }, [permissions]);
+    const sortedPermissions = useMemo(() => {
+        const roles = GuildRoleStore.getRolesSnapshot(guild.id);
+        return [...permissions].sort((a, b) => {
+            if (a.type !== b.type) return a.type - b.type;
+
+            if (a.type === PermissionOverwriteType.ROLE) {
+                const posA = roles[a.id ?? ""]?.position ?? 0;
+                const posB = roles[b.id ?? ""]?.position ?? 0;
+                return posB - posA;
+            }
+
+            const userA = UserStore.getUser(a.id ?? "");
+            const userB = UserStore.getUser(b.id ?? "");
+            const nameA = userA != null ? getUniqueUsername(userA) : "Unknown User";
+            const nameB = userB != null ? getUniqueUsername(userB) : "Unknown User";
+
+            return nameA.localeCompare(nameB);
+        });
+    }, [guild.id, memberIds, permissions]);
 
     useEffect(() => {
         const usersToRequest = permissions
@@ -69,7 +85,7 @@ function RolesAndUsersPermissionsComponent({ permissions, guild, modalProps, hea
     }, []);
 
     const [selectedItemIndex, selectItem] = useState(0);
-    const selectedItem = permissions[selectedItemIndex];
+    const selectedItem = sortedPermissions[selectedItemIndex];
 
     const roles = GuildRoleStore.getRolesSnapshot(guild.id);
 
@@ -88,7 +104,7 @@ function RolesAndUsersPermissionsComponent({ permissions, guild, modalProps, hea
             {selectedItem && (
                 <div className={cl("modal-container")}>
                     <ScrollerThin className={cl("modal-list")} orientation="auto">
-                        {permissions.map((permission, index) => {
+                        {sortedPermissions.map((permission, index) => {
                             const user: User | undefined = UserStore.getUser(permission.id ?? "");
                             const role: Role | undefined = roles[permission.id ?? ""];
                             const roleIconSrc = role != null ? getRoleIconSrc(role) : undefined;
