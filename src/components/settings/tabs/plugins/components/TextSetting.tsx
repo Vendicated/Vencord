@@ -38,7 +38,7 @@ export function TextSetting({ setting, pluginSettings, definedSettings, id, onCh
     }
 
     return (
-        <SettingsSection name={id} description={setting.description} error={error}>
+        <SettingsSection name={setting.displayName} id={id} description={setting.description} error={error}>
             {setting.multiline
                 ? <TextArea
                     placeholder={setting.placeholder ?? "Enter a value"}
