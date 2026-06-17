@@ -46,7 +46,7 @@ import SettingsPlugin from "./settings";
 const CodeBlockRe = /```js\n(.+?)```/s;
 
 const AdditionalAllowedChannelIds = [
-    "1024286218801926184", // Vencord > #bot-spam
+    "1024286218801926184", // Vencord > #bot-commands
 ];
 
 const TrustedRolesIds = [
@@ -315,27 +315,27 @@ export default definePlugin({
                     </Button>
                 );
             }
+        }
 
-            if (props.message.author.id === VENBOT_USER_ID) {
-                const match = CodeBlockRe.exec(props.message.content || props.message.embeds[0]?.rawDescription || "");
-                if (match) {
-                    buttons.push(
-                        <Button
-                            key="vc-run-snippet"
-                            onClick={async () => {
-                                try {
-                                    await AsyncFunction(match[1])();
-                                    showToast("Success!", Toasts.Type.SUCCESS);
-                                } catch (e) {
-                                    new Logger(this.name).error("Error while running snippet:", e);
-                                    showToast("Failed to run snippet :(", Toasts.Type.FAILURE);
-                                }
-                            }}
-                        >
-                            Run Snippet
-                        </Button>
-                    );
-                }
+        if (props.channel.parent_id === KNOWN_ISSUES_CHANNEL_ID || (props.channel.parent_id === SUPPORT_CATEGORY_ID && props.message.author.id === VENBOT_USER_ID)) {
+            const match = CodeBlockRe.exec(props.message.content || props.message.embeds[0]?.rawDescription || "");
+            if (match) {
+                buttons.push(
+                    <Button
+                        key="vc-run-snippet"
+                        onClick={async () => {
+                            try {
+                                await AsyncFunction(match[1])();
+                                showToast("Success!", Toasts.Type.SUCCESS);
+                            } catch (e) {
+                                new Logger(this.name).error("Error while running snippet:", e);
+                                showToast("Failed to run snippet :(", Toasts.Type.FAILURE);
+                            }
+                        }}
+                    >
+                        Run Snippet
+                    </Button>
+                );
             }
         }
 
