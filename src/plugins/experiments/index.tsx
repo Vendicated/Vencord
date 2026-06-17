@@ -140,8 +140,8 @@ export default definePlugin({
                 <Paragraph size="md">
                     You can open Discord's DevTools via {" "}
                     <div className={KbdStyles.combo} style={{ display: "inline-flex" }}>
-                        <kbd className={KbdStyles.key}>{modKey}</kbd> +{" "}
-                        <kbd className={KbdStyles.key}>{altKey}</kbd> +{" "}
+                        <kbd className={KbdStyles.key}>{modKey}</kbd>{" "}
+                        <kbd className={KbdStyles.key}>{altKey}</kbd>{" "}
                         <kbd className={KbdStyles.key}>O</kbd>{" "}
                     </div>
                 </Paragraph>

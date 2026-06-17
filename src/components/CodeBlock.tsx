@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { classes } from "@utils/misc";
 import { findCssClassesLazy } from "@webpack";
 import { Parser } from "@webpack/common";
 
@@ -12,9 +13,9 @@ const CodeContainerClasses = findCssClassesLazy("markup", "codeContainer");
 /**
  * Renders code in a Discord codeblock
  */
-export function CodeBlock(props: { content?: string, lang: string; }) {
+export function CodeBlock({ className, ...props }: { content?: string, lang: string; className?: string; }) {
     return (
-        <div className={CodeContainerClasses.markup}>
+        <div className={classes(CodeContainerClasses.markup, className)}>
             {Parser.defaultRules.codeBlock.react(props, null, {})}
         </div>
     );
@@ -23,9 +24,9 @@ export function CodeBlock(props: { content?: string, lang: string; }) {
 /**
  * Renders inline code like `this`
  */
-export function InlineCode({ children }: { children: React.ReactNode; }) {
+export function InlineCode({ children, className }: { children: React.ReactNode; className?: string; }) {
     return (
-        <span className={CodeContainerClasses.markup}>
+        <span className={classes(CodeContainerClasses.markup, className)}>
             <code className="inline">{children}</code>
         </span>
     );

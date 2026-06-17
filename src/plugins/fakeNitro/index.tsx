@@ -26,7 +26,7 @@ import definePlugin, { OptionType } from "@utils/types";
 import type { Emoji, Message, RenderModalProps, Sticker } from "@vencord/discord-types";
 import { StickerFormatType } from "@vencord/discord-types/enums";
 import { findByCodeLazy, findByPropsLazy, proxyLazyWebpack } from "@webpack";
-import { ChannelStore, ConfirmModal,DraftType, EmojiStore, FluxDispatcher, Forms, GuildMemberStore, IconUtils, lodash, openModal, Parser, PermissionsBits, PermissionStore, StickersStore, UploadHandler, UserSettingsActionCreators, UserSettingsProtoStore, UserStore } from "@webpack/common";
+import { ChannelStore, ConfirmModal, DraftType, EmojiStore, FluxDispatcher, Forms, GuildMemberStore, IconUtils, lodash, openModal, Parser, PermissionsBits, PermissionStore, StickersStore, UploadHandler, UserSettingsActionCreators, UserSettingsProtoStore, UserStore } from "@webpack/common";
 import { applyPalette, GIFEncoder, quantize } from "gifenc";
 import type { ReactElement, ReactNode } from "react";
 
@@ -310,9 +310,7 @@ export default definePlugin({
         },
         // Allow users to use custom client themes
         {
-            find: "customUserThemeSettings:{",
-            // Discord has two separate modules for treatments 1 and 2
-            all: true,
+            find: '("custom_themes_editor_footer")',
             replacement: {
                 match: /(?<=\i=)\(0,\i\.\i\)\(\i\.\i\.TIER_2\)(?=,|;)/g,
                 replace: "true"

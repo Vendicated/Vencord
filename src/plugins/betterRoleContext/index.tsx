@@ -6,16 +6,16 @@
 
 import { definePluginSettings } from "@api/Settings";
 import { getUserSettingLazy } from "@api/UserSettings";
-import { ImageIcon } from "@components/Icons";
+import { CopyIdIcon, ImageIcon } from "@components/Icons";
 import { copyToClipboard } from "@utils/clipboard";
 import { Devs } from "@utils/constants";
-import { getCurrentChannel, getCurrentGuild, openImageModal } from "@utils/discord";
+import { getCurrentChannel, getCurrentGuild, getIntlMessage, openImageModal } from "@utils/discord";
 import { isTruthy } from "@utils/guards";
 import { classes } from "@utils/misc";
 import definePlugin, { OptionType } from "@utils/types";
 import { Guild, PopoutProps, Role } from "@vencord/discord-types";
 import { findByCodeLazy, findByPropsLazy, findCssClassesLazy } from "@webpack";
-import { GuildRoleStore, Menu, PermissionStore, Popout, useRef } from "@webpack/common";
+import { ContextMenuApi, GuildRoleStore, Menu, PermissionStore, Popout, useRef } from "@webpack/common";
 import { ComponentType } from "react";
 
 const GuildSettingsActions = findByPropsLazy("open", "selectRole", "updateGuild");
@@ -171,22 +171,63 @@ export function buildExtraRoleContextMenuItems(role: Role, guild: Guild, popoutR
     return { before, after };
 }
 
+export function openRoleContextMenu(event: React.MouseEvent<HTMLElement>, { guildId, id: roleId }: { guildId: string; id: string; }) {
+    const guild = getCurrentGuild();
+    if (!guild || guild.id !== guildId) return;
+
+    const role = GuildRoleStore.getRole(guildId, roleId);
+    if (!role) return;
+
+    ContextMenuApi.openContextMenu(event, () => {
+        const popoutRef = useRef(null);
+        const { before, after } = buildExtraRoleContextMenuItems(role, guild, popoutRef);
+
+        return (
+            <Menu.Menu
+                navId="vc-better-role-context-member-list"
+                onClose={ContextMenuApi.closeContextMenu}
+                aria-label="Role Actions"
+            >
+                {before}
+                {after}
+                <Menu.MenuItem
+                    key="vc-better-role-context-copy-role-id"
+                    id="vc-better-role-context-copy-role-id"
+                    label={getIntlMessage("COPY_ID_ROLE")}
+                    icon={CopyIdIcon}
+                    action={() => copyToClipboard(role.id)}
+                />
+            </Menu.Menu>
+        );
+    });
+}
+
 export default definePlugin({
     name: "BetterRoleContext",
-    description: "Adds options to copy role color / edit role / view role icon when right clicking roles in the user profile",
+    description: "Adds options to copy role color / edit role / view role icon when right clicking roles in the user profile or in the member list",
     tags: ["Roles", "Appearance"],
-    authors: [Devs.Ven, Devs.goodbee],
+    authors: [Devs.Ven, Devs.goodbee, Devs.nightmaresan],
     dependencies: ["UserSettingsAPI"],
-
     settings,
-
-    patches: [{
-        find: ".ROLE_MENTION)",
-        replacement: {
-            match: /function (\i)(?=.+?renderPopout:.{0,20}\1,\{guildId:\i,channelId:\i)/,
-            replace: "$self.RoleMembers=$1;$&"
+    openRoleContextMenu,
+    patches: [
+        {
+            find: ".ROLE_MENTION)",
+            replacement: {
+                match: /function (\i)(?=.+?renderPopout:.{0,20}\1,\{guildId:\i,channelId:\i)/,
+                replace: "$self.RoleMembers=$1;$&"
+            }
+        },
+        // Conflicts with RoleColorEverywhere which changes the code at the end of our match. (and also uses same find & similar match)
+        // However, BetterRoleContext applies first (alphabetic order), so it's not an issue
+        {
+            find: 'tutorialId:"whos-online',
+            replacement: {
+                match: /(?<=#{intl::CHANNEL_MEMBERS_A11Y_LABEL}.{0,200}?"aria-hidden":!0,)children:.{0,200}?(?:—|\\u2014) ",\i\]\}\)\]/,
+                replace: "onContextMenu:e=>$self.openRoleContextMenu(e,arguments[0]),$&"
+            }
         }
-    }],
+    ],
 
     start() {
         // DeveloperMode needs to be enabled for the context menu to be shown

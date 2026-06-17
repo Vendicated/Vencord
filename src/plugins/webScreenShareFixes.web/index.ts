@@ -20,11 +20,7 @@ export default definePlugin({
             replacement: [
                 {
                     match: /`x-google-max-bitrate=\$\{\i\}`/,
-                    replace: '"x-google-max-bitrate=80_000"'
-                },
-                {
-                    match: ";level-asymmetry-allowed=1",
-                    replace: ";b=AS:800000;level-asymmetry-allowed=1"
+                    replace: '"x-google-max-bitrate=80000"'
                 },
                 {
                     match: /;usedtx=\$\{(\i)\?"0":"1"\}/,
