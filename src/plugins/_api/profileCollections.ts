@@ -32,7 +32,7 @@ export default definePlugin({
         {
             find: ".SIDEBAR,disableToolbar:",
             replacement: {
-                match: /user:(\i),widgets:.{0,100}?\}\),/,
+                match: /user:\i,widgets:.{0,100}?\}\),(?=.{0,200}#{intl::USER_PROFILE_WISHLIST})/,
                 replace: "$&Vencord.Api.ProfileCollections.renderProfileCollections({...arguments[0],isSideBar:true}),"
             }
         }
