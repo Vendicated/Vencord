@@ -11,10 +11,10 @@ import { HeadingSecondary } from "@components/Heading";
 import { InfoIcon } from "@components/Icons";
 import { Paragraph } from "@components/Paragraph";
 import { RenderModalProps } from "@vencord/discord-types";
-import { Modal,openModal, TextArea, TextInput, useState } from "@webpack/common";
+import { Modal, openModal, TextArea, TextInput, useState } from "@webpack/common";
 
 import { parseTagArguments } from ".";
-import { addTag, getTag, Tag } from "./settings";
+import { addTag, getTag, removeTag, Tag } from "./settings";
 
 export function openCreateTagModal(initialValue: Tag = { name: "", message: "" }) {
     openModal(modalProps => (
@@ -55,6 +55,10 @@ function CreateTagDialog({ initialValue, modalProps }: { initialValue: Tag; moda
                     text: isEdit ? "Save" : "Create",
                     variant: "primary",
                     onClick: () => {
+                        if (isEdit && initialValue.name !== name) {
+                            removeTag(initialValue.name);
+                        }
+
                         const tag = { name, message };
                         addTag(tag);
                         modalProps.onClose();
