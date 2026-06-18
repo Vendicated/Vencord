@@ -82,6 +82,26 @@ export default definePlugin({
         "user-profile-overflow-menu": userContextPatch
     },
 
+    patches: [
+        {
+            // DM profile sidebar
+            find: ".SIDEBAR,disableToolbar:",
+            replacement: {
+                match: /user:(\i),widgets:.{0,100}?\}\),(?=.{0,200}?#{intl::USER_PROFILE_WISHLIST})/,
+                replace: "$&$self.renderProfileComponent({user:$1,isSideBar:true}),"
+            }
+        },
+        {
+            // User popout
+            // Same find as ShowConnections
+            find: '"UserProfilePopout");',
+            replacement: {
+                match: /user:(\i),widgets:.{0,100}?\}\),/,
+                replace: "$&$self.renderProfileComponent({user:$1}),"
+            }
+        }
+    ],
+
     flux: {
         CONNECTION_OPEN: initAuth,
     },
