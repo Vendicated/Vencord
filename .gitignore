@@ -23,3 +23,7 @@ src/userplugins
 
 ExtensionCache/
 /settings
+
+.zed
+mise.toml
+_
