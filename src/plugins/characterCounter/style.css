@@ -15,5 +15,5 @@
 }
 
 .vc-charCounter-selected {
-    color: #4285F4
+    color: var(--vc-char-count-selected-color, --blue-new-40);
 }
