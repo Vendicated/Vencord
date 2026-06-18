@@ -11,11 +11,9 @@ import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import { classNameFactory } from "@utils/css";
 import definePlugin, { OptionType } from "@utils/types";
-import { findByPropsLazy } from "@webpack";
 import { useEffect, UserStore, useState } from "@webpack/common";
 
 const cl = classNameFactory("vc-charCounter-");
-const SlateUtils = findByPropsLazy("getSelectedText");
 
 const settings = definePluginSettings({
     colorEffects: {
@@ -64,9 +62,7 @@ export default definePlugin({
 
         useEffect(() => {
             const listener = () => {
-                if (!editorRef?.current) return setSelectedCount(0);
-
-                setTimeout(() => setSelectedCount(SlateUtils.getSelectedText(editorRef.current?.getSlateEditor())?.length ?? 0), 50);
+                setSelectedCount(document.getSelection()?.toString()?.length ?? 0);
             };
 
             document.addEventListener("selectionchange", listener);
