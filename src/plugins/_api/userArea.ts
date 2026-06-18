@@ -18,17 +18,10 @@ export default definePlugin({
     patches: [
         {
             find: ".DISPLAY_NAME_STYLES_COACHMARK)",
-            replacement: [
-                {
-                    match: /children:\[(?=.{0,50}accountContainerRef:\i)/,
-                    replace: "children:[...$self.renderButtons(arguments[0]),"
-                },
-                // fix discord weird shrink with extra buttons
-                {
-                    match: /(?<=\{ref:\i,)style:(\i)/,
-                    replace: "style:{...$1,minWidth:0}"
-                }
-            ]
+            replacement: {
+                match: /children:\[(?=.{0,50}accountContainerRef:\i)/,
+                replace: "children:[...$self.renderButtons(arguments[0]),"
+            }
         }
     ],
 
