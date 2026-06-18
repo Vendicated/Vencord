@@ -19,11 +19,35 @@ export interface Category {
 let forceUpdateDms: (() => void) | undefined = undefined;
 export let currentUserCategories: Category[] = [];
 
+let pinnedSetCache: Set<string> | null = null;
+let sortOrderCache: Map<string, number> | null = null;
+
+function invalidatePinnedCache() {
+    pinnedSetCache = null;
+}
+
+function getPinnedSet(): Set<string> {
+    return (pinnedSetCache ??= new Set(currentUserCategories.flatMap(c => c.channels)));
+}
+
+function getSortOrder(): Map<string, number> {
+    if (sortOrderCache === null) {
+        const ids = PrivateChannelSortStore.getPrivateChannelIds();
+        const map = new Map<string, number>();
+        for (let i = 0; i < ids.length; i++) map.set(ids[i], i);
+        sortOrderCache = map;
+
+        queueMicrotask(() => { sortOrderCache = null; });
+    }
+    return sortOrderCache;
+}
+
 export async function init() {
     const userId = UserStore.getCurrentUser()?.id;
     if (userId == null) return;
 
     currentUserCategories = settings.store.userBasedCategoryList[userId] ??= [];
+    invalidatePinnedCache();
     forceUpdateDms?.();
 }
 
@@ -42,6 +66,7 @@ export function getCategoryByIndex(index: number) {
 
 export function createCategory(category: Category) {
     currentUserCategories.push(category);
+    invalidatePinnedCache();
 }
 
 export function addChannelToCategory(channelId: string, categoryId: string) {
@@ -51,6 +76,7 @@ export function addChannelToCategory(channelId: string, categoryId: string) {
     if (category.channels.includes(channelId)) return;
 
     category.channels.push(channelId);
+    invalidatePinnedCache();
 }
 
 export function removeChannelFromCategory(channelId: string) {
@@ -58,6 +84,7 @@ export function removeChannelFromCategory(channelId: string) {
     if (category == null) return;
 
     category.channels = category.channels.filter(c => c !== channelId);
+    invalidatePinnedCache();
 }
 
 export function removeCategory(categoryId: string) {
@@ -65,6 +92,7 @@ export function removeCategory(categoryId: string) {
     if (categoryIndex === -1) return;
 
     currentUserCategories.splice(categoryIndex, 1);
+    invalidatePinnedCache();
 }
 
 export function collapseCategory(id: string, value = true) {
@@ -76,20 +104,30 @@ export function collapseCategory(id: string, value = true) {
 
 // Utils
 export function isPinned(id: string) {
-    return currentUserCategories.some(c => c.channels.includes(id));
+    return getPinnedSet().has(id);
 }
 
 export function categoryLen() {
     return currentUserCategories.length;
 }
 
-export function getAllUncollapsedChannels() {
+export function getCategoryChannels(category: Category): string[] {
+    if (category.channels.length === 0) return [];
+
     if (settings.store.pinOrder === PinOrder.LastMessage) {
-        const sortedChannels = PrivateChannelSortStore.getPrivateChannelIds();
-        return currentUserCategories.filter(c => !c.collapsed).flatMap(c => sortedChannels.filter(channel => c.channels.includes(channel)));
+        const order = getSortOrder();
+        return category.channels
+            .filter(id => order.has(id))
+            .sort((a, b) => order.get(a)! - order.get(b)!);
     }
 
-    return currentUserCategories.filter(c => !c.collapsed).flatMap(c => c.channels);
+    return category.channels;
+}
+
+export function getAllUncollapsedChannels() {
+    return currentUserCategories
+        .filter(c => !c.collapsed)
+        .flatMap(getCategoryChannels);
 }
 
 export function getSections() {
@@ -143,4 +181,5 @@ export function moveChannel(channelId: string, direction: -1 | 1) {
     const b = a + direction;
 
     swapElementsInArray(category.channels, a, b);
+    invalidatePinnedCache();
 }
