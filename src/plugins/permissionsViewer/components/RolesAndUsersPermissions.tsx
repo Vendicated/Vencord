@@ -20,6 +20,7 @@ import { BaseText } from "@components/BaseText";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Flex } from "@components/Flex";
 import { CopyIdIcon, InfoIcon, OwnerCrownIcon } from "@components/Icons";
+import { Paragraph } from "@components/Paragraph";
 import { buildExtraRoleContextMenuItems } from "@plugins/betterRoleContext";
 import { cl, getGuildPermissionSpecMap, loadGetGuildPermissionSpecMap } from "@plugins/permissionsViewer/utils";
 import { copyToClipboard } from "@utils/clipboard";
@@ -31,7 +32,6 @@ import { ContextMenuApi, FluxDispatcher, GuildMemberStore, GuildRoleStore, i18n,
 
 import { settings } from "..";
 import { PermissionAllowedIcon, PermissionDefaultIcon, PermissionDeniedIcon } from "./icons";
-import { Paragraph } from "@components/Paragraph";
 
 type GetRoleIconData = (role: Role, size: number) => { customIconSrc?: string; unicodeEmoji?: UnicodeEmoji; };
 const getRoleIconData: GetRoleIconData = findByCodeLazy("convertSurrogateToName", "customIconSrc", "unicodeEmoji");
