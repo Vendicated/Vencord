@@ -17,16 +17,19 @@
 */
 
 import { addProfileBadge, removeProfileBadge } from "@api/Badges";
-import { addChatBarButton, removeChatBarButton } from "@api/ChatButtons";
+import { addChatBarButton, addChatBarButtonWrapper, removeChatBarButton, removeChatBarButtonWrapper } from "@api/ChatButtons";
 import { registerCommand, unregisterCommand } from "@api/Commands";
 import { addContextMenuPatch, removeContextMenuPatch } from "@api/ContextMenu";
+import { addChannelToolbarButton, addHeaderBarButton, removeChannelToolbarButton, removeHeaderBarButton } from "@api/HeaderBar";
 import { addMemberListDecorator, removeMemberListDecorator } from "@api/MemberListDecorators";
 import { addMessageAccessory, removeMessageAccessory } from "@api/MessageAccessories";
 import { addMessageDecoration, removeMessageDecoration } from "@api/MessageDecorations";
 import { addMessageClickListener, addMessagePreEditListener, addMessagePreSendListener, removeMessageClickListener, removeMessagePreEditListener, removeMessagePreSendListener } from "@api/MessageEvents";
 import { addMessagePopoverButton, removeMessagePopoverButton } from "@api/MessagePopover";
+import { addProfileCollection, removeProfileCollection } from "@api/ProfileCollections";
 import { Settings, SettingsStore } from "@api/Settings";
 import { disableStyle, enableStyle } from "@api/Styles";
+import { addUserAreaButton, removeUserAreaButton } from "@api/UserArea";
 import { traceFunction } from "@debug/Tracer";
 import { Logger } from "@utils/Logger";
 import { onlyOnce } from "@utils/onlyOnce";
@@ -37,6 +40,8 @@ import { FluxDispatcher } from "@webpack/common";
 import { patches } from "@webpack/patcher";
 
 import Plugins from "~plugins";
+
+import { addProfileSection, removeProfileSection } from "./ProfileSections";
 export { Plugins as plugins };
 const logger = new Logger("PluginManager", "#a6d189");
 
@@ -203,8 +208,10 @@ export function subscribeAllPluginsFluxEvents(fluxDispatcher: typeof FluxDispatc
 export const startPlugin = traceFunction("startPlugin", function startPlugin(p: Plugin) {
     const {
         name, commands, contextMenus, managedStyle, userProfileBadge,
-        onBeforeMessageEdit, onBeforeMessageSend, onMessageClick,
-        chatBarButton, renderMemberListDecorator, renderMessageAccessory, renderMessageDecoration, messagePopoverButton
+        onBeforeMessageEdit, onBeforeMessageSend, onMessageClick, chatBarButton,
+        renderMemberListDecorator, renderMessageAccessory, renderMessageDecoration,
+        messagePopoverButton, headerBarButton, userAreaButton, renderProfileCollection,
+        chatBarButtonWrapper, renderProfileSection
     } = p;
 
     if (p.start) {
@@ -259,6 +266,13 @@ export const startPlugin = traceFunction("startPlugin", function startPlugin(p: 
     if (renderMessageDecoration) addMessageDecoration(name, renderMessageDecoration);
     if (renderMessageAccessory) addMessageAccessory(name, renderMessageAccessory);
     if (messagePopoverButton) addMessagePopoverButton(name, messagePopoverButton.render, messagePopoverButton.icon);
+    if (headerBarButton) headerBarButton.location === "channeltoolbar"
+        ? addChannelToolbarButton(name, headerBarButton.render, headerBarButton.priority)
+        : addHeaderBarButton(name, headerBarButton.render, headerBarButton.priority);
+    if (userAreaButton) addUserAreaButton(name, userAreaButton.render, userAreaButton.priority);
+    if (renderProfileCollection) addProfileCollection(name, renderProfileCollection.render, renderProfileCollection.priority);
+    if (chatBarButtonWrapper) addChatBarButtonWrapper(name, chatBarButtonWrapper.wrapper, chatBarButtonWrapper.priority);
+    if (renderProfileSection) addProfileSection(name, renderProfileSection.render, renderProfileSection.priority);
 
     return true;
 }, p => `startPlugin ${p.name}`);
@@ -267,7 +281,9 @@ export const stopPlugin = traceFunction("stopPlugin", function stopPlugin(p: Plu
     const {
         name, commands, contextMenus, managedStyle, userProfileBadge,
         onBeforeMessageEdit, onBeforeMessageSend, onMessageClick,
-        chatBarButton, renderMemberListDecorator, renderMessageAccessory, renderMessageDecoration, messagePopoverButton
+        chatBarButton, renderMemberListDecorator, renderMessageAccessory, renderMessageDecoration,
+        messagePopoverButton, headerBarButton, userAreaButton, renderProfileCollection,
+        chatBarButtonWrapper, renderProfileSection
     } = p;
 
     if (p.stop) {
@@ -320,6 +336,11 @@ export const stopPlugin = traceFunction("stopPlugin", function stopPlugin(p: Plu
     if (renderMessageDecoration) removeMessageDecoration(name);
     if (renderMessageAccessory) removeMessageAccessory(name);
     if (messagePopoverButton) removeMessagePopoverButton(name);
+    if (headerBarButton) headerBarButton.location === "channeltoolbar" ? removeChannelToolbarButton(name) : removeHeaderBarButton(name);
+    if (userAreaButton) removeUserAreaButton(name);
+    if (renderProfileCollection) removeProfileCollection(name);
+    if (chatBarButtonWrapper) removeChatBarButtonWrapper(name);
+    if (renderProfileSection) removeProfileSection(name);
 
     return true;
 }, p => `stopPlugin ${p.name}`);
@@ -330,7 +351,8 @@ export const initPluginManager = onlyOnce(function init() {
 
     const pluginKeysToBind: Array<keyof PluginDef & `${"on" | "render"}${string}`> = [
         "onBeforeMessageEdit", "onBeforeMessageSend", "onMessageClick",
-        "renderMemberListDecorator", "renderMessageAccessory", "renderMessageDecoration"
+        "renderMemberListDecorator", "renderMessageAccessory",
+        "renderMessageDecoration"
     ];
 
     const neededApiPlugins = new Set<string>();
@@ -366,9 +388,14 @@ export const initPluginManager = onlyOnce(function init() {
         if (p.renderMessageDecoration) neededApiPlugins.add("MessageDecorationsAPI");
         if (p.messagePopoverButton) neededApiPlugins.add("MessagePopoverAPI");
         if (p.userProfileBadge) neededApiPlugins.add("BadgeAPI");
+        if (p.headerBarButton) neededApiPlugins.add("HeaderBarAPI");
+        if (p.userAreaButton) neededApiPlugins.add("UserAreaAPI");
+        if (p.renderProfileCollection) neededApiPlugins.add("ProfileCollectionsAPI");
+        if (p.chatBarButtonWrapper) neededApiPlugins.add("ChatInputButtonAPI");
+        if (p.renderProfileSection) neededApiPlugins.add("ProfileSectionsAPI");
 
         for (const key of pluginKeysToBind) {
-            p[key] &&= p[key].bind(p) as any;
+            p[key] &&= (p[key] as Function).bind(p) as any;
         }
     }
 
