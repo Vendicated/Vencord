@@ -4,12 +4,13 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { HeadingPrimary } from "@components/Heading";
 import { DEFAULT_COLOR, SWATCHES } from "@plugins/pinDms/constants";
 import { categoryLen, createCategory, getCategory } from "@plugins/pinDms/data";
 import { classNameFactory } from "@utils/css";
 import { RenderModalProps } from "@vencord/discord-types";
 import { extractAndLoadChunksLazy, findComponentByCodeLazy } from "@webpack";
-import { ColorPicker, Forms, Modal,openModalLazy, TextInput, Toasts, useMemo, useState } from "@webpack/common";
+import { ColorPicker, Modal, openModalLazy, TextInput, Toasts, useMemo, useState } from "@webpack/common";
 
 interface ColorPickerWithSwatchesProps {
     className?: string;
@@ -89,14 +90,14 @@ export function NewCategoryModal({ categoryId, modalProps, initialChannelId }: P
                 }}
             >
                 <section>
-                    <Forms.FormTitle>Name</Forms.FormTitle>
+                    <HeadingPrimary>Name</HeadingPrimary>
                     <TextInput
                         value={name}
                         onChange={e => setName(e)}
                     />
                 </section>
                 <section>
-                    <Forms.FormTitle>Color</Forms.FormTitle>
+                    <HeadingPrimary>Color</HeadingPrimary>
                     <ColorPickerWithSwatches
                         className={cl("color-picker")}
                         key={category.id}

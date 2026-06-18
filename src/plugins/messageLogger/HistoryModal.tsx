@@ -11,7 +11,7 @@ import { Margins } from "@utils/margins";
 import { classes } from "@utils/misc";
 import { RenderModalProps } from "@vencord/discord-types";
 import { findCssClassesLazy } from "@webpack";
-import { Modal,openModal, TabBar, Timestamp, useState } from "@webpack/common";
+import { Modal, openModal, TabBar, Timestamp, useState } from "@webpack/common";
 
 import { parseEditContent } from ".";
 
