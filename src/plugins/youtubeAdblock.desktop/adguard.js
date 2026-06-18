@@ -88,8 +88,8 @@ const hiddenCSS = [
     "YTM-PROMOTED-VIDEO-RENDERER",
 ];
 /**
- * Adds CSS to the page
- */
+* Adds CSS to the page
+*/
 const hideElements = () => {
     const selectors = hiddenCSS;
     if (!selectors) {
@@ -101,9 +101,9 @@ const hideElements = () => {
     document.head.appendChild(style);
 };
 /**
- * Calls the "callback" function on every DOM change, but not for the tracked events
- * @param {Function} callback callback function
- */
+* Calls the "callback" function on every DOM change, but not for the tracked events
+* @param {Function} callback callback function
+*/
 const observeDomChanges = callback => {
     const domMutationObserver = new MutationObserver(mutations => {
         callback(mutations);
@@ -114,8 +114,8 @@ const observeDomChanges = callback => {
     });
 };
 /**
- * This function is supposed to be called on every DOM change
- */
+* This function is supposed to be called on every DOM change
+*/
 const hideDynamicAds = () => {
     const elements = document.querySelectorAll("#contents > ytd-rich-item-renderer ytd-display-ad-renderer");
     if (elements.length === 0) {
@@ -131,9 +131,9 @@ const hideDynamicAds = () => {
     });
 };
 /**
- * This function checks if the video ads are currently running
- * and auto-clicks the skip button.
- */
+* This function checks if the video ads are currently running
+* and auto-clicks the skip button.
+*/
 const autoSkipAds = () => {
     // If there's a video that plays the ad at this moment, scroll this ad
     if (document.querySelector(".ad-showing")) {
@@ -152,12 +152,12 @@ const autoSkipAds = () => {
     }
 };
 /**
- * This function overrides a property on the specified object.
- *
- * @param {object} obj object to look for properties in
- * @param {string} propertyName property to override
- * @param {*} overrideValue value to set
- */
+* This function overrides a property on the specified object.
+*
+* @param {object} obj object to look for properties in
+* @param {string} propertyName property to override
+* @param {*} overrideValue value to set
+*/
 const overrideObject = (obj, propertyName, overrideValue) => {
     if (!obj) {
         return false;
@@ -176,13 +176,13 @@ const overrideObject = (obj, propertyName, overrideValue) => {
     return overriden;
 };
 /**
- * Overrides JSON.parse and Response.json functions.
- * Examines these functions arguments, looks for properties with the specified name there
- * and if it exists, changes it's value to what was specified.
- *
- * @param {string} propertyName name of the property
- * @param {*} overrideValue new value for the property
- */
+* Overrides JSON.parse and Response.json functions.
+* Examines these functions arguments, looks for properties with the specified name there
+* and if it exists, changes it's value to what was specified.
+*
+* @param {string} propertyName name of the property
+* @param {*} overrideValue new value for the property
+*/
 const jsonOverride = (propertyName, overrideValue) => {
     const nativeJSONParse = JSON.parse;
     JSON.parse = (...args) => {
