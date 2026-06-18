@@ -4,10 +4,10 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/**
-  * Sometimes you want to find out which channels are the most active / important in a server.
-  * This plugin shows a small badge with the total number of messages in each channel.
-  */
+/*
+ * Sometimes you want to find out which channels are the most active / important in a server.
+ * This plugin shows a small badge with the total number of messages in each channel.
+ */
 
 import "./style.css";
 

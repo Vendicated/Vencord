@@ -1,13 +1,9 @@
 # ChannelMessageCount
 
-Shows message counts in server channels.
+A plugin for showing the total number of messages in server channels.
 
-Counts are fetched lazily for channels as they appear in the channel list and are cached to avoid repeatedly querying Discord. Regular channels use Discord's message search results, while threads use their built-in message count when available.
-
-## Notes
-
-- Counts may not appear instantly for every channel in a server.
-- Counts may be temporarily unavailable while Discord search is indexing.
-- Counts can be refreshed and failed fetches retried using the plugin settings.
+- Counts are fetched lazily for channels as they appear in the channel list and are cached to avoid Discord rate limits
+- Regular channels use Discord's message search results and threads use Discord's builtin message count when available
+- Failed fetches are retried after a configurable delay
 
 ![](https://github.com/user-attachments/assets/4e8b247f-ca0e-49ef-86b6-8503f60aeaab)
