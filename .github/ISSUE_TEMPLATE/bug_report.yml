@@ -1,5 +1,5 @@
 name: Bug/Crash Report
-description: Create a bug or crash report for Vencord. ALWAYS FIRST USE OUR SUPPORT CHANNEL! ONLY USE THIS FORM IF YOU ARE A CONTRIBUTOR OR WERE TOLD TO DO SO IN THE SUPPORT CHANNEL.
+description: Create a bug or crash report for Vencord.
 labels: [bug]
 title: "[Bug] <title>"
 
@@ -7,9 +7,16 @@ body:
     - type: markdown
       attributes:
           value: |
-              ![Are you a developer? No? This form is not for you!](https://github.com/Vendicated/Vencord/blob/main/.github/ISSUE_TEMPLATE/developer-banner.png?raw=true)
+              GitHub Issues are for development, not support!
 
-              GitHub Issues are for development, not support! Please use our [support server](https://vencord.dev/discord) unless you are a Vencord Developer.
+              Some plugins may sometimes break, but we have automatic tracking for that. So please **do not report broken plugins**, it is useless.
+              However, if a plugin works fine, but has a bug in its functionality, then you can report that here.
+
+              If you are experiencing any of the following issues, go to our [Discord server](https://discord.gg/D9uwnFnqmd) for support:
+              - Vencord doesn't work or crashes
+              - A plugin doesn't work anymore
+              - You are having issues installing Vencord
+              - You want to ask a question about Vencord or one of its plugins
 
     - type: textarea
       id: bug-description
@@ -46,7 +53,7 @@ body:
       id: crash-log
       attributes:
           label: Errors
-          description: Open the Developer Console with Ctrl/Cmd + Shift + i. Then look for any red errors (Ignore network errors like Failed to load resource) and paste them between the "```".
+          description: Open the Developer Console with `Ctrl+Shift+i` / `Cmd+Option+i`. Then look for any red errors (Ignore network errors like Failed to load resource) and paste them between the "```".
           value: |
               ```
               Replace this text with your crash-log.
@@ -60,7 +67,8 @@ body:
           label: Request Agreement
           description: We only accept reports for bugs that happen on Discord Stable. Canary and PTB are Development branches and may be unstable
           options:
+              - label: I've searched existing issues and this hasn't been reported before
               - label: I am using Discord Stable or tried on Stable and this bug happens there as well
-                required: true
-              - label: I am a Vencord Developer
-                required: true
+              - label: I installed Vencord via an official method (download from vencord.dev or from source), not via something like AUR or Nix packages
+              - label: This is not a support request
+              - label: I am willing to submit a fix for this myself
