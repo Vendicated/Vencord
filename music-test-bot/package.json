@@ -1,0 +1,18 @@
+{
+  "name": "voice-test-bot",
+  "version": "0.5.0",
+  "private": true,
+  "description": "Discord bot that joins a voice channel and loops audio, as a test source for a recorder.",
+  "main": "bot.js",
+  "scripts": {
+    "start": "node bot.js"
+  },
+  "dependencies": {
+    "@discordjs/voice": "^0.19.0",
+    "discord.js": "^14.21.0",
+    "dotenv": "^16.4.5",
+    "ffmpeg-static": "^5.2.0",
+    "libsodium-wrappers": "^0.7.15",
+    "opusscript": "^0.1.1"
+  }
+}

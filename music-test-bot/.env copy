@@ -1,0 +1,14 @@
+# Copy this file to ".env"
+
+# From https://discord.com/developers/applications
+DISCORD_TOKEN=
+
+
+GUILD_ID=
+CHANNEL_ID=
+
+# Path to mp3
+AUDIO_FILE=./test-audio.mp3
+
+# Loop the mp3 file?
+LOOP=true
