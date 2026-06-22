@@ -169,6 +169,7 @@ export default definePlugin({
     }
 });
 
+// Text splitting and codeblock repair logic based on an implementation by https://github.com/mwittrien
 function splitMessageSafe(text: string, limit: number): string[] {
     if (text.length <= limit) return [text];
 
