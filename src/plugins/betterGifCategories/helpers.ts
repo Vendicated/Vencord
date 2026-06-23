@@ -21,24 +21,32 @@ export function gifKey(gif: Gif): string {
 }
 
 export function isGifMedia(props: any): boolean {
-    const safeSrc: string = props?.itemSafeSrc ?? "";
+    const href: string = props?.itemHref ?? props?.itemSrc ?? "";
 
-    if (!safeSrc) {
+    if (!href) {
         return false;
     }
 
-    // Gifs proxied as mp4
+    // Trust discords mediaItem content types. External gifs dont have this
+    const contentType: string | undefined = props?.mediaItem?.contentType;
+
+    if (contentType) {
+        return contentType === "image/gif";
+    }
+
+    const safeSrc: string = props?.itemSafeSrc ?? "";
+
     if (/\.mp4(?:[?#]|$)/i.test(safeSrc)) {
+        // Actual videos should already be caught by the contentTyper check
         return true;
     }
 
-    // Some embeds (like vxtwitter) may serve animated WebP with an explicit flag
     try {
         if (new URL(safeSrc).searchParams.get("animated") === "true") return true;
     } catch {
         // malformed URL. fall through
     }
 
-    // Fallback for direct .gif file attachments (cdn.discordapp.com/attachments/...)
-    return /\.gif(?:[?#]|$)/i.test(props?.itemSrc ?? props?.itemHref ?? "");
+    // Direct .gif link with no mediaItem metadata.
+    return /\.gif(?:[?#]|$)/i.test(safeSrc) || /\.gif(?:[?#]|$)/i.test(href);
 }
