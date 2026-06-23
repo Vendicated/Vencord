@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { handleGifContextMenu } from "./contextMenu";
 import { getCategories, GifCategory } from "./data";
 
 const FAVORITES_RESULT_TYPE = "Favorites";
@@ -98,6 +99,58 @@ export function getHeadingLabel(defaultLabel: string): string {
 
 export function setInstance(instance: any): void {
     pickerInstance = instance;
+
+    const existing = document.getElementById("gif-picker-tab-panel");
+
+    if (existing?.dataset.bgcCtx) {
+        return;
+    }
+
+    requestAnimationFrame(() => {
+        const root = document.getElementById("gif-picker-tab-panel");
+
+        if (!root || root.dataset.bgcCtx) {
+            return;
+        }
+
+        root.dataset.bgcCtx = "1";
+        root.addEventListener("contextmenu", (e: Event) => {
+            const mouseEvent = e as MouseEvent;
+
+            // couldn't find a way to trigger the context menu without all this..
+            // walk up the DOM to the nearest React-owned element, then walk the fiber tree
+            let el: Element | null = mouseEvent.target as Element | null;
+
+            while (el && el !== root) {
+                const fiberKey = Object.keys(el).find(k => k.startsWith("__reactFiber"));
+
+                if (fiberKey) {
+                    let fiber: any = (el as any)[fiberKey];
+
+                    for (let i = 0; i < 10; i++) {
+                        const p = fiber?.memoizedProps;
+
+                        // gif tiles: have .url; category tiles: have .type, no .url
+                        if (p?.item?.url && !p?.item?.type) {
+                            mouseEvent.preventDefault();
+                            mouseEvent.stopPropagation();
+                            handleGifContextMenu(mouseEvent as any, p.item);
+                            return;
+                        }
+
+                        if (!fiber?.return) {
+                            break;
+                        }
+
+                        fiber = fiber.return;
+                    }
+                    break;
+                }
+
+                el = el.parentElement;
+            }
+        }, true);
+    });
 }
 
 export function getCategoryTiles(): CategoryTile[] {
@@ -108,16 +161,12 @@ export function getCategoryTiles(): CategoryTile[] {
 }
 
 export function getFavorites(original: any[]): any[] {
-    const currentCategory = activeCategory;
-
-    if (currentCategory == null) {
+    if (activeCategory == null) {
         fullFavorites = original;
-
         return original;
     }
 
-    const category = getCategories().find(c => c.id === currentCategory.id);
-
+    const category = getCategories().find(c => c.id === activeCategory!.id);
     return category ? category.gifs : original;
 }
 
