@@ -6,7 +6,6 @@
 
 import { UserStore } from "@webpack/common/stores";
 
-import type { Gif } from "./data";
 
 export function makeId(): string {
     return Date.now().toString(36) + Math.random().toString(36).slice(2);
@@ -16,9 +15,7 @@ export function getDataKey(): string {
     return `BetterGifCategories_${UserStore.getCurrentUser().id}`;
 }
 
-export function gifKey(gif: Gif): string {
-    return gif.url || gif.src;
-}
+
 
 export function isGifMedia(props: any): boolean {
     const href: string = props?.itemHref ?? props?.itemSrc ?? "";

@@ -8,7 +8,7 @@ import { findGroupChildrenByChildId, NavContextMenuPatchCallback } from "@api/Co
 import { ContextMenuApi, Menu, useState } from "@webpack/common";
 
 import { addGifToCategory, getCategories, type Gif, removeGifFromCategory } from "./data";
-import { gifKey, isGifMedia } from "./helpers";
+import { isGifMedia } from "./helpers";
 
 /**
  * Builds a {@link Gif} from the righ clicked message context
@@ -42,7 +42,6 @@ function gifFromMessageProps(props: any): Gif | null {
 // they only reflect the new state after a rerender, like moving the cursor out of the element
 function buildCategorySubmenu(gif: Gif) {
     const categories = getCategories();
-    const key = gifKey(gif);
 
     return (
         <Menu.MenuItem
@@ -58,7 +57,7 @@ function buildCategorySubmenu(gif: Gif) {
                     disabled
                 />
             ) : categories.map(category => {
-                const checked = category.gifs.some(g => gifKey(g) === key);
+                const checked = category.gifs.some(g => g.url === gif.url);
 
                 return (
                     <Menu.MenuCheckboxItem
@@ -67,7 +66,7 @@ function buildCategorySubmenu(gif: Gif) {
                         label={category.name}
                         checked={checked}
                         action={() => checked
-                            ? removeGifFromCategory(category.id, key)
+                            ? removeGifFromCategory(category.id, gif.url)
                             : addGifToCategory(category.id, gif)}
                     />
                 );
@@ -93,10 +92,9 @@ export const messageContextMenuPatch: NavContextMenuPatchCallback = (children, p
 
 function GifPickerContextMenu({ gif, onClose }: { gif: Gif; onClose: () => void; }) {
     const categories = getCategories();
-    const key = gifKey(gif);
 
     const [checkedIds, setCheckedIds] = useState<ReadonlySet<string>>(
-        () => new Set(categories.filter(c => c.gifs.some(g => gifKey(g) === key)).map(c => c.id))
+        () => new Set(categories.filter(c => c.gifs.some(g => g.url === gif.url)).map(c => c.id))
     );
 
     return (
@@ -127,7 +125,7 @@ function GifPickerContextMenu({ gif, onClose }: { gif: Gif; onClose: () => void;
                                     });
 
                                     if (checked) {
-                                        removeGifFromCategory(category.id, key);
+                                        removeGifFromCategory(category.id, gif.url);
                                     } else {
                                         addGifToCategory(category.id, gif);
                                     }

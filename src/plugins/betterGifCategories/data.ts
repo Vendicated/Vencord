@@ -6,7 +6,7 @@
 
 import * as DataStore from "@api/DataStore";
 
-import { getDataKey, gifKey, makeId } from "./helpers";
+import { getDataKey, makeId } from "./helpers";
 
 
 export interface Gif {
@@ -44,7 +44,7 @@ export function getCategories(): GifCategory[] {
  */
 export function getCategoriesForGif(gifUrl: string): string[] {
     return cache
-        .filter(c => c.gifs.some(g => gifKey(g) === gifUrl))
+        .filter(c => c.gifs.some(gif => gif.url === gifUrl))
         .map(c => c.name);
 }
 
@@ -78,16 +78,14 @@ export async function reorderCategories(ids: string[]): Promise<void> {
     await persist();
 }
 
-/**
- * Also mirrors the gif into Discord's normal favorites
- */
+
 export async function addGifToCategory(categoryId: string, gif: Gif): Promise<void> {
     cache = cache.map(c => {
         if (c.id !== categoryId) {
             return c;
         }
 
-        if (c.gifs.some(g => gifKey(g) === gifKey(gif))) {
+        if (c.gifs.some(g => gif.url === g.url)) {
             return c; // no duplicates
         }
 
@@ -100,21 +98,19 @@ export async function addGifToCategory(categoryId: string, gif: Gif): Promise<vo
         };
     });
 
+    // TODO check for not-yet-implemented setting for auto-favs is set
     await mirrorFavorite(gif);
     await persist();
 }
 
-/**
- * Does NOT unfavourite gif from user's favorites. To avoid overreaching, that task
- * is left for the user to decide
- */
 export async function removeGifFromCategory(categoryId: string, gifUrl: string): Promise<void> {
     cache = cache.map(c =>
         c.id === categoryId
-            ? { ...c, gifs: c.gifs.filter(g => gifKey(g) !== gifUrl) }
+            ? { ...c, gifs: c.gifs.filter(gif => gif.url !== gifUrl) }
             : c
     );
 
+    // TODO check if not-yet-implemented setting for unfav gifs is set
     await persist();
 }
 

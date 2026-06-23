@@ -106,6 +106,7 @@ export function setInstance(instance: any): void {
         return;
     }
 
+    // Honestly I hate this, but I am not sure how best to wait for the dom to be ready here.
     requestAnimationFrame(() => {
         const root = document.getElementById("gif-picker-tab-panel");
 
@@ -114,12 +115,13 @@ export function setInstance(instance: any): void {
         }
 
         root.dataset.bgcCtx = "1";
+
         root.addEventListener("contextmenu", (e: Event) => {
             const mouseEvent = e as MouseEvent;
 
             // couldn't find a way to trigger the context menu without all this..
             // walk up the DOM to the nearest React-owned element, then walk the fiber tree
-            let el: Element | null = mouseEvent.target as Element | null;
+            let el = mouseEvent.target as Element | null;
 
             while (el && el !== root) {
                 const fiberKey = Object.keys(el).find(k => k.startsWith("__reactFiber"));
