@@ -82,8 +82,6 @@ export async function reorderCategories(ids: string[]): Promise<void> {
  * Also mirrors the gif into Discord's normal favorites
  */
 export async function addGifToCategory(categoryId: string, gif: Gif): Promise<void> {
-    await mirrorFavorite(gif);
-
     cache = cache.map(c => {
         if (c.id !== categoryId) {
             return c;
@@ -92,9 +90,17 @@ export async function addGifToCategory(categoryId: string, gif: Gif): Promise<vo
         if (c.gifs.some(g => gifKey(g) === gifKey(gif))) {
             return c; // no duplicates
         }
-        return { ...c, gifs: [...c.gifs, gif] };
+
+        // Prepend newest gif at position 0
+        return {
+            ...c, gifs: [
+                { ...gif, order: 0 },
+                ...c.gifs.map(g => ({ ...g, order: g.order + 1 })),
+            ]
+        };
     });
 
+    await mirrorFavorite(gif);
     await persist();
 }
 
