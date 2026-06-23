@@ -8,6 +8,7 @@ import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 
 import { getCategoryTiles, getFavorites, getHeadingLabel, onSelectTile, patches, setInstance } from "./categoryView";
+import { messageContextMenuPatch } from "./contextMenu";
 import { loadCategories } from "./data";
 
 export default definePlugin({
@@ -17,6 +18,10 @@ export default definePlugin({
     tags: ["Media", "Customisation"],
 
     patches,
+
+    contextMenus: {
+        "message": messageContextMenuPatch,
+    },
 
     async start() {
         await loadCategories();
