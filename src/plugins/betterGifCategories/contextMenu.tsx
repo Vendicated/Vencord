@@ -35,7 +35,7 @@ function gifFromMessageProps(props: any): Gif | null {
     // format 2 = video (.mp4), format 1 = image (.gif / animated WebP)
     const format = /\.mp4(?:[?#]|$)/i.test(safeSrc) ? 2 : 1;
 
-    return { url, src: safeSrc, format, width, height, order: 0 };
+    return { url, src: safeSrc, format, width, height };
 }
 
 // FIXME: checkboxes don't update instantly
@@ -146,7 +146,6 @@ export function handleGifContextMenu(event: React.MouseEvent, gif: any) {
         format: gif.format ?? 1,
         width: gif.width ?? 200,
         height: gif.height ?? 200,
-        order: gif.order ?? 0,
     };
 
     ContextMenuApi.openContextMenu(event, ({ onClose }) => (

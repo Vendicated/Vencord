@@ -14,7 +14,6 @@ export interface Gif {
     src: string;
     width: number;
     height: number;
-    order: number;
     url: string;
 }
 
@@ -89,13 +88,7 @@ export async function addGifToCategory(categoryId: string, gif: Gif): Promise<vo
             return c; // no duplicates
         }
 
-        // Prepend newest gif at position 0
-        return {
-            ...c, gifs: [
-                { ...gif, order: 0 },
-                ...c.gifs.map(g => ({ ...g, order: g.order + 1 })),
-            ]
-        };
+        return { ...c, gifs: [gif, ...c.gifs] };
     });
 
     // TODO check for not-yet-implemented setting for auto-favs is set
