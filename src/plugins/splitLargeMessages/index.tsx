@@ -9,10 +9,13 @@ import "./style.css";
 import { MessageObject } from "@api/MessageEvents";
 import { isPluginEnabled } from "@api/PluginManager";
 import { definePluginSettings } from "@api/Settings";
+import { User } from "@vencord/discord-types";
+import characterCounter from "@plugins/characterCounter";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { classNameFactory } from "@utils/css";
 import { insertTextIntoChatInputBox } from "@utils/discord";
-import { classes, Devs } from "@utils/index";
+import { classes } from "@utils/misc";
+import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByPropsLazy } from "@webpack";
 import { DraftType, UserStore } from "@webpack/common";
@@ -44,8 +47,10 @@ const DEFAULT_LIMITS = {
     premium: 4000
 };
 const SAFE_MARGIN = 10;
+const CHUNK_BUFFER_FRACTION = 0.95;
+
 const NitroUtils = findByPropsLazy("canUseIncreasedMessageLength") as {
-    canUseIncreasedMessageLength?: (user: unknown) => boolean;
+    canUseIncreasedMessageLength?: (user: User) => boolean;
 };
 
 const DraftManager = findByPropsLazy("clearDraft", "saveDraft") as {
@@ -129,7 +134,7 @@ export default definePlugin({
         const count = splitMessageSafe(text, limit).filter(c => c.length > 0).length;
         if (count <= 1) return null;
 
-        const isCharCounterActive = isPluginEnabled("CharacterCounter");
+        const isCharCounterActive = isPluginEnabled(characterCounter.name);
 
         return (
             <div className={classes(cl("counter"), isCharCounterActive && cl("shifted"))}>
@@ -169,71 +174,87 @@ export default definePlugin({
     }
 });
 
-// Text splitting and codeblock repair logic based on an implementation by https://github.com/mwittrien
 function splitMessageSafe(text: string, limit: number): string[] {
     if (text.length <= limit) return [text];
-
     const separator = settings.store.byNewlines ? "\n" : " ";
-    return splitBySeparator(text, limit, separator, settings.store.leaveGaps);
+    const tokens = tokenize(text, separator, limit);
+    const chunks = buildChunks(tokens, separator, Math.floor(limit * CHUNK_BUFFER_FRACTION));
+    return repairCodeblocks(chunks, settings.store.leaveGaps, separator);
 }
 
-function splitBySeparator(text: string, limit: number, separator: string, leaveGaps: boolean): string[] {
-    text = text.replace(/\t/g, "    ");
+function tokenize(text: string, separator: string, maxTokenLength: number): string[] {
+    const raw = text.replace(/\t/g, " ").split(separator);
+    const tokens: string[] = [];
 
-    const escapedSeparator = separator === "\n" ? "\\n" : separator;
-    const longWordSize = Math.floor(limit * (19 / 20));
-    const longWords = text.match(new RegExp(`[^${escapedSeparator}]{${longWordSize},}`, "gm"));
+    for (const token of raw) {
+        if (token.length <= maxTokenLength) {
+            tokens.push(token);
+            continue;
+        }
+        let remaining = token;
+        while (remaining.length > maxTokenLength) {
+            tokens.push(remaining.slice(0, maxTokenLength));
+            remaining = remaining.slice(maxTokenLength);
+        }
+        if (remaining.length > 0) tokens.push(remaining);
+    }
 
-    if (longWords) {
-        for (const longWord of longWords) {
-            let count = 0;
-            const shortWords: string[] = [];
+    return tokens;
+}
 
-            for (const c of longWord) {
-                if (shortWords[count] && (shortWords[count].length >= longWordSize || (c === "\n" && shortWords[count].length >= longWordSize - 100))) {
-                    count++;
-                }
-                shortWords[count] = shortWords[count] ? shortWords[count] + c : c;
-            }
+function buildChunks(tokens: string[], separator: string, chunkLimit: number): string[] {
+    const chunks: string[] = [];
+    let current = "";
 
-            text = text.replace(longWord, shortWords.join(separator));
+    for (const token of tokens) {
+        const candidate = current.length > 0 ? current + separator + token : token;
+        if (current.length > 0 && candidate.length > chunkLimit) {
+            chunks.push(current);
+            current = token;
+        } else {
+            current = candidate;
         }
     }
 
-    const chunks: string[] = [];
-    let idx = 0;
-    const splitLimit = Math.floor(limit * (39 / 40));
+    if (current.length > 0) chunks.push(current);
+    return chunks;
+}
 
-    for (const word of text.split(separator)) {
-        if (chunks[idx] && (chunks[idx] + "" + word).length > splitLimit) idx++;
-        chunks[idx] = chunks[idx] ? chunks[idx] + separator + word : word;
-    }
+function repairCodeblocks(chunks: string[], leaveGaps: boolean, separator: string): string[] {
+    const FENCED_BLOCK = /`{3,}([\w-]*)\n|`{3,}/gm;
+    const INLINE_CODE = /(?<=[^`]|^)`{1,2}(?=[^`])/gm;
 
-    let insertCodeBlock: string | null = null;
-    let insertCodeLine: string | null = null;
+    let pendingBlockOpen: string | null = null;
+    let pendingInlineOpen: string | null = null;
 
     for (let i = 0; i < chunks.length; i++) {
-        if (insertCodeBlock) {
-            chunks[i] = insertCodeBlock + chunks[i];
-            insertCodeBlock = null;
-        } else if (insertCodeLine) {
-            chunks[i] = insertCodeLine + chunks[i];
-            insertCodeLine = null;
-        } else if (chunks[i].charCodeAt(0) === 10 && separator === "\n" && leaveGaps) {
+        if (pendingBlockOpen) {
+            chunks[i] = pendingBlockOpen + chunks[i];
+            pendingBlockOpen = null;
+        } else if (pendingInlineOpen) {
+            chunks[i] = pendingInlineOpen + chunks[i];
+            pendingInlineOpen = null;
+        } else if (leaveGaps && separator === "\n" && chunks[i].startsWith("\n")) {
             chunks[i] = "** **" + chunks[i];
         }
 
-        const codeBlocks = chunks[i].match(/`{3,}[\S]*\n|`{3,}/gm);
-        const codeLines = chunks[i].match(/[^`]{0,1}`{1,2}[^`]|[^`]`{1,2}[^`]{0,1}/gm);
+        const fenceMatches = [...chunks[i].matchAll(FENCED_BLOCK)];
+        if (fenceMatches.length % 2 === 1) {
+            const lastFence = fenceMatches[fenceMatches.length - 1];
+            const lang = lastFence[1] ?? "";
+            chunks[i] += "\n```";
+            pendingBlockOpen = "```" + lang + (lang ? "\n" : "");
+        } else {
+            const inlineMatches = [...chunks[i].matchAll(INLINE_CODE)];
+            if (inlineMatches.length % 2 === 1) {
+                const backticks = inlineMatches[inlineMatches.length - 1][0];
+                chunks[i] += backticks;
+                pendingInlineOpen = backticks;
+            }
+        }
 
-        if (codeBlocks && codeBlocks.length % 2 === 1) {
-            chunks[i] = chunks[i] + "```";
-            insertCodeBlock = codeBlocks[codeBlocks.length - 1] + "\n";
-        } else if (codeLines && codeLines.length % 2 === 1) {
-            insertCodeLine = codeLines[codeLines.length - 1].replace(/[^`]/g, "");
-            chunks[i] = chunks[i] + insertCodeLine;
-        } else if (chunks[i].charCodeAt(chunks[i].length - 1) === 10 && separator === "\n" && leaveGaps) {
-            chunks[i] = chunks[i] + "** **";
+        if (leaveGaps && separator === "\n" && chunks[i].endsWith("\n")) {
+            chunks[i] += "** **";
         }
     }
 
