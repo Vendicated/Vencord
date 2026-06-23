@@ -7,6 +7,7 @@
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 
+import { getCategoryTiles, getFavorites, getHeadingLabel, onSelectTile, patches, setInstance } from "./categoryView";
 import { loadCategories } from "./data";
 
 export default definePlugin({
@@ -15,8 +16,16 @@ export default definePlugin({
     authors: [Devs.marpfie],
     tags: ["Media", "Customisation"],
 
+    patches,
+
     async start() {
         await loadCategories();
     },
+
+    getCategoryTiles,
+    getFavorites,
+    getHeadingLabel,
+    onSelectTile,
+    setInstance,
 });
 
