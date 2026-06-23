@@ -29,7 +29,7 @@ import { useAwaiter } from "@utils/react";
 import definePlugin from "@utils/types";
 import { Guild, User } from "@vencord/discord-types";
 import { findCssClassesLazy } from "@webpack";
-import { Alerts, Clickable, IconUtils, Menu, Parser } from "@webpack/common";
+import { Clickable, ConfirmModal, IconUtils, Menu, openModal, Parser } from "@webpack/common";
 
 import { Auth, initAuth, updateAuth } from "./auth";
 import { openReviewsModal } from "./components/ReviewModal";
@@ -94,7 +94,7 @@ export default definePlugin({
         {
             // User popout
             // Same find as ShowConnections
-            find: "#{intl::USER_PROFILE_FRIEND_REQUEST_TOAST}",
+            find: '"UserProfilePopout");',
             replacement: {
                 match: /user:(\i),widgets:.{0,100}?\}\),/,
                 replace: "$&$self.renderProfileComponent({user:$1}),"
@@ -115,43 +115,51 @@ export default definePlugin({
         setTimeout(async () => {
             if (!Auth.token) return;
 
-            const user = await getCurrentUserInfo(Auth.token);
-            updateAuth({ user });
+            const user = await getCurrentUserInfo();
+            if (user) {
+                updateAuth({ user });
 
-            if (notifyReviews) {
-                if (lastReviewId && lastReviewId < user.lastReviewID) {
-                    s.lastReviewId = user.lastReviewID;
-                    if (user.lastReviewID !== 0)
-                        showToast("You have new reviews on your profile!");
+                if (notifyReviews) {
+                    if (lastReviewId && lastReviewId < user.lastReviewID) {
+                        s.lastReviewId = user.lastReviewID;
+                        if (user.lastReviewID !== 0)
+                            showToast("You have new reviews on your profile!");
+                    }
                 }
-            }
 
-            if (user.notification) {
-                const props = user.notification.type === NotificationType.Ban ? {
-                    cancelText: "Appeal",
-                    confirmText: "Ok",
-                    onCancel: async () =>
-                        VencordNative.native.openExternal(
-                            "https://reviewdb.mantikafasi.dev/api/redirect?"
-                            + new URLSearchParams({
-                                token: Auth.token!,
-                                page: "dashboard/appeal"
-                            })
-                        )
-                } : {};
+                const { notification } = user;
+                if (notification) {
+                    const props = notification.type === NotificationType.Ban ? {
+                        cancelText: "Appeal",
+                        confirmText: "Ok",
+                        onCancel: async () =>
+                            VencordNative.native.openExternal(
+                                "https://reviewdb.mantikafasi.dev/api/redirect?"
+                                + new URLSearchParams({
+                                    token: Auth.token!,
+                                    page: "dashboard/appeal"
+                                })
+                            )
+                    } : {};
 
-                Alerts.show({
-                    title: user.notification.title,
-                    body: (
-                        Parser.parse(
-                            user.notification.content,
-                            false
-                        )
-                    ),
-                    ...props
-                });
+                    openModal(modalProps => (
+                        <ConfirmModal
+                            {...modalProps}
+                            title={notification.title}
+                            confirmText={props.confirmText ?? "OK"}
+                            cancelText={props.cancelText}
+                            variant="primary"
+                            onCancel={props.onCancel}
+                        >
+                            {Parser.parse(
+                                notification.content,
+                                false
+                            )}
+                        </ConfirmModal>
+                    ));
 
-                readNotification(user.notification.id);
+                    readNotification(notification.id);
+                }
             }
         }, 4000);
     },
