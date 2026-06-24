@@ -45,6 +45,8 @@ export interface MessageOptions {
     content: string;
     channel: Channel;
     type?: any;
+    hasStickers: boolean;
+    hasAttachments: boolean;
     openWarningPopout: (props: any) => any;
 }
 
@@ -54,7 +56,26 @@ export type MessageEditListener = (channelId: string, messageId: string, message
 const sendListeners = new Set<MessageSendListener>();
 const editListeners = new Set<MessageEditListener>();
 
-export async function _handlePreSend(channelId: string, messageObj: MessageObject, options: MessageOptions, replyOptions: MessageReplyOptions) {
+interface MessageOptions2 {
+    content: string;
+    channelId: string,
+    command: unknown | null;
+    isGif?: boolean;
+    scheduledTimestamp?: unknown;
+    stickers?: string[];
+    uploads?: CloudUpload[];
+    alsoForwardToChannelId?: unknown;
+}
+
+export async function _handlePreSend(
+    channelId: string,
+    messageObj: MessageObject,
+    options: MessageOptions,
+    replyOptions: MessageReplyOptions,
+    options2: MessageOptions2
+) {
+    options.stickers = options2.stickers;
+    options.uploads = options2.uploads;
     options.replyOptions = replyOptions;
     for (const listener of sendListeners) {
         try {
