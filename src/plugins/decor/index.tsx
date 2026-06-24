@@ -113,7 +113,7 @@ export default definePlugin({
             find: "#{intl::PREMIUM_UPSELL_PROFILE_AVATAR_DECO_INLINE_UPSELL_DESCRIPTION}",
             replacement: [
                 {
-                    match: /(?<==)(?:\i=>|function\(\i\)){let{user:\i,guildId:\i,avatarDecoration:/,
+                    match: /(?<==)function\(\i\){let{user:\i,guildId:\i,avatarDecoration:/,
                     replace: "$self.AvatarDecorationModalPreview=$&"
                 }
             ]
