@@ -18,7 +18,8 @@
  * You should have received a copy of the GNU General Public License
  * along with AdGuard's Block YouTube Ads.  If not, see <http://www.gnu.org/licenses/>.
  */
-if(!window.adguardInjected) {
+(() => {
+    if(window.adguardInjected) return;
     window.adguardInjected = true;
 
     const hiddenCSS = [
@@ -216,4 +217,4 @@ if(!window.adguardInjected) {
         hideDynamicAds();
         autoSkipAds();
     });
-}
+})();
