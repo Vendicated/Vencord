@@ -40,30 +40,25 @@ export default definePlugin({
 
     patches: [
         {
-            find: "renderVoiceUsers()",
-            replacement: [
-                {
-                    match: /collapsedMax:(\d+),voiceStates:(\i),withGuildIcon:(\i)/,
-                    replace: "collapsedMax:$1,voiceStates:$self.sortVoiceStates($2),withGuildIcon:$3"
-                }
-            ]
+            find: 'selfStream?"\\0":"\\x01"',
+            replacement: {
+                match: /function (\i)\((\i),(\i)\)\{return`[^`]+`\}/,
+                replace: "function $1($2,$3){return $self.buildComparator($2,$3)}"
+            }
         }
     ],
 
-    sortVoiceStates(voiceStates: any) {
-        const serverMuteCounts = !settings.store.ignoreServerMute;
-        if (!voiceStates) return voiceStates;
-        return [...voiceStates].sort((a, b) => { // stable sorting
-            const score = item => {
-                const vs = item.voiceState;
-                if (settings.store.pinSelf && vs.userId === getSelfId()) return -1;
-                if (vs.selfStream) return 0;
-                if (vs.selfVideo) return 1;
-                if (vs.selfMute || (serverMuteCounts && vs.mute)) return 3;
-                if (vs.selfDeaf || (serverMuteCounts && vs.dead)) return 4;
-                return 2;
-            };
-            return score(a) - score(b);
-        });
+    buildComparator(voiceState: any, nick: string) {
+        let tier: string;
+        const countServerMute = !settings.store.ignoreServerMute;
+
+        if (settings.store.pinSelf && voiceState.userId === getSelfId()) tier = "\x01";
+        else if (voiceState.selfStream) tier = "\x02";
+        else if (voiceState.selfVideo) tier = "\x03";
+        else if (voiceState.selfDeaf || (voiceState.deaf && countServerMute)) tier = "\x06";
+        else if (voiceState.selfMute || (voiceState.mute && countServerMute)) tier = "\x05";
+        else tier = "\x04";
+
+        return `${tier}${nick.toLowerCase()}${voiceState.userId}`;
     }
 });
