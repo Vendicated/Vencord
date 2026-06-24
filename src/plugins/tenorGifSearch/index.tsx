@@ -46,12 +46,11 @@ interface GifPickerInstance {
 }
 
 function tenorUrl(path: string, extra: Record<string, string> = {}) {
-    const url = new URL(`https://api.tenor.com/v1/${path}`);
-    url.searchParams.set("key", TENOR_KEY);
-    url.searchParams.set("locale", (LocaleStore.locale).replace("-", "_").toLowerCase());
-    for (const [k, v] of Object.entries(extra))
-        url.searchParams.set(k, v);
-    return url.toString();
+	return `https://api.tenor.com/v1/${path}?` + new URLSearchParams({
+    	key: TENOR_KEY,
+    	locale: LocaleStore.locale.replace("-", "_").toLowerCase(),
+    	...extra
+    });
 }
 
 function toDiscordGif(item: TenorResult): DiscordGif | null {
