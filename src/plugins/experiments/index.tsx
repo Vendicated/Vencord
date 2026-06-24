@@ -127,8 +127,32 @@ export default definePlugin({
                 replace: "$&if($1==null)return;"
             }
         },
-
+        {
+            // Expands the experiment regex to allow negative numbers as well as text in the last segment of the URL.
+            find: '"^dev://experiment/',
+            replacement: {
+                match: /(\[0-9\]\+)/,
+                replace: "[a-zA-Z0-9-]+"
+            }
+        },
+        {
+            // Allow linking experiments by their label as well as their value.
+            find: ".EXPERIMENT_TREATMENT&&null",
+            replacement: [
+                {
+                    match: /(?<=find\(\i=>)((\i).value===\i)/,
+                    replace: "{return($1)||($self.matchExperiment(arguments[0].url,$2.label))}"
+                }
+            ]
+        },
     ],
+
+    matchExperiment(url: string, label: string): boolean {
+        const items = url.split("/");
+        const labelCleaned = label.replace(/[^a-zA-Z0-9]+/g, "").toLowerCase();
+        const urlEndCleaned = items[items.length - 1]?.replace(/[^a-zA-Z0-9]+/g, "").toLowerCase();
+        return !!labelCleaned && urlEndCleaned !== undefined && labelCleaned === urlEndCleaned;
+    },
 
     start: () => ExperimentStore.getUserExperimentBucket("2026-01-bug-reporter") > 0 && enableStyle(hideBugReport),
     stop: () => disableStyle(hideBugReport),
