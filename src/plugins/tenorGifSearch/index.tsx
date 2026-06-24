@@ -154,14 +154,6 @@ export default definePlugin({
         });
     },
 
-    stop() {
-        cachedCategories = null;
-        if (debounceTimer) {
-            clearTimeout(debounceTimer);
-            debounceTimer = null;
-        }
-    },
-
     handleTrendingFetch() {
         if (cachedCategories) {
             FluxDispatcher.dispatch({ type: "GIF_PICKER_TRENDING_FETCH_SUCCESS", ...cachedCategories });
