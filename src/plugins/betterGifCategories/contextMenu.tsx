@@ -6,13 +6,11 @@
 
 import { findGroupChildrenByChildId, NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { ContextMenuApi, Menu, useState } from "@webpack/common";
+import type { MouseEvent } from "react";
 
 import { addGifToCategory, getCategories, type Gif, removeGifFromCategory } from "./data";
 import { isGifMedia } from "./helpers";
 
-/**
- * Builds a {@link Gif} from the righ clicked message context
- */
 function gifFromMessageProps(props: any): Gif | null {
     const url: string | undefined = props?.itemHref ?? props?.itemSrc;
 
@@ -65,9 +63,11 @@ function buildCategorySubmenu(gif: Gif) {
                         id={`vc-bgc-cat-${category.id}`}
                         label={category.name}
                         checked={checked}
-                        action={() => checked
-                            ? removeGifFromCategory(category.id, gif.url)
-                            : addGifToCategory(category.id, gif)}
+                        action={
+                            () => checked
+                                ? removeGifFromCategory(category.id, gif.url)
+                                : addGifToCategory(category.id, gif)
+                        }
                     />
                 );
             })}
@@ -139,7 +139,7 @@ function GifPickerContextMenu({ gif, onClose }: { gif: Gif; onClose: () => void;
     );
 }
 
-export function handleGifContextMenu(event: React.MouseEvent, gif: any) {
+export function handleGifContextMenu(event: MouseEvent, gif: any) {
     const gifData: Gif = {
         url: gif.url || gif.src,
         src: gif.src,

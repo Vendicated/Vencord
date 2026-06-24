@@ -39,7 +39,11 @@ export function isGifMedia(props: any): boolean {
     }
 
     try {
-        if (new URL(safeSrc).searchParams.get("animated") === "true") return true;
+        // For other edge cases like
+        // https://gifconvert.vxtwitter.com/convert.avif?url=https://video.twimg.com/tweet_video/HKPuzUVXQAA2nbM.mp4
+        if (new URL(safeSrc).searchParams.get("animated") === "true") {
+            return true;
+        }
     } catch {
         // malformed URL. fall through
     }
