@@ -82,9 +82,13 @@ interface RoleMemberPopoutProps {
     channelId: string;
     roleId: string;
 }
-type RoleMemberPopout = ComponentType<RoleMemberPopoutProps>;
+export type RoleMemberPopout = ComponentType<RoleMemberPopoutProps>;
 
 let RoleMemberPopout: RoleMemberPopout = () => null;
+
+export function setRoleMemberPopout(component: RoleMemberPopout) {
+    RoleMemberPopout = component;
+}
 
 export function buildExtraRoleContextMenuItems(role: Role, guild: Guild, popoutRef?: React.RefObject<any>) {
     if (!role) return { before: [], after: [] };
@@ -215,7 +219,7 @@ export default definePlugin({
             find: ".ROLE_MENTION)",
             replacement: {
                 match: /function (\i)(?=.+?renderPopout:.{0,20}\1,\{guildId:\i,channelId:\i)/,
-                replace: "$self.RoleMembers=$1;$&"
+                replace: "$self.setRoleMemberPopout($1);$&"
             }
         },
         // Conflicts with RoleColorEverywhere which changes the code at the end of our match. (and also uses same find & similar match)
@@ -233,10 +237,7 @@ export default definePlugin({
         // DeveloperMode needs to be enabled for the context menu to be shown
         DeveloperMode.updateSetting(true);
     },
-
-    set RoleMembers(component: RoleMemberPopout) {
-        RoleMemberPopout = component;
-    },
+    setRoleMemberPopout,
 
     contextMenus: {
         "dev-context"(children, { id }: { id: string; }) {
