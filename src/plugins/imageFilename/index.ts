@@ -23,14 +23,15 @@ export default definePlugin({
     name: "ImageFilename",
     authors: [Devs.Ven],
     description: "Display the file name of images & GIFs as a tooltip when hovering over them",
+    tags: ["Media", "Utility"],
     settings,
 
     patches: [
         {
-            find: ".clickableWrapper",
+            find: ".RESPONSIVE?",
             replacement: {
-                match: /\.originalLink,href:(\i)/,
-                replace: "$&,title:$self.getTitle($1)"
+                match: /(?="data-role":"img","data-safe-src":)(?<=href:(\i).+?)/,
+                replace: "title:$self.getTitle($1),"
             }
         },
     ],

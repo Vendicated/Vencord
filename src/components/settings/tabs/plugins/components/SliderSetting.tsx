@@ -16,25 +16,26 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { PluginOptionSlider } from "@utils/types";
+import { isSettingDisabled } from "@api/PluginManager";
+import { PluginSettingSliderDef } from "@utils/types";
 import { React, Slider, useState } from "@webpack/common";
 
 import { resolveError, SettingProps, SettingsSection } from "./Common";
 
-export function SliderSetting({ option, pluginSettings, definedSettings, id, onChange }: SettingProps<PluginOptionSlider>) {
-    const def = pluginSettings[id] ?? option.default;
+export function SliderSetting({ setting, pluginSettings, definedSettings, id, onChange }: SettingProps<PluginSettingSliderDef>) {
+    const def = pluginSettings[id] ?? setting.default;
 
     const [error, setError] = useState<string | null>(null);
 
     function getValue(value: number): number {
-        if (option.onlyInts) {
+        if (setting.onlyInts) {
             return Math.round(value);
         }
         return value;
     }
 
     function handleChange(newValue: number): void {
-        const isValid = option.isValid?.call(definedSettings, getValue(newValue)) ?? true;
+        const isValid = setting.isValid?.call(definedSettings, getValue(newValue)) ?? true;
 
         setError(resolveError(isValid));
 
@@ -44,19 +45,19 @@ export function SliderSetting({ option, pluginSettings, definedSettings, id, onC
     }
 
     return (
-        <SettingsSection name={id} description={option.description} error={error}>
+        <SettingsSection name={setting.displayName} id={id} description={setting.description} error={error}>
             <Slider
-                markers={option.markers}
-                minValue={option.markers[0]}
-                maxValue={option.markers[option.markers.length - 1]}
+                markers={setting.markers}
+                minValue={setting.markers[0]}
+                maxValue={setting.markers[setting.markers.length - 1]}
                 initialValue={def}
                 onValueChange={handleChange}
-                keyboardStep={option.onlyInts ? 1 : undefined}
-                onValueRender={(v: number) => String(option.onlyInts ? Math.round(v) : v.toFixed(2))}
-                onMarkerRender={(v: number) => option.markers.includes(v) ? String(getValue(v)) : null}
-                stickToMarkers={option.stickToMarkers ?? true}
-                disabled={option.disabled?.call(definedSettings) ?? false}
-                {...option.componentProps}
+                keyboardStep={setting.onlyInts ? 1 : undefined}
+                onValueRender={(v: number) => String(setting.onlyInts ? Math.round(v) : v.toFixed(2))}
+                onMarkerRender={(v: number) => setting.markers.includes(v) ? String(getValue(v)) : null}
+                stickToMarkers={setting.stickToMarkers ?? true}
+                disabled={isSettingDisabled(definedSettings, setting)}
+                {...setting.componentProps}
             />
         </SettingsSection>
     );

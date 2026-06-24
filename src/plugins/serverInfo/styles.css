@@ -1,13 +1,10 @@
-.vc-gp-root {
-    height: 100%;
-    user-select: text;
-}
-
 .vc-gp-banner {
     cursor: pointer;
     aspect-ratio: auto 240 / 135;
     height: 334px;
     width: 100%;
+    padding-inline: 0.5em;
+    box-sizing: border-box;
     object-fit: cover;
     overflow: clip;
     overflow-clip-margin: content-box;
@@ -48,7 +45,7 @@
 
 .vc-gp-tab {
     border-bottom: 2px solid transparent;
-    color: var(--interactive-normal);
+    color: var(--interactive-icon-default);
     cursor: pointer;
     line-height: 14px;
 }
@@ -58,7 +55,7 @@
 }
 
 .vc-gp-tab:where(.vc-gp-selected, :hover, :focus) {
-    border-bottom-color: var(--interactive-active);
+    border-bottom-color: var(--interactive-icon-active);
 }
 
 .vc-gp-info {
@@ -71,7 +68,7 @@
     color: var(--text-default);
 }
 
-.vc-gp-server-info-pair [class^="timestamp"] {
+.vc-gp-server-info-pair [class*="timestamp"] {
     margin-left: 0;
 }
 
@@ -88,14 +85,9 @@
 }
 
 .vc-gp-scroller {
-    width: 100%;
     max-height: 500px;
 }
 
-.vc-gp-scroller [class^="listRow"] {
+.vc-gp-scroller [class*="row"] {
     margin: 1px 0;
-}
-
-.vc-gp-scroller [class^="listRow"]:hover {
-    background-color: var(--background-modifier-hover);
 }

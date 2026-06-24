@@ -17,7 +17,7 @@
 */
 
 import ErrorBoundary from "@components/ErrorBoundary";
-import BadgeAPIPlugin from "plugins/_api/badges";
+import BadgeAPIPlugin from "@plugins/_api/badges";
 import { ComponentType, HTMLProps } from "react";
 
 export const enum BadgePosition {
@@ -26,12 +26,16 @@ export const enum BadgePosition {
 }
 
 export interface ProfileBadge {
+    /**
+     * Badge id, unused by vencord, required by discord
+     */
+    id: string,
     /** The tooltip to show on hover. Required for image badges */
     description?: string;
     /** Custom component for the badge (tooltip not included) */
     component?: ComponentType<ProfileBadge & BadgeUserArgs>;
     /** The custom image to use */
-    image?: string;
+    iconSrc?: string;
     link?: string;
     /** Action to perform when you click the badge */
     onClick?(event: React.MouseEvent, props: ProfileBadge & BadgeUserArgs): void;
@@ -47,7 +51,8 @@ export interface ProfileBadge {
     key?: string;
 
     /**
-     * Allows dynamically returning multiple badges
+     * Allows dynamically returning multiple badges.
+     * Must not call hooks
      */
     getBadges?(userInfo: BadgeUserArgs): ProfileBadge[];
 }
