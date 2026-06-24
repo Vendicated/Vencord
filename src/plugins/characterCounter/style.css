@@ -15,5 +15,5 @@
 }
 
 .vc-charCounter-selected {
-    color: var(--vc-char-count-selected-color, --brand-500);
+    color: var(--brand-500);
 }
