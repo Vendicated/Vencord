@@ -210,7 +210,7 @@ export default definePlugin({
             replacement: [
                 {
                     match: /avatarSrc:(\i),eventHandlers:(\i).+?"div",.{0,100}className:\i,/,
-                    replace: '$&style:{cursor:"pointer"},onClick:e=>{$self.openAvatar($1,e)},',
+                    replace: '$&style:{cursor:"pointer"},onClick:vcEvent=>{$self.openAvatar($1,vcEvent)},',
                 }
             ],
             all: true
