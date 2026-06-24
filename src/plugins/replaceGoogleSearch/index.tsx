@@ -6,9 +6,10 @@
 
 import { findGroupChildrenByChildId, NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { definePluginSettings } from "@api/Settings";
+import { Flex } from "@components/Flex";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { Flex, Menu } from "@webpack/common";
+import { Menu } from "@webpack/common";
 
 const DefaultEngines = {
     Google: "https://www.google.com/search?q=",
@@ -20,6 +21,7 @@ const DefaultEngines = {
     GitHub: "https://github.com/search?q=",
     Reddit: "https://www.reddit.com/search?q=",
     Wikipedia: "https://wikipedia.org/w/index.php?search=",
+    Startpage: "https://www.startpage.com/sp/search?query="
 } as const;
 
 const enum ReplacementEngineValue {
@@ -34,6 +36,7 @@ const settings = definePluginSettings({
         placeholder: "Google"
     },
     customEngineURL: {
+        displayName: "Custom Engine URL",
         description: "The URL of your Engine",
         type: OptionType.STRING,
         placeholder: "https://google.com/search?q="
@@ -93,7 +96,7 @@ function makeSearchItem(src: string) {
                         key={key}
                         id={key}
                         label={
-                            <Flex style={{ alignItems: "center", gap: "0.5em" }}>
+                            <Flex gap="0.5em" alignItems="center">
                                 <img
                                     style={{
                                         borderRadius: "50%"
@@ -128,6 +131,7 @@ const messageContextMenuPatch: NavContextMenuPatchCallback = (children, _props) 
 export default definePlugin({
     name: "ReplaceGoogleSearch",
     description: "Replaces the Google search with different Engine(s)",
+    tags: ["Utility", "Customisation"],
     authors: [Devs.Moxxie, Devs.Ethan],
 
     settings,

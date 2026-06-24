@@ -6,22 +6,21 @@
 
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Link } from "@components/Link";
+import { GUILD_ID, INVITE_KEY, RAW_SKU_ID } from "@plugins/decor/lib/constants";
+import { useCurrentUserDecorationsStore } from "@plugins/decor/lib/stores/CurrentUserDecorationsStore";
+import { cl, DecorationModalClasses, requireAvatarDecorationModal, requireCreateStickerModal } from "@plugins/decor/ui";
+import { AvatarDecorationModalPreview } from "@plugins/decor/ui/components";
 import { openInviteModal } from "@utils/discord";
 import { Margins } from "@utils/margins";
-import { closeAllModals, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
+import { RenderModalProps } from "@vencord/discord-types";
 import { filters, findComponentByCodeLazy, mapMangledModuleLazy } from "@webpack";
-import { Button, FluxDispatcher, Forms, GuildStore, NavigationRouter, Text, TextInput, useEffect, useMemo, UserStore, useState } from "@webpack/common";
+import { closeAllModals, FluxDispatcher, Forms, GuildStore, Modal, NavigationRouter, openModal, Text, TextInput, useEffect, useMemo, UserStore, useState } from "@webpack/common";
 
-import { GUILD_ID, INVITE_KEY, RAW_SKU_ID } from "../../lib/constants";
-import { useCurrentUserDecorationsStore } from "../../lib/stores/CurrentUserDecorationsStore";
-import { cl, DecorationModalStyles, requireAvatarDecorationModal, requireCreateStickerModal } from "../";
-import { AvatarDecorationModalPreview } from "../components";
-
-const FileUpload = findComponentByCodeLazy(".fileUpload),");
+const FileUpload = findComponentByCodeLazy(".currentTarget.files", "lineClamp:1");
 
 const { HelpMessage, HelpMessageTypes } = mapMangledModuleLazy('POSITIVE="positive', {
     HelpMessageTypes: filters.byProps("POSITIVE", "WARNING", "INFO"),
-    HelpMessage: filters.byCode(".iconDiv")
+    HelpMessage: filters.byCode("messageType:")
 });
 
 function useObjectURL(object: Blob | MediaSource | null) {
@@ -42,7 +41,7 @@ function useObjectURL(object: Blob | MediaSource | null) {
     return url;
 }
 
-function CreateDecorationModal(props: ModalProps) {
+function CreateDecorationModal(props: RenderModalProps) {
     const [name, setName] = useState("");
     const [file, setFile] = useState<File | null>(null);
     const [submitting, setSubmitting] = useState(false);
@@ -58,26 +57,29 @@ function CreateDecorationModal(props: ModalProps) {
 
     const decoration = useMemo(() => fileUrl ? { asset: fileUrl, skuId: RAW_SKU_ID } : null, [fileUrl]);
 
-    return <ModalRoot
+    return <Modal
         {...props}
-        size={ModalSize.MEDIUM}
-        className={DecorationModalStyles.modal}
+        size="lg"
+        title="Create Decoration"
+        actions={[
+            {
+                text: "Cancel",
+                variant: "secondary",
+                onClick: props.onClose
+            },
+            {
+                text: "Submit for Review",
+                variant: "primary",
+                onClick: () => {
+                    setSubmitting(true);
+                    createDecoration({ alt: name, file: file! })
+                        .then(props.onClose).catch(e => { setSubmitting(false); setError(e); });
+                },
+                disabled: !file || !name || submitting
+            }
+        ]}
     >
-        <ModalHeader separator={false} className={cl("modal-header")}>
-            <Text
-                color="header-primary"
-                variant="heading-lg/semibold"
-                tag="h1"
-                style={{ flexGrow: 1 }}
-            >
-                Create Decoration
-            </Text>
-            <ModalCloseButton onClick={props.onClose} />
-        </ModalHeader>
-        <ModalContent
-            className={cl("create-decoration-modal-content")}
-            scrollbarType="none"
-        >
+        <div className={cl("create-decoration-modal-content", DecorationModalClasses.modal)}>
             <ErrorBoundary>
                 <HelpMessage messageType={HelpMessageTypes.WARNING}>
                     Make sure your decoration does not violate <Link
@@ -116,7 +118,7 @@ function CreateDecorationModal(props: ModalProps) {
                     </div>
                     <div>
                         <AvatarDecorationModalPreview
-                            avatarDecorationOverride={decoration}
+                            avatarDecoration={decoration}
                             user={UserStore.getCurrentUser()}
                         />
                     </div>
@@ -143,28 +145,8 @@ function CreateDecorationModal(props: ModalProps) {
                     </Link> and allow direct messages.
                 </HelpMessage>
             </ErrorBoundary>
-        </ModalContent>
-        <ModalFooter className={cl("modal-footer")}>
-            <div className={cl("modal-footer-btn-container")}>
-                <Button
-                    onClick={props.onClose}
-                    color={Button.Colors.PRIMARY}
-                >
-                    Cancel
-                </Button>
-                <Button
-                    onClick={() => {
-                        setSubmitting(true);
-                        createDecoration({ alt: name, file: file! })
-                            .then(props.onClose).catch(e => { setSubmitting(false); setError(e); });
-                    }}
-                    disabled={!file || !name || submitting}
-                >
-                    Submit for Review
-                </Button>
-            </div>
-        </ModalFooter>
-    </ModalRoot>;
+        </div>
+    </Modal>;
 }
 
 export const openCreateDecorationModal = () =>

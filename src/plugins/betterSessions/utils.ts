@@ -16,7 +16,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { DataStore } from "@api/index";
+import * as DataStore from "@api/DataStore";
+import { classNameFactory } from "@utils/css";
 import { UserStore } from "@webpack/common";
 
 import { ChromeIcon, DiscordIcon, EdgeIcon, FirefoxIcon, IEIcon, MobileIcon, OperaIcon, SafariIcon, UnknownIcon } from "./components/icons";
@@ -24,6 +25,7 @@ import { SessionInfo } from "./types";
 
 const getDataKey = () => `BetterSessions_savedSessions_${UserStore.getCurrentUser().id}`;
 
+export const cl = classNameFactory("vc-betterSessions-");
 export const savedSessionsCache: Map<string, { name: string, isNew: boolean; }> = new Map();
 
 export function getDefaultName(clientInfo: SessionInfo["session"]["client_info"]) {

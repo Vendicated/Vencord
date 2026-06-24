@@ -27,5 +27,5 @@
 }
 
 .vc-customRPC-settings-error {
-    color: var(--text-danger);
+    color: var(--text-feedback-critical);
 }

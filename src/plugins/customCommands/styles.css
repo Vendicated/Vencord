@@ -1,0 +1,8 @@
+.vc-customCommands-card {
+    padding: 0.5em;
+    padding-left: 1em;
+    display: grid;
+    grid-template-columns: 1fr min-content min-content;
+    align-items: center;
+    gap: 0.25em;
+}

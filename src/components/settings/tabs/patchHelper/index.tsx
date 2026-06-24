@@ -22,8 +22,8 @@ import { Flex } from "@components/Flex";
 import { HeadingTertiary } from "@components/Heading";
 import { SettingsTab, wrapTab } from "@components/settings/tabs/BaseTab";
 import { debounce } from "@shared/debounce";
+import { copyWithToast } from "@utils/discord";
 import { Margins } from "@utils/margins";
-import { copyWithToast } from "@utils/misc";
 import { stripIndent } from "@utils/text";
 import { ReplaceFn } from "@utils/types";
 import { search } from "@webpack";
@@ -104,7 +104,7 @@ function PatchHelper() {
     }
 
     return (
-        <SettingsTab title="Patch Helper">
+        <SettingsTab>
             <HeadingTertiary>Full patch</HeadingTertiary>
             <FullPatchInput
                 setFind={onFindChange}
@@ -164,4 +164,4 @@ function PatchHelper() {
     );
 }
 
-export default IS_DEV ? wrapTab(PatchHelper, "PatchHelper") : null;
+export default !IS_STANDALONE ? wrapTab(PatchHelper, "PatchHelper") : null;

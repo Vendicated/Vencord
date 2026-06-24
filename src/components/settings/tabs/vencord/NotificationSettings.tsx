@@ -10,8 +10,7 @@ import { ErrorCard } from "@components/ErrorCard";
 import { Flex } from "@components/Flex";
 import { Margins } from "@utils/margins";
 import { identity } from "@utils/misc";
-import { ModalCloseButton, ModalContent, ModalHeader, ModalRoot, ModalSize, openModal } from "@utils/modal";
-import { Button, Forms, Select, Slider, Text } from "@webpack/common";
+import { Button, Forms, Modal,openModal, Select, Slider } from "@webpack/common";
 
 export function NotificationSection() {
     return (
@@ -35,24 +34,21 @@ export function NotificationSection() {
 
 export function openNotificationSettingsModal() {
     openModal(props => (
-        <ModalRoot {...props} size={ModalSize.MEDIUM}>
-            <ModalHeader>
-                <Text variant="heading-lg/semibold" style={{ flexGrow: 1 }}>Notification Settings</Text>
-                <ModalCloseButton onClick={props.onClose} />
-            </ModalHeader>
-
-            <ModalContent>
-                <NotificationSettings />
-            </ModalContent>
-        </ModalRoot>
+        <Modal
+            {...props}
+            size="lg"
+            title="Notification Settings"
+        >
+            <NotificationSettings />
+        </Modal>
     ));
 }
 
 function NotificationSettings() {
-    const settings = useSettings().notifications;
+    const settings = useSettings(["notifications.*"]).notifications;
 
     return (
-        <div style={{ padding: "1em 0" }}>
+        <>
             <Forms.FormTitle tag="h5">Notification Style</Forms.FormTitle>
             {settings.useNative !== "never" && Notification?.permission === "denied" && (
                 <ErrorCard style={{ padding: "1em" }} className={Margins.bottom8}>
@@ -122,6 +118,6 @@ function NotificationSettings() {
                 onValueRender={v => v === 200 ? "∞" : v}
                 onMarkerRender={v => v === 200 ? "∞" : v}
             />
-        </div>
+        </>
     );
 }

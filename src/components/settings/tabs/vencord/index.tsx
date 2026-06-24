@@ -20,22 +20,24 @@ import { openNotificationLogModal } from "@api/Notifications/notificationLog";
 import { useSettings } from "@api/Settings";
 import { Divider } from "@components/Divider";
 import { FormSwitch } from "@components/FormSwitch";
-import { FolderIcon, GithubIcon, LogIcon, PaintbrushIcon, RestartIcon } from "@components/index";
+import { FolderIcon, GithubIcon, LogIcon, PaintbrushIcon, RestartIcon } from "@components/Icons";
 import { QuickAction, QuickActionCard } from "@components/settings/QuickAction";
 import { SpecialCard } from "@components/settings/SpecialCard";
 import { SettingsTab, wrapTab } from "@components/settings/tabs/BaseTab";
 import { openContributorModal } from "@components/settings/tabs/plugins/ContributorModal";
 import { openPluginModal } from "@components/settings/tabs/plugins/PluginModal";
+import SettingsPlugin from "@plugins/_core/settings";
 import { gitRemote } from "@shared/vencordUserAgent";
-import { IS_MAC, IS_WINDOWS } from "@utils/constants";
+import { IS_WINDOWS } from "@utils/constants";
 import { Margins } from "@utils/margins";
 import { isPluginDev } from "@utils/misc";
 import { relaunch } from "@utils/native";
-import { Alerts, Forms, React, useMemo, UserStore } from "@webpack/common";
+import { ConfirmModal, Forms, openModal, React, useMemo, UserStore } from "@webpack/common";
 
 import { DonateButtonComponent, isDonor } from "./DonateButton";
-import { VibrancySettings } from "./MacVibrancySettings";
+import { MacOSVibrancySettings } from "./MacVibrancySettings";
 import { NotificationSection } from "./NotificationSettings";
+import { WindowsMaterialSettings } from "./WindowsMaterialSettings";
 
 const DEFAULT_DONATE_IMAGE = "https://cdn.discordapp.com/emojis/1026533090627174460.png";
 const SHIGGY_DONATE_IMAGE = "https://media.discordapp.net/stickers/1039992459209490513.png";
@@ -110,13 +112,17 @@ function Switches() {
                     settings[key] = v;
 
                     if (restartRequired) {
-                        Alerts.show({
-                            title: "Restart Required",
-                            body: "A restart is required to apply this change",
-                            confirmText: "Restart now",
-                            cancelText: "Later!",
-                            onConfirm: relaunch
-                        });
+                        openModal(props => (
+                            <ConfirmModal
+                                {...props}
+                                title="Restart Required"
+                                subtitle="A restart is required to apply this change"
+                                confirmText="Restart now"
+                                cancelText="Later!"
+                                variant="primary"
+                                onConfirm={relaunch}
+                            />
+                        ));
                     }
                 }}
             />
@@ -130,12 +136,10 @@ function VencordSettings() {
         []
     );
 
-    const needsVibrancySettings = IS_DISCORD_DESKTOP && IS_MAC;
-
     const user = UserStore?.getCurrentUser();
 
     return (
-        <SettingsTab title="Vencord Settings">
+        <SettingsTab>
             {isDonor(user?.id)
                 ? (
                     <SpecialCard
@@ -217,7 +221,7 @@ function VencordSettings() {
                 <Forms.FormTitle tag="h5">Settings</Forms.FormTitle>
                 <Forms.FormText className={Margins.bottom20} style={{ color: "var(--text-muted)" }}>
                     Hint: You can change the position of this settings section in the{" "}
-                    <a onClick={() => openPluginModal(Vencord.Plugins.plugins.Settings)}>
+                    <a onClick={() => openPluginModal(SettingsPlugin)}>
                         settings of the Settings plugin
                     </a>!
                 </Forms.FormText>
@@ -226,7 +230,8 @@ function VencordSettings() {
             </section>
 
 
-            {needsVibrancySettings && <VibrancySettings />}
+            <MacOSVibrancySettings />
+            <WindowsMaterialSettings />
 
             <NotificationSection />
         </SettingsTab>

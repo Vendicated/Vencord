@@ -5,6 +5,8 @@
  */
 
 export * from "./BaseText";
+export * from "./Button";
+export * from "./Card";
 export * from "./CheckedTextInput";
 export * from "./CodeBlock";
 export * from "./Divider";

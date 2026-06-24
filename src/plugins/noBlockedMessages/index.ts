@@ -18,7 +18,7 @@
 
 import { definePluginSettings, migratePluginSetting } from "@api/Settings";
 import { Devs } from "@utils/constants";
-import { runtimeHashMessageKey, runtimeHashMessageKeyLegacy } from "@utils/intlHash";
+import { runtimeHashMessageKey } from "@utils/intlHash";
 import { Logger } from "@utils/Logger";
 import definePlugin, { OptionType } from "@utils/types";
 import { Message } from "@vencord/discord-types";
@@ -50,6 +50,7 @@ export default definePlugin({
     name: "NoBlockedMessages",
     description: "Hides all blocked/ignored messages from chat completely",
     authors: [Devs.rushii, Devs.Samu, Devs.jamesbt365],
+    tags: ["Accessibility", "Chat"],
     settings,
 
     patches: [
@@ -57,24 +58,31 @@ export default definePlugin({
             find: ".__invalid_blocked,",
             replacement: [
                 {
-                    match: /let{expanded:\i,[^}]*?collapsedReason[^}]*}/,
+                    match: /let{messages:\i,[^}]*?collapsedReason[^}]*}/,
                     replace: "if($self.shouldHide(arguments[0]))return null;$&"
                 }
             ]
         },
-        ...[
-            '"MessageStore"',
-            '"ReadStateStore"'
-        ].map(find => ({
-            find,
+        {
+            find: '"MessageStore"',
             predicate: () => settings.store.ignoreMessages,
             replacement: [
                 {
-                    match: /(?<=function (\i)\((\i)\){)(?=.*MESSAGE_CREATE:\1)/,
-                    replace: (_, _funcName, props) => `if($self.shouldIgnoreMessage(${props}.message))return;`
+                    match: /(?<=MESSAGE_CREATE:function\((\i)\){)/,
+                    replace: (_, props) => `if($self.shouldIgnoreMessage(${props}.message))return;`
                 }
             ]
-        }))
+        },
+        {
+            find: '"ReadStateStore"',
+            predicate: () => settings.store.ignoreMessages,
+            replacement: [
+                {
+                    match: /(?<=MESSAGE_CREATE:function\((\i)\){)/,
+                    replace: (_, props) => `if($self.shouldIgnoreMessage(${props}.message))return;`
+                }
+            ]
+        }
     ],
 
     shouldIgnoreMessage(message: Message) {
@@ -92,7 +100,7 @@ export default definePlugin({
     shouldHide(props: MessageDeleteProps): boolean {
         try {
             const collapsedReason = props.collapsedReason();
-            const is = (key: string) => collapsedReason === i18n.t[runtimeHashMessageKey(key)]() || collapsedReason === i18n.t[runtimeHashMessageKeyLegacy(key)]();
+            const is = (key: string) => collapsedReason === i18n.t[runtimeHashMessageKey(key)]();
 
             return is("BLOCKED_MESSAGE_COUNT") || (settings.store.applyToIgnoredUsers && is("IGNORED_MESSAGE_COUNT"));
         } catch (e) {

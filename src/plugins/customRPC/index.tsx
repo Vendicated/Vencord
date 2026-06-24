@@ -36,7 +36,7 @@ import { ApplicationAssetUtils, Button, FluxDispatcher, Forms, React, UserStore 
 import { RPCSettings } from "./RpcSettings";
 
 const useProfileThemeStyle = findByCodeLazy("profileThemeStyle:", "--profile-gradient-primary-color");
-const ActivityView = findComponentByCodeLazy(".party?(0", ".card");
+const ActivityView = findComponentByCodeLazy(".party?(0", "USER_PROFILE_ACTIVITY");
 
 const ShowCurrentGame = getUserSettingLazy<boolean>("status", "showCurrentGame")!;
 
@@ -213,19 +213,23 @@ export async function setRpc(disable?: boolean) {
 export default definePlugin({
     name: "CustomRPC",
     description: "Add a fully customisable Rich Presence (Game status) to your Discord profile",
+    tags: ["Activity", "Customisation"],
     authors: [Devs.captain, Devs.AutumnVN, Devs.nin0dev],
     dependencies: ["UserSettingsAPI"],
-    start: setRpc,
-    stop: () => setRpc(true),
+    // This plugin's patch is not important for functionality, so don't require a restart
+    requiresRestart: false,
     settings,
 
+    start: setRpc,
+    stop: () => setRpc(true),
+
+    // Discord hides buttons on your own Rich Presence for some reason. This patch disables that behaviour
     patches: [
         {
-            find: ".party?(0",
-            all: true,
+            find: ".USER_PROFILE_ACTIVITY_BUTTONS),",
             replacement: {
-                match: /\i\.id===\i\.id\?null:/,
-                replace: ""
+                match: /.getId\(\)===\i.id/,
+                replace: "$& && false"
             }
         }
     ],
@@ -255,7 +259,7 @@ export default definePlugin({
                     </ErrorCard>
                 )}
 
-                <Flex flexDirection="column" style={{ gap: ".5em" }} className={Margins.top16}>
+                <Flex flexDirection="column" gap=".5em" className={Margins.top16}>
                     <Forms.FormText>
                         Go to the <Link href="https://discord.com/developers/applications">Discord Developer Portal</Link> to create an application and
                         get the application ID.
@@ -276,7 +280,7 @@ export default definePlugin({
 
                 <Divider className={Margins.top8} />
 
-                <div style={{ width: "284px", ...profileThemeStyle, marginTop: 8, borderRadius: 8, background: "var(--background-mod-faint)" }}>
+                <div style={{ width: "284px", ...profileThemeStyle, marginTop: 8, borderRadius: 8, background: "var(--background-mod-muted)" }}>
                     {activity && <ActivityView
                         activity={activity}
                         user={UserStore.getCurrentUser()}
