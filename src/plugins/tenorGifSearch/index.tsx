@@ -42,7 +42,7 @@ interface TrendingCategories {
 interface GifPickerInstance {
     state: { resultType: string | null; };
     setState(state: { resultType: string | null; }, callback?: () => void): void;
-    props: { searchBarRef?: { current?: { focus(): void; } | null; }; };
+    props: { searchBarRef?: RefObject<HTMLInputElement> };
 }
 
 function tenorUrl(path: string, extra: Record<string, string> = {}) {
