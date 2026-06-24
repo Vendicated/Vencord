@@ -4,18 +4,20 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { handleGifContextMenu } from "./contextMenu";
+import { handleGifContextMenu } from "./ContextMenu";
+import { openCreateCategoryModal } from "./CreateCategoryModal";
 import { getCategories, GifCategory } from "./data";
 
 const FAVORITES_RESULT_TYPE = "Favorites";
-const FALLBACK_PREVIEW = "https://media.giphy.com/media/1TOSaJsWtnhe0/giphy.gif";
+const CREATE_NEW_CATEGORY_ACTION = "create";
 
 export interface CategoryTile {
-    type: string;
-    name: string;
-    src: string;
     format: number;
-    vcCategoryId: string;
+    name: string;
+    src?: string;
+    type: string;
+    vcAction?: string;
+    vcCategoryId?: string;
 }
 
 let activeCategory: { id: string; name: string; } | null = null;
@@ -23,6 +25,10 @@ let activeCategory: { id: string; name: string; } | null = null;
 // The live gif picker instance (captured via the renderHeaderContent patch)
 // Needed to avoid a display lag of one selection when switching between categories as re-renders were not triggered
 let pickerInstance: any = null;
+
+let gridInstance: any = null;
+
+
 
 // Last known full favourites list, so we can restore it when leaving a category.
 let fullFavorites: any[] = [];
@@ -39,7 +45,7 @@ function buildTile(category: GifCategory): CategoryTile {
     return {
         type: "Category",
         name: category.name,
-        src: first?.src || FALLBACK_PREVIEW,
+        src: first?.src,
         format: first?.format ?? 1,
         vcCategoryId: category.id,
     };
@@ -51,9 +57,9 @@ export const patches = [
         find: "renderCategoryExtras",
         replacement: [
             {
-                // Replace Discord's trending categories with users custom categories
+                // Replace Discord's trending categories with our own and capture the grid instance
                 match: /(this\.memoizedData\(this\.state\.favoritesTile,)this\.props\.trendingCategories(,this\.props\.hideFavoritesTile\))/,
-                replace: "$1$self.getCategoryTiles()$2"
+                replace: "($self.setGridInstance(this),$1$self.getCategoryTiles()$2)",
             },
             {
                 // Always render the card grid
@@ -95,6 +101,10 @@ export const patches = [
 
 export function getHeadingLabel(defaultLabel: string): string {
     return activeCategory?.name ?? defaultLabel;
+}
+
+export function setGridInstance(instance: any): void {
+    gridInstance = instance;
 }
 
 export function setInstance(instance: any): void {
@@ -159,7 +169,10 @@ export function getCategoryTiles(): CategoryTile[] {
     // We are on the landing grid, so no category is being viewed
     activeCategory = null;
 
-    return getCategories().map(buildTile);
+    return [
+        ...getCategories().map(buildTile),
+        { type: "Category", name: "New Category", format: 1, vcAction: CREATE_NEW_CATEGORY_ACTION },
+    ];
 }
 
 export function getFavorites(original: any[]): any[] {
@@ -173,6 +186,11 @@ export function getFavorites(original: any[]): any[] {
 }
 
 export function onSelectTile(item: CategoryTile, onSelectItem: (type: string, name: string) => void): void {
+    if (item?.vcAction === CREATE_NEW_CATEGORY_ACTION) {
+        openCreateCategoryModal(() => gridInstance?.forceUpdate());
+        return;
+    }
+
     if (item?.vcCategoryId != null) {
         activeCategory = { id: item.vcCategoryId, name: item.name };
 

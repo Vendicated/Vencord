@@ -7,8 +7,16 @@
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 
-import { getCategoryTiles, getFavorites, getHeadingLabel, onSelectTile, patches, setInstance } from "./categoryView";
-import { messageContextMenuPatch } from "./contextMenu";
+import {
+    getCategoryTiles,
+    getFavorites,
+    getHeadingLabel,
+    onSelectTile,
+    patches,
+    setGridInstance,
+    setInstance
+} from "./categoryView";
+import { messageContextMenuPatch } from "./ContextMenu";
 import { loadCategories } from "./data";
 
 export default definePlugin({
@@ -31,6 +39,7 @@ export default definePlugin({
     getFavorites,
     getHeadingLabel,
     onSelectTile,
+    setGridInstance,
     setInstance,
 });
 
