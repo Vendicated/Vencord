@@ -130,13 +130,6 @@ export default definePlugin({
             ]
         },
         {
-            find: "gif_picker",
-            replacement: {
-                match: /\i\.getConfig\(\{location:"gif_picker"\}\)\.provider/,
-                replace: '"tenor"'
-            }
-        },
-        {
             find: '"GIF_PICKER_TRENDING_FETCH_SUCCESS",trendingCategories:',
             replacement: {
                 match: /\i\.\i\.get\(\{url:\i\.\i\.GIFS_TRENDING,/,
