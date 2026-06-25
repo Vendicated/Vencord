@@ -11,6 +11,7 @@ import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { Channel, Message, User } from "@vencord/discord-types";
+import { findByCodeLazy } from "@webpack";
 import { RelationshipStore, StreamerModeStore } from "@webpack/common";
 
 interface UsernameProps {
@@ -21,6 +22,8 @@ interface UsernameProps {
     isRepliedMessage: boolean;
     userOverride?: User;
 }
+
+const wrapEmojis = findByCodeLazy("lastIndex;return");
 
 const settings = definePluginSettings({
     mode: {
@@ -104,8 +107,9 @@ export default definePlugin({
             if (mode === "user-nick")
                 return <>{prefix}{username} <span className="vc-smyn-suffix">{nick}</span></>;
 
-            if (mode === "nick-user")
-                return <>{prefix}{nick} <span className="vc-smyn-suffix">{username}</span></>;
+            if (mode === "nick-user") {
+                return <>{prefix}{wrapEmojis(nick)} <span className="vc-smyn-suffix">{username}</span></>;
+            }
 
             return <>{prefix}{username}</>;
         } catch {
