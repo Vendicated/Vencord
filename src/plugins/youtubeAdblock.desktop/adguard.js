@@ -19,7 +19,7 @@
  * along with AdGuard's Block YouTube Ads.  If not, see <http://www.gnu.org/licenses/>.
  */
 (() => {
-    if(window.adguardInjected) return;
+    if (window.adguardInjected) return;
     window.adguardInjected = true;
 
     const hiddenCSS = [
