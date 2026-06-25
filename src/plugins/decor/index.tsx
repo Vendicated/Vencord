@@ -51,8 +51,8 @@ export default definePlugin({
             find: "80,onlyAnimateOnHoverOrFocus:!",
             replacement: [
                 {
-                    match: /(?<==)\i=>{let{children.{20,200}isSelected:\i.{0,5}\}=\i/,
-                    replace: "$self.DecorationGridItem=$&",
+                    match: /(?=function (\i)\(\i\){let{children.{20,200}isSelected:\i,\.\.\.\i\}=\i)/,
+                    replace: "$self.DecorationGridItem=$1;",
                 },
                 {
                     match: /(?<==)\i=>{let{user:\i,avatarDecoration/,
@@ -113,7 +113,7 @@ export default definePlugin({
             find: "#{intl::PREMIUM_UPSELL_PROFILE_AVATAR_DECO_INLINE_UPSELL_DESCRIPTION}",
             replacement: [
                 {
-                    match: /(?<==)\i=>{let{user:\i,guildId:\i,avatarDecoration:/,
+                    match: /(?<==)function\(\i\){let{user:\i,guildId:\i,avatarDecoration:/,
                     replace: "$self.AvatarDecorationModalPreview=$&"
                 }
             ]
