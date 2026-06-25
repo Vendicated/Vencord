@@ -1,0 +1,12 @@
+.vc-media-loop-icon {
+    background-color: transparent;
+    z-index: 2;
+    color: var(--interactive-normal);
+    display: flex; /* Enable flexbox for alignment */
+    align-items: center; /* Center items vertically */
+    justify-content: center; /* Center items horizontally */
+}
+
+.vc-media-loop-icon:hover {
+    color: var(--interactive-active);
+}
