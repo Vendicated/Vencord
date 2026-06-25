@@ -1,0 +1,5 @@
+body[data-darken-stream="true"] [data-selenium-video-tile] video,
+body[data-darken-stream="true"] div[class*="pictureInPictureVideo"] video,
+body[data-darken-stream="true"] div[class*="pictureInPictureVideo_"] video {
+    filter: brightness(var(--stream-brightness, 1)) !important;
+}
