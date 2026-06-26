@@ -38,8 +38,17 @@ import { ConfirmModal,openModal, Select, Tooltip, useState } from "@webpack/comm
 
 function validateUrl(url: string) {
     try {
-        new URL(url);
-        return true;
+        const u = new URL(url);
+
+        /*
+        * We ensure the user's provided URL (if valid) contains a trailing slash
+        * This gives us the possibility to remove the leading slash when calling new URL("v1/foo/bar", getCloudUrl())
+        * It allows users to run self-hosted Vencloud instances under a custom path name, thus avoiding monopolizing a single subdomain.
+        */
+        if (!u.pathname.endsWith("/")) {
+            u.pathname += "/";
+            return u.toString();
+        }
     } catch {
         return "Invalid URL";
     }
