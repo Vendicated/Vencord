@@ -50,8 +50,8 @@ const enum NameFormat {
 }
 
 const enum ScrobblerBackends {
-    LastFM = "lastfm",
-    ListenBrainz = "listenbrainz"
+    LastFM = "Last.FM",
+    ListenBrainz = "ListenBrainz"
 }
 
 // Last.fm API keys are essentially public information and have no access to your account, so including one here is fine.
@@ -80,7 +80,8 @@ const settings = definePluginSettings({
         options: [
             {
                 "label": "Last.FM",
-                "value": ScrobblerBackends.LastFM
+                "value": ScrobblerBackends.LastFM,
+                "default": true
             },
             {
                 "label": "ListenBrainz",
@@ -430,11 +431,18 @@ export default definePlugin({
 
         const buttons: ActivityButton[] = [];
 
-        if (settings.store.shareUsername)
+        let profileURL;
+        if (settings.store.scrobblerBackend === ScrobblerBackends.ListenBrainz) {
+            profileURL = "https://listenbrainz.org/user/";
+        } else if (settings.store.scrobblerBackend === ScrobblerBackends.LastFM) {
+            profileURL = "https://www.last.fm/user/";
+        }
+        if (settings.store.shareUsername) {
             buttons.push({
-                label: "Last.fm Profile",
-                url: `https://www.last.fm/user/${settings.store.username}`,
+                label: `${settings.store.scrobblerBackend} Profile`,
+                url: profileURL + settings.store.username,
             });
+        }
 
         const statusName = (() => {
             switch (settings.store.nameFormat) {
