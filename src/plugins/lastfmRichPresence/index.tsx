@@ -447,16 +447,17 @@ export default definePlugin({
 
         const buttons: ActivityButton[] = [];
 
-        let profileURL;
-        if (settings.store.scrobblerBackend === ScrobblerBackends.ListenBrainz) {
-            profileURL = "https://listenbrainz.org/user/";
-        } else if (settings.store.scrobblerBackend === ScrobblerBackends.LastFM) {
-            profileURL = "https://www.last.fm/user/";
-        }
         if (settings.store.shareUsername) {
             buttons.push({
                 label: `${settings.store.scrobblerBackend} Profile`,
-                url: profileURL + settings.store.username,
+                url: (() => {
+                    switch (settings.store.scrobblerBackend) {
+                        case ScrobblerBackends.LastFM:
+                            return `https://listenbrainz.org/user/${settings.store.username}`;
+                        case ScrobblerBackends.ListenBrainz:
+                            return `https://www.last.fm/user/${settings.store.username}`;
+                    }
+                })()
             });
         }
 
