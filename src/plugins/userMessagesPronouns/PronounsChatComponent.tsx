@@ -16,7 +16,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { getUserSettingLazy } from "@api/UserSettings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { getIntlMessage } from "@utils/discord";
 import { classes } from "@utils/misc";
@@ -28,7 +27,6 @@ import { settings } from "./settings";
 import { useFormattedPronouns } from "./utils";
 
 const TimestampClasses = findCssClassesLazy("timestampInline", "timestamp");
-const MessageDisplayCompact = getUserSettingLazy("textAndImages", "messageDisplayCompact")!;
 
 const AUTO_MODERATION_ACTION = 24;
 
@@ -62,9 +60,7 @@ export const PronounsChatComponentWrapper = ErrorBoundary.wrap(({ message }: { m
         : null;
 }, { noop: true });
 
-export const CompactPronounsChatComponentWrapper = ErrorBoundary.wrap(({ message }: { message: Message; }) => {
-    const compact = MessageDisplayCompact.useSetting();
-
+export const CompactPronounsChatComponentWrapper = ErrorBoundary.wrap(({ message, compact }: { message: Message; compact: boolean }) => {
     if (!compact || !shouldShow(message)) {
         return null;
     }
