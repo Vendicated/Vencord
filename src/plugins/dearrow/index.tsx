@@ -26,9 +26,13 @@ interface Props {
         video: {
             url: string;
         };
+        author?: {
+            url: string;
+        }
 
         dearrow: {
             enabled: boolean;
+            allowListHasChannel: boolean;
             oldTitle?: string;
             oldThumb?: string;
         };
@@ -42,11 +46,12 @@ const enum ReplaceElements {
 }
 
 const embedUrlRe = /https:\/\/www\.youtube\.com\/embed\/([a-zA-Z0-9_-]{11})/;
+const channelUrlRe = /https:\/\/www\.youtube\.com\/channel\/([a-zA-Z0-9_-]{24})/;
 
 async function embedDidMount(this: Component<Props>) {
     try {
         const { embed } = this.props;
-        const { replaceElements, dearrowByDefault } = settings.store;
+        const { replaceElements, dearrowByDefault, channelAllowList } = settings.store;
 
         if (!embed || embed.dearrow || embed.provider?.name !== "YouTube" || !embed.video?.url) return;
 
@@ -63,22 +68,30 @@ async function embedDidMount(this: Component<Props>) {
 
         if (!hasTitle && !hasThumb) return;
 
+        let allowListHasChannel = false;
+        if (embed.author?.url) {
+            const channelId = channelUrlRe.exec(embed.author.url)?.[1];
+            if (channelId && channelAllowList.includes(channelId)) allowListHasChannel = true;
+        }
+
+        const shouldDearrow = dearrowByDefault && !allowListHasChannel;
 
         embed.dearrow = {
-            enabled: dearrowByDefault
+            enabled: shouldDearrow,
+            allowListHasChannel,
         };
 
         if (hasTitle && replaceElements !== ReplaceElements.ReplaceThumbnailsOnly) {
             const replacementTitle = titles[0].title.replace(/(^|\s)>(\S)/g, "$1$2");
 
-            embed.dearrow.oldTitle = dearrowByDefault ? embed.rawTitle : replacementTitle;
-            if (dearrowByDefault) embed.rawTitle = replacementTitle;
+            embed.dearrow.oldTitle = shouldDearrow ? embed.rawTitle : replacementTitle;
+            if (shouldDearrow) embed.rawTitle = replacementTitle;
         }
         if (hasThumb && replaceElements !== ReplaceElements.ReplaceTitlesOnly) {
             const replacementProxyURL = `https://dearrow-thumb.ajay.app/api/v1/getThumbnail?videoID=${videoId}&time=${thumbnails[0].timestamp}`;
 
-            embed.dearrow.oldThumb = dearrowByDefault ? embed.thumbnail.proxyURL : replacementProxyURL;
-            if (dearrowByDefault) embed.thumbnail.proxyURL = replacementProxyURL;
+            embed.dearrow.oldThumb = shouldDearrow ? embed.thumbnail.proxyURL : replacementProxyURL;
+            if (shouldDearrow) embed.thumbnail.proxyURL = replacementProxyURL;
         }
 
         this.forceUpdate();
@@ -99,8 +112,8 @@ function DearrowButton({ component }: { component: Component<Props>; }) {
                     onMouseLeave={onMouseLeave}
                     className={"vc-dearrow-toggle-" + (embed.dearrow.enabled ? "on" : "off")}
                     onClick={() => {
-                        const { enabled, oldThumb, oldTitle } = embed.dearrow;
-                        settings.store.dearrowByDefault = !enabled;
+                        const { enabled, allowListHasChannel, oldThumb, oldTitle } = embed.dearrow;
+                        if (!allowListHasChannel) settings.store.dearrowByDefault = !enabled;
                         embed.dearrow.enabled = !enabled;
                         if (oldTitle) {
                             embed.dearrow.oldTitle = embed.rawTitle;
@@ -165,6 +178,11 @@ const settings = definePluginSettings({
         type: OptionType.BOOLEAN,
         default: true,
         restartNeeded: false
+    },
+    channelAllowList: {
+        description: "List of IDs of channels that should not be dearrowed by default (separated by commas/spaces)",
+        type: OptionType.STRING,
+        default: "",
     }
 });
 
