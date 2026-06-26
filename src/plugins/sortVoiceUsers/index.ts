@@ -22,7 +22,7 @@ const settings = definePluginSettings({
         default: true,
         restartNeeded: true
     },
-    pinSelf: {
+    pinYourself: {
         type: OptionType.BOOLEAN,
         description: "Always show yourself at the top of the voice chat you are in",
         default: false,
@@ -40,7 +40,7 @@ export default definePlugin({
 
     patches: [
         {
-            find: 'selfStream?"\\0":"\\x01"',
+            find: "SortedVoiceStateStore",
             replacement: {
                 match: /function (\i)\((\i),(\i)\)\{return`[^`]+`\}/,
                 replace: "function $1($2,$3){return $self.buildComparator($2,$3)}"
@@ -52,7 +52,7 @@ export default definePlugin({
         let tier: string;
         const countServerMute = !settings.store.ignoreServerMute;
 
-        if (settings.store.pinSelf && voiceState.userId === getSelfId()) tier = "\x01";
+        if (settings.store.pinYourself && voiceState.userId === getSelfId()) tier = "\x01";
         else if (voiceState.selfStream) tier = "\x02";
         else if (voiceState.selfVideo) tier = "\x03";
         else if (voiceState.selfDeaf || (voiceState.deaf && countServerMute)) tier = "\x06";
