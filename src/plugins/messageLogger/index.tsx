@@ -452,10 +452,16 @@ export default definePlugin({
             // Attachment renderer
             find: "#{intl::REMOVE_ATTACHMENT_TOOLTIP_TEXT}",
             replacement: [
+                // add deleted class to deleted attachments
                 {
                     // we can't use arguments[0] because we patch a nested **non-arrow** function
                     match: /\.SPOILER,(?=\[\i\.\i\]:)(?<=item:(\i),.{0,200}?)/,
                     replace: '$&"messagelogger-deleted-attachment": $1?.originalItem?.deleted,'
+                },
+                // dont allow deleting attachments from deleted messages
+                {
+                    match: /(?<=function \i\(\i\)\{let\{[^}]*?item:(\i),\i:\i,)canRemoveItem:(\i)(?=,onRemoveItem:)/,
+                    replace: "_canRemoveItem:$2 = arguments[0].canRemoveItem && !$1?.originalItem?.deleted",
                 }
             ]
         },
