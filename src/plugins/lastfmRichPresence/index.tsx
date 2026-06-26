@@ -343,12 +343,17 @@ export default definePlugin({
 
         const coverArtURL = await this.fetchCoverArt(releaseGroupMBID);
 
+        // I guess bro
+        let url;
+        if (settings.store.scrobblerBackend === ScrobblerBackends.ListenBrainz) {
+            url = `https://listenbrainz.org/track/${metadataLookup.id}/`;
+        }
+
         return {
             name: metadataLookup.title,
             artist,
             album,
-            // no idea how URL is going to work here
-            // url: `https://listenbrainz.org/track/${metadataLookup.id}/`,
+            url: url,
             imageUrl: coverArtURL
         } as TrackData;
     },
