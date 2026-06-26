@@ -260,6 +260,8 @@ export default definePlugin({
             } as TrackData;
         } catch (e) {
             logger.error("Failed to query ListenBrainz API", e);
+            // will clear the rich presence if API fails
+            return null;
         }
     },
 
@@ -421,11 +423,25 @@ export default definePlugin({
                 large_image: await getApplicationAsset(largeImage),
                 large_text: trackData.album || undefined,
                 ...(settings.store.showLogo && {
-                    small_image: await getApplicationAsset("lastfm-small"),
-                    small_text: "Last.fm"
+                    small_image: await (async () => {
+                        switch (settings.store.scrobblerBackend) {
+                            case ScrobblerBackends.LastFM:
+                                return await getApplicationAsset("lastfm-small");
+                            case ScrobblerBackends.ListenBrainz:
+                                return await getApplicationAsset("listenbrainz-small");
+                        }
+                    })(),
+                    small_text: settings.store.scrobblerBackend
                 }),
             } : {
-                large_image: await getApplicationAsset("lastfm-large"),
+                large_image: await (async () => {
+                    switch (settings.store.scrobblerBackend) {
+                        case ScrobblerBackends.LastFM:
+                            return await getApplicationAsset("lastfm-large");
+                        case ScrobblerBackends.ListenBrainz:
+                            return await getApplicationAsset("listenbrainz-large");
+                    }
+                })(),
                 large_text: trackData.album || undefined,
             };
 
