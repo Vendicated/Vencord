@@ -39,9 +39,9 @@ export function getSortedRolesForMember({ id: guildId }: Guild, member: GuildMem
 export function sortUserRoles(roles: Role[]) {
     switch (settings.store.permissionsSortOrder) {
         case PermissionsSortOrder.HighestRole:
-            return roles.sort((a, b) => b.position - a.position);
+            return [...roles].sort((a, b) => b.position - a.position);
         case PermissionsSortOrder.LowestRole:
-            return roles.sort((a, b) => a.position - b.position);
+            return [...roles].sort((a, b) => a.position - b.position);
         default:
             return roles;
     }
@@ -50,7 +50,7 @@ export function sortUserRoles(roles: Role[]) {
 export function sortPermissionOverwrites<T extends { id: string; type: number; }>(overwrites: T[], guildId: string) {
     const roles = GuildRoleStore.getRolesSnapshot(guildId);
 
-    return overwrites.sort((a, b) => {
+    return [...overwrites].sort((a, b) => {
         if (a.type !== PermissionOverwriteType.ROLE || b.type !== PermissionOverwriteType.ROLE) return 0;
 
         const roleA = roles[a.id];

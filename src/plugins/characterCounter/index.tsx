@@ -62,7 +62,24 @@ export default definePlugin({
 
         useEffect(() => {
             const listener = () => {
-                setSelectedCount(document.getSelection()?.toString()?.length ?? 0);
+                const selection = document.getSelection();
+                if (!selection || selection.isCollapsed) {
+                    setSelectedCount(0);
+                    return;
+                }
+
+                const editorRoot = editorRef?.current?.ref?.current;
+                if (editorRoot) {
+                    for (const node of [selection.anchorNode, selection.focusNode]) {
+                        const el = node?.nodeType === Node.TEXT_NODE ? node.parentElement : node;
+                        if (!el || !editorRoot.contains(el)) {
+                            setSelectedCount(0);
+                            return;
+                        }
+                    }
+                }
+
+                setSelectedCount(selection.toString().length);
             };
 
             document.addEventListener("selectionchange", listener);

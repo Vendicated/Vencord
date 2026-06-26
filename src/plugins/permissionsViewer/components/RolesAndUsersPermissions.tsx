@@ -52,12 +52,13 @@ function RolesAndUsersPermissionsComponent({ permissions, guild, modalProps, hea
         (old, current) => old.length === current.length
     );
 
-    useEffect(() => {
-        permissions.sort((a, b) => a.type - b.type);
-    }, [permissions]);
+    const sortedPermissions = useMemo(
+        () => [...permissions].sort((a, b) => a.type - b.type),
+        [permissions]
+    );
 
     useEffect(() => {
-        const usersToRequest = permissions
+        const usersToRequest = sortedPermissions
             .filter(p => p.type === PermissionOverwriteType.MEMBER && !GuildMemberStore.isMember(guild.id, p.id!))
             .map(({ id }) => id);
 
@@ -69,7 +70,7 @@ function RolesAndUsersPermissionsComponent({ permissions, guild, modalProps, hea
     }, []);
 
     const [selectedItemIndex, selectItem] = useState(0);
-    const selectedItem = permissions[selectedItemIndex];
+    const selectedItem = sortedPermissions[selectedItemIndex];
 
     const roles = GuildRoleStore.getRolesSnapshot(guild.id);
 
@@ -88,7 +89,7 @@ function RolesAndUsersPermissionsComponent({ permissions, guild, modalProps, hea
             {selectedItem && (
                 <div className={cl("modal-container")}>
                     <ScrollerThin className={cl("modal-list")} orientation="auto">
-                        {permissions.map((permission, index) => {
+                        {sortedPermissions.map((permission, index) => {
                             const user: User | undefined = UserStore.getUser(permission.id ?? "");
                             const role: Role | undefined = roles[permission.id ?? ""];
                             const roleIconSrc = role != null ? getRoleIconSrc(role) : undefined;
@@ -167,7 +168,7 @@ function RolesAndUsersPermissionsComponent({ permissions, guild, modalProps, hea
                                 if (permissions != null)
                                     return (permissions & bit) === bit
                                         ? "allowed"
-                                        : "denied";
+                                        : "default";
 
                                 if (overwriteAllow && (overwriteAllow & bit) === bit)
                                     return "allowed";

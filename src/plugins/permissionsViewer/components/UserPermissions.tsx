@@ -111,10 +111,10 @@ function UserPermissionsComponent({ guild, guildMember, closePopout }: { guild: 
             });
         }
 
-        sortUserRoles(userRoles);
+        const sortedUserRoles = sortUserRoles(userRoles);
 
         for (const bit of Object.values(PermissionsBits)) {
-            for (const { permissions, colorString, position, name } of userRoles) {
+            for (const { permissions, colorString, position, name } of sortedUserRoles) {
                 if ((permissions & bit) === bit) {
                     userPermissions.push({
                         permission: guildPermissionSpecMap[String(bit)].title,
@@ -131,7 +131,7 @@ function UserPermissionsComponent({ guild, guildMember, closePopout }: { guild: 
         userPermissions.sort((a, b) => b.rolePosition - a.rolePosition);
 
         return [rolePermissions, userPermissions];
-    }, [permissionsSortOrder]);
+    }, [permissionsSortOrder, guild.id, guildMember.userId]);
 
     return <div>
         <div className={cl("user-header-container")}>
