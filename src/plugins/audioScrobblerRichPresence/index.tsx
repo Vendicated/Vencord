@@ -30,7 +30,10 @@ import { Activity, ActivityAssets, ActivityButton } from "@vencord/discord-types
 import { ActivityFlags, ActivityStatusDisplayType, ActivityType } from "@vencord/discord-types/enums";
 import { ApplicationAssetUtils, AuthenticationStore, FluxDispatcher, PresenceStore } from "@webpack/common";
 
-interface TrackData {
+import { fetchLastFMData } from "./lastfm";
+import { fetchListenBrainzData } from "./listenbrainz";
+
+export interface TrackData {
     name: string;
     album: string;
     artist: string;
@@ -84,7 +87,7 @@ const LASTFM_API_KEY = "790c37d90400163a5a5fe00d6ca32ef0";
 const DISCORD_APP_ID = "1108588077900898414";
 const LASTFM_PLACEHOLDER_IMAGE_HASH = "2a96cbd8b46e442fc41c2b86b821562f";
 
-const logger = new Logger("LastFMRichPresence");
+const logger = new Logger("AudioScrobblerRichPresence");
 
 async function getApplicationAsset(key: string): Promise<string> {
     return (await ApplicationAssetUtils.fetchAssetIds(DISCORD_APP_ID, [key]))[0];
@@ -268,69 +271,6 @@ export default definePlugin({
         clearInterval(this.updateInterval);
     },
 
-    async fetchListenBrainzData() {
-        try {
-            const res = await fetch(`https://api.listenbrainz.org/1/user/${settings.store.username}/playing-now`);
-            if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
-
-            const data = await res.json().then(json => json.payload?.listens[0]);
-            if (!data.playing_now)
-                return null;
-
-            return {
-                name: data.track_metadata.track_name || "Unknown",
-                artist: data.track_metadata.artist_name,
-                album: data.track_metadata.release_name || "Unknown",
-                serviceName: data?.track_metadata.additional_info.music_service_name
-            } as TrackData;
-        } catch (e) {
-            logger.error("Failed to query ListenBrainz API", e);
-            // will clear the rich presence if API fails
-            return null;
-        }
-    },
-
-    async fetchLastFMData() {
-        try {
-            const params = new URLSearchParams({
-                method: "user.getrecenttracks",
-                api_key: settings.store.apiKey || LASTFM_API_KEY,
-                user: settings.store.username!,
-                limit: "1",
-                format: "json"
-            });
-
-            const res = await fetch(`https://ws.audioscrobbler.com/2.0/?${params}`);
-            if (!res.ok) throw `${res.status} ${res.statusText}`;
-
-            const json = await res.json();
-            if (json.error) {
-                logger.error("Error from Last.fm API", `${json.error}: ${json.message}`);
-                return null;
-            }
-
-            const trackData = json.recenttracks?.track[0];
-
-            if (!trackData?.["@attr"]?.nowplaying)
-                return null;
-
-            // why does the json api have xml structure
-            return {
-                name: trackData.name || "Unknown",
-                album: trackData.album["#text"],
-                artist: trackData.artist["#text"] || "Unknown",
-                trackURL: trackData.url,
-                artistURL: trackData.artist["#text"] ? `https://www.last.fm/music/${encodeURIComponent(trackData.artist["#text"])}` : undefined,
-                albumURL: `https://www.last.fm/music/${encodeURIComponent(trackData.artist["#text"])}/${encodeURIComponent(trackData.album["#text"])}`,
-                imageURL: trackData.image?.find((x: any) => x.size === "large")?.["#text"]
-            } as TrackData;
-        } catch (e) {
-            logger.error("Failed to query Last.FM API", e);
-            // will clear the rich presence if API fails
-            return null;
-        }
-    },
-
     async fetchMetadata(data: TrackData) {
         // this needs to be encoded separately—URLSearchParams encodes spaces as "+"
         const query = encodeURIComponent(`artist:"${data.artist}" AND recording:"${data.name}"`);
@@ -406,9 +346,9 @@ export default definePlugin({
         let trackData: TrackData | null | undefined = await (async () => {
             switch (backend) {
                 case ScrobblerBackends.get("lastfm"):
-                    return await this.fetchLastFMData();
+                    return await fetchLastFMData(settings.store.username!, settings.store.apiKey || LASTFM_API_KEY);
                 case ScrobblerBackends.get("listenbrainz"):
-                    return await this.fetchListenBrainzData();
+                    return await fetchListenBrainzData(settings.store.username!);
             }
         })();
 
