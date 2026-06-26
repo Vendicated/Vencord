@@ -157,7 +157,7 @@ const settings = definePluginSettings({
                 default: true
             },
             {
-                label: "Use music service name",
+                label: "Use music service name (falls back to custom status text)",
                 value: NameFormat.ServiceName
             },
             {
@@ -380,7 +380,7 @@ export default definePlugin({
                 break;
         }
 
-        if (settings.store.fetchMetadata) {
+        if (settings.store.fetchMetadata && trackData) {
             trackData = Object.assign(trackData, await this.fetchMetadata(trackData));
         }
         return trackData;
