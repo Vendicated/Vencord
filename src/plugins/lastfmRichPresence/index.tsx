@@ -323,9 +323,9 @@ export default definePlugin({
 
         // build the artist string...
         let artist = "";
-        metadataLookup["artist-credit"].forEach((artistCredit: { name: string; joinPhrase: string; }) => {
+        metadataLookup["artist-credit"].forEach((artistCredit: { name: string; joinphrase: string; }) => {
             artist += artistCredit.name;
-            if (artistCredit.joinPhrase !== undefined) artist += artistCredit.joinPhrase;
+            if (artistCredit.joinphrase !== undefined) artist += artistCredit.joinphrase;
         });
 
         // preemptively set this to the first release found
