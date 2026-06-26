@@ -70,19 +70,19 @@ function mapGifs(items: TenorResult[]) {
     return items.map(toDiscordGif).filter((g): g is DiscordGif => g != null);
 }
 
-async function fetchSearch(query: string) {
-    const res = await fetch(tenorUrl("search", { q: query, limit: String(RESULT_LIMIT) }));
+async function fetchTenorResults(path: string, extra: Record<string, string> = {}) {
+    const res = await fetch(tenorUrl(path, extra));
     if (!res.ok) return [];
-    const body = await res.json();
-    const items: TenorResult[] = Array.isArray(body) ? body : (body.results ?? body.items ?? []);
-    return mapGifs(items);
+    const { results = [] } = await res.json();
+    return results as TenorResult[];
+}
+
+async function fetchSearch(query: string) {
+    return mapGifs(await fetchTenorResults("search", { q: query, limit: String(RESULT_LIMIT) }));
 }
 
 async function fetchTrending() {
-    const res = await fetch(tenorUrl("trending", { limit: String(RESULT_LIMIT) }));
-    if (!res.ok) return [];
-    const body = await res.json();
-    return mapGifs(body.results ?? []);
+    return mapGifs(await fetchTenorResults("trending", { limit: String(RESULT_LIMIT) }));
 }
 
 async function fetchCategories(): Promise<TrendingCategories | null> {
