@@ -244,7 +244,7 @@ export default definePlugin({
     name: "AudioScrobblerRichPresence",
     description: "Little plugin for Rich Presence from AudioScrobblers. Currently supports Last.FM and ListenBrainz!",
     tags: ["Activity", "Media"],
-    authors: [Devs.dzshn, Devs.RuiNtD, Devs.blahajZip, Devs.archeruwu],
+    authors: [Devs.dzshn, Devs.RuiNtD, Devs.blahajZip, Devs.archeruwu, Devs.angelcube],
 
     settings,
 
