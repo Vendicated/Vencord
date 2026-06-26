@@ -22,6 +22,7 @@ import { Card } from "@components/Card";
 import { Heading } from "@components/Heading";
 import { Margins } from "@components/margins";
 import { Paragraph } from "@components/Paragraph";
+import { VENCORD_USER_AGENT } from "@shared/vencordUserAgent";
 import { Devs } from "@utils/constants";
 import { Logger } from "@utils/Logger";
 import definePlugin, { OptionType } from "@utils/types";
@@ -33,8 +34,9 @@ interface TrackData {
     name: string;
     album: string;
     artist: string;
-    url: string;
+    url?: string;
     imageUrl?: string;
+    serviceName?: string;
 }
 
 const enum NameFormat {
@@ -43,7 +45,13 @@ const enum NameFormat {
     SongFirst = "song-first",
     ArtistOnly = "artist",
     SongOnly = "song",
-    AlbumName = "album"
+    AlbumName = "album",
+    ServiceName = "service-name"
+}
+
+const enum ScrobblerBackends {
+    LastFM = "lastfm",
+    ListenBrainz = "listenbrainz"
 }
 
 // Last.fm API keys are essentially public information and have no access to your account, so including one here is fine.
@@ -66,17 +74,31 @@ function setActivity(activity: Activity | null) {
 }
 
 const settings = definePluginSettings({
+    scrobblerBackend: {
+        description: "The scrobbler backend to use.",
+        type: OptionType.SELECT,
+        options: [
+            {
+                "label": "Last.FM",
+                "value": ScrobblerBackends.LastFM
+            },
+            {
+                "label": "ListenBrainz",
+                "value": ScrobblerBackends.ListenBrainz
+            }
+        ]
+    },
     apiKey: {
         displayName: "API Key",
         description: "Custom Last.fm API key. Not required but highly recommended to avoid rate limiting with our shared key",
         type: OptionType.STRING,
     },
     username: {
-        description: "Last.fm username",
+        description: "Username",
         type: OptionType.STRING,
     },
     shareUsername: {
-        description: "Show link to Last.fm profile",
+        description: "Show link to scrobbler profile",
         type: OptionType.BOOLEAN,
         default: false,
     },
@@ -85,13 +107,18 @@ const settings = definePluginSettings({
         type: OptionType.BOOLEAN,
         default: true,
     },
+    fetchMetadata: {
+        description: "Whether to fetch track metadata from MusicBrainz",
+        type: OptionType.BOOLEAN,
+        default: false,
+    },
     hideWithSpotify: {
-        description: "Hide Last.fm presence if spotify is running",
+        description: "Hide presence if Spotify is running",
         type: OptionType.BOOLEAN,
         default: true,
     },
     hideWithActivity: {
-        description: "Hide Last.fm presence if you have any other presence",
+        description: "Hide presence if you have any other presence",
         type: OptionType.BOOLEAN,
         default: false,
     },
@@ -129,6 +156,10 @@ const settings = definePluginSettings({
                 default: true
             },
             {
+                label: "Use music service name",
+                value: NameFormat.ServiceName
+            },
+            {
                 label: "Use format 'artist - song'",
                 value: NameFormat.ArtistFirst
             },
@@ -160,8 +191,8 @@ const settings = definePluginSettings({
         type: OptionType.SELECT,
         options: [
             {
-                label: "Use large Last.fm logo",
-                value: "lastfmLogo",
+                label: "Use large scrobbler logo",
+                value: "logo",
                 default: true
             },
             {
@@ -170,22 +201,22 @@ const settings = definePluginSettings({
             }
         ],
     },
-    showLastFmLogo: {
-        displayName: "Show Last.fm Logo",
-        description: "Show the Last.fm logo by the album cover",
+    showLogo: {
+        displayName: "Show Scrobbler Logo",
+        description: "Show the scrobbler service logo by the album cover",
         type: OptionType.BOOLEAN,
         default: true,
     },
     showAlbumCover: {
-        description: "Show album cover. Disabling this will display a placeholder. Useful if your Music has inappropriate art",
+        description: "Show album cover. Disabling this will display a placeholder. Useful if your music has inappropriate art",
         type: OptionType.BOOLEAN,
         default: true,
     }
 });
 
 export default definePlugin({
-    name: "LastFMRichPresence",
-    description: "Little plugin for Last.fm rich presence",
+    name: "AudioScrobblerRichPresence",
+    description: "Little plugin for Rich Presence from AudioScrobblers. Currently supports Last.FM and ListenBrainz!",
     tags: ["Activity", "Media"],
     authors: [Devs.dzshn, Devs.RuiNtD, Devs.blahajZip, Devs.archeruwu],
 
@@ -194,6 +225,7 @@ export default definePlugin({
     settingsAboutComponent() {
         return (
             <Card>
+                <Heading tag="h2">Last.FM</Heading>
                 <Heading tag="h5">How to create an API key</Heading>
                 <Paragraph>Set <strong>Application name</strong> and <strong>Application description</strong> to anything and leave the rest blank.</Paragraph>
                 <LinkButton size="small" href="https://www.last.fm/api/account/create" className={Margins.top8}>Create API Key</LinkButton>
@@ -210,15 +242,32 @@ export default definePlugin({
         clearInterval(this.updateInterval);
     },
 
-    async fetchTrackData(): Promise<TrackData | null> {
-        if (!settings.store.username)
-            return null;
+    async fetchListenBrainzData() {
+        try {
+            const res = await fetch(`https://api.listenbrainz.org/1/user/${settings.store.username}/playing-now`);
+            if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
 
+            const data = await res.json().then(json => json.payload?.listens[0]);
+            if (!data.playing_now)
+                return null;
+
+            return {
+                name: data.track_metadata.track_name || "Unknown",
+                artist: data.track_metadata.artist_name,
+                album: data.track_metadata.release_name || "Unknown",
+                serviceName: data?.track_metadata.additional_info.music_service_name
+            } as TrackData;
+        } catch (e) {
+            logger.error("Failed to query ListenBrainz API", e);
+        }
+    },
+
+    async fetchLastFMData() {
         try {
             const params = new URLSearchParams({
                 method: "user.getrecenttracks",
                 api_key: settings.store.apiKey || API_KEY,
-                user: settings.store.username,
+                user: settings.store.username!,
                 limit: "1",
                 format: "json"
             });
@@ -246,10 +295,89 @@ export default definePlugin({
                 imageUrl: trackData.image?.find((x: any) => x.size === "large")?.["#text"]
             };
         } catch (e) {
-            logger.error("Failed to query Last.fm API", e);
+            logger.error("Failed to query Last.FM API", e);
             // will clear the rich presence if API fails
             return null;
         }
+    },
+
+    async fetchMetadata(data: TrackData) {
+        // this needs to be encoded separately—URLSearchParams encodes spaces as "+"
+        const query = encodeURIComponent(`artist:"${data.artist}" AND recording:"${data.name}"`);
+
+        const params = new URLSearchParams({
+            fmt: "json",
+            limit: "1"
+        });
+
+        const metadataLookup = await fetch("https://musicbrainz.org/ws/2/recording/?" + params + "&query=" + query, {
+            headers: { "User-Agent": VENCORD_USER_AGENT }
+        }).then(res => {
+            if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
+            return res.json();
+        }).then(json => json.recordings[0]);
+
+        if (!metadataLookup) {
+            return null;
+        }
+
+        // build the artist string...
+        let artist = "";
+        metadataLookup["artist-credit"].forEach((artistCredit: { name: string; joinPhrase: string; }) => {
+            artist += artistCredit.name;
+            if (artistCredit.joinPhrase !== undefined) artist += artistCredit.joinPhrase;
+        });
+
+        // preemptively set this to the first release found
+        let album = metadataLookup.releases[0]["release-group"].title;
+        let releaseGroupMBID = metadataLookup.releases[0]["release-group"].id;
+
+        // then look for something matching what the scrobbler gave us
+        metadataLookup.releases.forEach((release: { title: string, id: string; }) => {
+            // TODO: fuzzy match?
+            if (data.album === release.title) {
+                album = release["release-group"].title;
+                releaseGroupMBID = release["release-group"].id;
+            }
+        });
+
+        const coverArtURL = await this.fetchCoverArt(releaseGroupMBID);
+
+        return {
+            name: metadataLookup.title,
+            artist,
+            album,
+            // no idea how URL is going to work here
+            // url: `https://listenbrainz.org/track/${metadataLookup.id}/`,
+            imageUrl: coverArtURL
+        } as TrackData;
+    },
+
+    async fetchCoverArt(releaseGroupMBID: string) {
+        const res = await fetch(`https://coverartarchive.org/release-group/${releaseGroupMBID}`);
+        if (!res.ok) return null;
+        return res.json().then(json => json.images[0].thumbnails.large);
+    },
+
+    async fetchTrackData(): Promise<TrackData | null> {
+        if (!settings.store.username)
+            return null;
+
+        let trackData;
+
+        switch (settings.store.scrobblerBackend) {
+            case ScrobblerBackends.LastFM:
+                trackData = await this.fetchLastFMData();
+                break;
+            case ScrobblerBackends.ListenBrainz:
+                trackData = await this.fetchListenBrainzData();
+                break;
+        }
+
+        if (settings.store.fetchMetadata) {
+            trackData = Object.assign(trackData, await this.fetchMetadata(trackData));
+        }
+        return trackData;
     },
 
     async updatePresence() {
@@ -286,7 +414,7 @@ export default definePlugin({
             {
                 large_image: await getApplicationAsset(largeImage),
                 large_text: trackData.album || undefined,
-                ...(settings.store.showLastFmLogo && {
+                ...(settings.store.showLogo && {
                     small_image: await getApplicationAsset("lastfm-small"),
                     small_text: "Last.fm"
                 }),
@@ -315,6 +443,11 @@ export default definePlugin({
                     return trackData.name;
                 case NameFormat.AlbumName:
                     return trackData.album || settings.store.statusName
+                        .replaceAll("{artist}", trackData.artist || "")
+                        .replaceAll("{album}", trackData.album || "")
+                        .replaceAll("{title}", trackData.name || "");
+                case NameFormat.ServiceName:
+                    return trackData.serviceName || settings.store.statusName
                         .replaceAll("{artist}", trackData.artist || "")
                         .replaceAll("{album}", trackData.album || "")
                         .replaceAll("{title}", trackData.name || "");
