@@ -126,6 +126,10 @@ export default definePlugin({
                 {
                     match: /(handleSelectItem=\((\i),(\i)\)=>\{)/,
                     replace: "$1if($self.handleSelectItem(this,$2,$3))return;"
+                },
+                {
+                    match: /placeholder:(\i),"aria-label":\i/,
+                    replace: 'placeholder:$1.replace(/Giphy|Klipy/gi,"Tenor"),"aria-label":$1.replace(/Giphy|Klipy/gi,"Tenor")'
                 }
             ]
         },
