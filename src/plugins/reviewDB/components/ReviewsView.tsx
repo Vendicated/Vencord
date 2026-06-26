@@ -156,6 +156,7 @@ export function ReviewsInputComponent(
                     disableThemedBackground={true}
                     setEditorRef={ref => editorRef.current = ref}
                     parentModalKey={modalKey}
+                    emojiPickerCloseOnModalOuterClick={true}
                     textValue=""
                     onSubmit={
                         async res => {
