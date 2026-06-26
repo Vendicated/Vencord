@@ -454,7 +454,7 @@ export default definePlugin({
             replacement: [
                 {
                     // we can't use arguments[0] because we patch a nested **non-arrow** function
-                    match: /\.SPOILER,(?=\[\i\.\i\]:)(?<=item:(\i).{0,200}?)/,
+                    match: /\.SPOILER,(?=\[\i\.\i\]:)(?<=item:(\i),.{0,200}?)/,
                     replace: '$&"messagelogger-deleted-attachment": $1?.originalItem?.deleted,'
                 }
             ]
