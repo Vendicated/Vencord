@@ -16,8 +16,9 @@ const SEARCH_DEBOUNCE_MS = 250;
 let debounceTimer: ReturnType<typeof setTimeout> | null = null;
 let cachedCategories: TrendingCategories | null = null;
 
-interface TenorMedia { url?: string; dims?: [number, number]; preview?: string; }
-interface TenorResult { id: string; title?: string; itemurl?: string; media?: Array<Record<string, TenorMedia>>; }
+interface TenorMedia { url: string; preview: string; dims: [number, number]; }
+interface TenorResult { id: string; media: Array<Record<string, TenorMedia>>; itemurl: string; }
+
 interface TenorCategoryTag { searchterm: string; image: string; }
 
 interface DiscordGif {
@@ -26,9 +27,9 @@ interface DiscordGif {
     url: string;
     src: string;
     gif_src: string;
-    width?: number;
-    height?: number;
-    preview?: string;
+    width: number;
+    height: number;
+    preview: string;
 }
 
 interface TrendingCategories {
@@ -51,19 +52,19 @@ function tenorUrl(path: string, extra: Record<string, string> = {}) {
 }
 
 function toDiscordGif(item: TenorResult): DiscordGif | null {
-    const media = item.media?.[0];
-    if (!media) return null;
+    const media = item.media[0];
+    const { gif, webm } = media;
 
-    const { webm, gif } = media;
-    const src = webm?.url ?? gif?.url;
-    const gifSrc = gif?.url ?? src;
-    if (!src || !gifSrc) return null;
-
-    const width = webm?.dims?.[0];
-    const height = webm?.dims?.[1];
-    const preview = webm?.preview;
-
-    return { id: item.id ?? src, title: item.title ?? "", url: item.itemurl ?? gifSrc, src, gif_src: gifSrc, width, height, preview };
+    return {
+        id: item.id,
+        title: "", // discord always returns a blank string
+        url: item.itemurl,
+        src: webm.url,
+        gif_src: gif.url,
+        width: webm.dims[0],
+        height: webm.dims[1],
+        preview: webm.preview
+    };
 }
 
 function mapGifs(items: TenorResult[]) {
