@@ -1,0 +1,106 @@
+/*
+ * Vencord, a Discord client mod
+ * Copyright (c) 2024 Vendicated and contributors
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
+
+#frequentFriends-root {
+    padding: 0 8px 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    flex-shrink: 0;
+}
+
+#frequentFriends-root .ff-label {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--channels-default);
+    padding: 8px 4px 4px 8px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    line-height: 1;
+}
+
+#frequentFriends-root .ff-label-text {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    min-width: 0;
+}
+
+#frequentFriends-root .ff-info-wrapper {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    cursor: default;
+    /* Prevent the info icon from being clipped by the parent's overflow:hidden */
+    flex-shrink: 0;
+}
+
+#frequentFriends-root .ff-info-icon {
+    width: 14px;
+    height: 14px;
+    border-radius: 999px;
+    background: var(--background-modifier-accent, #6d7078);
+    color: var(--header-primary, #f2f3f5);
+    font-size: 11px;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#frequentFriends-root .ff-avatars {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    padding: 4px 4px 0 8px;
+    padding-bottom: 8px;
+}
+
+#frequentFriends-root .ff-avatar-wrap {
+    position: relative;
+    cursor: pointer;
+    border-radius: 999px;
+    width: 32px;
+    height: 32px;
+    flex-shrink: 0;
+}
+
+#frequentFriends-root .ff-avatar-inner-wrapper {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 32px;
+    height: 32px;
+}
+
+#frequentFriends-root .ff-avatar-inner {
+    width: 32px !important;
+    height: 32px !important;
+    display: block;
+}
+
+#frequentFriends-root .ff-badge {
+    position: absolute;
+    top: -5px;
+    width: 16px;
+    height: 16px;
+    border-radius: 999px;
+    background: var(--background-secondary-alt, #2b2d31);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 3;
+}
+
+#frequentFriends-root .ff-badge-fire { left: -5px; }
+#frequentFriends-root .ff-badge-snow { right: -5px; }
+
+#frequentFriends-root .ff-empty {
+    padding: 0 8px 4px;
+    font-size: 11px;
+    color: var(--text-muted);
+}
