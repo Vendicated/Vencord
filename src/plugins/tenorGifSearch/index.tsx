@@ -113,6 +113,10 @@ export default definePlugin({
                 {
                     match: /let \i=Date\.now\(\);\i\([^)]+\),\i\.\i\.get\(\{url:\i\.\i\.GIFS_TRENDING_GIFS,/,
                     replace: "return $self.handleTrendingGifsFetch();$&"
+                },
+                {
+                    match: /\i\.\i\.post\(\{url:\i\.\i\.GIFS_SELECT,body:\{id:(\i),q:(\i),provider:\i\}/,
+                    replace: "return $self.handleGifSelect($1,$2);$&"
                 }
             ]
         }
@@ -158,6 +162,10 @@ export default definePlugin({
             cachedCategories = data;
             FluxDispatcher.dispatch({ type: "GIF_PICKER_TRENDING_FETCH_SUCCESS", ...data });
         });
+    },
+
+    handleGifSelect(id: string, query: string) {
+        fetch(tenorUrl("registershare", { id, q: query }));
     },
 
     handleTrendingGifsFetch() {
