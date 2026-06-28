@@ -24,6 +24,7 @@ import { sortPermissionOverwrites } from "@plugins/permissionsViewer/utils";
 import { classes } from "@utils/misc";
 import { formatDuration } from "@utils/text";
 import type { Channel, RoleOrUserPermission } from "@vencord/discord-types";
+import { ChannelType } from "@vencord/discord-types/enums/channel";
 import { findByPropsLazy, findComponentByCodeLazy, findCssClassesLazy } from "@webpack";
 import { EmojiStore, FluxDispatcher, GuildMemberStore, GuildStore, Parser, PermissionsBits, PermissionStore, SnowflakeUtils, Text, Timestamp, Tooltip, useEffect, useState } from "@webpack/common";
 import { ComponentType } from "react";
@@ -46,14 +47,6 @@ interface DefaultReaction {
     emojiName: string | null;
 }
 
-const enum ChannelTypes {
-    GUILD_TEXT = 0,
-    GUILD_VOICE = 2,
-    GUILD_ANNOUNCEMENT = 5,
-    GUILD_STAGE_VOICE = 13,
-    GUILD_FORUM = 15
-}
-
 const enum VideoQualityModes {
     AUTO = 1,
     FULL = 2
@@ -74,11 +67,11 @@ const EmojiParser = findByPropsLazy("convertSurrogateToName");
 const EmojiUtils = findByPropsLazy("getURL", "getEmojiColors");
 
 const ChannelTypesToChannelNames = {
-    [ChannelTypes.GUILD_TEXT]: "text",
-    [ChannelTypes.GUILD_ANNOUNCEMENT]: "announcement",
-    [ChannelTypes.GUILD_FORUM]: "forum",
-    [ChannelTypes.GUILD_VOICE]: "voice",
-    [ChannelTypes.GUILD_STAGE_VOICE]: "stage"
+    [ChannelType.GUILD_TEXT]: "text",
+    [ChannelType.GUILD_ANNOUNCEMENT]: "announcement",
+    [ChannelType.GUILD_FORUM]: "forum",
+    [ChannelType.GUILD_VOICE]: "voice",
+    [ChannelType.GUILD_STAGE_VOICE]: "stage"
 };
 
 const SortOrderTypesToNames = {
