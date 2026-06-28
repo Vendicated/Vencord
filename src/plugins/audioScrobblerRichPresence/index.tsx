@@ -353,7 +353,7 @@ export default definePlugin({
         })();
 
         // shush compiler
-        if (trackData === null || trackData === undefined) {
+        if (trackData == null) {
             return null;
         }
 
