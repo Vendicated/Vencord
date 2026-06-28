@@ -30,8 +30,8 @@ import { Activity, ActivityAssets, ActivityButton } from "@vencord/discord-types
 import { ActivityFlags, ActivityStatusDisplayType, ActivityType } from "@vencord/discord-types/enums";
 import { ApplicationAssetUtils, AuthenticationStore, FluxDispatcher, PresenceStore } from "@webpack/common";
 
-import { fetchLastFMData } from "./lastfm";
-import { fetchListenBrainzData } from "./listenbrainz";
+import { LastFMScrobbler } from "./lastfm";
+import { ListenBrainzScrobbler } from "./listenbrainz";
 
 export interface TrackData {
     name: string;
@@ -44,12 +44,19 @@ export interface TrackData {
     serviceName?: string;
 }
 
-interface ScrobblerBackend {
+export interface ScrobblerBackend {
     name: string,
     id: string,
     url: string,
-    userProfilePath: string;
+
+    fetchTrackData(username: string, apiKey?: string): Promise<TrackData | null>;
+    getUserURL(username: string): string;
 }
+
+const ScrobblerBackends = {
+    "lastfm": LastFMScrobbler,
+    "listenbrainz": ListenBrainzScrobbler
+};
 
 const enum NameFormat {
     StatusName = "status-name",
@@ -60,27 +67,6 @@ const enum NameFormat {
     AlbumName = "album",
     ServiceName = "service-name"
 }
-
-const ScrobblerBackends: Map<string, ScrobblerBackend> = new Map([
-    [
-        "lastfm",
-        {
-            name: "Last.FM",
-            id: "lastfm",
-            url: "https://www.last.fm/",
-            userProfilePath: "/user"
-        }
-    ],
-    [
-        "listenbrainz",
-        {
-            name: "ListenBrainz",
-            id: "listenbrainz",
-            url: "https://listenbrainz.org/",
-            userProfilePath: "/user"
-        }
-    ]
-]);
 
 // Last.fm API keys are essentially public information and have no access to your account, so including one here is fine.
 const LASTFM_API_KEY = "790c37d90400163a5a5fe00d6ca32ef0";
@@ -319,7 +305,7 @@ export default definePlugin({
 
         metaTrackData.imageURL = await this.fetchCoverArt(releaseGroupMBID);
 
-        // code smell alert
+        // FIXME: code smell alert
         // ListenBrainz doesn't provide a URL, it just passes the information directly through from your scrobbler
         // (no lookups are being done here)
         // so I guess we grab the IDs from MusicBrainz and use that to populate this data
@@ -343,14 +329,7 @@ export default definePlugin({
         if (!settings.store.username)
             return null;
 
-        let trackData: TrackData | null | undefined = await (async () => {
-            switch (backend) {
-                case ScrobblerBackends.get("lastfm"):
-                    return await fetchLastFMData(settings.store.username!, settings.store.apiKey || LASTFM_API_KEY);
-                case ScrobblerBackends.get("listenbrainz"):
-                    return await fetchListenBrainzData(settings.store.username!);
-            }
-        })();
+        let trackData = await backend.fetchTrackData(settings.store.username, settings.store.apiKey || LASTFM_API_KEY);
 
         // shush compiler
         if (trackData == null) {
@@ -390,7 +369,7 @@ export default definePlugin({
             }
         }
 
-        const currentBackend = ScrobblerBackends.get(settings.store.scrobblerBackend);
+        const currentBackend = new ScrobblerBackends[settings.store.scrobblerBackend] as ScrobblerBackend;
         if (currentBackend === undefined) {
             throw new Error("Backend from settings isn't in list of backends, check IDs!");
         }
@@ -416,8 +395,8 @@ export default definePlugin({
 
         if (settings.store.shareUsername) {
             buttons.push({
-                label: `${settings.store.scrobblerBackend} Profile`,
-                url: `${currentBackend.url + currentBackend.userProfilePath}/${settings.store.username}`
+                label: `${currentBackend.name} Profile`,
+                url: currentBackend.getUserURL(settings.store.username!)
             });
         }
 
