@@ -25,20 +25,24 @@ import { classNameFactory } from "@utils/css";
 import { classes } from "@utils/misc";
 import definePlugin, { OptionType } from "@utils/types";
 import type { Channel, Role } from "@vencord/discord-types";
-import { ChannelType, type ChannelTypesSets as ChannelTypesSetsType } from "@vencord/discord-types/enums/channel";
-import { findByPropsLazy, findCssClassesLazy } from "@webpack";
-import { ChannelStore, PermissionsBits, PermissionStore, Tooltip } from "@webpack/common";
+import { findCssClassesLazy } from "@webpack";
+import { ChannelStore, ChannelTypeSets, PermissionsBits, PermissionStore, Tooltip } from "@webpack/common";
 
 import HiddenChannelLockScreen, { setChannelBeginHeader } from "./components/HiddenChannelLockScreen";
 
 export const cl = classNameFactory("vc-shc-");
 
 const ChannelListClasses = findCssClassesLazy("modeSelected", "modeMuted", "unread", "icon");
-const ChannelTypesSets = findByPropsLazy("GUILD_TEXT_ONLY") as ChannelTypesSetsType;
 
 const enum ShowMode {
     LockIcon,
     HiddenIconWithMutedStyle
+}
+
+const enum HiddenChannelTypesToShow {
+    All,
+    Text,
+    Voice
 }
 
 const CONNECT = 1n << 20n;
@@ -50,10 +54,14 @@ export const settings = definePluginSettings({
         default: true,
         restartNeeded: true
     },
-    hideHiddenTextChannels: {
-        description: "Prevent hidden text channels from being shown",
-        type: OptionType.BOOLEAN,
-        default: false,
+    hiddenChannelVisibility: {
+        description: "Channel Types to show",
+        type: OptionType.SELECT,
+        options: [
+            { label: "All Channels", value: HiddenChannelTypesToShow.All, default: true },
+            { label: "Text Channels", value: HiddenChannelTypesToShow.Text },
+            { label: "Voice Channels", value: HiddenChannelTypesToShow.Voice },
+        ],
         restartNeeded: true
     },
     showMode: {
@@ -91,7 +99,7 @@ export default definePlugin({
                 // Remove the special logic for channels we don't have access to
                 {
                     match: /if\(!\i\.\i\.can\(\i\.\i\.VIEW_CHANNEL.+?{if\(this\.id===\i\).+?threadIds:\[\]}}/,
-                    replace: m => `if($self.shouldHideHiddenTextChannel(this.record)){${m}}`
+                    replace: "if(!$self.shouldShowHiddenChannel(this.record)){$&}"
                 },
                 // Do not check for unreads when selecting the render level if the channel is hidden
                 {
@@ -522,12 +530,24 @@ export default definePlugin({
         }
     },
 
-    shouldHideHiddenTextChannel(channel: Channel) {
-        return settings.store.hideHiddenTextChannels
-            && this.isHiddenChannel(channel)
-            && ChannelTypesSets.GUILD_TEXT_ONLY.has(channel.type as ChannelType);
-    },
+    shouldShowHiddenChannel(channel: Channel) {
+        try {
+            if (!this.isHiddenChannel(channel)) return true;
 
+            switch (settings.store.hiddenChannelVisibility) {
+                case HiddenChannelTypesToShow.Text:
+                    return ChannelTypeSets.GUILD_TEXT_ONLY.has(channel.type);
+                case HiddenChannelTypesToShow.Voice:
+                    return ChannelTypeSets.GUILD_VOCAL.has(channel.type);
+                case HiddenChannelTypesToShow.All:
+                default:
+                    return true;
+            }
+        } catch (e) {
+            console.error("[ShowHiddenChannels] Failed to check hidden channel type:", e);
+            return true;
+        }
+    },
     resolveGuildChannels(channels: Record<string | number, Array<{ channel: Channel; comparator: number; }> | string | number>, shouldIncludeHidden: boolean) {
         if (shouldIncludeHidden) return channels;
 
