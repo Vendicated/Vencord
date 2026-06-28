@@ -10,15 +10,11 @@ import { FluxDispatcher, LocaleStore } from "@webpack/common";
 
 // API key is taken from the GBoard app on iOS
 const TENOR_KEY = "3Z0688EVWYKH";
-const RESULT_LIMIT = 100;
-const SEARCH_DEBOUNCE_MS = 250;
 
-let debounceTimer: ReturnType<typeof setTimeout> | null = null;
 let cachedCategories: TrendingCategories | null = null;
 
 interface TenorMedia { url: string; preview: string; dims: [number, number]; }
 interface TenorResult { id: string; media: Array<Record<string, TenorMedia>>; itemurl: string; }
-
 interface TenorCategoryTag { searchterm: string; image: string; }
 
 interface DiscordGif {
@@ -35,12 +31,6 @@ interface DiscordGif {
 interface TrendingCategories {
     trendingCategories: { name: string; src: string; }[];
     trendingGIFPreview: { src: string; };
-}
-
-interface GifPickerInstance {
-    state: { resultType: string | null; };
-    setState(state: { resultType: string | null; }, callback?: () => void): void;
-    props: { searchBarRef?: RefObject<HTMLInputElement>; };
 }
 
 function tenorUrl(path: string, extra: Record<string, string> = {}) {
@@ -71,20 +61,117 @@ function mapGifs(items: TenorResult[]) {
     return items.map(toDiscordGif).filter((g): g is DiscordGif => g != null);
 }
 
-async function fetchTenorResults(path: string, extra: Record<string, string> = {}) {
-    const res = await fetch(tenorUrl(path, extra));
-    if (!res.ok) return [];
-    const { results = [] } = await res.json();
-    return results as TenorResult[];
+// this is ugly sorry
+async function fetchTenorResults(path: string, limit: number, extra: Record<string, string> = {}) {
+    const pageSize = Math.min(limit, 50);
+    const items: TenorResult[] = [];
+    let pos = "";
+
+    while (items.length < limit) {
+        const params: Record<string, string> = { ...extra, limit: String(Math.min(limit - items.length, pageSize)) };
+        if (pos) params.pos = pos;
+        const res = await fetch(tenorUrl(path, params));
+        if (!res.ok) break;
+        const body = await res.json();
+        const page: TenorResult[] = body.results ?? [];
+        if (!page.length) break;
+        items.push(...page);
+        if (!body.next) break;
+        pos = body.next;
+    }
+
+    return items;
 }
 
-async function fetchSearch(query: string) {
-    return mapGifs(await fetchTenorResults("search", { q: query, limit: String(RESULT_LIMIT) }));
-}
+export default definePlugin({
+    name: "TenorGifSearch",
+    description: "Restore Tenor GIF search",
+    authors: [Devs.Lunascape],
+    patches: [
+        {
+            find: "renderHeaderContent()",
+            replacement: {
+                match: /placeholder:(\i),"aria-label":\i/,
+                replace: 'placeholder:$1.replace(/Giphy|Klipy/gi,"Tenor"),"aria-label":$1.replace(/Giphy|Klipy/gi,"Tenor")'
+            }
+        },
+        {
+            find: '"GIF_PICKER_TRENDING_FETCH_SUCCESS",trendingCategories:',
+            replacement: [
+                {
+                    match: /let \i=Date\.now\(\);\i\([^)]+\),\i\.\i\.get\(\{url:\i\.\i\.GIFS_SEARCH,query:\{q:(\i),/,
+                    replace: "return $self.handleSearchFetch($1);$&"
+                },
+                {
+                    match: /""!==(\i)&&null!=\1&&\i\.\i\.get\(\{url:\i\.\i\.GIFS_SUGGEST,/,
+                    replace: "return $self.handleSuggestionsFetch($1);$&"
+                },
+                {
+                    match: /\i\.\i\.get\(\{url:\i\.\i\.GIFS_TRENDING,/,
+                    replace: "return $self.handleTrendingFetch();$&"
+                },
+                {
+                    match: /let \i=Date\.now\(\);\i\([^)]+\),\i\.\i\.get\(\{url:\i\.\i\.GIFS_TRENDING_GIFS,/,
+                    replace: "return $self.handleTrendingGifsFetch();$&"
+                }
+            ]
+        }
+    ],
 
-async function fetchTrending() {
-    return mapGifs(await fetchTenorResults("trending", { limit: String(RESULT_LIMIT) }));
-}
+    start() {
+        fetchCategories().then(data => {
+            if (!data) return;
+            cachedCategories = data;
+        });
+    },
+
+    handleSearchFetch(query: string) {
+        // discord has a 100 result limit for normal search
+        fetchTenorResults("search", 100, { q: query }).then(results => {
+            const items = mapGifs(results);
+            FluxDispatcher.dispatch(items.length
+                ? { type: "GIF_PICKER_QUERY_SUCCESS", query, items }
+                : { type: "GIF_PICKER_QUERY_FAILURE", query }
+            );
+        }).catch(() => {
+            FluxDispatcher.dispatch({ type: "GIF_PICKER_QUERY_FAILURE", query });
+        });
+    },
+
+    handleSuggestionsFetch(query: string) {
+        if (query === "" || query == null) return;
+        fetch(tenorUrl("search_suggestions", { q: query, limit: "5" }))
+            .then(res => res.ok ? res.json() : null)
+            .then(body => {
+                if (!body?.results?.length) return;
+                FluxDispatcher.dispatch({ type: "GIF_PICKER_SUGGESTIONS_SUCCESS", query, items: body.results });
+            });
+    },
+
+    handleTrendingFetch() {
+        if (cachedCategories) {
+            FluxDispatcher.dispatch({ type: "GIF_PICKER_TRENDING_FETCH_SUCCESS", ...cachedCategories });
+            return;
+        }
+        fetchCategories().then(data => {
+            if (!data) return;
+            cachedCategories = data;
+            FluxDispatcher.dispatch({ type: "GIF_PICKER_TRENDING_FETCH_SUCCESS", ...data });
+        });
+    },
+
+    handleTrendingGifsFetch() {
+        fetchTenorResults("trending", 50).then(results => {
+            const items = mapGifs(results);
+            FluxDispatcher.dispatch(items.length
+                ? { type: "GIF_PICKER_QUERY_SUCCESS", items }
+                : { type: "GIF_PICKER_QUERY_FAILURE" }
+            );
+        }).catch(() => {
+            FluxDispatcher.dispatch({ type: "GIF_PICKER_QUERY_FAILURE" });
+        });
+    }
+});
 
 async function fetchCategories(): Promise<TrendingCategories | null> {
     try {
@@ -100,114 +187,3 @@ async function fetchCategories(): Promise<TrendingCategories | null> {
         return null;
     }
 }
-
-function doFetch(query: string) {
-    fetchSearch(query).then(items => {
-        FluxDispatcher.dispatch(items.length
-            ? { type: "GIF_PICKER_QUERY_SUCCESS", query, items }
-            : { type: "GIF_PICKER_QUERY_FAILURE", query }
-        );
-    }).catch(() => {
-        FluxDispatcher.dispatch({ type: "GIF_PICKER_QUERY_FAILURE", query });
-    });
-}
-
-export default definePlugin({
-    name: "TenorGifSearch",
-    description: "Restore Tenor GIF search",
-    authors: [Devs.Lunascape],
-    patches: [
-        {
-            find: "renderHeaderContent()",
-            replacement: [
-                {
-                    match: /(search\((\i),(\i),(\i)\)\{)/,
-                    replace: "$1if($self.handleSearch(this,$2,$3,$4))return;"
-                },
-                {
-                    match: /(handleSelectItem=\((\i),(\i)\)=>\{)/,
-                    replace: "$1if($self.handleSelectItem(this,$2,$3))return;"
-                },
-                {
-                    match: /placeholder:(\i),"aria-label":\i/,
-                    replace: 'placeholder:$1.replace(/Giphy|Klipy/gi,"Tenor"),"aria-label":$1.replace(/Giphy|Klipy/gi,"Tenor")'
-                }
-            ]
-        },
-        {
-            find: '"GIF_PICKER_TRENDING_FETCH_SUCCESS",trendingCategories:',
-            replacement: {
-                match: /\i\.\i\.get\(\{url:\i\.\i\.GIFS_TRENDING,/,
-                replace: "return $self.handleTrendingFetch();$&"
-            }
-        }
-    ],
-
-    start() {
-        fetchCategories().then(data => {
-            if (!data) return;
-            cachedCategories = data;
-        });
-    },
-
-    handleTrendingFetch() {
-        if (cachedCategories) {
-            FluxDispatcher.dispatch({ type: "GIF_PICKER_TRENDING_FETCH_SUCCESS", ...cachedCategories });
-            return;
-        }
-        fetchCategories().then(data => {
-            if (!data) return;
-            cachedCategories = data;
-            FluxDispatcher.dispatch({ type: "GIF_PICKER_TRENDING_FETCH_SUCCESS", ...data });
-        });
-    },
-
-    handleSearch(instance: GifPickerInstance, query: string, _type: string, immediate: boolean) {
-        if (debounceTimer) {
-            clearTimeout(debounceTimer);
-            debounceTimer = null;
-        }
-
-        if (query === "") {
-            return false;
-        }
-
-        if (instance.state.resultType !== "Search") {
-            instance.setState({ resultType: "Search" });
-        }
-
-        FluxDispatcher.dispatch({ type: "GIF_PICKER_QUERY", query });
-
-        if (immediate) {
-            doFetch(query);
-        } else {
-            debounceTimer = setTimeout(() => doFetch(query), SEARCH_DEBOUNCE_MS);
-        }
-
-        return true;
-    },
-
-    handleSelectItem(instance: GifPickerInstance, type: string, name: string) {
-        if (type === "Category") {
-            FluxDispatcher.dispatch({ type: "GIF_PICKER_QUERY", query: name });
-            doFetch(name);
-            instance.setState({ resultType: type }, () => {
-                instance.props.searchBarRef?.current?.focus();
-            });
-            return true;
-        }
-        if (type === "Trending") {
-            instance.setState({ resultType: type });
-            fetchTrending().then(items => {
-                FluxDispatcher.dispatch(items.length
-                    ? { type: "GIF_PICKER_QUERY_SUCCESS", items }
-                    : { type: "GIF_PICKER_QUERY_FAILURE" }
-                );
-            }).catch(() => {
-                FluxDispatcher.dispatch({ type: "GIF_PICKER_QUERY_FAILURE" });
-            });
-            return true;
-        }
-        return false;
-    }
-});
