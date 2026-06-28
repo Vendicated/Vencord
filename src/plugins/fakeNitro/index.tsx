@@ -155,6 +155,64 @@ function getWordBoundary(origStr: string, offset: number) {
     return (!origStr[offset] || /\s/.test(origStr[offset])) ? "" : " ";
 }
 
+const snowflakeRegex = /^\d{16,25}$/;
+
+function getStickerId(value: unknown, seen = new WeakSet<object>(), depth = 0): string | undefined {
+    if (typeof value === "string" && snowflakeRegex.test(value)) return value;
+    if (typeof value === "number" || typeof value === "bigint") return String(value);
+    if (!value || typeof value !== "object" || seen.has(value) || depth > 5) return;
+
+    seen.add(value);
+
+    if (Array.isArray(value)) {
+        for (const item of value) {
+            const id = getStickerId(item, seen, depth + 1);
+            if (id) return id;
+        }
+        return;
+    }
+
+    const item = value as Record<string, unknown>;
+    for (const key of ["id", "stickerId", "sticker_id"]) {
+        const id = getStickerId(item[key], seen, depth + 1);
+        if (id) return id;
+    }
+
+    for (const [key, child] of Object.entries(item)) {
+        if (!/sticker/i.test(key)) continue;
+
+        const id = getStickerId(child, seen, depth + 1);
+        if (id) return id;
+    }
+}
+
+function getSelectedStickerId(options: Record<string, any>) {
+    for (const key of ["stickers", "stickerIds", "sticker_ids", "stickerItems", "sticker_items"]) {
+        const id = getStickerId(options[key]);
+        if (id) return id;
+    }
+
+    return getStickerId(options);
+}
+
+function clearStickerPayload(value: unknown, seen = new WeakSet<object>(), depth = 0) {
+    if (!value || typeof value !== "object" || seen.has(value) || depth > 5) return;
+    seen.add(value);
+
+    for (const [key, child] of Object.entries(value)) {
+        if (/sticker/i.test(key)) {
+            if (key === "stickers" && Array.isArray(child)) {
+                child.length = 0;
+            } else {
+                delete (value as Record<string, unknown>)[key];
+            }
+            continue;
+        }
+
+        clearStickerPayload(child, seen, depth + 1);
+    }
+}
+
 function CannotEmbedNoticeModal({ modalProps, resolve }: { modalProps: RenderModalProps; resolve: (value: boolean) => void; }) {
     const s = settings.use(["disableEmbedPermissionCheck"]);
     return (
@@ -831,16 +889,14 @@ export default definePlugin({
                 if (!s.enableStickerBypass)
                     break stickerBypass;
 
-                const sticker = StickersStore.getStickerById(extra.stickers?.[0]!);
+                const stickerId = getSelectedStickerId(extra);
+                const sticker = stickerId ? StickersStore.getStickerById(stickerId) : undefined;
                 if (!sticker)
                     break stickerBypass;
 
-                // Discord Stickers are now free yayyy!! :D
-                if ("pack_id" in sticker)
-                    break stickerBypass;
-
                 const canUseStickers = this.canUseStickers && hasExternalStickerPerms(channelId);
-                if (sticker.available !== false && (canUseStickers || sticker.guild_id === guildId))
+                const stickerGuildId = "guild_id" in sticker ? sticker.guild_id : undefined;
+                if (sticker.available !== false && (canUseStickers || stickerGuildId === guildId))
                     break stickerBypass;
 
                 const link = this.getStickerLink(sticker);
@@ -877,7 +933,7 @@ export default definePlugin({
                     const linkText = s.hyperLinkText.replaceAll("{{NAME}}", sticker.name);
 
                     messageObj.content += `${getWordBoundary(messageObj.content, messageObj.content.length - 1)}${s.useHyperLinks ? `[${linkText}](${url})` : url}`;
-                    extra.stickers!.length = 0;
+                    clearStickerPayload(extra);
                 }
             }
 
