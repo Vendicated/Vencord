@@ -26,7 +26,7 @@ import { classes } from "@utils/misc";
 import definePlugin, { OptionType } from "@utils/types";
 import type { Channel, Role } from "@vencord/discord-types";
 import { findCssClassesLazy } from "@webpack";
-import { ChannelStore, PermissionsBits, PermissionStore, Tooltip } from "@webpack/common";
+import { ChannelStore, ChannelTypeSets, PermissionsBits, PermissionStore, Tooltip } from "@webpack/common";
 
 import HiddenChannelLockScreen, { setChannelBeginHeader } from "./components/HiddenChannelLockScreen";
 
@@ -39,6 +39,12 @@ const enum ShowMode {
     HiddenIconWithMutedStyle
 }
 
+const enum HiddenChannelTypesToShow {
+    All,
+    Text,
+    Voice
+}
+
 const CONNECT = 1n << 20n;
 
 export const settings = definePluginSettings({
@@ -46,6 +52,16 @@ export const settings = definePluginSettings({
         description: "Hide Unreads",
         type: OptionType.BOOLEAN,
         default: true,
+        restartNeeded: true
+    },
+    hiddenChannelVisibility: {
+        description: "Channel Types to show",
+        type: OptionType.SELECT,
+        options: [
+            { label: "All Channels", value: HiddenChannelTypesToShow.All, default: true },
+            { label: "Text Channels", value: HiddenChannelTypesToShow.Text },
+            { label: "Voice Channels", value: HiddenChannelTypesToShow.Voice },
+        ],
         restartNeeded: true
     },
     showMode: {
@@ -72,7 +88,7 @@ export default definePlugin({
     name: "ShowHiddenChannels",
     description: "Show channels that you do not have access to view.",
     tags: ["Servers", "Utility"],
-    authors: [Devs.BigDuck, Devs.AverageReactEnjoyer, Devs.D3SOX, Devs.Ven, Devs.Nuckyz, Devs.Nickyux, Devs.dzshn],
+    authors: [Devs.BigDuck, Devs.AverageReactEnjoyer, Devs.D3SOX, Devs.Ven, Devs.Nuckyz, Devs.Nickyux, Devs.dzshn, Devs.nightmaresan],
     settings,
 
     patches: [
@@ -83,7 +99,7 @@ export default definePlugin({
                 // Remove the special logic for channels we don't have access to
                 {
                     match: /if\(!\i\.\i\.can\(\i\.\i\.VIEW_CHANNEL.+?{if\(this\.id===\i\).+?threadIds:\[\]}}/,
-                    replace: ""
+                    replace: "if(!$self.shouldShowHiddenChannel(this.record)){$&}"
                 },
                 // Do not check for unreads when selecting the render level if the channel is hidden
                 {
@@ -98,7 +114,7 @@ export default definePlugin({
                 // Remove permission checking for getRenderLevel function
                 {
                     match: /(getRenderLevel\(\i\){.+?return)!\i\.\i\.can\(\i\.\i\.VIEW_CHANNEL,this\.record\)\|\|/,
-                    replace: (_, rest) => `${rest} `
+                    replace: (_, rest) => `${rest}!$self.shouldShowHiddenChannel(this.record)||`
                 }
             ]
         },
@@ -514,6 +530,24 @@ export default definePlugin({
         }
     },
 
+    shouldShowHiddenChannel(channel: Channel) {
+        try {
+            if (!this.isHiddenChannel(channel)) return true;
+
+            switch (settings.store.hiddenChannelVisibility) {
+                case HiddenChannelTypesToShow.Text:
+                    return ChannelTypeSets.GUILD_TEXT_ONLY.has(channel.type);
+                case HiddenChannelTypesToShow.Voice:
+                    return ChannelTypeSets.GUILD_VOCAL.has(channel.type);
+                case HiddenChannelTypesToShow.All:
+                default:
+                    return true;
+            }
+        } catch (e) {
+            console.error("[ShowHiddenChannels] Failed to check hidden channel type:", e);
+            return true;
+        }
+    },
     resolveGuildChannels(channels: Record<string | number, Array<{ channel: Channel; comparator: number; }> | string | number>, shouldIncludeHidden: boolean) {
         if (shouldIncludeHidden) return channels;
 
