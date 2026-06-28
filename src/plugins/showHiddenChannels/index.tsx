@@ -114,7 +114,7 @@ export default definePlugin({
                 // Remove permission checking for getRenderLevel function
                 {
                     match: /(getRenderLevel\(\i\){.+?return)!\i\.\i\.can\(\i\.\i\.VIEW_CHANNEL,this\.record\)\|\|/,
-                    replace: (_, rest) => `${rest} `
+                    replace: (_, rest) => `${rest}!$self.shouldShowHiddenChannel(this.record)||`
                 }
             ]
         },
