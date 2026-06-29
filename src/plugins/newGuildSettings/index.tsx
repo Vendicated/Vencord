@@ -96,23 +96,21 @@ const makeContextMenuPatch: (shouldAddIcon: boolean) => NavContextMenuPatchCallb
 
 function applyDefaultSettings(guildId: string | null) {
     if (guildId === "@me" || guildId === "null" || guildId == null) return;
-    updateGuildNotificationSettings(guildId,
-        {
-            muted: settings.store.guild,
-            suppress_everyone: settings.store.everyone,
-            suppress_roles: settings.store.role,
-            mute_scheduled_events: settings.store.events,
-            notify_highlights: settings.store.highlights ? 1 : 0
-        });
-    if (settings.store.messages !== 3) {
-        updateGuildNotificationSettings(guildId,
-            {
-                message_notifications: settings.store.messages,
-            });
-    }
-    if (settings.store.showAllChannels && isOptInEnabledForGuild(guildId)) {
+
+    const notifSettings: Record<string, any> = {
+        muted: settings.store.guild,
+        suppress_everyone: settings.store.everyone,
+        suppress_roles: settings.store.role,
+        mute_scheduled_events: settings.store.events,
+        notify_highlights: settings.store.highlights ? 1 : 0
+    };
+    if (settings.store.messages !== 3)
+        notifSettings.message_notifications = settings.store.messages;
+
+    if (settings.store.showAllChannels && isOptInEnabledForGuild(guildId))
         toggleShowAllChannels(guildId);
-    }
+    // toggleShowAllChannels does a full state write based on current settings and can overwrite notification settings when run simultaneously (Apply NewGuildSettings Button)
+    setTimeout(() => updateGuildNotificationSettings(guildId, notifSettings), 1000);
 }
 
 export default definePlugin({
@@ -120,7 +118,7 @@ export default definePlugin({
     description: "Automatically mute new servers and change various other settings upon joining",
     tags: ["Servers", "Customisation"],
     searchTerms: ["MuteNewGuild", "mute", "server"],
-    authors: [Devs.Glitch, Devs.Nuckyz, Devs.carince, Devs.Mopi, Devs.GabiRP],
+    authors: [Devs.Glitch, Devs.Nuckyz, Devs.carince, Devs.Mopi, Devs.GabiRP, Devs.nightmaresan],
     contextMenus: {
         "guild-context": makeContextMenuPatch(false),
         "guild-header-popout": makeContextMenuPatch(true)
@@ -129,15 +127,15 @@ export default definePlugin({
         {
             find: ",acceptInvite(",
             replacement: {
-                match: /INVITE_ACCEPT_SUCCESS.+?,(\i)=null!=.+?;/,
-                replace: (m, guildId) => `${m}$self.applyDefaultSettings(${guildId});`
+                match: /null!=(\i)&&\i\.new_member&&!\i\.show_verification_form\)\{/,
+                replace: "$&$self.applyDefaultSettings($1);"
             }
         },
         {
             find: "{joinGuild:",
             replacement: {
                 match: /guildId:(\i),lurker:(\i).{0,20}}\)\);/,
-                replace: (m, guildId, lurker) => `${m}if(!${lurker})$self.applyDefaultSettings(${guildId});`
+                replace: "$&if(!$2)$self.applyDefaultSettings($1);"
             }
         }
     ],
