@@ -1,0 +1,145 @@
+.vc-channelHistory-popout {
+    background-color: var(--background-floating);
+    border-radius: 8px;
+    box-shadow: var(--elevation-high);
+    padding: 12px;
+    width: 320px;
+    max-height: 400px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    color: var(--text-normal);
+}
+
+.vc-channelHistory-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--background-modifier-accent);
+    padding-bottom: 8px;
+    margin-bottom: 4px;
+}
+
+.vc-channelHistory-title {
+    font-weight: 600;
+    font-size: 14px;
+    color: var(--header-primary);
+}
+
+.vc-channelHistory-clear-btn {
+    font-size: 12px;
+    cursor: pointer;
+    color: var(--text-muted);
+    transition: color 0.15s ease;
+    background: none;
+    border: none;
+    padding: 0;
+}
+
+.vc-channelHistory-clear-btn:hover {
+    color: var(--text-danger);
+}
+
+.vc-channelHistory-list {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    max-height: 320px;
+}
+
+.vc-channelHistory-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.15s ease;
+}
+
+.vc-channelHistory-item:hover {
+    background-color: var(--background-modifier-hover);
+}
+
+.vc-channelHistory-item-active {
+    background-color: var(--background-modifier-selected);
+}
+
+.vc-channelHistory-avatar {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    object-fit: cover;
+    flex-shrink: 0;
+}
+
+.vc-channelHistory-guild-icon-fallback {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background-color: var(--background-secondary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    font-weight: bold;
+    color: var(--text-normal);
+    flex-shrink: 0;
+}
+
+.vc-channelHistory-item-details {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.vc-channelHistory-item-name {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--header-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.vc-channelHistory-item-category {
+    font-size: 11px;
+    color: var(--text-muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.vc-channelHistory-empty {
+    padding: 16px 0;
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 14px;
+}
+
+.vc-channelHistory-nav-buttons {
+    display: flex;
+    gap: 8px;
+}
+
+.vc-channelHistory-nav-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--text-normal);
+    opacity: 0.7;
+    transition: opacity 0.15s ease;
+    padding: 2px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.vc-channelHistory-nav-btn:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+}
+
+.vc-channelHistory-nav-btn:hover:not(:disabled) {
+    opacity: 1;
+}
