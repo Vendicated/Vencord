@@ -35,6 +35,16 @@ export default definePlugin({
         return base.concat(route);
     },
     patches: [
+        // patch intl strings
+        {
+            find: ".T1Frnm",
+            replacement: [
+                {
+                    match: /(\i)\.intl\.string\([\s\S]+\)/,
+                    replace: "$1.intl.string($1.t.TnYqke)"
+                }
+            ]
+        },
         // patch api endpoints
         {
             find: ".GIFS_SEARCH",
