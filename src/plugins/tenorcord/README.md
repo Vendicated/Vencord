@@ -1,6 +1,6 @@
 # TenorCord
 
-A Vencord plugin that adds (back) Tenor GIF support to Discord.
+A Vencord plugin that adds (back) Tenor GIF support to Discord. as tenor api was sunset in **30 jun 2026**.
 
 ## Configuration
 
