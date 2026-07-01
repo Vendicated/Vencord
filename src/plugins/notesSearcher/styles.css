@@ -1,0 +1,107 @@
+.vc-notes-searcher-toolbox-button svg {
+    color: var(--interactive-normal);
+}
+
+.vc-notes-searcher-modal-user-actions * svg {
+    width: 32px !important;
+    height: 32px !important;
+}
+
+.vc-notes-searcher-toolbox-button:hover svg,
+.vc-notes-searcher-toolbox-button[class*="selected"] svg {
+    color: var(--interactive-active);
+}
+
+.vc-notes-searcher-modal-root {
+    min-height: 75vh;
+    max-height: 75vh;
+    min-width: 70vw;
+    max-width: 70vw;
+}
+
+.vc-notes-searcher-modal-header-input {
+    width: 100%;
+    margin-right: 16px;
+}
+
+.vc-notes-searcher-modal-content {
+    padding-bottom: 16px;
+    height: 100%;
+}
+
+.vc-notes-searcher-modal-content div[aria-hidden="true"] {
+    display: none;
+}
+
+.vc-notes-searcher-modal-content-inner > *:not(:last-child) {
+    margin-bottom: 8px;
+}
+
+.vc-notes-searcher-modal-user:hover:not(
+:has(
+    .vc-notes-searcher-modal-user-text-area:hover,
+    .vc-notes-searcher-modal-user-actions:hover
+)
+) {
+    background-color: var(--background-secondary-alt);
+}
+
+.vc-notes-searcher-modal-user-avatar {
+    aspect-ratio: 1 / 1;
+    margin: 12px;
+}
+
+.vc-notes-searcher-modal-user-actions * div:has(svg) {
+    width: 32px !important;
+    height: 32px !important;
+    overflow: visible !important;
+}
+
+.vc-notes-searcher-modal-user-notes-container
+*
+div:has(.vc-notes-searcher-modal-user-text-area) {
+    height: 67px;
+}
+
+.vc-notes-searcher-modal-user-text-area {
+    width: 100%;
+    height: 100%;
+}
+
+.vc-notes-searcher-modal-spinner::after {
+    content: "";
+    position: absolute;
+    width: 56px;
+    height: 56px;
+    border: 5px solid #fff;
+    border-radius: 50%;
+    display: inline-block;
+    box-sizing: border-box;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    animation: vc-notes-searcher-scale-up 1s linear infinite;
+}
+
+@keyframes vc-notes-searcher-scale-up {
+    0% {
+        transform: translate(-50%, -50%) scale(0);
+    }
+
+    60%,
+    100% {
+        transform: translate(-50%, -50%) scale(1);
+    }
+}
+
+@keyframes vc-notes-searcher-pulse {
+    0%,
+    60%,
+    100% {
+        transform: scale(0.9);
+    }
+
+    80% {
+        transform: scale(1.1);
+    }
+}
