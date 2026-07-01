@@ -1,0 +1,79 @@
+/* TempIgnore — Plugin Styles */
+
+/* ── Modal Content ── */
+.vc-temp-ignore-modal-content {
+    padding: 16px;
+}
+
+.vc-temp-ignore-user-info {
+    margin-bottom: 16px;
+    padding: 12px;
+    background: var(--background-secondary);
+    border-radius: 8px;
+    border-left: 3px solid var(--brand-500);
+}
+
+.vc-temp-ignore-section-title {
+    margin-top: 8px;
+    margin-bottom: 8px;
+}
+
+/* ── Preset Buttons Grid ── */
+.vc-temp-ignore-presets-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+}
+
+/* ── Custom Duration Row ── */
+.vc-temp-ignore-custom-row {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.vc-temp-ignore-custom-input {
+    flex: 1;
+    padding: 8px 12px;
+    border-radius: 4px;
+    border: 1px solid var(--input-border);
+    background: var(--input-background);
+    color: var(--text-normal);
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.2s ease;
+}
+
+.vc-temp-ignore-custom-input:focus {
+    border-color: var(--brand-500);
+}
+
+.vc-temp-ignore-custom-input::-webkit-inner-spin-button,
+.vc-temp-ignore-custom-input::-webkit-outer-spin-button {
+    opacity: 1;
+}
+
+.vc-temp-ignore-custom-select {
+    padding: 8px 12px;
+    border-radius: 4px;
+    border: 1px solid var(--input-border);
+    background: var(--input-background);
+    color: var(--text-normal);
+    font-size: 14px;
+    cursor: pointer;
+    outline: none;
+    transition: border-color 0.2s ease;
+}
+
+.vc-temp-ignore-custom-select:focus {
+    border-color: var(--brand-500);
+}
+
+/* ── Summary Confirmation ── */
+.vc-temp-ignore-summary {
+    margin-top: 16px;
+    padding: 10px 12px;
+    background: var(--info-positive-background);
+    border-radius: 6px;
+    border: 1px solid var(--info-positive-foreground);
+}
