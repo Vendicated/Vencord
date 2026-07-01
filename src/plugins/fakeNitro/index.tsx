@@ -182,7 +182,7 @@ function showCannotEmbedNotice() {
 
 export default definePlugin({
     name: "FakeNitro",
-    authors: [Devs.Arjix, Devs.D3SOX, Devs.Ven, Devs.fawn, Devs.captain, Devs.Nuckyz, Devs.AutumnVN, Devs.sadan],
+    authors: [Devs.Arjix, Devs.D3SOX, Devs.Ven, Devs.fawn, Devs.captain, Devs.Nuckyz, Devs.AutumnVN, Devs.sadan, Devs.niko],
     description: "Allows you to send fake emojis/stickers, use nitro themes, and stream in nitro quality",
     tags: ["Emotes", "Appearance", "Customisation", "Chat"],
     dependencies: ["MessageEventsAPI"],
@@ -831,7 +831,7 @@ export default definePlugin({
                 if (!s.enableStickerBypass)
                     break stickerBypass;
 
-                const sticker = StickersStore.getStickerById(extra.stickers?.[0]!);
+                const sticker = StickersStore.getStickerById(extra.replyOptions.stickerIds?.[0]!);
                 if (!sticker)
                     break stickerBypass;
 
@@ -877,7 +877,7 @@ export default definePlugin({
                     const linkText = s.hyperLinkText.replaceAll("{{NAME}}", sticker.name);
 
                     messageObj.content += `${getWordBoundary(messageObj.content, messageObj.content.length - 1)}${s.useHyperLinks ? `[${linkText}](${url})` : url}`;
-                    extra.stickers!.length = 0;
+                    extra.replyOptions.stickerIds!.length = 0;
                 }
             }
 

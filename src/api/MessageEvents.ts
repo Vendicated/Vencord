@@ -36,10 +36,10 @@ export interface MessageReplyOptions {
         parse: Array<string>;
         repliedUser: boolean;
     };
+    stickerIds?: string[];
 }
 
 export interface MessageOptions {
-    stickers?: string[];
     uploads?: CloudUpload[];
     replyOptions: MessageReplyOptions;
     content: string;
