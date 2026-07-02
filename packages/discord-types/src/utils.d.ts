@@ -367,6 +367,23 @@ export interface CommandOptions {
     autocomplete?: boolean;
 }
 
+export interface OpenUserProfileModalProps {
+    userId: string;
+    guildId: string | null | undefined;
+    showGuildProfile?: boolean;
+    channelId: string;
+    analyticsLocation: {
+        page: string;
+        section: string;
+    };
+    section?: "USER_INFO" | "BOT_INFO" | "ACTIVITY" | "MUTUAL_GUILDS" | "MUTUAL_FRIENDS" | "BOT_DATA_ACCESS";
+    subsection?: "ROLES" | "CONNECTIONS" | "NOTE" | "RECENT_ACTIVITY";
+}
+
+export interface UserProfileActions {
+    openUserProfileModal(props: OpenUserProfileModalProps): Promise<void>;
+}
+
 export interface URLUtils {
     URL_REGEX: RegExp;
     makeUrl(url: string): URL | null;
