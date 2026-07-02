@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Vencord, a Discord client mod
  * Copyright (c) 2026 Vendicated and contributors
  * SPDX-License-Identifier: GPL-3.0-or-later
@@ -217,7 +217,7 @@ async function buildActivity(track: TrackData) {
     let state = clean(track.artist) || "Unknown Artist";
 
     if (!track.isPlaying && track.duration)
-        state = `${state} â€¢ paused ${formatTime(track.playerPosition)} / ${formatTime(track.duration)}`;
+        state = `${state} - paused ${formatTime(track.playerPosition)} / ${formatTime(track.duration)}`;
 
     const activity: any = {
         application_id: APSENZ_CLIENT_ID,
