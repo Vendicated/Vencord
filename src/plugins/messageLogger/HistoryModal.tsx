@@ -11,7 +11,7 @@ import { Margins } from "@utils/margins";
 import { classes } from "@utils/misc";
 import { RenderModalProps } from "@vencord/discord-types";
 import { findCssClassesLazy } from "@webpack";
-import { Modal,openModal, TabBar, Timestamp, useState } from "@webpack/common";
+import { Modal, openModal, TabBar, Timestamp, useState } from "@webpack/common";
 
 import { parseEditContent } from ".";
 
@@ -32,9 +32,11 @@ export function openHistoryModal(message: any) {
 }
 
 export function HistoryModal({ modalProps, message }: { modalProps: RenderModalProps; message: any; }) {
-    const [currentTab, setCurrentTab] = useState(message.editHistory.length);
-    const timestamps = [message.firstEditTimestamp, ...message.editHistory.map(m => m.timestamp)];
-    const contents = [...message.editHistory.map(m => m.content), message.content];
+    const filteredEditHistory = message.editHistory.filter(edit => edit.attachmentsEdited === false);
+
+    const [currentTab, setCurrentTab] = useState(filteredEditHistory.length);
+    const timestamps = [message.firstEditTimestamp, ...filteredEditHistory.map(m => m.timestamp)];
+    const contents = [...filteredEditHistory.map(m => m.content), message.content];
 
     return (
         <Modal
