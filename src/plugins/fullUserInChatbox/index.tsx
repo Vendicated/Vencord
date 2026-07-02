@@ -9,7 +9,7 @@ import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 import { findComponentByCodeLazy } from "@webpack";
 import { UserStore, useStateFromStores } from "@webpack/common";
-import { ReactNode } from "react";
+import { ReactNode, SyntheticEvent } from "react";
 
 const UserMentionComponent = findComponentByCodeLazy(".USER_MENTION)");
 
@@ -24,7 +24,7 @@ export default definePlugin({
     name: "FullUserInChatbox",
     description: "Makes the user mention in the chatbox have more functionalities, like left/right clicking",
     tags: ["Shortcuts", "Utility"],
-    authors: [Devs.sadan],
+    authors: [Devs.sadan, Devs.MrCRACK],
 
     patches: [
         {
@@ -34,8 +34,27 @@ export default definePlugin({
                 match: /(hidePersonalInformation\).+?)(if\(null!=\i\){.+?return \i)(?=})/,
                 replace: "$1return $self.UserMentionComponent({...arguments[0],originalComponent:()=>{$2}});"
             }
+        },
+        {
+            find: 'getElementById("slate-toolbar"',
+            replacement: {
+                match: /handle(?:Focus|Blur|Paste)Capture\((\i)\)\{/g,
+                replace: "$&if($self.isEventOutsideEditor($1))return;"
+            }
+        },
+        {
+            find: ".current?.handleOuterClick()",
+            replacement: {
+                match: /\(\)=>\{(null!=\i\|\|\i\|\|\i\.current\?\.handleOuterClick\(\))\}/,
+                replace: "e=>{if($self.isEventOutsideEditor(e))return;$1}"
+            }
         }
     ],
+
+    isEventOutsideEditor(event?: SyntheticEvent) {
+        return event != null && event.currentTarget instanceof Node && event.target instanceof Node
+            && !event.currentTarget.contains(event.target);
+    },
 
     UserMentionComponent: ErrorBoundary.wrap((props: UserMentionComponentProps) => {
         const user = useStateFromStores([UserStore], () => UserStore.getUser(props.id));
