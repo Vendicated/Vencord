@@ -404,9 +404,9 @@ if ([string]::IsNullOrWhiteSpace($title)) {
     exit 0
 }
 
-# Apple Music for Windows sometimes puts "Artist — Album" inside Artist.
-if ([string]::IsNullOrWhiteSpace($album) -and $artist -match "\s[—-]\s") {
-    $parts = $artist -split "\s[—-]\s", 2
+# Apple Music for Windows sometimes puts "Artist - Album" inside Artist.
+if ([string]::IsNullOrWhiteSpace($album) -and $artist -match "\s[--]\s") {
+    $parts = $artist -split "\s[--]\s", 2
     if ($parts.Count -ge 2) {
         $artist = $parts[0]
         $album = $parts[1]
@@ -817,8 +817,8 @@ function norm(value?: string) {
         .toLowerCase()
         .replace(/[\u0300-\u036f]/g, "")
         .replace(/[\u064B-\u065F\u0670]/g, "")
-        .replace(/[’'`´]/g, "")
-        .replace(/[‐‑‒–—―]/g, "-")
+        .replace(/[''`']/g, "")
+        .replace(/[------]/g, "-")
         .replace(/&/g, " and ")
         .replace(/\s+/g, " ")
         .replace(/\s*\(.*?\)\s*/g, " ")
@@ -830,7 +830,7 @@ function norm(value?: string) {
 function slug(value?: string) {
     return (value || "music")
         .toLowerCase()
-        .replace(/['’]/g, "")
+        .replace(/['']/g, "")
         .replace(/[^a-z0-9]+/g, "-")
         .replace(/-+/g, "-")
         .replace(/^-|-$/g, "") || "music";
