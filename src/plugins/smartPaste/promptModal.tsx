@@ -43,7 +43,7 @@ function SmartPastePromptModal({ modalProps, description, defaultLanguage, onSel
     return (
         <Modal
             {...modalProps}
-            title={`Smart Paste - Wrapping as ${languageLabel}`}
+            title={"SmartPaste"}
             subtitle={description}
             onClose={() => resolve(null)}
             actions={[
