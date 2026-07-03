@@ -31,7 +31,7 @@ const settings = definePluginSettings({
 });
 
 export default definePlugin({
-    name: "Sort Voice Users",
+    name: "SortVoiceUsers",
     description:
         "Sorts users in voice chats by their status (streaming, camera, muted, deafened)",
     authors: [Devs.Paneddo],
