@@ -181,7 +181,7 @@ export default definePlugin({
         return (
             <>
                 <Forms.FormText>
-                    To quickly send send time only timestamps, include timestamps formatted as `HH:MM` (including the backticks!) in your message
+                    To quickly send time only timestamps, include timestamps formatted as `HH:MM` (including the backticks!) in your message
                 </Forms.FormText>
                 <Forms.FormText>
                     See below for examples.
