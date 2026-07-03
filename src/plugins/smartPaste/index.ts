@@ -50,7 +50,7 @@ const SmartPasteToggle: ChatBarButtonFactory = ({ isAnyChat }) => {
     return React.createElement(
         ChatBarButton as any,
         {
-            tooltip: enabled ? "Disable Smart Paste" : "Enable Smart Paste",
+            tooltip: enabled ? "Disable SmartPaste" : "Enable SmartPaste",
             onClick: () => settings.store.enabled = !enabled,
         },
         enabled ? React.createElement(SmartPasteIcon) : React.createElement(SmartPasteDisabledIcon)

@@ -80,7 +80,7 @@ export const SmartPasteLanguageLabels: Record<SmartPasteLanguage, string> = {
 export const settings = definePluginSettings({
     enabled: {
         type: OptionType.BOOLEAN,
-        description: "Enable Smart Paste",
+        description: "Enable SmartPaste",
         default: true,
     },
     autoDetectLanguage: {
