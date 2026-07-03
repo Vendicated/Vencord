@@ -58,7 +58,7 @@ const SmartPasteToggle: ChatBarButtonFactory = ({ isAnyChat }) => {
 };
 
 export default definePlugin({
-    name: "Smart Paste",
+    name: "SmartPaste",
     description: "Attempts to automatically wrap pasted code in fenced Markdown code blocks",
     tags: ["Chat", "Utility"],
     authors: [Devs.luckfiel],
