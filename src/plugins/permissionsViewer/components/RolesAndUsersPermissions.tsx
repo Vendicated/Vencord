@@ -65,7 +65,10 @@ function RolesAndUsersPermissionsComponent({ permissions, guild, modalProps, hea
         const container = containerRef.current;
         const modalScroller = getModalScrollerNode(modalScrollerRef.current as ModalScrollerRefTarget | null);
 
-        if (!container || !(modalScroller instanceof Element)) return;
+        if (!container || !(modalScroller instanceof HTMLElement)) return;
+
+        const previousOverflow = modalScroller.style.overflowY;
+        modalScroller.style.overflowY = "hidden";
 
         let frameId = 0;
 
@@ -89,6 +92,7 @@ function RolesAndUsersPermissionsComponent({ permissions, guild, modalProps, hea
         return () => {
             cancelAnimationFrame(frameId);
             resizeObserver.disconnect();
+            modalScroller.style.overflowY = previousOverflow;
         };
     }, [hasSelectedItem]);
 
