@@ -51,7 +51,7 @@ export default definePlugin({
     name: "UserVoiceShow",
     description: "Shows an indicator when a user is in a Voice Channel",
     tags: ["Voice", "Appearance", "Friends"],
-    authors: [Devs.Nuckyz, Devs.LordElias],
+    authors: [Devs.Nuckyz, Devs.LordElias, Devs.nightmaresan],
     dependencies: ["MemberListDecoratorsAPI", "MessageDecorationsAPI"],
     settings,
 
@@ -60,8 +60,8 @@ export default definePlugin({
         {
             find: "#{intl::USER_PROFILE_PRONOUNS}",
             replacement: {
-                match: /(?<=children:\[\i," ",\i)(?=\])/,
-                replace: ",$self.VoiceChannelIndicator({userId:arguments[0]?.user?.id,isProfile:true})"
+                match: /(?<=children:\[)(?=\i," ",\i\])/,
+                replace: "$self.VoiceChannelIndicator({userId:arguments[0]?.user?.id,isProfile:true}),"
             },
             predicate: () => settings.store.showInUserProfileModal
         },

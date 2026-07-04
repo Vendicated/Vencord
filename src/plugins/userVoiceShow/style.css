@@ -14,8 +14,21 @@
 }
 
 .vc-uvs-profile-speaker {
-    width: var(--custom-nickname-icon-size);
     height: var(--custom-nickname-icon-size);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.05em;
+    margin-right: 0.2em;
+    vertical-align: middle;
+    transform: translateY(-0.125em); /* Icon isnt fully in the middle */
+}
+
+.vc-uvs-profile-speaker::before {
+    content: "[";
+}
+
+.vc-uvs-profile-speaker::after {
+    content: "]";
 }
 
 .vc-uvs-tooltip-container {
@@ -24,8 +37,6 @@
 
 .vc-uvs-tooltip-content {
     display: flex;
-    flex-direction: column;
-    gap: 6px;
 }
 
 .vc-uvs-name {
