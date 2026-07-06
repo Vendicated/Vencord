@@ -1,3 +1,4 @@
+import { Moment } from "moment";
 import type { ComponentClass, ComponentPropsWithRef, ComponentType, CSSProperties, FunctionComponent, HtmlHTMLAttributes, HTMLProps, JSX, KeyboardEvent, MouseEvent, PointerEvent, PropsWithChildren, ReactNode, Ref, RefObject } from "react";
 
 
@@ -153,7 +154,7 @@ export type Checkbox = ComponentType<PropsWithChildren<{
 };
 
 export type Timestamp = ComponentType<PropsWithChildren<{
-    timestamp: Date;
+    timestamp: Date | Moment;
     isEdited?: boolean;
 
     className?: string;
@@ -191,9 +192,10 @@ export type TextInput = ComponentType<PropsWithChildren<{
 export type TextArea = ComponentType<Omit<HTMLProps<HTMLTextAreaElement>, "onChange"> & {
     onChange(v: string): void;
     inputRef?: Ref<HTMLTextAreaElement>;
+    autosize?: boolean;
 }>;
 
-interface SelectOption {
+export interface SelectOption {
     disabled?: boolean;
     value: any;
     label: string;
@@ -330,6 +332,15 @@ declare enum PopoutAnimation {
 
 type PopoutPosition = "top" | "bottom" | "left" | "right" | "center" | "window_center";
 
+export interface PopoutProps {
+    position: PopoutPosition;
+    nudge: number;
+    isPositioned: boolean;
+    setPopoutRef(ref: any): void;
+    closePopout(): void;
+    updatePosition(): void;
+}
+
 export type Popout = ComponentType<{
     children(
         thing: {
@@ -346,14 +357,8 @@ export type Popout = ComponentType<{
     ): ReactNode;
     shouldShow?: boolean;
     targetElementRef: RefObject<any>;
-    renderPopout(args: {
-        closePopout(): void;
-        isPositioned: boolean;
-        nudge: number;
-        position: PopoutPosition;
-        setPopoutRef(ref: any): void;
-        updatePosition(): void;
-    }): ReactNode;
+    renderPopout(props: PopoutProps): ReactNode;
+    preload?(): Promise<any>;
 
     onRequestOpen?(): void;
     onRequestClose?(): void;
@@ -392,6 +397,7 @@ export type Paginator = ComponentType<{
     pageSize: number;
     totalCount: number;
 
+    className?: string;
     onPageChange?(page: number): void;
     hideMaxPage?: boolean;
 }>;
@@ -409,6 +415,24 @@ export type MaskedLink = ComponentType<PropsWithChildren<{
     channelId?: string;
 }>>;
 
+interface ScrollToOptions {
+    animate?: boolean;
+    callback?: (() => unknown);
+}
+
+/** Full type can be found at {@link https://github.com/fedeericodl/discord-client-types/blob/main/src/discord_common/js/packages/design/components/Scroller/utils/core/getAnimatedScrollHelpers.ts} */
+export interface ScrollerBaseRef {
+    scrollTo: (props: { to: number; } & ScrollToOptions) => void;
+    scrollPageUp: (props?: ScrollToOptions) => void;
+    scrollPageDown: (props?: ScrollToOptions) => void;
+    scrollToTop: (props?: ScrollToOptions) => void;
+    scrollToBottom: (props?: ScrollToOptions) => void;
+    isScrolledToTop: () => boolean;
+    isScrolledToBottom: () => boolean;
+    getDistanceFromTop: () => number;
+    getDistanceFromBottom: () => number;
+}
+
 export interface ScrollerBaseProps {
     className?: string;
     style?: CSSProperties;
@@ -416,6 +440,7 @@ export interface ScrollerBaseProps {
     paddingFix?: boolean;
     onClose?(): void;
     onScroll?(): void;
+    ref?: Ref<ScrollerBaseRef>;
 }
 
 export type ScrollerThin = ComponentType<PropsWithChildren<ScrollerBaseProps & {
@@ -446,9 +471,9 @@ export type ListScrollerThin = ComponentType<ScrollerBaseProps & {
     renderSidebar?: (listVisible: boolean, sidebarVisible: boolean) => React.ReactNode;
     wrapSection?: (section: number, children: React.ReactNode) => React.ReactNode;
 
-    sectionHeight: number;
-    rowHeight: number;
-    footerHeight?: number;
+    sectionHeight: number | ((section: number) => number);
+    rowHeight: number | ((section: number, row: number) => number);
+    footerHeight?: number | ((section: number) => number);
     sidebarHeight?: number;
 
     chunkSize?: number;
@@ -479,6 +504,7 @@ export type Avatar = ComponentType<PropsWithChildren<{
     src?: string;
     size?: "SIZE_16" | "SIZE_20" | "SIZE_24" | "SIZE_32" | "SIZE_40" | "SIZE_48" | "SIZE_56" | "SIZE_80" | "SIZE_120";
 
+    status?: string;
     statusColor?: string;
     statusTooltip?: string;
     statusBackdropColor?: string;
@@ -495,6 +521,12 @@ export type Avatar = ComponentType<PropsWithChildren<{
 
 type FocusLock = ComponentType<PropsWithChildren<{
     containerRef: Ref<HTMLElement>;
+}>>;
+
+export type Dots = ComponentType<PropsWithChildren<{
+    dotRadius: number;
+    themed?: boolean;
+    className?: string;
 }>>;
 
 export type Icon = ComponentType<JSX.IntrinsicElements["svg"] & {

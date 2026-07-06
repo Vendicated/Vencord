@@ -80,6 +80,7 @@ function VencordPopoutButton() {
 export default definePlugin({
     name: "VencordToolbox",
     description: "Adds a button to the titlebar that houses Vencord quick actions",
+    tags: ["Utility", "Developers"],
     authors: [Devs.Ven, Devs.AutumnVN],
 
     settings,
@@ -88,8 +89,8 @@ export default definePlugin({
         {
             find: '?"BACK_FORWARD_NAVIGATION":',
             replacement: {
-                match: /(?<=trailing:.{0,50})\i\.Fragment,(?=\{children:\[)/,
-                replace: "$self.TrailingWrapper,"
+                match: /(trailing:.{0,50}?)\i\.Fragment,(?=\{children:\[)/,
+                replace: "$1$self.TrailingWrapper,"
             }
         }
     ],

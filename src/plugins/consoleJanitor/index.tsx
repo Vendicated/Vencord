@@ -57,7 +57,7 @@ function AllowLevelSetting({ settingKey }: AllowLevelSettingProps) {
 
 const AllowLevelSettings = ErrorBoundary.wrap(() => {
     return (
-        <SettingsSection name="Filter List" description="Always allow loggers of these types">
+        <SettingsSection name="Filter List" id="filterList" description="Always allow loggers of these types">
             <div style={{ display: "flex", flexDirection: "row" }}>
                 {Object.keys(settings.store.allowLevel).map(key => (
                     <AllowLevelSetting key={key} settingKey={key as keyof AllowLevels} />
@@ -108,6 +108,7 @@ export default definePlugin({
     name: "ConsoleJanitor",
     description: "Disables annoying console messages/errors",
     authors: [Devs.Nuckyz, Devs.sadan],
+    tags: ["Developers", "Console", "Utility"],
     settings,
 
     startAt: StartAt.Init,
@@ -134,7 +135,7 @@ export default definePlugin({
         {
             find: 'The "interpolate" function is deprecated in v10 (use "to" instead)',
             replacement: {
-                match: /,console.warn\(\i\+'The "interpolate" function is deprecated in v10 \(use "to" instead\)'\)/,
+                match: /,console.warn\('react-spring: The "interpolate" function is deprecated in v10 \(use "to" instead\)'\)/,
                 replace: ""
             }
         },
@@ -195,7 +196,7 @@ export default definePlugin({
             find: "Slow dispatch on",
             replacement: [
                 {
-                    match: /\i\.totalTime>\i&&\i\.verbose\([`"]Slow dispatch on.{0,55}\);/,
+                    match: /\i\.totalTime>\d+?&&\i\.verbose\([`"]Slow dispatch on.{0,55}\);/,
                     replace: ""
                 },
             ]

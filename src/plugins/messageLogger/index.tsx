@@ -20,7 +20,7 @@ import "./messageLogger.css";
 
 import { findGroupChildrenByChildId, NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { updateMessage } from "@api/MessageUpdater";
-import { Settings } from "@api/Settings";
+import { definePluginSettings } from "@api/Settings";
 import { disableStyle, enableStyle } from "@api/Styles";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs, SUPPORT_CATEGORY_ID, VENBOT_USER_ID } from "@utils/constants";
@@ -44,8 +44,70 @@ interface MLMessage extends Message {
 
 const MessageClasses = findCssClassesLazy("edited", "communicationDisabled", "isSystemMessage");
 
+const settings = definePluginSettings({
+    deleteStyle: {
+        type: OptionType.SELECT,
+        description: "The style of deleted messages",
+        default: "text",
+        options: [
+            { label: "Red text", value: "text", default: true },
+            { label: "Red overlay", value: "overlay" }
+        ],
+        onChange: () => addDeleteStyle()
+    },
+    logDeletes: {
+        type: OptionType.BOOLEAN,
+        description: "Whether to log deleted messages",
+        default: true,
+    },
+    collapseDeleted: {
+        type: OptionType.BOOLEAN,
+        description: "Whether to collapse deleted messages, similar to blocked messages",
+        default: false,
+        restartNeeded: true,
+    },
+    logEdits: {
+        type: OptionType.BOOLEAN,
+        description: "Whether to log edited messages",
+        default: true,
+    },
+    inlineEdits: {
+        type: OptionType.BOOLEAN,
+        description: "Whether to display edit history as part of message content",
+        default: true
+    },
+    ignoreBots: {
+        type: OptionType.BOOLEAN,
+        description: "Whether to ignore messages by bots",
+        default: false
+    },
+    ignoreSelf: {
+        type: OptionType.BOOLEAN,
+        description: "Whether to ignore messages by yourself",
+        default: false
+    },
+    ignoreUsers: {
+        type: OptionType.STRING,
+        description: "Comma-separated list of user IDs to ignore",
+        default: "",
+        multiline: true
+    },
+    ignoreChannels: {
+        type: OptionType.STRING,
+        description: "Comma-separated list of channel IDs to ignore",
+        default: "",
+        multiline: true
+    },
+    ignoreGuilds: {
+        type: OptionType.STRING,
+        description: "Comma-separated list of guild IDs to ignore",
+        default: "",
+        multiline: true
+    },
+});
+
 function addDeleteStyle() {
-    if (Settings.plugins.MessageLogger.deleteStyle === "text") {
+    if (settings.store.deleteStyle === "text") {
         enableStyle(textStyle);
         disableStyle(overlayStyle);
     } else {
@@ -93,7 +155,7 @@ const patchMessageContextMenu: NavContextMenuPatchCallback = (children, props) =
                         mlDeleted: true
                     });
                 } else {
-                    message.editHistory = [];
+                    updateMessage(channel_id, id, { editHistory: [] });
                 }
             }}
         />
@@ -144,9 +206,10 @@ export function parseEditContent(content: string, message: Message) {
 export default definePlugin({
     name: "MessageLogger",
     description: "Temporarily logs deleted and edited messages.",
+    tags: ["Chat", "Utility"],
     authors: [Devs.rushii, Devs.Ven, Devs.AutumnVN, Devs.Nickyux, Devs.Kyuuhachi],
     dependencies: ["MessageUpdaterAPI"],
-
+    settings,
     contextMenus: {
         "message": patchMessageContextMenu,
         "channel-context": patchChannelContextMenu,
@@ -167,7 +230,7 @@ export default definePlugin({
             (oldMsg, newMsg) => oldMsg?.editHistory === newMsg?.editHistory
         );
 
-        return Settings.plugins.MessageLogger.inlineEdits && (
+        return settings.store.inlineEdits && (
             <>
                 {message.editHistory?.map((edit, idx) => (
                     <div key={idx} className="messagelogger-edited">
@@ -190,68 +253,6 @@ export default definePlugin({
             timestamp: new Date(newMessage.edited_timestamp),
             content: oldMessage.content
         };
-    },
-
-    options: {
-        deleteStyle: {
-            type: OptionType.SELECT,
-            description: "The style of deleted messages",
-            default: "text",
-            options: [
-                { label: "Red text", value: "text", default: true },
-                { label: "Red overlay", value: "overlay" }
-            ],
-            onChange: () => addDeleteStyle()
-        },
-        logDeletes: {
-            type: OptionType.BOOLEAN,
-            description: "Whether to log deleted messages",
-            default: true,
-        },
-        collapseDeleted: {
-            type: OptionType.BOOLEAN,
-            description: "Whether to collapse deleted messages, similar to blocked messages",
-            default: false,
-            restartNeeded: true,
-        },
-        logEdits: {
-            type: OptionType.BOOLEAN,
-            description: "Whether to log edited messages",
-            default: true,
-        },
-        inlineEdits: {
-            type: OptionType.BOOLEAN,
-            description: "Whether to display edit history as part of message content",
-            default: true
-        },
-        ignoreBots: {
-            type: OptionType.BOOLEAN,
-            description: "Whether to ignore messages by bots",
-            default: false
-        },
-        ignoreSelf: {
-            type: OptionType.BOOLEAN,
-            description: "Whether to ignore messages by yourself",
-            default: false
-        },
-        ignoreUsers: {
-            type: OptionType.STRING,
-            description: "Comma-separated list of user IDs to ignore",
-            default: "",
-            multiline: true
-        },
-        ignoreChannels: {
-            type: OptionType.STRING,
-            description: "Comma-separated list of channel IDs to ignore",
-            default: "",
-            multiline: true
-        },
-        ignoreGuilds: {
-            type: OptionType.STRING,
-            description: "Comma-separated list of guild IDs to ignore",
-            default: "",
-            multiline: true
-        },
     },
 
     handleDelete(cache: any, data: { ids: string[], id: string; mlDeleted?: boolean; }, isBulk: boolean) {
@@ -289,7 +290,7 @@ export default definePlugin({
 
     shouldIgnore(message: any, isEdit = false) {
         try {
-            const { ignoreBots, ignoreSelf, ignoreUsers, ignoreChannels, ignoreGuilds, logEdits, logDeletes } = Settings.plugins.MessageLogger;
+            const { ignoreBots, ignoreSelf, ignoreUsers, ignoreChannels, ignoreGuilds, logEdits, logDeletes } = settings.store;
             const myId = UserStore.getCurrentUser().id;
 
             return ignoreBots && message.author?.bot ||
@@ -349,40 +350,41 @@ export default definePlugin({
 
     patches: [
         {
-            // MessageStore
             find: '"MessageStore"',
             replacement: [
                 {
                     // Add deleted=true to all target messages in the MESSAGE_DELETE event
-                    match: /function (?=.+?MESSAGE_DELETE:(\i))\1\((\i)\){let.+?((?:\i\.){2})getOrCreate.+?}(?=function)/,
-                    replace:
-                        "function $1($2){" +
-                        "   var cache = $3getOrCreate($2.channelId);" +
-                        "   cache = $self.handleDelete(cache, $2, false);" +
-                        "   $3commit(cache);" +
-                        "}"
+                    match: /(?<=MESSAGE_DELETE:function\((\i)\)\{)(?=let.{0,100}(\i\.\i)\.getOrCreate)/,
+                    replace: `
+                        let cache = $2.getOrCreate($1.channelId);
+                        cache = $self.handleDelete(cache, $1, false);
+                        $2.commit(cache);
+                        return;
+                    `
                 },
                 {
                     // Add deleted=true to all target messages in the MESSAGE_DELETE_BULK event
-                    match: /function (?=.+?MESSAGE_DELETE_BULK:(\i))\1\((\i)\){let.+?((?:\i\.){2})getOrCreate.+?}(?=function)/,
-                    replace:
-                        "function $1($2){" +
-                        "   var cache = $3getOrCreate($2.channelId);" +
-                        "   cache = $self.handleDelete(cache, $2, true);" +
-                        "   $3commit(cache);" +
-                        "}"
+                    match: /(?<=MESSAGE_DELETE_BULK:function\((\i)\){)(?=let.{0,100}(\i\.\i)\.getOrCreate)/,
+                    replace: `
+                        let cache = $2.getOrCreate($1.channelId);
+                        cache = $self.handleDelete(cache, $1, true);
+                        $2.commit(cache);
+                        return;
+                    `
                 },
                 {
                     // Add current cached content + new edit time to cached message's editHistory
-                    match: /(function (\i)\((\i)\).+?)\.update\((\i)(?=.*MESSAGE_UPDATE:\2)/,
-                    replace: "$1" +
-                        ".update($4,m =>" +
-                        "   (($3.message.flags & 64) === 64 || $self.shouldIgnore($3.message, true)) ? m :" +
-                        "   $3.message.edited_timestamp && $3.message.content !== m.content ?" +
-                        "       m.set('editHistory',[...(m.editHistory || []), $self.makeEdit($3.message, m)]) :" +
-                        "       m" +
-                        ")" +
-                        ".update($4"
+                    match: /(MESSAGE_UPDATE:function\((\i)\).+?)\.update\((\i)/,
+                    replace: `
+                        $1
+                        .update($3, m =>
+                            (($2.message.flags & 64) === 64 || $self.shouldIgnore($2.message, true)) ? m :
+                            $2.message.edited_timestamp && $2.message.content !== m.content ?
+                                m.set('editHistory',[...(m.editHistory || []), $self.makeEdit($2.message, m)]) :
+                                m
+                        )
+                        .update($3
+                    `
                 },
                 {
                     // fix up key (edit last message) attempting to edit a deleted message
@@ -493,12 +495,12 @@ export default definePlugin({
             find: '"ReferencedMessageStore"',
             replacement: [
                 {
-                    match: /MESSAGE_DELETE:\i,/,
-                    replace: "MESSAGE_DELETE:()=>{},"
+                    match: /(?<=MESSAGE_DELETE:function\(\i\)\{)/,
+                    replace: "return;"
                 },
                 {
-                    match: /MESSAGE_DELETE_BULK:\i,/,
-                    replace: "MESSAGE_DELETE_BULK:()=>{},"
+                    match: /(?<=MESSAGE_DELETE_BULK:function\(\i\)\{)/,
+                    replace: "return;"
                 }
             ]
         },
@@ -521,7 +523,7 @@ export default definePlugin({
                 match: /if\((\i)\.blocked\)return \i\.\i\.MESSAGE_GROUP_BLOCKED;/,
                 replace: '$&else if($1.deleted) return"MESSAGE_GROUP_DELETED";',
             },
-            predicate: () => Settings.plugins.MessageLogger.collapseDeleted
+            predicate: () => settings.store.collapseDeleted
         },
         {
             // Message group rendering
@@ -532,11 +534,11 @@ export default definePlugin({
                     replace: '$&$1.type==="MESSAGE_GROUP_DELETED"||',
                 },
                 {
-                    match: /(\i).type===\i\.\i\.MESSAGE_GROUP_BLOCKED\?.*?:/,
-                    replace: '$&$1.type==="MESSAGE_GROUP_DELETED"?$self.DELETED_MESSAGE_COUNT:',
+                    match: /(\i).type===\i\.\i\.MESSAGE_GROUP_BLOCKED\?(\i)=.*?:/,
+                    replace: '$&$1.type==="MESSAGE_GROUP_DELETED"?$2=$self.DELETED_MESSAGE_COUNT:',
                 },
             ],
-            predicate: () => Settings.plugins.MessageLogger.collapseDeleted
+            predicate: () => settings.store.collapseDeleted
         }
     ]
 });

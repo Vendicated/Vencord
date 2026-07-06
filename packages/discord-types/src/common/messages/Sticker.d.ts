@@ -1,7 +1,7 @@
 import { StickerFormatType, StickerType } from "../../../enums";
 
 interface BaseSticker {
-    asset: string;
+    asset?: string;
     available: boolean;
     description: string;
     format_type: StickerFormatType;

@@ -92,6 +92,7 @@
     padding-left: 5px;
     padding-right: 8px;
     user-select: none;
+    white-space: nowrap;
 }
 
 .vc-shiki-root .vc-shiki-table-cell:last-child {

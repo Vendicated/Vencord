@@ -1,0 +1,4 @@
+/* Works around a very strange issue where *something* (electron?) will inject body { app-region: drag } when using online themes */
+body {
+    app-region: no-drag;
+}

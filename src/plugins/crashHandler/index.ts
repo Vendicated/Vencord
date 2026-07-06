@@ -16,15 +16,15 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { DataStore } from "@api/index";
 import { showNotification } from "@api/Notifications";
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import { Logger } from "@utils/Logger";
-import { closeAllModals } from "@utils/modal";
 import definePlugin, { OptionType } from "@utils/types";
 import { maybePromptToUpdate } from "@utils/updater";
 import { filters, findBulk, proxyLazyWebpack } from "@webpack";
-import { DraftType, ExpressionPickerStore, FluxDispatcher, NavigationRouter, SelectedChannelStore } from "@webpack/common";
+import { closeAllModals, DraftType, ExpressionPickerStore, FluxDispatcher, NavigationRouter, SelectedChannelStore } from "@webpack/common";
 
 const CrashHandlerLogger = new Logger("CrashHandler");
 
@@ -61,8 +61,8 @@ export default definePlugin({
     name: "CrashHandler",
     description: "Utility plugin for handling and possibly recovering from crashes without a restart",
     authors: [Devs.Nuckyz],
+    tags: ["Utility", "Developers"],
     enabledByDefault: true,
-
     settings,
 
     patches: [
@@ -76,6 +76,8 @@ export default definePlugin({
     ],
 
     handleCrash(_this: any, errorState: any) {
+        DataStore.del("KeepCurrentChannel_previousData");
+
         if (IS_DEV) {
             try {
                 if (errorState?.info && "componentStack" in errorState.info) {

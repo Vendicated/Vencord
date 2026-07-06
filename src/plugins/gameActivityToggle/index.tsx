@@ -104,6 +104,7 @@ function GameActivityToggleButton(props: { nameplate?: any; }) {
 export default definePlugin({
     name: "GameActivityToggle",
     description: "Adds a button next to the mic and deafen button to toggle game activity.",
+    tags: ["Activity", "Shortcuts"],
     authors: [Devs.Nuckyz, Devs.RuukuLada],
     dependencies: ["UserSettingsAPI"],
     settings,
@@ -112,7 +113,7 @@ export default definePlugin({
 
     patches: [
         {
-            find: ".DISPLAY_NAME_STYLES_COACHMARK)",
+            find: "#{intl::USER_PROFILE_ACCOUNT_POPOUT_BUTTON_A11Y_LABEL}",
             replacement: {
                 match: /children:\[(?=.{0,25}?accountContainerRef)/,
                 replace: "children:[$self.GameActivityToggleButton(arguments[0]),"
