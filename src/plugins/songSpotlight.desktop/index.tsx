@@ -20,38 +20,39 @@ import WidgetSongs from "./ui/songs/WidgetSongs";
 export default definePlugin({
     name: "SongSpotlight",
     description: "Show off songs on your profile",
+    tags: ["Appearance", "Media"],
     authors: [Devs.nexpid],
     settings,
     patches: [
-        // Personal profile popout
+        // Own profile popout
         {
             find: '"UserProfileAccountPopout"',
             replacement: {
-                match: /user:(\i),bio:.{0,60}}\)/,
-                replace: "$&,$self.renderProfileSongs({user:$1})",
+                match: /user:\i,widgets:.{0,100}}\),/,
+                replace: "$&$self.renderProfileSongs(arguments[0]),",
             },
         },
-        // Message user popout
+        // Message and member list popout (lazy loaded)
         {
-            find: ".isProvisional?(",
+            find: '"UserProfilePopout");',
             replacement: {
-                match: /user:(\i),bio:.{0,60}}\)/,
-                replace: "$&,$self.renderProfileSongs({user:$1})",
+                match: /user:\i,widgets:.{0,100}?\}\),/,
+                replace: "$&$self.renderProfileSongs(arguments[0]),",
             },
         },
-        // DM sidebar profile
+        // DM sidebar
         {
-            find: ".SIDEBAR}),nicknameIcons:",
+            find: ".SIDEBAR,disableToolbar:",
             replacement: {
-                match: /{userId:(\i)\.id}\)}\).{0,100}]}\)(?=\]\}\))/,
-                replace: "$&,$self.renderProfileSongs({user:$1,isSideBar:true})",
+                match: /user:\i,widgets:.{0,100}?\}\),(?=.{0,200}#{intl::USER_PROFILE_WISHLIST})/,
+                replace: "$&$self.renderProfileSongs({...arguments[0],isSideBar:true}),",
             },
         },
         // Full profile modal sections (lazy loaded)
         {
             find: ".MUTUAL_GUILDS})),",
             replacement: {
-                match: /(\i).push\({text.{0,50}}\);/,
+                match: /(\i).push\({text.{0,50}.ACTIVITY\}\);/,
                 replace: '$&$1.push({text:"Song Spotlight",section:"SONG_SPOTLIGHT"});',
             },
         },

@@ -13,12 +13,7 @@ import { useAuthorizationStore } from "@plugins/songSpotlight.desktop/lib/stores
 import { useSongStore } from "@plugins/songSpotlight.desktop/lib/stores/SongStore";
 import { cl } from "@plugins/songSpotlight.desktop/lib/utils";
 import settings from "@plugins/songSpotlight.desktop/settings";
-import {
-    CardClasses,
-    MoreHorizontalIcon,
-    OverlayClasses,
-    Spinner,
-} from "@plugins/songSpotlight.desktop/ui/common";
+import { CardClasses, MoreHorizontalIcon, OverlayClasses, Spinner } from "@plugins/songSpotlight.desktop/ui/common";
 import { openSettingsModal } from "@plugins/songSpotlight.desktop/ui/settings";
 import { sid } from "@song-spotlight/api/util";
 import { copyWithToast } from "@utils/discord";
@@ -39,17 +34,21 @@ import {
 import Song from ".";
 import CollapsedProfileSongs from "./CollapsedProfileSongs";
 
-export interface ProfileSongsProps {
-    user: User;
+interface ProfileSongsProps {
+    user?: User;
+    currentUser?: User;
     isSideBar: boolean;
 }
 
-export default function ProfileSongs({ user, isSideBar }: ProfileSongsProps) {
+export default function ProfileSongs({ user: _user, currentUser, isSideBar }: ProfileSongsProps) {
+    const user = _user ?? currentUser;
+    if (!user) throw new Error("Missing user");
+
     const [failed, setFailed] = useState(false);
     const { isAuthorized } = useAuthorizationStore();
     const { users } = useSongStore();
     const { profileSongsLimit, collapseSongList } = settings.use();
-    const userId = user?.id;
+    const userId = user.id;
     const data = users[userId]?.data;
     useEffect(() => {
         if (isAuthorized() && !data) listData(userId).catch(() => setFailed(true));

@@ -5,7 +5,6 @@
  */
 
 import { BaseText } from "@components/BaseText";
-import { Button } from "@components/Button";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Flex } from "@components/Flex";
 import { PlusIcon } from "@components/Icons";
@@ -13,11 +12,11 @@ import { cl, logger } from "@plugins/songSpotlight.desktop/lib/utils";
 import { Native } from "@plugins/songSpotlight.desktop/service";
 import { parsers } from "@song-spotlight/api/handlers";
 import { Song } from "@song-spotlight/api/structs";
-import { closeModal, ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, openModal } from "@utils/modal";
-import { Clickable, TextInput, useState } from "@webpack/common";
+import { RenderModalProps } from "@vencord/discord-types";
+import { Clickable, closeModal, Modal, openModal, TextInput, useState } from "@webpack/common";
 
 interface AddSongModalProps {
-    modalProps: ModalProps;
+    modalProps: RenderModalProps;
     close(): void;
     onAdd(song: Song): string | undefined;
 }
@@ -29,64 +28,60 @@ function AddSongModal({ modalProps, close, onAdd }: AddSongModalProps) {
 
     return (
         <ErrorBoundary>
-            <ModalRoot {...modalProps}>
-                <ModalHeader>
-                    <BaseText size="xl" weight="bold">Add a new song</BaseText>
-                </ModalHeader>
-                <ModalContent>
-                    <Flex flexDirection="column" gap="10px">
-                        <BaseText size="md" weight="normal" className={cl("sub")}>
-                            Song Spotlight supports these services: <b>{parsers.map(x => x.label).join(", ")}</b>
-                        </BaseText>
-                        <TextInput
-                            placeholder="https://open.spotify.com/..."
-                            error={error}
-                            onChange={value => {
-                                setURL(value);
-                                try {
-                                    if (value) new URL(value);
-                                    setError(undefined);
-                                } catch {
-                                    setError("Invalid URL");
+            <Modal
+                {...modalProps}
+                size="md"
+                title="Add a new song"
+                actions={[
+                    {
+                        text: "Add song",
+                        variant: "primary",
+                        disabled: !url || !!error || pending,
+                        onClick: async () => {
+                            setPending(true);
+                            try {
+                                const parsed = await Native.parseLink(url);
+                                if (!parsed) {
+                                    setError("Invalid link");
+                                    return setPending(false);
                                 }
-                            }}
-                        />
-                    </Flex>
-                </ModalContent>
-                <ModalFooter>
-                    <Flex justifyContent="flex-end" gap={0}>
-                        <Button
-                            variant="primary"
-                            onClick={async () => {
-                                setPending(true);
-                                try {
-                                    const parsed = await Native.parseLink(url);
-                                    if (!parsed) {
-                                        setError("Invalid link");
-                                        return setPending(false);
-                                    }
 
-                                    const result = onAdd(parsed);
-                                    if (result) {
-                                        setError(result);
-                                        return setPending(false);
-                                    }
-
-                                    close();
-                                } catch (error) {
-                                    logger.error("parseLink error", error);
-
-                                    setError("Failed to parse link");
-                                    setPending(false);
+                                const result = onAdd(parsed);
+                                if (result) {
+                                    setError(result);
+                                    return setPending(false);
                                 }
-                            }}
-                            disabled={!url || !!error || pending}
-                        >
-                            Add song
-                        </Button>
-                    </Flex>
-                </ModalFooter>
-            </ModalRoot>
+
+                                close();
+                            } catch (error) {
+                                logger.error("parseLink error", error);
+
+                                setError("Failed to parse link");
+                                setPending(false);
+                            }
+                        }
+                    }
+                ]}
+            >
+                <Flex flexDirection="column" gap="10px">
+                    <BaseText size="md" weight="normal" className={cl("sub")}>
+                        Song Spotlight supports these services: <b>{parsers.map(x => x.label).join(", ")}</b>
+                    </BaseText>
+                    <TextInput
+                        placeholder="https://open.spotify.com/..."
+                        error={error}
+                        onChange={value => {
+                            setURL(value);
+                            try {
+                                if (value) new URL(value);
+                                setError(undefined);
+                            } catch {
+                                setError("Invalid URL");
+                            }
+                        }}
+                    />
+                </Flex>
+            </Modal>
         </ErrorBoundary>
     );
 }

@@ -13,7 +13,6 @@ import { cl } from "@plugins/songSpotlight.desktop/lib/utils";
 import { useRender } from "@plugins/songSpotlight.desktop/service";
 import { TrashIcon } from "@plugins/songSpotlight.desktop/ui/common";
 import ServiceIcon from "@plugins/songSpotlight.desktop/ui/components/ServiceIcon";
-import AddSong from "@plugins/songSpotlight.desktop/ui/settings/AddSong";
 import { Song, UserData } from "@song-spotlight/api/structs";
 import { sid } from "@song-spotlight/api/util";
 import { copyWithToast } from "@utils/discord";
@@ -29,6 +28,8 @@ import {
     useState,
 } from "@webpack/common";
 import { DragEvent } from "react";
+
+import AddSong from "./AddSong";
 
 interface EditableSongProps {
     song: Song;

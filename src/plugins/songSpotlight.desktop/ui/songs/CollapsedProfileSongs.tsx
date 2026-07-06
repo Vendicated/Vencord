@@ -6,17 +6,12 @@
 
 import { BaseText } from "@components/index";
 import { Native } from "@plugins/songSpotlight.desktop/service";
-import {
-    ContainerClasses,
-    DMSideBarClasses,
-    OverlayClasses,
-    ProfileCardClasses,
-    Spinner,
-} from "@plugins/songSpotlight.desktop/ui/common";
+import { ContainerClasses, DMSideBarClasses, OverlayClasses, ProfileCardClasses, Spinner } from "@plugins/songSpotlight.desktop/ui/common";
 import { RenderSongInfo } from "@song-spotlight/api/handlers";
 import { UserData } from "@song-spotlight/api/structs";
 import { sid } from "@song-spotlight/api/util";
 import { classes } from "@utils/index";
+import { User } from "@vencord/discord-types";
 import {
     SelectedChannelStore,
     SelectedGuildStore,
@@ -26,12 +21,12 @@ import {
     useState,
 } from "@webpack/common";
 
-import { ProfileSongsProps } from "./ProfileSongs";
-
 const shownSongs = 4;
 
-interface CollapsedProfileSongsProps extends ProfileSongsProps {
+interface CollapsedProfileSongsProps {
     data?: UserData;
+    user: User;
+    isSideBar: boolean;
 }
 
 export default function CollapsedProfileSongs({ data, user, isSideBar }: CollapsedProfileSongsProps) {
@@ -76,7 +71,13 @@ export default function CollapsedProfileSongs({ data, user, isSideBar }: Collaps
                             });
                         }}
                     >
-                        <div className={classes(OverlayClasses.overlay, ContainerClasses.innerContainer, ProfileCardClasses.card)}>
+                        <div
+                            className={classes(
+                                OverlayClasses.overlay,
+                                ContainerClasses.innerContainer,
+                                ProfileCardClasses.card,
+                            )}
+                        >
                             <BaseText size={isSideBar ? "sm" : "xs"} weight="medium">Song Spotlight</BaseText>
                             <div className={ContainerClasses.icons}>
                                 {previews && data
@@ -95,7 +96,9 @@ export default function CollapsedProfileSongs({ data, user, isSideBar }: Collaps
                                                 )}
                                                 {extra && (
                                                     <div className={ContainerClasses.displayCountText}>
-                                                        <BaseText size={isSideBar ? "sm" : "xs"} weight="medium">+{data.length - shownSongs}</BaseText>
+                                                        <BaseText size={isSideBar ? "sm" : "xs"} weight="medium">
+                                                            +{data.length - shownSongs}
+                                                        </BaseText>
                                                     </div>
                                                 )}
                                             </div>
