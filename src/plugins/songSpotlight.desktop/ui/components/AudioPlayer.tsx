@@ -106,7 +106,7 @@ export default function AudioPlayer({ audioRef, list, playing, setPlaying, setLo
             }
             audios.current.delete(index);
         }
-    }, []);
+    }, [list]);
 
     const handleLoaded = useCallback((index: number) => {
         loaded.current.add(index);
