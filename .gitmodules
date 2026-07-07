@@ -1,0 +1,3 @@
+[submodule "src/plugins/vc-betterActivities"]
+	path = src/plugins/vc-betterActivities
+	url = https://github.com/D3SOX/vc-betterActivities

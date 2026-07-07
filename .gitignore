@@ -20,6 +20,7 @@ lerna-debug.log*
 *.tsbuildinfo
 
 src/userplugins
+src/plugins/vc-betterActivities
 
 ExtensionCache/
 /settings
