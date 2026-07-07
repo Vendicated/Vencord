@@ -44,8 +44,6 @@ interface MLMessage extends Message {
 
 const MessageClasses = findCssClassesLazy("edited", "communicationDisabled", "isSystemMessage");
 
-const IdRegex = /^\d{17,21}$/;
-
 const settings = definePluginSettings({
     deleteStyle: {
         type: OptionType.SELECT,
@@ -309,10 +307,14 @@ export default definePlugin({
         }
     },
 
+    /*
+     * Due to a Discord bug, it is possible to edit a past message by sending a new message whose nonce matches the old message's ID.
+     * This will make Discord replace the old message with the new one, which bypasses our edit logging since the message isn't ever
+     * actually edited. To patch this behaviour, we check for this trick and remove the nonce if detected.
+    */
     normalizeNonce(msg: Message) {
         try {
-
-            if (!msg?.nonce) return;
+            if (!msg.nonce) return;
 
             const prevMsg = MessageStore.getMessage(msg.channel_id, msg.nonce);
             if (!prevMsg || prevMsg.state !== "SENT") return;
