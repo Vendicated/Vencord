@@ -4,16 +4,18 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { RenderInfoEntry } from "@song-spotlight/api/handlers";
 import { useEffect, useMemo, useState } from "@webpack/common";
 import { JSX, RefObject } from "react";
 
 interface ProgressCircleProps extends SvgProps {
     border: number;
     audioRef: RefObject<HTMLAudioElement | undefined>;
+    playingRef: RefObject<RenderInfoEntry | undefined>;
 }
 type SvgProps = JSX.IntrinsicElements["svg"];
 
-export default function ProgressCircle({ border, audioRef, ...props }: ProgressCircleProps) {
+export default function ProgressCircle({ border, audioRef, playingRef, ...props }: ProgressCircleProps) {
     const { radius, stroke, circumference } = useMemo(() => {
         const radius = 50 - border * 2;
         return {
@@ -26,9 +28,14 @@ export default function ProgressCircle({ border, audioRef, ...props }: ProgressC
 
     useEffect(() => {
         let handle = requestAnimationFrame(function update() {
-            const audio = audioRef.current;
-            if (audio && !Number.isNaN(audio.duration) && !audio.paused) {
-                setProgress(audio.currentTime / audio.duration);
+            const audio = audioRef.current, playing = playingRef.current?.audio;
+            if (audio && playing && !Number.isNaN(audio.duration) && !audio.paused) {
+                let preg = audio.currentTime / audio.duration;
+                if (playing.previewStart && playing.previewSlice) {
+                    const start = playing.previewStart / 1e3, slice = playing.previewSlice / 1e3;
+                    preg = (audio.currentTime - start) / slice;
+                }
+                setProgress(Math.min(Math.max(preg, 0), 1));
             } else {
                 setProgress(0);
             }

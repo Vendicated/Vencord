@@ -33,7 +33,9 @@ export default function AudioPlayer({ audioRef, list, playing, setPlaying, setLo
             if (audio && loaded.current.has(playing)) {
                 if (globalPlaying) globalPlaying.pause();
 
-                audio.currentTime = 0;
+                const previewStart = list[playing]?.audio?.previewStart;
+
+                audio.currentTime = previewStart ? previewStart / 1e3 : 0;
                 audio.volume = DEFAULT_VOLUME;
                 audio.play().catch(error => {
                     showToast("Failed to play song preview!", Toasts.Type.FAILURE);
@@ -64,8 +66,19 @@ export default function AudioPlayer({ audioRef, list, playing, setPlaying, setLo
     }, [playing]);
 
     const handleRef = useCallback((index: number, audio: HTMLAudioElement | null) => {
-        if (audio) audios.current.set(index, audio);
-        else audios.current.delete(index);
+        if (audio) {
+            audios.current.set(index, audio);
+
+            const listed = list[index]?.audio;
+            if (!listed?.previewSlice) return;
+
+            let timeout: any;
+            audio.addEventListener("play", () => {
+                clearTimeout(timeout);
+                timeout = setTimeout(() => audio.currentTime = audio.duration, listed.previewSlice);
+            });
+            audio.addEventListener("pause", () => clearTimeout(timeout));
+        } else audios.current.delete(index);
     }, []);
 
     const handleLoaded = useCallback((index: number) => {
