@@ -31,7 +31,7 @@ export default function ProgressCircle({ border, audioRef, playingRef, ...props 
             const audio = audioRef.current, playing = playingRef.current?.audio;
             if (audio && playing && !Number.isNaN(audio.duration) && !audio.paused) {
                 let preg = audio.currentTime / audio.duration;
-                if (playing.previewStart && playing.previewSlice) {
+                if (playing.previewStart !== undefined && playing.previewSlice) {
                     const start = playing.previewStart / 1e3, slice = playing.previewSlice / 1e3;
                     preg = (audio.currentTime - start) / slice;
                 }

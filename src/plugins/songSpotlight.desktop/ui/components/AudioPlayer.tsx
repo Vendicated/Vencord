@@ -17,6 +17,12 @@ interface AudioPlayerProps {
     setLoaded(index: number, state: boolean): void;
 }
 
+interface ListenerEntry {
+    onPlay(): void;
+    onPause(): void;
+    timeout?: ReturnType<typeof setTimeout>;
+}
+
 const DEFAULT_VOLUME = 0.35;
 
 // only allow one song to play at a time
@@ -35,7 +41,7 @@ export default function AudioPlayer({ audioRef, list, playing, setPlaying, setLo
 
                 const previewStart = list[playing]?.audio?.previewStart;
 
-                audio.currentTime = previewStart ? previewStart / 1e3 : 0;
+                audio.currentTime = previewStart !== undefined ? previewStart / 1e3 : 0;
                 audio.volume = DEFAULT_VOLUME;
                 audio.play().catch(error => {
                     showToast("Failed to play song preview!", Toasts.Type.FAILURE);
@@ -65,6 +71,8 @@ export default function AudioPlayer({ audioRef, list, playing, setPlaying, setLo
         }
     }, [playing]);
 
+    const listenerEntries = useRef(new Map<number, ListenerEntry>());
+
     const handleRef = useCallback((index: number, audio: HTMLAudioElement | null) => {
         if (audio) {
             audios.current.set(index, audio);
@@ -72,13 +80,32 @@ export default function AudioPlayer({ audioRef, list, playing, setPlaying, setLo
             const listed = list[index]?.audio;
             if (!listed?.previewSlice) return;
 
-            let timeout: any;
-            audio.addEventListener("play", () => {
-                clearTimeout(timeout);
-                timeout = setTimeout(() => audio.currentTime = audio.duration, listed.previewSlice);
-            });
-            audio.addEventListener("pause", () => clearTimeout(timeout));
-        } else audios.current.delete(index);
+            const entry: ListenerEntry = {
+                onPlay() {
+                    clearTimeout(entry.timeout);
+                    entry.timeout = setTimeout(() => {
+                        audio.currentTime = audio.duration;
+                    }, listed.previewSlice);
+                },
+                onPause() {
+                    clearTimeout(entry.timeout);
+                },
+            };
+
+            audio.addEventListener("play", entry.onPlay);
+            audio.addEventListener("pause", entry.onPause);
+            listenerEntries.current.set(index, entry);
+        } else {
+            const audio = audios.current.get(index);
+            const entry = listenerEntries.current.get(index);
+            if (audio && entry) {
+                clearTimeout(entry.timeout);
+                audio.removeEventListener("play", entry.onPlay);
+                audio.removeEventListener("pause", entry.onPause);
+                listenerEntries.current.delete(index);
+            }
+            audios.current.delete(index);
+        }
     }, []);
 
     const handleLoaded = useCallback((index: number) => {
