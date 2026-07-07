@@ -44,6 +44,8 @@ interface MLMessage extends Message {
 
 const MessageClasses = findCssClassesLazy("edited", "communicationDisabled", "isSystemMessage");
 
+const IdRegex = /^\d{17,21}$/;
+
 const settings = definePluginSettings({
     deleteStyle: {
         type: OptionType.SELECT,
@@ -307,6 +309,22 @@ export default definePlugin({
         }
     },
 
+    normalizeNonce(msg: Message) {
+        try {
+
+            if (!msg?.nonce) return;
+
+            const prevMsg = MessageStore.getMessage(msg.channel_id, msg.nonce);
+            if (!prevMsg || prevMsg.state !== "SENT") return;
+
+            if (prevMsg.id !== msg.id) {
+                delete msg.nonce;
+            }
+        } catch (e) {
+            console.error("[MessageLogger] Error normalizing nonce");
+        }
+    },
+
     EditMarker({ message, className, children, ...props }: any) {
         return (
             <span
@@ -539,6 +557,14 @@ export default definePlugin({
                 },
             ],
             predicate: () => settings.store.collapseDeleted
+        },
+
+        {
+            find: "this.truncateTop",
+            replacement: {
+                match: /receiveMessage\((\i)\)\{/,
+                replace: "$& $self.normalizeNonce($1);"
+            }
         }
     ]
 });
