@@ -62,24 +62,34 @@ function mapGifs(items: TenorResult[]) {
 }
 
 // this is ugly sorry
+// function contributed by taep96 because my original one broke the search result window
 async function fetchTenorResults(path: string, limit: number, extra: Record<string, string> = {}) {
     const pageSize = Math.min(limit, 50);
     const items: TenorResult[] = [];
+    const seen = new Set<string>();
     let pos = "";
-
     while (items.length < limit) {
-        const params: Record<string, string> = { ...extra, limit: String(Math.min(limit - items.length, pageSize)) };
+        const params: Record<string, string> = {
+            ...extra,
+            limit: String(Math.min(limit - items.length, pageSize))
+        };
         if (pos) params.pos = pos;
         const res = await fetch(tenorUrl(path, params));
         if (!res.ok) break;
         const body = await res.json();
         const page: TenorResult[] = body.results ?? [];
         if (!page.length) break;
-        items.push(...page);
-        if (!body.next) break;
+        const previousLength = items.length;
+        for (const item of page) {
+            if (seen.has(item.id)) continue;
+            seen.add(item.id);
+            items.push(item);
+            if (items.length >= limit) break;
+        }
+        if (items.length === previousLength) break;
+        if (!body.next || body.next === pos) break;
         pos = body.next;
     }
-
     return items;
 }
 
