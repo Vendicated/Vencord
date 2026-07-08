@@ -1,0 +1,11 @@
+.cgifs-bordered-item:not(:hover):not([class*="focused" i]) {
+    background-color: rgba(255, 255, 255, 0.03) !important;
+}
+.cgifs-bordered-item {
+    border-radius: 4px;
+}
+
+.cgifs-menu {
+    width: max-content !important;
+    min-width: 0 !important;
+}
