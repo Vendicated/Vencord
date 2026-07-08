@@ -129,6 +129,13 @@ export default definePlugin({
                     replace: "return $self.handleGifSelect($1,$2);$&"
                 }
             ]
+        },
+        {
+            find: '"IntegrationQueryStore"',
+            replacement: {
+                match: /search\((\i),(\i)\)\{null==\i\.getResults\(\1,\2\)&&/,
+                replace: "search($1,$2){return $self.tenorIntegrationSearch($1,$2);null==void 0&&"
+            }
         }
     ],
 
@@ -187,6 +194,19 @@ export default definePlugin({
             );
         }).catch(() => {
             FluxDispatcher.dispatch({ type: "GIF_PICKER_QUERY_FAILURE" });
+        });
+    },
+
+    tenorIntegrationSearch(integration: string, query: string) {
+        FluxDispatcher.dispatch({ type: "INTEGRATION_QUERY", integration, query });
+        fetchTenorResults("search", 20, { q: query }).then(results => {
+            const items = mapGifs(results);
+            FluxDispatcher.dispatch(items.length
+                ? { type: "INTEGRATION_QUERY_SUCCESS", integration, query, results: items }
+                : { type: "INTEGRATION_QUERY_FAILURE", integration, query }
+            );
+        }).catch(() => {
+            FluxDispatcher.dispatch({ type: "INTEGRATION_QUERY_FAILURE", integration, query, results: [] });
         });
     }
 });
