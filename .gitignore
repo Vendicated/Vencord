@@ -20,6 +20,9 @@ lerna-debug.log*
 *.tsbuildinfo
 
 .copilot-memory/*.db
+.agents/
+.copilot-memory/
+.gemini/
 
 ExtensionCache/
 /settings
