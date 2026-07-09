@@ -26,10 +26,10 @@ import { getIntlMessage, getUniqueUsername } from "@utils/discord";
 import { Guild, RenderModalProps, Role, RoleOrUserPermission, UnicodeEmoji, User } from "@vencord/discord-types";
 import { PermissionOverwriteType } from "@vencord/discord-types/enums";
 import { findByCodeLazy } from "@webpack";
-import { ContextMenuApi, FluxDispatcher, GuildMemberStore, GuildRoleStore, i18n, Menu, Modal,openModalLazy, PermissionsBits, ScrollerThin, Text, Tooltip, useEffect, useMemo, useRef, UserStore, useState, useStateFromStores } from "@webpack/common";
+import { ContextMenuApi, FluxDispatcher, GuildMemberStore, GuildRoleStore, i18n, Menu, Modal, openModalLazy, PermissionsBits, ScrollerThin, Text, Tooltip, useEffect, useMemo, useRef, UserStore, useState, useStateFromStores } from "@webpack/common";
 
 import { settings } from "..";
-import { PermissionAllowedIcon, PermissionDefaultIcon, PermissionDeniedIcon } from "./icons";
+import { PermissionAllowedIcon, PermissionDeniedIcon } from "./icons";
 
 type GetRoleIconData = (role: Role, size: number) => { customIconSrc?: string; unicodeEmoji?: UnicodeEmoji; };
 const getRoleIconData: GetRoleIconData = findByCodeLazy("convertSurrogateToName", "customIconSrc", "unicodeEmoji");
@@ -160,37 +160,44 @@ function RolesAndUsersPermissionsComponent({ permissions, guild, modalProps, hea
                     </ScrollerThin>
                     <div className={cl("modal-divider")} />
                     <ScrollerThin className={cl("modal-perms")} orientation="auto">
-                        {Object.values(PermissionsBits).map(bit => (
-                            <div key={bit} className={cl("modal-perms-item")}>
-                                <div className={cl("modal-perms-item-icon")}>
-                                    {(() => {
-                                        const { permissions, overwriteAllow, overwriteDeny } = selectedItem;
+                        {Object.values(PermissionsBits).map(bit => {
+                            const overrideType = (() => {
+                                const { permissions, overwriteAllow, overwriteDeny } = selectedItem;
 
-                                        if (permissions)
-                                            return (permissions & bit) === bit
-                                                ? PermissionAllowedIcon()
-                                                : PermissionDeniedIcon();
+                                if (permissions != null)
+                                    return (permissions & bit) === bit
+                                        ? "allowed"
+                                        : "denied";
 
-                                        if (overwriteAllow && (overwriteAllow & bit) === bit)
-                                            return PermissionAllowedIcon();
-                                        if (overwriteDeny && (overwriteDeny & bit) === bit)
-                                            return PermissionDeniedIcon();
+                                if (overwriteAllow && (overwriteAllow & bit) === bit)
+                                    return "allowed";
+                                if (overwriteDeny && (overwriteDeny & bit) === bit)
+                                    return "denied";
 
-                                        return PermissionDefaultIcon();
-                                    })()}
+                                return "default";
+                            })();
+
+                            if (overrideType === "default") return null;
+
+                            return (
+                                <div key={bit} className={cl("modal-perms-item")}>
+                                    <div className={cl("modal-perms-item-icon")}>
+                                        {overrideType === "allowed" && <PermissionAllowedIcon />}
+                                        {overrideType === "denied" && <PermissionDeniedIcon />}
+                                    </div>
+                                    <Text variant="text-md/normal">{guildPermissionSpecMap[String(bit)].title}</Text>
+
+                                    <Tooltip text={
+                                        (() => {
+                                            const { description } = guildPermissionSpecMap[String(bit)];
+                                            return typeof description === "function" ? i18n.intl.format(description, {}) : description;
+                                        })()
+                                    }>
+                                        {props => <InfoIcon {...props} />}
+                                    </Tooltip>
                                 </div>
-                                <Text variant="text-md/normal">{guildPermissionSpecMap[String(bit)].title}</Text>
-
-                                <Tooltip text={
-                                    (() => {
-                                        const { description } = guildPermissionSpecMap[String(bit)];
-                                        return typeof description === "function" ? i18n.intl.format(description, {}) : description;
-                                    })()
-                                }>
-                                    {props => <InfoIcon {...props} />}
-                                </Tooltip>
-                            </div>
-                        ))}
+                            );
+                        })}
                     </ScrollerThin>
                 </div>
             )}
