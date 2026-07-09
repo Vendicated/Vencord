@@ -18,6 +18,7 @@ import {
     useEffect,
     useMemo,
     UserProfileActions,
+    UserStore,
     useState,
 } from "@webpack/common";
 
@@ -58,6 +59,9 @@ export default function CollapsedProfileSongs({ data, user, isSideBar }: Collaps
                         role="button"
                         tabIndex={0}
                         onClick={() => {
+                            const user = UserStore.getUser(userId);
+                            if (!user) return;
+
                             const guildId = SelectedGuildStore.getGuildId();
                             UserProfileActions.openUserProfileModal({
                                 userId,
