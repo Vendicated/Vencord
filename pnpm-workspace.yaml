@@ -1,2 +1,18 @@
 packages:
-    - packages/*
+  - packages/*
+patchedDependencies:
+  eslint-plugin-path-alias@2.1.0: patches/eslint-plugin-path-alias@2.1.0.patch
+peerDependencyRules:
+  ignoreMissing:
+    - eslint-plugin-import
+    - eslint
+allowedDeprecatedVersions:
+  source-map-resolve: '*'
+  resolve-url: '*'
+  source-map-url: '*'
+  urix: '*'
+  q: '*'
+strictPeerDependencies: false
+allowBuilds:
+  esbuild: true
+pmOnFail: warn

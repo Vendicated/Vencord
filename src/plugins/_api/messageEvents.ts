@@ -27,7 +27,7 @@ export default definePlugin({
         {
             find: "#{intl::EDIT_TEXTAREA_HELP}",
             replacement: {
-                match: /(?<=,channel:\i\}\)\.then\().+?(?=\i\.content!==this\.props\.message\.content&&\i\((.+?)\)\})/,
+                match: /(?<=,channel:\i,message:\i\}\)\.then\().+?(?=\i\.content!==this\.props\.message\.content&&\i\((.+?)\)\})/,
                 replace: (match, args) => "" +
                     `async ${match}` +
                     `if(await Vencord.Api.MessageEvents._handlePreEdit(${args}))` +
@@ -39,8 +39,8 @@ export default definePlugin({
             replacement: {
                 // https://regex101.com/r/7iswuk/1
                 match: /let (\i)=\i\.\i\.parse\((\i),.+?\.getSendMessageOptions\(\{.+?\}\)?;(?=.+?(\i)\.flags=)(?<=\)\(({.+?})\)\.then.+?)/,
-                replace: (m, parsedMessage, channel, replyOptions, extra) => m +
-                    `if(await Vencord.Api.MessageEvents._handlePreSend(${channel}.id,${parsedMessage},${extra},${replyOptions}))` +
+                replace: (m, parsedMessage, channel, options, props) => m +
+                    `if(await Vencord.Api.MessageEvents._handlePreSend(${channel}.id,${parsedMessage},${options},${props}))` +
                     "return{shouldClear:false,shouldRefocus:true};"
             }
         },

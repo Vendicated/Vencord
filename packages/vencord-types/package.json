@@ -1,7 +1,7 @@
 {
     "name": "@vencord/types",
     "private": false,
-    "version": "1.14.1",
+    "version": "1.14.15",
     "description": "",
     "types": "index.d.ts",
     "scripts": {
@@ -10,20 +10,20 @@
     },
     "keywords": [],
     "author": "Vencord",
-    "license": "GPL-3.0",
+    "license": "GPL-3.0-or-later",
     "devDependencies": {
         "@types/fs-extra": "^11.0.4",
-        "fs-extra": "^11.3.0",
-        "tsx": "^4.19.2"
+        "fs-extra": "^11.3.6",
+        "tsx": "^4.22.4"
     },
     "dependencies": {
-        "@types/lodash": "4.17.15",
-        "@types/node": "^22.13.4",
-        "@vencord/discord-types": "^1.0.0",
+        "@types/lodash": "4.17.19",
+        "@types/node": "^26.0.1",
+        "@vencord/discord-types": "^1.0.1",
         "highlight.js": "11.11.1",
         "moment": "^2.22.2",
         "ts-pattern": "^5.6.0",
-        "type-fest": "^4.35.0"
+        "type-fest": "^5.7.0"
     },
     "peerDependencies": {
         "@types/react": "18.3.1",

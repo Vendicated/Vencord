@@ -113,7 +113,7 @@ export default definePlugin({
 
     patches: [
         {
-            find: ".DISPLAY_NAME_STYLES_COACHMARK)",
+            find: "#{intl::USER_PROFILE_ACCOUNT_POPOUT_BUTTON_A11Y_LABEL}",
             replacement: {
                 match: /children:\[(?=.{0,25}?accountContainerRef)/,
                 replace: "children:[$self.GameActivityToggleButton(arguments[0]),"

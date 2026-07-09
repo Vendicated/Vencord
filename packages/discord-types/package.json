@@ -13,10 +13,10 @@
         "directory": "packages/discord-types"
     },
     "dependencies": {
-        "moment": "^2.22.2",
-        "type-fest": "^4.41.0"
+        "moment": "2.22.2",
+        "type-fest": "^5.7.0"
     },
     "peerDependencies": {
-        "@types/react": "^19.0.10"
+        "@types/react": "19.1.0"
     }
 }
