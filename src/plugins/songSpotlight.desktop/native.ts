@@ -20,7 +20,3 @@ export async function renderSong(_: IpcMainInvokeEvent, song: Song) {
 export async function validateSong(_: IpcMainInvokeEvent, song: Song) {
     return handlers.validateSong(song);
 }
-
-export function clearCache() {
-    return handlers.clearCache();
-}

@@ -145,6 +145,7 @@
     gap: 6px;
 
     &.vc-songspotlight-songs-container-sidebar {
+        margin: 12px 16px 0;
         padding: 12px;
     }
 }
@@ -199,10 +200,6 @@
 
 .user-profile-sidebar .vc-songspotlight-song-container {
     padding: 8px;
-}
-
-.user-profile-popout:not(.custom-user-profile-theme) .vc-songspotlight-song-container {
-    background: var(--opacity-16);
 }
 
 .vc-songspotlight-song {
@@ -301,7 +298,7 @@
 .vc-songspotlight-song-progress {
     position: absolute;
     inset: 0;
-    color: white;
+    color: var(--icon-default);
     pointer-events: none;
 
     > circle {

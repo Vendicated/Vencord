@@ -15,9 +15,11 @@ interface ProgressCircleProps extends SvgProps {
 }
 type SvgProps = JSX.IntrinsicElements["svg"];
 
+const SIZE = 50;
+
 export default function ProgressCircle({ border, audioRef, playingRef, ...props }: ProgressCircleProps) {
     const { radius, stroke, circumference } = useMemo(() => {
-        const radius = 50 - border * 2;
+        const radius = SIZE - border * 2;
         return {
             radius,
             stroke: border * 2,
@@ -30,12 +32,12 @@ export default function ProgressCircle({ border, audioRef, playingRef, ...props 
         let handle = requestAnimationFrame(function update() {
             const audio = audioRef.current, playing = playingRef.current?.audio;
             if (audio && playing && !Number.isNaN(audio.duration) && !audio.paused) {
-                let preg = audio.currentTime / audio.duration;
+                let start = 0, slice = audio.duration;
                 if (playing.previewStart !== undefined && playing.previewSlice) {
-                    const start = playing.previewStart / 1e3, slice = playing.previewSlice / 1e3;
-                    preg = (audio.currentTime - start) / slice;
+                    start = playing.previewStart / 1000;
+                    slice = playing.previewSlice / 1000;
                 }
-                setProgress(Math.min(Math.max(preg, 0), 1));
+                setProgress(Math.min(Math.max((audio.currentTime - start) / slice, 0), 1));
             } else {
                 setProgress(0);
             }
@@ -49,11 +51,11 @@ export default function ProgressCircle({ border, audioRef, playingRef, ...props 
     return (
         <svg
             {...props}
-            viewBox="0 0 100 100"
+            viewBox={`0 0 ${SIZE * 2} ${SIZE * 2}`}
         >
             <circle
-                cx={50}
-                cy={50}
+                cx={SIZE}
+                cy={SIZE}
                 r={radius}
                 fill="none"
                 stroke="currentColor"
@@ -61,7 +63,7 @@ export default function ProgressCircle({ border, audioRef, playingRef, ...props 
                 strokeDasharray={circumference}
                 strokeDashoffset={circumference * (1 - progress)}
                 strokeLinecap="round"
-                transform="rotate(-90 50 50)"
+                transform={`rotate(-90 ${SIZE} ${SIZE})`}
                 data-empty={progress === 0}
             />
         </svg>

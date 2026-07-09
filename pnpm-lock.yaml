@@ -15,8 +15,8 @@ importers:
         specifier: ^0.1.2
         version: 0.1.2
       '@song-spotlight/api':
-        specifier: ^2.1.4
-        version: 2.1.4(typescript@6.0.3)
+        specifier: ^2.2.0
+        version: 2.2.0(typescript@6.0.3)
       '@vap/core':
         specifier: 0.0.12
         version: 0.0.12
@@ -522,8 +522,8 @@ packages:
     resolution: {integrity: sha512-tlqY9xq5ukxTUZBmoOp+m61cqwQD5pHJtFY3Mn8CA8ps6yghLH/Hw8UPdqg4OLmFW3IFlcXnQNmo/dh8HzXYIQ==}
     engines: {node: '>=18'}
 
-  '@song-spotlight/api@2.1.4':
-    resolution: {integrity: sha512-+jeJBu39f3OYE3RBrrnBdUdXm7qhD8aH2rhXJl+snxnQBcNF0+ylUmJd718Wrei6aw6bfQMB7NLC+jqBQYsePA==}
+  '@song-spotlight/api@2.2.0':
+    resolution: {integrity: sha512-zKH9X+G1uRYmEHFgluExPEFJWtA87PG8C39Xng0XG7Oh42ycOHjZtqtyEbfGM+hs+QEVos4wOoySeBAggnK7Iw==}
     peerDependencies:
       typescript: ^5
 
@@ -2638,8 +2638,8 @@ packages:
   zod@3.24.2:
     resolution: {integrity: sha512-lY7CDW43ECgW9u1TcT3IoXHflywfVqDYze4waEz812jR/bZ8FHDsl7pFQoSZTz5N+2NqRXs8GBwnAwo3ZNxqhQ==}
 
-  zod@4.3.6:
-    resolution: {integrity: sha512-rftlrkhHZOcjDwkGlnUtZZkvaPHCsDATp4pGpuOOMDaTdDDXF91wuVDJoWoPsKX/3YPQ5fHuF3STjcYyKr+Qhg==}
+  zod@4.4.3:
+    resolution: {integrity: sha512-ytENFjIJFl2UwYglde2jchW2Hwm4GJFLDiSXWdTrJQBIN9Fcyp7n4DhxJEiWNAJMV1/BqWfW/kkg71UDcHJyTQ==}
 
 snapshots:
 
@@ -2868,11 +2868,11 @@ snapshots:
 
   '@sindresorhus/merge-streams@4.0.0': {}
 
-  '@song-spotlight/api@2.1.4(typescript@6.0.3)':
+  '@song-spotlight/api@2.2.0(typescript@6.0.3)':
     dependencies:
       typescript: 6.0.3
     optionalDependencies:
-      zod: 4.3.6
+      zod: 4.4.3
 
   '@stylistic/eslint-plugin@5.10.0(eslint@10.6.0)':
     dependencies:
@@ -5487,5 +5487,5 @@ snapshots:
 
   zod@3.24.2: {}
 
-  zod@4.3.6:
+  zod@4.4.3:
     optional: true

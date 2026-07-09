@@ -35,15 +35,11 @@ import Song from ".";
 import CollapsedProfileSongs from "./CollapsedProfileSongs";
 
 interface ProfileSongsProps {
-    user?: User;
-    currentUser?: User;
+    user: User;
     isSideBar: boolean;
 }
 
-export default function ProfileSongs({ user: _user, currentUser, isSideBar }: ProfileSongsProps) {
-    const user = _user ?? currentUser;
-    if (!user) throw new Error("Missing user");
-
+export default function ProfileSongs({ user, isSideBar }: ProfileSongsProps) {
     const [failed, setFailed] = useState(false);
     const { isAuthorized } = useAuthorizationStore();
     const { users } = useSongStore();

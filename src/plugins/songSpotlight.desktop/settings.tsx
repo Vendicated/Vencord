@@ -22,6 +22,13 @@ export default definePluginSettings({
         default: apiConstants.songLimit,
         markers: makeRange(1, 3),
     },
+    previewVolume: {
+        type: OptionType.SLIDER,
+        description: "Volume of song previews when played",
+        markers: [0, 25, 50, 100],
+        default: 100,
+        stickToMarkers: false
+    },
     manager: {
         type: OptionType.COMPONENT,
         component: () => <Settings />,
