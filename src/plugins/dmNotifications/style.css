@@ -1,0 +1,411 @@
+.vc-dmn-container {
+    position: fixed;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 16px;
+    width: 340px;
+    max-width: calc(100vw - 32px);
+    pointer-events: none;
+}
+
+.vc-dmn-pos-top-right {
+    top: 0;
+    right: 0;
+}
+
+.vc-dmn-pos-top-left {
+    top: 0;
+    left: 0;
+}
+
+.vc-dmn-pos-bottom-right {
+    bottom: 0;
+    right: 0;
+    flex-direction: column-reverse;
+}
+
+.vc-dmn-pos-bottom-left {
+    bottom: 0;
+    left: 0;
+    flex-direction: column-reverse;
+}
+
+.vc-dmn-toast {
+    pointer-events: all;
+    position: relative;
+    animation: vc-dmn-in 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.vc-dmn-toast-surface {
+    position: relative;
+    overflow: hidden;
+    border-radius: 10px 10px 0 0;
+    background: var(--vc-dmn-bg, #232428);
+    box-shadow: 0 8px 24px rgb(0 0 0 / 45%);
+    border: 1px solid rgb(255 255 255 / 6%);
+    border-bottom: none;
+}
+
+.vc-dmn-toast:not(:has(.vc-dmn-replybar)) .vc-dmn-toast-surface {
+    border-radius: 10px;
+    border-bottom: 1px solid rgb(255 255 255 / 6%);
+}
+
+.vc-dmn-pos-top-left .vc-dmn-toast,
+.vc-dmn-pos-bottom-left .vc-dmn-toast {
+    animation-name: vc-dmn-in-left;
+}
+
+.vc-dmn-toast-closing {
+    overflow: hidden;
+    animation: vc-dmn-out 0.2s ease forwards;
+}
+
+@keyframes vc-dmn-in {
+    from {
+        opacity: 0;
+        transform: translateX(24px) scale(0.96);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0) scale(1);
+    }
+}
+
+@keyframes vc-dmn-in-left {
+    from {
+        opacity: 0;
+        transform: translateX(-24px) scale(0.96);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0) scale(1);
+    }
+}
+
+@keyframes vc-dmn-out {
+    from {
+        opacity: 1;
+        transform: scale(1);
+        max-height: 400px;
+    }
+
+    to {
+        opacity: 0;
+        transform: scale(0.92);
+        max-height: 0;
+    }
+}
+
+.vc-dmn-toast-clickable {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 12px;
+    cursor: pointer;
+}
+
+.vc-dmn-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.vc-dmn-body {
+    flex: 1;
+    min-width: 0;
+}
+
+.vc-dmn-header {
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+.vc-dmn-username {
+    font-weight: 600;
+    font-size: 14px;
+    color: var(--vc-dmn-user, #fff);
+}
+
+.vc-dmn-context {
+    font-size: 11px;
+    color: var(--vc-dmn-text, #dbdee1);
+    opacity: 0.65;
+}
+
+.vc-dmn-content {
+    margin-top: 2px;
+    font-size: 13px;
+    line-height: 1.35;
+    color: var(--vc-dmn-text, #dbdee1);
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 4;
+    -webkit-box-orient: vertical;
+    overflow-wrap: anywhere;
+}
+
+.vc-dmn-close {
+    background: transparent;
+    border: none;
+    color: var(--vc-dmn-text, #dbdee1);
+    opacity: 0.7;
+    cursor: pointer;
+    padding: 2px;
+    border-radius: 4px;
+    flex-shrink: 0;
+    transition: background 0.15s, opacity 0.15s;
+}
+
+.vc-dmn-close:hover {
+    opacity: 1;
+    background: rgb(255 255 255 / 8%);
+}
+
+.vc-dmn-progress {
+    height: 3px;
+    background: var(--vc-dmn-accent, #5865f2);
+    transition: width 0.05s linear;
+}
+
+.vc-dmn-replybar {
+    position: relative;
+    border-top: 1px solid rgb(255 255 255 / 6%);
+    border-left: 1px solid rgb(255 255 255 / 6%);
+    border-right: 1px solid rgb(255 255 255 / 6%);
+    border-bottom: 1px solid rgb(255 255 255 / 6%);
+    border-radius: 0 0 10px 10px;
+    padding: 8px;
+    background: var(--vc-dmn-bg, #232428);
+    box-shadow: 0 8px 24px rgb(0 0 0 / 45%);
+}
+
+.vc-dmn-replyrow {
+    display: flex;
+    align-items: flex-end;
+    gap: 6px;
+}
+
+.vc-dmn-textarea {
+    flex: 1;
+    resize: none;
+    max-height: 90px;
+    min-height: 32px;
+    border-radius: 8px;
+    border: none;
+    outline: none;
+    padding: 7px 10px;
+    background: rgb(0 0 0 / 25%);
+    color: var(--vc-dmn-text, #dbdee1);
+    caret-color: var(--vc-dmn-user, #fff);
+    font-size: 13px;
+    font-family: inherit;
+    line-height: 1.3;
+}
+
+.vc-dmn-textarea::placeholder {
+    color: var(--vc-dmn-text, #dbdee1);
+    opacity: 0.45;
+}
+
+.vc-dmn-icon-btn {
+    flex-shrink: 0;
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    color: var(--vc-dmn-text, #dbdee1);
+    opacity: 0.75;
+    cursor: pointer;
+    font-size: 17px;
+    transition: background 0.15s, opacity 0.15s;
+}
+
+.vc-dmn-icon-btn:hover {
+    opacity: 1;
+    background: rgb(255 255 255 / 8%);
+}
+
+.vc-dmn-icon-btn.vc-dmn-active {
+    opacity: 1;
+    background: rgb(255 255 255 / 12%);
+}
+
+.vc-dmn-send-btn {
+    flex-shrink: 0;
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--vc-dmn-accent, #5865f2);
+    color: #fff;
+    cursor: pointer;
+    transition: background 0.15s, opacity 0.15s, transform 0.1s;
+}
+
+.vc-dmn-send-btn:disabled {
+    opacity: 0.4;
+    cursor: default;
+}
+
+.vc-dmn-send-btn:hover:not(:disabled) {
+    filter: brightness(1.1);
+}
+
+.vc-dmn-send-btn:active:not(:disabled) {
+    transform: scale(0.92);
+}
+
+.vc-dmn-emoji-suggestions {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    max-height: 160px;
+    overflow-y: auto;
+    margin-bottom: 6px;
+    background: #18191c;
+    border-radius: 8px;
+    padding: 4px;
+}
+
+.vc-dmn-emoji-suggestion {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 4px 6px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 13px;
+    color: var(--vc-dmn-text, #dbdee1);
+}
+
+.vc-dmn-emoji-suggestion:hover {
+    background: rgb(255 255 255 / 8%);
+}
+
+.vc-dmn-emoji-suggestion img {
+    width: 20px;
+    height: 20px;
+}
+
+.vc-dmn-emoji-unicode {
+    font-size: 18px;
+    width: 20px;
+    text-align: center;
+}
+
+.vc-dmn-emoji-popover {
+    position: absolute;
+    bottom: calc(100% + 8px);
+    right: 0;
+    width: 100%;
+    max-width: 320px;
+    height: 320px;
+    display: flex;
+    flex-direction: column;
+    background: #111214;
+    border-radius: 8px;
+    box-shadow: 0 8px 24px rgb(0 0 0 / 50%);
+    border: 1px solid rgb(255 255 255 / 6%);
+    z-index: 1;
+    overflow: hidden;
+}
+
+.vc-dmn-emoji-popover-search-wrap {
+    position: relative;
+    flex-shrink: 0;
+    padding: 10px;
+    border-bottom: 1px solid rgb(255 255 255 / 6%);
+}
+
+.vc-dmn-emoji-popover-search-icon {
+    position: absolute;
+    left: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--vc-dmn-text, #dbdee1);
+    opacity: 0.5;
+    pointer-events: none;
+}
+
+.vc-dmn-emoji-popover-search {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 8px 10px 8px 30px;
+    border-radius: 4px;
+    border: none;
+    outline: none;
+    background: #1e1f22;
+    color: var(--vc-dmn-text, #dbdee1);
+    caret-color: var(--vc-dmn-user, #fff);
+    font-size: 13px;
+}
+
+.vc-dmn-emoji-popover-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 8px 10px;
+}
+
+.vc-dmn-emoji-category + .vc-dmn-emoji-category {
+    margin-top: 12px;
+}
+
+.vc-dmn-emoji-category-label {
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+    color: var(--vc-dmn-text, #dbdee1);
+    opacity: 0.5;
+    margin-bottom: 6px;
+}
+
+.vc-dmn-emoji-empty {
+    text-align: center;
+    padding: 24px 8px;
+    font-size: 13px;
+    color: var(--vc-dmn-text, #dbdee1);
+    opacity: 0.5;
+}
+
+.vc-dmn-emoji-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(32px, 1fr));
+    gap: 2px;
+}
+
+.vc-dmn-emoji-grid-item {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    border-radius: 6px;
+    cursor: pointer;
+    aspect-ratio: 1;
+    transition: background 0.1s, transform 0.08s;
+}
+
+.vc-dmn-emoji-grid-item:hover {
+    background: rgb(255 255 255 / 8%);
+    transform: scale(1.12);
+}
+
+.vc-dmn-emoji-grid-item img {
+    width: 24px;
+    height: 24px;
+}
