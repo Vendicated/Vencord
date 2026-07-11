@@ -4,15 +4,15 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { definePluginSettings, Settings } from "@api/Settings";
+import { definePluginSettings } from "@api/Settings";
 import { getUserSettingLazy } from "@api/UserSettings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Flex } from "@components/Flex";
+import CustomRpcPlugin from "@plugins/customRPC";
 import { Devs } from "@utils/constants";
 import { Margins } from "@utils/margins";
 import definePlugin, { OptionType } from "@utils/types";
-import { findStoreLazy } from "@webpack";
-import { Button, Forms, showToast, TextInput, Toasts, Tooltip, useEffect, useState } from "@webpack/common";
+import { Button, Forms, RunningGameStore, showToast, TextArea, Toasts, Tooltip, useEffect, useState } from "@webpack/common";
 
 const enum ActivitiesTypes {
     Game,
@@ -29,8 +29,6 @@ const enum FilterMode {
     Whitelist,
     Blacklist
 }
-
-const RunningGameStore = findStoreLazy("RunningGameStore");
 
 const ShowCurrentGame = getUserSettingLazy("status", "showCurrentGame")!;
 
@@ -64,7 +62,7 @@ function ToggleActivityComponent(activity: IgnoredActivity, isPlaying = false) {
     const { ignoredActivities } = s;
 
     if (ignoredActivities.some(act => act.id === activity.id)) return ToggleIconOff(activity, "var(--status-danger)");
-    return ToggleIconOn(activity, isPlaying ? "var(--green-300)" : "var(--interactive-normal)");
+    return ToggleIconOn(activity, isPlaying ? "var(--green-300)" : "var(--interactive-icon-default)");
 }
 
 function handleActivityToggle(e: React.MouseEvent<HTMLButtonElement, MouseEvent>, activity: IgnoredActivity) {
@@ -86,7 +84,7 @@ function ImportCustomRPCComponent() {
             <div>
                 <Button
                     onClick={() => {
-                        const id = Settings.plugins.CustomRPC?.appID as string | undefined;
+                        const id = CustomRpcPlugin.settings.store.appID;
                         if (!id) {
                             return showToast("CustomRPC application ID is not set.", Toasts.Type.FAILURE);
                         }
@@ -131,16 +129,16 @@ function IdsListComponent(props: { setValue: (value: string) => void; }) {
     }
 
     return (
-        <Forms.FormSection>
+        <section>
             <Forms.FormTitle tag="h3">Filter List</Forms.FormTitle>
             <Forms.FormText className={Margins.bottom8}>Comma separated list of activity IDs to filter (Useful for filtering specific RPC activities and CustomRPC</Forms.FormText>
-            <TextInput
+            <TextArea
                 type="text"
                 value={idsList}
                 onChange={handleChange}
                 placeholder="235834946571337729, 343383572805058560"
             />
-        </Forms.FormSection>
+        </section>
     );
 }
 
@@ -232,6 +230,7 @@ export default definePlugin({
     name: "IgnoreActivities",
     authors: [Devs.Nuckyz, Devs.Kylie],
     description: "Ignore activities from showing up on your status ONLY. You can configure which ones are specifically ignored from the Registered Games and Activities tabs, or use the general settings below",
+    tags: ["Activity", "Privacy", "Customisation"],
     dependencies: ["UserSettingsAPI"],
 
     settings,
@@ -253,35 +252,20 @@ export default definePlugin({
                 replace: (m, runningGames) => `${m}${runningGames}=${runningGames}.filter(({id,name})=>$self.isActivityNotIgnored({type:0,application_id:id,name}));`
             }
         },
-
-        // FIXME(Bundler minifier change related): Remove the non used compability once enough time has passed
         {
             find: "#{intl::SETTINGS_GAMES_TOGGLE_OVERLAY}",
             replacement: {
-                // let { ... nowPlaying: a = !1 ...
-                // let { overlay: b ... } = Props
-                match: /#{intl::SETTINGS_GAMES_TOGGLE_OVERLAY}.+?}\(\),(?<=nowPlaying:(\i)=!1,.+?overlay:\i,[^}]+?\}=(\i).+?)/,
-                replace: (m, nowPlaying, props) => `${m}$self.renderToggleGameActivityButton(${props},${nowPlaying}),`,
-                noWarn: true,
-            }
-        },
-        {
-            find: "#{intl::SETTINGS_GAMES_TOGGLE_OVERLAY}",
-            replacement: {
-                // let { ... nowPlaying: a = !1 ...
-                // let { overlay: b ... } = Props ...
-                // ToggleOverLayButton(), nowPlaying && ... RemoveGameButton()
-                match: /\.gameNameLastPlayed.+?,\i\(\),(?<=nowPlaying:(\i)=!1,.+?overlay:\i,[^}]+?\}=(\i).+?)(?=\1&&)/,
-                replace: (m, nowPlaying, props) => `${m}$self.renderToggleGameActivityButton(${props},${nowPlaying}),`,
+                match: /(\i)&&!\i\|\|\i\?null(?<=(\i)\.verified&&.+?)/,
+                replace: "$self.renderToggleGameActivityButton($2,$1),$&"
             }
         },
 
         // Activities from the apps launcher in the bottom right of the chat bar
         {
-            find: ".promotedLabelWrapperNonBanner,children",
+            find: "#{intl::EMBEDDED_ACTIVITIES_DEVELOPER_ACTIVITY}",
             replacement: {
-                match: /\.appDetailsHeaderContainer.+?children:\i.*?}\),(?<=application:(\i).+?)/,
-                replace: (m, props) => `${m}$self.renderToggleActivityButton(${props}),`
+                match: /lineClamp:1.{0,50}?(?=!\i&&\i\?.+?application:(\i))/,
+                replace: "$&$self.renderToggleActivityButton($1),"
             }
         }
     ],

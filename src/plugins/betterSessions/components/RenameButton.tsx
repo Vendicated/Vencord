@@ -4,23 +4,19 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { openModal } from "@utils/modal";
-import { Button } from "@webpack/common";
+import { Button } from "@components/Button";
+import { SessionInfo } from "@plugins/betterSessions/types";
+import { cl } from "@plugins/betterSessions/utils";
+import { openModal } from "@webpack/common";
 
-import { SessionInfo } from "../types";
 import { RenameModal } from "./RenameModal";
 
 export function RenameButton({ session, state }: { session: SessionInfo["session"], state: [string, React.Dispatch<React.SetStateAction<string>>]; }) {
     return (
         <Button
-            look={Button.Looks.LINK}
-            color={Button.Colors.LINK}
-            size={Button.Sizes.NONE}
-            style={{
-                paddingTop: "0px",
-                paddingBottom: "0px",
-                top: "-2px"
-            }}
+            variant="secondary"
+            size="xs"
+            className={cl("rename-btn")}
             onClick={() =>
                 openModal(props => (
                     <RenameModal
@@ -32,6 +28,18 @@ export function RenameButton({ session, state }: { session: SessionInfo["session
             }
         >
             Rename
+        </Button>
+    );
+}
+
+export function NewButton() {
+    return (
+        <Button
+            variant="dangerPrimary"
+            size="min"
+            className={cl("new-btn")}
+        >
+            NEW
         </Button>
     );
 }

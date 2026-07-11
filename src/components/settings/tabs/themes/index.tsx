@@ -18,10 +18,15 @@
 
 import "./styles.css";
 
+import { BaseText } from "@components/BaseText";
+import { Card } from "@components/Card";
+import { Flex } from "@components/Flex";
 import { Link } from "@components/Link";
+import { Margins } from "@components/margins";
+import { Paragraph } from "@components/Paragraph";
 import { SettingsTab, wrapTab } from "@components/settings/tabs/BaseTab";
 import { getStylusWebStoreUrl } from "@utils/web";
-import { Card, Forms, React, TabBar, useState } from "@webpack/common";
+import { Forms, React, TabBar, useState } from "@webpack/common";
 
 import { CspErrorCard } from "./CspErrorCard";
 import { LocalThemesTab } from "./LocalThemesTab";
@@ -36,7 +41,7 @@ function ThemesTab() {
     const [currentTab, setCurrentTab] = useState(ThemeTab.LOCAL);
 
     return (
-        <SettingsTab title="Themes">
+        <SettingsTab>
             <TabBar
                 type="top"
                 look="brand"
@@ -58,18 +63,28 @@ function ThemesTab() {
                 </TabBar.Item>
             </TabBar>
 
-            <CspErrorCard />
+            <Flex flexDirection="column" gap="1em">
+                <CspErrorCard />
 
-            {currentTab === ThemeTab.LOCAL && <LocalThemesTab />}
-            {currentTab === ThemeTab.ONLINE && <OnlineThemesTab />}
+                <Card variant="warning">
+                    <BaseText tag="h3" size="md" weight="medium" className={Margins.bottom8}>Theme Performance</BaseText>
+                    <Paragraph>
+                        Themes and custom CSS have the potential to cause major lag! If you experience performance issues, try
+                        disabling your themes and CSS to see if they're the cause. The most common cause of lag is the <code>:has()</code> operator.
+                    </Paragraph>
+                </Card>
+
+                {currentTab === ThemeTab.LOCAL && <LocalThemesTab />}
+                {currentTab === ThemeTab.ONLINE && <OnlineThemesTab />}
+            </Flex>
         </SettingsTab>
     );
 }
 
 function UserscriptThemesTab() {
     return (
-        <SettingsTab title="Themes">
-            <Card className="vc-settings-card">
+        <SettingsTab>
+            <Card variant="danger">
                 <Forms.FormTitle tag="h5">Themes are not supported on the Userscript!</Forms.FormTitle>
 
                 <Forms.FormText>

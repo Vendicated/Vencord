@@ -1,4 +1,4 @@
-.messagelogger-deleted [class^="buttons"] {
+.messagelogger-deleted [class*="buttons"] {
     display: none;
 }
 
@@ -14,7 +14,7 @@
     filter: grayscale(1) !important;
     transition: 150ms filter ease-in-out;
 
-    &[class*="hiddenMosaicItem_"] {
+    &[class*="hiddenMosaicItem"] {
         filter: grayscale(1) blur(var(--custom-message-attachment-spoiler-blur-radius, 44px)) !important;
     }
 

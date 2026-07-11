@@ -103,6 +103,7 @@ const settings = definePluginSettings({
     },
     preferUDP: {
         type: OptionType.BOOLEAN,
+        displayName: "Prefer UDP",
         description: "Enable if you use an older build of XSOverlay unable to connect through websockets. This setting is ignored on web.",
         default: false,
         disabled: () => IS_WEB
@@ -119,11 +120,13 @@ const settings = definePluginSettings({
     },
     dmNotifications: {
         type: OptionType.BOOLEAN,
+        displayName: "DM Notifications",
         description: "Allow Direct Message notifications",
         default: true
     },
     groupDmNotifications: {
         type: OptionType.BOOLEAN,
+        displayName: "Group DM Notifications",
         description: "Allow Group DM notifications",
         default: true
     },
@@ -188,8 +191,9 @@ const Native = VencordNative.pluginHelpers.XSOverlay as PluginNative<typeof impo
 export default definePlugin({
     name: "XSOverlay",
     description: "Forwards discord notifications to XSOverlay, for easy viewing in VR",
+    tags: ["Notifications"],
     authors: [Devs.Nyako],
-    tags: ["vr", "notify"],
+    searchTerms: ["vr", "notify"],
     reporterTestable: ReporterTestable.None,
     settings,
 

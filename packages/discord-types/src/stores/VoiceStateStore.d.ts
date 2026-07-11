@@ -10,6 +10,7 @@ export interface VoiceState extends DiscordRecord {
     sessionId: string | null | undefined;
     mute: boolean;
     deaf: boolean;
+    stream: boolean;
     selfMute: boolean;
     selfDeaf: boolean;
     selfVideo: boolean;
@@ -20,23 +21,35 @@ export interface VoiceState extends DiscordRecord {
 
     isVoiceMuted(): boolean;
     isVoiceDeafened(): boolean;
+
+    oldChannelId?: string;
+    guildId?: string;
 }
 
 export class VoiceStateStore extends FluxStore {
     getAllVoiceStates(): VoiceStates;
+    getVoiceStateVersion(): number;
 
     getVoiceStates(guildId?: string | null): UserVoiceStateRecords;
     getVoiceStatesForChannel(channelId: string): UserVoiceStateRecords;
     getVideoVoiceStatesForChannel(channelId: string): UserVoiceStateRecords;
 
     getVoiceState(guildId: string | null, userId: string): VoiceState | undefined;
-    getUserVoiceChannelId(guildId: string | null, userId: string): string | undefined;
+    getDiscoverableVoiceState(guildId: string | null, userId: string): VoiceState | null;
     getVoiceStateForChannel(channelId: string, userId?: string): VoiceState | undefined;
     getVoiceStateForUser(userId: string): VoiceState | undefined;
+    getDiscoverableVoiceStateForUser(userId: string): VoiceState | undefined;
+    getVoiceStateForSession(userId: string, sessionId?: string | null): VoiceState | null | undefined;
 
+    getUserVoiceChannelId(guildId: string | null, userId: string): string | undefined;
     getCurrentClientVoiceChannelId(guildId: string | null): string | undefined;
-    isCurrentClientInVoiceChannel(): boolean;
 
+    getUsersWithVideo(channelId: string): Set<string>;
+    getVoicePlatformForChannel(channelId: string, guildId: string): string | undefined;
+
+    isCurrentClientInVoiceChannel(): boolean;
     isInChannel(channelId: string, userId?: string): boolean;
     hasVideo(channelId: string): boolean;
+
+    get userHasBeenMovedVersion(): number;
 }

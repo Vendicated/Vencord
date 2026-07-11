@@ -6,9 +6,9 @@
 
 import { getCurrentChannel } from "@utils/discord";
 import { isObjectEmpty } from "@utils/misc";
-import { ChannelStore, PermissionsBits, PermissionStore, SelectedChannelStore, Tooltip, useEffect, useStateFromStores, VoiceStateStore } from "@webpack/common";
+import { ChannelStore, GuildMemberCountStore, PermissionsBits, PermissionStore, SelectedChannelStore, Tooltip, useEffect, useStateFromStores, VoiceStateStore } from "@webpack/common";
 
-import { ChannelMemberStore, cl, GuildMemberCountStore, numberFormat, settings, ThreadMemberListStore } from ".";
+import { ChannelMemberStore, cl, numberFormat, settings, ThreadMemberListStore } from ".";
 import { CircleIcon } from "./CircleIcon";
 import { OnlineMemberCountStore } from "./OnlineMemberCountStore";
 import { VoiceIcon } from "./VoiceIcon";
@@ -40,7 +40,7 @@ export function MemberCount({ isTooltip, tooltipGuildId }: { isTooltip?: true; t
 
     const totalCount = useStateFromStores(
         [GuildMemberCountStore],
-        () => GuildMemberCountStore.getMemberCount(guildId)
+        () => GuildMemberCountStore.getMemberCount(guildId!)
     );
 
     let onlineCount = useStateFromStores(
