@@ -36,6 +36,7 @@ const settings = definePluginSettings({
         placeholder: "Google"
     },
     customEngineURL: {
+        displayName: "Custom Engine URL",
         description: "The URL of your Engine",
         type: OptionType.STRING,
         placeholder: "https://google.com/search?q="

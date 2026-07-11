@@ -107,7 +107,7 @@ export default definePlugin({
             replacement: [
                 {
                     // Do not show confirmation to join a voice channel when already connected to another if clicking on a hidden voice channel
-                    match: /(?<=getIgnoredUsersForVoiceChannel\((\i)\.id\)[^;]+?;return\()/,
+                    match: /(?<=getIgnoredUsersForVoiceChannel\((\i)\.id\)[^;]{0,300}?;return\()/,
                     replace: (_, channel) => `!$self.isHiddenChannel(${channel})&&`
                 },
                 {
@@ -157,7 +157,7 @@ export default definePlugin({
             predicate: () => settings.store.showMode === ShowMode.LockIcon,
             replacement: {
                 // Lock Icon
-                match: /(?<=(\i)\.isNSFW\(\);)switch\(\i\.type\)/,
+                match: /(?<=(\i)\.isNSFW\(\);)switch\(\i\.type\).{0,15}\.GUILD_ANNOUNCEMENT/,
                 replace: (m, channel) => `if($self.isHiddenChannel(${channel}))return $self.LockIcon;${m}`
             }
         },
