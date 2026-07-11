@@ -190,3 +190,30 @@ addContextMenuPatch("textarea-context", (children, args) => {
         </Menu.MenuItem>
     );
 });
+
+export type ChatBarButtonWrapper = (buttons: ReactNode) => ReactNode;
+
+export interface ChatBarButtonWrapperData {
+    wrapper: ChatBarButtonWrapper;
+    priority: number;
+}
+
+/**
+ * Registry for plugins that need to wrap the entire chat bar button container.
+ * Wrappers are applied in ascending priority order (lower number = outermost wrapper).
+ */
+export const ChatBarButtonWrappers = new Map<string, ChatBarButtonWrapperData>();
+
+export const addChatBarButtonWrapper = (id: string, wrapper: ChatBarButtonWrapper, priority: number = 0) => ChatBarButtonWrappers.set(id, { wrapper, priority });
+export const removeChatBarButtonWrapper = (id: string) => ChatBarButtonWrappers.delete(id);
+
+export function _wrapButtons(buttons: ReactNode) {
+    const sorted = [...ChatBarButtonWrappers.values()]
+        .sort((a, b) => a.priority - b.priority);
+
+    let wrapped = buttons;
+    for (const { wrapper } of sorted) {
+        wrapped = wrapper(wrapped);
+    }
+    return wrapped;
+}
