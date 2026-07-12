@@ -17,6 +17,7 @@
 */
 
 import * as t from "@vencord/discord-types";
+import * as enums from "@vencord/discord-types/enums";
 import { findByCodeLazy, findByPropsLazy } from "@webpack";
 
 import { waitForStore } from "./internal";
@@ -25,7 +26,7 @@ export const Flux: t.Flux = findByPropsLazy("connectStores");
 
 export type GenericStore = t.FluxStore & Record<string, any>;
 
-export const DraftType = findByPropsLazy("ChannelMessage", "SlashCommand");
+export const DraftType: typeof enums.DraftType = findByPropsLazy("ChannelMessage", "SlashCommand");
 
 export let MessageStore: Omit<t.MessageStore, "getMessages"> & GenericStore & {
     getMessages(chanId: string): any;
