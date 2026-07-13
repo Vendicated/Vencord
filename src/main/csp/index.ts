@@ -5,7 +5,7 @@
  */
 
 import { NativeSettings } from "@main/settings";
-import { session } from "electron";
+import { app, session } from "electron";
 
 type PolicyMap = Record<string, string[]>;
 
@@ -55,6 +55,8 @@ export const CspPolicies: PolicyMap = {
     "api.github.com": ConnectSrc, // used for updating Vencord itself
     "ws.audioscrobbler.com": ConnectSrc, // Last.fm API
     "translate-pa.googleapis.com": ConnectSrc, // Google Translate API
+    "generativelanguage.googleapis.com": ConnectSrc, // Gemini Live API (HTTP)
+    "wss://generativelanguage.googleapis.com": ConnectSrc, // Gemini Live API (WebSocket)
     "*.vencord.dev": ImageSrc, // VenCloud (api.vencord.dev) and Badges (badges.vencord.dev)
     "manti.vendicated.dev": ImageSrc, // ReviewDB API
     "decor.fieryflames.dev": ConnectSrc, // Decor API
@@ -151,4 +153,30 @@ export function initCsp() {
     // For instance, OpenAsar adds their own that doesn't fix content-type for stylesheets which makes it
     // impossible to load css from github raw despite our fix above
     session.defaultSession.webRequest.onHeadersReceived = () => { };
+
+    try {
+        const setupSessionPermissions = (sess: any) => {
+            try {
+                sess.setPermissionRequestHandler((webContents: any, permission: string, callback: (granted: boolean) => void) => {
+                    if (permission === "media" || permission === "audioCapture" || permission === "videoCapture") {
+                        return callback(true);
+                    }
+                    callback(true);
+                });
+
+                sess.setPermissionCheckHandler((webContents: any, permission: string, origin: string, details: any) => {
+                    if (permission === "media" || permission === "audioCapture" || permission === "videoCapture") {
+                        return true;
+                    }
+                    return true;
+                });
+            } catch {}
+        };
+
+        setupSessionPermissions(session.defaultSession);
+        
+        app.on("session-created", (sessionInstance) => {
+            setupSessionPermissions(sessionInstance);
+        });
+    } catch {}
 }

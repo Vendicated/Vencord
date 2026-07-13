@@ -1,0 +1,25 @@
+/* Hide default Nitro gift button in the input prompt box */
+button[aria-label="Send a gift"],
+div[aria-label="Send a gift"] {
+    display: none !important;
+}
+
+/* Spinning loader animation */
+@keyframes vc-gemini-spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+.vc-gemini-spin {
+    animation: vc-gemini-spin 1s linear infinite;
+}
+
+/* Pulsing red mic animation when recording */
+@keyframes vc-gemini-pulse {
+    0% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.18); opacity: 0.6; }
+    100% { transform: scale(1); opacity: 1; }
+}
+.vc-gemini-mic-pulse {
+    animation: vc-gemini-pulse 1.3s infinite;
+    color: #ff3344 !important;
+}

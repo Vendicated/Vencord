@@ -17,6 +17,7 @@
 */
 
 import { app, net, protocol } from "electron";
+app.commandLine.appendSwitch("use-fake-ui-for-media-stream");
 import { join } from "path";
 import { pathToFileURL } from "url";
 
