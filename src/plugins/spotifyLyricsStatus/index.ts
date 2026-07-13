@@ -54,7 +54,8 @@ let lastStatusText: string | null = null;
 let isLoopRunning = false;
 
 let lastUpdateSentAt = 0;
-const MIN_UPDATE_INTERVAL_MS = 1500;
+let rateLimitResetTime = 0; // Timestamp when rate limit expires
+const MIN_UPDATE_INTERVAL_MS = 4000; // Safe interval: Discord limits status updates to about once every 4 seconds
 
 function getPrefixSetting(): string {
     try {
@@ -85,6 +86,13 @@ function updateDiscordStatus(text: string) {
     if (lastStatusText === cleanText) return;
 
     const now = Date.now();
+    
+    // Check if we are currently rate-limited
+    if (now < rateLimitResetTime) {
+        return;
+    }
+
+    // Rate-limiting check to prevent 429
     if (now - lastUpdateSentAt < MIN_UPDATE_INTERVAL_MS) {
         return;
     }
@@ -105,8 +113,21 @@ function updateDiscordStatus(text: string) {
                     expires_at: null
                 }
             }
-        }).catch(err => {
+        }).then((res: any) => {
+            // Handle successful response or check if rate limited in the payload
+            if (res && res.status === 429) {
+                const retryAfter = res.body?.retry_after || 5;
+                rateLimitResetTime = Date.now() + (retryAfter * 1000) + 1500;
+                console.warn(`[SpotifyLyricsStatus] Rate limited by Discord. Pausing updates for ${retryAfter}s.`);
+            }
+        }).catch((err: any) => {
             console.error("[SpotifyLyricsStatus] Error patching status:", err);
+            // Handle 429 error responses
+            if (err && (err.status === 429 || err.body?.retry_after)) {
+                const retryAfter = err.body?.retry_after || 30;
+                rateLimitResetTime = Date.now() + (retryAfter * 1000) + 2000; // Add 2s safety buffer
+                console.warn(`[SpotifyLyricsStatus] Rate limited by Discord. Pausing updates for ${retryAfter}s.`);
+            }
         });
     } catch (e) {
         console.error("[SpotifyLyricsStatus] Exception in RestAPI.patch:", e);
@@ -117,14 +138,20 @@ function clearDiscordStatus() {
     if (lastStatusText === null) return;
     lastStatusText = null;
     console.log("[SpotifyLyricsStatus] Clearing status request");
+    
+    // Do not check rate limit when clearing status, we always want to attempt clearing it on pause
     try {
         RestAPI.patch({
             url: "/users/@me/settings",
             body: {
                 custom_status: null
             }
-        }).catch(err => {
+        }).catch((err: any) => {
             console.error("[SpotifyLyricsStatus] Error clearing status:", err);
+            if (err && err.status === 429) {
+                const retryAfter = err.body?.retry_after || 30;
+                rateLimitResetTime = Date.now() + (retryAfter * 1000) + 2000;
+            }
         });
     } catch (e) {
         console.error("[SpotifyLyricsStatus] Exception in clearing status:", e);
