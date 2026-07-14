@@ -169,6 +169,10 @@ function getBadges({ userId }: BadgeUserArgs): ProfileBadge[] {
 
     ensureOwnStatus(user);
 
+    // Discord's clientStatuses store can retain stale per platform entries after a user
+    // goes offline, so only trust them while the user's overall status is not offline
+    if (PresenceStore.getStatus(user.id) === "offline") return [];
+
     const status = PresenceStore.getClientStatus(user.id);
     if (!status) return [];
 
@@ -191,7 +195,12 @@ function getBadges({ userId }: BadgeUserArgs): ProfileBadge[] {
 const PlatformIndicator = ({ user, small = false }: { user: User; small?: boolean; }) => {
     ensureOwnStatus(user);
 
-    const status = useStateFromStores([PresenceStore], () => PresenceStore.getClientStatus(user.id));
+    const status = useStateFromStores([PresenceStore], () => {
+        // Discord's clientStatuses store can retain stale per platform entries after a user
+        // goes offline, so only trust them while the user's overall status is not offline
+        if (PresenceStore.getStatus(user.id) === "offline") return null;
+        return PresenceStore.getClientStatus(user.id);
+    });
     if (!status) return null;
 
     const icons = Object.entries(status).map(([platform, status]) => (
