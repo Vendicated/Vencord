@@ -469,7 +469,7 @@ export default definePlugin({
                 },
                 // dont allow deleting attachments from deleted messages
                 {
-                    match: /(?<=function \i\(\i\)\{let\{[^}]*?item:(\i),\i:\i,)canRemoveItem:(\i)(?=,onRemoveItem:)/,
+                    match: /(?<=\{let\{[^}]*?item:(\i),autoPlayGif:\i,)canRemoveItem:(\i)(?=,onRemoveItem:)/,
                     replace: "_canRemoveItem:$2 = arguments[0].canRemoveItem && !$1?.originalItem?.deleted",
                 }
             ]
