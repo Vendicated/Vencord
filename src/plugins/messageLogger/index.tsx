@@ -28,7 +28,7 @@ import { getIntlMessage } from "@utils/discord";
 import { Logger } from "@utils/Logger";
 import { classes } from "@utils/misc";
 import definePlugin, { OptionType } from "@utils/types";
-import { Message } from "@vencord/discord-types";
+import { Message, MessageAttachment } from "@vencord/discord-types";
 import { findCssClassesLazy } from "@webpack";
 import { ChannelStore, FluxDispatcher, Menu, MessageStore, Parser, SelectedChannelStore, Timestamp, UserStore, useStateFromStores } from "@webpack/common";
 
@@ -40,6 +40,15 @@ interface MLMessage extends Message {
     deleted?: boolean;
     editHistory?: { timestamp: Date; content: string; }[];
     firstEditTimestamp?: Date;
+}
+
+interface MLAttachment extends MessageAttachment {
+    /**
+     * if the attachment was deleted
+     *
+     * a non-deleted {@link MLMessage|Message} can have deleted attachments
+     */
+    deleted?: boolean;
 }
 
 const MessageClasses = findCssClassesLazy("edited", "communicationDisabled", "isSystemMessage");
@@ -207,7 +216,7 @@ export default definePlugin({
     name: "MessageLogger",
     description: "Temporarily logs deleted and edited messages.",
     tags: ["Chat", "Utility"],
-    authors: [Devs.rushii, Devs.Ven, Devs.AutumnVN, Devs.Nickyux, Devs.Kyuuhachi],
+    authors: [Devs.rushii, Devs.Ven, Devs.AutumnVN, Devs.Nickyux, Devs.Kyuuhachi, Devs.sadan],
     dependencies: ["MessageUpdaterAPI"],
     settings,
     contextMenus: {
@@ -253,6 +262,28 @@ export default definePlugin({
             timestamp: new Date(newMessage.edited_timestamp),
             content: oldMessage.content
         };
+    },
+
+    handleUpdateAttachments(newMessage: MLMessage): MLAttachment[] {
+        const oldMessage = MessageStore.getMessage(newMessage.channel_id, newMessage.id) as MLMessage | undefined;
+        // if oldMessage is undefined, this is a new message and we shouldn't touch the attachments
+        if (!oldMessage) {
+            return newMessage.attachments;
+        }
+        // not sure if it's ever actually null after an edit but discord does a null check here
+        if (!newMessage.attachments?.length) {
+            return oldMessage.attachments.map((a): MLAttachment => ({ ...a, deleted: true }));
+        }
+        const attachments: MLAttachment[] = [];
+        for (const oldAttachment of oldMessage.attachments) {
+            const wasDeleted = newMessage.attachments.every(a => a.id !== oldAttachment.id);
+            if (wasDeleted) {
+                attachments.push({ ...oldAttachment, deleted: true });
+            } else {
+                attachments.push(oldAttachment);
+            }
+        }
+        return attachments;
     },
 
     handleDelete(cache: any, data: { ids: string[], id: string; mlDeleted?: boolean; }, isBulk: boolean) {
@@ -409,15 +440,20 @@ export default definePlugin({
         },
 
         {
-            // Updated message transformer(?)
+            // Updated message transformer
             find: ".PREMIUM_REFERRAL&&(",
             replacement: [
                 {
-                    // Pass through editHistory & deleted & original attachments to the "edited message" transformer
+                    // Pass through editHistory & deleted to the "edited message" transformer
                     match: /(?<=null!=\i\.edited_timestamp\)return )\i\(\i,\{reactions:(\i)\.reactions.{0,50}\}\)/,
                     replace:
                         "Object.assign($&,{ deleted:$1.deleted, editHistory:$1.editHistory, firstEditTimestamp:$1.firstEditTimestamp })"
                 },
+                // just mark deleted attachments as deleted on MESSAGE_UPDATE
+                {
+                    match: /attachments:(\i)\.attachments\?\?\[\],/,
+                    replace: "attachments: $self.handleUpdateAttachments($1),"
+                }
             ]
         },
 
