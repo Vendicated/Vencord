@@ -290,7 +290,7 @@ export function createTimezoneMenuItems(user: User, currentTimezone: string) {
                             value={options.find(o => o.value === currentTimezone)}
                             placeholder="Select a timezone"
                             maxVisibleItems={12}
-                            closeOnSelect={true}
+                            closeOnSelect
                             onChange={(optOrValue: any) => {
                                 const v = typeof optOrValue === "string" ? optOrValue : optOrValue?.value ?? "";
                                 try { setUserTimezone(user.id, v); }
