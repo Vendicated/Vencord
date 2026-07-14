@@ -17,14 +17,22 @@
 */
 
 import { findGroupChildrenByChildId, NavContextMenuPatchCallback } from "@api/ContextMenu";
-import { BaseText } from "@components/BaseText";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { classes } from "@utils/misc";
-import { closeModal, ModalCloseButton, ModalContent, ModalHeader, ModalRoot, ModalSize, openModal } from "@utils/modal";
 import { useTimer } from "@utils/react";
-import { User } from "@vencord/discord-types";
+import { RenderModalProps, User } from "@vencord/discord-types";
 import { findCssClassesLazy } from "@webpack";
-import { Menu, React, SearchableSelect, Timestamp, Tooltip, useEffect, UserStore, useState } from "@webpack/common";
+import {
+    Menu, Modal,
+    openModal,
+    React,
+    SearchableSelect,
+    Timestamp,
+    Tooltip,
+    useEffect,
+    UserStore,
+    useState
+} from "@webpack/common";
 
 import { settings } from "./settings";
 import { formatTimezoneLabel, getOffsetMinutes, getUserTimezone, setUserTimezone, update } from "./utils";
@@ -261,39 +269,38 @@ export function createTimezoneMenuItems(user: User, currentTimezone: string) {
     });
 
     const openSelectModal = () => {
-        const modalKey = openModal(props => (
-            <ModalRoot {...props} size={ModalSize.SMALL} className="vc-tzonprofile-modal">
-                <ModalHeader>
-                    <BaseText tag="h3" size="lg" weight="semibold" style={{ flexGrow: 1 }}>Select Timezone</BaseText>
-                    <ModalCloseButton onClick={() => closeModal(modalKey)} />
-                </ModalHeader>
-                <ModalContent className="vc-tzonprofile-modalcontent">
-                    <ErrorBoundary>
-                        <div className="vc-tzonprofile-modalinformation">
-                            <div className="vc-tzonprofile-current-timezone">
-                                <span>Selected Timezone: </span>
-                                <strong>
-                                    {currentTimezone ? formatTimezoneLabel(currentTimezone) : "None"}
-                                </strong>
-                            </div>
+        openModal((props: RenderModalProps) => (
+            <Modal
+                {...props}
+                title="Select Timezone"
+                size="sm"
+            >
+                <ErrorBoundary>
+                    <div className="vc-tzonprofile-modalinformation">
+                        <div className="vc-tzonprofile-current-timezone">
+                            <span>Selected Timezone: </span>
 
-                            <SearchableSelect
-                                options={options}
-                                value={options.find(o => o.value === currentTimezone)}
-                                placeholder="Select a timezone"
-                                maxVisibleItems={12}
-                                closeOnSelect={true}
-                                onChange={(optOrValue: any) => {
-                                    const v = typeof optOrValue === "string" ? optOrValue : optOrValue?.value ?? "";
-                                    try { setUserTimezone(user.id, v); }
-                                    catch (e) { console.error("[TimezoneOnProfile] Failed to update timezone:", e); }
-                                    closeModal(modalKey);
-                                }}
-                            />
+                            <strong>
+                                {currentTimezone ? formatTimezoneLabel(currentTimezone) : "None"}
+                            </strong>
                         </div>
-                    </ErrorBoundary>
-                </ModalContent>
-            </ModalRoot>
+
+                        <SearchableSelect
+                            options={options}
+                            value={options.find(o => o.value === currentTimezone)}
+                            placeholder="Select a timezone"
+                            maxVisibleItems={12}
+                            closeOnSelect={true}
+                            onChange={(optOrValue: any) => {
+                                const v = typeof optOrValue === "string" ? optOrValue : optOrValue?.value ?? "";
+                                try { setUserTimezone(user.id, v); }
+                                catch (e) { console.error("[TimezoneOnProfile] Failed to update timezone:", e); }
+                                props.onClose();
+                            }}
+                        />
+                    </div>
+                </ErrorBoundary>
+            </Modal>
         ));
     };
 
