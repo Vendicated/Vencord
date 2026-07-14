@@ -267,7 +267,7 @@ export default definePlugin({
     handleUpdateAttachments(newMessage: MLMessage): MLAttachment[] {
         const oldMessage = MessageStore.getMessage(newMessage.channel_id, newMessage.id) as MLMessage | undefined;
         // if oldMessage is undefined, this is a new message and we shouldn't touch the attachments
-        if (!oldMessage) {
+        if (!oldMessage || this.shouldIgnore(newMessage, true)) {
             return newMessage.attachments;
         }
         // not sure if it's ever actually null after an edit but discord does a null check here
