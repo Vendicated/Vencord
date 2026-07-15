@@ -16,3 +16,5 @@ strictPeerDependencies: false
 allowBuilds:
   esbuild: true
 pmOnFail: warn
+minimumReleaseAgeExclude:
+  - '@song-spotlight/api@2.2.0'
