@@ -135,8 +135,8 @@ export default definePlugin({
         {
             find: "renderHeaderContent()",
             replacement: {
-                match: /placeholder:(\i),"aria-label":\i/,
-                replace: 'placeholder:$1.replace(/Giphy|Klipy/gi,"Tenor"),"aria-label":$1.replace(/Giphy|Klipy/gi,"Tenor")'
+                match: /placeholder:(\i),"aria-label":(\i)/,
+                replace: 'placeholder:$1?.replace(/Giphy|Klipy/gi,"Tenor"),"aria-label":$2?.replace(/Giphy|Klipy/gi,"Tenor")'
             }
         },
         {
@@ -167,8 +167,8 @@ export default definePlugin({
         {
             find: '"IntegrationQueryStore"',
             replacement: {
-                match: /search\((\i),(\i)\)\{null==\i\.getResults\(\1,\2\)&&/,
-                replace: "search($1,$2){return $self.tenorIntegrationSearch($1,$2);null==void 0&&"
+                match: /(?<=search\((\i),(\i)\)\{)null==\i\.getResults\(\1,\2\)&&/,
+                replace: "return $self.tenorIntegrationSearch($1,$2);null==void 0&&"
             }
         }
     ],
