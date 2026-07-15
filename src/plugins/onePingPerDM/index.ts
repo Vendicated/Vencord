@@ -1,6 +1,6 @@
 /*
  * Vencord, a Discord client mod
- * Copyright (c) 2023 Vendicated and contributors
+ * Copyright (c) 2026 Vendicated and contributors
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
@@ -9,33 +9,41 @@ import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { MessageJSON } from "@vencord/discord-types";
 import { ChannelType } from "@vencord/discord-types/enums";
-import { ChannelStore, ReadStateStore, UserStore } from "@webpack/common";
+import { ChannelStore, FluxDispatcher, ReadStateStore, UserStore } from "@webpack/common";
+
+const pingedReactionChannels = new Set<string>();
 
 const settings = definePluginSettings({
-    channelToAffect: {
-        type: OptionType.SELECT,
-        description: "Select the type of DM for the plugin to affect",
-        options: [
-            { label: "Both", value: "both_dms", default: true },
-            { label: "User DMs", value: "user_dm" },
-            { label: "Group DMs", value: "group_dm" },
-        ]
+    affectDMs: {
+        type: OptionType.BOOLEAN,
+        description: "Limit repeated notifications in DMs (1-on-1)",
+        default: true,
+    },
+    affectGroupDMs: {
+        type: OptionType.BOOLEAN,
+        description: "Limit repeated notifications in group DMs",
+        default: true,
+    },
+    affectServers: {
+        type: OptionType.BOOLEAN,
+        description: "Limit repeated notifications in server channels",
+        default: true,
     },
     allowMentions: {
         type: OptionType.BOOLEAN,
-        description: "Receive audio pings for @mentions",
+        description: "Always receive a ping for direct @mentions",
         default: false,
     },
     allowEveryone: {
         type: OptionType.BOOLEAN,
-        description: "Receive audio pings for @everyone and @here in group DMs",
+        description: "Always receive a ping for @everyone and @here",
         default: false,
     },
 });
 
 export default definePlugin({
-    name: "OnePingPerDM",
-    description: "If unread messages are sent by a user in DMs multiple times, you'll only receive one audio ping. Read the messages to reset the limit",
+    name: "OnePingPerChannel",
+    description: "If multiple unread messages or reactions arrive in the same channel (DM, group, or server), you'll only get one ping. Reading the messages resets the limit.",
     tags: ["Notifications", "Customisation"],
     authors: [Devs.ProffDea],
     settings,
@@ -45,26 +53,67 @@ export default definePlugin({
             replacement: [
                 {
                     match: /(\i\.\i\.getDesktopType\(\)===\i\.\i\.NEVER)\)/,
-                    replace: "$&if(!$self.isPrivateChannelRead(arguments[0]?.message))return;else "
+                    replace: "$&if(!$self.shouldPing(arguments[0]?.message))return;else "
                 },
                 {
-                    match: /sound:(\i\?\i:void 0,volume:\i,onClick)/,
-                    replace: "sound:!$self.isPrivateChannelRead(arguments[0]?.message)?undefined:$1"
+                    match: /\i\(\i\),\i\.\i\.showNotification\(\i,\i,\i,\{notif_type:"MESSAGE_CREATE"/,
+                    replace: "if(!$self.shouldPing(arguments[0]?.message))return;$&"
+                },
+                {
+                    match: /\i\.\i\.showNotification\(\i,\i,\i,\{notif_type:\i,notif_user_id:\i,message_id:\i\.id\}/,
+                    replace: "if(!$self.shouldPingReaction(arguments[0]?.message))return;$&"
                 }
             ]
         }
     ],
-    isPrivateChannelRead(message: MessageJSON) {
+    start() {
+        FluxDispatcher.subscribe("MESSAGE_ACK", this.onMessageAck);
+    },
+    stop() {
+        FluxDispatcher.unsubscribe("MESSAGE_ACK", this.onMessageAck);
+    },
+    onMessageAck({ channelId }: { channelId: string; }) {
+        pingedReactionChannels.delete(channelId);
+    },
+    shouldPing(message: MessageJSON) {
         const channelType = ChannelStore.getChannel(message.channel_id)?.type;
+        const isDM = channelType === ChannelType.DM;
+        const isGroupDM = channelType === ChannelType.GROUP_DM;
+        const isServerChannel = !isDM && !isGroupDM;
+
         if (
-            (channelType !== ChannelType.DM && channelType !== ChannelType.GROUP_DM) ||
-            (channelType === ChannelType.DM && settings.store.channelToAffect === "group_dm") ||
-            (channelType === ChannelType.GROUP_DM && settings.store.channelToAffect === "user_dm") ||
+            (isDM && !settings.store.affectDMs) ||
+            (isGroupDM && !settings.store.affectGroupDMs) ||
+            (isServerChannel && !settings.store.affectServers) ||
             (settings.store.allowMentions && message.mentions.some(m => m.id === UserStore.getCurrentUser().id)) ||
             (settings.store.allowEveryone && message.mention_everyone)
         ) {
             return true;
         }
+
         return ReadStateStore.getOldestUnreadMessageId(message.channel_id) === message.id;
+    },
+    // Reactions aren't tied to an "unread message" like normal messages, so we track
+    // per-channel whether a reaction ping has already fired since the channel was last read.
+    shouldPingReaction(message: MessageJSON) {
+        const channelType = ChannelStore.getChannel(message.channel_id)?.type;
+        const isDM = channelType === ChannelType.DM;
+        const isGroupDM = channelType === ChannelType.GROUP_DM;
+        const isServerChannel = !isDM && !isGroupDM;
+
+        if (
+            (isDM && !settings.store.affectDMs) ||
+            (isGroupDM && !settings.store.affectGroupDMs) ||
+            (isServerChannel && !settings.store.affectServers)
+        ) {
+            return true;
+        }
+
+        if (pingedReactionChannels.has(message.channel_id)) {
+            return false;
+        }
+
+        pingedReactionChannels.add(message.channel_id);
+        return true;
     },
 });
