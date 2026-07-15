@@ -9,7 +9,8 @@ import { Logger } from "@utils/Logger";
 import { ScrobblerBackend, TrackData } from ".";
 
 const logger = new Logger("MusicRichPresence/LastFM");
-const BASE_URL = "https://www.last.fm";
+
+const url = (path: string) => `https://www.last.fm${path}`;
 
 export const LastFMScrobbler: ScrobblerBackend = {
     name: "Last.FM",
@@ -45,8 +46,8 @@ export const LastFMScrobbler: ScrobblerBackend = {
                 album: trackData.album["#text"],
                 artist: trackData.artist["#text"] || "Unknown",
                 trackURL: trackData.url,
-                artistURL: trackData.artist["#text"] ? `${BASE_URL}/music/${encodeURIComponent(trackData.artist["#text"])}` : undefined,
-                albumURL: `${BASE_URL}/music/${encodeURIComponent(trackData.artist["#text"])}/${encodeURIComponent(trackData.album["#text"])}`,
+                artistURL: trackData.artist["#text"] ? url(`/music/${encodeURIComponent(trackData.artist["#text"])}`) : undefined,
+                albumURL: url(`/music/${encodeURIComponent(trackData.artist["#text"])}/${encodeURIComponent(trackData.album["#text"])}`),
                 imageURL: trackData.image?.find((x: any) => x.size === "large")?.["#text"]
             } as TrackData;
         } catch (e) {
@@ -57,6 +58,6 @@ export const LastFMScrobbler: ScrobblerBackend = {
     },
 
     getUserURL(username: string): string {
-        return `${BASE_URL}/user/${username}`;
+        return url(`/user/${username}`);
     }
 };
