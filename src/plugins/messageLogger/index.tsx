@@ -172,7 +172,6 @@ const patchMessageContextMenu: NavContextMenuPatchCallback = (children, props) =
 };
 
 const patchChannelContextMenu: NavContextMenuPatchCallback = (children, { channel }) => {
-    // This is not actually an array, but it has the some and forEach methods so we just cast it to an array
     const messages = MessageStore.getMessages(channel?.id);
     if (!messages?.some(msg => msg.deleted || (msg as MLMessage).editHistory?.length)) return;
 
