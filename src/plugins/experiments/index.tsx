@@ -135,6 +135,8 @@ export default definePlugin({
                 replace: "[a-zA-Z0-9-]+"
             }
         },
+    ],
+
     start: () => ExperimentStore.getUserExperimentBucket("2026-01-bug-reporter") > 0 && enableStyle(hideBugReport),
     stop: () => disableStyle(hideBugReport),
 
