@@ -10,10 +10,9 @@ import { ScrobblerBackend, TrackData } from ".";
 
 const logger = new Logger("AudioScrobblerRichPresence/ListenBrainz");
 
-export class ListenBrainzScrobbler implements ScrobblerBackend {
-    name: string = "ListenBrainz";
-    id: string = "listenbrainz";
-    url: string = "https://listenbrainz.org";
+export const ListenBrainzScrobbler: ScrobblerBackend = {
+    name: "ListenBrainz",
+    id: "listenbrainz",
 
     async fetchTrackData(username: string, _apiKey?: string): Promise<TrackData | null> {
         try {
@@ -35,9 +34,9 @@ export class ListenBrainzScrobbler implements ScrobblerBackend {
             // will clear the rich presence if API fails
             return null;
         }
-    }
-    getUserURL(username: string): string {
-        return `${this.url}/user/${username}`;
-    }
+    },
 
-}
+    getUserURL(username: string): string {
+        return `https://listenbrainz.org/user/${username}`;
+    }
+};

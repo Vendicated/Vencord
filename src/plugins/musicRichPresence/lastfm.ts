@@ -8,12 +8,12 @@ import { Logger } from "@utils/Logger";
 
 import { ScrobblerBackend, TrackData } from ".";
 
-const logger = new Logger("AudioScrobblerRichPresence/LastFM");
+const logger = new Logger("MusicRichPresence/LastFM");
+const BASE_URL = "https://www.last.fm";
 
-export class LastFMScrobbler implements ScrobblerBackend {
-    name: string = "Last.FM";
-    id: string = "lastfm";
-    url: string = "https://www.last.fm";
+export const LastFMScrobbler: ScrobblerBackend = {
+    name: "Last.FM",
+    id: "lastfm",
 
     async fetchTrackData(username: string, apiKey: string): Promise<TrackData | null> {
         try {
@@ -45,8 +45,8 @@ export class LastFMScrobbler implements ScrobblerBackend {
                 album: trackData.album["#text"],
                 artist: trackData.artist["#text"] || "Unknown",
                 trackURL: trackData.url,
-                artistURL: trackData.artist["#text"] ? `${this.url}/music/${encodeURIComponent(trackData.artist["#text"])}` : undefined,
-                albumURL: `${this.url}/music/${encodeURIComponent(trackData.artist["#text"])}/${encodeURIComponent(trackData.album["#text"])}`,
+                artistURL: trackData.artist["#text"] ? `${BASE_URL}/music/${encodeURIComponent(trackData.artist["#text"])}` : undefined,
+                albumURL: `${BASE_URL}/music/${encodeURIComponent(trackData.artist["#text"])}/${encodeURIComponent(trackData.album["#text"])}`,
                 imageURL: trackData.image?.find((x: any) => x.size === "large")?.["#text"]
             } as TrackData;
         } catch (e) {
@@ -54,8 +54,9 @@ export class LastFMScrobbler implements ScrobblerBackend {
             // will clear the rich presence if API fails
             return null;
         }
-    }
+    },
+
     getUserURL(username: string): string {
-        return `${this.url}/user/${username}`;
+        return `${BASE_URL}/user/${username}`;
     }
-}
+};

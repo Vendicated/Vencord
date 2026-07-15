@@ -47,7 +47,6 @@ export interface TrackData {
 export interface ScrobblerBackend {
     name: string,
     id: string,
-    url: string,
 
     fetchTrackData(username: string, apiKey?: string): Promise<TrackData | null>;
     getUserURL(username: string): string;
@@ -369,12 +368,9 @@ export default definePlugin({
             }
         }
 
-        const currentBackend = new ScrobblerBackends[settings.store.scrobblerBackend] as ScrobblerBackend;
-        if (currentBackend === undefined) {
-            throw new Error("Backend from settings isn't in list of backends, check IDs!");
-        }
+        const scrobbler = ScrobblerBackends[settings.store.scrobblerBackend];
 
-        const trackData = await this.fetchTrackData(currentBackend);
+        const trackData = await this.fetchTrackData(scrobbler);
         if (!trackData) return null;
 
         const largeImage = this.getLargeImage(trackData);
@@ -383,11 +379,11 @@ export default definePlugin({
                 large_image: await getApplicationAsset(largeImage),
                 large_text: trackData.album || undefined,
                 ...(settings.store.showLogo && {
-                    small_image: await getApplicationAsset(`${currentBackend.id}-small`),
-                    small_text: currentBackend.id
+                    small_image: await getApplicationAsset(`${scrobbler.id}-small`),
+                    small_text: scrobbler.id
                 }),
             } : {
-                large_image: await getApplicationAsset(`${currentBackend.id}-large`),
+                large_image: await getApplicationAsset(`${scrobbler.id}-large`),
                 large_text: trackData.album || undefined,
             };
 
@@ -395,8 +391,8 @@ export default definePlugin({
 
         if (settings.store.shareUsername) {
             buttons.push({
-                label: `${currentBackend.name} Profile`,
-                url: currentBackend.getUserURL(settings.store.username!)
+                label: `${scrobbler.name} Profile`,
+                url: scrobbler.getUserURL(settings.store.username!)
             });
         }
 
