@@ -221,7 +221,7 @@ export default definePlugin({
     description: "Rich Presence for Last.FM/Listenbrainz",
     tags: ["Activity", "Media"],
     searchTerms: ["lastfm", "LastFMRichPresence"],
-    authors: [Devs.dzshn, Devs.RuiNtD, Devs.blahajZip, Devs.archeruwu, Devs.angelcube],
+    authors: [Devs.Rini, Devs.Ven, Devs.angelcube, Devs.RuiNtD, Devs.blahajZip, Devs.archeruwu],
 
     settings,
 
