@@ -230,8 +230,8 @@ const settings = definePluginSettings({
 });
 
 export default definePlugin({
-    name: "AudioScrobblerRichPresence",
-    description: "Little plugin for Rich Presence from AudioScrobblers. Currently supports Last.FM and ListenBrainz!",
+    name: "MusicRichPresence",
+    description: "Discord Rich Presence for Last.FM/Listenbrainz",
     tags: ["Activity", "Media"],
     authors: [Devs.dzshn, Devs.RuiNtD, Devs.blahajZip, Devs.archeruwu, Devs.angelcube],
 
