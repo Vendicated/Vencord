@@ -19,7 +19,7 @@ async function fetchCoverArt(releaseGroupMBID: string) {
     return res.json().then(json => json.images[0].thumbnails.large);
 }
 
-async function getUrls(additionalInfo: Record<string, string> | undefined, trackName: string, artistName: string): Promise<Partial<TrackData>> {
+async function getUrls(additionalInfo: Record<string, string> | undefined, trackName: string, artistName: string, releaseName: string): Promise<Partial<TrackData>> {
     // Well tagged music will have MBIDs which we can use directly. These are optional but highly recommended in ListenBrainz scrobbles.
     // If your music doesn't have these, it's highly recommended to use https://picard.musicbrainz.org/ to automatically add them
     if (additionalInfo?.recording_mbid) {
@@ -40,7 +40,8 @@ async function getUrls(additionalInfo: Record<string, string> | undefined, track
     // If no MBIDs are present, try to search for the track on MusicBrainz
 
     // this needs to be encoded separately—URLSearchParams encodes spaces as "+"
-    const query = encodeURIComponent(`artist:"${artistName}" AND recording:"${trackName}"`);
+    const query = encodeURIComponent(`artist:"${artistName}" AND recording:"${trackName}" AND album:${releaseName}`);
+
     const params = new URLSearchParams({
         fmt: "json",
         limit: "1"
@@ -87,7 +88,7 @@ export const ListenBrainzScrobbler: ScrobblerBackend = {
                 artist: artist_name,
                 album: release_name || "Unknown",
                 serviceName: additional_info?.music_service_name || additional_info?.submission_client,
-                ...await getUrls(additional_info, track_name, artist_name)
+                ...await getUrls(additional_info, track_name, artist_name, release_name)
             } as TrackData;
 
             return trackData;
