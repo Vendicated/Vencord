@@ -1,0 +1,45 @@
+.adc-table {
+    width: 100%;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.adc-row {
+    background-color: var(--primary-500);
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+}
+
+.adc-row:nth-child(even) {
+    background-color: var(--primary-460);
+}
+
+.adc-header div {
+    font-weight: 600;
+}
+
+.adc-row div {
+    padding: 0.5rem 0.75rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.adc-table input[type="number"] {
+    width: 3rem;
+    padding: 0.25rem;
+    border-radius: 4px;
+    background-color: var(--primary-600);
+    color: var(--text-default);
+    border: none;
+
+}
+
+.adc-table input[type="number"]::-webkit-outer-spin-button,
+.adc-table input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
