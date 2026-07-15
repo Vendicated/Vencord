@@ -172,8 +172,9 @@ const patchMessageContextMenu: NavContextMenuPatchCallback = (children, props) =
 };
 
 const patchChannelContextMenu: NavContextMenuPatchCallback = (children, { channel }) => {
-    const messages = MessageStore.getMessages(channel?.id) as MLMessage[];
-    if (!messages?.some(msg => msg.deleted || msg.editHistory?.length)) return;
+    // This is not actually an array, but it has the some and forEach methods so we just cast it to an array
+    const messages = MessageStore.getMessages(channel?.id);
+    if (!messages?.some(msg => msg.deleted || (msg as MLMessage).editHistory?.length)) return;
 
     const group = findGroupChildrenByChildId("mark-channel-read", children) ?? children;
     group.push(
