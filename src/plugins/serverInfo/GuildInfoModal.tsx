@@ -12,7 +12,7 @@ import { classes } from "@utils/misc";
 import { useAwaiter } from "@utils/react";
 import { Guild, RenderModalProps, User } from "@vencord/discord-types";
 import { findComponentByCodeLazy, findCssClassesLazy } from "@webpack";
-import { FluxDispatcher, Forms, GuildChannelStore, GuildMemberStore, GuildRoleStore, IconUtils, Modal,openModal, Parser, PresenceStore, RelationshipStore, ScrollerThin, SnowflakeUtils, TabBar, Timestamp, useEffect, UserStore, UserUtils, useState, useStateFromStores } from "@webpack/common";
+import { Button, FluxDispatcher, Forms, GuildChannelStore, GuildMemberStore, GuildRoleStore, GuildStore, IconUtils, Modal, openModal, Parser, PresenceStore, RelationshipStore, ScrollerThin, SnowflakeUtils, TabBar, Timestamp, useEffect, useMemo, UserStore, UserUtils, useState, useStateFromStores } from "@webpack/common";
 
 const IconClasses = findCssClassesLazy("icon", "acronym", "childWrapper");
 const FriendRow = findComponentByCodeLazy("discriminatorClass:", ".isMobileOnline", "avatarSrc:");
@@ -26,6 +26,7 @@ export function openGuildInfoModal(guild: Guild) {
 const enum Tabs {
     ServerInfo,
     Friends,
+    Overlap,
     BlockedUsers,
     IgnoredUsers
 }
@@ -44,6 +45,10 @@ const fetched = {
     ignored: false
 };
 
+const requestSize = 100;
+const dispatchDelay = 120;
+const settleDelay = 1500;
+
 function renderTimestamp(timestamp: number) {
     return (
         <Timestamp timestamp={new Date(timestamp)} />
@@ -52,6 +57,7 @@ function renderTimestamp(timestamp: number) {
 
 function GuildInfoModal({ guild, modalProps }: GuildProps & { modalProps: RenderModalProps; }) {
     const [friendCount, setFriendCount] = useState<number>();
+    const [overlapCount, setOverlapCount] = useState<number>();
     const [blockedCount, setBlockedCount] = useState<number>();
     const [ignoredCount, setIgnoredCount] = useState<number>();
 
@@ -131,6 +137,12 @@ function GuildInfoModal({ guild, modalProps }: GuildProps & { modalProps: Render
                     Friends{friendCount !== undefined ? ` (${friendCount})` : ""}
                 </TabBar.Item>
                 <TabBar.Item
+                    className={cl("tab", { selected: currentTab === Tabs.Overlap })}
+                    id={Tabs.Overlap}
+                >
+                    Overlap{overlapCount !== undefined ? ` (${overlapCount})` : ""}
+                </TabBar.Item>
+                <TabBar.Item
                     className={cl("tab", { selected: currentTab === Tabs.BlockedUsers })}
                     id={Tabs.BlockedUsers}
                 >
@@ -147,6 +159,7 @@ function GuildInfoModal({ guild, modalProps }: GuildProps & { modalProps: Render
             <div className={cl("tab-content")}>
                 {currentTab === Tabs.ServerInfo && <ServerInfoTab guild={guild} />}
                 {currentTab === Tabs.Friends && <FriendsTab guild={guild} setCount={setFriendCount} />}
+                {currentTab === Tabs.Overlap && <OverlapTab guild={guild} setCount={setOverlapCount} />}
                 {currentTab === Tabs.BlockedUsers && <BlockedUsersTab guild={guild} setCount={setBlockedCount} />}
                 {currentTab === Tabs.IgnoredUsers && <IgnoredUserTab guild={guild} setCount={setIgnoredCount} />}
             </div>
@@ -240,7 +253,6 @@ function UserList(type: "friends" | "blocked" | "ignored", guild: Guild, ids: st
             missing.push(id);
     }
 
-    // Used for side effects (rerender on member request success)
     useStateFromStores(
         [GuildMemberStore],
         () => GuildMemberStore.getMemberIds(guild.id),
@@ -273,5 +285,158 @@ function UserList(type: "friends" | "blocked" | "ignored", guild: Guild, ids: st
                 />
             )}
         </ScrollerThin>
+    );
+}
+
+function chunk<T>(arr: T[], size: number): T[][] {
+    const out: T[][] = [];
+    for (let i = 0; i < arr.length; i += size) out.push(arr.slice(i, i + size));
+    return out;
+}
+
+function computeOverlap(guildId: string, memberIds: string[], otherGuildIds: string[]) {
+    const me = UserStore.getCurrentUser();
+    const results: { id: string; count: number; }[] = [];
+    for (const id of memberIds) {
+        // ignoring self and bots
+        if (id === me?.id) continue;
+        const user = UserStore.getUser(id);
+        if (user?.bot) continue; 
+
+        let count = 1; // the current guild itself
+        for (const otherId of otherGuildIds) {
+            if (GuildMemberStore.getMember(otherId, id)) count++;
+        }
+        if (count > 1) results.push({ id, count });
+    }
+    results.sort((a, b) => b.count - a.count);
+    return results;
+}
+
+function sameOverlap(a: { id: string; count: number; }[], b: { id: string; count: number; }[]) {
+    return a.length === b.length && a.every((v, i) => v.id === b[i].id && v.count === b[i].count);
+}
+
+type CheckStatus = "idle" | "checking" | "done";
+
+function OverlapTab({ guild, setCount }: RelationshipProps) {
+    const otherGuildIds = useMemo(
+        () => Object.keys(GuildStore.getGuilds()).filter(id => id !== guild.id),
+        [guild.id]
+    );
+
+    const memberIds = useStateFromStores(
+        [GuildMemberStore],
+        () => GuildMemberStore.getMemberIds(guild.id),
+        null,
+        (old, curr) => old.length === curr.length
+    );
+
+    const [status, setStatus] = useState<CheckStatus>("idle");
+    const [progress, setProgress] = useState(0);
+
+    const overlap = useStateFromStores(
+        [GuildMemberStore],
+        () => computeOverlap(guild.id, memberIds, otherGuildIds),
+        [memberIds, otherGuildIds],
+        sameOverlap
+    );
+
+    useEffect(() => setCount(overlap.length), [overlap.length]);
+
+    useEffect(() => {
+        setStatus("idle");
+        setProgress(0);
+    }, [guild.id]);
+
+    async function runCheck() {
+        if (status === "checking" || memberIds.length === 0 || otherGuildIds.length === 0) return;
+
+        setStatus("checking");
+        setProgress(0);
+
+        const batches = otherGuildIds.flatMap(otherId =>
+            chunk(memberIds, requestSize).map(userIds => ({ guildId: otherId, userIds }))
+        );
+        const total = batches.length;
+        let received = 0;
+
+        const onChunk = (data: any) => {
+            const responseGuildId = data?.guildId ?? data?.guild_id;
+            if (batches.some(b => b.guildId === responseGuildId)) {
+                received = Math.min(received + 1, total);
+                setProgress(Math.round((received / total) * 100));
+            }
+        };
+        FluxDispatcher.subscribe("GUILD_MEMBERS_CHUNK", onChunk);
+
+        for (const { guildId: otherId, userIds } of batches) {
+            FluxDispatcher.dispatch({
+                type: "GUILD_MEMBERS_REQUEST",
+                guildIds: [otherId],
+                userIds
+            });
+            await new Promise(r => setTimeout(r, dispatchDelay));
+        }
+
+        await new Promise(r => setTimeout(r, settleDelay));
+
+        FluxDispatcher.unsubscribe("GUILD_MEMBERS_CHUNK", onChunk);
+        setProgress(100);
+        setStatus("done");
+    }
+
+    return (
+        <div className={cl("overlap-wrapper")}>
+            <div className={cl("overlap-controls")}>
+                <Button
+                    size={Button.Sizes.SMALL}
+                    disabled={status === "checking" || memberIds.length === 0}
+                    onClick={runCheck}
+                >
+                    {status === "checking"
+                        ? `Checking… ${progress}%`
+                        : status === "done"
+                            ? "Check Again"
+                            : "Check Now"}
+                </Button>
+
+                {status === "checking" && (
+                    <div className={cl("overlap-progress-track")}>
+                        <div className={cl("overlap-progress-fill")} style={{ width: `${progress}%` }} />
+                    </div>
+                )}
+
+                <Forms.FormText className={cl("overlap-hint")}>
+                    Checks the {memberIds.length} members currently loaded for this server against your {otherGuildIds.length} other servers.
+                </Forms.FormText>
+            </div>
+
+            {status === "idle" && (
+                <Forms.FormText className={cl("overlap-empty")}>Click "Check Now" to look for overlap.</Forms.FormText>
+            )}
+
+            {status !== "idle" && overlap.length === 0 && (
+                <Forms.FormText className={cl("overlap-empty")}>
+                    {status === "checking" ? "Checking…" : "No overlap found among the members currently loaded for this server."}
+                </Forms.FormText>
+            )}
+
+            {overlap.length > 0 && (
+                <ScrollerThin fade className={cl("scroller")}>
+                    {overlap.map(({ id, count }) =>
+                        <div key={id} className={cl("overlap-row")}>
+                            <FriendRow
+                                user={UserStore.getUser(id)}
+                                status={PresenceStore.getStatus(id) || "offline"}
+                                onSelect={() => openUserProfile(id)}
+                                onContextMenu={() => { }}
+                            />
+                            <span className={cl("overlap-badge")}>{count} servers</span>
+                        </div>
+                    )}
+                </ScrollerThin>
+            )}
+        </div>
     );
 }
