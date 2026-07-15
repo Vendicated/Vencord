@@ -16,14 +16,13 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { definePluginSettings } from "@api/Settings";
+import { definePluginSettings, migratePluginSetting, migratePluginSettings } from "@api/Settings";
 import { LinkButton } from "@components/Button";
 import { Card } from "@components/Card";
 import { Heading } from "@components/Heading";
 import { Margins } from "@components/margins";
 import { Paragraph } from "@components/Paragraph";
 import { Devs } from "@utils/constants";
-import { Logger } from "@utils/Logger";
 import definePlugin, { OptionType } from "@utils/types";
 import { Activity, ActivityAssets, ActivityButton } from "@vencord/discord-types";
 import { ActivityFlags, ActivityStatusDisplayType, ActivityType } from "@vencord/discord-types/enums";
@@ -70,8 +69,6 @@ const enum NameFormat {
 const LASTFM_API_KEY = "790c37d90400163a5a5fe00d6ca32ef0";
 const DISCORD_APP_ID = "1108588077900898414";
 const LASTFM_PLACEHOLDER_IMAGE_HASH = "2a96cbd8b46e442fc41c2b86b821562f";
-
-const logger = new Logger("AudioScrobblerRichPresence");
 
 async function getApplicationAsset(key: string): Promise<string> {
     return (await ApplicationAssetUtils.fetchAssetIds(DISCORD_APP_ID, [key]))[0];
@@ -222,6 +219,8 @@ const settings = definePluginSettings({
     }
 });
 
+migratePluginSettings("MusicRichPresence", "LastFMRichPresence");
+migratePluginSetting("MusicRichPresence", "showLastFmLogo", "showLogo");
 export default definePlugin({
     name: "MusicRichPresence",
     description: "Discord Rich Presence for Last.FM/Listenbrainz",
