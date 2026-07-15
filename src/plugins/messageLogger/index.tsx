@@ -30,7 +30,7 @@ import { classes } from "@utils/misc";
 import definePlugin, { OptionType } from "@utils/types";
 import { Message, MessageAttachment } from "@vencord/discord-types";
 import { findCssClassesLazy } from "@webpack";
-import { ChannelStore, FluxDispatcher, Menu, MessageStore, Parser, SelectedChannelStore, Timestamp, UserStore, useStateFromStores } from "@webpack/common";
+import { AuthenticationStore, ChannelStore, FluxDispatcher, Menu, MessageStore, Parser, SelectedChannelStore, Timestamp, UserStore, useStateFromStores } from "@webpack/common";
 
 import overlayStyle from "./deleteStyleOverlay.css?managed";
 import textStyle from "./deleteStyleText.css?managed";
@@ -338,14 +338,12 @@ export default definePlugin({
         }
     },
 
-    /*
-     * Due to a Discord bug, it is possible to edit a past message by sending a new message whose nonce matches the old message's ID.
-     * This will make Discord replace the old message with the new one, which bypasses our edit logging since the message isn't ever
-     * actually edited. To patch this behaviour, we check for this trick and remove the nonce if detected.
-    */
+    // It is possible to replace a message in place by creating a new message with the same nonce as an existing one.
+    // This is not considered an edit since it's a new message. Thus it bypasses our edit logging and can be used to "delete" a message by replacing it with an empty one.
+    // This fixes that bypass
     normalizeNonce(msg: Message) {
         try {
-            if (!msg.nonce) return;
+            if (!msg.nonce || msg.author.id === AuthenticationStore.getId()) return;
 
             const prevMsg = MessageStore.getMessage(msg.channel_id, msg.nonce);
             if (!prevMsg || prevMsg.state !== "SENT") return;
