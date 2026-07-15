@@ -50,11 +50,6 @@ export interface ScrobblerBackend {
     getUserURL(username: string): string;
 }
 
-const ScrobblerBackends = {
-    "lastfm": LastFMScrobbler,
-    "listenbrainz": ListenBrainzScrobbler
-};
-
 const enum NameFormat {
     StatusName = "status-name",
     ArtistFirst = "artist-first",
@@ -96,7 +91,7 @@ const settings = definePluginSettings({
                 "label": "ListenBrainz",
                 "value": "listenbrainz"
             }
-        ]
+        ] as const
     },
     apiKey: {
         displayName: "API Key",
@@ -278,7 +273,7 @@ export default definePlugin({
             }
         }
 
-        const scrobbler = ScrobblerBackends[settings.store.scrobblerBackend as keyof typeof ScrobblerBackends];
+        const scrobbler = settings.store.scrobblerBackend === "lastfm" ? LastFMScrobbler : ListenBrainzScrobbler;
 
         const trackData = await scrobbler.fetchTrackData(settings.store.username, settings.store.apiKey || LASTFM_API_KEY);
         if (!trackData) return null;
