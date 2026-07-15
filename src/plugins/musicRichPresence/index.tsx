@@ -218,8 +218,9 @@ migratePluginSettings("MusicRichPresence", "LastFMRichPresence");
 migratePluginSetting("MusicRichPresence", "showLastFmLogo", "showLogo");
 export default definePlugin({
     name: "MusicRichPresence",
-    description: "Discord Rich Presence for Last.FM/Listenbrainz",
+    description: "Rich Presence for Last.FM/Listenbrainz",
     tags: ["Activity", "Media"],
+    searchTerms: ["lastfm", "LastFMRichPresence"],
     authors: [Devs.dzshn, Devs.RuiNtD, Devs.blahajZip, Devs.archeruwu, Devs.angelcube],
 
     settings,
