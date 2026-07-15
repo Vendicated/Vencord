@@ -22,7 +22,6 @@ import { Card } from "@components/Card";
 import { Heading } from "@components/Heading";
 import { Margins } from "@components/margins";
 import { Paragraph } from "@components/Paragraph";
-import { VENCORD_USER_AGENT } from "@shared/vencordUserAgent";
 import { Devs } from "@utils/constants";
 import { Logger } from "@utils/Logger";
 import definePlugin, { OptionType } from "@utils/types";
@@ -120,11 +119,6 @@ const settings = definePluginSettings({
         description: "Make track, artist and album names clickable links",
         type: OptionType.BOOLEAN,
         default: true,
-    },
-    fetchMetadata: {
-        description: "Whether to fetch track metadata from MusicBrainz",
-        type: OptionType.BOOLEAN,
-        default: false,
     },
     hideWithSpotify: {
         description: "Hide presence if Spotify is running",
@@ -256,92 +250,6 @@ export default definePlugin({
         clearInterval(this.updateInterval);
     },
 
-    async fetchMetadata(data: TrackData) {
-        // this needs to be encoded separately—URLSearchParams encodes spaces as "+"
-        const query = encodeURIComponent(`artist:"${data.artist}" AND recording:"${data.name}"`);
-
-        const params = new URLSearchParams({
-            fmt: "json",
-            limit: "1"
-        });
-
-        const metadataLookup = await fetch("https://musicbrainz.org/ws/2/recording/?" + params + "&query=" + query, {
-            headers: { "User-Agent": VENCORD_USER_AGENT }
-        }).then(res => {
-            if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
-            return res.json();
-        }).then(json => json.recordings[0]);
-
-        if (!metadataLookup) {
-            return null;
-        }
-
-        // we're gonna be returning this one
-        const metaTrackData: TrackData = {
-            name: metadataLookup.title,
-            album: "",
-            artist: ""
-        };
-
-        // build the artist string...
-        metadataLookup["artist-credit"].forEach((artistCredit: { name: string; joinphrase: string; }) => {
-            metaTrackData.artist += artistCredit.name;
-            if (artistCredit.joinphrase !== undefined) metaTrackData.artist += artistCredit.joinphrase;
-        });
-
-        // preemptively set this to the first release found
-        metaTrackData.album = metadataLookup.releases[0]["release-group"].title;
-        let releaseGroupMBID = metadataLookup.releases[0]["release-group"].id;
-
-        // then look for something matching what the scrobbler gave us
-        metadataLookup.releases.forEach((release: { title: string, id: string; }) => {
-            // TODO: fuzzy match?
-            if (data.album === release.title) {
-                metaTrackData.album = release["release-group"].title;
-                releaseGroupMBID = release["release-group"].id;
-            }
-        });
-
-        metaTrackData.imageURL = await this.fetchCoverArt(releaseGroupMBID);
-
-        // FIXME: code smell alert
-        // ListenBrainz doesn't provide a URL, it just passes the information directly through from your scrobbler
-        // (no lookups are being done here)
-        // so I guess we grab the IDs from MusicBrainz and use that to populate this data
-        if (settings.store.scrobblerBackend === "listenbrainz") {
-            metaTrackData.trackURL = `https://listenbrainz.org/track/${metadataLookup.id}/`;
-            // artist URL is just gonna be the first credited artist
-            metaTrackData.artistURL = `https://listenbrainz.org/artist/${metadataLookup["artist-credit"][0].artist.id}/`;
-            metaTrackData.albumURL = `https://listenbrainz.org/album/${releaseGroupMBID}`;
-        }
-
-        return metaTrackData;
-    },
-
-    async fetchCoverArt(releaseGroupMBID: string) {
-        const res = await fetch(`https://coverartarchive.org/release-group/${releaseGroupMBID}`);
-        if (!res.ok) return null;
-        return res.json().then(json => json.images[0].thumbnails.large);
-    },
-
-    async fetchTrackData(backend: ScrobblerBackend): Promise<TrackData | null> {
-        if (!settings.store.username)
-            return null;
-
-        let trackData = await backend.fetchTrackData(settings.store.username, settings.store.apiKey || LASTFM_API_KEY);
-
-        // shush compiler
-        if (trackData == null) {
-            return null;
-        }
-
-        if (settings.store.fetchMetadata) {
-            trackData = Object.assign(trackData, await this.fetchMetadata(trackData));
-        }
-
-        return trackData;
-    },
-
     async updatePresence() {
         setActivity(await this.getActivity());
     },
@@ -355,6 +263,9 @@ export default definePlugin({
     },
 
     async getActivity(): Promise<Activity | null> {
+        if (!settings.store.username)
+            return null;
+
         if (settings.store.hideWithActivity) {
             if (PresenceStore.getActivities(AuthenticationStore.getId()).some(a => a.application_id !== DISCORD_APP_ID && a.type !== ActivityType.CUSTOM_STATUS)) {
                 return null;
@@ -368,9 +279,9 @@ export default definePlugin({
             }
         }
 
-        const scrobbler = ScrobblerBackends[settings.store.scrobblerBackend];
+        const scrobbler = ScrobblerBackends[settings.store.scrobblerBackend as keyof typeof ScrobblerBackends];
 
-        const trackData = await this.fetchTrackData(scrobbler);
+        const trackData = await scrobbler.fetchTrackData(settings.store.username, settings.store.apiKey || LASTFM_API_KEY);
         if (!trackData) return null;
 
         const largeImage = this.getLargeImage(trackData);
