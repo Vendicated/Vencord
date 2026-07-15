@@ -16,6 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { ConstEnumToRuntimeEnum } from "@utils/types";
 import * as t from "@vencord/discord-types";
 import * as enums from "@vencord/discord-types/enums";
 import { findByCodeLazy, findByPropsLazy } from "@webpack";
@@ -26,11 +27,9 @@ export const Flux: t.Flux = findByPropsLazy("connectStores");
 
 export type GenericStore = t.FluxStore & Record<string, any>;
 
-export const DraftType: typeof enums.DraftType = findByPropsLazy("ChannelMessage", "SlashCommand");
+export const DraftType: ConstEnumToRuntimeEnum<typeof enums.DraftType> = findByPropsLazy("ChannelMessage", "SlashCommand");
 
-export let MessageStore: Omit<t.MessageStore, "getMessages"> & GenericStore & {
-    getMessages(chanId: string): any;
-};
+export let MessageStore: t.MessageStore;
 
 export let PermissionStore: t.PermissionStore;
 export let GuildChannelStore: t.GuildChannelStore;

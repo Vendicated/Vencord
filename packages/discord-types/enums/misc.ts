@@ -3,7 +3,7 @@ export const enum CloudUploadPlatform {
     WEB = 1,
 }
 
-export declare enum DraftType {
+export const enum DraftType {
     ChannelMessage = 0,
     ThreadSettings = 1,
     FirstThreadMessage = 2,
