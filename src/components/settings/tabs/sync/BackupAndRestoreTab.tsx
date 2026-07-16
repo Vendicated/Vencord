@@ -17,13 +17,13 @@
 */
 
 import { downloadSettingsBackup, uploadSettingsBackup } from "@api/SettingsSync/offline";
+import { Button } from "@components/Button";
 import { Card } from "@components/Card";
 import { Flex } from "@components/Flex";
 import { Heading } from "@components/Heading";
 import { Paragraph } from "@components/Paragraph";
 import { SettingsTab, wrapTab } from "@components/settings/tabs/BaseTab";
 import { Margins } from "@utils/margins";
-import { Button, Text } from "@webpack/common";
 
 function BackupAndRestoreTab() {
     return (
@@ -34,20 +34,20 @@ function BackupAndRestoreTab() {
                     <Paragraph>Importing a settings file will overwrite your current settings.</Paragraph>
                 </Card>
 
-                <Text variant="text-md/normal" className={Margins.bottom8}>
+                <Paragraph className={Margins.bottom8}>
                     You can import and export your Vencord settings as a JSON file.
                     This allows you to easily transfer your settings to another device,
                     or recover your settings after reinstalling Vencord or Discord.
-                </Text>
+                </Paragraph>
 
                 <Heading tag="h4">Settings Export contains:</Heading>
-                <Text variant="text-md/normal" className={Margins.bottom8}>
+                <Paragraph className={Margins.bottom8}>
                     <ul>
                         <li>&mdash; Custom QuickCSS</li>
                         <li>&mdash; Theme Links</li>
                         <li>&mdash; Plugin Settings</li>
                     </ul>
-                </Text>
+                </Paragraph>
 
                 <Flex>
                     <Button onClick={() => uploadSettingsBackup()}>

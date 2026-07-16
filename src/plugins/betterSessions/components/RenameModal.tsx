@@ -17,10 +17,11 @@
 */
 
 import { TextButton } from "@components/Button";
+import { Heading } from "@components/Heading";
 import { SessionInfo } from "@plugins/betterSessions/types";
 import { getDefaultName, savedSessionsCache, saveSessionsToDataStore } from "@plugins/betterSessions/utils";
 import { RenderModalProps } from "@vencord/discord-types";
-import { Forms, Modal,React, TextInput } from "@webpack/common";
+import { Modal, React, TextInput } from "@webpack/common";
 import { KeyboardEvent } from "react";
 
 export function RenameModal({ props, session, state }: { props: RenderModalProps, session: SessionInfo["session"], state: [string, React.Dispatch<React.SetStateAction<string>>]; }) {
@@ -57,7 +58,7 @@ export function RenameModal({ props, session, state }: { props: RenderModalProps
             ]}
         >
             <div>
-                <Forms.FormTitle tag="h5">New device name</Forms.FormTitle>
+                <Heading tag="h5">New device name</Heading>
                 <TextInput
                     style={{ marginBottom: "10px" }}
                     placeholder={getDefaultName(session.client_info)}
