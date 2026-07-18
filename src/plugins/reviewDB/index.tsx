@@ -92,12 +92,27 @@ export default definePlugin({
             }
         },
         {
-            // User popout
-            // Same find as ShowConnections
+            // Bot profile popout.
+            find: /\(0,\i\.jsx\)\(\i\.\i,\{userId:\i\.id,userBio:\i\?\.bio,hidePersonalInformation:\i,onClose:\i\}\),.{0,500}popularApplicationCommandIds/,
+            replacement: {
+                match: /\(0,\i\.jsx\)\(\i\.\i,\{userId:(\i)\.id,userBio:\i\?\.bio,hidePersonalInformation:\i,onClose:\i\}\),/,
+                replace: "$&$self.renderProfileComponent({user:$1}),"
+            }
+        },
+        {
+            // User profile popout.
             find: '"UserProfilePopout");',
             replacement: {
-                match: /user:(\i),widgets:.{0,100}?\}\),/,
+                match: /\(0,\i\.jsx\)\(\i\.\i,\{userId:(\i)\.id,userBio:\i\?\.bio,hidePersonalInformation:\i,onClose:\i\}\),/,
                 replace: "$&$self.renderProfileComponent({user:$1}),"
+            }
+        },
+        {
+            // Preserve direct provider media for ReviewDB instead of the share page URL.
+            find: 'source_object:"GIF Picker",gif_url:',
+            replacement: {
+                match: /gif_url:(\i)\.url,gif_id:\1\.id/,
+                replace: "gif_url:$1.url,gif_src:$1.gifSrc??$1.src,gif_id:$1.id"
             }
         }
     ],
