@@ -16,25 +16,38 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { definePluginSettings } from "@api/Settings";
+import { definePluginSettings, migratePluginSetting, migratePluginSettings } from "@api/Settings";
 import { LinkButton } from "@components/Button";
 import { Card } from "@components/Card";
 import { Heading } from "@components/Heading";
 import { Margins } from "@components/margins";
 import { Paragraph } from "@components/Paragraph";
 import { Devs } from "@utils/constants";
-import { Logger } from "@utils/Logger";
 import definePlugin, { OptionType } from "@utils/types";
 import { Activity, ActivityAssets, ActivityButton } from "@vencord/discord-types";
 import { ActivityFlags, ActivityStatusDisplayType, ActivityType } from "@vencord/discord-types/enums";
 import { ApplicationAssetUtils, AuthenticationStore, FluxDispatcher, PresenceStore } from "@webpack/common";
 
-interface TrackData {
+import { LastFMScrobbler } from "./lastfm";
+import { ListenBrainzScrobbler } from "./listenbrainz";
+
+export interface TrackData {
     name: string;
     album: string;
     artist: string;
-    url: string;
-    imageUrl?: string;
+    trackURL?: string;
+    artistURL?: string;
+    albumURL?: string;
+    imageURL?: string;
+    serviceName?: string;
+}
+
+export interface ScrobblerBackend {
+    name: string,
+    id: string,
+
+    fetchTrackData(username: string, apiKey?: string): Promise<TrackData | null>;
+    getUserURL(username: string): string;
 }
 
 const enum NameFormat {
@@ -43,15 +56,14 @@ const enum NameFormat {
     SongFirst = "song-first",
     ArtistOnly = "artist",
     SongOnly = "song",
-    AlbumName = "album"
+    AlbumName = "album",
+    ServiceName = "service-name"
 }
 
 // Last.fm API keys are essentially public information and have no access to your account, so including one here is fine.
-const API_KEY = "790c37d90400163a5a5fe00d6ca32ef0";
+const LASTFM_API_KEY = "790c37d90400163a5a5fe00d6ca32ef0";
 const DISCORD_APP_ID = "1108588077900898414";
 const LASTFM_PLACEHOLDER_IMAGE_HASH = "2a96cbd8b46e442fc41c2b86b821562f";
-
-const logger = new Logger("LastFMRichPresence");
 
 async function getApplicationAsset(key: string): Promise<string> {
     return (await ApplicationAssetUtils.fetchAssetIds(DISCORD_APP_ID, [key]))[0];
@@ -66,17 +78,32 @@ function setActivity(activity: Activity | null) {
 }
 
 const settings = definePluginSettings({
+    scrobblerBackend: {
+        description: "The scrobbler backend to use.",
+        type: OptionType.SELECT,
+        options: [
+            {
+                "label": "Last.FM",
+                "value": "lastfm",
+                "default": true
+            },
+            {
+                "label": "ListenBrainz",
+                "value": "listenbrainz"
+            }
+        ] as const
+    },
     apiKey: {
         displayName: "API Key",
         description: "Custom Last.fm API key. Not required but highly recommended to avoid rate limiting with our shared key",
         type: OptionType.STRING,
     },
     username: {
-        description: "Last.fm username",
+        description: "Username",
         type: OptionType.STRING,
     },
     shareUsername: {
-        description: "Show link to Last.fm profile",
+        description: "Show link to scrobbler profile",
         type: OptionType.BOOLEAN,
         default: false,
     },
@@ -86,12 +113,12 @@ const settings = definePluginSettings({
         default: true,
     },
     hideWithSpotify: {
-        description: "Hide Last.fm presence if spotify is running",
+        description: "Hide presence if Spotify is running",
         type: OptionType.BOOLEAN,
         default: true,
     },
     hideWithActivity: {
-        description: "Hide Last.fm presence if you have any other presence",
+        description: "Hide presence if you have any other presence",
         type: OptionType.BOOLEAN,
         default: false,
     },
@@ -129,6 +156,10 @@ const settings = definePluginSettings({
                 default: true
             },
             {
+                label: "Use music service name (falls back to custom status text)",
+                value: NameFormat.ServiceName
+            },
+            {
                 label: "Use format 'artist - song'",
                 value: NameFormat.ArtistFirst
             },
@@ -160,8 +191,8 @@ const settings = definePluginSettings({
         type: OptionType.SELECT,
         options: [
             {
-                label: "Use large Last.fm logo",
-                value: "lastfmLogo",
+                label: "Use large scrobbler logo",
+                value: "logo",
                 default: true
             },
             {
@@ -170,30 +201,34 @@ const settings = definePluginSettings({
             }
         ],
     },
-    showLastFmLogo: {
-        displayName: "Show Last.fm Logo",
-        description: "Show the Last.fm logo by the album cover",
+    showLogo: {
+        displayName: "Show Scrobbler Logo",
+        description: "Show the scrobbler service logo by the album cover",
         type: OptionType.BOOLEAN,
         default: true,
     },
     showAlbumCover: {
-        description: "Show album cover. Disabling this will display a placeholder. Useful if your Music has inappropriate art",
+        description: "Show album cover. Disabling this will display a placeholder. Useful if your music has inappropriate art",
         type: OptionType.BOOLEAN,
         default: true,
     }
 });
 
+migratePluginSettings("MusicRichPresence", "LastFMRichPresence");
+migratePluginSetting("MusicRichPresence", "showLastFmLogo", "showLogo");
 export default definePlugin({
-    name: "LastFMRichPresence",
-    description: "Little plugin for Last.fm rich presence",
+    name: "MusicRichPresence",
+    description: "Rich Presence for Last.FM/Listenbrainz",
     tags: ["Activity", "Media"],
-    authors: [Devs.dzshn, Devs.RuiNtD, Devs.blahajZip, Devs.archeruwu],
+    searchTerms: ["lastfm", "LastFMRichPresence"],
+    authors: [Devs.Rini, Devs.Ven, Devs.angelcube, Devs.RuiNtD, Devs.blahajZip, Devs.archeruwu],
 
     settings,
 
     settingsAboutComponent() {
         return (
             <Card>
+                <Heading tag="h2">Last.FM</Heading>
                 <Heading tag="h5">How to create an API key</Heading>
                 <Paragraph>Set <strong>Application name</strong> and <strong>Application description</strong> to anything and leave the rest blank.</Paragraph>
                 <LinkButton size="small" href="https://www.last.fm/api/account/create" className={Margins.top8}>Create API Key</LinkButton>
@@ -210,61 +245,22 @@ export default definePlugin({
         clearInterval(this.updateInterval);
     },
 
-    async fetchTrackData(): Promise<TrackData | null> {
-        if (!settings.store.username)
-            return null;
-
-        try {
-            const params = new URLSearchParams({
-                method: "user.getrecenttracks",
-                api_key: settings.store.apiKey || API_KEY,
-                user: settings.store.username,
-                limit: "1",
-                format: "json"
-            });
-
-            const res = await fetch(`https://ws.audioscrobbler.com/2.0/?${params}`);
-            if (!res.ok) throw `${res.status} ${res.statusText}`;
-
-            const json = await res.json();
-            if (json.error) {
-                logger.error("Error from Last.fm API", `${json.error}: ${json.message}`);
-                return null;
-            }
-
-            const trackData = json.recenttracks?.track[0];
-
-            if (!trackData?.["@attr"]?.nowplaying)
-                return null;
-
-            // why does the json api have xml structure
-            return {
-                name: trackData.name || "Unknown",
-                album: trackData.album["#text"],
-                artist: trackData.artist["#text"] || "Unknown",
-                url: trackData.url,
-                imageUrl: trackData.image?.find((x: any) => x.size === "large")?.["#text"]
-            };
-        } catch (e) {
-            logger.error("Failed to query Last.fm API", e);
-            // will clear the rich presence if API fails
-            return null;
-        }
-    },
-
     async updatePresence() {
         setActivity(await this.getActivity());
     },
 
     getLargeImage(track: TrackData): string | undefined {
-        if (settings.store.showAlbumCover && track.imageUrl && !track.imageUrl.includes(LASTFM_PLACEHOLDER_IMAGE_HASH))
-            return track.imageUrl;
+        if (settings.store.showAlbumCover && track.imageURL && !track.imageURL.includes(LASTFM_PLACEHOLDER_IMAGE_HASH))
+            return track.imageURL;
 
         if (settings.store.missingArt === "placeholder")
             return "placeholder";
     },
 
     async getActivity(): Promise<Activity | null> {
+        if (!settings.store.username)
+            return null;
+
         if (settings.store.hideWithActivity) {
             if (PresenceStore.getActivities(AuthenticationStore.getId()).some(a => a.application_id !== DISCORD_APP_ID && a.type !== ActivityType.CUSTOM_STATUS)) {
                 return null;
@@ -278,7 +274,9 @@ export default definePlugin({
             }
         }
 
-        const trackData = await this.fetchTrackData();
+        const scrobbler = settings.store.scrobblerBackend === "lastfm" ? LastFMScrobbler : ListenBrainzScrobbler;
+
+        const trackData = await scrobbler.fetchTrackData(settings.store.username, settings.store.apiKey || LASTFM_API_KEY);
         if (!trackData) return null;
 
         const largeImage = this.getLargeImage(trackData);
@@ -286,22 +284,23 @@ export default definePlugin({
             {
                 large_image: await getApplicationAsset(largeImage),
                 large_text: trackData.album || undefined,
-                ...(settings.store.showLastFmLogo && {
-                    small_image: await getApplicationAsset("lastfm-small"),
-                    small_text: "Last.fm"
+                ...(settings.store.showLogo && {
+                    small_image: await getApplicationAsset(`${scrobbler.id}-small`),
+                    small_text: scrobbler.id
                 }),
             } : {
-                large_image: await getApplicationAsset("lastfm-large"),
+                large_image: await getApplicationAsset(`${scrobbler.id}-large`),
                 large_text: trackData.album || undefined,
             };
 
         const buttons: ActivityButton[] = [];
 
-        if (settings.store.shareUsername)
+        if (settings.store.shareUsername) {
             buttons.push({
-                label: "Last.fm Profile",
-                url: `https://www.last.fm/user/${settings.store.username}`,
+                label: `${scrobbler.name} Profile`,
+                url: scrobbler.getUserURL(settings.store.username!)
             });
+        }
 
         const statusName = (() => {
             switch (settings.store.nameFormat) {
@@ -315,6 +314,11 @@ export default definePlugin({
                     return trackData.name;
                 case NameFormat.AlbumName:
                     return trackData.album || settings.store.statusName
+                        .replaceAll("{artist}", trackData.artist || "")
+                        .replaceAll("{album}", trackData.album || "")
+                        .replaceAll("{title}", trackData.name || "");
+                case NameFormat.ServiceName:
+                    return trackData.serviceName || settings.store.statusName
                         .replaceAll("{artist}", trackData.artist || "")
                         .replaceAll("{album}", trackData.album || "")
                         .replaceAll("{title}", trackData.name || "");
@@ -350,11 +354,11 @@ export default definePlugin({
         };
 
         if (settings.store.clickableLinks) {
-            activity.details_url = trackData.url;
-            activity.state_url = `https://www.last.fm/music/${encodeURIComponent(trackData.artist)}`;
+            activity.details_url = trackData.trackURL;
+            activity.state_url = trackData.artistURL;
 
             if (trackData.album) {
-                activity.assets!.large_url = `https://www.last.fm/music/${encodeURIComponent(trackData.artist)}/${encodeURIComponent(trackData.album)}`;
+                activity.assets!.large_url = trackData.albumURL;
             }
         }
 
