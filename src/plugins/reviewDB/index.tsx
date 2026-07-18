@@ -101,9 +101,10 @@ export default definePlugin({
         },
         {
             // User profile popout.
+            // Same find as ShowConnections
             find: '"UserProfilePopout");',
             replacement: {
-                match: /\(0,\i\.jsx\)\(\i\.\i,\{userId:(\i)\.id,userBio:\i\?\.bio,hidePersonalInformation:\i,onClose:\i\}\),/,
+                match: /user:(\i),widgets:.{0,100}?\}\),/,
                 replace: "$&$self.renderProfileComponent({user:$1}),"
             }
         },
