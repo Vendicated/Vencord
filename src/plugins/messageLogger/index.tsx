@@ -216,7 +216,7 @@ export default definePlugin({
     name: "MessageLogger",
     description: "Temporarily logs deleted and edited messages.",
     tags: ["Chat", "Utility"],
-    authors: [Devs.rushii, Devs.Ven, Devs.AutumnVN, Devs.Nickyux, Devs.Kyuuhachi, Devs.sadan],
+    authors: [Devs.rushii, Devs.Ven, Devs.AutumnVN, Devs.Nickyux, Devs.Kyuuhachi, Devs.sadan, Devs.yuna0x0],
     dependencies: ["MessageUpdaterAPI"],
     settings,
     contextMenus: {
@@ -274,15 +274,12 @@ export default definePlugin({
         if (!newMessage.attachments?.length) {
             return oldMessage.attachments.map((a): MLAttachment => ({ ...a, deleted: true }));
         }
-        const attachments: MLAttachment[] = [];
-        for (const oldAttachment of oldMessage.attachments) {
-            const wasDeleted = newMessage.attachments.every(a => a.id !== oldAttachment.id);
-            if (wasDeleted) {
-                attachments.push({ ...oldAttachment, deleted: true });
-            } else {
-                attachments.push(oldAttachment);
-            }
-        }
+        const attachments = oldMessage.attachments
+            .map((oldAttachment): MLAttachment =>
+                newMessage.attachments.find(a => a.id === oldAttachment.id)
+                ?? { ...oldAttachment, deleted: true }
+            )
+            .concat(newMessage.attachments.filter(a => oldMessage.attachments.every(o => o.id !== a.id)));
         return attachments;
     },
 
