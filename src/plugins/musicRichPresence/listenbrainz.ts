@@ -59,8 +59,10 @@ async function getUrls(additionalInfo: Record<string, string> | undefined, track
 
     // If no MBIDs are present, try to search for the track on MusicBrainz
 
-    // this needs to be encoded separately—URLSearchParams encodes spaces as "+"
-    const query = encodeURIComponent(`artist:"${artistName}" AND recording:"${trackName}" AND album:${releaseName}`);
+    let rawQuery = `artist:"${artistName}" AND recording:"${trackName}"`;
+    if (releaseName)
+        rawQuery += ` AND album:${releaseName}`;
+    const query = encodeURIComponent(rawQuery);
 
     if (metadataCache.has(query)) {
         return metadataCache.get(query) ?? {};
