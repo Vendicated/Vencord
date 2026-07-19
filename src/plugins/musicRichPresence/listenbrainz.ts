@@ -6,17 +6,32 @@
 
 import { VENCORD_USER_AGENT } from "@shared/vencordUserAgent";
 import { Logger } from "@utils/Logger";
+import { TTLMap } from "@utils/TTLMap";
 
-import { ScrobblerBackend, TrackData } from ".";
+import { ScrobblerBackend, settings, TrackData } from ".";
 
 const logger = new Logger("AudioScrobblerRichPresence/ListenBrainz");
 
-const url = (path: string) => `https://listenbrainz.org${path}`;
+// 15 minutes
+const coverArtCache = new TTLMap<string, string>(15 * 60 * 1000);
+const metadataCache = new TTLMap<string, Partial<TrackData> | null>(15 * 60 * 1000);
+
+const isCustomInstance = () => settings.store.scrobblerBackend === "listenbrainz-compatible";
+const url = (path: string) => `${isCustomInstance() ? settings.store.instanceBaseURL : "https://listenbrainz.org"}${path}`;
+const apiUrl = (path: string) => `${isCustomInstance() ? settings.store.instanceAPIBaseUrl : "https://api.listenbrainz.org"}${path}`;
 
 async function fetchCoverArt(releaseGroupMBID: string) {
+    if (coverArtCache.has(releaseGroupMBID)) {
+        return coverArtCache.get(releaseGroupMBID);
+    }
+
     const res = await fetch(`https://coverartarchive.org/release-group/${releaseGroupMBID}`);
     if (!res.ok) return null;
-    return res.json().then(json => json.images[0].thumbnails.large);
+
+    const url = await res.json().then(json => json.images[0].thumbnails.large);
+    coverArtCache.set(releaseGroupMBID, url);
+
+    return url;
 }
 
 async function getUrls(additionalInfo: Record<string, string> | undefined, trackName: string, artistName: string, releaseName: string): Promise<Partial<TrackData>> {
@@ -42,6 +57,10 @@ async function getUrls(additionalInfo: Record<string, string> | undefined, track
     // this needs to be encoded separately—URLSearchParams encodes spaces as "+"
     const query = encodeURIComponent(`artist:"${artistName}" AND recording:"${trackName}" AND album:${releaseName}`);
 
+    if (metadataCache.has(query)) {
+        return metadataCache.get(query) ?? {};
+    }
+
     const params = new URLSearchParams({
         fmt: "json",
         limit: "1"
@@ -54,27 +73,31 @@ async function getUrls(additionalInfo: Record<string, string> | undefined, track
         .then(json => json.recordings?.[0]);
 
     if (!metadata) {
+        metadataCache.set(query, null);
         return {};
     }
 
     const artist = metadata["artist-credit"]?.[0]?.artist;
     const release = metadata.releases?.[0];
 
-    return {
+    const data: Partial<TrackData> = {
         imageURL: release?.["release-group"] ? await fetchCoverArt(release["release-group"].id) : undefined,
         trackURL: url(`/track/${metadata.id}/`),
         albumURL: release?.id ? url(`/release/${release.id}/`) : release?.["release-group"]?.id ? url(`/release-group/${release["release-group"].id}/`) : undefined,
         artistURL: artist?.id ? url(`/artist/${artist.id}/`) : undefined,
     };
+    metadataCache.set(query, data);
+
+    return data;
 }
 
 export const ListenBrainzScrobbler: ScrobblerBackend = {
     name: "ListenBrainz",
     id: "listenbrainz",
 
-    async fetchTrackData(username: string, _apiKey?: string): Promise<TrackData | null> {
+    async fetchTrackData(): Promise<TrackData | null> {
         try {
-            const res = await fetch(`https://api.listenbrainz.org/1/user/${username}/playing-now`);
+            const res = await fetch(apiUrl(`/1/user/${settings.store.username}/playing-now`));
             if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
 
             const data = await res.json().then(json => json.payload?.listens[0]);
