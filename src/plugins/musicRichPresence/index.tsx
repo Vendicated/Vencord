@@ -29,7 +29,7 @@ import { ActivityFlags, ActivityStatusDisplayType, ActivityType } from "@vencord
 import { ApplicationAssetUtils, AuthenticationStore, FluxDispatcher, PresenceStore } from "@webpack/common";
 
 import { LastFMScrobbler } from "./lastfm";
-import { ListenBrainzScrobbler } from "./listenbrainz";
+import { invalidateListenBrainzCache, ListenBrainzScrobbler } from "./listenbrainz";
 
 export interface TrackData {
     name: string;
@@ -98,12 +98,14 @@ export const settings = definePluginSettings({
     instanceBaseURL: {
         description: "The base url of your ListenBrainz instance.",
         type: OptionType.STRING,
-        placeholder: "https://example.org"
+        placeholder: "https://example.org",
+        onChange: invalidateListenBrainzCache
     },
     instanceAPIBaseUrl: {
         description: "The base url of your ListenBrainz API.",
         type: OptionType.STRING,
-        placeholder: "https://api.example.org"
+        placeholder: "https://api.example.org",
+        onChange: invalidateListenBrainzCache
     },
     apiKey: {
         displayName: "API Key",

@@ -20,6 +20,11 @@ const isCustomInstance = () => settings.store.scrobblerBackend === "listenbrainz
 const url = (path: string) => `${isCustomInstance() ? settings.store.instanceBaseURL : "https://listenbrainz.org"}${path}`;
 const apiUrl = (path: string) => `${isCustomInstance() ? settings.store.instanceAPIBaseUrl : "https://api.listenbrainz.org"}${path}`;
 
+export function invalidateListenBrainzCache() {
+    coverArtCache.clear();
+    metadataCache.clear();
+}
+
 async function fetchCoverArt(releaseGroupMBID: string) {
     if (coverArtCache.has(releaseGroupMBID)) {
         return coverArtCache.get(releaseGroupMBID);
