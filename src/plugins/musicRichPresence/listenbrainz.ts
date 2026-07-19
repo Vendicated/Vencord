@@ -92,8 +92,9 @@ async function getUrls(additionalInfo: Record<string, string> | undefined, track
         .then(json => json.recordings?.[0]);
 
     if (!metadata) {
-        metadataCache.set(query, null);
-        return additionalInfo?.origin_url ? { imageURL: fallbackToYoutubeThumbnail(additionalInfo.origin_url) } : {};
+        const data = additionalInfo?.origin_url ? { imageURL: fallbackToYoutubeThumbnail(additionalInfo.origin_url) } : {};
+        metadataCache.set(query, data);
+        return data;
     }
 
     const artist = metadata["artist-credit"]?.[0]?.artist;
