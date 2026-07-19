@@ -61,7 +61,7 @@ async function getUrls(additionalInfo: Record<string, string> | undefined, track
 
     let rawQuery = `artist:"${artistName}" AND recording:"${trackName}"`;
     if (releaseName)
-        rawQuery += ` AND album:${releaseName}`;
+        rawQuery += ` AND album:"${releaseName}"`;
     const query = encodeURIComponent(rawQuery);
 
     if (metadataCache.has(query)) {
