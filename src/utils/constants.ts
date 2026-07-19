@@ -649,6 +649,18 @@ export const Devs = /* #__PURE__*/ Object.freeze({
     Lunascape: {
         name: "Lunascape",
         id: 383365021415243776n
+    },
+    sillysrc: {
+        name: "silly.src",
+        id: 1527689633440334084n
+    },
+    iusetheybtw: {
+        name: "definitely not ivan",
+        id: 1473325002815181002n
+    },
+    meqativ: {
+        name: "meqa",
+        id: 744276454946242723n
     }
 } satisfies Record<string, Dev>);
 
