@@ -38,7 +38,7 @@ const userContextPatch: NavContextMenuPatchCallback = (children, { user }: { use
 
 export default definePlugin({
     name: "CopyProfileColors",
-    description: "Adds a right click button to the user's profile to copy their profile colors ",
+    description: "Adds a right click button to the user's profile to copy their profile colors.",
     authors: [Devs.alexagian],
     tags: ["Utility", "Appearance"],
 
