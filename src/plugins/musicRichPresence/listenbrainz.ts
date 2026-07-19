@@ -25,15 +25,27 @@ export function invalidateListenBrainzCache() {
     metadataCache.clear();
 }
 
-async function fetchCoverArt(releaseGroupMBID: string) {
+const YoutubeVideoURLRegex = /^((?:https?:)?\/\/)?((?:www|m)\.)?((?:youtube(?:-nocookie)?\.com|youtu.be))(\/(?:[\w-]+\?v=|embed\/|live\/|v\/)?)([\w-]+)(\S+)?$/;
+
+function fallbackToYoutubeThumbnail(originUrl: string | undefined): string | undefined {
+    if (!originUrl) return undefined;
+
+    const match = originUrl.match(YoutubeVideoURLRegex);
+    return match ? `https://img.youtube.com/vi/${match[5]}/hqdefault.jpg` : undefined;
+}
+
+async function fetchCoverArt(releaseGroupMBID: string, originUrl?: string): Promise<string | undefined> {
+    if (!releaseGroupMBID) return fallbackToYoutubeThumbnail(originUrl);
+
     if (coverArtCache.has(releaseGroupMBID)) {
         return coverArtCache.get(releaseGroupMBID);
     }
 
     const res = await fetch(`https://coverartarchive.org/release-group/${releaseGroupMBID}`);
-    if (!res.ok) return null;
+    if (!res.ok) return fallbackToYoutubeThumbnail(originUrl);
 
-    const url = await res.json().then(json => json.images[0].thumbnails.large);
+    const url = await res.json()
+        .then(json => json.images[0].thumbnails.large ?? fallbackToYoutubeThumbnail(originUrl));
     coverArtCache.set(releaseGroupMBID, url);
 
     return url;
@@ -43,10 +55,10 @@ async function getUrls(additionalInfo: Record<string, string> | undefined, track
     // Well tagged music will have MBIDs which we can use directly. These are optional but highly recommended in ListenBrainz scrobbles.
     // If your music doesn't have these, it's highly recommended to use https://picard.musicbrainz.org/ to automatically add them
     if (additionalInfo?.recording_mbid) {
-        const { release_group_mbid, release_mbid, recording_mbid, artist_mbids } = additionalInfo;
+        const { release_group_mbid, release_mbid, recording_mbid, artist_mbids, origin_url } = additionalInfo;
 
         return {
-            imageURL: release_group_mbid ? await fetchCoverArt(release_group_mbid) : undefined,
+            imageURL: await fetchCoverArt(release_group_mbid, origin_url),
             trackURL: recording_mbid ? url(`/track/${recording_mbid}`) : undefined,
             albumURL: release_group_mbid
                 ? url(`/release-group/${release_group_mbid}`)
@@ -81,14 +93,14 @@ async function getUrls(additionalInfo: Record<string, string> | undefined, track
 
     if (!metadata) {
         metadataCache.set(query, null);
-        return {};
+        return additionalInfo?.origin_url ? { imageURL: fallbackToYoutubeThumbnail(additionalInfo.origin_url) } : {};
     }
 
     const artist = metadata["artist-credit"]?.[0]?.artist;
     const release = metadata.releases?.[0];
 
     const data: Partial<TrackData> = {
-        imageURL: release?.["release-group"] ? await fetchCoverArt(release["release-group"].id) : undefined,
+        imageURL: await fetchCoverArt(release?.["release-group"]?.id, additionalInfo?.origin_url),
         trackURL: url(`/track/${metadata.id}/`),
         albumURL: release?.id ? url(`/release/${release.id}/`) : release?.["release-group"]?.id ? url(`/release-group/${release["release-group"].id}/`) : undefined,
         artistURL: artist?.id ? url(`/artist/${artist.id}/`) : undefined,
