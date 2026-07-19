@@ -23,7 +23,7 @@ interface UsernameProps {
     userOverride?: User;
 }
 
-const wrapEmojis = findByCodeLazy("lastIndex;return");
+const wrapEmojis = findByCodeLazy("`emoji${", "span");
 
 const settings = definePluginSettings({
     mode: {
