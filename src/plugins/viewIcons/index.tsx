@@ -228,7 +228,7 @@ export default definePlugin({
             replacement: {
                 match: /null==\i\.icon\?.+?src:(\(0,\i\.\i\).+?\))(?=[,}])/,
                 // We have to check that icon is not an unread GDM in the server bar
-                replace: (m, iconUrl) => `${m},onClick:e=>arguments[0]?.size!=="SIZE_48"&&$self.openAvatar(${iconUrl},e)`
+                replace: (m, iconUrl) => `${m},onClick:vcEvent=>arguments[0]?.size!=="SIZE_48"&&$self.openAvatar(${iconUrl},vcEvent)`
             }
         },
         // User DMs top small icon
@@ -236,7 +236,7 @@ export default definePlugin({
             find: ".channel.getRecipientId(),",
             replacement: {
                 match: /(?=,src:(\i.getAvatarURL\(.+?[)]))/,
-                replace: (_, avatarUrl) => `,onClick:e=>$self.openAvatar(${avatarUrl},e)`
+                replace: (_, avatarUrl) => `,onClick:vcEvent=>$self.openAvatar(${avatarUrl},vcEvent)`
             }
         },
         // User Dms top large icon
@@ -244,7 +244,7 @@ export default definePlugin({
             find: ".EMPTY_GROUP_DM)",
             replacement: {
                 match: /(?<=SIZE_80,)(?=src:(.+?\))[,}])/,
-                replace: (_, avatarUrl) => `onClick:e=>$self.openAvatar(${avatarUrl},e),`
+                replace: (_, avatarUrl) => `onClick:vcEvent=>$self.openAvatar(${avatarUrl},vcEvent),`
             }
         }
     ]
