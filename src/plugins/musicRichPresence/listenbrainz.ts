@@ -31,7 +31,7 @@ function fallbackToYoutubeThumbnail(originUrl: string | undefined): string | und
     if (!originUrl) return undefined;
 
     const match = originUrl.match(YoutubeVideoURLRegex);
-    return match ? `https://img.youtube.com/vi/${match[5]}/hqdefault.jpg` : undefined;
+    return match ? `https://i.ytimg.com/vi/${match[5]}/maxresdefault.jpg` : undefined;
 }
 
 async function fetchCoverArt(releaseGroupMBID: string, originUrl?: string): Promise<string | undefined> {
