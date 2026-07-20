@@ -9,11 +9,12 @@ import { disableStyle, enableStyle } from "@api/Styles";
 import { buildPluginMenuEntries, buildThemeMenuEntries } from "@plugins/vencordToolbox/menu";
 import { Devs } from "@utils/constants";
 import { classNameFactory } from "@utils/css";
+import { getIntlMessage } from "@utils/discord";
 import { Logger } from "@utils/Logger";
 import definePlugin, { OptionType } from "@utils/types";
 import { findCssClassesLazy } from "@webpack";
 import { ComponentDispatch, FocusLock, Menu, useEffect, useRef } from "@webpack/common";
-import type { HTMLAttributes, ReactNode } from "react";
+import type { HTMLAttributes, ReactElement, ReactNode } from "react";
 
 import fullHeightStyle from "./fullHeightContext.css?managed";
 
@@ -177,7 +178,7 @@ export default definePlugin({
         return <Layer {...props} />;
     },
 
-    transformSettingsEntries(list) {
+    transformSettingsEntries(list: ReactElement<any>[]): ReactNode[] {
         const items: ReactNode[] = [];
 
         for (const item of list) {
@@ -194,9 +195,13 @@ export default definePlugin({
                         {children}
                     </Menu.MenuItem>
                 );
-            } else if (key.endsWith("_section") && props.label) {
+            } else if (key === "user_section" || (key?.endsWith("_section") && props.label)) {
+                const label = key === "user_section"
+                    ? getIntlMessage("USER_SETTINGS")
+                    : props.label;
+
                 items.push(
-                    <Menu.MenuItem key={key} label={props.label} id={props.label}>
+                    <Menu.MenuItem key={key} label={label} id={label}>
                         {this.transformSettingsEntries(props.children)}
                     </Menu.MenuItem>
                 );
