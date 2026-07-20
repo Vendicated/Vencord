@@ -649,7 +649,11 @@ export const Devs = /* #__PURE__*/ Object.freeze({
     Lunascape: {
         name: "Lunascape",
         id: 383365021415243776n
-    }
+    },
+    bonk: {
+        name: "bonk",
+        id: 379022874872381440n
+    },
 } satisfies Record<string, Dev>);
 
 // iife so #__PURE__ works correctly
