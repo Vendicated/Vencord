@@ -95,8 +95,8 @@ export default definePlugin({
             find: "this.renderArtisanalHack()",
             replacement: [
                 {
-                    match: /class (\i)(?= extends \i\.PureComponent.+?static contextType=.+?jsx\)\(\1,\{mode:)/,
-                    replace: "var $1=$self.Layer;class VencordPatchedOldFadeLayer",
+                    match: /class (\i)( extends \i\.PureComponent.+?jsx\)\(\1,\{mode:)/,
+                    replace: "var $1=$self.Layer;class VencordPatchedOldFadeLayer$2",
                     predicate: () => settings.store.disableFade
                 },
                 { // Lazy-load contents
