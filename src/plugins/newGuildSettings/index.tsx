@@ -26,7 +26,7 @@ import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { Guild } from "@vencord/discord-types";
 import { findByCodeLazy, findByPropsLazy, mapMangledModuleLazy } from "@webpack";
-import { Menu, UserStore } from "@webpack/common";
+import { GuildStore, Menu } from "@webpack/common";
 
 const { updateGuildNotificationSettings } = findByPropsLazy("updateGuildNotificationSettings");
 const { toggleShowAllChannels } = mapMangledModuleLazy(".onboardExistingMember(", {
@@ -144,9 +144,16 @@ export default definePlugin({
     settings,
     applyDefaultSettings,
     flux: {
-        GUILD_JOIN_REQUEST_UPDATE({ guildId, request, status }) {
-            if (status === "APPROVED" && request.user_id === UserStore.getCurrentUser().id)
-                applyDefaultSettings(guildId);
+        GUILD_CREATE(event: any) {
+            const guildId = event.guild?.id || event.guildId;
+            if (!guildId) return;
+
+            const guild = GuildStore.getGuild(guildId);
+            const isLurker = (event.guild as any)?.is_lurker || (guild as any)?.isLurker;
+
+            if (isLurker) return;
+
+            applyDefaultSettings(guildId);
         }
-    }
+    },
 });
