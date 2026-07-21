@@ -274,16 +274,12 @@ export default definePlugin({
         if (!newMessage.attachments?.length) {
             return oldMessage.attachments.map((a): MLAttachment => ({ ...a, deleted: true }));
         }
-        const attachments: MLAttachment[] = [];
-        for (const oldAttachment of oldMessage.attachments) {
-            const wasDeleted = newMessage.attachments.every(a => a.id !== oldAttachment.id);
-            if (wasDeleted) {
-                attachments.push({ ...oldAttachment, deleted: true });
-            } else {
-                attachments.push(oldAttachment);
-            }
-        }
-        return attachments;
+        return oldMessage.attachments
+            .map((oldAttachment): MLAttachment =>
+                newMessage.attachments.find(a => a.id === oldAttachment.id)
+                ?? { ...oldAttachment, deleted: true }
+            )
+            .concat(newMessage.attachments.filter(a => !oldMessage.attachments.some(o => o.id === a.id)));
     },
 
     handleDelete(cache: any, data: { ids: string[], id: string; mlDeleted?: boolean; }, isBulk: boolean) {
