@@ -131,6 +131,12 @@ export default definePlugin({
                 {
                     match: /(?<=canCopyImage\(.+?)typeof \i\.clipboard\.copyImage/,
                     replace: '"function"'
+                },
+                {
+                    // Discord's copy allowlist is missing formats like webp & avif that its save
+                    // allowlist has. copyImage re-encodes to png anyway, so they work fine
+                    match: /\["jpg","jpeg","jfif","png"\]/,
+                    replace: '["jpg","jpeg","jfif","png","webp","avif"]'
                 }
             ]
         },
