@@ -6,8 +6,8 @@
 
 import { ApplicationCommandInputType, ApplicationCommandOptionType, findOption, sendBotMessage } from "@api/Commands";
 import * as DataStore from "@api/DataStore";
-import { Devs } from "@utils/constants";
 import { definePluginSettings } from "@api/Settings";
+import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 
 const DATA_KEY = "QuickSnippets_snippets";
@@ -40,7 +40,7 @@ function applyVariables(content: string) {
 }
 
 function expandSnippets(content: string) {
-    const prefix = settings.store.prefix;
+    const { prefix } = settings.store;
     if (!prefix) return content;
 
     const triggerRegex = new RegExp(`(^|\\s)${escapeRegex(prefix)}([\\w-]+)`, "g");
@@ -115,7 +115,7 @@ export default definePlugin({
             ],
 
             async execute(args, ctx) {
-                const prefix = settings.store.prefix;
+                const { prefix } = settings.store;
 
                 switch (args[0].name) {
                     case "add": {
