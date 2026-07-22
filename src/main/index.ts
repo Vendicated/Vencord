@@ -16,6 +16,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import "./ipcMain";
+
 import { app, net, protocol } from "electron";
 import { join } from "path";
 import { pathToFileURL } from "url";
