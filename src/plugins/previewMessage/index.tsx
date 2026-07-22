@@ -44,6 +44,8 @@ const getAttachments = async (channelId: string) =>
         UploadAttachmentStore.getUploads(channelId, DraftType.ChannelMessage)
             .map(async (upload: CloudUpload) => {
                 const { isImage, filename, spoiler, item: { file } } = upload;
+
+                // FIXME: revoke object url to fix memory leak
                 const url = URL.createObjectURL(file);
                 const attachment: MessageAttachment = {
                     id: generateId(),
