@@ -1,12 +1,15 @@
 .vc-ranb-button {
     color: var(--interactive-icon-default);
-    padding: 0 0.5em;
     width: 100%;
-    font-size: 14px;
-    white-space: nowrap;
+    font-size: 0.875rem;
     box-sizing: border-box;
 }
 
 .vc-ranb-button:hover {
     color: var(--interactive-icon-active);
+}
+
+.vc-ranb-text {
+    color: var(--interactive-icon-default);
+    text-align: center;
 }
