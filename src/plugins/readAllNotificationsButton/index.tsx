@@ -90,9 +90,9 @@ const settings = definePluginSettings({
         description: "Which buttons to show",
         type: OptionType.SELECT,
         options: [
-            { label: "Both", value: 0, default: true },
-            { label: "Only Guilds (Servers)", value: 1 },
-            { label: "Only DMs", value: 2 }
+            { label: "Both", value: "BOTH", default: true },
+            { label: "Only Guilds (Servers)", value: "GUILDS" },
+            { label: "Only DMs", value: "DMS" }
         ]
     }
 });
@@ -149,14 +149,14 @@ export default definePlugin({
                     Read All
                 </BaseText>
 
-                {(mode === 0 || mode === 1) && (
+                {(mode == "BOTH" || mode == "GUILDS") && (
                     <ReadButton onClick={onClickGuilds}>
                         <GuildsIcon />
                         Guilds
                     </ReadButton>
                 )}
 
-                {(mode === 0 || mode === 2) && (
+                {(mode == "BOTH" || mode == "DMS") && (
                     <ReadButton onClick={onClickDMs}>
                         <DMsIcon />
                         DMs
