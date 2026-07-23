@@ -649,6 +649,10 @@ export const Devs = /* #__PURE__*/ Object.freeze({
     Lunascape: {
         name: "Lunascape",
         id: 383365021415243776n
+    },
+    tekken: {
+        name: "tekken",
+        id: 680541988625711136n
     }
 } satisfies Record<string, Dev>);
 
