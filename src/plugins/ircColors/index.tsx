@@ -19,22 +19,33 @@
 import { definePluginSettings } from "@api/Settings";
 import { hash as h64 } from "@intrnl/xxhash64";
 import { Devs } from "@utils/constants";
-import definePlugin, { OptionType } from "@utils/types";
-import { useMemo } from "@webpack/common";
-
-// Calculate a CSS color string based on the user ID
-function calculateNameColorForUser(id?: string) {
-    const { lightness } = settings.use(["lightness"]);
-    const idHash = useMemo(() => id ? h64(id) : null, [id]);
-
-    return idHash && `hsl(${idHash % 360n}, 100%, ${lightness}%)`;
-}
+import definePlugin, { defineDefault, OptionType } from "@utils/types";
+import { ColorPicker, useMemo, UserStore } from "@webpack/common";
 
 const settings = definePluginSettings({
     lightness: {
         description: "Lightness, in %. Change if the colors are too light or too dark",
         type: OptionType.NUMBER,
         default: 70,
+    },
+    myColor: {
+        description: "Set your own color",
+        type: OptionType.COMPONENT,
+        component: () => {
+            const { myColor } = settings.use(["myColor"]);
+
+            return (
+                <ColorPicker
+                    color={myColor.color}
+                    onChange={(color: number) => {
+                        myColor.color = color;
+                    }}
+                />
+            );
+        },
+        default: defineDefault({
+            color: 0xFF0000,
+        }),
     },
     memberListColors: {
         description: "Replace role colors in the member list",
@@ -56,6 +67,60 @@ const settings = definePluginSettings({
         default: false
     }
 });
+
+// Calculate a CSS color string based on the user ID
+function calculateNameColorForUser(id?: string) {
+    const { lightness } = settings.use(["lightness"]);
+    const idHash = useMemo(() => id ? h64(id) : null, [id]);
+
+    return idHash && `hsl(${idHash % 360n}, 100%, ${lightness}%)`;
+}
+
+function hexToHSL(hexCode: number) {
+    // Hex => RGB normalized to 0-1
+    const r = (hexCode >> 16 & 0xFF) / 255;
+    const g = (hexCode >> 8 & 0xFF) / 255;
+    const b = (hexCode & 0xFF) / 255;
+
+    // RGB => HSL
+    const cMax = Math.max(r, g, b);
+    const cMin = Math.min(r, g, b);
+    const delta = cMax - cMin;
+
+    let hue: number;
+    let saturation: number;
+    let lightness: number;
+
+    lightness = (cMax + cMin) / 2;
+
+    if (delta === 0) {
+        // If r=g=b then the only thing that matters is lightness
+        hue = 0;
+        saturation = 0;
+    } else {
+        // Magic
+        saturation = delta / (1 - Math.abs(2 * lightness - 1));
+
+        if (cMax === r) {
+            hue = ((g - b) / delta) % 6;
+        } else if (cMax === g) {
+            hue = (b - r) / delta + 2;
+        } else {
+            hue = (r - g) / delta + 4;
+        }
+
+        hue *= 60;
+        if (hue < 0) {
+            hue += 360;
+        }
+    }
+
+    // Move saturation and lightness from 0-1 to 0-100
+    saturation *= 100;
+    lightness *= 100;
+
+    return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
+}
 
 export default definePlugin({
     name: "IrcColors",
@@ -109,6 +174,7 @@ export default definePlugin({
         const userId: string | undefined = context?.message?.author?.id;
         const colorString = context?.author?.colorString;
         const color = calculateNameColorForUser(userId);
+        const myId = UserStore.getCurrentUser().id;
 
         // Color preview in role settings
         if (context?.message?.channel_id === "1337" && userId === "313337")
@@ -116,6 +182,10 @@ export default definePlugin({
 
         if (settings.store.applyColorOnlyInDms && !context?.channel?.isPrivate()) {
             return colorString;
+        }
+
+        if (userId === myId) {
+            return hexToHSL(settings.store.myColor.color);
         }
 
         return (!settings.store.applyColorOnlyToUsersWithoutColor || !colorString)
