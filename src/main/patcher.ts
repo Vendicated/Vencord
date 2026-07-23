@@ -28,10 +28,10 @@ console.log("[Vencord] Starting up...");
 // Our injector file at app/index.js
 const injectorPath = require.main!.filename;
 
-// special discord_arch_electron injection method
+// Original Discord app.asar name
 const asarName = require.main!.path.endsWith("app.asar") ? "_app.asar" : "app.asar";
 
-// The original app.asar
+// Original Discord app.asar
 const asarPath = join(dirname(injectorPath), "..", asarName);
 
 const discordPkg = require(join(asarPath, "package.json"));
@@ -138,13 +138,11 @@ if (!IS_VANILLA) {
     process.env.DATA_DIR = join(app.getPath("userData"), "..", "Vencord");
 
     // Monkey patch commandLine to:
-    // - disable WidgetLayering: Fix DevTools context menus https://github.com/electron/electron/issues/38790
     // - disable UseEcoQoSForBackgroundProcess: Work around Discord unloading when in background
     const originalAppend = app.commandLine.appendSwitch;
     app.commandLine.appendSwitch = function (...args) {
         if (args[0] === "disable-features") {
             const disabledFeatures = new Set((args[1] ?? "").split(","));
-            disabledFeatures.add("WidgetLayering");
             disabledFeatures.add("UseEcoQoSForBackgroundProcess");
             args[1] += [...disabledFeatures].join(",");
         }
