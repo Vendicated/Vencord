@@ -63,6 +63,8 @@ export default definePlugin({
                                 if (cleaned) return;
                                 cleaned = true;
 
+                                const { currentTime } = videoClone;
+
                                 videoClone.onloadedmetadata = null;
                                 videoClone.onleavepictureinpicture = null;
 
@@ -73,7 +75,7 @@ export default definePlugin({
 
                                 // resume original if still in the document
                                 if (video.isConnected) {
-                                    video.currentTime = videoClone.currentTime;
+                                    video.currentTime = currentTime;
                                     video.play().catch(() => 0);
                                 }
                             }

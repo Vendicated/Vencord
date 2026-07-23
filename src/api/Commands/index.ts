@@ -46,7 +46,7 @@ export let OptionalMessageOption: CommandOption = OptPlaceholder;
  */
 export let RequiredMessageOption: CommandOption = ReqPlaceholder;
 
-let idCounter: number = -99;
+let idCounter = 99;
 
 export const _init = function (cmds: VencordCommand[]) {
     try {
