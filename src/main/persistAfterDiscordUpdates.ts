@@ -17,8 +17,7 @@
 */
 
 import { app } from "electron";
-import { copyFileSync } from "fs";
-import { existsSync, readdirSync, renameSync } from "original-fs";
+import { copyFileSync, existsSync, readdirSync, renameSync } from "original-fs";
 import { basename, dirname, join } from "path";
 
 function isNewer($new: string, old: string) {
