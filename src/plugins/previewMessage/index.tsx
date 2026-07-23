@@ -23,8 +23,9 @@ import definePlugin, { IconComponent, StartAt } from "@utils/types";
 import { CloudUpload, MessageAttachment } from "@vencord/discord-types";
 import { DraftStore, DraftType, UploadAttachmentStore, UserStore, useStateFromStores } from "@webpack/common";
 
-const getDraft = (channelId: string) => DraftStore.getDraft(channelId, DraftType.ChannelMessage);
+const objectURLMap = new Map<string, string[]>();
 
+const getDraft = (channelId: string) => DraftStore.getDraft(channelId, DraftType.ChannelMessage);
 
 const getImageBox = (url: string): Promise<{ width: number, height: number; } | null> =>
     new Promise(res => {
@@ -61,13 +62,13 @@ const getAttachments = async (channelId: string) =>
 
                 if (isImage) {
                     const box = await getImageBox(url);
-                    if (!box) return attachment;
-
-                    attachment.width = box.width;
-                    attachment.height = box.height;
+                    if (box) {
+                        attachment.width = box.width;
+                        attachment.height = box.height;
+                    }
                 }
 
-                return attachment;
+                return { attachment, objectURL: url };
             })
     );
 
@@ -101,15 +102,20 @@ const PreviewButton: ChatBarButtonFactory = ({ isAnyChat, isEmpty, type: { attac
     return (
         <ChatBarButton
             tooltip="Preview Message"
-            onClick={async () =>
-                sendBotMessage(
+            onClick={async () => {
+                const attachments = hasAttachments ? await getAttachments(channelId) : undefined;
+                const message = sendBotMessage(
                     channelId,
                     {
                         content: getDraft(channelId),
                         author: UserStore.getCurrentUser(),
-                        attachments: hasAttachments ? await getAttachments(channelId) : undefined,
+                        attachments: attachments?.map(a => a.attachment),
                     }
-                )}
+                );
+
+                if (attachments)
+                    objectURLMap.set(message.id, attachments.map(a => a.objectURL));
+            }}
             buttonProps={{
                 style: {
                     translate: "0 2px"
@@ -134,5 +140,15 @@ export default definePlugin({
     chatBarButton: {
         icon: PreviewIcon,
         render: PreviewButton
+    },
+
+    flux: {
+        MESSAGE_DELETE({ id: messageId }) {
+            const objectURLs = objectURLMap.get(messageId);
+            if (objectURLs) {
+                objectURLs.forEach(url => URL.revokeObjectURL(url));
+                objectURLMap.delete(messageId);
+            }
+        }
     }
 });
