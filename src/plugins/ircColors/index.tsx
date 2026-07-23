@@ -28,19 +28,27 @@ const settings = definePluginSettings({
         type: OptionType.NUMBER,
         default: 70,
     },
+    useMyOwnColor: {
+        description: "Use a custom color for yourself",
+        restartNeeded: false,
+        type: OptionType.BOOLEAN,
+        default: false
+    },
     myColor: {
         description: "Set your own color",
         type: OptionType.COMPONENT,
         component: () => {
-            const { myColor } = settings.use(["myColor"]);
+            const { useMyOwnColor, myColor } = settings.use(["useMyOwnColor", "myColor"]);
 
             return (
-                <ColorPicker
-                    color={myColor.color}
-                    onChange={(color: number) => {
-                        myColor.color = color;
-                    }}
-                />
+                useMyOwnColor
+                    ? <ColorPicker
+                        color={myColor.color}
+                        onChange={(color: number) => {
+                            myColor.color = color;
+                        }}
+                    />
+                    : <></>
             );
         },
         default: defineDefault({
@@ -184,7 +192,7 @@ export default definePlugin({
             return colorString;
         }
 
-        if (userId === myId) {
+        if (settings.store.useMyOwnColor && userId === myId) {
             return hexToHSL(settings.store.myColor.color);
         }
 
