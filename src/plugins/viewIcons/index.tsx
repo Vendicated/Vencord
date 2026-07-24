@@ -215,7 +215,7 @@ export default definePlugin({
         {
             find: "return{avatarProps:{",
             replacement: {
-                match: /(?<=avatarProps:(\i),eventHandlers:\i.{0,100}?)return null==(?<=onOpenAvatar:(\i).+?)/,
+                match: /(?<=avatarProps:(\i),eventHandlers:\i.{0,150}?)return null==(?<=onOpenAvatar:(\i).+?)/,
                 replace: "$2&&=$self.openAvatar.bind(undefined,$1.src);$&",
             }
         },
