@@ -1,0 +1,107 @@
+.vc-favouriteAnything-attachment-container {
+    padding: 12px;
+    display: flex;
+    gap: 12px;
+
+    &.vc-favouriteAnything-reduced-padding {
+        padding-bottom: 0;
+    }
+
+    > :first-child {
+        margin: 0;
+        flex: 1;
+        min-width: 0;
+
+        > [class*="nonVisualMediaItem"] {
+            width: 100%;
+
+            [class*="mosaicItem"] {
+                min-width: 0;
+                max-width: unset;
+                width: 100%;
+            }
+
+            [class*="spoilerContent"] {
+                min-width: 0;
+                flex: 1;
+            }
+        }
+    }
+
+    > button {
+        width: 15%;
+        min-width: 54px;
+    }
+}
+
+.vc-favouriteAnything-container {
+    background: var(--background-base-lower);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    position: relative;
+    width: 100%;
+}
+
+.vc-favouriteAnything-container-header {
+    background: var(--background-surface-high);
+    border-bottom: 1px solid var(--border-subtle);
+    padding: var(--custom-gif-picker-gutter-size);
+    z-index: 1;
+}
+
+.vc-favouriteAnything-container-body {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
+    flex: 1;
+    overflow: hidden;
+
+    &.vc-favouriteAnything-container-info {
+        justify-content: center;
+        align-items: center;
+        gap: 1.5rem;
+    }
+}
+
+.vc-favouriteAnything-image-accessory {
+    inset-inline-end: unset;
+    position: absolute;
+    z-index: 3;
+    cursor: pointer;
+    margin: 6px;
+
+    :is(.imageWrapper:is(:hover, :focus-within) ~ &, :hover, :focus-within) > [class*="gifFavoriteButton"] {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.vc-favouriteAnything-attachment-accessory {
+    cursor: pointer;
+
+    &:hover {
+        background: var(--interactive-background-hover);
+    }
+}
+
+.vc-favouriteAnything-info-text {
+    text-align: center;
+    line-height: 1.6;
+    font-size: 1.1rem;
+}
+
+.vc-favouriteAnything-demo {
+    width: 70%;
+    justify-self: center;
+    position: relative;
+
+    .vc-favouriteAnything-demo-favourite-button {
+        position: absolute;
+        inset-inline-end: 4px;
+        top: 4px;
+        border-radius: 4px;
+        box-shadow: 0 0 0 4px var(--yellow-300);
+    }
+}
