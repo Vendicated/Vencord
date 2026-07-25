@@ -108,6 +108,8 @@ const UserContext: NavContextMenuPatchCallback = (children, { user, guildId }: U
     if (!user) return;
     const memberAvatar = GuildMemberStore.getMember(guildId!, user.id)?.avatar || null;
 
+    const avatarDecoration = user.avatarDecorationData ?? user.avatarDecoration;
+
     children.splice(-1, 0, (
         <Menu.MenuGroup>
             <Menu.MenuItem
@@ -126,6 +128,18 @@ const UserContext: NavContextMenuPatchCallback = (children, { user, guildId }: U
                         guildId: guildId!,
                         canAnimate: true
                     }))}
+                    icon={ImageIcon}
+                />
+            )}
+            {avatarDecoration && (
+                <Menu.MenuItem
+                    id="view-avatar-decoration"
+                    label="View Avatar Decoration"
+                    action={() => openAvatar(IconUtils.getAvatarDecorationURL({
+                        avatarDecoration,
+                        size: 1024,
+                        canAnimate: true
+                    })!)}
                     icon={ImageIcon}
                 />
             )}
@@ -189,7 +203,7 @@ const GroupDMContext: NavContextMenuPatchCallback = (children, { channel }: Grou
 export default definePlugin({
     name: "ViewIcons",
     authors: [Devs.Ven, Devs.TheKodeToad, Devs.Nuckyz, Devs.nyx],
-    description: "Makes avatars and banners in user profiles clickable, adds View Icon/Banner entries in the user, server and group channel context menu.",
+    description: "Makes avatars and banners in user profiles clickable, adds View Icon/Banner/Avatar Decoration entries in the user, server and group channel context menu.",
     tags: ["Media", "Servers", "Appearance"],
     searchTerms: ["ImageUtilities"],
     dependencies: ["DynamicImageModalAPI"],
