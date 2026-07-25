@@ -26,15 +26,19 @@ export const wordsFromKebab = (text: string) => text.toLowerCase().split("-");
 export const wordsFromPascal = (text: string) => text.split(/(?=[A-Z])/).map(w => w.toLowerCase());
 export const wordsFromTitle = (text: string) => text.toLowerCase().split(" ");
 
+// The wordsFrom* helpers above yield an empty string for a leading, trailing or
+// repeated separator, so capitalising blind throws on input like "-foo" or "a__b".
+const capitalize = (w: string) => w ? w[0].toUpperCase() + w.slice(1) : w;
+
 // Words to case style
 export const wordsToCamel = (words: string[]) =>
-    words.map((w, i) => (i ? w[0].toUpperCase() + w.slice(1) : w)).join("");
+    words.map((w, i) => (i ? capitalize(w) : w)).join("");
 export const wordsToSnake = (words: string[]) => words.join("_").toUpperCase();
 export const wordsToKebab = (words: string[]) => words.join("-").toLowerCase();
 export const wordsToPascal = (words: string[]) =>
-    words.map(w => w[0].toUpperCase() + w.slice(1)).join("");
+    words.map(capitalize).join("");
 export const wordsToTitle = (words: string[]) =>
-    words.map(w => w[0].toUpperCase() + w.slice(1)).join(" ");
+    words.map(capitalize).join(" ");
 
 const units = ["years", "months", "weeks", "days", "hours", "minutes", "seconds"] as const;
 type Units = typeof units[number];
