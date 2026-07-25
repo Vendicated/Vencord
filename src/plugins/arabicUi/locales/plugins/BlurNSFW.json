@@ -1,7 +1,7 @@
 {
-  "name": "BlurNSFW",
-  "description": "مقدار الطمس (بالبكسل)",
-  "settings": {
-    "blurAmount": "Blur Amount"
-  }
+    "name": "BlurNSFW",
+    "description": "مقدار الطمس (بالبكسل)",
+    "settings": {
+        "blurAmount": "مقدار التمويه (بالبكسل)"
+    }
 }

@@ -5,11 +5,10 @@
  */
 
 import { plugins } from "@api/PluginManager";
+import type { PluginLocalePack } from "@plugins/arabicUi/types";
 import { Logger } from "@utils/Logger";
-import type { Plugin } from "@utils/types";
-import { OptionType } from "@utils/types";
+import { OptionType, type Plugin } from "@utils/types";
 
-import type { PluginLocalePack } from "../types";
 import { getArabicByEnglish } from "./lookup";
 
 const logger = new Logger("ArabicUI");

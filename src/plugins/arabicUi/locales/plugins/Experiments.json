@@ -1,7 +1,7 @@
 {
-  "name": "Experiments",
-  "description": "تغيير زر المساعدة (؟) في شريط الأدوات",
-  "settings": {
-    "toolbarDevMenu": "Change the Help (?) toolbar button to دسكورد"
-  }
+    "name": "Experiments",
+    "description": "تغيير زر المساعدة (؟) في شريط الأدوات",
+    "settings": {
+        "toolbarDevMenu": "يغيّر زر المساعدة (؟) في شريط الأدوات (أعلى يمين المحادثة) إلى دسكورد"
+    }
 }

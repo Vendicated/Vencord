@@ -1,16 +1,16 @@
 {
-  "name": "MessageLogger",
-  "description": "نمط الرسائل المحذوفة",
-  "settings": {
-    "deleteStyle": "The style of deleted messages",
-    "logDeletes": "Whether to log deleted messages",
-    "collapseDeleted": "Whether to collapse deleted messages, similar to blocked messages",
-    "logEdits": "Whether to log edited messages",
-    "inlineEdits": "Whether to display edit history as part of message content",
-    "ignoreBots": "Whether to ignore messages by بوتات",
-    "ignoreSelf": "Whether to ignore messages by yourself",
-    "ignoreUsers": "Comma-separated list of user IDs to ignore",
-    "ignoreChannels": "Comma-separated list of channel IDs to ignore",
-    "ignoreGuilds": "Comma-separated list of سيرفر IDs to ignore"
-  }
+    "name": "MessageLogger",
+    "description": "يسجّل مؤقتاً الرسائل المحذوفة والمعدّلة.",
+    "settings": {
+        "collapseDeleted": "طي الرسائل المحذوفة، مشابه للرسائل المحظورة",
+        "deleteStyle": "نمط الرسائل المحذوفة",
+        "ignoreBots": "تجاهل رسائل البوتات",
+        "ignoreChannels": "قائمة IDs القنوات للتجاهل مفصولة بفواصل",
+        "ignoreGuilds": "قائمة IDs السيرفرات للتجاهل مفصولة بفواصل",
+        "ignoreSelf": "تجاهل رسائلك أنت",
+        "ignoreUsers": "قائمة IDs المستخدمين للتجاهل مفصولة بفواصل",
+        "inlineEdits": "عرض سجل التعديل ضمن محتوى الرسالة",
+        "logDeletes": "تسجيل الرسائل المحذوفة",
+        "logEdits": "تسجيل الرسائل المعدّلة"
+    }
 }

@@ -1,7 +1,7 @@
 {
-  "name": "Noسيرفرايموجيز",
-  "description": "أنواع الايموجي المعروضة في قائمة الإكمال التلقائي",
-  "settings": {
-    "shownEmojis": "The types of ايموجيز to show in the autocomplete menu."
-  }
+    "name": "NoServerEmojis",
+    "description": "أنواع الايموجي المعروضة في قائمة الإكمال التلقائي",
+    "settings": {
+        "shownEmojis": "أنواع الايموجي المعروضة في قائمة الإكمال التلقائي."
+    }
 }

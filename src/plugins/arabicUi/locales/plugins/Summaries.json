@@ -1,7 +1,7 @@
 {
-  "name": "Summaries",
-  "description": "الوقت بالأيام قبل إزالة الملخص. يتم الاحتفاظ بـ 50 ملخصاً كحد أقصى لكل قناة",
-  "settings": {
-    "summaryExpiryThresholdDays": "The time in days before a summary is removed. Note that only up to 50 summaries are kept per channel"
-  }
+    "name": "Summaries",
+    "description": "الوقت بالأيام قبل إزالة الملخص. يتم الاحتفاظ بـ 50 ملخصاً كحد أقصى لكل قناة",
+    "settings": {
+        "summaryExpiryThresholdDays": "المدة بالأيام قبل حذف الملخص. ملاحظة: يُحفظ 50 ملخصاً كحد أقصى لكل قناة"
+    }
 }

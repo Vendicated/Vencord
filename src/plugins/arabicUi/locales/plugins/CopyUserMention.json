@@ -1,4 +1,5 @@
 {
-  "name": "نسخ منشن",
-  "description": "انسخ منشن المستخدم بسهولة."
+    "name": "CopyUserMention",
+    "description": "انسخ منشن المستخدم بسهولة.",
+    "settings": {}
 }

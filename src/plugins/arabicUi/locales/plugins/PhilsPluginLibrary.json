@@ -1,4 +1,5 @@
 {
-  "name": "مكتبة Phil",
-  "description": "مكتبة مشتركة لبلجنات الصوت والشاشة."
+    "name": "PhilsPluginLibrary",
+    "description": "مكتبة مشتركة لبلجنات الصوت والشاشة.",
+    "settings": {}
 }

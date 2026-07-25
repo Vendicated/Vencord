@@ -1,8 +1,8 @@
 {
-  "name": "ShowConnections",
-  "description": "حجم الأيقونة (بكسل)",
-  "settings": {
-    "iconSize": "Icon size",
-    "iconSpacing": "Icon margin"
-  }
+    "name": "ShowConnections",
+    "description": "حجم الأيقونة (بكسل)",
+    "settings": {
+        "iconSize": "حجم الأيقونة بالبكسل",
+        "iconSpacing": "هامش الأيقونة"
+    }
 }

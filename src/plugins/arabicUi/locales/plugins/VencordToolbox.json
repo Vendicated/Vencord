@@ -1,7 +1,7 @@
 {
-  "name": "فينكوردToolbox",
-  "description": "إظهار قائمة الإضافات في صندوق الأدوات",
-  "settings": {
-    "showPluginMenu": "Show the بلوقنز menu in the toolbox"
-  }
+    "name": "VencordToolbox",
+    "description": "إظهار قائمة الإضافات في صندوق الأدوات",
+    "settings": {
+        "showPluginMenu": "عرض قائمة البلوقنات في صندوق الأدوات"
+    }
 }

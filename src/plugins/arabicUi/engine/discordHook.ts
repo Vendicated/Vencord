@@ -7,7 +7,7 @@
 import { Logger } from "@utils/Logger";
 import { i18n } from "@webpack/common";
 
-import { getArabicByHash, getArabicByPlainKey, translateEnglishResult, getArabicByEnglish } from "./lookup";
+import { getArabicByEnglish,getArabicByHash, getArabicByPlainKey, translateEnglishResult } from "./lookup";
 
 const logger = new Logger("ArabicUI");
 
@@ -20,13 +20,14 @@ let hooked = false;
 
 export function dumpUntranslatedMessages(): Record<string, string> {
     const untranslated: Record<string, string> = {};
-    if (!i18n?.Messages) return untranslated;
+    const messages = (i18n as any)?.Messages;
+    if (!messages) return untranslated;
 
-    for (const key of Object.keys(i18n.Messages)) {
+    for (const key of Object.keys(messages)) {
         if (getArabicByPlainKey(key) != null) continue;
 
         try {
-            const rawVal = i18n.Messages[key];
+            const rawVal = messages[key];
             let english = "";
             if (typeof rawVal === "string") {
                 english = rawVal;
@@ -130,21 +131,37 @@ export function installDiscordHook() {
                 const cloned = { ...m };
                 if (cloned.defaultMessage) cloned.defaultMessage = byHash;
                 if (cloned.message) cloned.message = byHash;
-                return originalFormat!(cloned, values);
+                return translateEnglishResult(originalFormat!(cloned, values));
             }
         }
 
+        let defaultMsg: string | undefined;
         if (message && typeof message === "object") {
             const m = message as Record<string, any>;
-            const defaultMsg = m.defaultMessage || m.message;
-            if (typeof defaultMsg === "string") {
-                const arabic = getArabicByEnglish(defaultMsg);
-                if (arabic != null) {
+            if (typeof m.defaultMessage === "string") defaultMsg = m.defaultMessage;
+            else if (typeof m.message === "string") defaultMsg = m.message;
+        }
+        // Resolve English when Discord only passes a hashed message descriptor
+        if (!defaultMsg && originalString) {
+            try {
+                const resolved = originalString(message);
+                if (typeof resolved === "string") defaultMsg = resolved;
+            } catch { /* ignore */ }
+        }
+
+        if (typeof defaultMsg === "string") {
+            const arabic = getArabicByEnglish(defaultMsg);
+            if (arabic != null) {
+                if (message && typeof message === "object") {
+                    const m = message as Record<string, any>;
                     const cloned = { ...m };
                     if (cloned.defaultMessage) cloned.defaultMessage = arabic;
-                    if (cloned.message) cloned.message = arabic;
-                    return originalFormat!(cloned, values);
+                    else if (cloned.message) cloned.message = arabic;
+                    else cloned.defaultMessage = arabic;
+                    return translateEnglishResult(originalFormat!(cloned, values));
                 }
+                // Plain string message id path — still try format then translate leaves
+                return translateEnglishResult(originalFormat!(message, values));
             }
         }
 

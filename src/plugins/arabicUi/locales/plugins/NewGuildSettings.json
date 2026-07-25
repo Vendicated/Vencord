@@ -1,13 +1,13 @@
 {
-  "name": "Newسيرفراتettings",
-  "description": "ميوت السيرفر تلقائياً",
-  "settings": {
-    "guild": "ميوت سيرفر automatically",
-    "messages": "سيرفر Notification Settings",
-    "everyone": "Suppress @everyone and @here",
-    "role": "Suppress All Role @mentions",
-    "highlights": "Suppress Highlights automatically",
-    "events": "ميوت New Events automatically",
-    "showAllChannels": "Show all channels automatically"
-  }
+    "name": "NewGuildSettings",
+    "description": "ميوت السيرفرات الجديدة تلقائياً وتغيير إعدادات أخرى عند الانضمام",
+    "settings": {
+        "events": "ميوت الفعاليات الجديدة تلقائياً",
+        "everyone": "ميوت @everyone و @here",
+        "guild": "ميوت السيرفر تلقائياً",
+        "highlights": "ميوت الإبرازات تلقائياً",
+        "messages": "إعدادات إشعارات السيرفر",
+        "role": "ميوت كل منشنات الرولات",
+        "showAllChannels": "عرض كل القنوات تلقائياً"
+    }
 }

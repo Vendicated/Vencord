@@ -1,7 +1,7 @@
 {
-  "name": "FavoriteGifSearch",
-  "description": "جزء الرابط المراد البحث عنه",
-  "settings": {
-    "searchOption": "The part of the url you want to search"
-  }
+    "name": "FavoriteGifSearch",
+    "description": "جزء الرابط المراد البحث عنه",
+    "settings": {
+        "searchOption": "الجزء من الرابط اللي تبي تبحث فيه"
+    }
 }

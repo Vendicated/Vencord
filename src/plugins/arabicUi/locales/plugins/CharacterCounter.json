@@ -1,7 +1,7 @@
 {
-  "name": "CharacterCounter",
-  "description": "تفعيل التلوين الأصفر/الأحمر عند الاقتراب من حد الأحرف",
-  "settings": {
-    "colorEffects": "Enable yellow/red colouring as you get closer to the character limit"
-  }
+    "name": "CharacterCounter",
+    "description": "تفعيل التلوين الأصفر/الأحمر عند الاقتراب من حد الأحرف",
+    "settings": {
+        "colorEffects": "تفعيل تلوين أصفر/أحمر كل ما اقتربت من حد الأحرف"
+    }
 }

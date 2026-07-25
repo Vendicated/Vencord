@@ -1,11 +1,11 @@
 {
-  "name": "LoadingQuotes",
-  "description": "هل تُطبق الإضافة أيضاً أثناء الأحداث ذات الاقتباسات المخصصة؟ (مثل الهالوين)",
-  "settings": {
-    "replaceEvents": "Should this بلوقن also apply during events with special event themed quotes?",
-    "enablePluginPresetQuotes": "Enable the quotes preset by this بلوقن",
-    "enableDiscordPresetQuotes": "Enable دسكورد",
-    "additionalQuotes": "Additional custom quotes to possibly appear, separated by the below delimiter",
-    "additionalQuotesDelimiter": "Delimiter for additional quotes"
-  }
+    "name": "LoadingQuotes",
+    "description": "هل تُطبق الإضافة أيضاً أثناء الأحداث ذات الاقتباسات المخصصة؟ (مثل الهالوين)",
+    "settings": {
+        "additionalQuotes": "اقتباسات مخصصة إضافية قد تظهر، مفصولة بالفاصل أدناه",
+        "additionalQuotesDelimiter": "فاصل الاقتباسات الإضافية",
+        "enableDiscordPresetQuotes": "Enable دسكورد",
+        "enablePluginPresetQuotes": "تفعيل إعداد الاقتباسات المسبق لهالبلوقن",
+        "replaceEvents": "هل البلوقن يطبّق أيضاً أثناء أحداث باقتباسات ثيم خاص؟ (مثل الهالوين)"
+    }
 }

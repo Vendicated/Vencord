@@ -1,8 +1,8 @@
 {
-  "name": "BetterSessions",
-  "description": "التحقق من الجلسات الجديدة في الخلفية وعرض إشعارات عند اكتشافها",
-  "settings": {
-    "backgroundCheck": "Check for new sessions in the background, and display notifications when they are detected",
-    "checkInterval": "How often to check for new sessions in the background, in minutes"
-  }
+    "name": "BetterSessions",
+    "description": "التحقق من الجلسات الجديدة في الخلفية وعرض إشعارات عند اكتشافها",
+    "settings": {
+        "backgroundCheck": "يفحص الجلسات الجديدة في الخلفية ويعرض إشعاراً عند اكتشافها",
+        "checkInterval": "كل كم دقيقة يفحص الجلسات الجديدة بالخلفية، إذا مفعّل"
+    }
 }

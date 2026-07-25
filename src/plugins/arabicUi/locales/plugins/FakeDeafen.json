@@ -1,13 +1,13 @@
 {
-  "name": "صمّ مزيف",
-  "description": "تبين أصم وأنت مو أصم.",
-  "settings": {
-    "hideIcon": "إخفاء الأيقونة",
-    "keybind": "اختصار لوحة المفاتيح",
-    "muteUponFakeDeafen": "ميوت الصوت مع الصم المزيف",
-    "mute": "ميوت",
-    "deafen": "ديفن",
-    "cam": "الكاميرا",
-    "useCustomKeybind": "استخدم اختصار مخصّص"
-  }
+    "name": "FakeDeafen",
+    "description": "تبين أصم وأنت مو أصم.",
+    "settings": {
+        "cam": "الكاميرا",
+        "deafen": "ديفن",
+        "hideIcon": "إخفاء الأيقونة",
+        "keybind": "اختصار لوحة المفاتيح",
+        "mute": "ميوت",
+        "muteUponFakeDeafen": "ميوت الصوت مع الصم المزيف",
+        "useCustomKeybind": "استخدم اختصار مخصّص"
+    }
 }

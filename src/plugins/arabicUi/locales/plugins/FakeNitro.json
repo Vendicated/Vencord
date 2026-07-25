@@ -1,17 +1,17 @@
 {
-  "name": "Fakeنيترو",
-  "description": "إرسال ايموجي مزيفة (تجاوز صلاحية الايموجي المخصصة أيضاً)",
-  "settings": {
-    "enableEmojiBypass": "Allows sending fake ايموجيز (also bypasses missing permission to use custom ايموجيز)",
-    "emojiSize": "Size of the ايموجيز when sending",
-    "transformEmojis": "Whether to transform fake ايموجيز into real ones",
-    "enableStickerBypass": "Allows sending fake ستيكرات (also bypasses missing permission to use ستيكرات)",
-    "stickerSize": "Size of the ستيكرات when sending",
-    "transformStickers": "Whether to transform fake ستيكرات into real ones",
-    "transformCompoundSentence": "Whether to transform fake ستيكرات and ايموجيز in compound sentences (sentences with more content than just the fake ايموجي or ستيكر link)",
-    "enableStreamQualityBypass": "Allow streaming in نيترو quality",
-    "useHyperLinks": "Whether to use hyperlinks when sending fake ايموجيز and ستيكرات",
-    "hyperLinkText": "What text the hyperlink should use. {{NAME}} will be replaced with the ايموجي/ستيكر name.",
-    "disableEmbedPermissionCheck": "Whether to disable the embed permission check when sending fake ايموجيز and ستيكرات"
-  }
+    "name": "FakeNitro",
+    "description": "إرسال واستقبال ايموجي وستيكرات نيترو المزيفة، وتحسين جودة البث",
+    "settings": {
+        "disableEmbedPermissionCheck": "تعطيل فحص صلاحية التضمين عند إرسال ايموجي وستيكرات مزيفة",
+        "emojiSize": "حجم الايموجي عند الإرسال",
+        "enableEmojiBypass": "يسمح بإرسال ايموجي وهمية (ويتجاوز أيضاً نقص صلاحية استخدام الايموجي المخصصة)",
+        "enableStickerBypass": "يسمح بإرسال ستيكر وهمية (ويتجاوز أيضاً نقص صلاحية استخدام الستيكر)",
+        "enableStreamQualityBypass": "السماح بالبث بجودة نيترو",
+        "hyperLinkText": "نص الرابط. {{NAME}} يُستبدل باسم الايموجي أو الستيكر.",
+        "stickerSize": "حجم الستيكر عند الإرسال",
+        "transformCompoundSentence": "تحويل الستيكرات والايموجي المزيفة في الجمل المركّبة (جمل فيها أكثر من رابط الايموجي أو الستيكر المزيف فقط)",
+        "transformEmojis": "تحويل الايموجي المزيف إلى حقيقي",
+        "transformStickers": "تحويل الستيكر المزيف إلى حقيقي",
+        "useHyperLinks": "استخدام روابط تشعبية عند إرسال ايموجي وستيكرات مزيفة"
+    }
 }

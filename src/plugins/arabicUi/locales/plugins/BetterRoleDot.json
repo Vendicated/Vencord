@@ -1,8 +1,8 @@
 {
-  "name": "BetterRoleDot",
-  "description": "إظهار نقطة الدور والأسماء الملونة معاً",
-  "settings": {
-    "bothStyles": "Show both role dot and coloured names",
-    "copyRoleColorInProfilePopout": "Allow click on role dot in profile popout to copy role color"
-  }
+    "name": "BetterRoleDot",
+    "description": "إظهار نقطة الدور والأسماء الملونة معاً",
+    "settings": {
+        "bothStyles": "عرض نقطة الرتبة والأسماء الملوّنة معاً",
+        "copyRoleColorInProfilePopout": "السماح بالنقر على نقطة الرتبة في نافذة الملف لنسخ لون الرتبة"
+    }
 }

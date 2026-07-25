@@ -1,10 +1,10 @@
 {
-  "name": "NoReplyMention",
-  "description": "قائمة معرّفات المستخدمين للسماح أو الإعفاء من الإشعارات",
-  "settings": {
-    "userList": "List of user ids to allow or exempt pings for",
-    "roleList": "List of role ids to allow or exempt pings for",
-    "shouldPingListed": "Behaviour",
-    "inverseShiftReply": "Invert دسكورد"
-  }
+    "name": "NoReplyMention",
+    "description": "قائمة معرّفات المستخدمين للسماح أو الإعفاء من الإشعارات",
+    "settings": {
+        "inverseShiftReply": "Invert دسكورد",
+        "roleList": "قائمة معرفات الرولات المسموح بالمنشن أو المعفاة، مفصولة بفواصل أو مسافات",
+        "shouldPingListed": "السلوك",
+        "userList": "قائمة معرفات المستخدمين المسموح بالمنشن أو المعفاة، مفصولة بفواصل أو مسافات"
+    }
 }

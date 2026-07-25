@@ -1,4 +1,5 @@
 {
-  "name": "سبوتفايShareCommands",
-  "description": "مشاركة سبوتفاي الحالي في الدردشة"
+    "name": "SpotifyShareCommands",
+    "description": "مشاركة سبوتفاي الحالي في الدردشة",
+    "settings": {}
 }

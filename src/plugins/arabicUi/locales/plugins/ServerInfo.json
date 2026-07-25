@@ -1,4 +1,5 @@
 {
-  "name": "سيرفرInfo",
-  "description": "يسمح لك بعرض معلومات عن سيرفر"
+    "name": "ServerInfo",
+    "description": "يسمح لك بعرض معلومات عن سيرفر",
+    "settings": {}
 }

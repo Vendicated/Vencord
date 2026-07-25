@@ -1,9 +1,9 @@
 {
-  "name": "MemberCount",
-  "description": "إظهار عدد الأعضاء في تلميح السيرفر",
-  "settings": {
-    "toolTip": "Show member count on the سيرفر tooltip",
-    "memberList": "Show member count in the member list",
-    "voiceActivity": "Show voice activity with member count in the member list"
-  }
+    "name": "MemberCount",
+    "description": "إظهار عدد الأعضاء في تلميح السيرفر",
+    "settings": {
+        "memberList": "عرض عدد الأعضاء في قائمة الأعضاء",
+        "toolTip": "عرض عدد الأعضاء في تلميح السيرفر",
+        "voiceActivity": "عرض النشاط الصوتي مع عدد الأعضاء في قائمة الأعضاء"
+    }
 }

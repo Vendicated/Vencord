@@ -1,19 +1,19 @@
 {
-  "name": "ValidUser",
-  "description": "مطوّر نشط",
-  "settings": {
-    "active_developer": "Active Developer",
-    "bug_hunter_level_1": "دسكورد Bug Hunter",
-    "bug_hunter_level_2": "دسكورد Bug Hunter",
-    "certified_moderator": "مودريتر Programs Alumni",
-    "discord_employee": "دسكورد Staff",
-    "hypesquad": "HypeSquad Events",
-    "hypesquad_online_house_1": "HypeSquad Bravery",
-    "hypesquad_online_house_2": "HypeSquad Brilliance",
-    "hypesquad_online_house_3": "HypeSquad Balance",
-    "partner": "Partnered سيرفر Owner",
-    "premium": "Subscriber",
-    "premium_early_supporter": "Early Supporter",
-    "verified_developer": "Early Verified بوت Developer"
-  }
+    "name": "ValidUser",
+    "description": "مطوّر نشط",
+    "settings": {
+        "active_developer": "مطور نشط",
+        "bug_hunter_level_1": "دسكورد Bug Hunter",
+        "bug_hunter_level_2": "دسكورد Bug Hunter",
+        "certified_moderator": "خريج برامج المودريتر",
+        "discord_employee": "دسكورد Staff",
+        "hypesquad": "هايب سكواد الفعاليات",
+        "hypesquad_online_house_1": "هايب سكواد الشجاعة",
+        "hypesquad_online_house_2": "هايب سكواد التألق",
+        "hypesquad_online_house_3": "هايب سكواد التوازن",
+        "partner": "مالك سيرفر شريك",
+        "premium": "مشترك",
+        "premium_early_supporter": "داعم مبكر",
+        "verified_developer": "مطور بوت موثّق مبكراً"
+    }
 }

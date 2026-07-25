@@ -1,7 +1,7 @@
 {
-  "name": "ImageFilename",
-  "description": "إظهار رابط الصورة الكامل بدلاً من اسم الملف فقط",
-  "settings": {
-    "showFullUrl": "Show the full URL of the image instead of just the file name. Always enabled for صور متحركة because they usually have no meaningful file name"
-  }
+    "name": "ImageFilename",
+    "description": "إظهار رابط الصورة الكامل بدلاً من اسم الملف فقط",
+    "settings": {
+        "showFullUrl": "عرض الرابط الكامل للصورة بدل اسم الملف فقط. دائماً مفعّل لصور متحركة لأن اسم ملفها غالباً ما له معنى"
+    }
 }

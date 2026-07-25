@@ -1,4 +1,5 @@
 {
-  "name": "اسحب مستخدم",
-  "description": "اسحب شخص لرومك الصوتي."
+    "name": "PullUser",
+    "description": "اسحب شخص لرومك الصوتي.",
+    "settings": {}
 }

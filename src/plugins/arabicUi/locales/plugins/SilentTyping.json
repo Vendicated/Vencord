@@ -1,9 +1,9 @@
 {
-  "name": "SilentTyping",
-  "description": "إظهار أيقونة لتبديل الإضافة",
-  "settings": {
-    "showIcon": "Show an icon for toggling the بلوقن",
-    "contextMenu": "Add option to toggle the functionality in the chat input context menu",
-    "isEnabled": "Toggle functionality"
-  }
+    "name": "SilentTyping",
+    "description": "إظهار أيقونة لتبديل الإضافة",
+    "settings": {
+        "contextMenu": "يضيف خياراً لتفعيل الميزة أو إيقافها من قائمة سياق إدخال المحادثة",
+        "isEnabled": "تبديل الوظيفة",
+        "showIcon": "عرض أيقونة لتفعيل/تعطيل البلوقن"
+    }
 }

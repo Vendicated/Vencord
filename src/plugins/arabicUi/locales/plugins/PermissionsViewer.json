@@ -1,7 +1,7 @@
 {
-  "name": "PermissionsViewer",
-  "description": "طريقة الترتيب لتحديد أي دور يمنح المستخدم صلاحية معينة",
-  "settings": {
-    "permissionsSortOrder": "The sort method used for defining which role grants an user a certain permission"
-  }
+    "name": "PermissionsViewer",
+    "description": "طريقة الترتيب لتحديد أي دور يمنح المستخدم صلاحية معينة",
+    "settings": {
+        "permissionsSortOrder": "طريقة الترتيب لتحديد أي رتبة تعطي المستخدم صلاحية معيّنة"
+    }
 }

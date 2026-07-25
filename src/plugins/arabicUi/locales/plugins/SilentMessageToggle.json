@@ -1,8 +1,8 @@
 {
-  "name": "SilentMessageToggle",
-  "description": "حفظ حالة تبديل الرسائل الصامتة عند تغيير القنوات",
-  "settings": {
-    "persistState": "Whether to persist the state of the silent message toggle when changing channels",
-    "autoDisable": "Automatically disable the silent message toggle again after sending one"
-  }
+    "name": "SilentMessageToggle",
+    "description": "حفظ حالة تبديل الرسائل الصامتة عند تغيير القنوات",
+    "settings": {
+        "autoDisable": "يعطّل زر الرسالة الصامتة تلقائياً بعد إرسال رسالة",
+        "persistState": "الاحتفاظ بحالة زر الرسالة الصامتة عند تغيير القنوات"
+    }
 }

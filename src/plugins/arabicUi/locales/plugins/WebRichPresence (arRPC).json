@@ -1,4 +1,5 @@
 {
-  "name": "WebRichPresence",
-  "description": "إضافة عميل arRPC لتفعيل RPC على دسكورد ويب (تجريبي)"
+    "name": "WebRichPresence (arRPC)",
+    "description": "إضافة عميل arRPC لتفعيل RPC على دسكورد ويب (تجريبي)",
+    "settings": {}
 }

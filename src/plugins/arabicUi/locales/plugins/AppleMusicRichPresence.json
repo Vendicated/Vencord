@@ -1,22 +1,22 @@
 {
-  "name": "AppleMusicRichPresence",
-  "description": "نوع النشاط",
-  "settings": {
-    "activityType": "Which type of activity",
-    "statusDisplayType": "Show the track / artist name in the member list",
-    "refreshInterval": "The interval between activity refreshes",
-    "enableTimestamps": "Whether or not to enable timestamps",
-    "enableButtons": "Whether or not to enable buttons",
-    "nameString": "Activity name format string",
-    "detailsString": "Activity details format string",
-    "stateString": "Activity state format string",
-    "detailsLink": "Activity details link",
-    "stateLink": "Activity state link",
-    "largeImageType": "Activity assets large image type",
-    "largeTextString": "Activity assets large text format string",
-    "largeImageLink": "Activity assets large image link",
-    "smallImageType": "Activity assets small image type",
-    "smallTextString": "Activity assets small text format string",
-    "smallImageLink": "Activity assets small image link"
-  }
+    "name": "AppleMusicRichPresence",
+    "description": "حالة نشاط دسكورد لـ Apple Music!",
+    "settings": {
+        "activityType": "نوع النشاط",
+        "detailsLink": "رابط تفاصيل النشاط",
+        "detailsString": "نص تنسيق تفاصيل النشاط",
+        "enableButtons": "تفعيل الأزرار أم لا",
+        "enableTimestamps": "تفعيل الطوابع الزمنية أم لا",
+        "largeImageLink": "رابط الصورة الكبيرة لأصول حالة النشاط",
+        "largeImageType": "نوع الصورة الكبيرة لأصول حالة النشاط",
+        "largeTextString": "نص تنسيق الصورة الكبيرة لأصول حالة النشاط",
+        "nameString": "نص تنسيق اسم النشاط",
+        "refreshInterval": "الفترة بين تحديثات النشاط",
+        "smallImageLink": "رابط الصورة الصغيرة لأصول حالة النشاط",
+        "smallImageType": "نوع الصورة الصغيرة لأصول حالة النشاط",
+        "smallTextString": "نص تنسيق الصورة الصغيرة لأصول حالة النشاط",
+        "stateLink": "رابط حالة النشاط",
+        "stateString": "نص تنسيق حالة النشاط",
+        "statusDisplayType": "عرض اسم المقطع / الفنان في قائمة الأعضاء"
+    }
 }

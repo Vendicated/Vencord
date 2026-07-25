@@ -1,7 +1,7 @@
 {
-  "name": "Volumeبوستer",
-  "description": "مضاعف الصوت",
-  "settings": {
-    "multiplier": "Volume Multiplier"
-  }
+    "name": "VolumeBooster",
+    "description": "يخليك ترفع صوت المستخدم والبث فوق الحد الافتراضي",
+    "settings": {
+        "multiplier": "مضاعف الصوت"
+    }
 }

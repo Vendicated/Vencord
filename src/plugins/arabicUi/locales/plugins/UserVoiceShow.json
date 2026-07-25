@@ -1,9 +1,9 @@
 {
-  "name": "UserVoiceShow",
-  "description": "إظهار مستخدم",
-  "settings": {
-    "showInUserProfileModal": "Show a user",
-    "showInMemberList": "Show a user",
-    "showInMessages": "Show a user"
-  }
+    "name": "UserVoiceShow",
+    "description": "إظهار مستخدم",
+    "settings": {
+        "showInMemberList": "عرض مستخدم",
+        "showInMessages": "عرض مستخدم",
+        "showInUserProfileModal": "عرض مستخدم"
+    }
 }

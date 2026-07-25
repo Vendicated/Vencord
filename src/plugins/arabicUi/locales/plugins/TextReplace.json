@@ -1,4 +1,5 @@
 {
-  "name": "TextReplace",
-  "description": "استبدال النص في رسائلك. قواعد جاهزة في قناة #textreplace-rules في فينكورد"
+    "name": "TextReplace",
+    "description": "استبدل نص في رسائلك. تلقى قواعد جاهزة في قناة #textreplace-rules في فينكورد",
+    "settings": {}
 }

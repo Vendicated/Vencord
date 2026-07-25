@@ -1,7 +1,7 @@
 {
-  "name": "SendTimestamps",
-  "description": "استبدال الطوابع الزمنية في محتوى الرسائل",
-  "settings": {
-    "replaceMessageContents": "استبدال الطوابع الزمنية في محتوى الرسائل"
-  }
+    "name": "SendTimestamps",
+    "description": "أرسل طوابع زمنية بسهولة من زر الشات واختصارات نصية. اقرأ الوصف الموسّع!",
+    "settings": {
+        "replaceMessageContents": "استبدال الطوابع الزمنية في محتوى الرسائل"
+    }
 }

@@ -14,8 +14,8 @@ import { clearDiscordLocales, getDiscordCoverage, registerDiscordPack, registerE
 import {
     applyPluginOverlay,
     clearPluginPacks,
-    removePluginOverlay,
     registerPluginPack,
+    removePluginOverlay,
 } from "./engine/pluginStrings";
 import enTextAll from "./locales/discord/en-text/_all.json";
 import { discordPacks, pluginPacks } from "./locales/registry";
@@ -86,12 +86,42 @@ function applyFont(font: string) {
             font-family: ${family} !important;
         }
 
-        #app-mount, #app-mount *:not(code):not(pre):not([class*="code"]):not([class*="hljs"]) {
+        #app-mount, #app-mount *:not(code):not(pre):not([class*="code"]):not([class*="hljs"]):not(svg):not(path):not(canvas) {
             font-family: ${family} !important;
         }
 
         code, pre, [class*="codeBlock"], [class*="hljs"], [class*="monospace"] {
             font-family: var(--font-code, ui-monospace, monospace) !important;
+        }
+
+        /* End-to-end fix for custom font overflow: hide native scrollbar arrow buttons (⬍) and mini-scrollbars */
+        *::-webkit-scrollbar-button {
+            display: none !important;
+            width: 0 !important;
+            height: 0 !important;
+        }
+
+        [class*="button"], [class*="input"], [class*="select"], [class*="option"], [class*="badge"], [class*="tag"], [class*="tab"], [class*="label"], [class*="title"], [class*="header"], [class*="text"], [class*="item"], [class*="row"], [class*="card"] {
+            scrollbar-width: none;
+        }
+
+        [class*="button"]::-webkit-scrollbar,
+        [class*="input"]::-webkit-scrollbar,
+        [class*="select"]::-webkit-scrollbar,
+        [class*="option"]::-webkit-scrollbar,
+        [class*="badge"]::-webkit-scrollbar,
+        [class*="tag"]::-webkit-scrollbar,
+        [class*="tab"]::-webkit-scrollbar,
+        [class*="label"]::-webkit-scrollbar,
+        [class*="title"]::-webkit-scrollbar,
+        [class*="header"]::-webkit-scrollbar,
+        [class*="text"]::-webkit-scrollbar,
+        [class*="item"]::-webkit-scrollbar,
+        [class*="row"]::-webkit-scrollbar,
+        [class*="card"]::-webkit-scrollbar {
+            display: none !important;
+            width: 0 !important;
+            height: 0 !important;
         }
     `;
     document.head.appendChild(style);
@@ -102,10 +132,28 @@ function removeFont() {
     document.getElementById("vc-arabic-ui-font-link")?.remove();
 }
 
+function injectGlobalScrollbarHygiene() {
+    if (document.getElementById("vc-arabic-ui-scrollbar-style")) return;
+    const style = document.createElement("style");
+    style.id = "vc-arabic-ui-scrollbar-style";
+    style.textContent = `
+        *::-webkit-scrollbar-button {
+            display: none !important;
+            width: 0 !important;
+            height: 0 !important;
+        }
+    `;
+    document.head.appendChild(style);
+}
+
+function removeGlobalScrollbarHygiene() {
+    document.getElementById("vc-arabic-ui-scrollbar-style")?.remove();
+}
+
 export default definePlugin({
     name: "ArabicUI",
     description: "Arabic for Discord and Vencord UI. Turn on, restart once. Missing bits stay English.",
-    authors: [Devs.mar],
+    authors: [Devs.mar, Devs.nyiq],
     tags: ["Appearance"],
     restartNeeded: true,
     settings,
@@ -115,6 +163,7 @@ export default definePlugin({
         installDiscordHook();
         installDomTranslator();
         applyPluginOverlay();
+        injectGlobalScrollbarHygiene();
         applyFont(settings.store.font);
 
         const c = getDiscordCoverage();
@@ -126,5 +175,6 @@ export default definePlugin({
         uninstallDomTranslator();
         uninstallDiscordHook();
         removeFont();
+        removeGlobalScrollbarHygiene();
     },
 });

@@ -1,7 +1,7 @@
 {
-  "name": "CallTimer",
-  "description": "تنسيق المؤقت. أي تنسيق moment.js صالح",
-  "settings": {
-    "format": "The timer format. This can be any valid moment.js format"
-  }
+    "name": "CallTimer",
+    "description": "يضيف مؤقت مكالمة لكل المستخدمين في القنوات الصوتية وفي حالة الاتصال.",
+    "settings": {
+        "format": "تنسيق المؤقت. أي تنسيق moment.js صالح"
+    }
 }

@@ -1,10 +1,10 @@
 {
-  "name": "MessageClickActions",
-  "description": "تفعيل الحذف بالنقر أثناء الضغط على Backspace",
-  "settings": {
-    "enableDeleteOnClick": "Enable delete on click while holding backspace",
-    "enableDoubleClickToEdit": "Enable double click to edit",
-    "enableDoubleClickToReply": "Enable double click to reply",
-    "requireModifier": "Only do double click actions when shift/ctrl is held"
-  }
+    "name": "MessageClickActions",
+    "description": "اضغط مطولاً على Backspace مع النقر للحذف، أو نقر مزدوج للتعديل/الرد",
+    "settings": {
+        "enableDeleteOnClick": "تفعيل الحذف بالنقر مع الاستمرار على Backspace",
+        "enableDoubleClickToEdit": "تفعيل النقر المزدوج للتعديل",
+        "enableDoubleClickToReply": "تفعيل النقر المزدوج للرد",
+        "requireModifier": "تنفيذ النقر المزدوج فقط مع الضغط على Shift أو Ctrl"
+    }
 }

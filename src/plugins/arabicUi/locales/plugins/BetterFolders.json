@@ -1,14 +1,14 @@
 {
-  "name": "BetterFolders",
-  "description": "عرض سيرفرات المجلد في شريط جانبي مخصص",
-  "settings": {
-    "sidebar": "Display سيرفرات from folder on dedicated sidebar",
-    "sidebarAnim": "Animate opening the folder sidebar",
-    "closeAllFolders": "Close all folders when selecting a سيرفر not in a folder",
-    "closeAllHomeButton": "Close all folders when clicking on the home button",
-    "closeOthers": "Close other folders when opening a folder",
-    "forceOpen": "Force a folder to open when switching to a سيرفر of that folder",
-    "keepIcons": "Keep showing سيرفر icons in the primary سيرفر bar folder when it",
-    "showFolderIcon": "Show the folder icon above the folder سيرفرات in the BetterFolders sidebar"
-  }
+    "name": "BetterFolders",
+    "description": "يعرض مجلدات السيرفرات في شريط جانبي مخصص ويحسّن تجربة المجلدات",
+    "settings": {
+        "closeAllFolders": "يغلق كل المجلدات عند اختيار سيرفر خارج مجلد",
+        "closeAllHomeButton": "يغلق كل المجلدات عند النقر على زر الرئيسية",
+        "closeOthers": "يغلق المجلدات الأخرى عند فتح مجلد",
+        "forceOpen": "إجبار فتح المجلد عند التبديل لسيرفر من نفس المجلد",
+        "keepIcons": "استمر بعرض أيقونات السيرفر في مجلد الشريط الرئيسي لما يكون مفتوح في الشريط الجانبي لـ BetterFolders",
+        "showFolderIcon": "عرض أيقونة المجلد فوق سيرفرات المجلد في الشريط الجانبي لـ BetterFolders",
+        "sidebar": "عرض سيرفرات المجلد في شريط جانبي مخصص",
+        "sidebarAnim": "حرّك فتح الشريط الجانبي للمجلدات"
+    }
 }

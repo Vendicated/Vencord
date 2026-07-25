@@ -1,7 +1,7 @@
 {
-  "name": "MoreQuickReactions",
-  "description": "عدد التفاعلات (0-42)",
-  "settings": {
-    "reactionCount": "Number of reactions (0-42)"
-  }
+    "name": "MoreQuickReactions",
+    "description": "يزيد عدد التفاعلات في قائمة التفاعل السريع عند التمرير",
+    "settings": {
+        "reactionCount": "عدد التفاعلات (0-42)"
+    }
 }

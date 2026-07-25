@@ -1,4 +1,5 @@
 {
-  "name": "اقفز للبداية",
-  "description": "ارجع لأول الرسائل بسرعة."
+    "name": "JumpTo",
+    "description": "ارجع لأول الرسائل بسرعة.",
+    "settings": {}
 }

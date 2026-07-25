@@ -2,7 +2,7 @@
   "name": "ViewIcons",
   "description": "اختيار تنسيق الصور الثابتة. الصور المتحركة تستخدم دائماً.صورة متحركة",
   "settings": {
-    "format": "Choose the image format to use for non animated images. Animated images will always use.صورة متحركة",
-    "imgSize": "The image size to use"
+    "format": "اختر صيغة الصورة للصور غير المتحركة. الصور المتحركة دائماً تستخدم.صورة متحركة",
+    "imgSize": "حجم الصورة المستخدم"
   }
 }

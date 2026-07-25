@@ -1,9 +1,9 @@
 {
-  "name": "ConsoleJanitor",
-  "description": "تعطيل سجلات دسكورد",
-  "settings": {
-    "disableLoggers": "Disables دسكوردs loggers",
-    "disableSpotifyLogger": "Disable the سبوتفاي logger, which leaks account information and access token",
-    "whitelistedLoggers": "Semicolon (;) separated list of loggers to allow even if others are hidden"
-  }
+    "name": "ConsoleJanitor",
+    "description": "تعطيل سجلات دسكورد",
+    "settings": {
+        "disableLoggers": "يعطّل مسجلات دسكورد",
+        "disableSpotifyLogger": "تعطيل مسجل سبوتفاي اللي يسرّب معلومات الحساب وتوكن الوصول",
+        "whitelistedLoggers": "قائمة مسجّلات مفصولة بفاصلة منقوطة (;) للسماح بها حتى لو الباقي مخفي"
+    }
 }

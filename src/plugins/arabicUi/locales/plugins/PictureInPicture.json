@@ -1,7 +1,7 @@
 {
-  "name": "PictureInPicture",
-  "description": "تكرار فيديو صورة داخل صورة أم لا",
-  "settings": {
-    "loop": "Whether to make the PiP video loop or not"
-  }
+    "name": "PictureInPicture",
+    "description": "تكرار فيديو صورة داخل صورة أم لا",
+    "settings": {
+        "loop": "تكرار فيديو PiP أم لا"
+    }
 }

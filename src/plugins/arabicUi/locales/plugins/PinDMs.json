@@ -1,9 +1,9 @@
 {
-  "name": "PinDMs",
-  "description": "ترتيب عرض الرسائل الخاصة المثبتة",
-  "settings": {
-    "pinOrder": "Which order should pinned خاص be displayed in?",
-    "canCollapseDmSection": "Allow uncategorised خاص section to be collapsable",
-    "dmSectionCollapsed": "Collapse خاص section"
-  }
+    "name": "PinDMs",
+    "description": "ترتيب عرض الرسائل الخاصة المثبتة",
+    "settings": {
+        "canCollapseDmSection": "السماح بجعل قسم الخاص غير المصنّف قابلاً للطي",
+        "dmSectionCollapsed": "طيّ قسم الخاص",
+        "pinOrder": "بأي ترتيب يُعرض الخاص المثبّت؟"
+    }
 }

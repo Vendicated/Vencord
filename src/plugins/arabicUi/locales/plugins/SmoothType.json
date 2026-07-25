@@ -1,4 +1,8 @@
 {
-  "name": "كتابة ناعمة",
-  "description": "خلِّ الكتابة تطلع أنعم وأوضح."
+    "name": "SmoothType",
+    "description": "خلِّ الكتابة تطلع أنعم وأوضح.",
+    "settings": {
+        "animationType": "تنعيم الحركة",
+        "showChatBarButton": "عرض زر SmoothType في شريط الدردشة (جنب صور متحركة وغيرها)"
+    }
 }

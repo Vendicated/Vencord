@@ -1,8 +1,8 @@
 {
-  "name": "CustomIdle",
-  "description": "الدقائق قبل خمول دسكورد (0 للتعطيل)",
-  "settings": {
-    "idleTimeout": "Minutes before دسكورد goes idle (0 to disable auto-idle)",
-    "remainInIdle": "When you come back to دسكورد, remain idle until you confirm you want to go اونلاين"
-  }
+    "name": "CustomIdle",
+    "description": "الدقائق قبل خمول دسكورد (0 للتعطيل)",
+    "settings": {
+        "idleTimeout": "دقائق قبل ما دسكورد يصير خاملاً، 0 لتعطيل الخمول التلقائي",
+        "remainInIdle": "لما ترجع لدسكورد، ابقَ خامل حتى تأكد إنك تبي تصير اونلاين"
+    }
 }

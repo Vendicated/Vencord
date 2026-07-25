@@ -1,7 +1,7 @@
 {
-  "name": "UnlockedAvatarZoom",
-  "description": "مضاعف التكبير",
-  "settings": {
-    "zoomMultiplier": "Zoom multiplier"
-  }
+    "name": "UnlockedAvatarZoom",
+    "description": "يخليك تكبّر أكثر في أداة قص الصورة عند تغيير الأفاتار",
+    "settings": {
+        "zoomMultiplier": "مضاعف التكبير"
+    }
 }

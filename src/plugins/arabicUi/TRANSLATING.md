@@ -81,11 +81,11 @@ node scripts/arabicUi/mergeEnText.mjs
 
 - `normalizeLoanwords` — glossary style
 - `dedupeEnText` — one file per key
-- `mergeEnText` — rebuilds `_all.json`
+- `mergeEnText` — rebuilds `_all.json` and updates `locales/meta.json`
 
 Then build / inject and check in Discord.
 
-Short single words (Board, Wishlist…): if merge skips them, add the word to `ALLOW_CHROME_SINGLE` in `engine/lookup.ts` and `scripts/arabicUi/mergeEnText.mjs`, then merge again.
+Short single words (Board, Wishlist…): if merge skips them, add the word once to `engine/chromeAllowlist.json`, then merge again. Do not edit allowlists in `lookup.ts` or `mergeEnText.mjs` — both load that file.
 
 Optional: `getUntranslatedArabicUiStrings()` in the Discord console lists misses.
 

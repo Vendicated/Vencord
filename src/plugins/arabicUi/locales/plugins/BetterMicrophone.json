@@ -1,4 +1,5 @@
 {
-  "name": "مايك أفضل",
-  "description": "إعدادات مايك إضافية لسطح المكتب."
+    "name": "BetterMicrophone",
+    "description": "إعدادات مايك إضافية لسطح المكتب.",
+    "settings": {}
 }

@@ -1,10 +1,10 @@
 {
-  "name": "IrcColors",
-  "description": "الإضاءة بالنسبة المئوية. غيّر إذا كانت الألوان فاتحة أو داكنة جداً",
-  "settings": {
-    "lightness": "Lightness, in %. Change if the colors are too light or too dark",
-    "memberListColors": "Replace role colors in the member list",
-    "applyColorOnlyToUsersWithoutColor": "Apply colors only to users who don",
-    "applyColorOnlyInDms": "Apply colors only in direct messages; do not apply colors in سيرفرات."
-  }
+    "name": "IrcColors",
+    "description": "الإضاءة بالنسبة المئوية. غيّر إذا كانت الألوان فاتحة أو داكنة جداً",
+    "settings": {
+        "applyColorOnlyInDms": "طبّق الألوان في الخاص فقط؛ لا تطبّقها في السيرفرات.",
+        "applyColorOnlyToUsersWithoutColor": "طبّق الألوان فقط على من ما عنده لون محدد مسبقاً",
+        "lightness": "السطوع بالنسبة المئوية، غيّره إذا الألوان فاتحة أو غامقة زيادة",
+        "memberListColors": "استبدال ألوان الرتب في قائمة الأعضاء"
+    }
 }

@@ -1,9 +1,9 @@
 {
-  "name": "BetterSettings",
-  "description": "تعطيل رسوم الانتقال التدريجي",
-  "settings": {
-    "disableFade": "Disable the crossfade animation",
-    "organizeMenu": "Organizes the settings cog context menu into categories",
-    "eagerLoad": "Removes the loading delay when opening the menu for the first time"
-  }
+    "name": "BetterSettings",
+    "description": "تعطيل رسوم الانتقال التدريجي",
+    "settings": {
+        "disableFade": "تعطيل انيميشن التلاشي المتقاطع",
+        "eagerLoad": "إزالة تأخير التحميل عند فتح القائمة لأول مرة",
+        "organizeMenu": "يرتّب قائمة ترس الإعدادات في فئات"
+    }
 }

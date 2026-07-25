@@ -1,9 +1,9 @@
 {
-  "name": "OnePingPerDM",
-  "description": "اختر نوع الرسائل الخاصة المتأثرة",
-  "settings": {
-    "channelToAffect": "Select the type of خاص for the بلوقن to affect",
-    "allowMentions": "Receive audio pings for @mentions",
-    "allowEveryone": "Receive audio pings for @everyone and @here in group خاص"
-  }
+    "name": "OnePingPerDM",
+    "description": "إذا أرسل مستخدم رسائل غير مقروءة في الخاص أكثر من مرة، توصلك رنة صوتية واحدة فقط. اقرأ الرسائل عشان يعيد الحد",
+    "settings": {
+        "allowEveryone": "استقبال تنبيهات صوتية لـ @everyone و @here في الخاص الجماعي",
+        "allowMentions": "استقبال تنبيهات صوتية للمنشنات",
+        "channelToAffect": "اختر نوع الخاص اللي البلوقن يطبّق عليه"
+    }
 }

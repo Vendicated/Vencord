@@ -1,11 +1,11 @@
 {
-  "name": "PlatformIndicators",
-  "description": "في قائمة الأعضاء",
-  "settings": {
-    "list": "In the member list",
-    "badges": "In user profiles, as بادجز",
-    "messages": "Inside messages",
-    "colorMobileIndicator": "Whether to make the mobile indicator match the color of the user status.",
-    "profileLocation": "Where to show the indicator in user profiles"
-  }
+    "name": "PlatformIndicators",
+    "description": "يضيف مؤشرات المنصة (كمبيوتر، جوال، ويب…) للمستخدمين",
+    "settings": {
+        "badges": "في ملفات المستخدمين كبادجات",
+        "colorMobileIndicator": "جعل مؤشر الجوال يطابق لون حالة المستخدم.",
+        "list": "في قائمة الأعضاء",
+        "messages": "داخل الرسائل",
+        "profileLocation": "مكان عرض المؤشر في الملفات الشخصية"
+    }
 }

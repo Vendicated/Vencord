@@ -1,10 +1,10 @@
 {
-  "name": "MessageLinkEmbeds",
-  "description": "لون خلفية الرسائل في التضمينات الغنية",
-  "settings": {
-    "messageBackgroundColor": "Background color for messages in rich embeds",
-    "automodEmbeds": "Use automod embeds instead of rich embeds",
-    "listMode": "Whether to use ID list as blacklist or whitelist",
-    "idList": "سيرفر/channel/user IDs to blacklist or whitelist"
-  }
+    "name": "MessageLinkEmbeds",
+    "description": "يضيف معاينة للرسائل اللي فيها رابط لرسالة ثانية",
+    "settings": {
+        "automodEmbeds": "استخدام تضمينات الأوتومود بدل التضمينات الغنية (أصغر لكن معلومات أقل)",
+        "idList": "معرّفات السيرفر/القناة/المستخدم للقائمة السوداء أو البيضاء",
+        "listMode": "استخدام قائمة المعرفات كقائمة سوداء أو بيضاء",
+        "messageBackgroundColor": "لون خلفية الرسائل في التضمينات الغنية"
+    }
 }

@@ -1,20 +1,20 @@
 {
-  "name": "MusicRichPresence",
-  "description": "واجهة تتبع الموسيقى المستخدمة",
-  "settings": {
-    "scrobblerBackend": "The scrobbler backend to use.",
-    "apiKey": "Custom Last.fm API key. Not required but highly recommended to avoid rate limiting with our shared key",
-    "username": "Username",
-    "shareUsername": "Show link to scrobbler profile",
-    "clickableLinks": "Make track, artist and album names clickable links",
-    "hideWithSpotify": "Hide presence if سبوتفاي is running",
-    "hideWithActivity": "Hide presence if you have any other presence",
-    "statusName": "Custom status text. You can use the following variables: {artist} | {album} | {title}",
-    "statusDisplayType": "Show the track / artist name in the member list",
-    "nameFormat": "Show name of song and artist in status name",
-    "useListeningStatus": "Show",
-    "missingArt": "When album or album art is missing",
-    "showLogo": "Show the scrobbler service logo by the album cover",
-    "showAlbumCover": "Show album cover. Disabling this will display a placeholder. Useful if your music has inappropriate art"
-  }
+    "name": "MusicRichPresence",
+    "description": "حالة نشاط للموسيقى من Last.fm أو ListenBrainz",
+    "settings": {
+        "apiKey": "مفتاح Last.fm API مخصص. مو إلزامي لكن يُنصح فيه بقوة لتجنب حد الطلبات مع المفتاح المشترك",
+        "clickableLinks": "جعل اسم الأغنية والفنان والألبوم روابط قابلة للنقر",
+        "hideWithActivity": "إخفاء حالة النشاط إذا عندك حالة نشاط ثانية",
+        "hideWithSpotify": "إخفاء حالة النشاط إذا سبوتفاي شغّال",
+        "missingArt": "عند غياب الألبوم أو غلاف الألبوم",
+        "nameFormat": "عرض اسم الأغنية والفنان في اسم الحالة",
+        "scrobblerBackend": "خدمة تسجيل الاستماع اللي تستخدمها.",
+        "shareUsername": "عرض رابط ملف التتبع",
+        "showAlbumCover": "عرض غلاف الألبوم. لو تعطّله يظهر بديل. مفيد إذا غلاف أغنيتك مو مناسب",
+        "showLogo": "عرض شعار خدمة التتبع بجانب غلاف الألبوم",
+        "statusDisplayType": "عرض اسم المقطع / الفنان في قائمة الأعضاء",
+        "statusName": "نص حالة مخصص. تقدر تستخدم المتغيرات: {artist} | {album} | {title}",
+        "useListeningStatus": "عرض حالة \"Listening to\" بدل \"Playing\"",
+        "username": "اسم المستخدم"
+    }
 }

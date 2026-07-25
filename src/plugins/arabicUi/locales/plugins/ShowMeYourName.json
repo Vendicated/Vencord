@@ -1,10 +1,10 @@
 {
-  "name": "ShowMeYourName",
-  "description": "طريقة عرض أسماء المستخدمين والألقاب",
-  "settings": {
-    "mode": "How to display usernames and nicks",
-    "friendNicknames": "How to prioritise friend nicknames over سيرفر nicknames",
-    "displayNames": "Use display names in place of usernames",
-    "inReplies": "Also apply functionality to reply previews"
-  }
+    "name": "ShowMeYourName",
+    "description": "طريقة عرض أسماء المستخدمين والألقاب",
+    "settings": {
+        "displayNames": "استخدام أسماء العرض بدل أسماء المستخدم",
+        "friendNicknames": "كيف تُقدَّم ألقاب الأصدقاء على ألقاب السيرفر",
+        "inReplies": "طبّق الميزة أيضاً على معاينات الرد",
+        "mode": "كيف تُعرض أسماء المستخدمين والألقاب"
+    }
 }

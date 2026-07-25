@@ -1,13 +1,13 @@
 {
-  "name": "RoleColorEverywhere",
-  "description": "إظهار ألوان الأدوار في إشارات الدردشة",
-  "settings": {
-    "chatMentions": "Show role colors in chat mentions",
-    "memberList": "Show role colors in member list role headers",
-    "voiceUsers": "Show role colors in the voice chat user list",
-    "reactorsList": "Show role colors in the reactors list",
-    "pollResults": "Show role colors in the poll results",
-    "colorChatMessages": "Color chat messages based on the author",
-    "messageSaturation": "Intensity of message coloring."
-  }
+    "name": "RoleColorEverywhere",
+    "description": "إظهار ألوان الأدوار في إشارات الدردشة",
+    "settings": {
+        "chatMentions": "عرض ألوان الرتب في المنشنات (بما فيها صندوق الرسالة)",
+        "colorChatMessages": "يلوّن رسائل المحادثة حسب المرسل",
+        "memberList": "عرض ألوان الرتب في عناوين الرتب بقائمة الأعضاء",
+        "messageSaturation": "شدة تلوين الرسائل.",
+        "pollResults": "عرض ألوان الرتب في نتائج التصويت",
+        "reactorsList": "عرض ألوان الرتب في قائمة المتفاعلين",
+        "voiceUsers": "عرض ألوان الرتب في قائمة مستخدمي الدردشة الصوتية"
+    }
 }

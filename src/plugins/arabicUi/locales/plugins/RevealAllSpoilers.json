@@ -1,4 +1,5 @@
 {
-  "name": "RevealAllSpoilers",
-  "description": "كشف جميع المحروقات بالنقر مع Ctrl أو في الدردشة مع Ctrl+Shift"
+    "name": "RevealAllSpoilers",
+    "description": "اكشف كل الحرق في الرسالة بـ Ctrl+نقر على الحرق، أو في الدردشة كاملة بـ Ctrl+Shift+نقر",
+    "settings": {}
 }

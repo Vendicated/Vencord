@@ -1,10 +1,10 @@
 {
-  "name": "AnonymiseFileNames",
-  "description": "إخفاء أسماء الملفات افتراضياً",
-  "settings": {
-    "anonymiseByDefault": "Whether to anonymise file names by default",
-    "method": "Anonymising method",
-    "randomisedLength": "Random characters length",
-    "consistent": "Consistent filename"
-  }
+    "name": "AnonymiseFileNames",
+    "description": "إخفاء أسماء الملفات المرفوعة",
+    "settings": {
+        "anonymiseByDefault": "إخفاء أسماء الملفات افتراضياً",
+        "consistent": "اسم ملف ثابت",
+        "method": "طريقة إخفاء الاسم",
+        "randomisedLength": "طول الأحرف العشوائية"
+    }
 }

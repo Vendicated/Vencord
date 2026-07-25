@@ -1,8 +1,8 @@
 {
-  "name": "PermissionFreeWill",
-  "description": "تجاوز منع قفل الصلاحيات",
-  "settings": {
-    "lockout": "Bypass the permission lockout prevention (",
-    "onboarding": "Bypass the onboarding requirements ("
-  }
+    "name": "PermissionFreeWill",
+    "description": "تجاوز منع قفل الصلاحيات",
+    "settings": {
+        "lockout": "تجاوز منع قفل الصلاحيات (",
+        "onboarding": "تجاوز متطلبات الإعداد الأولي ("
+    }
 }

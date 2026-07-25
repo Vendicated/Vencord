@@ -1,7 +1,7 @@
 {
-  "name": "FixسبوتفايEmbeds",
-  "description": "نسبة الصوت لتضمينات سبوتفاي. أي شيء فوق 10% عالٍ جداً",
-  "settings": {
-    "volume": "The volume % to set for سبوتفاي embeds. Anything above 10% is veeeery loud"
-  }
+    "name": "FixSpotifyEmbeds",
+    "description": "نسبة الصوت لتضمينات سبوتفاي. أي شيء فوق 10% عالٍ جداً",
+    "settings": {
+        "volume": "نسبة الصوت لتضمينات سبوتفاي. أي شي فوق 10% صوته عالي جداً"
+    }
 }

@@ -1,4 +1,5 @@
 {
-  "name": "Translate",
-  "description": "ترجمة الرسائل باستخدام Google Translate أو DeepL أو Kagi"
+    "name": "Translate",
+    "description": "ترجم الرسائل بـ Google Translate أو DeepL أو Kagi",
+    "settings": {}
 }

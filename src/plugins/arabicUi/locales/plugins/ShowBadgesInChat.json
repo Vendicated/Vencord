@@ -1,4 +1,5 @@
 {
-  "name": "شارات في الشات",
-  "description": "اعرض الشارات جنب الرسائل."
+    "name": "ShowBadgesInChat",
+    "description": "اعرض الشارات جنب الرسائل.",
+    "settings": {}
 }

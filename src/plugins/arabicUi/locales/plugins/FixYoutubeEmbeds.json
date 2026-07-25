@@ -1,4 +1,5 @@
 {
-  "name": "FixيوتيوبEmbeds",
-  "description": "تجاوز حظر فيديوهات يوتيوب من العرض على دسكورد"
+    "name": "FixYoutubeEmbeds",
+    "description": "تجاوز حظر فيديوهات يوتيوب من العرض على دسكورد",
+    "settings": {}
 }

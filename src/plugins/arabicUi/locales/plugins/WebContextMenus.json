@@ -1,7 +1,7 @@
 {
-  "name": "WebContextMenus",
-  "description": "إعادة قوائم سياق دسكورد للصور والروابط وشريط الإدخال",
-  "settings": {
-    "addBack": "Add back the دسكورد context menus for images, links and the chat input bar"
-  }
+    "name": "WebContextMenus",
+    "description": "إعادة قوائم سياق دسكورد للصور والروابط وشريط الإدخال",
+    "settings": {
+        "addBack": "يرجّع قوائم دسكورد السياقية للصور والروابط وشريط إدخال المحادثة"
+    }
 }

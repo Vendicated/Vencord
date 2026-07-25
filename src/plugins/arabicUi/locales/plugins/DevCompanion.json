@@ -1,7 +1,7 @@
 {
-  "name": "DevCompanion",
-  "description": "الإشعار عند اتصال Dev Companion تلقائياً",
-  "settings": {
-    "notifyOnAutoConnect": "Whether to notify when Dev Companion has automatically connected."
-  }
+    "name": "DevCompanion",
+    "description": "الإشعار عند اتصال Dev Companion تلقائياً",
+    "settings": {
+        "notifyOnAutoConnect": "الإشعار عند اتصال Dev Companion تلقائياً."
+    }
 }

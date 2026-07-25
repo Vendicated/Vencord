@@ -1,12 +1,12 @@
 {
-  "name": "IgnoreActivities",
-  "description": "تغيير وضع قائمة الفلتر",
-  "settings": {
-    "listMode": "Change the mode of the filter list",
-    "ignorePlaying": "Ignore all playing activities",
-    "ignoreStreaming": "Ignore all streaming activities",
-    "ignoreListening": "Ignore all listening activities",
-    "ignoreWatching": "Ignore all watching activities",
-    "ignoreCompeting": "Ignore all competing activities (These are normally special game activities)"
-  }
+    "name": "IgnoreActivities",
+    "description": "تغيير وضع قائمة الفلتر",
+    "settings": {
+        "ignoreCompeting": "تجاهل كل أنشطة المنافسة، عادة أنشطة ألعاب خاصة",
+        "ignoreListening": "تجاهل كل أنشطة الاستماع",
+        "ignorePlaying": "تجاهل كل أنشطة اللعب",
+        "ignoreStreaming": "تجاهل كل أنشطة البث",
+        "ignoreWatching": "تجاهل كل أنشطة المشاهدة",
+        "listMode": "يغيّر وضع قائمة الفلتر"
+    }
 }

@@ -1,8 +1,8 @@
 {
-  "name": "سبوتفايCrack",
-  "description": "تعطيل الإيقاف التلقائي لـ سبوتفاي",
-  "settings": {
-    "noSpotifyAutoPause": "تعطيل الإيقاف التلقائي لـ سبوتفاي",
-    "keepSpotifyActivityOnIdle": "Keep سبوتفاي activity playing when idling"
-  }
+    "name": "SpotifyCrack",
+    "description": "استماع مشترك مجاني، بدون إيقاف تلقائي في الصوت، ويخلي النشاط يكمل لما تكون خامل",
+    "settings": {
+        "keepSpotifyActivityOnIdle": "إبقاء نشاط سبوتفاي شغّال عند الخمول",
+        "noSpotifyAutoPause": "تعطيل الإيقاف التلقائي لـ سبوتفاي"
+    }
 }

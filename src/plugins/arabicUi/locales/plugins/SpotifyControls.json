@@ -1,9 +1,9 @@
 {
-  "name": "سبوتفايControls",
-  "description": "إظهار عناصر التحكم عند التحويم",
-  "settings": {
-    "hoverControls": "Show controls on hover",
-    "useSpotifyUris": "Open سبوتفاي URIs instead of سبوتفاي URLs. Will only work if you have سبوتفاي installed and might not work on all platforms",
-    "previousButtonRestartsTrack": "Restart currently playing track when pressing the previous button if playtime is >3s"
-  }
+    "name": "SpotifyControls",
+    "description": "إظهار عناصر التحكم عند التحويم",
+    "settings": {
+        "hoverControls": "عرض عناصر التحكم عند التمرير",
+        "previousButtonRestartsTrack": "إعادة تشغيل المقطع الحالي عند الضغط على زر السابق إذا وقت التشغيل أكثر من 3 ثوان",
+        "useSpotifyUris": "فتح معرفات سبوتفاي بدل روابط سبوتفاي. يشتغل فقط إذا سبوتفاي مثبت ويمكن ما يشتغل على كل المنصات"
+    }
 }

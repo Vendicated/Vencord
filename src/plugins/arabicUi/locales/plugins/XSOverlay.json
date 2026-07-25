@@ -1,20 +1,20 @@
 {
-  "name": "XSOverlay",
-  "description": "منفذ WebSocket",
-  "settings": {
-    "webSocketPort": "Websocket port",
-    "preferUDP": "Enable if you use an older build of XSOverlay unable to connect through websockets. This setting is ignored on web.",
-    "botNotifications": "Allow بوت notifications",
-    "serverNotifications": "Allow سيرفر notifications",
-    "dmNotifications": "Allow Direct Message notifications",
-    "groupDmNotifications": "Allow Group خاص notifications",
-    "callNotifications": "Allow call notifications",
-    "pingColor": "User mention color",
-    "channelPingColor": "Channel mention color",
-    "soundPath": "Notification sound",
-    "timeout": "Notification duration",
-    "lengthBasedTimeout": "Extend duration with message length",
-    "opacity": "Notif opacity",
-    "volume": "Volume"
-  }
+    "name": "XSOverlay",
+    "description": "يحوّل إشعارات دسكورد لـ XSOverlay عشان تشوفها بسهولة في VR",
+    "settings": {
+        "botNotifications": "السماح بإشعارات البوتات",
+        "callNotifications": "السماح بإشعارات المكالمات",
+        "channelPingColor": "لون منشن القناة",
+        "dmNotifications": "السماح بإشعارات الخاص",
+        "groupDmNotifications": "السماح بإشعارات الخاص الجماعي",
+        "lengthBasedTimeout": "تمديد المدة حسب طول الرسالة",
+        "opacity": "شفافية الإشعار",
+        "pingColor": "لون إشارة المستخدم",
+        "preferUDP": "فعّله إذا تستخدم نسخة قديمة من XSOverlay ما تقدر تتصل عبر ويب سوكيت. هالإعداد ما ينطبق على الويب.",
+        "serverNotifications": "السماح بإشعارات السيرفرات",
+        "soundPath": "صوت الإشعار: افتراضي أو تحذير أو خطأ",
+        "timeout": "مدة الإشعار بالثواني",
+        "volume": "الصوت",
+        "webSocketPort": "منفذ WebSocket"
+    }
 }

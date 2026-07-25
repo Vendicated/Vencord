@@ -1,8 +1,8 @@
 {
-  "name": "GameActivityToggle",
-  "description": "استخدام نمط الأيقونة القديم قبل إعادة تصميم أيقونات دسكورد",
-  "settings": {
-    "oldIcon": "Use the old icon style before دسكورد icon redesign",
-    "location": "Where to show the game activity toggle button"
-  }
+    "name": "GameActivityToggle",
+    "description": "استخدام نمط الأيقونة القديم قبل إعادة تصميم أيقونات دسكورد",
+    "settings": {
+        "location": "مكان زر تبديل نشاط اللعبة",
+        "oldIcon": "استخدام نمط الأيقونات القديم قبل إعادة تصميم أيقونات دسكورد"
+    }
 }

@@ -1,4 +1,5 @@
 {
-  "name": "ستريمرModeOnStream",
-  "description": "تفعيل وضع البث تلقائياً عند بدء البث في دسكورد"
+    "name": "StreamerModeOnStream",
+    "description": "تفعيل وضع البث تلقائياً عند بدء البث في دسكورد",
+    "settings": {}
 }

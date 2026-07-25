@@ -6,7 +6,7 @@
 
 import { Logger } from "@utils/Logger";
 
-import { getDiscordCoverage, getArabicByEnglish } from "./lookup";
+import { getArabicByEnglish,getDiscordCoverage } from "./lookup";
 
 const logger = new Logger("ArabicUI.DOM");
 
@@ -35,11 +35,15 @@ function shouldSkip(el: Element | null): boolean {
 function shouldLeaveText(s: string) {
     const hasAr = /[\u0600-\u06FF]/.test(s);
     const hasEn = /[A-Za-z]{3,}/.test(s);
-    if (hasAr && hasEn) return true;
+    // Pure Arabic (e.g. already-translated link label) — leave alone
     if (hasAr && !hasEn) return true;
-    // "RoleName — 12"
-    if (/^.+?\s*[\u2013\u2014—–-]\s*\d+\s*$/.test(s.trim())) return true;
+    // Mixed EN+AR: still try translate (Learn-more link tails are stripped in lookup)
     return false;
+}
+
+/** Role-like "Name - 12" headers — only after a real translation miss */
+function looksLikeRoleCountLabel(s: string) {
+    return /^.+?\s*[\u2013\u2014—–-]\s*\d+\s*$/.test(s.trim());
 }
 
 function isUserGeneratedOrDynamic(raw: string, el: Element | null): boolean {
@@ -50,7 +54,7 @@ function isUserGeneratedOrDynamic(raw: string, el: Element | null): boolean {
     if (/\d+,\d+/.test(trimmed)) return true;
     if (/\d+\s+(online|total|members|unread|mentions|online in this channel|total server members|elapsed)/i.test(trimmed)) return true;
     if (/elapsed/i.test(trimmed)) return true;
-    if (/(Playing|Listening to|Open conversation with|direct message)/i.test(trimmed)) return true;
+    if (/(Playing|Listening to|Open conversation with)/i.test(trimmed)) return true;
     if (/, Offline|, Idle|, Online/i.test(trimmed)) return true;
     if (/Server Tag:/i.test(trimmed)) return true;
 
@@ -58,7 +62,7 @@ function isUserGeneratedOrDynamic(raw: string, el: Element | null): boolean {
     let current: Element | null = el;
     let depth = 0;
     while (current && depth < 8) {
-        if (current.hasAttribute("data-user-id") || 
+        if (current.hasAttribute("data-user-id") ||
             current.hasAttribute("data-message-author-id") ||
             current.hasAttribute("data-author-id")) {
             return true;
@@ -73,7 +77,7 @@ function isUserGeneratedOrDynamic(raw: string, el: Element | null): boolean {
             return true;
         }
 
-        const className = current.className;
+        const { className } = current;
         if (typeof className === "string" && className) {
             const lowerClass = className.toLowerCase();
             if (lowerClass.includes("username") ||
@@ -85,7 +89,8 @@ function isUserGeneratedOrDynamic(raw: string, el: Element | null): boolean {
                 lowerClass.includes("memberroles") ||
                 lowerClass.includes("roleslist") ||
                 lowerClass.includes("messagecontent") ||
-                lowerClass.includes("markup_") ||
+                // Do NOT skip markup_ — chat messages already blocked via
+                // #message-content- / chat list. Server home tips use markup too.
                 lowerClass.includes("customstatus") ||
                 lowerClass.includes("memberswrap") ||
                 lowerClass.includes("membersgroup") ||
@@ -103,24 +108,32 @@ function isUserGeneratedOrDynamic(raw: string, el: Element | null): boolean {
 function translateText(raw: string, el: Element | null): string | null {
     if (!raw || !raw.trim()) return null;
     if (shouldLeaveText(raw)) return null;
-    if (isUserGeneratedOrDynamic(raw, el)) return null;
 
+    // 1. Try exact dictionary/engine lookup first.
+    // If we have an authoritative translation for this string, translate it regardless of parent card flags.
     const ar = getArabicByEnglish(raw);
-    if (!ar || ar === raw) {
-        if (typeof window !== "undefined" && /[A-Za-z]{2,}/.test(raw)) {
-            const trimmed = raw.trim();
-            if (trimmed.length >= 2) {
-                const untranslated = (window as any).untranslatedArabicUiStrings || new Set();
-                untranslated.add(trimmed);
-                (window as any).untranslatedArabicUiStrings = untranslated;
-            }
-        }
-        return null;
+    if (ar && ar !== raw) {
+        const lead = raw.match(/^\s*/)?.[0] ?? "";
+        const trail = raw.match(/\s*$/)?.[0] ?? "";
+        return lead + ar + trail;
     }
 
-    const lead = raw.match(/^\s*/)?.[0] ?? "";
-    const trail = raw.match(/\s*$/)?.[0] ?? "";
-    return lead + ar + trail;
+    // 2. If missed, check if it's dynamic/user-generated before logging
+    if (isUserGeneratedOrDynamic(raw, el)) return null;
+
+    // "Moderator — 12" style role headers (after chrome/count patterns miss)
+    if (looksLikeRoleCountLabel(raw)) return null;
+
+    if (typeof window !== "undefined" && /[A-Za-z]{2,}/.test(raw)) {
+        const trimmed = raw.trim();
+        if (trimmed.length >= 2) {
+            const untranslated = (window as any).untranslatedArabicUiStrings || new Set();
+            untranslated.add(trimmed);
+            (window as any).untranslatedArabicUiStrings = untranslated;
+        }
+    }
+
+    return null;
 }
 
 function translateElementAttrs(el: Element) {
@@ -153,7 +166,7 @@ function walk(node: Node) {
 
 let observer: MutationObserver | null = null;
 let scheduled = false;
-let pendingRoots = new Set<Node>();
+const pendingRoots = new Set<Node>();
 let active = false;
 
 function flush() {

@@ -1,10 +1,10 @@
 {
-  "name": "TypingIndicator",
-  "description": "إظهار مؤشر الكتابة للقناة المحددة حالياً",
-  "settings": {
-    "includeCurrentChannel": "Whether to show the typing indicator for the currently selected channel",
-    "includeMutedChannels": "Whether to show the typing indicator for ميوتd channels.",
-    "includeBlockedUsers": "Whether to show the typing indicator for blocked users.",
-    "indicatorMode": "How should the indicator be displayed?"
-  }
+    "name": "TypingIndicator",
+    "description": "إظهار مؤشر الكتابة للقناة المحددة حالياً",
+    "settings": {
+        "includeBlockedUsers": "عرض مؤشر الكتابة للمستخدمين المحظورين.",
+        "includeCurrentChannel": "عرض مؤشر الكتابة للقناة المختارة حالياً",
+        "includeMutedChannels": "عرض مؤشر الكتابة للقنوات المكتومة.",
+        "indicatorMode": "كيف يُعرض المؤشر؟"
+    }
 }

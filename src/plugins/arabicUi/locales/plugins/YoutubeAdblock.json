@@ -1,4 +1,5 @@
 {
-  "name": "يوتيوبAdblock",
-  "description": "حظر إعلانات يوتيوب في التضمينات ونشاط المشاهدة معاً عبر AdGuard"
+    "name": "YoutubeAdblock",
+    "description": "حظر إعلانات يوتيوب في التضمينات ونشاط المشاهدة معاً عبر AdGuard",
+    "settings": {}
 }
