@@ -10,6 +10,7 @@ import { Card } from "@components/Card";
 import { Flex } from "@components/Flex";
 import { FolderIcon, PaintbrushIcon, PencilIcon, PlusIcon, RestartIcon } from "@components/Icons";
 import { Link } from "@components/Link";
+import { Margins } from "@components/margins";
 import { QuickAction, QuickActionCard } from "@components/settings/QuickAction";
 import { openPluginModal } from "@components/settings/tabs/plugins/PluginModal";
 import { UserThemeHeader } from "@main/themes";
@@ -87,12 +88,10 @@ export function LocalThemesTab() {
         <Flex flexDirection="column" gap="1em">
             <Card>
                 <Forms.FormTitle tag="h5">Find Themes:</Forms.FormTitle>
-                <div style={{ marginBottom: ".5em", display: "flex", flexDirection: "column" }}>
-                    <Link style={{ marginRight: ".5em" }} href="https://betterdiscord.app/themes">
-                        BetterDiscord Themes
-                    </Link>
-                    <Link href="https://github.com/search?q=discord+theme">GitHub</Link>
-                </div>
+                <Flex gap="0.4em" flexDirection="column" justifyContent="flex-start" className={Margins.bottom8}>
+                    <span>&ndash; <Link href="https://betterdiscord.app/themes">BetterDiscord theme list</Link></span>
+                    <span>&ndash; <Link href="https://github.com/search?q=discord+theme">GitHub</Link></span>
+                </Flex>
                 <Forms.FormText>If using the BD site, click on "Download" and place the downloaded .theme.css file into your themes folder.</Forms.FormText>
             </Card>
 
