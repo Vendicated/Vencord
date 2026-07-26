@@ -18,10 +18,11 @@
 
 import { ChatBarButton, ChatBarButtonFactory } from "@api/ChatButtons";
 import { TooltipContainer } from "@components/TooltipContainer";
+import { getCurrentChannel, getCurrentGuild } from "@utils/discord";
 import { classes } from "@utils/misc";
 import { IconComponent } from "@utils/types";
 import { RenderModalProps } from "@vencord/discord-types";
-import { ConfirmModal,openModal, useEffect, useState } from "@webpack/common";
+import { ConfirmModal, openModal, useEffect, useState } from "@webpack/common";
 
 import { settings } from "./settings";
 import { openTranslateModal } from "./TranslateModal";
@@ -63,7 +64,9 @@ function AutoTranslateConfirmModal(props: RenderModalProps) {
 }
 
 export const TranslateChatBarIcon: ChatBarButtonFactory = ({ isMainChat }) => {
-    const { autoTranslate } = settings.use(["autoTranslate"]);
+    const { autoTranslate: globalAutoTranslate } = settings.use(["autoTranslate"]);
+    const perServer = settings.use(["perServerAutoTranslate"]).perServerAutoTranslate;
+    const { perServerScope } = settings.use(["perServerScope"]);
 
     const [shouldShowTranslateEnabledTooltip, setter] = useState(false);
     useEffect(() => {
@@ -73,9 +76,26 @@ export const TranslateChatBarIcon: ChatBarButtonFactory = ({ isMainChat }) => {
 
     if (!isMainChat) return null;
 
+    const channelId = getCurrentChannel()?.id;
+    const guildId = getCurrentGuild()?.id;
+
+    const { perServerRecord } = settings.use(["perServerRecord"]);
+
+    const isScoped = perServer && (channelId || guildId);
+    const shouldTranslate = isScoped
+        ? perServerRecord[perServerScope === "server" && guildId ? guildId : channelId!] ?? globalAutoTranslate
+        : globalAutoTranslate;
+
     const toggle = () => {
-        const newState = !autoTranslate;
-        settings.store.autoTranslate = newState;
+        const newState = !shouldTranslate;
+
+        if (isScoped) {
+            const key = perServerScope === "server" && guildId ? guildId : channelId!;
+            settings.store.perServerRecord = { ...settings.store.perServerRecord, [key]: newState };
+        } else {
+            settings.store.autoTranslate = newState;
+        }
+
         if (newState && !settings.store.dismissedAutoTranslateAlert)
             openModal(props => <AutoTranslateConfirmModal {...props} />);
     };
@@ -85,14 +105,14 @@ export const TranslateChatBarIcon: ChatBarButtonFactory = ({ isMainChat }) => {
             tooltip="Open Translate Modal"
             onClick={e => {
                 if (e.shiftKey) return toggle();
-                else openTranslateModal();
+                else openTranslateModal(channelId, guildId);
             }}
             onContextMenu={toggle}
             buttonProps={{
                 "aria-haspopup": "dialog"
             }}
         >
-            <TranslateIcon className={cl({ "auto-translate": autoTranslate, "chat-button": true })} />
+            <TranslateIcon className={cl({ "auto-translate": shouldTranslate, "chat-button": true })} />
         </ChatBarButton>
     );
 
