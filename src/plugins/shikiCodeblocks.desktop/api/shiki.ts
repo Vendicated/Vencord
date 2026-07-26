@@ -16,12 +16,12 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { dispatchTheme } from "@plugins/shikiCodeblocks.desktop/hooks/useTheme";
+import type { ShikiSpec } from "@plugins/shikiCodeblocks.desktop/types";
 import { shikiOnigasmSrc, shikiWorkerSrc } from "@utils/dependencies";
 import { WorkerClient } from "@vap/core/ipc";
 import type { IShikiTheme, IThemedToken } from "@vap/shiki";
 
-import { dispatchTheme } from "../hooks/useTheme";
-import type { ShikiSpec } from "../types";
 import { getGrammar, languages, loadLanguages, resolveLang } from "./languages";
 import { themes } from "./themes";
 

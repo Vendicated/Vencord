@@ -4,11 +4,11 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { Decoration, deleteDecoration, getUserDecoration, getUserDecorations, NewDecoration, setUserDecoration } from "@plugins/decor/lib/api";
+import { decorationToAsset } from "@plugins/decor/lib/utils/decoration";
 import { proxyLazy } from "@utils/lazy";
 import { UserStore, zustandCreate } from "@webpack/common";
 
-import { Decoration, deleteDecoration, getUserDecoration, getUserDecorations, NewDecoration, setUserDecoration } from "../api";
-import { decorationToAsset } from "../utils/decoration";
 import { useUsersDecorationsStore } from "./UsersDecorationsStore";
 
 interface UserDecorationsState {
