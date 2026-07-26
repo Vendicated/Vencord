@@ -34,22 +34,18 @@ import { SpotifyStore, Track } from "./SpotifyStore";
 
 const cl = classNameFactory("vc-spotify-");
 
+const pad = (n: number) => n.toString().padStart(2, "0");
+
 function msToHuman(ms: number): string {
     const totalSeconds = Math.floor(ms / 1000);
     const hours = Math.floor(totalSeconds / 3600);
     const minutes = Math.floor((totalSeconds % 3600) / 60);
     const seconds = totalSeconds % 60;
 
-    let result = "";
-
-    if (hours > 0) {
-        result += `${hours.toString().padStart(2, "0")}:`;
-    }
-
-    result += `${minutes.toString().padStart(2, "0")}:`;
-    result += `${seconds.toString().padStart(2, "0")}`;
-
-    return result;
+    const result = `${pad(minutes)}:${pad(seconds)}`;
+    return hours > 0
+        ? `${pad(hours)}:${result}`
+        : result;
 }
 
 function Svg(path: string, label: string) {
