@@ -50,7 +50,7 @@ async function extract(data: Buffer, outDir: string) {
                 }
 
                 const pathElements = f.split("/");
-                const directories = pathElements.join("/");
+                const directories = pathElements.slice(-1).join("/");
 
                 const dir = ensureSafePath(outDir, directories);
                 if (!dir) throw new Error(`Path traversal detected: "${f}"`);
