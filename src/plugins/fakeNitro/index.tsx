@@ -74,6 +74,9 @@ const fakeNitroGifStickerRegex = /\/attachments\/\d+?\/\d+?\/(\d+?)\.gif/;
 const hyperLinkRegex = /\[.+?\]\((https?:\/\/.+?)\)/;
 const mediaSizes = [16, 32, 48, 56, 64, 96, 128, 160, 256, 512, 1024];
 
+const DEFAULT_EMOJI_SIZE = 48;
+const DEFAULT_STICKER_SIZE = 160;
+
 const settings = definePluginSettings({
     enableEmojiBypass: {
         description: "Allows sending fake emojis (also bypasses missing permission to use custom emojis)",
@@ -84,9 +87,9 @@ const settings = definePluginSettings({
     emojiSize: {
         description: "Size of the emojis when sending",
         type: OptionType.SELECT,
-        default: 48,
+        default: DEFAULT_EMOJI_SIZE,
         options: mediaSizes.map(size => ({
-            label: size.toString(),
+            label: `${size}px`,
             value: size
         }))
     },
@@ -105,9 +108,9 @@ const settings = definePluginSettings({
     stickerSize: {
         description: "Size of the stickers when sending",
         type: OptionType.SELECT,
-        default: 160,
+        default: DEFAULT_STICKER_SIZE,
         options: mediaSizes.map(size => ({
-            label: size.toString(),
+            label: `${size}px`,
             value: size
         }))
     },
@@ -754,7 +757,7 @@ export default definePlugin({
             .then(parseAPNG);
 
         const gif = GIFEncoder();
-        const resolution = settings.store.stickerSize ?? 160;
+        const resolution = settings.store.stickerSize ?? DEFAULT_STICKER_SIZE;
 
         const canvas = document.createElement("canvas");
         canvas.width = resolution;
@@ -894,7 +897,7 @@ export default definePlugin({
 
                     hasBypass = true;
 
-                    const emojiSize = s.emojiSize ?? 48;
+                    const emojiSize = s.emojiSize ?? DEFAULT_EMOJI_SIZE;
                     const emojiString = `<${emoji.animated ? "a" : ""}:${emoji.originalName || emoji.name}:${emoji.id}>`;
 
                     const url = new URL(IconUtils.getEmojiURL({ id: emoji.id, animated: emoji.animated, size: emojiSize }));
@@ -931,7 +934,7 @@ export default definePlugin({
 
                 hasBypass = true;
 
-                const emojiSize = s.emojiSize ?? 48;
+                const emojiSize = s.emojiSize ?? DEFAULT_EMOJI_SIZE;
 
                 const url = new URL(IconUtils.getEmojiURL({ id: emoji.id, animated: emoji.animated, size: emojiSize }));
                 url.searchParams.set("size", emojiSize.toString());
