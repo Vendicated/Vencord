@@ -27,11 +27,12 @@ import monacoHtml from "file://monacoWin.html?minify&base64";
 import { FSWatcher, mkdirSync, readFileSync, watch, writeFileSync } from "fs";
 import { open, readdir, readFile } from "fs/promises";
 import { release } from "os";
-import { join, normalize } from "path";
+import { join } from "path";
 
 import { registerCspIpcHandlers } from "./csp/manager";
 import { getThemeInfo, stripBOM, UserThemeHeader } from "./themes";
 import { ALLOWED_PROTOCOLS, QUICK_CSS_PATH, SETTINGS_DIR, THEMES_DIR } from "./utils/constants";
+import { ensureSafePath } from "./utils/ensureSafePath";
 import { makeLinksOpenExternally } from "./utils/externalLinks";
 
 const RENDERER_CSS_PATH = join(__dirname, IS_VESKTOP ? "vencordDesktopRenderer.css" : "renderer.css");
@@ -39,13 +40,6 @@ const RENDERER_CSS_PATH = join(__dirname, IS_VESKTOP ? "vencordDesktopRenderer.c
 mkdirSync(THEMES_DIR, { recursive: true });
 
 registerCspIpcHandlers();
-
-export function ensureSafePath(basePath: string, path: string) {
-    const normalizedBasePath = normalize(basePath + "/");
-    const newPath = join(basePath, path);
-    const normalizedPath = normalize(newPath);
-    return normalizedPath.startsWith(normalizedBasePath) ? normalizedPath : null;
-}
 
 function readCss() {
     return readFile(QUICK_CSS_PATH, "utf-8").catch(() => "");
@@ -86,7 +80,8 @@ ipcMain.handle(IpcEvents.OPEN_EXTERNAL, (_, url) => {
     if (!ALLOWED_PROTOCOLS.includes(protocol))
         throw "Disallowed protocol.";
 
-    shell.openExternal(url);
+    shell.openExternal(url)
+        .catch(err => console.error("[Vencord] Failed to open external link", url, err));
 });
 
 
@@ -112,7 +107,11 @@ ipcMain.handle(IpcEvents.GET_THEME_SYSTEM_VALUES, () => {
 ipcMain.handle(IpcEvents.OPEN_THEMES_FOLDER, () => shell.openPath(THEMES_DIR));
 ipcMain.handle(IpcEvents.OPEN_SETTINGS_FOLDER, () => shell.openPath(SETTINGS_DIR));
 
+let fsWatchers = [] as FSWatcher[];
+
 ipcMain.handle(IpcEvents.INIT_FILE_WATCHERS, ({ sender }) => {
+    fsWatchers.forEach(w => w.close());
+
     let quickCssWatcher: FSWatcher | undefined;
     let rendererCssWatcher: FSWatcher | undefined;
 
@@ -133,10 +132,13 @@ ipcMain.handle(IpcEvents.INIT_FILE_WATCHERS, ({ sender }) => {
         });
     }
 
+    fsWatchers = [quickCssWatcher, themesWatcher, rendererCssWatcher].filter(Boolean) as FSWatcher[];
+
     sender.once("destroyed", () => {
         quickCssWatcher?.close();
         themesWatcher.close();
         rendererCssWatcher?.close();
+        fsWatchers = [];
     });
 });
 
