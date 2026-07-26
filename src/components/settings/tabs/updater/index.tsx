@@ -17,11 +17,17 @@
 */
 
 import { useSettings } from "@api/Settings";
+import { Button } from "@components/Button";
+import { Card } from "@components/Card";
 import { Divider } from "@components/Divider";
+import { Flex } from "@components/Flex";
 import { FormSwitch } from "@components/FormSwitch";
+import { HeadingSecondary } from "@components/Heading";
 import { Link } from "@components/Link";
+import { Paragraph } from "@components/Paragraph";
 import { SettingsTab, wrapTab } from "@components/settings/tabs/BaseTab";
 import { Margins } from "@utils/margins";
+import { classes } from "@utils/misc";
 import { useAwaiter } from "@utils/react";
 import { getRepo, isNewer, UpdateLogger } from "@utils/updater";
 import { Forms, React } from "@webpack/common";
@@ -29,6 +35,34 @@ import { Forms, React } from "@webpack/common";
 import gitHash from "~git-hash";
 
 import { CommonProps, HashLink, Newer, Updatable } from "./Components";
+
+function VesktopSection() {
+    if (!IS_VESKTOP) return null;
+
+    const [isVesktopOutdated] = useAwaiter<boolean>(VesktopNative.app.isOutdated, { fallbackValue: false });
+
+    return (
+        <Flex className={Margins.bottom20} flexDirection="column" gap="1em">
+            <Card variant="info">
+                <HeadingSecondary>Vesktop & Vencord</HeadingSecondary>
+                <Paragraph>Vesktop and Vencord are two separate things. This updater is for Vencord.</Paragraph>
+                <Paragraph className={Margins.top8}>
+                    You receive separate popups for Vesktop updates. You can also manually update by installing the <Link href="https://vesktop.dev/install">latest version</Link>.
+                </Paragraph>
+            </Card>
+
+            {isVesktopOutdated && (
+                <Card variant="warning">
+                    <HeadingSecondary>Vesktop Outdated</HeadingSecondary>
+                    <Flex flexDirection="column" gap="0.5em">
+                        <Paragraph>Your version of Vesktop is outdated!</Paragraph>
+                        <Button variant="link" onClick={() => VesktopNative.app.openUpdater()}>Open Vesktop Updater</Button>
+                    </Flex>
+                </Card>
+            )}
+        </Flex>
+    );
+}
 
 function Updater() {
     const settings = useSettings(["autoUpdate", "autoUpdateNotification"]);
@@ -45,6 +79,8 @@ function Updater() {
 
     return (
         <SettingsTab>
+            <VesktopSection />
+
             <FormSwitch
                 title="Automatically update"
                 description="Automatically update Vencord without confirmation prompt"
@@ -59,7 +95,7 @@ function Updater() {
                 disabled={!settings.autoUpdate}
             />
 
-            <Forms.FormTitle tag="h5">Repo</Forms.FormTitle>
+            <Forms.FormTitle tag="h5" className={Margins.top20}>Repo</Forms.FormTitle>
 
             <Forms.FormText>
                 {repoPending
@@ -76,7 +112,7 @@ function Updater() {
                 (<HashLink hash={gitHash} repo={repo} disabled={repoPending} />)
             </Forms.FormText>
 
-            <Divider className={Margins.top8 + " " + Margins.bottom8} />
+            <Divider className={classes(Margins.top16, Margins.bottom16)} />
 
             <Forms.FormTitle tag="h5">Updates</Forms.FormTitle>
 

@@ -17,14 +17,13 @@
 */
 
 import type { MessageObject } from "@api/MessageEvents";
-import type { Channel, CloudUpload, Guild, GuildFeatures, Message, User } from "@vencord/discord-types";
-import { ChannelActionCreators, ChannelStore, ComponentDispatch, Constants, FluxDispatcher, GuildStore, i18n, InviteActions, MessageActions, RestAPI, SelectedChannelStore, SelectedGuildStore, Toasts, UserProfileActions, UserProfileStore, UserSettingsActionCreators, UserUtils } from "@webpack/common";
+import type { Channel, CloudUpload, Guild, GuildFeatures, MediaModalItem, MediaModalProps, Message, User } from "@vencord/discord-types";
+import { ChannelActionCreators, ChannelStore, ComponentDispatch, Constants, FluxDispatcher, GuildStore, i18n, InviteActions, MessageActions, openMediaModal, RestAPI, SelectedChannelStore, SelectedGuildStore, Toasts, UserProfileActions, UserProfileStore, UserSettingsActionCreators, UserUtils } from "@webpack/common";
 import { Except } from "type-fest";
 
 import { copyToClipboard } from "./clipboard";
 import { runtimeHashMessageKey } from "./intlHash";
 import { Logger } from "./Logger";
-import { MediaModalItem, MediaModalProps, openMediaModal } from "./modal";
 
 const IntlManagerLogger = new Logger("IntlManager");
 

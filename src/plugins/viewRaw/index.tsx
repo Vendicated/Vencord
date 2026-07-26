@@ -16,22 +16,24 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { NavContextMenuPatchCallback } from "@api/ContextMenu";
+import "./style.css";
+
+import { findGroupChildrenByChildId, NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { definePluginSettings } from "@api/Settings";
 import { CodeBlock } from "@components/CodeBlock";
-import { Divider } from "@components/Divider";
 import ErrorBoundary from "@components/ErrorBoundary";
-import { Flex } from "@components/Flex";
+import { HeadingSecondary } from "@components/Heading";
+import { Margins } from "@components/margins";
 import { Devs } from "@utils/constants";
 import { copyWithToast, getCurrentGuild, getIntlMessage } from "@utils/discord";
-import { Margins } from "@utils/margins";
-import { closeModal, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalRoot, ModalSize, openModal } from "@utils/modal";
+import { isTruthy } from "@utils/guards";
 import definePlugin, { IconComponent, OptionType } from "@utils/types";
 import { Message } from "@vencord/discord-types";
-import { Button, ChannelStore, Forms, GuildRoleStore, Menu, Text } from "@webpack/common";
+import { ChannelStore, GuildRoleStore, Menu, Modal, openModal, UserProfileStore } from "@webpack/common";
+import { MouseEventHandler } from "react";
 
 
-const CopyIcon: IconComponent = ({ height = 20, width = 20, className }) => {
+const CopyRawIcon: IconComponent = ({ height = 20, width = 20, className }) => {
     return (
         <svg
             viewBox="0 0 20 20"
@@ -71,40 +73,34 @@ function cleanMessage(msg: Message) {
 }
 
 function openViewRawModal(json: string, type: string, msgContent?: string) {
-    const key = openModal(props => (
+    openModal(props => (
         <ErrorBoundary>
-            <ModalRoot {...props} size={ModalSize.LARGE}>
-                <ModalHeader>
-                    <Text variant="heading-lg/semibold" style={{ flexGrow: 1 }}>View Raw</Text>
-                    <ModalCloseButton onClick={() => closeModal(key)} />
-                </ModalHeader>
-                <ModalContent>
-                    <div style={{ padding: "16px 0" }}>
-                        {!!msgContent && (
-                            <>
-                                <Forms.FormTitle tag="h5">Content</Forms.FormTitle>
-                                <CodeBlock content={msgContent} lang="" />
-                                <Divider className={Margins.bottom20} />
-                            </>
-                        )}
-
-                        <Forms.FormTitle tag="h5">{type} Data</Forms.FormTitle>
-                        <CodeBlock content={json} lang="json" />
-                    </div>
-                </ModalContent >
-                <ModalFooter>
-                    <Flex>
-                        <Button onClick={() => copyWithToast(json, `${type} data copied to clipboard!`)}>
-                            Copy {type} JSON
-                        </Button>
-                        {!!msgContent && (
-                            <Button onClick={() => copyWithToast(msgContent, "Content copied to clipboard!")}>
-                                Copy Raw Content
-                            </Button>
-                        )}
-                    </Flex>
-                </ModalFooter>
-            </ModalRoot >
+            <Modal
+                {...props}
+                title={`Raw ${type} Data`}
+                size="xl"
+                actions={[
+                    {
+                        text: `Copy ${type} Data`,
+                        variant: "secondary",
+                        onClick: () => copyWithToast(json, `${type} data copied to clipboard!`)
+                    },
+                    msgContent && {
+                        text: "Copy Raw Content",
+                        variant: "secondary",
+                        onClick: () => copyWithToast(msgContent, "Content copied to clipboard!")
+                    }
+                ].filter(isTruthy)}
+            >
+                {!!msgContent && (
+                    <>
+                        <HeadingSecondary>Message Content</HeadingSecondary>
+                        <CodeBlock className="vc-viewRaw-codeBlock" content={msgContent} lang="" />
+                        <HeadingSecondary className={Margins.top16}>Message Data</HeadingSecondary>
+                    </>
+                )}
+                <CodeBlock className="vc-viewRaw-codeBlock" content={json} lang="json" />
+            </Modal>
         </ErrorBoundary >
     ));
 }
@@ -124,32 +120,37 @@ const settings = definePluginSettings({
             { label: "Left Click to view the raw content.", value: "Left", default: true },
             { label: "Right click to view the raw content.", value: "Right" }
         ]
+    },
+    messageContextMenu: {
+        description: "Show in message context menu",
+        type: OptionType.BOOLEAN,
+        default: false
     }
 });
 
-function MakeContextCallback(name: "Guild" | "Role" | "User" | "Channel"): NavContextMenuPatchCallback {
+function MakeContextCallback(name: "Guild" | "Role" | "User" | "Channel" | "Message" | "Profile", getData?: (props: any) => any): NavContextMenuPatchCallback {
     return (children, props) => {
-        const value = props[name.toLowerCase()];
+        const value = getData ? getData(props) : props[name.toLowerCase()];
         if (!value) return;
         if (props.label === getIntlMessage("CHANNEL_ACTIONS_MENU_LABEL")) return; // random shit like notification settings
+        const isMessage = name === "Message";
+        if (isMessage && !settings.store.messageContextMenu) return;
 
-        const lastChild = children.at(-1);
-        if (lastChild?.key === "developer-actions") {
-            const p = lastChild.props;
-            if (!Array.isArray(p.children))
-                p.children = [p.children];
-
-            children = p.children;
-        }
 
         // typescript parser goes crazy if this is inline
         const id = `vc-view-${name.toLowerCase()}-raw`;
-        children.splice(-1, 0,
+        const action = isMessage
+            ? () => openViewRawModalMessage(value)
+            : () => openViewRawModal(JSON.stringify(value, null, 4), name);
+
+        const devContainer = findGroupChildrenByChildId(`devmode-copy-id-${value.id}`, children);
+
+        (devContainer ?? children).splice(-1, 0,
             <Menu.MenuItem
                 id={id}
                 label="View Raw"
-                action={() => openViewRawModal(JSON.stringify(value, null, 4), name)}
-                icon={CopyIcon}
+                action={action}
+                icon={CopyRawIcon}
             />
         );
     };
@@ -167,7 +168,7 @@ const devContextCallback: NavContextMenuPatchCallback = (children, { id }: { id:
             id={"vc-view-role-raw"}
             label="View Raw"
             action={() => openViewRawModal(JSON.stringify(role, null, 4), "Role")}
-            icon={CopyIcon}
+            icon={CopyRawIcon}
         />
     );
 };
@@ -175,6 +176,7 @@ const devContextCallback: NavContextMenuPatchCallback = (children, { id }: { id:
 export default definePlugin({
     name: "ViewRaw",
     description: "Copy and view the raw content/data of any message, channel or guild",
+    tags: ["Chat", "Developers"],
     authors: [Devs.KingFish, Devs.Ven, Devs.rad, Devs.ImLvna],
     settings,
 
@@ -185,11 +187,13 @@ export default definePlugin({
         "thread-context": MakeContextCallback("Channel"),
         "gdm-context": MakeContextCallback("Channel"),
         "user-context": MakeContextCallback("User"),
-        "dev-context": devContextCallback
+        "dev-context": devContextCallback,
+        "message": MakeContextCallback("Message"),
+        "user-profile-overflow-menu": MakeContextCallback("Profile", props => UserProfileStore.getGuildMemberProfile(props.user?.id, props.guildId) ?? UserProfileStore.getUserProfile(props.user?.id))
     },
 
     messagePopoverButton: {
-        icon: CopyIcon,
+        icon: CopyRawIcon,
         render(msg) {
             const handleClick = () => {
                 if (settings.store.clickMethod === "Right") {
@@ -199,7 +203,7 @@ export default definePlugin({
                 }
             };
 
-            const handleContextMenu = e => {
+            const handleContextMenu: MouseEventHandler<HTMLButtonElement> = e => {
                 if (settings.store.clickMethod === "Left") {
                     e.preventDefault();
                     e.stopPropagation();
@@ -217,7 +221,7 @@ export default definePlugin({
 
             return {
                 label,
-                icon: CopyIcon,
+                icon: CopyRawIcon,
                 message: msg,
                 channel: ChannelStore.getChannel(msg.channel_id),
                 onClick: handleClick,

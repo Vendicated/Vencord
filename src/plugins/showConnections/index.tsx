@@ -155,15 +155,17 @@ function CompactConnectionComponent({ connection, theme }: { connection: Connect
 export default definePlugin({
     name: "ShowConnections",
     description: "Show connected accounts in user popouts",
+    tags: ["Friends", "Appearance"],
     authors: [Devs.TheKodeToad],
     settings,
 
     patches: [
         {
-            find: ".hasAvatarForGuild(null==",
+            // Same find as ReviewDB
+            find: '"UserProfilePopout");',
             replacement: {
-                match: /currentUser:\i,guild:\i[^}]*?\}\)(?=])(?<=user:(\i),bio:null==(\i)\?.+?)/,
-                replace: "$&,$self.profilePopoutComponent({ user: $1, displayProfile: $2 })"
+                match: /userId:\i\.id,guild:\i\}\)(?=])/,
+                replace: "$&,$self.profilePopoutComponent(arguments[0])"
             }
         }
     ],

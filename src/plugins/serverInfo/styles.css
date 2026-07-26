@@ -1,13 +1,10 @@
-.vc-gp-root {
-    height: 100%;
-    user-select: text;
-}
-
 .vc-gp-banner {
     cursor: pointer;
     aspect-ratio: auto 240 / 135;
     height: 334px;
     width: 100%;
+    padding-inline: 0.5em;
+    box-sizing: border-box;
     object-fit: cover;
     overflow: clip;
     overflow-clip-margin: content-box;
@@ -88,14 +85,9 @@
 }
 
 .vc-gp-scroller {
-    width: 100%;
     max-height: 500px;
 }
 
-.vc-gp-scroller [class*="listRow"] {
+.vc-gp-scroller [class*="row"] {
     margin: 1px 0;
-}
-
-.vc-gp-scroller [class*="listRow"]:hover {
-    background-color: var(--background-mod-subtle);
 }

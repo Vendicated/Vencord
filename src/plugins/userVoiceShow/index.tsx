@@ -50,6 +50,7 @@ const settings = definePluginSettings({
 export default definePlugin({
     name: "UserVoiceShow",
     description: "Shows an indicator when a user is in a Voice Channel",
+    tags: ["Voice", "Appearance", "Friends"],
     authors: [Devs.Nuckyz, Devs.LordElias],
     dependencies: ["MemberListDecoratorsAPI", "MessageDecorationsAPI"],
     settings,
@@ -59,8 +60,8 @@ export default definePlugin({
         {
             find: "#{intl::USER_PROFILE_PRONOUNS}",
             replacement: {
-                match: /(\i).isVerifiedBot\(\)}\),/,
-                replace: "$&$self.VoiceChannelIndicator({userId:$1.id,isProfile:true}),"
+                match: /(?<=children:\[\i," ",\i)(?=\])/,
+                replace: ",$self.VoiceChannelIndicator({userId:arguments[0]?.user?.id,isProfile:true})"
             },
             predicate: () => settings.store.showInUserProfileModal
         },
@@ -87,7 +88,7 @@ export default definePlugin({
         {
             find: "null!=this.peopleListItemRef.current",
             replacement: {
-                match: /\.actions,children:\[(?<=isFocused:(\i).+?)/,
+                match: /\.isProvisional.{0,50}?className:\i\.\i,children:\[(?<=isFocused:(\i).+?)/,
                 replace: "$&$self.VoiceChannelIndicator({userId:this?.props?.user?.id,isActionButton:true,shouldHighlight:$1}),"
             },
             predicate: () => settings.store.showInMemberList

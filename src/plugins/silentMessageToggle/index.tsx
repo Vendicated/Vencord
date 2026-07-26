@@ -104,6 +104,7 @@ export default definePlugin({
     name: "SilentMessageToggle",
     authors: [Devs.Nuckyz, Devs.CatNoir],
     description: "Adds a button to the chat bar to toggle sending a silent message.",
+    tags: ["Chat", "Utility"],
     settings,
 
     chatBarButton: {

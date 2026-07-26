@@ -9,9 +9,8 @@ import { ReviewDBUser } from "@plugins/reviewDB/entities";
 import { fetchBlocks, unblockUser } from "@plugins/reviewDB/reviewDbApi";
 import { cl } from "@plugins/reviewDB/utils";
 import { Logger } from "@utils/Logger";
-import { ModalCloseButton, ModalContent, ModalHeader, ModalRoot, openModal } from "@utils/modal";
 import { useAwaiter } from "@utils/react";
-import { Forms, Tooltip, useState } from "@webpack/common";
+import { Forms, Modal,openModal, Tooltip, useState } from "@webpack/common";
 
 function UnblockButton(props: { onClick?(): void; }) {
     return (
@@ -55,7 +54,7 @@ function BlockedUser({ user, isBusy, setIsBusy }: { user: ReviewDBUser; isBusy: 
     );
 }
 
-function Modal() {
+function BlockedUsersList() {
     const [isBusy, setIsBusy] = useState(false);
     const [blocks, error, pending] = useAwaiter(fetchBlocks, {
         onError: e => new Logger("ReviewDB").error("Failed to fetch blocks", e),
@@ -85,14 +84,13 @@ function Modal() {
 
 export function openBlockModal() {
     openModal(modalProps => (
-        <ModalRoot {...modalProps}>
-            <ModalHeader className={cl("block-modal-header")}>
-                <Forms.FormTitle style={{ margin: 0 }}>Blocked Users</Forms.FormTitle>
-                <ModalCloseButton onClick={modalProps.onClose} />
-            </ModalHeader>
-            <ModalContent className={cl("block-modal")}>
-                {Auth.token ? <Modal /> : <Forms.FormText>You are not logged into ReviewDB!</Forms.FormText>}
-            </ModalContent>
-        </ModalRoot>
+        <Modal
+            {...modalProps}
+            title="Blocked Users"
+        >
+            <div className={cl("block-modal")}>
+                {Auth.token ? <BlockedUsersList /> : <Forms.FormText>You are not logged into ReviewDB!</Forms.FormText>}
+            </div>
+        </Modal>
     ));
 }

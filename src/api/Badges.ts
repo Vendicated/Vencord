@@ -26,6 +26,10 @@ export const enum BadgePosition {
 }
 
 export interface ProfileBadge {
+    /**
+     * Badge id, unused by vencord, required by discord
+     */
+    id: string,
     /** The tooltip to show on hover. Required for image badges */
     description?: string;
     /** Custom component for the badge (tooltip not included) */
@@ -36,7 +40,7 @@ export interface ProfileBadge {
     /** Action to perform when you click the badge */
     onClick?(event: React.MouseEvent, props: ProfileBadge & BadgeUserArgs): void;
     /** Action to perform when you right click the badge */
-    onContextMenu?(event: React.MouseEvent, props: BadgeUserArgs & BadgeUserArgs): void;
+    onContextMenu?(event: React.MouseEvent, props: ProfileBadge & BadgeUserArgs): void;
     /** Should the user display this badge? */
     shouldShow?(userInfo: BadgeUserArgs): boolean;
     /** Optional props (e.g. style) for the badge, ignored for component badges */

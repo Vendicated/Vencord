@@ -62,6 +62,7 @@ export const cl = classNameFactory("vc-membercount-");
 export default definePlugin({
     name: "MemberCount",
     description: "Shows the number of online members, total members, and users in voice channels on the server — in the member list and tooltip.",
+    tags: ["Servers", "Utility"],
     authors: [Devs.Ven, Devs.Commandtechno, Devs.Apexo],
     settings,
 
@@ -70,14 +71,14 @@ export default definePlugin({
             find: "{isSidebarVisible:",
             replacement: [
                 {
-                    match: /(?<=var\{className:(\i),.+?children):\[(\i\.useMemo[^}]+"aria-multiselectable")/,
-                    replace: ":[$1?.includes('members')?$self.render():null,$2",
+                    match: /children:\[(\i\.useMemo[^}]+"aria-multiselectable")(?<=className:(\i),.+?)/,
+                    replace: "children:[$2?.includes('members')?$self.render():null,$1",
                 },
             ],
             predicate: () => settings.store.memberList
         },
         {
-            find: ".invitesDisabledTooltip",
+            find: "GuildTooltip - ",
             replacement: {
                 match: /#{intl::VIEW_AS_ROLES_MENTIONS_WARNING}.{0,100}(?=])/,
                 replace: "$&,$self.renderTooltip(arguments[0].guild)"

@@ -16,9 +16,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { cl } from "@plugins/shikiCodeblocks.desktop/utils/misc";
+import { cl, hljs } from "@plugins/shikiCodeblocks.desktop/utils/misc";
 import type { IThemedToken } from "@vap/shiki";
-import { hljs } from "@webpack/common";
 import { JSX } from "react";
 
 import { ThemeBase } from "./Highlighter";
