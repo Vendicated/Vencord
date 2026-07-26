@@ -18,10 +18,8 @@ export function MemberCount({ isTooltip, tooltipGuildId }: { isTooltip?: true; t
     const includeVoice = voiceActivity && !isTooltip;
 
     const currentChannel = useStateFromStores(
-        [SelectedChannelStore],
-        () => isTooltip ? undefined : getCurrentChannel(),
-        [],
-        (a, b) => a?.id === b?.id
+        [SelectedChannelStore], () => isTooltip ? undefined : getCurrentChannel(),
+        [], (a, b) => a?.id === b?.id
     );
 
     const guildId = tooltipGuildId ?? currentChannel?.guild_id;
@@ -112,7 +110,7 @@ export function MemberCount({ isTooltip, tooltipGuildId }: { isTooltip?: true; t
                 {props => (
                     <div {...props} className={cl("container")}>
                         <CircleIcon className={cl("online-count")} />
-                        <span className={cl("online-count")}>{formattedOnlineCount}</span>
+                        <span className={cl("online")}>{formattedOnlineCount}</span>
                     </div>
                 )}
             </Tooltip>
