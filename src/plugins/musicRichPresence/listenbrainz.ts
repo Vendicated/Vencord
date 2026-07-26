@@ -6,27 +6,59 @@
 
 import { VENCORD_USER_AGENT } from "@shared/vencordUserAgent";
 import { Logger } from "@utils/Logger";
+import { TTLMap } from "@utils/TTLMap";
 
-import { ScrobblerBackend, TrackData } from ".";
+import { ScrobblerBackend, settings, TrackData } from ".";
 
 const logger = new Logger("AudioScrobblerRichPresence/ListenBrainz");
 
-const url = (path: string) => `https://listenbrainz.org${path}`;
+// 15 minutes
+const coverArtCache = new TTLMap<string, string>(15 * 60 * 1000);
+const metadataCache = new TTLMap<string, Partial<TrackData> | null>(15 * 60 * 1000);
 
-async function fetchCoverArt(releaseGroupMBID: string) {
+const isCustomInstance = () => settings.store.scrobblerBackend === "listenbrainz-compatible";
+const url = (path: string) => `${isCustomInstance() ? settings.store.instanceBaseURL : "https://listenbrainz.org"}${path}`;
+const apiUrl = (path: string) => `${isCustomInstance() ? settings.store.instanceAPIBaseUrl : "https://api.listenbrainz.org"}${path}`;
+
+export function invalidateListenBrainzCache() {
+    coverArtCache.clear();
+    metadataCache.clear();
+}
+
+const YoutubeVideoURLRegex = /^((?:https?:)?\/\/)?((?:www|m)\.)?((?:youtube(?:-nocookie)?\.com|youtu.be))(\/(?:[\w-]+\?v=|embed\/|live\/|v\/)?)([\w-]+)(\S+)?$/;
+
+function fallbackToYoutubeThumbnail(originUrl: string | undefined): string | undefined {
+    if (!originUrl) return undefined;
+
+    const match = originUrl.match(YoutubeVideoURLRegex);
+    return match ? `https://i.ytimg.com/vi/${match[5]}/maxresdefault.jpg` : undefined;
+}
+
+async function fetchCoverArt(releaseGroupMBID: string, originUrl?: string): Promise<string | undefined> {
+    if (!releaseGroupMBID) return fallbackToYoutubeThumbnail(originUrl);
+
+    if (coverArtCache.has(releaseGroupMBID)) {
+        return coverArtCache.get(releaseGroupMBID);
+    }
+
     const res = await fetch(`https://coverartarchive.org/release-group/${releaseGroupMBID}`);
-    if (!res.ok) return null;
-    return res.json().then(json => json.images[0].thumbnails.large);
+    if (!res.ok) return fallbackToYoutubeThumbnail(originUrl);
+
+    const url = await res.json()
+        .then(json => json.images[0].thumbnails.large ?? fallbackToYoutubeThumbnail(originUrl));
+    coverArtCache.set(releaseGroupMBID, url);
+
+    return url;
 }
 
 async function getUrls(additionalInfo: Record<string, string> | undefined, trackName: string, artistName: string, releaseName: string): Promise<Partial<TrackData>> {
     // Well tagged music will have MBIDs which we can use directly. These are optional but highly recommended in ListenBrainz scrobbles.
     // If your music doesn't have these, it's highly recommended to use https://picard.musicbrainz.org/ to automatically add them
     if (additionalInfo?.recording_mbid) {
-        const { release_group_mbid, release_mbid, recording_mbid, artist_mbids } = additionalInfo;
+        const { release_group_mbid, release_mbid, recording_mbid, artist_mbids, origin_url } = additionalInfo;
 
         return {
-            imageURL: release_group_mbid ? await fetchCoverArt(release_group_mbid) : undefined,
+            imageURL: await fetchCoverArt(release_group_mbid, origin_url),
             trackURL: recording_mbid ? url(`/track/${recording_mbid}`) : undefined,
             albumURL: release_group_mbid
                 ? url(`/release-group/${release_group_mbid}`)
@@ -39,8 +71,14 @@ async function getUrls(additionalInfo: Record<string, string> | undefined, track
 
     // If no MBIDs are present, try to search for the track on MusicBrainz
 
-    // this needs to be encoded separately—URLSearchParams encodes spaces as "+"
-    const query = encodeURIComponent(`artist:"${artistName}" AND recording:"${trackName}" AND album:${releaseName}`);
+    let rawQuery = `artist:"${artistName}" AND recording:"${trackName}"`;
+    if (releaseName)
+        rawQuery += ` AND album:"${releaseName}"`;
+    const query = encodeURIComponent(rawQuery);
+
+    if (metadataCache.has(query)) {
+        return metadataCache.get(query) ?? {};
+    }
 
     const params = new URLSearchParams({
         fmt: "json",
@@ -54,27 +92,32 @@ async function getUrls(additionalInfo: Record<string, string> | undefined, track
         .then(json => json.recordings?.[0]);
 
     if (!metadata) {
-        return {};
+        const data = additionalInfo?.origin_url ? { imageURL: fallbackToYoutubeThumbnail(additionalInfo.origin_url) } : {};
+        metadataCache.set(query, data);
+        return data;
     }
 
     const artist = metadata["artist-credit"]?.[0]?.artist;
     const release = metadata.releases?.[0];
 
-    return {
-        imageURL: release?.["release-group"] ? await fetchCoverArt(release["release-group"].id) : undefined,
+    const data: Partial<TrackData> = {
+        imageURL: await fetchCoverArt(release?.["release-group"]?.id, additionalInfo?.origin_url),
         trackURL: url(`/track/${metadata.id}/`),
         albumURL: release?.id ? url(`/release/${release.id}/`) : release?.["release-group"]?.id ? url(`/release-group/${release["release-group"].id}/`) : undefined,
         artistURL: artist?.id ? url(`/artist/${artist.id}/`) : undefined,
     };
+    metadataCache.set(query, data);
+
+    return data;
 }
 
 export const ListenBrainzScrobbler: ScrobblerBackend = {
     name: "ListenBrainz",
     id: "listenbrainz",
 
-    async fetchTrackData(username: string, _apiKey?: string): Promise<TrackData | null> {
+    async fetchTrackData(): Promise<TrackData | null> {
         try {
-            const res = await fetch(`https://api.listenbrainz.org/1/user/${username}/playing-now`);
+            const res = await fetch(apiUrl(`/1/user/${settings.store.username}/playing-now`));
             if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
 
             const data = await res.json().then(json => json.payload?.listens[0]);

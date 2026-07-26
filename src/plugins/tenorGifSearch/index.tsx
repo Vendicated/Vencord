@@ -170,6 +170,21 @@ export default definePlugin({
                 match: /(?<=search\((\i),(\i)\)\{)null==\i\.getResults\(\1,\2\)&&/,
                 replace: "return $self.tenorIntegrationSearch($1,$2);null==void 0&&"
             }
+        },
+        // Add back tenor command
+        {
+            find: 'commandId:"-16"',
+            replacement: {
+                match: /commandId:"-16"}/,
+                replace: '$&,TENOR:{type:"GIF",command:"tenor",title:"Tenor",commandId:"-9"}'
+            }
+        },
+        {
+            find: "#{intl::COMMAND_GIPHY_DESCRIPTION}",
+            replacement: {
+                match: /(\i)===\i\.\i\.GIF\.title/,
+                replace: '$&||$1==="Tenor"'
+            }
         }
     ],
 
