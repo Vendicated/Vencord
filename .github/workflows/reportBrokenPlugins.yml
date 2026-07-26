@@ -14,9 +14,14 @@ on:
                 type: string
                 description: "Webhook URL that the report will be posted to. This will be visible for everyone, so DO NOT pass sensitive webhooks like discord webhook. This is meant to be used by Venbot."
                 required: false
-    # schedule:
-    #   # Every day at midnight
-    #   - cron: 0 0 * * *
+            repository:
+                type: string
+                description: Repository to test patches on
+                required: false
+            ref:
+                type: string
+                description: "Git reference to test patches on. This can be a branch, tag, or commit SHA."
+                required: false
 
 jobs:
     TestPlugins:
@@ -31,6 +36,9 @@ jobs:
 
             - uses: actions/checkout@v7
               if: ${{ github.event_name == 'workflow_dispatch' }}
+              with:
+                  ref: ${{ inputs.ref || github.ref }}
+                  repository: ${{ inputs.repository || github.repository }}
 
             - uses: pnpm/action-setup@v6 # Install pnpm using packageManager key in package.json
 
