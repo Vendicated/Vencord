@@ -91,5 +91,9 @@ export async function installExt(id: string) {
             .catch(err => console.error(`Failed to extract extension ${id}`, err));
     }
 
-    session.defaultSession.loadExtension(extDir);
+    if (session.defaultSession.extensions) {
+        session.defaultSession.extensions.loadExtension(id);
+    } else {
+        session.defaultSession.loadExtension(extDir);
+    }
 }
