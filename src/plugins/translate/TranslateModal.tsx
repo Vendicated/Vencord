@@ -23,7 +23,7 @@ import { RenderModalProps } from "@vencord/discord-types";
 import { Forms, Modal, openModal, SearchableSelect, useMemo } from "@webpack/common";
 
 import { settings } from "./settings";
-import { getLanguages } from "./utils";
+import { getLanguages, getScopeKey } from "./utils";
 
 const LanguageSettingKeys = ["receivedInput", "receivedOutput", "sentInput", "sentOutput"] as const;
 
@@ -59,17 +59,16 @@ function LanguageSelect({ settingsKey, includeAuto }: { settingsKey: typeof Lang
 }
 
 function AutoTranslateToggle({ channelId, guildId }: { channelId?: string; guildId?: string; }) {
-    const globalAutoTranslate = settings.use(["autoTranslate"]).autoTranslate;
-    const perServer = settings.use(["perServerAutoTranslate"]).perServerAutoTranslate;
-    const { perServerScope } = settings.use(["perServerScope"]);
-    const { perServerRecord } = settings.use(["perServerRecord"]);
+    const { autoTranslate: globalAutoTranslate, perServerAutoTranslate: perServer, perServerScope, perServerRecord } = settings.use([
+        "autoTranslate", "perServerAutoTranslate", "perServerScope", "perServerRecord"
+    ]);
 
     const isScoped = perServer && (channelId || guildId);
     const value = isScoped
-        ? perServerRecord[perServerScope === "server" && guildId ? guildId : channelId!] ?? globalAutoTranslate
+        ? perServerRecord[getScopeKey(channelId, guildId)] ?? globalAutoTranslate
         : globalAutoTranslate;
 
-    const appendedText = isScoped ? ` (on this ${perServerScope === "server" ? (guildId ? "Server" : "Channel") : "Channel"})` : "";
+    const appendedText = isScoped ? ` (in this ${perServerScope === "server" ? (guildId ? "Server" : "Channel") : "Channel"})` : "";
 
     return (
         <FormSwitch
@@ -78,7 +77,7 @@ function AutoTranslateToggle({ channelId, guildId }: { channelId?: string; guild
             value={value}
             onChange={v => {
                 if (isScoped) {
-                    const key = perServerScope === "server" && guildId ? guildId : channelId!;
+                    const key = getScopeKey(channelId, guildId);
                     settings.store.perServerRecord = { ...settings.store.perServerRecord, [key]: v };
                 } else {
                     settings.store.autoTranslate = v;

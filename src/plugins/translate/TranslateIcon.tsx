@@ -26,7 +26,7 @@ import { ConfirmModal, openModal, useEffect, useState } from "@webpack/common";
 
 import { settings } from "./settings";
 import { openTranslateModal } from "./TranslateModal";
-import { cl } from "./utils";
+import { cl, getScopeKey } from "./utils";
 
 export const TranslateIcon: IconComponent = ({ height = 20, width = 20, className }) => {
     return (
@@ -65,7 +65,7 @@ function AutoTranslateConfirmModal(props: RenderModalProps) {
 
 export const TranslateChatBarIcon: ChatBarButtonFactory = ({ isMainChat }) => {
     const { autoTranslate: globalAutoTranslate } = settings.use(["autoTranslate"]);
-    const perServer = settings.use(["perServerAutoTranslate"]).perServerAutoTranslate;
+    const { perServerAutoTranslate } = settings.use(["perServerAutoTranslate"]);
     const { perServerScope } = settings.use(["perServerScope"]);
 
     const [shouldShowTranslateEnabledTooltip, setter] = useState(false);
@@ -81,16 +81,16 @@ export const TranslateChatBarIcon: ChatBarButtonFactory = ({ isMainChat }) => {
 
     const { perServerRecord } = settings.use(["perServerRecord"]);
 
-    const isScoped = perServer && (channelId || guildId);
+    const isScoped = perServerAutoTranslate && (channelId || guildId);
     const shouldTranslate = isScoped
-        ? perServerRecord[perServerScope === "server" && guildId ? guildId : channelId!] ?? globalAutoTranslate
+        ? perServerRecord[getScopeKey(channelId, guildId)] ?? globalAutoTranslate
         : globalAutoTranslate;
 
     const toggle = () => {
         const newState = !shouldTranslate;
 
         if (isScoped) {
-            const key = perServerScope === "server" && guildId ? guildId : channelId!;
+            const key = getScopeKey(channelId, guildId);
             settings.store.perServerRecord = { ...settings.store.perServerRecord, [key]: newState };
         } else {
             settings.store.autoTranslate = newState;
