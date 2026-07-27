@@ -9,4 +9,5 @@
 .vc-settings-modal-links {
     display: flex;
     gap: 0.2em;
+    margin-left: auto;
 }

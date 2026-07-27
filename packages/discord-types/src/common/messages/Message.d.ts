@@ -2,60 +2,135 @@ import { CommandOption } from './Commands';
 import { User, UserJSON } from '../User';
 import { Embed, EmbedJSON } from './Embed';
 import { DiscordRecord } from "../Record";
-import { ApplicationIntegrationType, MessageFlags, MessageType, StickerFormatType } from "../../../enums";
+import { ApplicationCommandOptionType, ApplicationCommandType, ApplicationIntegrationType, ButtonStyle, ComponentType, InteractionType, MessageActivityType, MessageFlags, MessageReferenceType, MessageType, PollLayoutType, StickerFormatType } from "../../../enums";
+
+export type MessageState = "SENT" | "SENDING" | "SEND_FAILED";
+
+export type CodedLinkType =
+    | "INVITE"
+    | "TEMPLATE"
+    | "BUILD_OVERRIDE"
+    | "MANUAL_BUILD_OVERRIDE"
+    | "EXPERIMENT"
+    | "EVENT"
+    | "CHANNEL_LINK"
+    | "APP_DIRECTORY_PROFILE"
+    | "APP_DIRECTORY_STOREFRONT"
+    | "APP_DIRECTORY_STOREFRONT_SKU"
+    | "APP_OAUTH2_LINK"
+    | "ACTIVITY_BOOKMARK"
+    | "EMBEDDED_ACTIVITY_INVITE"
+    | "GUILD_PRODUCT"
+    | "SERVER_SHOP"
+    | "SOCIAL_LAYER_STOREFRONT"
+    | "QUESTS_EMBED"
+    | "COLLECTIBLES_SHOP";
+
+export interface MessageActivity {
+    type: MessageActivityType;
+    party_id?: string;
+}
+
+export interface PollMedia {
+    text?: string;
+    emoji?: ReactionEmoji;
+}
+
+export interface PollAnswer {
+    answer_id: number;
+    poll_media: PollMedia;
+}
+
+export interface Poll {
+    question: PollMedia;
+    answers: PollAnswer[];
+    expiry: string;
+    allow_multiselect: boolean;
+    layout_type: PollLayoutType;
+}
+
+export interface RoleSubscriptionData {
+    role_subscription_listing_id: string;
+    tier_name: string;
+    total_months_subscribed: number;
+    is_renewal: boolean;
+}
+
+export interface MessageComponent {
+    type: ComponentType;
+    id?: string;
+    custom_id?: string;
+    disabled?: boolean;
+    style?: ButtonStyle;
+    label?: string;
+    emoji?: ReactionEmoji;
+    url?: string;
+    options?: { label: string; value: string; description?: string; emoji?: ReactionEmoji; default?: boolean; }[];
+    placeholder?: string;
+    min_values?: number;
+    max_values?: number;
+    components?: MessageComponent[];
+}
 
 /*
  * TODO: looks like discord has moved over to Date instead of Moment;
  */
 export class Message extends DiscordRecord {
     constructor(message: object);
-    activity: unknown;
-    application: unknown;
-    applicationId: string | unknown;
+    activity: MessageActivity | null;
+    activityInstance: { applicationId: string; instanceId: string; } | null;
+    application: { id: string; name: string; icon: string | null; } | null;
+    applicationId: string | null;
     attachments: MessageAttachment[];
     author: User;
     blocked: boolean;
     bot: boolean;
     call: {
-        duration: moment.Duration;
-        endedTimestamp: moment.Moment;
+        duration: number | null;
+        endedTimestamp: Date | null;
         participants: string[];
-    };
+    } | null;
+    changelogId: string | null;
     channel_id: string;
     /**
      * NOTE: not fully typed
      */
     codedLinks: {
         code?: string;
-        type: string;
+        type: CodedLinkType;
     }[];
-    colorString: unknown;
-    components: unknown[];
+    colorString: string | null;
+    components: MessageComponent[];
     content: string;
-    customRenderedContent: unknown;
-    editedTimestamp: Date;
+    customRenderedContent: {
+        content: React.ReactNode;
+        [key: string]: unknown;
+    } | null;
+    editedTimestamp: Date | null;
     embeds: Embed[];
     flags: MessageFlags;
     giftCodes: string[];
+    giftInfo: { sku_id: string; slug: string; } | null;
+    giftingPrompt: { recipientUserId: string; } | null;
     id: string;
     interaction: {
         id: string;
         name: string;
-        type: number;
+        type: InteractionType;
         user: User;
-    }[] | undefined;
+    }[] | null;
     interactionData: {
         application_command: {
             application_id: string;
-            default_member_permissions: unknown;
+            default_member_permissions: string | null;
             default_permission: boolean;
             description: string;
-            dm_permission: unknown;
+            dm_permission: boolean | null;
             id: string;
             name: string;
             options: CommandOption[];
-            permissions: unknown[];
-            type: number;
+            permissions: string[];
+            type: ApplicationCommandType;
             version: string;
         };
         attachments: MessageAttachment[];
@@ -63,19 +138,19 @@ export class Message extends DiscordRecord {
         id: string;
         name: string;
         options: {
-            focused: unknown;
+            focused: boolean | undefined;
             name: string;
-            type: number;
+            type: ApplicationCommandOptionType;
             value: string;
         }[];
-        type: number;
+        type: InteractionType;
         version: string;
-    }[];
-    interactionMetadata?: {
+    }[] | null;
+    interactionMetadata: {
         id: string;
-        type: number;
+        type: InteractionType;
         name?: string;
-        command_type?: number;
+        command_type?: ApplicationCommandType;
         ephemerality_reason?: number;
         user: User;
         authorizing_integration_owners: Record<ApplicationIntegrationType, string>;
@@ -83,16 +158,20 @@ export class Message extends DiscordRecord {
         interacted_message_id?: string;
         target_user?: User;
         target_message_id?: string;
-    };
-    interactionError: unknown[];
+    } | null;
+    interactionError: string[] | null;
+    ignored: boolean;
     isSearchHit: boolean;
-    loggingName: unknown;
+    isUnsupported: boolean;
+    loggingName: string | null;
     mentionChannels: string[];
     mentionEveryone: boolean;
+    mentionGames: { id: string; name: string; }[];
     mentionRoles: string[];
     mentioned: boolean;
     mentions: string[];
     messageReference: {
+        type?: MessageReferenceType;
         guild_id?: string;
         channel_id: string;
         message_id: string;
@@ -100,18 +179,26 @@ export class Message extends DiscordRecord {
     messageSnapshots: {
         message: Message;
     }[];
-    nick: unknown; // probably a string
+    nick: string | null;
     nonce: string | undefined;
     pinned: boolean;
+    poll: Poll | null;
+    potions: { id: string; expiresAt: string; }[];
+    premiumGroupInviteId: string | null;
+    purchaseNotification: { type: number; guild_product_purchase?: { product_name: string; }; } | null;
     reactions: MessageReaction[];
-    state: string;
+    referralTrialOfferId: string | null;
+    roleSubscriptionData: RoleSubscriptionData | null;
+    sharedClientTheme: { primary_color: number; secondary_color: number; } | null;
+    soundboardSounds: { sound_id: string; volume: number; emoji_id?: string; emoji_name?: string; }[];
+    state: MessageState;
     stickerItems: {
         format_type: StickerFormatType;
         id: string;
         name: string;
     }[];
-    stickers: unknown[];
-    timestamp: moment.Moment;
+    stickers: { id: string; name: string; format_type: StickerFormatType; }[];
+    timestamp: Date;
     tts: boolean;
     type: MessageType;
     webhookId: string | undefined;
@@ -134,10 +221,18 @@ export class Message extends DiscordRecord {
     removeReaction(emoji: ReactionEmoji, fromCurrentUser: boolean): Message;
 
     getChannelId(): string;
+    getContentMessage(): Message;
     hasFlag(flag: MessageFlags): boolean;
+    hasPotions(): boolean;
     isCommandType(): boolean;
     isEdited(): boolean;
+    isFirstMessageInForumPost(channel: unknown): boolean;
+    isInteractionPlaceholder(): boolean;
+    isPoll(): boolean;
     isSystemDM(): boolean;
+    canDeleteOwnMessage(userId: string): boolean;
+    userHasReactedWithEmoji(emoji: ReactionEmoji, burst?: boolean): boolean;
+    addReactionBatch(reactions: { emoji: ReactionEmoji; users: string[]; }[], burstReactions: { emoji: ReactionEmoji; users: string[]; }[]): Message;
 
     /** Vencord added */
     deleted?: boolean;
@@ -148,14 +243,14 @@ export interface MessageJSON {
     attachments: MessageAttachment[];
     author: UserJSON;
     channel_id: string;
-    components: unknown[];
+    components: MessageComponent[];
     content: string;
     edited_timestamp: string;
     embeds: EmbedJSON[];
-    flags: number;
+    flags: MessageFlags;
     guild_id: string | undefined;
     id: string;
-    loggingName: unknown;
+    loggingName: string | null;
     member: {
         avatar: string | undefined;
         communication_disabled_until: string | undefined;
@@ -180,10 +275,10 @@ export interface MessageJSON {
     nonce: string | undefined;
     pinned: boolean;
     referenced_message: MessageJSON | undefined;
-    state: string;
+    state: MessageState;
     timestamp: string;
     tts: boolean;
-    type: number;
+    type: MessageType;
 }
 
 export interface MessageAttachment {

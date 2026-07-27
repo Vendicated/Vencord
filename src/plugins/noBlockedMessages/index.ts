@@ -50,6 +50,7 @@ export default definePlugin({
     name: "NoBlockedMessages",
     description: "Hides all blocked/ignored messages from chat completely",
     authors: [Devs.rushii, Devs.Samu, Devs.jamesbt365],
+    tags: ["Accessibility", "Chat"],
     settings,
 
     patches: [
@@ -57,24 +58,31 @@ export default definePlugin({
             find: ".__invalid_blocked,",
             replacement: [
                 {
-                    match: /let{expanded:\i,[^}]*?collapsedReason[^}]*}/,
+                    match: /let{messages:\i,[^}]*?collapsedReason[^}]*}/,
                     replace: "if($self.shouldHide(arguments[0]))return null;$&"
                 }
             ]
         },
-        ...[
-            '"MessageStore"',
-            '"ReadStateStore"'
-        ].map(find => ({
-            find,
+        {
+            find: '"MessageStore"',
             predicate: () => settings.store.ignoreMessages,
             replacement: [
                 {
-                    match: /(?<=function (\i)\((\i)\){)(?=.*MESSAGE_CREATE:\1)/,
-                    replace: (_, _funcName, props) => `if($self.shouldIgnoreMessage(${props}.message))return;`
+                    match: /(?<=MESSAGE_CREATE:function\((\i)\){)/,
+                    replace: (_, props) => `if($self.shouldIgnoreMessage(${props}.message))return;`
                 }
             ]
-        }))
+        },
+        {
+            find: '"ReadStateStore"',
+            predicate: () => settings.store.ignoreMessages,
+            replacement: [
+                {
+                    match: /(?<=MESSAGE_CREATE:function\((\i)\){)/,
+                    replace: (_, props) => `if($self.shouldIgnoreMessage(${props}.message))return;`
+                }
+            ]
+        }
     ],
 
     shouldIgnoreMessage(message: Message) {

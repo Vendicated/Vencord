@@ -37,8 +37,9 @@ const settings = definePluginSettings({
 
 export default definePlugin({
     name: "ShowHiddenThings",
-    tags: ["ShowTimeouts", "ShowInvitesPaused", "ShowModView", "DisableDiscoveryFilters"],
+    searchTerms: ["ShowTimeouts", "ShowInvitesPaused", "ShowModView", "DisableDiscoveryFilters"],
     description: "Displays various hidden & moderator-only things regardless of permissions.",
+    tags: ["Servers", "Utility"],
     authors: [Devs.Dolfies],
     settings,
 
@@ -52,7 +53,7 @@ export default definePlugin({
             },
         },
         {
-            find: "INVITES_DISABLED))||",
+            find: "INVITES_DISABLED)||",
             predicate: () => settings.store.showInvitesPaused,
             replacement: {
                 match: /\i\.\i\.can\(\i\.\i.MANAGE_GUILD,\i\)/,

@@ -15,7 +15,7 @@
     position: absolute;
     z-index: 2147483647;
     right: 1rem;
-    width: 25vw;
+    width: min(25vw, 400px);
     min-height: 10vh;
 }
 
@@ -89,12 +89,6 @@
     margin-bottom: 40px;
 }
 
-.vc-notification-log-container {
-    padding: 1em;
-    max-height: min(750px, 75vh);
-    width: 100%;
-}
-
 .vc-notification-log-wrapper {
     height: 120px;
     width: 100%;
@@ -136,6 +130,6 @@
 }
 
 .vc-notification-log-danger-btn {
-    color: var(--white-500);
-    background-color: var(--redesign-button-danger-background);
+    color: var(--control-critical-primary-text-default);
+    background-color: var(--control-critical-primary-background-default);
 }
