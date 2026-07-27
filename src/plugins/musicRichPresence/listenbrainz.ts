@@ -74,7 +74,7 @@ async function getUrls(additionalInfo: Record<string, string> | undefined, track
     let rawQuery = `artist:"${artistName}" AND recording:"${trackName}"`;
     if (releaseName)
         rawQuery += ` AND album:"${releaseName}"`;
-    const query = encodeURIComponent(rawQuery);
+    const query = encodeURIComponent(rawQuery).replace(/[\\!\\(\\)\\*\-\\~]/g, c => `\\${c}`,);
 
     if (metadataCache.has(query)) {
         return metadataCache.get(query) ?? {};
@@ -98,11 +98,14 @@ async function getUrls(additionalInfo: Record<string, string> | undefined, track
     }
 
     const artist = metadata["artist-credit"]?.[0]?.artist;
-    const release = metadata.releases?.[0];
+    const release = metadata.releases.find((release: { title: string; }) => release.title === releaseName) || metadata.releases?.[0];
 
     const data: Partial<TrackData> = {
         imageURL: await fetchCoverArt(release?.["release-group"]?.id, additionalInfo?.origin_url),
         trackURL: url(`/track/${metadata.id}/`),
+        // If no album is provided by the scrobbler, but one is found in MusicBrainz and used as the cover art, return the
+        // one found as albumName
+        album: release?.title,
         albumURL: release?.id ? url(`/release/${release.id}/`) : release?.["release-group"]?.id ? url(`/release-group/${release["release-group"].id}/`) : undefined,
         artistURL: artist?.id ? url(`/artist/${artist.id}/`) : undefined,
     };
@@ -125,13 +128,14 @@ export const ListenBrainzScrobbler: ScrobblerBackend = {
                 return null;
 
             const { track_name, artist_name, release_name, additional_info } = data.track_metadata;
+            const fetchedMetadata = await getUrls(additional_info, track_name, artist_name, release_name);
 
             const trackData = {
                 name: track_name || "Unknown",
                 artist: artist_name,
-                album: release_name || "Unknown",
                 serviceName: additional_info?.music_service_name || additional_info?.submission_client,
-                ...await getUrls(additional_info, track_name, artist_name, release_name)
+                ...fetchedMetadata,
+                album: release_name || fetchedMetadata.album || "Unknown",
             } as TrackData;
 
             return trackData;
