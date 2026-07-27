@@ -4,11 +4,11 @@ import definePlugin, { OptionType } from "@utils/types";
 import { ChannelRouter, FluxDispatcher } from "@webpack/common";
 
 const settings = definePluginSettings({
-    onlyWhenOutOfFocus: {
+    onlyWhenUnfocused: {
         type: OptionType.BOOLEAN,
         default: true,
         description:
-            "Only automatically jump to messages when Discord's window is out of focus.",
+            "Only automatically jump to messages when Discord's window is unfocused.",
     },
 });
 
@@ -17,7 +17,7 @@ export default definePlugin({
     description:
         "Automatically opens the channel from new messages. Muted channels are ignored. Made for those who keep Discord on another monitor.",
     tags: ["Chat", "Utility"],
-    searchTerms: ["jump", "message", "auto", "notification", "focus"],
+    searchTerms: ["jump", "message", "auto", "notification", "focus", "unfocused"],
     authors: [Devs.k304, Devs.k304],
     settings,
 
@@ -26,7 +26,7 @@ export default definePlugin({
 
         if (payload.type === "RPC_NOTIFICATION_CREATE") {
             // Dont do anything if discord is in focus
-            if (settings.store.onlyWhenOutOfFocus && document.hasFocus()) {
+            if (settings.store.onlyWhenUnfocused && document.hasFocus()) {
                 return;
             }
 
