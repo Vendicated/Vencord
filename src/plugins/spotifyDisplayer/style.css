@@ -1,0 +1,80 @@
+#vc-spotify-displayer {
+    padding: 10px 12px;
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: 8px;
+    margin: 2px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    order: -10;
+}
+
+.vc-spotify-displayer-content {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.vc-spotify-displayer-cover {
+    width: 40px;
+    height: 40px;
+    border-radius: 6px;
+    object-fit: cover;
+    flex-shrink: 0;
+}
+
+.vc-spotify-displayer-info {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    flex: 1;
+}
+
+.vc-spotify-displayer-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: #ffffff;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    transition: color 0.2s ease;
+}
+
+.vc-spotify-displayer-artist {
+    font-size: 11px;
+    color: #ffffff;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    margin-top: 2px;
+}
+
+.vc-spotify-displayer-progress {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    gap: 6px;
+}
+
+.vc-spotify-displayer-time {
+    font-size: 10px;
+    color: #ffffff;
+    min-width: 28px;
+}
+
+.vc-spotify-displayer-bar-bg {
+    flex-grow: 1;
+    height: 4px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 2px;
+    position: relative;
+    overflow: hidden;
+}
+
+.vc-spotify-displayer-bar-fill {
+    height: 100%;
+    background: #ffffff42;
+    border-radius: 2px;
+    transition: width 0.1s linear;
+}
