@@ -193,7 +193,7 @@ export const VoiceChannelIndicator = ErrorBoundary.wrap(({ userId, isProfile, is
                         isActionButton && shouldHighlight && ActionButtonClasses.highlight,
                         cl(isProfile && "profile-speaker")
                     )}
-                    size={(isActionButton || isMessage) ? 20 : 17}
+                    size={(isActionButton || isMessage) ? 20 : 16}
                 />
             )}
         </Tooltip>
