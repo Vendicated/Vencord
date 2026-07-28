@@ -20,14 +20,14 @@ import { getUserSettingLazy } from "@api/UserSettings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { getIntlMessage } from "@utils/discord";
 import { classes } from "@utils/misc";
-import { findByPropsLazy } from "@webpack";
+import { Message } from "@vencord/discord-types";
+import { findCssClassesLazy } from "@webpack";
 import { Tooltip, UserStore } from "@webpack/common";
-import { Message } from "discord-types/general";
 
 import { settings } from "./settings";
 import { useFormattedPronouns } from "./utils";
 
-const styles: Record<string, string> = findByPropsLazy("timestampInline");
+const TimestampClasses = findCssClassesLazy("timestampInline", "timestamp");
 const MessageDisplayCompact = getUserSettingLazy("textAndImages", "messageDisplayCompact")!;
 
 const AUTO_MODERATION_ACTION = 24;
@@ -49,7 +49,7 @@ function PronounsChatComponent({ message }: { message: Message; }) {
             {tooltipProps => (
                 <span
                     {...tooltipProps}
-                    className={classes(styles.timestampInline, styles.timestamp)}
+                    className={classes(TimestampClasses.timestampInline, TimestampClasses.timestamp)}
                 >• {pronouns}</span>
             )}
         </Tooltip>

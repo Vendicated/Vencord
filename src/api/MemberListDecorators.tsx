@@ -17,7 +17,7 @@
 */
 
 import ErrorBoundary from "@components/ErrorBoundary";
-import { Channel, User } from "discord-types/general/index.js";
+import { Channel, User } from "@vencord/discord-types";
 import { JSX } from "react";
 
 interface DecoratorProps {

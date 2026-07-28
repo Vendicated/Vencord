@@ -1,0 +1,28 @@
+.vc-settings-theme-grid {
+    display: grid;
+    gap: 16px;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+}
+
+.vc-settings-csp-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.vc-settings-csp-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+
+
+    & a {
+        text-overflow: ellipsis;
+        overflow: hidden;
+        white-space: nowrap;
+        line-height: 1.2em;
+    }
+
+    --custom-button-button-md-height: 26px;
+}

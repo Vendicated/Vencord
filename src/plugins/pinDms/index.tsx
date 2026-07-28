@@ -11,12 +11,12 @@ import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import { classes } from "@utils/misc";
 import definePlugin, { OptionType, StartAt } from "@utils/types";
-import { findByPropsLazy, findStoreLazy } from "@webpack";
+import { Channel } from "@vencord/discord-types";
+import { findCssClassesLazy, findStoreLazy } from "@webpack";
 import { Clickable, ContextMenuApi, FluxDispatcher, Menu, React } from "@webpack/common";
-import { Channel } from "discord-types/general";
 
 import { contextMenus } from "./components/contextMenu";
-import { openCategoryModal, requireSettingsMenu } from "./components/CreateCategoryModal";
+import { openCategoryModal, requireSettingsModal } from "./components/CreateCategoryModal";
 import { DEFAULT_CHUNK_SIZE } from "./constants";
 import { canMoveCategory, canMoveCategoryInDirection, Category, categoryLen, collapseCategory, getAllUncollapsedChannels, getCategoryByIndex, getSections, init, isPinned, moveCategory, removeCategory, usePinnedDms } from "./data";
 
@@ -26,7 +26,7 @@ interface ChannelComponentProps {
     selected: boolean;
 }
 
-const headerClasses = findByPropsLazy("privateChannelsHeaderContainer");
+const headerClasses = findCssClassesLazy("privateChannelsHeaderContainer", "headerText");
 
 export const PrivateChannelSortStore = findStoreLazy("PrivateChannelSortStore") as { getPrivateChannelIds: () => string[]; };
 
@@ -48,11 +48,13 @@ export const settings = definePluginSettings({
     },
     canCollapseDmSection: {
         type: OptionType.BOOLEAN,
+        displayName: "Can Collapse DM Section",
         description: "Allow uncategorised DMs section to be collapsable",
         default: false
     },
     dmSectionCollapsed: {
         type: OptionType.BOOLEAN,
+        displayName: "DM Section Collapsed",
         description: "Collapse DM section",
         default: false,
         hidden: true
@@ -66,13 +68,14 @@ export const settings = definePluginSettings({
 export default definePlugin({
     name: "PinDMs",
     description: "Allows you to pin private channels to the top of your DM list. To pin/unpin or re-order pins, right click DMs",
+    tags: ["Friends", "Organisation"],
     authors: [Devs.Ven, Devs.Aria],
     settings,
     contextMenus,
 
     patches: [
         {
-            find: ".privateChannelsHeaderContainer,",
+            find: '"dm-quick-launcher"===',
             replacement: [
                 {
                     // Filter out pinned channels from the private channel list
@@ -87,16 +90,16 @@ export default definePlugin({
 
                 // Rendering
                 {
-                    match: /"renderRow",(\i)=>{(?<="renderDM",.+?(\i\.\i),\{channel:.+?)/,
+                    match: /renderRow(?:",|=)(\i)=>{(?<=renderDM(?:",|=).+?(\i\.\i),\{channel:.+?)/,
                     replace: "$&if($self.isChannelIndex($1.section, $1.row))return $self.renderChannel($1.section,$1.row,$2)();"
                 },
                 {
-                    match: /"renderSection",(\i)=>{/,
+                    match: /renderSection(?:",|=)(\i)=>{/,
                     replace: "$&if($self.isCategoryIndex($1.section))return $self.renderCategory($1);"
                 },
                 {
-                    match: /(?<=span",{)className:\i\.headerText,/,
-                    replace: "...$self.makeSpanProps(),$&"
+                    match: /renderSection(?:",|=).{0,300}?"span",{/,
+                    replace: "$&...$self.makeSpanProps(),"
                 },
 
                 // Fix Row Height
@@ -105,7 +108,7 @@ export default definePlugin({
                     replace: "$1($2-$self.categoryLen())"
                 },
                 {
-                    match: /"getRowHeight",\((\i),(\i)\)=>{/,
+                    match: /getRowHeight(?:",|=)\((\i),(\i)\)=>{/,
                     replace: "$&if($self.isChannelHidden($1,$2))return 0;"
                 },
 
@@ -113,7 +116,7 @@ export default definePlugin({
                 {
                     // Override scrollToChannel to properly account for pinned channels
                     match: /(?<=scrollTo\(\{to:\i\}\):\(\i\+=)(\d+)\*\(.+?(?=,)/,
-                    replace: "$self.getScrollOffset(arguments[0],$1,this.props.padding,this.state.preRenderedChildren,$&)"
+                    replace: "$self.getScrollOffset(arguments[0],$1,this?.props?.padding,this?.state?.preRenderedChildren,$&)"
                 },
                 {
                     match: /(scrollToChannel\(\i\){.{1,300})(this\.props\.privateChannelIds)/,
@@ -147,7 +150,7 @@ export default definePlugin({
 
         // fix alt+shift+up/down
         {
-            find: ".getFlattenedGuildIds()],",
+            find: "=()=>!1,ensureChatIsVisible:",
             replacement: {
                 match: /(?<=\i===\i\.ME\?)\i\.\i\.getPrivateChannelIds\(\)/,
                 replace: "$self.getAllUncollapsedChannels().concat($&.filter(c=>!$self.isPinned(c)))"
@@ -173,7 +176,7 @@ export default definePlugin({
     categoryLen,
     getSections,
     getAllUncollapsedChannels,
-    requireSettingsMenu,
+    requireSettingsMenu: requireSettingsModal,
 
     makeProps(instance, { sections }: { sections: number[]; }) {
         this._instance = instance;
@@ -209,7 +212,7 @@ export default definePlugin({
         const sectionHeaderSizePx = sections.length * 40;
         // (header heights + DM heights + DEFAULT_CHUNK_SIZE) * 1.5
         // we multiply everything by 1.5 so it only gets unmounted after the entire list is off screen
-        return (sectionHeaderSizePx + sections.reduce((acc, v) => acc += v + 44, 0) + DEFAULT_CHUNK_SIZE) * 1.5;
+        return (sectionHeaderSizePx + sections.reduce((acc, v) => acc += v * 44, 0) + DEFAULT_CHUNK_SIZE) * 1.5;
     },
 
     isCategoryIndex(sectionIndex: number) {

@@ -16,9 +16,9 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Language } from "../api/languages";
-import { DeviconSetting } from "../types";
-import { cl } from "../utils/misc";
+import { Language } from "@plugins/shikiCodeblocks.desktop/api/languages";
+import { DeviconSetting } from "@plugins/shikiCodeblocks.desktop/types";
+import { cl } from "@plugins/shikiCodeblocks.desktop/utils/misc";
 
 export interface HeaderProps {
     langName?: string;

@@ -21,8 +21,8 @@ import { LinkIcon } from "@components/Icons";
 import { copyToClipboard } from "@utils/clipboard";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
+import type { Channel, User } from "@vencord/discord-types";
 import { Menu } from "@webpack/common";
-import type { Channel, User } from "discord-types/general";
 
 interface UserContextProps {
     channel: Channel;
@@ -47,6 +47,7 @@ export default definePlugin({
     name: "CopyUserURLs",
     authors: [Devs.castdrian],
     description: "Adds a 'Copy User URL' option to the user context menu.",
+    tags: ["Utility", "Friends"],
     contextMenus: {
         "user-context": UserContextMenuPatch
     }

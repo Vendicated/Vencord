@@ -30,8 +30,8 @@ export default definePlugin({
             replacement: [
                 // Main setting definition
                 {
-                    match: /(?<=INFREQUENT_USER_ACTION.{0,20},)useSetting:/,
-                    replace: "userSettingsAPIGroup:arguments[0],userSettingsAPIName:arguments[1],$&"
+                    match: /\.updateAsync\(.+?(?=,useSetting:)/,
+                    replace: "$&,userSettingsAPIGroup:arguments[0],userSettingsAPIName:arguments[1]"
                 },
                 // Selective wrapper
                 {

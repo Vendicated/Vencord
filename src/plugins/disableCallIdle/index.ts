@@ -22,21 +22,24 @@ import definePlugin from "@utils/types";
 export default definePlugin({
     name: "DisableCallIdle",
     description: "Disables automatically getting kicked from a DM voice call after 3 minutes and being moved to an AFK voice channel.",
+    tags: ["Voice", "Utility"],
     authors: [Devs.Nuckyz],
     patches: [
         {
-            find: "#{intl::BOT_CALL_IDLE_DISCONNECT_2}",
+            find: "this.idleTimeout.start(",
             replacement: {
-                match: /,?(?=\i\(this,"idleTimeout",new \i\.\i\))/,
-                replace: ";return;"
+                match: /this\.idleTimeout\.(start|stop)/g,
+                replace: "$self.noop"
             }
         },
         {
             find: "handleIdleUpdate(){",
             replacement: {
-                match: /(?<=_initialize\(\){)/,
-                replace: "return;"
+                match: "handleIdleUpdate(){",
+                replace: "handleIdleUpdate(){return;"
             }
         }
-    ]
+    ],
+
+    noop() { }
 });

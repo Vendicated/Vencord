@@ -49,6 +49,7 @@ const settings = definePluginSettings({
         default: false
     },
     applyColorOnlyInDms: {
+        displayName: "Apply Color Only In DMs",
         description: "Apply colors only in direct messages; do not apply colors in servers.",
         restartNeeded: false,
         type: OptionType.BOOLEAN,
@@ -59,6 +60,7 @@ const settings = definePluginSettings({
 export default definePlugin({
     name: "IrcColors",
     description: "Makes username colors in chat unique, like in IRC clients",
+    tags: ["Appearance", "Customisation"],
     authors: [Devs.Grzesiek11, Devs.jamesbt365],
     settings,
 
@@ -67,26 +69,40 @@ export default definePlugin({
             find: '="SYSTEM_TAG"',
             replacement: {
                 // Override colorString with our custom color and disable gradients if applying the custom color.
-                match: /&&null!=\i\.secondaryColor,(?<=colorString:(\i).+?(\i)=.+?)/,
-                replace: (m, colorString, hasGradientColors) => `${m}` +
-                    `vcIrcColorsDummy=[${colorString},${hasGradientColors}]=$self.getMessageColorsVariables(arguments[0],${hasGradientColors}),`
+                match: /(?<=colorString:\i,colorStrings:\i,colorRoleName:\i.*?}=)(\i),/,
+                replace: "$self.wrapMessageColorProps($1, arguments[0]),"
             }
         },
         {
             find: "#{intl::GUILD_OWNER}),children:",
             replacement: {
-                match: /(?<=roleName:\i,)color:/,
-                replace: "color:$self.calculateNameColorForListContext(arguments[0]),originalColor:"
+                match: /(?<=roleName:\i,)colorString:/,
+                replace: "colorString:$self.calculateNameColorForListContext(arguments[0]),originalColor:"
             },
             predicate: () => settings.store.memberListColors
         }
     ],
 
-    getMessageColorsVariables(context: any, hasGradientColors: boolean) {
-        const colorString = this.calculateNameColorForMessageContext(context);
-        const originalColorString = context?.author?.colorString;
+    wrapMessageColorProps(colorProps: { colorString: string, colorStrings?: Record<"primaryColor" | "secondaryColor" | "tertiaryColor", string>; }, context: any) {
+        try {
+            const colorString = this.calculateNameColorForMessageContext(context);
+            if (colorString === colorProps.colorString) {
+                return colorProps;
+            }
 
-        return [colorString, hasGradientColors && colorString === originalColorString];
+            return {
+                ...colorProps,
+                colorString,
+                colorStrings: colorProps.colorStrings && {
+                    primaryColor: colorString,
+                    secondaryColor: undefined,
+                    tertiaryColor: undefined
+                }
+            };
+        } catch (e) {
+            console.error("Failed to calculate message color strings:", e);
+            return colorProps;
+        }
     },
 
     calculateNameColorForMessageContext(context: any) {
@@ -108,16 +124,20 @@ export default definePlugin({
     },
 
     calculateNameColorForListContext(context: any) {
-        const id = context?.user?.id;
-        const colorString = context?.colorString;
-        const color = calculateNameColorForUser(id);
+        try {
+            const id = context?.user?.id;
+            const colorString = context?.colorString;
+            const color = calculateNameColorForUser(id);
 
-        if (settings.store.applyColorOnlyInDms && !context?.channel?.isPrivate()) {
-            return colorString;
+            if (settings.store.applyColorOnlyInDms && context?.guildId !== undefined) {
+                return colorString;
+            }
+
+            return (!settings.store.applyColorOnlyToUsersWithoutColor || !colorString)
+                ? color
+                : colorString;
+        } catch (e) {
+            console.error("Failed to calculate name color for list context:", e);
         }
-
-        return (!settings.store.applyColorOnlyToUsersWithoutColor || !colorString)
-            ? color
-            : colorString;
     }
 });

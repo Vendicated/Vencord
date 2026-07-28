@@ -1,6 +1,6 @@
 .vc-shiki-container {
     border: 4px;
-    background-color: var(--background-secondary);
+    background-color: var(--background-base-lower);
 }
 
 .vc-shiki-root {
@@ -92,6 +92,7 @@
     padding-left: 5px;
     padding-right: 8px;
     user-select: none;
+    white-space: nowrap;
 }
 
 .vc-shiki-root .vc-shiki-table-cell:last-child {
