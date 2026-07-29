@@ -24,7 +24,7 @@ export const CONTRIB_ROLE_ID = "1026534353167208489";
 export const REGULAR_ROLE_ID = "1026504932959977532";
 export const SUPPORT_CHANNEL_ID = "1026515880080842772";
 export const SUPPORT_CATEGORY_ID = "1108135649699180705";
-export const KNOWN_ISSUES_CHANNEL_ID = "1222936386626129920";
+export const KNOWN_ISSUES_CHANNEL_ID = "1257025907625951423";
 
 const platform = navigator.platform.toLowerCase();
 export const IS_WINDOWS = platform.startsWith("win");
@@ -175,10 +175,6 @@ export const Devs = /* #__PURE__*/ Object.freeze({
     kemo: {
         name: "kemo",
         id: 715746190813298788n
-    },
-    dzshn: {
-        name: "dzshn",
-        id: 310449948011528192n
     },
     Ducko: {
         name: "Ducko",
@@ -358,8 +354,8 @@ export const Devs = /* #__PURE__*/ Object.freeze({
         id: 354191516979429376n
     },
     Rini: {
-        name: "Rini",
-        id: 1079479184478441643n
+        name: "rini",
+        id: 0n
     },
     castdrian: {
         name: "castdrian",
@@ -499,7 +495,7 @@ export const Devs = /* #__PURE__*/ Object.freeze({
     },
     Byeoon: {
         name: "byeoon",
-        id: 1167275288036655133n
+        id: 495683688474869781n
     },
     Kaitlyn: {
         name: "kaitlyn",
@@ -642,6 +638,30 @@ export const Devs = /* #__PURE__*/ Object.freeze({
         name: "prism",
         id: 390884143749136386n,
     },
+    creations: {
+        name: "creations",
+        id: 209830981060788225n
+    },
+    nightmaresan: {
+        name: "NightmareSan",
+        id: 304239816466235392n
+    },
+    angelcube: {
+        name: "angelcube",
+        id: 958505257288208446n
+    },
+    Lunascape: {
+        name: "Lunascape",
+        id: 383365021415243776n
+    },
+    jax: {
+        name: "jax",
+        id: 1493703027801194598n
+    },
+    yuna0x0: {
+        name: "yuna0x0",
+        id: 213656926414831616n
+    }
 } satisfies Record<string, Dev>);
 
 // iife so #__PURE__ works correctly
