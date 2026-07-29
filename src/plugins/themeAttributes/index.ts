@@ -23,7 +23,7 @@ export default definePlugin({
         {
             find: ".tabBarRef",
             replacement: {
-                match: /style:this\.getStyle\(\),role:"tab"/,
+                match: /style:this\.getStyle\(\),role:\i/,
                 replace: "$&,'data-tab-id':this?.props?.id"
             }
         },
