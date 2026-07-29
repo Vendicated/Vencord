@@ -71,8 +71,6 @@ const customFilters: SearchFilter[] = [
     makeFilter("COMMAND_ID", "commandId", ID_REGEX, parseTrimmed),
     makeFilter("COMMAND_NAME", "commandName", WORD_REGEX, parseTrimmed),
     makeFilter("SLOP", "slop", NUMBER_REGEX, parseNumber),
-    makeFilter("MIN_ID", "minId", ID_REGEX, parseTrimmed),
-    makeFilter("MAX_ID", "maxId", ID_REGEX, parseTrimmed),
 ];
 
 let lastResolvedFilter: SearchFilter | null = null;
