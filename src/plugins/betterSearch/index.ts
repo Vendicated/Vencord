@@ -14,6 +14,13 @@ type SearchToken = {
     getFullMatch(): string;
 };
 
+type AutocompleteOptions = {
+    query: string;
+    maxResults: number;
+};
+
+type SearchAutocomplete = (options: AutocompleteOptions) => { text: string; }[];
+
 type SearchFilter = {
     filterType: string;
     answerType: string;
@@ -22,6 +29,7 @@ type SearchFilter = {
     filterRegex: RegExp;
     answerRegex: RegExp;
     parse: (token: SearchToken) => unknown;
+    getAutocompletions?: SearchAutocomplete;
 };
 
 type SearchRule = {
@@ -31,15 +39,18 @@ type SearchRule = {
     plainText?: string;
     follows?: string[];
     queryKey?: string;
+    getAutocompletions?: SearchAutocomplete;
 };
 
 function makeFilter(
     name: string,
     key: string,
     answerRegex: RegExp,
-    parse: (token: SearchToken) => unknown
+    parse: (token: SearchToken) => unknown,
+    getAutocompletions?: SearchAutocomplete
 ): SearchFilter {
     const filterKey = `${key}:`;
+
     return {
         filterType: `FILTER_${name}`,
         answerType: `ANSWER_${name}`,
@@ -47,7 +58,8 @@ function makeFilter(
         queryKey: key.replace(/([A-Z])/g, "_$1").toLowerCase(),
         filterRegex: new RegExp(`^${filterKey}`, "i"),
         answerRegex,
-        parse
+        parse,
+        getAutocompletions
     };
 }
 
@@ -55,22 +67,41 @@ const parseTrimmed = (token: SearchToken) => token.getFullMatch().trim();
 const parseBoolean = (token: SearchToken) => token.getFullMatch().trim() === "true";
 const parseNumber = (token: SearchToken) => Number(token.getFullMatch().trim());
 
-const ID_REGEX = /^\d{17,20}\b/;
-const NUMBER_REGEX = /^\d+\b/;
-const BOOL_REGEX = /^(true|false)/i;
-const WORD_REGEX = /^[^\s]+/;
+const booleanAutocomplete: SearchAutocomplete = () => [
+    { text: "true" },
+    { text: "false" }
+];
+
+function wordAutocomplete(values: string[]): SearchAutocomplete {
+    return ({ query, maxResults }) =>
+        values
+            .filter(value => value.startsWith(query.toLowerCase()))
+            .slice(0, maxResults)
+            .map(text => ({ text }));
+}
+
+const BOOL_REGEX = /^\s*(true|false)/i;
+const WORD_REGEX = /^\s*[^\s]+/;
+const SLOP_REGEX = /^\s*(?:[0-9]|[1-9][0-9]|100)\b/; // 0-100
+const ID_REGEX = /^\s*\d{17,20}\b/;
 
 const customFilters: SearchFilter[] = [
-    makeFilter("INCLUDE_NSFW", "includeNsfw", BOOL_REGEX, parseBoolean),
+    makeFilter("INCLUDE_NSFW", "includeNsfw", BOOL_REGEX, parseBoolean, booleanAutocomplete),
     makeFilter("REPLIED_TO_MESSAGE_ID", "repliedToMessageId", ID_REGEX, parseTrimmed),
     makeFilter("REPLIED_TO_USER_ID", "repliedToUserId", ID_REGEX, parseTrimmed),
     makeFilter("MENTIONS_ROLE_ID", "mentionsRoleId", ID_REGEX, parseTrimmed),
-    makeFilter("MENTION_EVERYONE", "mentionEveryone", BOOL_REGEX, parseBoolean),
-    makeFilter("EMBED_TYPE", "embedType", WORD_REGEX, parseTrimmed),
+    makeFilter("MENTION_EVERYONE", "mentionEveryone", BOOL_REGEX, parseBoolean, booleanAutocomplete),
+    makeFilter("EMBED_TYPE", "embedType", WORD_REGEX, parseTrimmed, wordAutocomplete([
+        "image",
+        "video",
+        "gif",
+        "sound",
+        "article"
+    ])),
     makeFilter("EMBED_PROVIDER", "embedProvider", WORD_REGEX, parseTrimmed),
     makeFilter("COMMAND_ID", "commandId", ID_REGEX, parseTrimmed),
     makeFilter("COMMAND_NAME", "commandName", WORD_REGEX, parseTrimmed),
-    makeFilter("SLOP", "slop", NUMBER_REGEX, parseNumber),
+    makeFilter("SLOP", "slop", SLOP_REGEX, parseNumber),
 ];
 
 let lastResolvedFilter: SearchFilter | null = null;
@@ -111,7 +142,10 @@ export default definePlugin({
                 regex: filter.filterRegex,
                 componentType: "FILTER",
                 key: filter.filterKey,
-                plainText: filter.filterKey.replace(/:$/, "")
+                plainText: filter.filterKey.replace(/:$/, ""),
+                getAutocompletions(options: AutocompleteOptions) {
+                    return filter.getAutocompletions?.(options) ?? [];
+                }
             };
 
             rules[filter.answerType] = {
