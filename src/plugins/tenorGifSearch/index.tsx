@@ -159,8 +159,8 @@ export default definePlugin({
                     replace: "return $self.handleTrendingGifsFetch();$&"
                 },
                 {
-                    match: /\i\.\i\.post\(\{url:\i\.\i\.GIFS_SELECT,body:\{id:(\i),q:(\i),provider:\i\}/,
-                    replace: "return $self.handleGifSelect($1,$2);$&"
+                    match: /\i\.\i\.post\(\{url:\i\.\i\.GIFS_SELECT,body:\{id:(\i),q:(\i)\}/,
+                    replace: "$self.handleGifSelect($1,$2)&&false&&$&"
                 }
             ]
         },
@@ -193,7 +193,7 @@ export default definePlugin({
     },
 
     handleSearchFetch(query: string) {
-        // discord has a 100 result limit for normal search
+        // Discord has a 100 result limit for normal search
         fetchTenorResults("/search", 100, { q: query })
             .then(results => {
                 const items = mapToDiscordGifs(results);

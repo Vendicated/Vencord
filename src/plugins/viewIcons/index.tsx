@@ -230,10 +230,10 @@ export default definePlugin({
         },
         // Banners
         {
-            find: 'backgroundColor:"COMPLETE"',
+            find: '"--custom-cutout-radius":',
             replacement: {
-                match: /(overflow:"visible",.{0,125}?!1\),)style:{(?=.+?backgroundImage:null!=(\i)\?`url\(\$\{\2\}\))/,
-                replace: (_, rest, bannerSrc) => `${rest}onClick:vcEvent=>${bannerSrc}!=null&&$self.openBanner(${bannerSrc}, vcEvent),style:{cursor:${bannerSrc}!=null?"pointer":void 0,`
+                match: /style:{(?=\.\.\.\i,backgroundImage:null!=(\i).{0,20}?\?`url\(\$\{\1\}\)`)/,
+                replace: (_, bannerSrc) => `onClick:vcEvent=>${bannerSrc}!=null&&$self.openBanner(${bannerSrc},vcEvent),style:{cursor:${bannerSrc}!=null?"pointer":void 0,`
             }
         },
         // Group DMs top small & large icon
