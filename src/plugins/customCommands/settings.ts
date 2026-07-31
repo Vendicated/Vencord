@@ -28,7 +28,7 @@ export interface Tag {
 }
 
 export function getTags() {
-    return settings.store.tagsList;
+    return Object.values(settings.store.tagsList);
 }
 
 export function getTag(name: string) {
