@@ -1,0 +1,280 @@
+/* ── FakeDM styles ── */
+
+/* Fond semi-transparent */
+.fdm-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 9997;
+    background: rgba(0, 0, 0, 0.4);
+    animation: fdm-fade 0.12s ease;
+}
+@keyframes fdm-fade {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+/* Panneau principal — position calculée par JS près du bouton */
+.fdm-panel {
+    position: fixed;
+    /* left et top injectés inline par React */
+    z-index: 9998;
+    background: #2b2d31;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    box-shadow:
+        0 16px 48px rgba(0, 0, 0, 0.65),
+        0 2px 8px rgba(0, 0, 0, 0.4);
+    width: 430px;
+    max-width: 95vw;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    animation: fdm-up 0.15s cubic-bezier(0.2, 0.8, 0.4, 1);
+}
+@keyframes fdm-up {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Header */
+.fdm-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 11px 14px 9px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+}
+.fdm-title {
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.45) !important;
+    margin: 0;
+}
+.fdm-close {
+    background: none;
+    border: none;
+    color: rgba(255, 255, 255, 0.4);
+    cursor: pointer;
+    font-size: 16px;
+    line-height: 1;
+    padding: 2px 4px;
+    border-radius: 4px;
+    transition: color 0.1s;
+}
+.fdm-close:hover {
+    color: #fff;
+}
+
+/* Sélecteur expéditeur */
+.fdm-sender-row {
+    display: flex;
+    gap: 6px;
+    padding: 9px 12px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+.fdm-sender-btn {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    padding: 7px 10px;
+    border-radius: 8px;
+    border: 1.5px solid rgba(255, 255, 255, 0.06);
+    background: rgba(255, 255, 255, 0.03);
+    cursor: pointer;
+    transition: all 0.1s;
+    font-size: 13px;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.6) !important;
+    font-family: inherit;
+    text-align: left;
+}
+.fdm-sender-btn:hover {
+    background: rgba(255, 255, 255, 0.07);
+    border-color: rgba(255, 255, 255, 0.12);
+}
+.fdm-sender-btn--active {
+    border-color: var(--brand-500, #5865f2);
+    background: rgba(88, 101, 242, 0.14);
+    color: #fff !important;
+}
+.fdm-sender-avatar {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    object-fit: cover;
+    flex-shrink: 0;
+}
+.fdm-sender-avatar--ph {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: rgba(88, 101, 242, 0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 700;
+    color: #fff;
+    flex-shrink: 0;
+}
+.fdm-sender-name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    min-width: 0;
+}
+
+/* Date */
+.fdm-date-row {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    padding: 7px 12px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+.fdm-date-label {
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.38) !important;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+.fdm-date-input {
+    flex: 1;
+    min-width: 0;
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.09);
+    border-radius: 6px;
+    color: #fff !important;
+    padding: 4px 8px;
+    font-size: 12px;
+    font-family: monospace;
+    outline: none;
+    transition: border-color 0.1s;
+    color-scheme: dark;
+}
+.fdm-date-input:focus {
+    border-color: var(--brand-500, #5865f2);
+}
+.fdm-date-now {
+    background: rgba(255, 255, 255, 0.06);
+    border: none;
+    border-radius: 5px;
+    color: rgba(255, 255, 255, 0.55) !important;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 4px 9px;
+    cursor: pointer;
+    white-space: nowrap;
+    font-family: inherit;
+    flex-shrink: 0;
+    transition: background 0.1s;
+}
+.fdm-date-now:hover {
+    background: rgba(255, 255, 255, 0.12);
+    color: #fff !important;
+}
+
+/* Zone message */
+.fdm-input-row {
+    display: flex;
+    align-items: flex-end;
+    gap: 8px;
+    padding: 9px 12px;
+}
+.fdm-textarea {
+    flex: 1;
+    min-width: 0;
+    background: rgba(0, 0, 0, 0.22);
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    border-radius: 8px;
+    color: #fff !important;
+    padding: 8px 10px;
+    font-size: 14px;
+    font-family: inherit;
+    outline: none;
+    resize: none;
+    min-height: 38px;
+    max-height: 110px;
+    transition: border-color 0.1s;
+    line-height: 1.45;
+}
+.fdm-textarea:focus {
+    border-color: rgba(255, 255, 255, 0.18);
+}
+.fdm-textarea::placeholder {
+    color: rgba(255, 255, 255, 0.28) !important;
+}
+
+/* Boutons */
+.fdm-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    flex-shrink: 0;
+}
+.fdm-send-btn {
+    background: var(--brand-500, #5865f2);
+    border: none;
+    border-radius: 7px;
+    color: #fff !important;
+    padding: 7px 14px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+    transition: opacity 0.1s;
+    white-space: nowrap;
+}
+.fdm-send-btn:hover:not(:disabled) {
+    opacity: 0.85;
+}
+.fdm-send-btn:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+}
+
+.fdm-clear-btn {
+    background: rgba(237, 66, 69, 0.1);
+    border: none;
+    border-radius: 7px;
+    color: #ed4245 !important;
+    padding: 5px 10px;
+    font-size: 11px;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: inherit;
+    transition: background 0.1s;
+    white-space: nowrap;
+}
+.fdm-clear-btn:hover {
+    background: rgba(237, 66, 69, 0.22);
+}
+
+/* Status */
+.fdm-status {
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.35) !important;
+    text-align: center;
+    padding: 2px 12px 10px;
+    min-height: 20px;
+    transition: color 0.2s;
+}
+.fdm-status--ok {
+    color: #3ba55c !important;
+}
+.fdm-status--err {
+    color: #ed4245 !important;
+}
