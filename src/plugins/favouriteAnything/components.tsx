@@ -11,7 +11,7 @@ import { Embed, ListRow, Message, MessageAttachment, ScrollerBaseRef } from "@ve
 import { ChannelType } from "@vencord/discord-types/enums";
 import { findByCodeLazy, findComponentByCode, findComponentByCodeLazy, findCssClassesLazy, proxyLazyWebpack } from "@webpack";
 import { ChannelStore, ExpressionPickerStore, ListScrollerThin, lodash, PermissionsBits, PermissionStore, React, useCallback, useEffect, useMemo, useRef, useState, useStateFromStores } from "@webpack/common";
-import { ReactNode } from "react";
+import { ComponentProps, ReactNode } from "react";
 
 import { SignedUrlsStore } from "./stores";
 import { AttachmentContextProviderProps, AttachmentItem, AttachmentsComponentProps, CustomItemFormat, FavoriteButtonProps, FavouriteItemFormat, FilePickerItemProps, FilePickerProps, ManaSearchBarProps, MessageComponentClass } from "./types";
@@ -23,7 +23,6 @@ const AttachmentContext = proxyLazyWebpack(() => React.createContext<null | Atta
 
 const ManaSearchBar = findComponentByCodeLazy<ManaSearchBarProps>("#{intl::SEARCH}),ref");
 const FavoriteButton = findComponentByCodeLazy<FavoriteButtonProps>("#{intl::GIF_TOOLTIP_ADD_TO_FAVORITES}");
-const SendIcon = findComponentByCodeLazy("M6.6 10.02 14 11.4a.6.6");
 
 const createChannelRecordFromServer = findByCodeLazy(".GUILD_TEXT]", "fromServer)");
 const createMessageRecord = findByCodeLazy(".createFromServer(", ".isBlockedForMessage", "messageReference:");
@@ -186,6 +185,21 @@ function Demo() {
     );
 }
 
+function SendIcon({ height = 24, width = 24, ...props }: ComponentProps<"svg">) {
+    return (
+        <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width={width}
+            height={height}
+            fill="currentColor"
+            viewBox="0 0 24 24"
+            {...props}
+        >
+            <path d="M6.6 10.02 14 11.4a.6.6 0 0 1 0 1.18L6.6 14l-2.94 5.87a1.48 1.48 0 0 0 1.99 1.98l17.03-8.52a1.48 1.48 0 0 0 0-2.64L5.65 2.16a1.48 1.48 0 0 0-1.99 1.98l2.94 5.88Z" />
+        </svg>
+    );
+}
+
 export function FilePickerItem({ url, file, channel, onResize, onSubmit, reducePadding }: FilePickerItemProps) {
     const [isFetching, setIsFetching] = useState(false);
 
@@ -229,7 +243,7 @@ export function FilePickerItem({ url, file, channel, onResize, onSubmit, reduceP
             <AttachmentPreview attachment={attachment} />
             {handleClick && (
                 <Button onClick={handleClick} variant="secondary" disabled={isFetching}>
-                    <SendIcon size="refresh_sm" color="currentColor" />
+                    <SendIcon width={20} height={20} />
                 </Button>
             )}
         </div>
