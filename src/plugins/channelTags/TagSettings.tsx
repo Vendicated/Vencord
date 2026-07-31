@@ -12,6 +12,8 @@ import { deleteTag, sortAlphaNum } from "./data";
 import { settings } from "./settings";
 import { openCreateTagModal, openEditTagModal } from "./TagModal";
 import { TagShapeIcon } from "./TagShape";
+import { openTagUsageModal } from "./TagUsageModal";
+import { getTagUsageCounts } from "./usage";
 
 function confirmDeleteTag(id: string, name: string) {
     openModal(props => (
@@ -30,11 +32,20 @@ function confirmDeleteTag(id: string, name: string) {
     ));
 }
 
+function ViewIcon() {
+    return (
+        <svg aria-hidden="true" className="vc-channel-tags-action-icon" viewBox="0 0 24 24">
+            <path fill="currentColor" d="M12 5c5.5 0 9.5 5.1 9.7 5.3a2.7 2.7 0 0 1 0 3.4C21.5 13.9 17.5 19 12 19s-9.5-5.1-9.7-5.3a2.7 2.7 0 0 1 0-3.4C2.5 10.1 6.5 5 12 5Zm0 2c-4.2 0-7.5 3.8-8.1 5 .6 1.2 3.9 5 8.1 5s7.5-3.8 8.1-5c-.6-1.2-3.9-5-8.1-5Zm0 2a3 3 0 1 1 0 6 3 3 0 0 1 0-6Z" />
+        </svg>
+    );
+}
+
 export function TagSettings() {
     // CUSTOM settings do not expose wildcard paths in definePluginSettings' types.
     const { tags: tagMap } = settings.use(["tags", "channelTags.*" as "channelTags"]);
     const tags = Object.entries(tagMap)
         .sort(([, a], [, b]) => sortAlphaNum(a.name, b.name));
+    const usageCounts = getTagUsageCounts();
 
     return (
         <div className="vc-channel-tags-settings">
@@ -65,8 +76,27 @@ export function TagSettings() {
                         />
                         <span className="vc-channel-tags-settings-name">
                             {tag.name}
+                            <span className="vc-channel-tags-settings-usage-count">
+                                ({usageCounts.get(id) || "Unused"})
+                            </span>
                         </span>
                     </div>
+                    <Tooltip position="top" text="View">
+                        {tooltipProps => (
+                            <Button
+                                {...tooltipProps}
+                                aria-label="View"
+                                onClick={event => {
+                                    event.stopPropagation();
+                                    openTagUsageModal(id);
+                                }}
+                                size="iconOnly"
+                                variant="secondary"
+                            >
+                                <ViewIcon />
+                            </Button>
+                        )}
+                    </Tooltip>
                     <Tooltip position="top" text="Edit">
                         {tooltipProps => (
                             <Button

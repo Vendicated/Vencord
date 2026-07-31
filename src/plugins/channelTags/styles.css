@@ -132,7 +132,112 @@
     white-space: nowrap;
 }
 
+.vc-channel-tags-settings-usage-count {
+    margin-left: 4px;
+    color: var(--text-muted);
+    font-size: 12px;
+    font-weight: 400;
+}
+
 .vc-channel-tags-action-icon {
     width: 20px;
     height: 20px;
+}
+
+.vc-channel-tags-usage-content {
+    display: grid;
+    gap: 12px;
+    padding-bottom: 16px;
+}
+
+.vc-channel-tags-usage-empty {
+    padding: 20px;
+    color: var(--text-muted);
+    text-align: center;
+}
+
+.vc-channel-tags-usage-group-icon {
+    display: grid;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--background-tertiary);
+    color: var(--text-normal);
+    font-size: 11px;
+    font-weight: 600;
+    place-items: center;
+}
+
+.vc-channel-tags-usage-group-icon-dms {
+    font-size: 18px;
+}
+
+.vc-channel-tags-usage-group .vc-expandable-card-header {
+    align-items: center;
+    gap: 8px;
+}
+
+.vc-channel-tags-usage-group-name {
+    overflow: hidden;
+    flex: 1;
+    color: var(--header-primary);
+    font-weight: 600;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.vc-channel-tags-usage-group-count {
+    color: var(--text-muted);
+    font-size: 12px;
+}
+
+.vc-channel-tags-usage-channels {
+    display: grid;
+    gap: 6px;
+}
+
+.vc-channel-tags-usage-channel-row {
+    display: flex;
+    align-items: center;
+    min-height: 38px;
+    padding: 6px 8px;
+    border-radius: 6px;
+    gap: 8px;
+}
+
+.vc-channel-tags-usage-channel-row .vc-channel-tags-decorations {
+    margin-left: 0;
+}
+
+.vc-channel-tags-usage-channel-avatar {
+    flex: 0 0 auto;
+}
+
+.vc-channel-tags-usage-channel-row:hover {
+    background: var(--message-background-hover);
+}
+
+.vc-channel-tags-usage-channel-names {
+    display: flex;
+    overflow: hidden;
+    flex: 1;
+    flex-direction: column;
+    justify-content: center;
+    gap: 2px;
+}
+
+.vc-channel-tags-usage-parent-name {
+    overflow: hidden;
+    max-width: 100%;
+    color: var(--text-muted);
+    font-size: 12px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.vc-channel-tags-usage-channel-name {
+    overflow: hidden;
+    color: var(--text-normal);
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
