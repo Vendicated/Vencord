@@ -30,7 +30,7 @@ export default definePlugin({
                 {
                     // Wrap the embed component's render method in a custom context to avoid having to drill props
                     match: "render()",
-                    replace: "$&{return $self.renderEmbed.call(this)}__render()"
+                    replace: "$&{return $self.renderEmbed(this)}__render()"
                 },
                 {
                     // Specify the index for individual items in embed.images
@@ -141,8 +141,8 @@ export default definePlugin({
     renderCV2File(children: ReactNode, key: React.Key, component: AttachmentContextProviderProps["component"]) {
         return <AttachmentContextProvider component={component} key={key}>{children}</AttachmentContextProvider>;
     },
-    renderEmbed(this: EmbedComponent) {
-        return <EmbedContext.Provider value={this.props.embed}>{this.__render()}</EmbedContext.Provider>;
+    renderEmbed(comp: EmbedComponent) {
+        return <EmbedContext.Provider value={comp.props.embed}>{comp.__render()}</EmbedContext.Provider>;
     },
     renderEmbedMosaicItem(children: ReactNode, index: number) {
         return <EmbedMosaicContext.Provider value={index}>{children}</EmbedMosaicContext.Provider>;
