@@ -62,7 +62,7 @@ export default definePlugin({
             find: "#{intl::AUTH_SESSIONS_OS_UNKNOWN}",
             replacement: [
                 {
-                    match: /(#{intl::AUTH_SESSIONS_ACTIVE_RECENTLY}.{0,230}role:"listitem",children:\[.{0,15},\{Icon:)\i/,
+                    match: /(#{intl::AUTH_SESSIONS_ACTIVE_RECENTLY}.{0,230}role:"listitem",children:\[.{0,15},\{icon:)\i/,
                     replace: "$1()=>$self.renderIcon(arguments[0])"
                 },
                 {

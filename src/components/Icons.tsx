@@ -82,6 +82,31 @@ export function CopyIcon(props: IconProps) {
 }
 
 /**
+ * Discord's ID icon, as seen in Developer Mode "Copy ID" context menu items
+ */
+export function CopyIdIcon(props: IconProps) {
+    return (
+        <Icon
+            {...props}
+            className={classes(props.className, "vc-copy-id-icon")}
+            viewBox="0 0 24 24"
+        >
+            <path
+                fill="currentColor"
+                d="M15.3 14.48c-.46.45-1.08.67-1.86.67h-1.39V9.2h1.39c.78 0 1.4.22 1.86.67.46.45.68 1.22.68 2.31 0 1.1-.22 1.86-.68 2.31Z"
+            />
+            <path
+                fill="currentColor"
+                fillRule="evenodd"
+                clipRule="evenodd"
+                d="M5 2a3 3 0 0 0-3 3v14a3 3 0 0 0 3 3h14a3 3 0 0 0 3-3V5a3 3 0 0 0-3-3H5Zm1 15h2.04V7.34H6V17Zm4-9.66V17h3.44c1.46 0 2.6-.42 3.38-1.25.8-.83 1.2-2.02 1.2-3.58s-.4-2.75-1.2-3.58c-.79-.83-1.92-1.25-3.38-1.25H10Z"
+            />
+        </Icon>
+    );
+}
+
+
+/**
  * Discord's open external icon, as seen in the user profile connections
  */
 export function OpenExternalIcon(props: IconProps) {
@@ -611,6 +636,34 @@ export function RightArrow(props: IconProps) {
                 fill={props.fill || "currentColor"}
                 d="M9.3 5.3a1 1 0 0 0 0 1.4l5.29 5.3-5.3 5.3a1 1 0 1 0 1.42 1.4l6-6a1 1 0 0 0 0-1.4l-6-6a1 1 0 0 0-1.42 0Z"
             />
+        </Icon>
+    );
+}
+
+export function StarFilled(props: IconProps) {
+    return (
+        <Icon
+            {...props}
+            viewBox="0 0 24 24"
+        >
+            <path
+                fill={props.fill || "currentColor"}
+                d="M10.81 2.86c.38-1.15 2-1.15 2.38 0l1.89 5.83h6.12c1.2 0 1.71 1.54.73 2.25l-4.95 3.6 1.9 5.82a1.25 1.25 0 0 1-1.93 1.4L12 18.16l-4.95 3.6c-.98.7-2.3-.25-1.92-1.4l1.89-5.82-4.95-3.6a1.25 1.25 0 0 1 .73-2.25h6.12l1.9-5.83Z"
+            />
+        </Icon>
+    );
+}
+
+export function StarOutlined(props: IconProps) {
+    return (
+        <Icon
+            {...props}
+            viewBox="0 0 24 24"
+        >
+            <path
+                fill={props.fill || "currentColor"}
+                fillRule="evenodd"
+                d="M2.07 10.94a1.25 1.25 0 0 1 .73-2.25h6.12l1.9-5.83c.37-1.15 2-1.15 2.37 0l1.89 5.83h6.12c1.2 0 1.71 1.54.73 2.25l-4.95 3.6 1.9 5.82a1.25 1.25 0 0 1-1.93 1.4L12 18.16l-4.95 3.6c-.98.7-2.3-.25-1.92-1.4l1.89-5.82-4.95-3.6Zm11.55-.25h5.26l-4.25 3.09 1.62 5-4.25-3.1-4.25 3.1 1.62-5-4.25-3.1h5.26l1.62-5 1.62 5Z" />
         </Icon>
     );
 }
