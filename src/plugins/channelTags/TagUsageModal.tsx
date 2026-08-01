@@ -13,7 +13,7 @@ import { Avatar, ChannelRouter, ChannelStore, closeAllModals, IconUtils, Modal, 
 
 import { ChannelTags } from "./ChannelTags";
 import { openChannelTagsMenu } from "./contextMenu";
-import { settings } from "./settings";
+import { getTagMap, settings } from "./settings";
 import { getTagUsageChannelIds, groupTagUsageChannels } from "./usage";
 
 const cl = classNameFactory("vc-channel-tags-usage-");
@@ -146,7 +146,8 @@ function TagUsageModal({ tagId, channelIds, modalProps }: {
     channelIds: string[];
     modalProps: RenderModalProps;
 }) {
-    const { tags } = settings.use(["tags"]);
+    settings.use();
+    const tags = getTagMap();
     const groups = groupTagUsageChannels(channelIds);
 
     return (

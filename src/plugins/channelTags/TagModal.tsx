@@ -11,7 +11,7 @@ import { extractAndLoadChunksLazy, findComponentByCodeLazy } from "@webpack";
 import { ColorPicker, Forms, Modal, openModalLazy, TextInput, useState } from "@webpack/common";
 
 import { addTagToChannel, createTag, DEFAULT_TAG_SHAPE, TagShape, updateTag } from "./data";
-import { settings } from "./settings";
+import { getTagMap } from "./settings";
 import { TagShapeIcon } from "./TagShape";
 
 const DEFAULT_COLOR = 0x5865f2;
@@ -48,7 +48,7 @@ interface TagModalProps {
 }
 
 function TagModal({ channelId, tagId, modalProps }: TagModalProps) {
-    const existingTag = tagId ? settings.store.tags[tagId] : undefined;
+    const existingTag = tagId ? getTagMap()[tagId] : undefined;
     const [name, setName] = useState(existingTag?.name ?? "");
     const [color, setColor] = useState(cssColorToInt(existingTag?.color));
     const [shape, setShape] = useState<TagShape>(existingTag?.shape ?? DEFAULT_TAG_SHAPE);

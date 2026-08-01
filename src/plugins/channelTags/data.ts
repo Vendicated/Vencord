@@ -6,7 +6,7 @@
 
 import { LocaleStore } from "@webpack/common";
 
-import { settings } from "./settings";
+import { getChannelTagMap, getTagMap } from "./settings";
 
 export interface ChannelTag {
     name: string;
@@ -24,44 +24,50 @@ export type ChannelTagMap = Record<string, string[]>;
 export const sortAlphaNum = (a: string, b: string) => a.localeCompare(b, LocaleStore?.locale ?? "en", { numeric: true });
 
 function sortTagIds(tagIds: string[]) {
-    return tagIds.sort((a, b) => sortAlphaNum(settings.store.tags[a]?.name ?? "", settings.store.tags[b]?.name ?? ""));
+    const tags = getTagMap();
+    return tagIds.sort((a, b) => sortAlphaNum(tags[a]?.name ?? "", tags[b]?.name ?? ""));
 }
 
 export function createTag(name: string, color: string, shape: TagShape = DEFAULT_TAG_SHAPE): string {
     const id = crypto.randomUUID();
-    settings.store.tags[id] = { name, color, shape };
+    getTagMap()[id] = { name, color, shape };
     return id;
 }
 
 export function updateTag(id: string, tag: ChannelTag) {
-    if (!settings.store.tags[id]) return;
+    const tags = getTagMap();
+    if (!tags[id]) return;
 
-    settings.store.tags[id] = tag;
-    for (const [channelId, tagIds] of Object.entries(settings.store.channelTags)) {
-        if (tagIds.includes(id)) settings.store.channelTags[channelId] = sortTagIds([...tagIds]);
+    tags[id] = tag;
+    const channelTags = getChannelTagMap();
+    for (const [channelId, tagIds] of Object.entries(channelTags)) {
+        if (tagIds.includes(id)) channelTags[channelId] = sortTagIds([...tagIds]);
     }
 }
 
 export function deleteTag(id: string) {
-    delete settings.store.tags[id];
+    delete getTagMap()[id];
 
-    for (const [channelId, tagIds] of Object.entries(settings.store.channelTags)) {
+    const channelTags = getChannelTagMap();
+    for (const [channelId, tagIds] of Object.entries(channelTags)) {
         const nextTagIds = tagIds.filter(tagId => tagId !== id);
-        if (nextTagIds.length) settings.store.channelTags[channelId] = nextTagIds;
-        else delete settings.store.channelTags[channelId];
+        if (nextTagIds.length) channelTags[channelId] = nextTagIds;
+        else delete channelTags[channelId];
     }
 }
 
 export function addTagToChannel(channelId: string, tagId: string) {
-    const tagIds = settings.store.channelTags[channelId] ?? [];
-    if (!tagIds.includes(tagId)) settings.store.channelTags[channelId] = sortTagIds([...tagIds, tagId]);
+    const channelTags = getChannelTagMap();
+    const tagIds = channelTags[channelId] ?? [];
+    if (!tagIds.includes(tagId)) channelTags[channelId] = sortTagIds([...tagIds, tagId]);
 }
 
 export function removeTagFromChannel(channelId: string, tagId: string) {
-    const tagIds = settings.store.channelTags[channelId];
+    const channelTags = getChannelTagMap();
+    const tagIds = channelTags[channelId];
     if (!tagIds) return;
 
     const nextTagIds = tagIds.filter(id => id !== tagId);
-    if (nextTagIds.length) settings.store.channelTags[channelId] = nextTagIds;
-    else delete settings.store.channelTags[channelId];
+    if (nextTagIds.length) channelTags[channelId] = nextTagIds;
+    else delete channelTags[channelId];
 }

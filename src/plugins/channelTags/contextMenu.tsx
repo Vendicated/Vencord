@@ -10,7 +10,7 @@ import { openPluginModal } from "@components/settings";
 import { ContextMenuApi, Menu } from "@webpack/common";
 
 import { addTagToChannel, ChannelTagMap, removeTagFromChannel, sortAlphaNum, TagShape } from "./data";
-import { settings } from "./settings";
+import { getChannelTagMap, getTagMap, settings } from "./settings";
 import { openCreateTagModal } from "./TagModal";
 import { TagShapeIcon } from "./TagShape";
 
@@ -32,7 +32,7 @@ function TagMenuLabel({ color, name, shape }: {
 }
 
 export function makeChannelTagsMenuChildren(channelId: string, channelTags: ChannelTagMap) {
-    const tags = Object.entries(settings.store.tags)
+    const tags = Object.entries(getTagMap())
         .sort(([, a], [, b]) => sortAlphaNum(a.name, b.name));
     const assignedTagIds = new Set(channelTags[channelId] ?? []);
 
@@ -80,7 +80,7 @@ export function makeChannelTagsMenuChildren(channelId: string, channelTags: Chan
 
 export function makeChannelTagsMenuItem(channelId: string, channelTags: ChannelTagMap) {
     const children = makeChannelTagsMenuChildren(channelId, channelTags);
-    if (!Object.keys(settings.store.tags).length) return children[0];
+    if (!Object.keys(getTagMap()).length) return children[0];
 
     return (
         <Menu.MenuItem
@@ -94,8 +94,7 @@ export function makeChannelTagsMenuItem(channelId: string, channelTags: ChannelT
 }
 
 function ChannelTagsMenu({ channelId }: { channelId: string; }) {
-    // CUSTOM settings do not expose wildcard paths in definePluginSettings' types.
-    const { channelTags } = settings.use(["tags.*" as "tags", "channelTags.*" as "channelTags"]);
+    settings.use();
 
     return (
         <Menu.Menu
@@ -103,7 +102,7 @@ function ChannelTagsMenu({ channelId }: { channelId: string; }) {
             navId="vc-channel-tags-row-menu"
             onClose={ContextMenuApi.closeContextMenu}
         >
-            {makeChannelTagsMenuChildren(channelId, channelTags)}
+            {makeChannelTagsMenuChildren(channelId, getChannelTagMap())}
         </Menu.Menu>
     );
 }
@@ -119,12 +118,12 @@ export const patchChannelContextMenu: NavContextMenuPatchCallback = (children, p
     if (!channel?.id) return;
 
     const group = findGroupChildrenByChildId("mark-channel-read", children) ?? children;
-    group.push(makeChannelTagsMenuItem(channel.id, settings.store.channelTags));
+    group.push(makeChannelTagsMenuItem(channel.id, getChannelTagMap()));
 };
 
 export const patchDmListContextMenu: NavContextMenuPatchCallback = (children, props) => {
     const group = findGroupChildrenByChildId("close-dm", children);
     if (!group || !props?.channel?.id) return;
 
-    group.push(makeChannelTagsMenuItem(props.channel.id, settings.store.channelTags));
+    group.push(makeChannelTagsMenuItem(props.channel.id, getChannelTagMap()));
 };
