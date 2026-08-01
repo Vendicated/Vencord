@@ -7,16 +7,17 @@
 import { Tooltip } from "@webpack/common";
 
 import { removeTagFromChannel } from "./data";
-import { settings } from "./settings";
+import { getChannelTagMap, getTagMap, settings } from "./settings";
 import { TagShapeIcon } from "./TagShape";
 
 export function ChannelTags({ channelId }: { channelId: string; }) {
-    // CUSTOM settings do not expose wildcard paths in definePluginSettings' types.
-    settings.use(["tags.*" as "tags", "channelTags.*" as "channelTags", "clickTagsToRemove"]);
+    settings.use();
     const clickToRemove = settings.store.clickTagsToRemove;
+    const channelTags = getChannelTagMap();
+    const tagMap = getTagMap();
 
-    const tags = (settings.store.channelTags[channelId] ?? [])
-        .map(id => [id, settings.store.tags[id]] as const)
+    const tags = (channelTags[channelId] ?? [])
+        .map(id => [id, tagMap[id]] as const)
         .filter((entry): entry is readonly [string, NonNullable<typeof entry[1]>] => entry[1] != null);
 
     if (!tags.length) return null;

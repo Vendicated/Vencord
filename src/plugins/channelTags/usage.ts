@@ -8,7 +8,7 @@ import type { Channel, Guild } from "@vencord/discord-types";
 import { ChannelStore, GuildStore } from "@webpack/common";
 
 import { sortAlphaNum } from "./data";
-import { settings } from "./settings";
+import { getChannelTagMap } from "./settings";
 
 export interface TagUsageGroup {
     id: string;
@@ -20,7 +20,7 @@ export interface TagUsageGroup {
 const DMS_GROUP_ID = "@me";
 
 export function getTagUsageChannelIds(tagId: string) {
-    return Object.entries(settings.store.channelTags)
+    return Object.entries(getChannelTagMap())
         .filter(([, tagIds]) => tagIds.includes(tagId))
         .map(([channelId]) => channelId);
 }
@@ -28,7 +28,7 @@ export function getTagUsageChannelIds(tagId: string) {
 export function getTagUsageCounts() {
     const counts = new Map<string, number>();
 
-    for (const tagIds of Object.values(settings.store.channelTags)) {
+    for (const tagIds of Object.values(getChannelTagMap())) {
         for (const tagId of tagIds) counts.set(tagId, (counts.get(tagId) ?? 0) + 1);
     }
 

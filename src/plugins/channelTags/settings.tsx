@@ -11,14 +11,6 @@ import type { ChannelTagMap, TagMap } from "./data";
 import { TagSettings } from "./TagSettings";
 
 export const settings = definePluginSettings({
-    tags: {
-        type: OptionType.CUSTOM,
-        default: {} as TagMap
-    },
-    channelTags: {
-        type: OptionType.CUSTOM,
-        default: {} as ChannelTagMap
-    },
     clickTagsToRemove: {
         type: OptionType.BOOLEAN,
         displayName: "Click tags to remove them",
@@ -29,4 +21,15 @@ export const settings = definePluginSettings({
         type: OptionType.COMPONENT,
         component: TagSettings
     }
-});
+}).withPrivateSettings<{
+    tags?: TagMap;
+    channelTags?: ChannelTagMap;
+}>();
+
+export function getTagMap() {
+    return settings.store.tags ??= {};
+}
+
+export function getChannelTagMap() {
+    return settings.store.channelTags ??= {};
+}

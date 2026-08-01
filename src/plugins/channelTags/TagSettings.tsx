@@ -9,7 +9,7 @@ import { DeleteIcon, PencilIcon } from "@components/Icons";
 import { ConfirmModal, Forms, openModal, Tooltip } from "@webpack/common";
 
 import { deleteTag, sortAlphaNum } from "./data";
-import { settings } from "./settings";
+import { getTagMap, settings } from "./settings";
 import { openCreateTagModal, openEditTagModal } from "./TagModal";
 import { TagShapeIcon } from "./TagShape";
 import { openTagUsageModal } from "./TagUsageModal";
@@ -41,9 +41,8 @@ function ViewIcon() {
 }
 
 export function TagSettings() {
-    // CUSTOM settings do not expose wildcard paths in definePluginSettings' types.
-    const { tags: tagMap } = settings.use(["tags", "channelTags.*" as "channelTags"]);
-    const tags = Object.entries(tagMap)
+    settings.use();
+    const tags = Object.entries(getTagMap())
         .sort(([, a], [, b]) => sortAlphaNum(a.name, b.name));
     const usageCounts = getTagUsageCounts();
 
