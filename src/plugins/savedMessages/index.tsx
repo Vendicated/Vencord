@@ -62,8 +62,8 @@ const ChatBarIcon: ChatBarButtonFactory = ({ isMainChat }) => {
 
 export default definePlugin({
     name: "SavedMessages",
-    description: "Save messages locally via the message context menu, and view them later from a Saved Messages panel.",
-    authors: [Devs.Ven],
+    description: "Adds a 'Save Message' option to save messages locally and revisit them from a Saved Messages panel which is a pin icon in chatbox",
+    authors: [Devs.Saransh],
     dependencies: ["ChatInputButtonAPI"],
 
     contextMenus: {
