@@ -102,7 +102,7 @@ export default definePlugin({
         }
 
         // Cheap way to check if there are any search params
-        if (url.searchParams.entries().next().done) return match;
+        if (!url.searchParams.size) return match;
 
         // Check rules for each provider that matches
         this.rules.forEach(({ urlPattern, exceptions, rawRules, rules }) => {
