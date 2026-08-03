@@ -14,9 +14,17 @@ export interface ChannelTag {
     shape?: TagShape;
 }
 
-export type TagShape = "square" | "triangle" | "circle";
+export const TagShapes = {
+    Circle: "circle",
+    Triangle: "triangle",
+    Square: "square",
+    Spark: "spark",
+    Star: "star",
+} as const;
+export type TagShape = (typeof TagShapes)[keyof typeof TagShapes];
+export const TagShapesList: TagShape[] = Object.values(TagShapes);
 
-export const DEFAULT_TAG_SHAPE: TagShape = "square";
+export const DEFAULT_TAG_SHAPE: TagShape = TagShapes.Circle;
 
 export type TagMap = Record<string, ChannelTag>;
 export type ChannelTagMap = Record<string, string[]>;

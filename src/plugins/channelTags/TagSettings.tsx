@@ -71,7 +71,7 @@ export function TagSettings() {
                         <TagShapeIcon
                             className="vc-channel-tags-settings-swatch"
                             color={tag.color}
-                            shape={tag.shape}
+                            tagShape={tag.shape}
                         />
                         <span className="vc-channel-tags-settings-name">
                             {tag.name}

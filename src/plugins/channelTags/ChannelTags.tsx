@@ -46,7 +46,7 @@ export function ChannelTags({ channelId }: { channelId: string; }) {
                             role={clickToRemove ? "button" : undefined}
                             tabIndex={clickToRemove ? 0 : undefined}
                         >
-                            <TagShapeIcon color={tag.color} shape={tag.shape} />
+                            <TagShapeIcon color={tag.color} tagShape={tag.shape} />
                         </span>
                     )}
                 </Tooltip>

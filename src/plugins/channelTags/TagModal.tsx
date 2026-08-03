@@ -10,13 +10,12 @@ import { RenderModalProps } from "@vencord/discord-types";
 import { extractAndLoadChunksLazy, findComponentByCodeLazy } from "@webpack";
 import { ColorPicker, Forms, Modal, openModalLazy, TextInput, useState } from "@webpack/common";
 
-import { addTagToChannel, createTag, DEFAULT_TAG_SHAPE, TagShape, updateTag } from "./data";
+import { addTagToChannel, createTag, DEFAULT_TAG_SHAPE, TagShape, TagShapesList, updateTag } from "./data";
 import { getTagMap } from "./settings";
 import { TagShapeIcon } from "./TagShape";
 
 const DEFAULT_COLOR = 0x5865f2;
 const SWATCHES = [0x1abc9c, 0x2ecc71, 0x3498db, 0x5865f2, 0x9b59b6, 0xe91e63, 0xf1c40f, 0xe67e22, 0xe74c3c];
-const SHAPES: TagShape[] = ["square", "triangle", "circle"];
 const cl = classNameFactory("vc-channel-tags-modal-");
 
 interface ColorPickerWithSwatchesProps {
@@ -55,8 +54,8 @@ function TagModal({ channelId, tagId, modalProps }: TagModalProps) {
 
     const cycleShape = (direction: 1 | -1) => {
         setShape(currentShape => {
-            const currentIndex = SHAPES.indexOf(currentShape);
-            return SHAPES[(currentIndex + direction + SHAPES.length) % SHAPES.length];
+            const currentIndex = TagShapesList.indexOf(currentShape);
+            return TagShapesList[(currentIndex + direction + TagShapesList.length) % TagShapesList.length];
         });
     };
 
@@ -107,7 +106,7 @@ function TagModal({ channelId, tagId, modalProps }: TagModalProps) {
                             type="button"
                             variant="secondary"
                         >
-                            <TagShapeIcon color={intToCssColor(color)} shape={shape} />
+                            <TagShapeIcon color={intToCssColor(color)} tagShape={shape} />
                         </Button>
                         <div className={cl("name-input")}>
                             <TextInput
