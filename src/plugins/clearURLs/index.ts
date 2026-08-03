@@ -109,12 +109,15 @@ export default definePlugin({
             if (!urlPattern.test(url.href) || exceptions?.some(ex => ex.test(url.href))) return;
 
             if (rules) {
-                // Delete matched params from list
+                const toDelete: string[] = [];
+                // Add matched params to delete list (can't delete while iterating).
                 url.searchParams.forEach((_, param) => {
                     if (rules.some(rule => rule.test(param))) {
-                        url.searchParams.delete(param);
+                        toDelete.push(param);
                     }
                 });
+                // Delete matched params from list
+                toDelete.forEach(param => url.searchParams.delete(param));
             }
 
             // Match and remove any raw rules
