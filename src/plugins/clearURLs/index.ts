@@ -72,29 +72,27 @@ export default definePlugin({
     },
 
     async createRules() {
-        const res = await fetch(CLEAR_URLS_JSON_URL)
+        const { providers } = await fetch(CLEAR_URLS_JSON_URL)
             .then(res => res.json()) as ClearUrlsData;
 
-        this.rules = [];
-
-        for (const [name, provider] of Object.entries(res.providers)) {
+        this.rules = Object.entries(providers).map(([name, provider]) => {
             const urlPattern = new RegExp(provider.urlPattern, "i");
 
             const rules = provider.rules?.map(rule => new RegExp(rule, "i"));
             const rawRules = provider.rawRules?.map(rule => new RegExp(rule, "i"));
             const exceptions = provider.exceptions?.map(ex => new RegExp(ex, "i"));
 
-            this.rules.push({
+            return {
                 name,
                 urlPattern,
                 rules,
                 rawRules,
                 exceptions,
-            });
-        }
+            };
+        });
     },
 
-    replacer(match: string) {
+    cleanURL(match: string) {
         // Parse URL without throwing errors
         try {
             var url = new URL(match);
@@ -110,19 +108,14 @@ export default definePlugin({
         this.rules.forEach(({ urlPattern, exceptions, rawRules, rules }) => {
             if (!urlPattern.test(url.href) || exceptions?.some(ex => ex.test(url.href))) return;
 
-            const toDelete: string[] = [];
-
             if (rules) {
-                // Add matched params to delete list
+                // Delete matched params from list
                 url.searchParams.forEach((_, param) => {
                     if (rules.some(rule => rule.test(param))) {
-                        toDelete.push(param);
+                        url.searchParams.delete(param);
                     }
                 });
             }
-
-            // Delete matched params from list
-            toDelete.forEach(param => url.searchParams.delete(param));
 
             // Match and remove any raw rules
             let cleanedUrl = url.href;
@@ -140,7 +133,7 @@ export default definePlugin({
         if (/http(s)?:\/\//.test(msg.content)) {
             msg.content = msg.content.replace(
                 /(https?:\/\/[^\s<]+[^<.,:;"'>)|\]\s])/g,
-                match => this.replacer(match)
+                this.cleanURL
             );
         }
     },
