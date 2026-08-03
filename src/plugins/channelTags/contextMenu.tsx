@@ -24,7 +24,7 @@ function TagMenuLabel({ color, name, shape }: {
             <TagShapeIcon
                 className="vc-channel-tags-menu-swatch"
                 color={color}
-                shape={shape}
+                tagShape={shape}
             />
             <span>{name}</span>
         </span>
