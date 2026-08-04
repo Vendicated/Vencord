@@ -1,0 +1,138 @@
+/*
+ * Vencord, a Discord client mod
+ * Copyright (c) 2026 Vendicated and contributors
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
+
+.vc-activity-timeline-modal {
+    min-height: 520px;
+}
+
+.vc-activity-timeline-summary {
+    padding: 4px 0 16px;
+}
+
+.vc-activity-timeline-target {
+    color: var(--header-primary);
+    font-size: 20px;
+    font-weight: 600;
+}
+
+.vc-activity-timeline-targetHeader {
+    align-items: center;
+    display: flex;
+    gap: 10px;
+}
+
+.vc-activity-timeline-avatar {
+    flex: 0 0 auto;
+}
+
+.vc-activity-timeline-activeBadge {
+    background: var(--status-positive-background);
+    border-radius: 4px;
+    color: var(--status-positive-text);
+    font-size: 11px;
+    font-weight: 600;
+    padding: 3px 6px;
+    text-transform: uppercase;
+}
+
+.vc-activity-timeline-notice {
+    background: var(--background-secondary-alt);
+    border-radius: 4px;
+    color: var(--text-normal);
+    margin-top: 8px;
+    padding: 8px;
+}
+
+.vc-activity-timeline-error {
+    color: var(--text-danger);
+}
+
+.vc-activity-timeline-filters {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.vc-activity-timeline-filter {
+    min-width: 0;
+}
+
+.vc-activity-timeline-filter > div:first-child {
+    margin-bottom: 6px;
+}
+
+.vc-activity-timeline-scroller {
+    min-height: 320px;
+    max-height: 420px;
+}
+
+.vc-activity-timeline-event {
+    border-top: 1px solid var(--background-modifier-accent);
+    padding: 12px 4px;
+}
+
+.vc-activity-timeline-eventHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    color: var(--text-muted);
+    font-size: 12px;
+}
+
+.vc-activity-timeline-eventType {
+    color: var(--text-link);
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.vc-activity-timeline-eventTitle {
+    color: var(--header-primary);
+    font-size: 15px;
+    font-weight: 600;
+    margin-top: 4px;
+}
+
+.vc-activity-timeline-eventDetails {
+    color: var(--text-normal);
+    font-size: 13px;
+    margin-top: 2px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.vc-activity-timeline-jump {
+    background: none;
+    border: 0;
+    color: var(--text-link);
+    cursor: pointer;
+    font-size: 12px;
+    margin-top: 6px;
+    padding: 0;
+}
+
+.vc-activity-timeline-jump:disabled {
+    color: var(--text-muted);
+    cursor: not-allowed;
+}
+
+.vc-activity-timeline-empty {
+    align-items: center;
+    color: var(--text-muted);
+    display: flex;
+    justify-content: center;
+    min-height: 320px;
+    padding: 24px;
+    text-align: center;
+}
+
+@media (width <= 700px) {
+    .vc-activity-timeline-filters {
+        grid-template-columns: 1fr;
+    }
+}
