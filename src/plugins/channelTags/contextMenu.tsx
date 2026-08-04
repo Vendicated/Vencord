@@ -97,7 +97,7 @@ export function makeChannelTagsMenuItem(channelId: string, channelTags: ChannelT
 }
 
 function ChannelTagsMenu({ channelId }: { channelId: string; }) {
-    settings.use();
+    settings.use(["channelTags"]);
 
     return (
         <Menu.Menu
@@ -117,6 +117,8 @@ export function openChannelTagsMenu(event: React.MouseEvent, channelId: string) 
 }
 
 export const patchChannelContextMenu: NavContextMenuPatchCallback = (children, props) => {
+    settings.use(["channelTags"]);
+
     const channel = props?.channel;
     if (!channel?.id) return;
 
@@ -125,6 +127,8 @@ export const patchChannelContextMenu: NavContextMenuPatchCallback = (children, p
 };
 
 export const patchDmListContextMenu: NavContextMenuPatchCallback = (children, props) => {
+    settings.use(["channelTags"]);
+
     const group = findGroupChildrenByChildId("close-dm", children);
     if (!group || !props?.channel?.id) return;
 

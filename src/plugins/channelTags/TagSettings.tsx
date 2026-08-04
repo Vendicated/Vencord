@@ -6,7 +6,10 @@
 
 import { Button } from "@components/Button";
 import { DeleteIcon, PencilIcon } from "@components/Icons";
-import { ConfirmModal, Forms, openModal, Tooltip } from "@webpack/common";
+import { Paragraph } from "@components/index";
+import { SettingsSection } from "@components/settings/tabs/plugins/components/Common";
+import { classNameFactory } from "@utils/css";
+import { ConfirmModal, openModal, Tooltip } from "@webpack/common";
 
 import { deleteTag, sortAlphaNum } from "./data";
 import { getTagMap, settings } from "./settings";
@@ -14,6 +17,8 @@ import { openCreateTagModal, openEditTagModal } from "./TagModal";
 import { TagShapeIcon } from "./TagShape";
 import { openTagUsageModal } from "./TagUsageModal";
 import { getTagUsageCounts } from "./usage";
+
+const cl = classNameFactory("vc-channel-tags-");
 
 function confirmDeleteTag(id: string, name: string) {
     openModal(props => (
@@ -25,16 +30,16 @@ function confirmDeleteTag(id: string, name: string) {
             title="Delete Channel Tag"
             variant="critical-primary"
         >
-            <Forms.FormText>
+            <Paragraph>
                 Delete “{name}” and remove it from every channel?
-            </Forms.FormText>
+            </Paragraph>
         </ConfirmModal>
     ));
 }
 
 function ViewIcon() {
     return (
-        <svg aria-hidden="true" className="vc-channel-tags-action-icon" viewBox="0 0 24 24">
+        <svg aria-hidden="true" className={cl("action-icon")} viewBox="0 0 24 24">
             <path fill="currentColor" d="M12 5c5.5 0 9.5 5.1 9.7 5.3a2.7 2.7 0 0 1 0 3.4C21.5 13.9 17.5 19 12 19s-9.5-5.1-9.7-5.3a2.7 2.7 0 0 1 0-3.4C2.5 10.1 6.5 5 12 5Zm0 2c-4.2 0-7.5 3.8-8.1 5 .6 1.2 3.9 5 8.1 5s7.5-3.8 8.1-5c-.6-1.2-3.9-5-8.1-5Zm0 2a3 3 0 1 1 0 6 3 3 0 0 1 0-6Z" />
         </svg>
     );
@@ -47,35 +52,36 @@ export function TagSettings() {
     const usageCounts = getTagUsageCounts();
 
     return (
-        <div className="vc-channel-tags-settings">
-            <div className="vc-channel-tags-settings-header">
-                <Forms.FormTitle tag="h3">Tags</Forms.FormTitle>
+        <div className={cl("settings")}>
+            <SettingsSection tag="div" name="Tags" id="" description="" inlineSetting>
                 <Button onClick={() => openCreateTagModal()} size="small">
                     Add Tag
                 </Button>
-            </div>
-            <Forms.FormText className="vc-channel-tags-settings-note">
-                Hold Shift when clicking Delete to skip confirmation.
-            </Forms.FormText>
+            </SettingsSection>
+            {tags.length && (
+                <Paragraph size="xs" style={{ color: "var(--text-muted)" }}>
+                    Hold Shift when clicking Delete to skip confirmation.
+                </Paragraph>
+            )}
             {!tags.length && (
-                <Forms.FormText className="vc-channel-tags-settings-empty">
+                <Paragraph style={{ color: "var(--text-muted)" }}>
                     No tags have been defined yet. Right-click a channel and choose Add Tag to create one.
-                </Forms.FormText>
+                </Paragraph>
             )}
             {tags.map(([id, tag]) => (
                 <div
-                    className="vc-channel-tags-settings-row"
+                    className={cl("settings-row")}
                     key={id}
                 >
-                    <div className="vc-channel-tags-settings-summary">
+                    <div className={cl("settings-summary")}>
                         <TagShapeIcon
-                            className="vc-channel-tags-settings-swatch"
+                            className={cl("settings-swatch")}
                             color={tag.color}
                             tagShape={tag.shape}
                         />
-                        <span className="vc-channel-tags-settings-name">
+                        <span className={cl("settings-name")}>
                             {tag.name}
-                            <span className="vc-channel-tags-settings-usage-count">
+                            <span className={cl("settings-usage-count")}>
                                 ({usageCounts.get(id) || "Unused"})
                             </span>
                         </span>
@@ -108,7 +114,7 @@ export function TagSettings() {
                                 size="iconOnly"
                                 variant="secondary"
                             >
-                                <PencilIcon className="vc-channel-tags-action-icon" />
+                                <PencilIcon className={cl("action-icon")} />
                             </Button>
                         )}
                     </Tooltip>
@@ -125,7 +131,7 @@ export function TagSettings() {
                                 size="iconOnly"
                                 variant="dangerSecondary"
                             >
-                                <DeleteIcon className="vc-channel-tags-action-icon" />
+                                <DeleteIcon className={cl("action-icon")} />
                             </Button>
                         )}
                     </Tooltip>

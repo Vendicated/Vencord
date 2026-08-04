@@ -4,11 +4,11 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { Button } from "@components/Button";
+import { Button, Heading, Margins, Paragraph } from "@components/index";
 import { classNameFactory } from "@utils/css";
 import { RenderModalProps } from "@vencord/discord-types";
 import { extractAndLoadChunksLazy, findComponentByCodeLazy } from "@webpack";
-import { ColorPicker, Forms, Modal, openModalLazy, TextInput, useState } from "@webpack/common";
+import { ColorPicker, Modal, openModalLazy, TextInput, useState } from "@webpack/common";
 
 import { addTagToChannel, createTag, DEFAULT_TAG_SHAPE, TagShape, TagShapesList, updateTag } from "./data";
 import { getTagMap } from "./settings";
@@ -86,61 +86,54 @@ function TagModal({ channelId, tagId, modalProps }: TagModalProps) {
                 disabled: !name.trim()
             }]}
         >
-            <form
-                className={cl("content")}
-                onSubmit={event => {
-                    event.preventDefault();
-                    onSave();
-                }}
-            >
-                <section>
-                    <Forms.FormTitle>Tag Name</Forms.FormTitle>
-                    <div className={cl("name-row")}>
-                        <Button
-                            aria-label={`Shape: ${shape}. Click for next shape; right-click for previous shape`}
-                            className={cl("shape-button")}
-                            onClick={() => cycleShape(1)}
-                            onContextMenu={event => {
+            <div className={cl("content")}>
+                <div className={cl("name-row")}>
+                    <Button
+                        aria-label={`Shape: ${shape}. Click for next shape; right-click for previous shape`}
+                        className={cl("shape-button")}
+                        onClick={() => cycleShape(1)}
+                        onContextMenu={event => {
+                            event.preventDefault();
+                            event.stopPropagation();
+                            cycleShape(-1);
+                        }}
+                        size="iconOnly"
+                        type="button"
+                        variant="secondary"
+                    >
+                        <TagShapeIcon color={intToCssColor(color)} tagShape={shape} />
+                    </Button>
+                    <div className={cl("name-input")}>
+                        <TextInput
+                            autoFocus
+                            maxLength={32}
+                            onKeyDown={event => {
+                                if (event.key !== "Enter") return;
                                 event.preventDefault();
-                                event.stopPropagation();
-                                cycleShape(-1);
+                                onSave();
                             }}
-                            size="iconOnly"
-                            type="button"
-                            variant="secondary"
-                        >
-                            <TagShapeIcon color={intToCssColor(color)} tagShape={shape} />
-                        </Button>
-                        <div className={cl("name-input")}>
-                            <TextInput
-                                autoFocus
-                                maxLength={32}
-                                placeholder="Important"
-                                value={name}
-                                onChange={setName}
-                            />
-                        </div>
+                            placeholder="Tag Name"
+                            value={name}
+                            onChange={setName}
+                        />
                     </div>
-                </section>
-                <section>
-                    <Forms.FormTitle>Color</Forms.FormTitle>
-                    <ColorPickerWithSwatches
-                        className={cl("color-picker")}
-                        colors={SWATCHES}
-                        defaultColor={DEFAULT_COLOR}
-                        onChange={nextColor => nextColor != null && setColor(nextColor)}
-                        renderCustomButton={() => (
-                            <ColorPicker
-                                color={color}
-                                onChange={nextColor => nextColor != null && setColor(nextColor)}
-                                showEyeDropper={false}
-                            />
-                        )}
-                        renderDefaultButton={() => null}
-                        value={color}
-                    />
-                </section>
-            </form>
+                </div>
+                <ColorPickerWithSwatches
+                    className={cl("color-picker")}
+                    colors={SWATCHES}
+                    defaultColor={DEFAULT_COLOR}
+                    onChange={c => setColor(c!)}
+                    value={color}
+                    renderDefaultButton={() => null}
+                    renderCustomButton={() => (
+                        <ColorPicker
+                            color={color}
+                            onChange={c => setColor(c!)}
+                            showEyeDropper={false}
+                        />
+                    )}
+                />
+            </div>
         </Modal>
     );
 }

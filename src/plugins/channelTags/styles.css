@@ -10,6 +10,7 @@
 
 .vc-channel-tags-modal-color-picker {
     margin-inline-end: 0;
+    justify-content: space-evenly;
 
     [class*="defaultContainer"] {
         display: none;
@@ -92,21 +93,11 @@
     margin-bottom: 0;
 }
 
-.vc-channel-tags-settings-note {
-    color: var(--text-muted);
-    font-size: 12px;
-}
-
-.vc-channel-tags-settings-empty {
-    color: var(--text-muted);
-}
-
 .vc-channel-tags-settings-row {
     display: flex;
     align-items: center;
-    gap: 8px;
-    min-height: 40px;
-    padding: 0 10px;
+    gap: 6px;
+    min-height: 36px;
 }
 
 .vc-channel-tags-settings-summary {
