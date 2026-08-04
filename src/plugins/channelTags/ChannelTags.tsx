@@ -6,7 +6,7 @@
 
 import { Tooltip } from "@webpack/common";
 
-import { removeTagFromChannel } from "./data";
+import { compareTags, removeTagFromChannel } from "./data";
 import { getChannelTagMap, getTagMap, settings } from "./settings";
 import { TagShapeIcon } from "./TagShape";
 
@@ -18,7 +18,8 @@ export function ChannelTags({ channelId }: { channelId: string; }) {
 
     const tags = (channelTags[channelId] ?? [])
         .map(id => [id, tagMap[id]] as const)
-        .filter((entry): entry is readonly [string, NonNullable<typeof entry[1]>] => entry[1] != null);
+        .filter((entry): entry is readonly [string, NonNullable<typeof entry[1]>] => entry[1] != null)
+        .sort(([, a], [, b]) => compareTags(a, b));
 
     if (!tags.length) return null;
 

@@ -5,13 +5,14 @@
  */
 
 import { Button } from "@components/Button";
+import { ExpandableSection } from "@components/ExpandableCard";
 import { DeleteIcon, PencilIcon } from "@components/Icons";
 import { Paragraph } from "@components/index";
 import { SettingsSection } from "@components/settings/tabs/plugins/components/Common";
 import { classNameFactory } from "@utils/css";
 import { ConfirmModal, openModal, Tooltip } from "@webpack/common";
 
-import { deleteTag, sortAlphaNum } from "./data";
+import { ChannelTag, compareTags, deleteTag } from "./data";
 import { getTagMap, settings } from "./settings";
 import { openCreateTagModal, openEditTagModal } from "./TagModal";
 import { TagShapeIcon } from "./TagShape";
@@ -48,8 +49,14 @@ function ViewIcon() {
 export function TagSettings() {
     settings.use();
     const tags = Object.entries(getTagMap())
-        .sort(([, a], [, b]) => sortAlphaNum(a.name, b.name));
+        .sort(([, a], [, b]) => compareTags(a, b));
     const usageCounts = getTagUsageCounts();
+    const groupedTags = new Map<string | undefined, [string, ChannelTag][]>();
+    for (const entry of tags) {
+        const groupTags = groupedTags.get(entry[1].group) ?? [];
+        groupTags.push(entry);
+        groupedTags.set(entry[1].group, groupTags);
+    }
 
     return (
         <div className={cl("settings")}>
@@ -68,74 +75,86 @@ export function TagSettings() {
                     No tags have been defined yet. Right-click a channel and choose Add Tag to create one.
                 </Paragraph>
             )}
-            {tags.map(([id, tag]) => (
-                <div
-                    className={cl("settings-row")}
-                    key={id}
+            {[...groupedTags].map(([group, groupTags]) => (
+                <ExpandableSection
+                    initialExpanded
+                    key={group}
+                    renderContent={() => (
+                        groupTags.map(([id, tag]) => (
+                            <div
+                                className={cl("settings-row")}
+                                key={id}
+                            >
+                                <div className={cl("settings-summary")}>
+                                    <TagShapeIcon
+                                        className={cl("settings-swatch")}
+                                        color={tag.color}
+                                        tagShape={tag.shape}
+                                    />
+                                    <span className={cl("settings-name")}>
+                                        {tag.name}
+                                        <span className={cl("settings-usage-count")}>
+                                            ({usageCounts.get(id) || "Unused"})
+                                        </span>
+                                    </span>
+                                </div>
+                                <Tooltip position="top" text="View">
+                                    {tooltipProps => (
+                                        <Button
+                                            {...tooltipProps}
+                                            aria-label="View"
+                                            onClick={event => {
+                                                event.stopPropagation();
+                                                openTagUsageModal(id);
+                                            }}
+                                            size="iconOnly"
+                                            variant="secondary"
+                                        >
+                                            <ViewIcon />
+                                        </Button>
+                                    )}
+                                </Tooltip>
+                                <Tooltip position="top" text="Edit">
+                                    {tooltipProps => (
+                                        <Button
+                                            {...tooltipProps}
+                                            aria-label="Edit"
+                                            onClick={event => {
+                                                event.stopPropagation();
+                                                openEditTagModal(id);
+                                            }}
+                                            size="iconOnly"
+                                            variant="secondary"
+                                        >
+                                            <PencilIcon className={cl("action-icon")} />
+                                        </Button>
+                                    )}
+                                </Tooltip>
+                                <Tooltip position="top" text="Delete">
+                                    {tooltipProps => (
+                                        <Button
+                                            {...tooltipProps}
+                                            aria-label="Delete"
+                                            onClick={event => {
+                                                event.stopPropagation();
+                                                if (event.shiftKey) deleteTag(id);
+                                                else confirmDeleteTag(id, tag.name);
+                                            }}
+                                            size="iconOnly"
+                                            variant="dangerSecondary"
+                                        >
+                                            <DeleteIcon className={cl("action-icon")} />
+                                        </Button>
+                                    )}
+                                </Tooltip>
+                            </div>
+                        ))
+                    )}
                 >
-                    <div className={cl("settings-summary")}>
-                        <TagShapeIcon
-                            className={cl("settings-swatch")}
-                            color={tag.color}
-                            tagShape={tag.shape}
-                        />
-                        <span className={cl("settings-name")}>
-                            {tag.name}
-                            <span className={cl("settings-usage-count")}>
-                                ({usageCounts.get(id) || "Unused"})
-                            </span>
-                        </span>
-                    </div>
-                    <Tooltip position="top" text="View">
-                        {tooltipProps => (
-                            <Button
-                                {...tooltipProps}
-                                aria-label="View"
-                                onClick={event => {
-                                    event.stopPropagation();
-                                    openTagUsageModal(id);
-                                }}
-                                size="iconOnly"
-                                variant="secondary"
-                            >
-                                <ViewIcon />
-                            </Button>
-                        )}
-                    </Tooltip>
-                    <Tooltip position="top" text="Edit">
-                        {tooltipProps => (
-                            <Button
-                                {...tooltipProps}
-                                aria-label="Edit"
-                                onClick={event => {
-                                    event.stopPropagation();
-                                    openEditTagModal(id);
-                                }}
-                                size="iconOnly"
-                                variant="secondary"
-                            >
-                                <PencilIcon className={cl("action-icon")} />
-                            </Button>
-                        )}
-                    </Tooltip>
-                    <Tooltip position="top" text="Delete">
-                        {tooltipProps => (
-                            <Button
-                                {...tooltipProps}
-                                aria-label="Delete"
-                                onClick={event => {
-                                    event.stopPropagation();
-                                    if (event.shiftKey) deleteTag(id);
-                                    else confirmDeleteTag(id, tag.name);
-                                }}
-                                size="iconOnly"
-                                variant="dangerSecondary"
-                            >
-                                <DeleteIcon className={cl("action-icon")} />
-                            </Button>
-                        )}
-                    </Tooltip>
-                </div>
+                    <Paragraph weight="medium" size="md">
+                        {group ?? "Ungrouped"}
+                    </Paragraph>
+                </ExpandableSection>
             ))}
         </div>
     );

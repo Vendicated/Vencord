@@ -11,6 +11,7 @@ import { getChannelTagMap, getTagMap } from "./settings";
 export interface ChannelTag {
     name: string;
     color: string;
+    group?: string;
     shape?: TagShape;
 }
 
@@ -31,14 +32,30 @@ export type ChannelTagMap = Record<string, string[]>;
 
 export const sortAlphaNum = (a: string, b: string) => a.localeCompare(b, LocaleStore?.locale ?? "en", { numeric: true });
 
-function sortTagIds(tagIds: string[]) {
-    const tags = getTagMap();
-    return tagIds.sort((a, b) => sortAlphaNum(tags[a]?.name ?? "", tags[b]?.name ?? ""));
+export function compareTags(a: ChannelTag, b: ChannelTag) {
+    if (a.group && b.group) {
+        const groupComparison = sortAlphaNum(a.group, b.group);
+        if (groupComparison) return groupComparison;
+    } else if (a.group) {
+        return -1;
+    } else if (b.group) {
+        return 1;
+    }
+
+    return sortAlphaNum(a.name, b.name);
 }
 
-export function createTag(name: string, color: string, shape: TagShape = DEFAULT_TAG_SHAPE): string {
+function sortTagIds(tagIds: string[]) {
+    const tags = getTagMap();
+    return tagIds.sort((a, b) => compareTags(
+        tags[a] ?? { name: "", color: "" },
+        tags[b] ?? { name: "", color: "" }
+    ));
+}
+
+export function createTag(name: string, color: string, shape: TagShape = DEFAULT_TAG_SHAPE, group?: string): string {
     const id = crypto.randomUUID();
-    getTagMap()[id] = { name, color, shape };
+    getTagMap()[id] = { name, color, group, shape };
     return id;
 }
 
@@ -49,7 +66,12 @@ export function updateTag(id: string, tag: ChannelTag) {
     tags[id] = tag;
     const channelTags = getChannelTagMap();
     for (const [channelId, tagIds] of Object.entries(channelTags)) {
-        if (tagIds.includes(id)) channelTags[channelId] = sortTagIds([...tagIds]);
+        if (!tagIds.includes(id)) continue;
+
+        const nextTagIds = tag.group
+            ? tagIds.filter(tagId => tagId === id || tags[tagId]?.group !== tag.group)
+            : [...tagIds];
+        channelTags[channelId] = sortTagIds(nextTagIds);
     }
 }
 
@@ -66,7 +88,10 @@ export function deleteTag(id: string) {
 
 export function addTagToChannel(channelId: string, tagId: string) {
     const channelTags = getChannelTagMap();
-    const tagIds = channelTags[channelId] ?? [];
+    const tags = getTagMap();
+    const group = tags[tagId]?.group;
+    const tagIds = (channelTags[channelId] ?? [])
+        .filter(id => !group || tags[id]?.group !== group);
     if (!tagIds.includes(tagId)) channelTags[channelId] = sortTagIds([...tagIds, tagId]);
 }
 
