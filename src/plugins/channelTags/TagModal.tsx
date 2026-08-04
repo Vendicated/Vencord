@@ -14,8 +14,11 @@ import { addTagToChannel, createTag, DEFAULT_TAG_SHAPE, TagShape, TagShapesList,
 import { getTagMap } from "./settings";
 import { TagShapeIcon } from "./TagShape";
 
-const DEFAULT_COLOR = 0x5865f2;
-const SWATCHES = [0x1abc9c, 0x2ecc71, 0x3498db, 0x5865f2, 0x9b59b6, 0xe91e63, 0xf1c40f, 0xe67e22, 0xe74c3c];
+const SWATCHES = [
+    0x1abc9c, 0x2ecc71, 0x3498db, 0x9b59b6, 0xe91e63, 0xf1c40f, 0xe67e22, 0xe74c3c, 0x95a5a6, 0x607d8b,
+    0x11806a, 0x1f8b4c, 0x206694, 0x71368a, 0xad1457, 0xc27c0e, 0xa84300, 0x992d22, 0x979c9f, 0x546e7a,
+];
+const DEFAULT_COLOR = SWATCHES[8];
 const cl = classNameFactory("vc-channel-tags-modal-");
 
 interface ColorPickerWithSwatchesProps {
@@ -75,9 +78,9 @@ function TagModal({ channelId, tagId, modalProps }: TagModalProps) {
     return (
         <Modal
             {...modalProps}
-            title={tagId ? "Edit Tag" : "Add Tag"}
+            title={tagId ? "Edit Tag" : "Create Tag"}
             actions={[{
-                text: tagId ? "Save" : "Add Tag",
+                text: tagId ? "Save" : "Create & Set",
                 variant: "primary",
                 onClick: onSave,
                 disabled: !name.trim()

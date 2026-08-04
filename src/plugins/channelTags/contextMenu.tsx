@@ -6,6 +6,7 @@
 
 import { findGroupChildrenByChildId, NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { plugins } from "@api/PluginManager";
+import { MainSettingsIcon, PlusIcon } from "@components/index";
 import { openPluginModal } from "@components/settings";
 import { ContextMenuApi, Menu } from "@webpack/common";
 
@@ -41,7 +42,7 @@ export function makeChannelTagsMenuChildren(channelId: string, channelTags: Chan
             <Menu.MenuItem
                 id="vc-channel-tags-add"
                 key="vc-channel-tags-add"
-                label="Add Tag"
+                label="Create Tag"
                 action={() => openCreateTagModal(channelId)}
             />
         ];
@@ -51,13 +52,15 @@ export function makeChannelTagsMenuChildren(channelId: string, channelTags: Chan
         <Menu.MenuItem
             id="vc-channel-tags-add-new"
             key="vc-channel-tags-add-new"
-            label="Add New Tag"
+            label="Create New Tag"
+            icon={PlusIcon}
             action={() => openCreateTagModal(channelId)}
         />,
         <Menu.MenuItem
             id="vc-channel-tags-edit"
             key="vc-channel-tags-edit"
-            label="Manage All Tags"
+            label="Manage Tags"
+            icon={MainSettingsIcon}
             action={() => openPluginModal(plugins.ChannelTags)}
         />,
         <Menu.MenuSeparator key="vc-channel-tags-separator" />,
