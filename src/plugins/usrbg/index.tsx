@@ -45,12 +45,6 @@ const settings = definePluginSettings({
         default: "",
         placeholder: "https://files.catbox.moe/XXXXXX.gif"
     },
-    customAvatarUrl: {
-        description: "Custom animated avatar URL for your own account (client-side only)",
-        type: OptionType.STRING,
-        default: "",
-        placeholder: "https://files.catbox.moe/XXXXXX.gif"
-    },
     voiceBackground: {
         description: "Use USRBG banners as voice chat backgrounds",
         type: OptionType.BOOLEAN,
@@ -61,9 +55,9 @@ const settings = definePluginSettings({
 
 export default definePlugin({
     name: "USRBG",
-    description: "Displays user banners from USRBG, allowing anyone to get a banner without Nitro. Optional custom banner/avatar support.",
+    description: "Displays user banners from USRBG, allowing anyone to get a banner without Nitro. Optional custom banner support.",
     tags: ["Appearance", "Customisation"],
-    authors: [Devs.AutumnVN, Devs.katlyn, Devs.pylix, Devs.TheKodeToad, { name: "Jonttex", id: 571800335757082624n }],
+    authors: [Devs.AutumnVN, Devs.katlyn, Devs.pylix, Devs.TheKodeToad, Devs.Jonttex],
     settings,
     patches: [
         {
@@ -89,13 +83,6 @@ export default definePlugin({
             replacement: {
                 match: /backgroundColor:.{0,25},\{style:(?=\i\?)/,
                 replace: "$&$self.userHasBackground(arguments[0]?.userId)?null:",
-            }
-        },
-        {
-            find: "getUserAvatarURL:",
-            replacement: {
-                match: /(getUserAvatarURL:)(\i),/,
-                replace: "$1$self.getAvatarHook($2),"
             }
         }
     ],
@@ -133,19 +120,6 @@ export default definePlugin({
         if (this.userHasBackground(displayProfile?.userId)) return this.getImageUrl(displayProfile?.userId);
     },
 
-    getAvatarHook(original: Function) {
-        return (user: any, animated: boolean, size: number) => {
-            const currentUser = Vencord.Webpack.Common.UserStore.getCurrentUser();
-            if (user?.id !== currentUser?.id) return original(user, animated, size);
-
-            if (settings.store.customAvatarUrl) {
-                return settings.store.customAvatarUrl;
-            }
-
-            return original(user, animated, size);
-        };
-    },
-
     userHasBackground(userId: string) {
         return !!this.data?.users[userId] || this.hasCustomBanner(userId);
     },
@@ -156,7 +130,6 @@ export default definePlugin({
     },
 
     getImageUrl(userId: string): string | null {
-        // Check custom banner first
         if (this.hasCustomBanner(userId)) {
             return settings.store.customBannerUrl;
         }
