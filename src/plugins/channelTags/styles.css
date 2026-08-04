@@ -93,6 +93,15 @@
     margin-bottom: 0;
 }
 
+.vc-channel-tags-settings-group {
+    display: grid;
+    gap: 4px;
+}
+
+.vc-channel-tags-settings-group-title {
+    margin: 8px 10px 0;
+}
+
 .vc-channel-tags-settings-row {
     display: flex;
     align-items: center;

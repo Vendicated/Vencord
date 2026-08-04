@@ -10,7 +10,7 @@ import { MainSettingsIcon, PlusIcon } from "@components/index";
 import { openPluginModal } from "@components/settings";
 import { ContextMenuApi, Menu } from "@webpack/common";
 
-import { addTagToChannel, ChannelTagMap, removeTagFromChannel, sortAlphaNum, TagShape } from "./data";
+import { addTagToChannel, ChannelTag, ChannelTagMap, compareTags, removeTagFromChannel, TagShape } from "./data";
 import { getChannelTagMap, getTagMap, settings } from "./settings";
 import { openCreateTagModal } from "./TagModal";
 import { TagShapeIcon } from "./TagShape";
@@ -34,7 +34,7 @@ function TagMenuLabel({ color, name, shape }: {
 
 export function makeChannelTagsMenuChildren(channelId: string, channelTags: ChannelTagMap) {
     const tags = Object.entries(getTagMap())
-        .sort(([, a], [, b]) => sortAlphaNum(a.name, b.name));
+        .sort(([, a], [, b]) => compareTags(a, b));
     const assignedTagIds = new Set(channelTags[channelId] ?? []);
 
     if (!tags.length) {
@@ -46,6 +46,13 @@ export function makeChannelTagsMenuChildren(channelId: string, channelTags: Chan
                 action={() => openCreateTagModal(channelId)}
             />
         ];
+    }
+
+    const groupedTags = new Map<string | undefined, [string, ChannelTag][]>();
+    for (const entry of tags) {
+        const groupTags = groupedTags.get(entry[1].group) ?? [];
+        groupTags.push(entry);
+        groupedTags.set(entry[1].group, groupTags);
     }
 
     return [
@@ -64,20 +71,24 @@ export function makeChannelTagsMenuChildren(channelId: string, channelTags: Chan
             action={() => openPluginModal(plugins.ChannelTags)}
         />,
         <Menu.MenuSeparator key="vc-channel-tags-separator" />,
-        ...tags.map(([id, tag]) => {
-            const isAssigned = assignedTagIds.has(id);
-            return (
-                <Menu.MenuCheckboxItem
-                    id={`vc-channel-tags-toggle-${id}`}
-                    key={`vc-channel-tags-toggle-${id}`}
-                    label={<TagMenuLabel color={tag.color} name={tag.name} shape={tag.shape} />}
-                    checked={isAssigned}
-                    action={() => isAssigned
-                        ? removeTagFromChannel(channelId, id)
-                        : addTagToChannel(channelId, id)}
-                />
-            );
-        })
+        ...[...groupedTags].map(([group, groupTags]) => (
+            <Menu.MenuGroup key={group ?? "vc-channel-tags-ungrouped"} label={group ?? "Ungrouped"}>
+                {groupTags.map(([id, tag]) => {
+                    const isAssigned = assignedTagIds.has(id);
+                    return (
+                        <Menu.MenuCheckboxItem
+                            id={`vc-channel-tags-toggle-${id}`}
+                            key={`vc-channel-tags-toggle-${id}`}
+                            label={<TagMenuLabel color={tag.color} name={tag.name} shape={tag.shape} />}
+                            checked={isAssigned}
+                            action={() => isAssigned
+                                ? removeTagFromChannel(channelId, id)
+                                : addTagToChannel(channelId, id)}
+                        />
+                    );
+                })}
+            </Menu.MenuGroup>
+        ))
     ];
 }
 
