@@ -6,6 +6,7 @@
 
 import { Tooltip } from "@webpack/common";
 
+import { openChannelTagsMenu } from "./contextMenu";
 import { compareTags, removeTagFromChannel } from "./data";
 import { getChannelTagMap, getTagMap, settings } from "./settings";
 import { TagShapeIcon } from "./TagShape";
@@ -39,6 +40,7 @@ export function ChannelTags({ channelId }: { channelId: string; }) {
                             aria-label={clickToRemove ? `Remove ${tag.name} tag` : undefined}
                             className={`vc-channel-tags-decoration${clickToRemove ? " vc-channel-tags-decoration-clickable" : ""}`}
                             onClick={clickToRemove ? event => remove(event, id) : undefined}
+                            onContextMenu={event => openChannelTagsMenu(event, channelId)}
                             onKeyDown={clickToRemove
                                 ? event => {
                                     if (event.key === "Enter" || event.key === " ") remove(event, id);
