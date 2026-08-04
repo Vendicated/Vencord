@@ -4,6 +4,8 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { classes } from "@utils/index";
+
 import { DEFAULT_TAG_SHAPE, TagShape, TagShapes } from "./data";
 
 let SHAPES: Record<TagShape, React.JSX.Element> | undefined;
@@ -16,7 +18,7 @@ const getShapes = () => SHAPES || (SHAPES = {
 });
 
 function getBorderColor(color: string) {
-    return `color-mix(in oklab, ${color}, contrast-color(${color}) 80%)`;
+    return `color-mix(in oklab, ${color}, oklch(from ${color} round(0.9 - L) 0 0) 75%)`;
 }
 
 export function TagShapeIcon({
@@ -34,9 +36,11 @@ export function TagShapeIcon({
     return (
         <svg
             aria-hidden="true"
-            className={className}
+            className={classes("vc-channel-tags-tag-shape", className)}
             viewBox="0 0 12 12"
             xmlns="http://www.w3.org/2000/svg"
+            filter={`drop-shadow(1px 1px 0 ${borderColor}) drop-shadow(1px 1px 0 ${borderColor})`}
+            transform="translate(-1 -1)"
         >
             <g fill={color} stroke={borderColor} strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" paintOrder="markers stroke fill">
                 {shape}
