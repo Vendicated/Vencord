@@ -64,6 +64,10 @@ export const Devs = /* #__PURE__*/ Object.freeze({
         name: "Cynosphere",
         id: 150745989836308480n
     },
+    Jonttex: {
+        name: "Jonttex",
+        id: 571800335757082624n
+    },
     Trwy: {
         name: "trey",
         id: 354427199023218689n
