@@ -1,0 +1,233 @@
+.vc-context-pins-modal-content {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    min-height: min(360px, 60vh);
+    color: var(--text-default);
+}
+
+.vc-context-pins-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--background-modifier-accent);
+}
+
+.vc-context-pins-search {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.vc-context-pins-filters {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 8px;
+}
+
+.vc-context-pins-filter,
+.vc-context-pins-sort {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-width: 0;
+}
+
+.vc-context-pins-toolbar {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.vc-context-pins-result-count {
+    color: var(--text-muted);
+    font-size: 12px;
+}
+
+.vc-context-pins-toolbar-actions {
+    display: flex;
+    align-items: flex-end;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.vc-context-pins-sort {
+    min-width: 180px;
+}
+
+.vc-context-pins-clear {
+    align-self: flex-end;
+}
+
+.vc-context-pins-list {
+    min-height: min(240px, 35vh);
+    max-height: min(520px, 55vh);
+    padding-inline-end: 4px;
+}
+
+.vc-context-pins-row {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 16px;
+    margin-bottom: 8px;
+    border: 1px solid var(--background-modifier-accent);
+    border-radius: 8px;
+    background: var(--background-secondary);
+}
+
+.vc-context-pins-row:last-child {
+    margin-bottom: 0;
+}
+
+.vc-context-pins-row-header {
+    display: flex;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.vc-context-pins-row-location,
+.vc-context-pins-row-header time,
+.vc-context-pins-editor-location {
+    color: var(--text-muted);
+    font-size: 12px;
+}
+
+.vc-context-pins-row-content {
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    line-height: 1.45;
+}
+
+.vc-context-pins-row-note {
+    padding: 8px 10px;
+    border-inline-start: 3px solid var(--text-brand);
+    background: var(--background-tertiary);
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+}
+
+.vc-context-pins-row-meta {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    color: var(--text-muted);
+    font-size: 12px;
+}
+
+.vc-context-pins-unavailable {
+    color: var(--text-feedback-critical);
+}
+
+.vc-context-pins-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+}
+
+.vc-context-pins-tag {
+    padding: 2px 7px;
+    border-radius: 10px;
+    background: var(--background-modifier-accent);
+    color: var(--text-default);
+}
+
+.vc-context-pins-row-actions {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 4px;
+}
+
+.vc-context-pins-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 220px;
+    color: var(--text-muted);
+    text-align: center;
+}
+
+.vc-context-pins-state-error {
+    color: var(--text-feedback-critical);
+}
+
+.vc-context-pins-muted,
+.vc-context-pins-field-hint {
+    color: var(--text-muted);
+}
+
+.vc-context-pins-editor {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.vc-context-pins-editor-preview {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 12px;
+    margin-bottom: 8px;
+    border: 1px solid var(--background-modifier-accent);
+    border-radius: 8px;
+    background: var(--background-secondary);
+}
+
+.vc-context-pins-editor-author {
+    color: var(--header-primary);
+    font-weight: 600;
+}
+
+.vc-context-pins-editor-content {
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    line-height: 1.45;
+}
+
+.vc-context-pins-editor-indicators {
+    color: var(--text-muted);
+    font-size: 12px;
+}
+
+@media (width <= 700px) {
+    .vc-context-pins-filters {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .vc-context-pins-toolbar-actions {
+        flex: 1 1 100%;
+        justify-content: space-between;
+    }
+}
+
+@media (width <= 480px) {
+    .vc-context-pins-filters {
+        grid-template-columns: 1fr;
+    }
+
+    .vc-context-pins-toolbar-actions {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .vc-context-pins-sort {
+        width: 100%;
+    }
+
+    .vc-context-pins-clear {
+        align-self: flex-start;
+    }
+
+    .vc-context-pins-row {
+        padding: 12px;
+    }
+}
