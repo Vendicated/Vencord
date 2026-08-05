@@ -304,7 +304,7 @@ function patchHTMLAudio() {
         origHTMLAudioPlay = window.HTMLAudioElement.prototype.play;
         window.HTMLAudioElement.prototype.play = function (this: HTMLAudioElement) {
             if (settings.store.enabled && this.src) {
-                if (this.src.endsWith(".mp3") || this.src.endsWith(".ogg")) {
+                if (this.src.includes(".mp3") || this.src.includes(".ogg") || this.src.includes(".wav")) {
                     logger.debug(`[UwUSounds] Blocked native audio: ${this.src} (loop: ${this.loop})`);
                     // Dzwonki (ringtone) są zapętlane - jeśli Discord próbuje puścić zapętlony dźwięk, odpalamy nasz!
                     if (this.loop) {
