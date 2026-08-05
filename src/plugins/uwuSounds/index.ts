@@ -217,7 +217,16 @@ const MAP: Record<string, () => void> = {
 function handleDiscordSound(name: string) {
     if (RING_NAMES.has(name)) { startRing(); return; }
     if (RING_STOP.has(name)) { stopRing(); }
-    MAP[name]?.();
+    if (MAP[name]) {
+        MAP[name]();
+    } else if (name.includes("stream")) {
+        // Fallback dla dowolnego dźwięku streamu (jak wchodzenie na streama kogoś)
+        if (name.includes("end") || name.includes("stop") || name.includes("leave") || name.includes("left")) {
+            S.sv_leave();
+        } else {
+            S.sv_join();
+        }
+    }
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
