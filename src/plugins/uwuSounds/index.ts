@@ -512,6 +512,11 @@ function handleStreamWatch(data: any) {
     }
 }
 
+function handleStreamStop(data: any) {
+    if (!settings.store.enabled) return;
+    S.sv_leave();
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 //  Ustawienia
 // ─────────────────────────────────────────────────────────────────────────────
@@ -631,6 +636,8 @@ export default definePlugin({
         FluxDispatcher.subscribe("CALL_DELETE", handleCallDelete);
         FluxDispatcher.subscribe("CALL_UPDATE", handleCallUpdate);
         FluxDispatcher.subscribe("STREAM_WATCH", handleStreamWatch);
+        FluxDispatcher.subscribe("STREAM_STOP", handleStreamStop);
+        FluxDispatcher.subscribe("STREAM_DELETE", handleStreamStop);
     },
 
     stop() {
@@ -647,5 +654,7 @@ export default definePlugin({
         FluxDispatcher.unsubscribe("CALL_DELETE", handleCallDelete);
         FluxDispatcher.unsubscribe("CALL_UPDATE", handleCallUpdate);
         FluxDispatcher.unsubscribe("STREAM_WATCH", handleStreamWatch);
+        FluxDispatcher.unsubscribe("STREAM_STOP", handleStreamStop);
+        FluxDispatcher.unsubscribe("STREAM_DELETE", handleStreamStop);
     },
 });
