@@ -499,59 +499,40 @@ const settings = definePluginSettings({
 // ─────────────────────────────────────────────────────────────────────────────
 
 // ─────────────────────────────────────────────────────────────────────────────
-//  Video Stream Detection
+//  Video Stream Detection (DOM Polling)
 // ─────────────────────────────────────────────────────────────────────────────
 
-let origVideoPlay: (() => Promise<void>) | null = null;
 let activeStreams = 0;
-const streamObservers = new Set<MutationObserver>();
+let streamPoller: ReturnType<typeof setInterval> | null = null;
 
-function patchVideoElements() {
-    origVideoPlay = window.HTMLVideoElement.prototype.play;
-    window.HTMLVideoElement.prototype.play = function (this: HTMLVideoElement) {
-        if (settings.store.enabled && this.srcObject instanceof MediaStream) {
-            if (!(this as any).__uwu_stream_counted) {
-                (this as any).__uwu_stream_counted = true;
-                activeStreams++;
-                if (activeStreams === 1) {
-                    S.sv_join();
-                }
-
-                const onEnd = () => {
-                    if ((this as any).__uwu_stream_counted) {
-                        (this as any).__uwu_stream_counted = false;
-                        activeStreams--;
-                        if (activeStreams === 0) S.sv_leave();
-                    }
-                };
-
-                this.addEventListener("pause", onEnd);
-                this.addEventListener("ended", onEnd);
-
-                const observer = new MutationObserver(() => {
-                    if (!document.body.contains(this)) {
-                        observer.disconnect();
-                        streamObservers.delete(observer);
-                        onEnd();
-                    }
-                });
-                observer.observe(document.body, { childList: true, subtree: true });
-                streamObservers.add(observer);
+function startVideoPoller() {
+    if (streamPoller) return;
+    streamPoller = setInterval(() => {
+        if (!settings.store.enabled) return;
+        
+        const videos = document.querySelectorAll("video");
+        let count = 0;
+        videos.forEach(v => {
+            if (v.srcObject instanceof MediaStream) {
+                count++;
             }
+        });
+
+        if (count > activeStreams) {
+            for (let i = 0; i < count - activeStreams; i++) S.sv_join();
+            activeStreams = count;
+        } else if (count < activeStreams) {
+            for (let i = 0; i < activeStreams - count; i++) S.sv_leave();
+            activeStreams = count;
         }
-        return origVideoPlay!.apply(this, arguments as any);
-    };
+    }, 500);
 }
 
-function unpatchVideoElements() {
-    if (origVideoPlay) {
-        window.HTMLVideoElement.prototype.play = origVideoPlay;
-        origVideoPlay = null;
+function stopVideoPoller() {
+    if (streamPoller) {
+        clearInterval(streamPoller);
+        streamPoller = null;
     }
-    for (const obs of streamObservers) {
-        obs.disconnect();
-    }
-    streamObservers.clear();
     activeStreams = 0;
 }
 
@@ -596,7 +577,7 @@ export default definePlugin({
 
         patchSounds();
         patchHTMLAudio();
-        patchVideoElements();
+        startVideoPoller();
 
         FluxDispatcher.subscribe("CONNECTION_OPEN", handleConnectionOpen);
         FluxDispatcher.subscribe("MESSAGE_CREATE", handleMessageCreate);
@@ -616,6 +597,6 @@ export default definePlugin({
         FluxDispatcher.unsubscribe("TYPING_START", handleTypingStart);
         FluxDispatcher.unsubscribe("CALL_DELETE", handleCallDelete);
         FluxDispatcher.unsubscribe("CALL_UPDATE", handleCallUpdate);
-        unpatchVideoElements();
+        stopVideoPoller();
     },
 });
