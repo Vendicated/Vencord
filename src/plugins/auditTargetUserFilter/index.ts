@@ -24,6 +24,7 @@ import { GuildStore, PermissionsBits, PermissionStore, SelectedGuildStore } from
 import { Webpack } from "../../Vencord";
 
 let apply_target_id: string | null = null;
+let current_session_target_id: string | null = null;
 
 export default definePlugin({
     name: "AuditTargetUserFilter",
@@ -76,9 +77,13 @@ export default definePlugin({
     },
 
     modify_audit_query(query: any) {
-        if (apply_target_id) {
-            query.target_id = apply_target_id;
+        if (query.before === undefined) {
+            current_session_target_id = apply_target_id;
             apply_target_id = null;
+        }
+
+        if (current_session_target_id) {
+            query.target_id = current_session_target_id;
         }
     }
 });
