@@ -423,6 +423,7 @@ function handleMessageCreate(data: any) {
 //  Discord wysyła oba warianty (singular + plural) w zależności od wersji
 // ─────────────────────────────────────────────────────────────────────────────
 
+let pluginStartTime = 0;
 let prevChannelId: string | null = null;
 const myChannelUsers = new Set<string>();
 
@@ -436,8 +437,10 @@ function processVoiceState(userId: string, channelId: string | null) {
         if (channelId === prevChannelId) return; // brak zmiany (np. mute)
 
         if (channelId) {
-            if (!prevChannelId) S.user_join();
-            else S.user_moved();
+            if (Date.now() - pluginStartTime > 3500) {
+                if (!prevChannelId) S.user_join();
+                else S.user_moved();
+            }
 
             // Pobieramy aktualną listę osób na nowym kanale
             myChannelUsers.clear();
@@ -575,6 +578,7 @@ export default definePlugin({
     },
 
     start() {
+        pluginStartTime = Date.now();
         startupPlayed = false;
         lastTypingAt = 0;
         lastMsgSoundAt = 0;
@@ -612,14 +616,6 @@ export default definePlugin({
         FluxDispatcher.subscribe("TYPING_START", handleTypingStart);
         FluxDispatcher.subscribe("CALL_DELETE", handleCallDelete);
         FluxDispatcher.subscribe("CALL_UPDATE", handleCallUpdate);
-
-        // Test dźwięku przy włączeniu pluginu
-        setTimeout(() => {
-            if (settings.store.enabled && settings.store.playstartup) {
-                S.startup();
-                logger.info("[UwUSounds] 🎵 Test dźwięku zagrany!");
-            }
-        }, 1000);
     },
 
     stop() {
