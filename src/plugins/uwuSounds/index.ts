@@ -8,7 +8,7 @@ import { definePluginSettings } from "@api/Settings";
 import { Logger } from "@utils/Logger";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByPropsLazy } from "@webpack";
-import { FluxDispatcher, UserStore } from "@webpack/common";
+import { FluxDispatcher, UserStore, Toasts } from "@webpack/common";
 
 const logger = new Logger("UwUSounds");
 
@@ -215,6 +215,11 @@ const MAP: Record<string, () => void> = {
 };
 
 function handleDiscordSound(name: string) {
+    Toasts.show({
+        message: `SOUND: ${name}`,
+        id: Toasts.genId(),
+        type: Toasts.Type.SUCCESS
+    });
     if (RING_NAMES.has(name)) { startRing(); return; }
     if (RING_STOP.has(name)) { stopRing(); }
     if (MAP[name]) {
@@ -498,6 +503,15 @@ function handleCallUpdate(d: any) {
     if (d?.ringing === false || d?.channelId) stopRing();
 }
 
+function handleStreamWatch(data: any) {
+    if (!settings.store.enabled) return;
+    if (data.streamKey) {
+        S.sv_join();
+    } else {
+        S.sv_leave();
+    }
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 //  Ustawienia
 // ─────────────────────────────────────────────────────────────────────────────
@@ -616,6 +630,7 @@ export default definePlugin({
         FluxDispatcher.subscribe("TYPING_START", handleTypingStart);
         FluxDispatcher.subscribe("CALL_DELETE", handleCallDelete);
         FluxDispatcher.subscribe("CALL_UPDATE", handleCallUpdate);
+        FluxDispatcher.subscribe("STREAM_WATCH", handleStreamWatch);
     },
 
     stop() {
@@ -631,5 +646,6 @@ export default definePlugin({
         FluxDispatcher.unsubscribe("TYPING_START", handleTypingStart);
         FluxDispatcher.unsubscribe("CALL_DELETE", handleCallDelete);
         FluxDispatcher.unsubscribe("CALL_UPDATE", handleCallUpdate);
+        FluxDispatcher.unsubscribe("STREAM_WATCH", handleStreamWatch);
     },
 });
