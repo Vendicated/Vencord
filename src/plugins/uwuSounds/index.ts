@@ -498,6 +498,63 @@ const settings = definePluginSettings({
 //  Plugin
 // ─────────────────────────────────────────────────────────────────────────────
 
+// ─────────────────────────────────────────────────────────────────────────────
+//  Video Stream Detection
+// ─────────────────────────────────────────────────────────────────────────────
+
+let origVideoPlay: (() => Promise<void>) | null = null;
+let activeStreams = 0;
+const streamObservers = new Set<MutationObserver>();
+
+function patchVideoElements() {
+    origVideoPlay = window.HTMLVideoElement.prototype.play;
+    window.HTMLVideoElement.prototype.play = function (this: HTMLVideoElement) {
+        if (settings.store.enabled && this.srcObject instanceof MediaStream) {
+            if (!(this as any).__uwu_stream_counted) {
+                (this as any).__uwu_stream_counted = true;
+                activeStreams++;
+                if (activeStreams === 1) {
+                    S.sv_join();
+                }
+
+                const onEnd = () => {
+                    if ((this as any).__uwu_stream_counted) {
+                        (this as any).__uwu_stream_counted = false;
+                        activeStreams--;
+                        if (activeStreams === 0) S.sv_leave();
+                    }
+                };
+
+                this.addEventListener("pause", onEnd);
+                this.addEventListener("ended", onEnd);
+
+                const observer = new MutationObserver(() => {
+                    if (!document.body.contains(this)) {
+                        observer.disconnect();
+                        streamObservers.delete(observer);
+                        onEnd();
+                    }
+                });
+                observer.observe(document.body, { childList: true, subtree: true });
+                streamObservers.add(observer);
+            }
+        }
+        return origVideoPlay!.apply(this, arguments as any);
+    };
+}
+
+function unpatchVideoElements() {
+    if (origVideoPlay) {
+        window.HTMLVideoElement.prototype.play = origVideoPlay;
+        origVideoPlay = null;
+    }
+    for (const obs of streamObservers) {
+        obs.disconnect();
+    }
+    streamObservers.clear();
+    activeStreams = 0;
+}
+
 export default definePlugin({
     name: "UwUSounds",
     description: "Zastępuje wszystkie dźwięki Discorda słodkimi UwU melodyjkami 🐱 (Web Audio API)",
@@ -539,26 +596,13 @@ export default definePlugin({
 
         patchSounds();
         patchHTMLAudio();
+        patchVideoElements();
 
         FluxDispatcher.subscribe("CONNECTION_OPEN", handleConnectionOpen);
         FluxDispatcher.subscribe("MESSAGE_CREATE", handleMessageCreate);
         FluxDispatcher.subscribe("TYPING_START", handleTypingStart);
         FluxDispatcher.subscribe("CALL_DELETE", handleCallDelete);
         FluxDispatcher.subscribe("CALL_UPDATE", handleCallUpdate);
-        FluxDispatcher.subscribe("STREAM_WATCH", handleStreamWatch);
-        FluxDispatcher.subscribe("STREAM_STOP", handleStreamStop);
-        FluxDispatcher.subscribe("STREAM_DELETE", handleStreamStop);
-
-        debugInterceptor = (event: any) => {
-            if (event?.type && (event.type.includes("STREAM") || event.type.includes("MEDIA") || event.type.includes("VIDEO") || event.type.includes("CALL") || event.type.includes("RTC"))) {
-                Toasts.show({
-                    message: `FLUX: ${event.type}`,
-                    id: Toasts.genId(),
-                    type: Toasts.Type.SUCCESS
-                });
-            }
-        };
-        FluxDispatcher.addInterceptor(debugInterceptor);
     },
 
     stop() {
@@ -572,14 +616,6 @@ export default definePlugin({
         FluxDispatcher.unsubscribe("TYPING_START", handleTypingStart);
         FluxDispatcher.unsubscribe("CALL_DELETE", handleCallDelete);
         FluxDispatcher.unsubscribe("CALL_UPDATE", handleCallUpdate);
-        FluxDispatcher.unsubscribe("STREAM_WATCH", handleStreamWatch);
-        FluxDispatcher.unsubscribe("STREAM_STOP", handleStreamStop);
-        FluxDispatcher.unsubscribe("STREAM_DELETE", handleStreamStop);
-        
-        if (debugInterceptor) {
-            // @ts-expect-error
-            if (FluxDispatcher.removeInterceptor) FluxDispatcher.removeInterceptor(debugInterceptor);
-            debugInterceptor = null;
-        }
+        unpatchVideoElements();
     },
 });
