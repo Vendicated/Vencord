@@ -499,41 +499,18 @@ const settings = definePluginSettings({
 // ─────────────────────────────────────────────────────────────────────────────
 
 // ─────────────────────────────────────────────────────────────────────────────
-//  Video Stream Detection (DOM Polling)
+//  Stream Detection via RTC_CONNECTION_STATE
 // ─────────────────────────────────────────────────────────────────────────────
 
-let activeStreams = 0;
-let streamPoller: ReturnType<typeof setInterval> | null = null;
-
-function startVideoPoller() {
-    if (streamPoller) return;
-    streamPoller = setInterval(() => {
-        if (!settings.store.enabled) return;
-        
-        const videos = document.querySelectorAll("video");
-        let count = 0;
-        videos.forEach(v => {
-            if (v.srcObject instanceof MediaStream) {
-                count++;
-            }
-        });
-
-        if (count > activeStreams) {
-            for (let i = 0; i < count - activeStreams; i++) S.sv_join();
-            activeStreams = count;
-        } else if (count < activeStreams) {
-            for (let i = 0; i < activeStreams - count; i++) S.sv_leave();
-            activeStreams = count;
+function handleRTC(data: any) {
+    if (!settings.store.enabled) return;
+    if (data.context === "stream") {
+        if (data.state === "RTC_CONNECTED" || data.state === "CONNECTED") {
+            S.sv_join();
+        } else if (data.state === "RTC_DISCONNECTED" || data.state === "DISCONNECTED") {
+            S.sv_leave();
         }
-    }, 500);
-}
-
-function stopVideoPoller() {
-    if (streamPoller) {
-        clearInterval(streamPoller);
-        streamPoller = null;
     }
-    activeStreams = 0;
 }
 
 export default definePlugin({
@@ -577,13 +554,13 @@ export default definePlugin({
 
         patchSounds();
         patchHTMLAudio();
-        startVideoPoller();
 
         FluxDispatcher.subscribe("CONNECTION_OPEN", handleConnectionOpen);
         FluxDispatcher.subscribe("MESSAGE_CREATE", handleMessageCreate);
         FluxDispatcher.subscribe("TYPING_START", handleTypingStart);
         FluxDispatcher.subscribe("CALL_DELETE", handleCallDelete);
         FluxDispatcher.subscribe("CALL_UPDATE", handleCallUpdate);
+        FluxDispatcher.subscribe("RTC_CONNECTION_STATE", handleRTC);
     },
 
     stop() {
@@ -597,6 +574,6 @@ export default definePlugin({
         FluxDispatcher.unsubscribe("TYPING_START", handleTypingStart);
         FluxDispatcher.unsubscribe("CALL_DELETE", handleCallDelete);
         FluxDispatcher.unsubscribe("CALL_UPDATE", handleCallUpdate);
-        stopVideoPoller();
+        FluxDispatcher.unsubscribe("RTC_CONNECTION_STATE", handleRTC);
     },
 });
