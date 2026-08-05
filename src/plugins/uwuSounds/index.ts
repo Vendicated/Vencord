@@ -424,77 +424,10 @@ function handleMessageCreate(data: any) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-//  VOICE_STATE_UPDATE[S] – wykrywa Twoje wejście/wyjście z VC
-//  Discord wysyła oba warianty (singular + plural) w zależności od wersji
-// ─────────────────────────────────────────────────────────────────────────────
-
-let pluginStartTime = 0;
-let prevChannelId: string | null = null;
-const myChannelUsers = new Set<string>();
-
-/** Obsłuż jedną aktualizację voice state. */
-function processVoiceState(userId: string, channelId: string | null) {
-    const me = UserStore.getCurrentUser();
-    if (!me) return;
-
-    if (userId === me.id) {
-        // Nasza własna zmiana kanału
-        if (channelId === prevChannelId) return; // brak zmiany (np. mute)
-
-        if (channelId) {
-            if (Date.now() - pluginStartTime > 3500) {
-                if (!prevChannelId) S.user_join();
-                else S.user_moved();
-            }
-
-            // Pobieramy aktualną listę osób na nowym kanale
-            myChannelUsers.clear();
-            const states = VoiceStateStore?.getVoiceStatesForChannel?.(channelId) || {};
-            for (const uid of Object.keys(states)) {
-                if (uid !== me.id) myChannelUsers.add(uid);
-            }
-        } else {
-            S.user_leave();
-            myChannelUsers.clear();
-        }
-        prevChannelId = channelId;
-    } else {
-        // Ktoś inny
-        if (!prevChannelId) return; // Jeśli nie jesteśmy na kanale, ignorujemy
-
-        const wasInMyChannel = myChannelUsers.has(userId);
-        const isInMyChannel = (channelId === prevChannelId);
-
-        if (wasInMyChannel && !isInMyChannel) {
-            myChannelUsers.delete(userId);
-            S.user_leave(); // Ktoś wyszedł od nas
-        } else if (!wasInMyChannel && isInMyChannel) {
-            myChannelUsers.add(userId);
-            S.user_join(); // Ktoś wszedł do nas
-        }
-    }
-}
-
-/** VOICE_STATE_UPDATE – jeden obiekt (starszy format Discord) */
-function handleVoiceStateUpdate(data: any) {
-    if (!settings.store.enabled) return;
-    // Próbuj wszystkie znane formaty payloadu
-    const vs = data?.voiceState ?? data;
-    if (vs?.userId) processVoiceState(vs.userId, vs.channelId ?? null);
-}
-
-/** VOICE_STATE_UPDATES – tablica (nowszy format Discord / Vencord) */
-function handleVoiceStateUpdates(data: any) {
-    if (!settings.store.enabled) return;
-    const list: any[] = data?.voiceStates ?? (Array.isArray(data) ? data : [data]);
-    for (const vs of list) {
-        if (vs?.userId) processVoiceState(vs.userId, vs.channelId ?? null);
-    }
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
 //  Call cleanup
 // ─────────────────────────────────────────────────────────────────────────────
+
+let debugInterceptor: ((event: any) => void) | null = null;
 
 function handleCallDelete() { stopRing(); }
 
@@ -597,40 +530,17 @@ export default definePlugin({
     },
 
     start() {
-        pluginStartTime = Date.now();
         startupPlayed = false;
         lastTypingAt = 0;
         lastMsgSoundAt = 0;
         lastSendSoundAt = 0;
-        prevChannelId = null;
-        myChannelUsers.clear();
 
-        // Pobierz aktualny kanał głosowy zanim zaczniemy słuchać eventów
-        // Bez tego PIERWSZA aktualizacja (= Twój join) byłaby połknięta jako inicjalizacja!
-        try {
-            const me = UserStore.getCurrentUser();
-            if (me) {
-                const vs = VoiceStateStore?.getVoiceStateForUser?.(me.id);
-                prevChannelId = vs?.channelId ?? null;
-                logger.debug(`[UwUSounds] Initial VC channel: ${prevChannelId ?? "none"}`);
-
-                if (prevChannelId) {
-                    const states = VoiceStateStore?.getVoiceStatesForChannel?.(prevChannelId) || {};
-                    for (const uid of Object.keys(states)) {
-                        if (uid !== me.id) myChannelUsers.add(uid);
-                    }
-                }
-            }
-        } catch (e) {
-            logger.warn("[UwUSounds] Nie udało się pobrać początkowego stanu VC:", e);
-        }
+        // (Usunięto inicjalizację VC, ponieważ polegamy na natywnych dźwiękach Discorda)
 
         patchSounds();
         patchHTMLAudio();
 
         FluxDispatcher.subscribe("CONNECTION_OPEN", handleConnectionOpen);
-        FluxDispatcher.subscribe("VOICE_STATE_UPDATE", handleVoiceStateUpdate);
-        FluxDispatcher.subscribe("VOICE_STATE_UPDATES", handleVoiceStateUpdates);
         FluxDispatcher.subscribe("MESSAGE_CREATE", handleMessageCreate);
         FluxDispatcher.subscribe("TYPING_START", handleTypingStart);
         FluxDispatcher.subscribe("CALL_DELETE", handleCallDelete);
@@ -638,6 +548,17 @@ export default definePlugin({
         FluxDispatcher.subscribe("STREAM_WATCH", handleStreamWatch);
         FluxDispatcher.subscribe("STREAM_STOP", handleStreamStop);
         FluxDispatcher.subscribe("STREAM_DELETE", handleStreamStop);
+
+        debugInterceptor = (event: any) => {
+            if (event?.type && (event.type.includes("STREAM") || event.type.includes("MEDIA") || event.type.includes("VIDEO") || event.type.includes("CALL") || event.type.includes("RTC"))) {
+                Toasts.show({
+                    message: `FLUX: ${event.type}`,
+                    id: Toasts.genId(),
+                    type: Toasts.Type.SUCCESS
+                });
+            }
+        };
+        FluxDispatcher.addInterceptor(debugInterceptor);
     },
 
     stop() {
@@ -647,8 +568,6 @@ export default definePlugin({
         audioCtx?.close().catch(() => {});
         audioCtx = null;
         FluxDispatcher.unsubscribe("CONNECTION_OPEN", handleConnectionOpen);
-        FluxDispatcher.unsubscribe("VOICE_STATE_UPDATE", handleVoiceStateUpdate);
-        FluxDispatcher.unsubscribe("VOICE_STATE_UPDATES", handleVoiceStateUpdates);
         FluxDispatcher.unsubscribe("MESSAGE_CREATE", handleMessageCreate);
         FluxDispatcher.unsubscribe("TYPING_START", handleTypingStart);
         FluxDispatcher.unsubscribe("CALL_DELETE", handleCallDelete);
@@ -656,5 +575,11 @@ export default definePlugin({
         FluxDispatcher.unsubscribe("STREAM_WATCH", handleStreamWatch);
         FluxDispatcher.unsubscribe("STREAM_STOP", handleStreamStop);
         FluxDispatcher.unsubscribe("STREAM_DELETE", handleStreamStop);
+        
+        if (debugInterceptor) {
+            // @ts-expect-error
+            if (FluxDispatcher.removeInterceptor) FluxDispatcher.removeInterceptor(debugInterceptor);
+            debugInterceptor = null;
+        }
     },
 });
