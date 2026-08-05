@@ -34,9 +34,25 @@ function fallbackToYoutubeThumbnail(originUrl: string | undefined): string | und
     return match ? `https://i.ytimg.com/vi/${match[5]}/maxresdefault.jpg` : undefined;
 }
 
-async function fetchCoverArt(releaseGroupMBID: string, originUrl?: string): Promise<string | undefined> {
-    if (!releaseGroupMBID) return fallbackToYoutubeThumbnail(originUrl);
+async function fetchCoverArt(releaseMBID: string, releaseGroupMBID: string, originUrl?: string): Promise<string | undefined> {
+    if (!releaseGroupMBID && !releaseMBID) return fallbackToYoutubeThumbnail(originUrl);
 
+    if (releaseMBID) { // Try release fist, since different release variations can have differing cover art
+        if (coverArtCache.has(releaseMBID)) {
+            return coverArtCache.get(releaseMBID);
+        }
+
+        const res = await fetch(`https://coverartarchive.org/release/${releaseMBID}`);
+        if (res.ok) {
+            const url = await res.json()
+                .then(json => json.images[0].thumbnails.large);
+            if (url) {
+                coverArtCache.set(releaseMBID, url);
+                return url;
+            }
+        }
+    }
+    // Fallback to RG if release fails or is missing MBID
     if (coverArtCache.has(releaseGroupMBID)) {
         return coverArtCache.get(releaseGroupMBID);
     }
@@ -58,7 +74,7 @@ async function getUrls(additionalInfo: Record<string, string> | undefined, track
         const { release_group_mbid, release_mbid, recording_mbid, artist_mbids, origin_url } = additionalInfo;
 
         return {
-            imageURL: await fetchCoverArt(release_group_mbid, origin_url),
+            imageURL: await fetchCoverArt(release_mbid, release_group_mbid, origin_url),
             trackURL: recording_mbid ? url(`/track/${recording_mbid}`) : undefined,
             albumURL: release_group_mbid
                 ? url(`/release-group/${release_group_mbid}`)
@@ -101,7 +117,7 @@ async function getUrls(additionalInfo: Record<string, string> | undefined, track
     const release = metadata.releases?.[0];
 
     const data: Partial<TrackData> = {
-        imageURL: await fetchCoverArt(release?.["release-group"]?.id, additionalInfo?.origin_url),
+        imageURL: await fetchCoverArt(release?.id, release?.["release-group"]?.id, additionalInfo?.origin_url),
         trackURL: url(`/track/${metadata.id}/`),
         albumURL: release?.id ? url(`/release/${release.id}/`) : release?.["release-group"]?.id ? url(`/release-group/${release["release-group"].id}/`) : undefined,
         artistURL: artist?.id ? url(`/artist/${artist.id}/`) : undefined,
