@@ -134,6 +134,7 @@ async function getUrls(additionalInfo: Record<string, string> | undefined, track
         trackURL: url(`/track/${metadata.id}/`),
         albumURL: release?.id ? url(`/release/${release.id}/`) : release?.["release-group"]?.id ? url(`/release-group/${release["release-group"].id}/`) : undefined,
         artistURL: artist?.id ? url(`/artist/${artist.id}/`) : undefined,
+        album: additionalInfo?.release_name ?? release?.title ?? "Unknown",
     };
     metadataCache.set(query, data);
 
