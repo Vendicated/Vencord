@@ -67,6 +67,18 @@ async function fetchCoverArt(releaseMBID: string, releaseGroupMBID: string, orig
     return url;
 }
 
+async function tryLookup(query: string): Promise<Record<string, unknown> | undefined> {
+    const params = new URLSearchParams({
+        fmt: "json",
+        limit: "1"
+    });
+    return await fetch("https://musicbrainz.org/ws/2/recording/?" + params + "&query=" + query, {
+        headers: { "User-Agent": VENCORD_USER_AGENT }
+    })
+        .then(res => res.ok ? res.json() : Promise.reject(new Error(`${res.status} ${res.statusText}`)))
+        .then(json => json.recordings?.[0]);
+}
+
 async function getUrls(additionalInfo: Record<string, string> | undefined, trackName: string, artistName: string, releaseName: string): Promise<Partial<TrackData>> {
     // Well tagged music will have MBIDs which we can use directly. These are optional but highly recommended in ListenBrainz scrobbles.
     // If your music doesn't have these, it's highly recommended to use https://picard.musicbrainz.org/ to automatically add them
@@ -86,28 +98,29 @@ async function getUrls(additionalInfo: Record<string, string> | undefined, track
     }
 
     // If no MBIDs are present, try to search for the track on MusicBrainz
+    let query: string = `artist:"${artistName}" AND recording:"${trackName}"${releaseName ? ` AND release:"${releaseName}"` : ""}`;
+    let metadata: Record<string, unknown> | undefined;
 
-    let rawQuery = `artist:"${artistName}" AND recording:"${trackName}"`;
-    if (releaseName)
-        rawQuery += ` AND album:"${releaseName}"`;
-    const query = encodeURIComponent(rawQuery);
-
-    if (metadataCache.has(query)) {
-        return metadataCache.get(query) ?? {};
+    // Attempt ISRC lookup if present
+    if (additionalInfo?.isrc) {
+        const { isrc } = additionalInfo;
+        query = encodeURIComponent(`isrc:${isrc}`);
+        if (metadataCache.has(query)) {
+            return metadataCache.get(query) ?? {};
+        }
+        metadata = await tryLookup(query);
     }
 
-    const params = new URLSearchParams({
-        fmt: "json",
-        limit: "1"
-    });
-
-    const metadata = await fetch("https://musicbrainz.org/ws/2/recording/?" + params + "&query=" + query, {
-        headers: { "User-Agent": VENCORD_USER_AGENT }
-    })
-        .then(res => res.ok ? res.json() : Promise.reject(new Error(`${res.status} ${res.statusText}`)))
-        .then(json => json.recordings?.[0]);
-
+    // Attempt name lookup
     if (!metadata) {
+        query = encodeURIComponent(`artist:"${artistName}" AND recording:"${trackName}"${releaseName ? ` AND release:"${releaseName}"` : ""}`);
+        if (metadataCache.has(query)) {
+            return metadataCache.get(query) ?? {};
+        }
+        metadata = await tryLookup(query);
+    }
+
+    if (!metadata) { // Fall back to image from the orgin url
         const data = additionalInfo?.origin_url ? { imageURL: fallbackToYoutubeThumbnail(additionalInfo.origin_url) } : {};
         metadataCache.set(query, data);
         return data;
