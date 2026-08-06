@@ -175,8 +175,12 @@ export async function sendAttachment(attachment: MessageAttachment, channel: Cha
 
     const [upload] = uploads.splice(uploadIdx);
     UploadManager.setUploads({ uploads, channelId: channel.id, draftType: DraftType.ChannelMessage });
+
     // Empty titles and descriptions are allowed
-    if (title != null) upload.filename = title;
+    if (title != null) {
+        const ext = upload.filename.lastIndexOf(".");
+        upload.filename = title + (ext > 0 ? upload.filename.substring(ext) : "");
+    }
     if (description != null) upload.description = description;
 
     FluxDispatcher.dispatch({ type: "DELETE_PENDING_REPLY", channelId: channel.id });
