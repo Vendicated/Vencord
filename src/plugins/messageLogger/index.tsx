@@ -133,24 +133,18 @@ const TOGGLE_DELETE_STYLE_ID = "ml-toggle-style";
  *
  * if the message was deleted, it will be completely removed from the UI and MessageStore
  */
-function clearMessageHistory(channelId: string, messageId: string) {
-    const message = MessageStore.getMessage(channelId, messageId) as MLMessage | null;
-
-    if (!message) {
-        return;
-    }
-
-    if (message.deleted) {
+function clearMessageHistory(msg: MLMessage) {
+    if (msg.deleted) {
         FluxDispatcher.dispatch({
             type: "MESSAGE_DELETE",
-            channelId: channelId,
-            messageId: messageId,
+            channelId: msg.channel_id,
+            messageId: msg.id,
             mlDeleted: true
         });
     } else {
-        const attachments = message.attachments?.filter((a: MLAttachment) => !a.deleted);
+        const attachments = msg.attachments?.filter((a: MLAttachment) => !a.deleted);
 
-        updateMessage(channelId, messageId, { editHistory: [], attachments });
+        updateMessage(msg.channel_id, msg.id, { editHistory: [], attachments });
     }
 }
 
@@ -194,7 +188,7 @@ const patchMessageContextMenu: NavContextMenuPatchCallback = (children, props) =
             label="Remove Message History"
             color="danger"
             action={() => {
-                clearMessageHistory(channel_id, id);
+                clearMessageHistory(message);
             }}
         />
     ));
@@ -212,7 +206,7 @@ const patchChannelContextMenu: NavContextMenuPatchCallback = (children, { channe
             color="danger"
             action={() => {
                 messages.forEach(msg => {
-                    clearMessageHistory(channel.id, msg.id);
+                    clearMessageHistory(msg);
                 });
             }}
         />
