@@ -20,17 +20,22 @@ function setupAudioInterceptor() {
     HTMLAudioElement.prototype.play = function() {
         if (!settings.store.Enabled) return originalPlay.call(this);
 
-        // Wyłapujemy natywne dźwięki Discorda i mutujemy je
-        if (this.src && (this.src.includes("/assets/") || this.src.includes(".mp3") || this.src.includes(".wav") || this.src.includes(".ogg"))) {
-            this.volume = 0;
-            this.muted = true;
-            
-            // Zagraj uniwersalny dźwięk UwU w zamian (zabezpieczone flagą startową)
-            if (typeof isStartingUp !== "undefined" && !isStartingUp) {
-                playUwU("generic", true);
+        try {
+            // Wyłapujemy natywne dźwięki Discorda i mutujemy je
+            const srcStr = typeof this.src === "string" ? this.src : "";
+            if (srcStr && (srcStr.includes("/assets/") || srcStr.includes(".mp3") || srcStr.includes(".wav") || srcStr.includes(".ogg"))) {
+                this.volume = 0;
+                this.muted = true;
+                
+                // Zagraj uniwersalny dźwięk UwU w zamian (zabezpieczone flagą startową)
+                if (typeof isStartingUp !== "undefined" && !isStartingUp) {
+                    playUwU("generic", true);
+                }
+                
+                return Promise.resolve();
             }
-            
-            return Promise.resolve();
+        } catch(e) {
+            logger.error("Audio Interceptor Error:", e);
         }
         return originalPlay.call(this);
     };
@@ -108,36 +113,58 @@ function playUwU(category: string, isGeneric = false) {
             playTone(783.99, "sine", now + 0.30, 0.2, 0.6);
             playTone(1046.50, "sine", now + 0.50, 0.4, 0.8);
         } else if (category === "message") {
+            // Powiadomienie (klasyczny czysty dźwięk SINE)
             playTone(880, "sine", now, 0.2, 0.8);
             playTone(1108.73, "sine", now + 0.1, 0.2, 0.8);
         } else if (category === "send") {
             playTone(600, "sine", now, 0.1, 0.5);
             playTone(800, "sine", now + 0.08, 0.15, 0.5);
-        } else if (category === "mute" || category === "toggle_off") {
-            // Zbliżające się wyciszenie, wyłączenie kamery/ekranu
-            playTone(800, "sine", now, 0.1, 0.6);
-            playTone(600, "sine", now + 0.1, 0.2, 0.6);
-        } else if (category === "unmute" || category === "toggle_on") {
-            // Odmutowanie, udostępnienie ekranu
-            playTone(600, "sine", now, 0.1, 0.6);
-            playTone(800, "sine", now + 0.1, 0.2, 0.6);
+        } else if (category === "mute") {
+            playTone(300, "square", now, 0.05, 0.3);
+            playTone(200, "square", now + 0.05, 0.05, 0.3);
+        } else if (category === "unmute") {
+            playTone(200, "square", now, 0.05, 0.3);
+            playTone(300, "square", now + 0.05, 0.05, 0.3);
+        } else if (category === "deafen") {
+            playTone(200, "sawtooth", now, 0.04, 0.2);
+            playTone(150, "sawtooth", now + 0.04, 0.04, 0.2);
+            playTone(100, "sawtooth", now + 0.08, 0.06, 0.2);
+        } else if (category === "undeafen") {
+            playTone(100, "sawtooth", now, 0.04, 0.2);
+            playTone(150, "sawtooth", now + 0.04, 0.04, 0.2);
+            playTone(200, "sawtooth", now + 0.08, 0.06, 0.2);
+        } else if (category === "stream_start") {
+            // Rozpoczęcie streama (technologiczne arpeggio SINE)
+            playTone(400, "sine", now, 0.1, 0.4);
+            playTone(600, "sine", now + 0.1, 0.1, 0.4);
+            playTone(800, "sine", now + 0.2, 0.2, 0.4);
+        } else if (category === "stream_stop") {
+            // Zakończenie streama (technologiczne arpeggio SINE w dół)
+            playTone(800, "sine", now, 0.1, 0.4);
+            playTone(600, "sine", now + 0.1, 0.1, 0.4);
+            playTone(400, "sine", now + 0.2, 0.2, 0.4);
+        } else if (category === "activity") {
+            // Aktywność aplikacyjna (gra, rich presence) - energiczny blip trójkątny
+            playTone(500, "triangle", now, 0.1, 0.4);
+            playTone(750, "triangle", now + 0.1, 0.2, 0.4);
         } else if (category === "call") {
-            // Dzwonienie
-            playTone(400, "triangle", now, 0.5, 0.6);
-            playTone(800, "triangle", now + 0.5, 0.5, 0.6);
+            playTone(300, "triangle", now, 0.5, 0.5);
+            playTone(350, "triangle", now + 0.5, 0.5, 0.5);
         } else if (category === "join") {
-            playTone(523.25, "sine", now, 0.3);
-            playTone(1046.50, "sine", now + 0.3, 0.6);
+            playTone(300, "square", now, 0.05, 0.3);
+            playTone(400, "square", now + 0.05, 0.05, 0.3);
+            playTone(500, "square", now + 0.10, 0.05, 0.3);
+            playTone(600, "square", now + 0.15, 0.10, 0.3);
         } else if (category === "leave") {
-            playTone(1046.50, "sine", now, 0.3);
-            playTone(523.25, "sine", now + 0.3, 0.6);
+            playTone(600, "square", now, 0.05, 0.3);
+            playTone(500, "square", now + 0.05, 0.05, 0.3);
+            playTone(400, "square", now + 0.10, 0.05, 0.3);
+            playTone(300, "square", now + 0.15, 0.10, 0.3);
         } else if (category === "pingword") {
             playTone(1200, "sine", now, 0.1, 1.0);
             playTone(1400, "sine", now + 0.1, 0.3, 1.0);
         } else if (category === "generic") {
-            // Uniwersalny, słodki i cichy blip na KAŻDY inny dźwięk Discorda
-            playTone(900, "sine", now, 0.1, 0.4);
-            playTone(1200, "sine", now + 0.1, 0.15, 0.4);
+            playTone(800, "sawtooth", now, 0.02, 0.1);
         } else if (category === "typing") {
             // Typing has its own heavy randomization inside
             playTone((400 + Math.random() * 50) * pitchMod, "triangle", now, 0.05, 0.2);
@@ -149,56 +176,63 @@ function playUwU(category: string, isGeneric = false) {
 
 // Interceptor na klawiaturę do dźwięku pisania
 function handleKeyDown(e: KeyboardEvent) {
-    if (settings.store.Playtyping && e.key.length === 1) { // tylko znaki
-        playUwU("typing");
-    }
+    try {
+        if (settings.store.Playtyping && e && e.key && e.key.length === 1) { // tylko znaki
+            playUwU("typing");
+        }
+    } catch(err) {}
 }
 
 function handleMessageCreate(event: any) {
-    if (isStartingUp || !settings.store.Enabled) return;
-    const message = event.message;
-    if (!message) return;
-    
-    const currentUser = UserStore?.getCurrentUser();
-    
-    // ZABEZPIECZENIE PRZED CRASHEM (Wiadomości systemowe nie mają autora!)
-    if (!currentUser || !message.author) return;
-    
-    if (message.author.id === currentUser.id) {
-        if (settings.store.Playsend) {
-            playUwU("send");
-        }
-    } else {
-        // Ping words detection
-        if (settings.store.PingWords && settings.store.PingWords.trim() !== "") {
-            const words = settings.store.PingWords.split(",").map(w => w.trim().toLowerCase()).filter(w => w.length > 0);
-            const content = (message.content || "").toLowerCase();
-            const hasPingWord = words.some(w => content.includes(w));
-            if (hasPingWord) {
-                if (settings.store.AdminConsole) logger.info(`[Admin Console] Znaleziono Słowo Kluczowe (Ping Word)!`);
-                playUwU("pingword");
-                return;
+    try {
+        if (isStartingUp || !settings.store.Enabled) return;
+        const message = event?.message;
+        if (!message) return;
+        
+        const currentUser = UserStore?.getCurrentUser();
+        
+        // ZABEZPIECZENIE PRZED CRASHEM (Wiadomości systemowe nie mają autora!)
+        if (!currentUser || !message.author) return;
+        
+        if (message.author.id === currentUser.id) {
+            if (settings.store.Playsend) {
+                playUwU("send");
             }
-        }
+        } else {
+            // Ping words detection
+            if (settings.store.PingWords && settings.store.PingWords.trim() !== "") {
+                const words = settings.store.PingWords.split(",").map(w => w.trim().toLowerCase()).filter(w => w.length > 0);
+                const content = (message.content || "").toLowerCase();
+                const hasPingWord = words.some(w => content.includes(w));
+                if (hasPingWord) {
+                    if (settings.store.AdminConsole) logger.info(`[Admin Console] Znaleziono Słowo Kluczowe (Ping Word)!`);
+                    playUwU("pingword");
+                    return;
+                }
+            }
 
-        // Filtrujemy, żeby dźwięk powiadomienia grał TYLKO przy DM lub Mentions, 
-        // a nie przy każdej wiadomości na serwerze!
-        const channel = ChannelStore?.getChannel(message.channel_id);
-        const isDM = channel?.isPrivate();
-        const isMentioned = message.mentions?.some((m: any) => m.id === currentUser.id);
+            // Filtrujemy, żeby dźwięk powiadomienia grał TYLKO przy DM lub Mentions, 
+            // ALBO gdy wiadomość jest wysłana na tekstowym kanale wewnątrz kanału głosowego (text-in-voice)
+            const channel = ChannelStore?.getChannel(message.channel_id);
+            const isDM = channel?.isPrivate();
+            const isMentioned = message.mentions?.some((m: any) => m.id === currentUser.id);
+            const isTextInVoice = channel?.type === 2 || channel?.isGuildVoice?.();
 
-        if ((isDM || isMentioned) && settings.store.Playmsgdnd) {
-            // Zawsze natychmiast graj dla Prywatnych Wiadomości i Wzmianek
-            playUwU("message");
-        } else if (settings.store.Playmsgdnd) {
-            // Wiadomości serwerowe - "w umiarze" (maksymalnie raz na 60 sekund)
-            const timeNow = Date.now();
-            if (timeNow - lastServerMessageSoundTime >= 60000) {
-                lastServerMessageSoundTime = timeNow;
+            if ((isDM || isMentioned || isTextInVoice) && settings.store.Playmsgdnd) {
+                // Zawsze natychmiast graj dla Prywatnych Wiadomości, Wzmianek i Kanałów Głosowych
                 playUwU("message");
-                if (settings.store.AdminConsole) logger.info(`[Admin Console] Odtworzono powiadomienie serwerowe (kolejne za min. 60s)`);
+            } else if (settings.store.Playmsgdnd) {
+                // Pozostałe wiadomości serwerowe - "w umiarze" (maksymalnie raz na 60 sekund)
+                const timeNow = Date.now();
+                if (timeNow - lastServerMessageSoundTime >= 60000) {
+                    lastServerMessageSoundTime = timeNow;
+                    playUwU("message");
+                    if (settings.store.AdminConsole) logger.info(`[Admin Console] Odtworzono powiadomienie serwerowe (kolejne za min. 60s)`);
+                }
             }
         }
+    } catch(err) {
+        logger.error("Message handling failed", err);
     }
 }
 
@@ -206,33 +240,55 @@ let isMutedState = false;
 let isStartingUp = true; // Flaga zapobiegająca spamowi przy starcie
 
 function handleMuteToggle() {
-    if (isStartingUp || !settings.store.MuteSync) return;
-    isMutedState = !isMutedState;
-    if (settings.store.AdminConsole) logger.info(`[Admin Console] Wykryto użycie MuteSync`);
-    if (isMutedState) playUwU("toggle_off");
-    else playUwU("toggle_on");
+    try {
+        if (isStartingUp || !settings.store.MuteSync) return;
+        isMutedState = !isMutedState;
+        if (settings.store.AdminConsole) logger.info(`[Admin Console] Wykryto użycie MuteSync`);
+        if (isMutedState) playUwU("mute");
+        else playUwU("unmute");
+    } catch(e) {}
 }
 
 let isDeafenedState = false;
 function handleDeafenToggle() {
-    if (isStartingUp || !settings.store.MuteSync) return;
-    isDeafenedState = !isDeafenedState;
-    if (isDeafenedState) playUwU("toggle_off");
-    else playUwU("toggle_on");
+    try {
+        if (isStartingUp || !settings.store.MuteSync) return;
+        isDeafenedState = !isDeafenedState;
+        if (isDeafenedState) playUwU("deafen");
+        else playUwU("undeafen");
+    } catch(e) {}
 }
 
-function handleStreamToggle(event: any) {
-    if (isStartingUp) return;
-    if (event.type === "STREAM_START" || event.type === "MEDIA_ENGINE_SET_GO_LIVE_SOURCE") {
-        playUwU("toggle_on");
-    } else {
-        playUwU("toggle_off");
-    }
+function handleStreamCreate(event: any) {
+    try {
+        if (isStartingUp) return;
+        const currentUser = UserStore?.getCurrentUser();
+        if (event?.streamKey && currentUser?.id && !event.streamKey.endsWith(currentUser.id)) return;
+        playUwU("stream_start");
+    } catch(e) {}
+}
+
+function handleStreamDelete(event: any) {
+    try {
+        if (isStartingUp) return;
+        const currentUser = UserStore?.getCurrentUser();
+        if (event?.streamKey && currentUser?.id && !event.streamKey.endsWith(currentUser.id)) return;
+        playUwU("stream_stop");
+    } catch(e) {}
+}
+
+function handleActivityUpdate(event: any) {
+    try {
+        if (isStartingUp) return;
+        playUwU("activity");
+    } catch(e) {}
 }
 
 function handleCallCreate() {
-    if (isStartingUp) return;
-    playUwU("call");
+    try {
+        if (isStartingUp) return;
+        playUwU("call");
+    } catch(e) {}
 }
 
 function handleVoiceState(event: any) {
@@ -331,7 +387,7 @@ export const settings = definePluginSettings({
 export default definePlugin({
     name: "UwUSounds",
     description: "Zastępuje wszystkie dźwięki Discorda słodkimi UwU melodyjkami 🐹 (Web Audio API) + Super Funkcje Admina",
-    authors: [],
+    authors: [{ id: 1302034381648695357n, name: "Ulux" }],
     settings,
     patches: [], 
 
@@ -355,8 +411,9 @@ export default definePlugin({
         FluxDispatcher.subscribe("MESSAGE_CREATE", handleMessageCreate);
         FluxDispatcher.subscribe("AUDIO_TOGGLE_LOCAL_MUTE", handleMuteToggle);
         FluxDispatcher.subscribe("AUDIO_TOGGLE_LOCAL_DEAF", handleDeafenToggle);
-        FluxDispatcher.subscribe("MEDIA_ENGINE_SET_GO_LIVE_SOURCE", handleStreamToggle);
-        FluxDispatcher.subscribe("STREAM_STOP", handleStreamToggle);
+        FluxDispatcher.subscribe("STREAM_CREATE", handleStreamCreate);
+        FluxDispatcher.subscribe("STREAM_DELETE", handleStreamDelete);
+        FluxDispatcher.subscribe("LOCAL_ACTIVITY_UPDATE", handleActivityUpdate);
         FluxDispatcher.subscribe("CALL_CREATE", handleCallCreate);
         FluxDispatcher.subscribe("VOICE_STATE_UPDATES", handleVoiceState);
 
@@ -379,8 +436,9 @@ export default definePlugin({
         FluxDispatcher.unsubscribe("MESSAGE_CREATE", handleMessageCreate);
         FluxDispatcher.unsubscribe("AUDIO_TOGGLE_LOCAL_MUTE", handleMuteToggle);
         FluxDispatcher.unsubscribe("AUDIO_TOGGLE_LOCAL_DEAF", handleDeafenToggle);
-        FluxDispatcher.unsubscribe("MEDIA_ENGINE_SET_GO_LIVE_SOURCE", handleStreamToggle);
-        FluxDispatcher.unsubscribe("STREAM_STOP", handleStreamToggle);
+        FluxDispatcher.unsubscribe("STREAM_CREATE", handleStreamCreate);
+        FluxDispatcher.unsubscribe("STREAM_DELETE", handleStreamDelete);
+        FluxDispatcher.unsubscribe("LOCAL_ACTIVITY_UPDATE", handleActivityUpdate);
         FluxDispatcher.unsubscribe("CALL_CREATE", handleCallCreate);
         FluxDispatcher.unsubscribe("VOICE_STATE_UPDATES", handleVoiceState);
         if (exportWatcherInterval) clearInterval(exportWatcherInterval);
