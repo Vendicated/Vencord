@@ -39,6 +39,12 @@ const settings = definePluginSettings({
             { label: "USRBG banner", value: false },
         ]
     },
+    customBannerUrl: {
+        description: "Custom banner URL for your own account (client-side only, overrides USRBG)",
+        type: OptionType.STRING,
+        default: "",
+        placeholder: "https://files.catbox.moe/XXXXXX.gif"
+    },
     voiceBackground: {
         description: "Use USRBG banners as voice chat backgrounds",
         type: OptionType.BOOLEAN,
@@ -49,9 +55,9 @@ const settings = definePluginSettings({
 
 export default definePlugin({
     name: "USRBG",
-    description: "Displays user banners from USRBG, allowing anyone to get a banner without Nitro",
+    description: "Displays user banners from USRBG, allowing anyone to get a banner without Nitro. Optional custom banner support.",
     tags: ["Appearance", "Customisation"],
-    authors: [Devs.AutumnVN, Devs.katlyn, Devs.pylix, Devs.TheKodeToad],
+    authors: [Devs.AutumnVN, Devs.katlyn, Devs.pylix, Devs.TheKodeToad, Devs.Jonttex],
     settings,
     patches: [
         {
@@ -59,7 +65,6 @@ export default definePlugin({
             replacement: {
                 match: /\i(?:\?)?.getPreviewBanner\(\i,\i,\i\)(?=.{0,100}"COMPLETE")/,
                 replace: "$self.patchBannerUrl(arguments[0])||$&"
-
             }
         },
         {
@@ -86,9 +91,14 @@ export default definePlugin({
 
     settingsAboutComponent: () => {
         return (
-            <LinkButton href="https://github.com/AutumnVN/usrbg#how-to-request-your-own-usrbg-banner" variant="primary">
-                Get your own USRBG banner
-            </LinkButton>
+            <>
+                <LinkButton href="https://github.com/AutumnVN/usrbg#how-to-request-your-own-usrbg-banner" variant="primary">
+                    Get your own USRBG banner
+                </LinkButton>
+                <LinkButton href="https://catbox.moe" variant="secondary">
+                    Upload custom image to Catbox
+                </LinkButton>
+            </>
         );
     },
 
@@ -111,13 +121,21 @@ export default definePlugin({
     },
 
     userHasBackground(userId: string) {
-        return !!this.data?.users[userId];
+        return !!this.data?.users[userId] || this.hasCustomBanner(userId);
+    },
+
+    hasCustomBanner(userId: string): boolean {
+        const currentUser = Vencord.Webpack.Common.UserStore.getCurrentUser();
+        return userId === currentUser?.id && !!settings.store.customBannerUrl;
     },
 
     getImageUrl(userId: string): string | null {
-        if (!this.userHasBackground(userId)) return null;
+        if (this.hasCustomBanner(userId)) {
+            return settings.store.customBannerUrl;
+        }
 
-        // We can assert that data exists because userHasBackground returned true
+        if (!this.data?.users[userId]) return null;
+
         const { endpoint, bucket, prefix, users: { [userId]: etag } } = this.data!;
         return `${endpoint}/${bucket}/${prefix}${userId}?${etag}`;
     },
