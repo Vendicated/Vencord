@@ -167,7 +167,7 @@ function doesMessageHaveHistory(message: MLMessage): boolean {
 
 const patchMessageContextMenu: NavContextMenuPatchCallback = (children, props) => {
     const { message } = props;
-    const { deleted, editHistory, id, channel_id } = message;
+    const { deleted, id, channel_id } = message;
 
     if (!doesMessageHaveHistory(message)) return;
 
