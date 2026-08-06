@@ -33,7 +33,7 @@ import { Promisable } from "type-fest";
 
 const uploadEmoji = findByCodeLazy(".GUILD_EMOJIS(", "EMOJI_UPLOAD_START");
 
-const getGuildMaxEmojiSlots = findByCodeLazy(".additionalEmojiSlots") as (guild: Guild) => number;
+const getGuildMaxEmojiSlots = findByCodeLazy(".additionalEmojiSlots??") as (guild: Guild) => number;
 
 interface Sticker extends GuildSticker {
     t: "Sticker";
