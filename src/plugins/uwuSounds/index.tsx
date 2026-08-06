@@ -5,9 +5,10 @@
  */
 
 import { definePluginSettings } from "@api/Settings";
+import { Devs } from "@utils/constants";
 import { Logger } from "@utils/Logger";
 import definePlugin, { OptionType } from "@utils/types";
-import { FluxDispatcher, UserStore, Toasts, ChannelStore } from "@webpack/common";
+import { ChannelStore,FluxDispatcher, Toasts, UserStore } from "@webpack/common";
 
 const logger = new Logger("UwUSounds");
 
@@ -26,12 +27,12 @@ function setupAudioInterceptor() {
             if (srcStr && (srcStr.includes("/assets/") || srcStr.includes(".mp3") || srcStr.includes(".wav") || srcStr.includes(".ogg"))) {
                 this.volume = 0;
                 this.muted = true;
-                
+
                 // Zagraj uniwersalny dźwięk UwU w zamian (zabezpieczone flagą startową)
                 if (typeof isStartingUp !== "undefined" && !isStartingUp) {
                     playUwU("generic", true);
                 }
-                
+
                 return Promise.resolve();
             }
         } catch(e) {
@@ -66,7 +67,7 @@ function playUwU(category: string, isGeneric = false) {
 
     const timeNow = Date.now();
     if (isGeneric) {
-        // Jeśli w ciągu ostatnich 200ms zagrał jakiś dedykowany dźwięk (np. message), 
+        // Jeśli w ciągu ostatnich 200ms zagrał jakiś dedykowany dźwięk (np. message),
         // nie odtwarzaj dźwięku generic, by zapobiec nałożeniu się na siebie!
         if (timeNow - lastSpecificSoundTime < 200) return;
     } else {
@@ -78,12 +79,12 @@ function playUwU(category: string, isGeneric = false) {
         console.log(`%c[UwUSounds Admin]%c Żądanie dźwięku: ${category}`, "color: #ffb6c1; font-weight: bold;", "color: inherit;");
     }
 
-    let vol = settings.store.Volume / 100;
-    
+    const vol = settings.store.Volume / 100;
+
     try {
         const ctx = getAudioContext();
         const now = ctx.currentTime;
-        
+
         let pitchMod = 1.0;
         if (settings.store.RandomPitch) {
             if (category === "typing") {
@@ -188,12 +189,12 @@ function handleMessageCreate(event: any) {
         if (isStartingUp || !settings.store.Enabled) return;
         const message = event?.message;
         if (!message) return;
-        
+
         const currentUser = UserStore?.getCurrentUser();
-        
+
         // ZABEZPIECZENIE PRZED CRASHEM (Wiadomości systemowe nie mają autora!)
         if (!currentUser || !message.author) return;
-        
+
         if (message.author.id === currentUser.id) {
             if (settings.store.Playsend) {
                 playUwU("send");
@@ -205,13 +206,13 @@ function handleMessageCreate(event: any) {
                 const content = (message.content || "").toLowerCase();
                 const hasPingWord = words.some(w => content.includes(w));
                 if (hasPingWord) {
-                    if (settings.store.AdminConsole) logger.info(`[Admin Console] Znaleziono Słowo Kluczowe (Ping Word)!`);
+                    if (settings.store.AdminConsole) logger.info("[Admin Console] Znaleziono Słowo Kluczowe (Ping Word)!");
                     playUwU("pingword");
                     return;
                 }
             }
 
-            // Filtrujemy, żeby dźwięk powiadomienia grał TYLKO przy DM lub Mentions, 
+            // Filtrujemy, żeby dźwięk powiadomienia grał TYLKO przy DM lub Mentions,
             // ALBO gdy wiadomość jest wysłana na tekstowym kanale wewnątrz kanału głosowego (text-in-voice)
             const channel = ChannelStore?.getChannel(message.channel_id);
             const isDM = channel?.isPrivate();
@@ -227,7 +228,7 @@ function handleMessageCreate(event: any) {
                 if (timeNow - lastServerMessageSoundTime >= 60000) {
                     lastServerMessageSoundTime = timeNow;
                     playUwU("message");
-                    if (settings.store.AdminConsole) logger.info(`[Admin Console] Odtworzono powiadomienie serwerowe (kolejne za min. 60s)`);
+                    if (settings.store.AdminConsole) logger.info("[Admin Console] Odtworzono powiadomienie serwerowe (kolejne za min. 60s)");
                 }
             }
         }
@@ -243,7 +244,7 @@ function handleMuteToggle() {
     try {
         if (isStartingUp || !settings.store.MuteSync) return;
         isMutedState = !isMutedState;
-        if (settings.store.AdminConsole) logger.info(`[Admin Console] Wykryto użycie MuteSync`);
+        if (settings.store.AdminConsole) logger.info("[Admin Console] Wykryto użycie MuteSync");
         if (isMutedState) playUwU("mute");
         else playUwU("unmute");
     } catch(e) {}
@@ -295,10 +296,10 @@ function handleVoiceState(event: any) {
     if (isStartingUp || !settings.store.Enabled) return;
     const currentUser = UserStore?.getCurrentUser();
     if (!currentUser) return;
-    
+
     // ZABEZPIECZENIE PRZED CRASHEM (Brak tablicy states)
     if (!event || !event.voiceStates || !Array.isArray(event.voiceStates)) return;
-    
+
     try {
         const update = event.voiceStates.find((vs: any) => vs.userId === currentUser.id);
         if (update) {
@@ -387,13 +388,13 @@ export const settings = definePluginSettings({
 export default definePlugin({
     name: "UwUSounds",
     description: "Zastępuje wszystkie dźwięki Discorda słodkimi UwU melodyjkami 🐹 (Web Audio API) + Super Funkcje Admina",
-    authors: [{ id: 1302034381648695357n, name: "Ulux" }],
+    authors: [Devs.Ulux],
     settings,
-    patches: [], 
+    patches: [],
 
     start() {
         logger.info("Starting UwUSounds on old system with new Admin features...");
-        
+
         isStartingUp = true;
         setupAudioInterceptor();
 
@@ -401,7 +402,7 @@ export default definePlugin({
             setTimeout(() => playUwU("startup"), 1500);
         }
 
-        // Odblokowujemy dźwięki systemowe po 4 sekundach od uruchomienia, 
+        // Odblokowujemy dźwięki systemowe po 4 sekundach od uruchomienia,
         // aby Discord zdążył pobrać wiadomości z cache bez spamu dźwięków
         setTimeout(() => {
             isStartingUp = false;
@@ -424,7 +425,7 @@ export default definePlugin({
                     const exportStr = btoa(JSON.stringify(settings.store));
                     DiscordNative.clipboard.copy(`UwU_Config::${exportStr}`);
                     Toasts?.show({ message: "Konfiguracja skopiowana do schowka!", type: Toasts.Type.SUCCESS, id: Toasts.genId() });
-                    if (settings.store.AdminConsole) logger.info(`[Admin Console] Konfiguracja wyeksportowana pomyślnie.`);
+                    if (settings.store.AdminConsole) logger.info("[Admin Console] Konfiguracja wyeksportowana pomyślnie.");
                 } catch(e) { }
                 settings.store.ExportConfig = false; // untoggle automatically
             }
