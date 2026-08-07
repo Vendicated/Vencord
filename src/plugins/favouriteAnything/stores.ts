@@ -13,7 +13,7 @@ import { BatchedRequestQueue, isAllowedHost } from "./utils";
 /** Used for storing and automatically refreshing signed CDN/Media proxy urls ({@link https://docs.discord.food/reference#signed-attachment-urls}). */
 export const SignedUrlsStore = proxyLazyWebpack(() => {
     class SignedUrlsStoreClass extends Flux.Store {
-        public static readonly displayName = "SignedUrlsStoreClass";
+        public static readonly displayName = "SignedUrlsStore";
         private static readonly _expirationThreshold = 60 * 60 * 1000;
 
         private _urls = new Map<string, string>();
