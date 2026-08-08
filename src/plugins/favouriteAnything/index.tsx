@@ -12,8 +12,8 @@ import { ComponentType, ReactNode } from "react";
 import { AttachmentAccessory, AttachmentContextProvider, EmbedAccessory, EmbedContext, EmbedMosaicContext, FilePicker } from "./components";
 import { SignedUrlsStore } from "./stores";
 import managedStyle from "./style.css?managed";
-import { AttachmentContextProviderProps, EmbedComponent, ExpressionPickerTabProps, ExpressionPickerView, FavouriteItem, FavouriteItemFormat } from "./types";
-import { getThumbnailUrl } from "./utils";
+import { AttachmentContextProviderProps, EmbedComponent, ExpressionPickerTabProps, ExpressionPickerView, FavouriteItem, FavouriteItemFormat, FullFavouriteItem } from "./types";
+import { fixFavouriteItem } from "./utils";
 
 export default definePlugin({
     name: "FavouriteAnything",
@@ -58,8 +58,8 @@ export default definePlugin({
                 },
                 {
                     // Always add our custom accessory to the attachment's adjacent content
-                    match: "=[];",
-                    replace: "=[$self.renderAttachmentAccessory()];"
+                    match: /let \i=Math.max\(0,(\i)\.length-\i\)/,
+                    replace: "$1.unshift($self.renderAttachmentAccessory());$&"
                 }
             ]
         },
@@ -96,13 +96,13 @@ export default definePlugin({
                 replace: "$&.filter($self.filterGifs)"
             }
         },
-        // FAVOURITE BUTTON
+        // PROTOBUF
         {
-            find: "#{intl::GIF_TOOLTIP_REMOVE_FROM_FAVORITES}",
+            find: "#{intl::FAVORITE_GIFS_LIMIT_REACHED_BODY}",
             replacement: {
-                // Intercept the onClick callback to replace the placeholder thumbnail with a valid CDN link
-                match: /\(0,(\i\.\i)\)\((\{[^}].{40,60}?\})\)/,
-                replace: "$self.interceptAddToFavourites($2).then($1)"
+                // Intercept add/remove actions to generate a valid thumbnail url before storing the item
+                match: /function (\i)\((\i)\)\{(?=\i\.\i\.updateAsync\("favoriteGifs")/g,
+                replace: "async function $1($2){await $self.convertFavItem($2);await "
             }
         }
     ],
@@ -135,7 +135,7 @@ export default definePlugin({
     renderFilePicker(activeView: ExpressionPickerView, onSelectGIF: (item: { url: string; }) => void) {
         return activeView === ExpressionPickerView.FILES ? <FilePicker onSelectItem={onSelectGIF} /> : null;
     },
-    renderAttachment(children: ReactNode, { item }: { item: AttachmentContextProviderProps["attachment"] }) {
+    renderAttachment(children: ReactNode, { item }: { item: AttachmentContextProviderProps["attachment"]; }) {
         return <AttachmentContextProvider attachment={item}>{children}</AttachmentContextProvider>;
     },
     renderCV2File(children: ReactNode, key: React.Key, component: AttachmentContextProviderProps["component"]) {
@@ -150,21 +150,14 @@ export default definePlugin({
     renderAttachmentAccessory: () => <AttachmentAccessory />,
     renderEmbedAccessory: () => <EmbedAccessory />,
     filterGifs: (item: FavouriteItem) => item.format !== FavouriteItemFormat.NONE,
-    interceptAddToFavourites: async (item: FavouriteItem & { url: string; }) => {
-        if (item.format !== FavouriteItemFormat.NONE) return item;
-
-        SignedUrlsStore.addSigned(item.url);
-
-        if (URL.canParse(item.src)) {
+    convertFavItem: async (item: FullFavouriteItem | string) => {
+        if (typeof item === "string") {
+            SignedUrlsStore.addSigned(item);
+        } else {
+            SignedUrlsStore.addSigned(item.url);
             SignedUrlsStore.addSigned(item.src);
-            return item;
+
+            Object.assign(item, await fixFavouriteItem(item));
         }
-
-        const thumbnail = await getThumbnailUrl(item.src, item.width, item.height);
-        if (!thumbnail) return item;
-
-        thumbnail.search = "";
-        thumbnail.hash = item.src;
-        return { ...item, src: `${thumbnail}` };
     }
 });

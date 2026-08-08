@@ -117,6 +117,10 @@ export interface FavouriteItem {
     order: number;
 }
 
+export interface FullFavouriteItem extends FavouriteItem {
+    url: string;
+}
+
 export enum CustomItemFormat {
     ATTACHMENT = 0
 }

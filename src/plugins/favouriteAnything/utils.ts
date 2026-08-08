@@ -18,7 +18,7 @@ import { Key } from "react";
 import { JsonValue } from "type-fest";
 
 import { base64ToUint8Array, uint8ArrayToBase64 } from "./polyfills";
-import { AttachmentTransformer, CustomItemDef, CustomItemFormat, FavouriteItem, FavouriteItemFormat, ImageUtils as ImageUtils_, ItemsDef, ResizeObserverHook, UnfurledEmbedsResponse } from "./types";
+import { AttachmentTransformer, CustomItemDef, CustomItemFormat, FavouriteItem, FavouriteItemFormat, FullFavouriteItem, ImageUtils as ImageUtils_, ItemsDef, ResizeObserverHook, UnfurledEmbedsResponse } from "./types";
 
 const Native = VencordNative.pluginHelpers.FavouriteAnything as PluginNative<typeof import("./native")>;
 
@@ -98,10 +98,21 @@ export const defs = defineItems({
     // This could be expanded in the future with other item types (e.g. voice messages)
 });
 
+export async function fixFavouriteItem(item: FullFavouriteItem): Promise<FullFavouriteItem> {
+    if (item.format !== FavouriteItemFormat.NONE) return item;
+
+    const thumbnail = await getThumbnailUrl(item.src, item.width, item.height);
+    if (!thumbnail) return item;
+
+    thumbnail.search = "";
+    thumbnail.hash = item.src;
+    return { ...item, src: `${thumbnail}` };
+}
+
 // TODO: make thumbnails prettier
 const fallbackThumbnail = new URL("https://images-ext-1.discordapp.net/external/pGTJg3YdSHpyGTltH4vZUKEyQoNzf5mtqbSJs7I4ebc/https/equicord.org/assets/plugins/favoriteAnything/invalid.png");
 
-export async function getThumbnailUrl(data: string, width: number, height: number): Promise<URL | null> {
+async function getThumbnailUrl(data: string, width: number, height: number): Promise<URL | null> {
     try {
         const decoded = defs.decode(data);
         if (!decoded || !width || !height) return null;
