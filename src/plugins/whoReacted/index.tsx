@@ -16,31 +16,16 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { definePluginSettings } from "@api/Settings";
+import { isPluginEnabled } from "@api/PluginManager";
 import ErrorBoundary from "@components/ErrorBoundary";
+import NoBlockedMessagesPlugin from "@plugins/noBlockedMessages";
 import { Devs } from "@utils/constants";
 import { sleep } from "@utils/misc";
 import { Queue } from "@utils/Queue";
 import { useForceUpdater } from "@utils/react";
-import definePlugin, { OptionType } from "@utils/types";
-import {
-    CustomEmoji,
-    Message,
-    ReactionEmoji,
-    User,
-} from "@vencord/discord-types";
-import {
-    ChannelStore,
-    Constants,
-    FluxDispatcher,
-    React,
-    RelationshipStore,
-    RestAPI,
-    useEffect,
-    useLayoutEffect,
-    UserStore,
-    UserSummaryItem,
-} from "@webpack/common";
+import definePlugin from "@utils/types";
+import { CustomEmoji, Message, ReactionEmoji, User } from "@vencord/discord-types";
+import { ChannelStore, Constants, FluxDispatcher, React, RestAPI, useEffect, useLayoutEffect, UserStore, UserSummaryItem } from "@webpack/common";
 
 interface ReactionCacheEntry {
     fetched: boolean;
@@ -56,14 +41,6 @@ interface ReactionProps {
 let Scroll: any = null;
 const queue = new Queue();
 let reactions: Record<string, ReactionCacheEntry> = {};
-const settings = definePluginSettings({
-    hideBlockedUsers: {
-        description: "Whether to hide blocked or ignored reactions",
-        type: OptionType.BOOLEAN,
-        default: true,
-        restartNeeded: false
-    }
-});
 
 function fetchReactions(msg: Message, emoji: ReactionEmoji, type: number) {
     const key = emoji.name + (emoji.id ? `:${emoji.id}` : "");
@@ -113,7 +90,7 @@ function handleClickAvatar(event: React.UIEvent<HTMLElement, Event>) {
 
 function ReactionUsers({ message, users }: {
     message: Message,
-    users: User[]
+    users: User[];
 }) {
     const forceUpdate = useForceUpdater();
 
@@ -156,7 +133,6 @@ export default definePlugin({
     description: "Renders the avatars of users who reacted to a message",
     tags: ["Reactions", "Chat", "Appearance"],
     authors: [Devs.Ven, Devs.KannaDev, Devs.newwares, Devs.paige],
-    settings,
 
     patches: [
         {
@@ -185,10 +161,11 @@ export default definePlugin({
 
     renderUsers: ErrorBoundary.wrap(({ message, emoji, type }: ReactionProps) => {
         const reactionMap = getReactionsWithQueue(message, emoji, type);
-        const users = Array.from(reactionMap, ([id]) => UserStore.getUser(id))
-            .filter(Boolean)
-            .filter(user => !settings.store.hideBlockedUsers
-                || !RelationshipStore.isBlockedOrIgnored(user.id));
+        let users = Array.from(reactionMap, ([id]) => UserStore.getUser(id)).filter(Boolean);
+
+        if (isPluginEnabled(NoBlockedMessagesPlugin.name))
+            users = users.filter(user => !NoBlockedMessagesPlugin.shouldIgnoreUser(user.id));
+
         return message.reactions.length > 10 || users.length === 0
             ? null
             : <ReactionUsers message={message} users={users} />;
