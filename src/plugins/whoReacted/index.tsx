@@ -157,13 +157,15 @@ export default definePlugin({
     ],
 
     renderUsers: ErrorBoundary.wrap(({ message, emoji, type }: ReactionProps) => {
+        if (message.reactions.length > 10) return null;
+
         const reactionMap = getReactionsWithQueue(message, emoji, type);
         let users = Array.from(reactionMap, ([id]) => UserStore.getUser(id)).filter(Boolean);
 
         if (isPluginEnabled(NoBlockedMessagesPlugin.name))
             users = users.filter(user => !NoBlockedMessagesPlugin.shouldIgnoreUser(user.id));
 
-        return message.reactions.length > 10 || users.length === 0
+        return users.length === 0
             ? null
             : <ReactionUsers message={message} users={users} />;
     }, { noop: true }),
