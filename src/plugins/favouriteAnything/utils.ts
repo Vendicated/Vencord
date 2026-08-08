@@ -17,7 +17,6 @@ import { deflateSync, inflateSync } from "fflate";
 import { Key } from "react";
 import { JsonValue } from "type-fest";
 
-import { base64ToUint8Array, uint8ArrayToBase64 } from "./polyfills";
 import { AttachmentTransformer, CustomItemDef, CustomItemFormat, FavouriteItem, FavouriteItemFormat, FullFavouriteItem, ImageUtils as ImageUtils_, ItemsDef, ResizeObserverHook, UnfurledEmbedsResponse } from "./types";
 
 const Native = VencordNative.pluginHelpers.FavouriteAnything as PluginNative<typeof import("./native")>;
@@ -40,7 +39,7 @@ function defineItems<T extends Record<CustomItemFormat, CustomItemDef>>(def: Ite
                 const obj = [format, def[format].encode(data)];
 
                 const buf = deflateSync(encoder.encode(JSON.stringify(obj)));
-                return uint8ArrayToBase64(buf);
+                return buf.toBase64({ alphabet: "base64url", omitPadding: true });
             } catch {
                 return null;
             }
@@ -49,7 +48,7 @@ function defineItems<T extends Record<CustomItemFormat, CustomItemDef>>(def: Ite
             try {
                 if (!raw) return null;
 
-                const buf = inflateSync(base64ToUint8Array(raw));
+                const buf = inflateSync(Uint8Array.fromBase64(raw, { alphabet: "base64url" }));
                 const parsed: unknown[] | null = JSON.parse(decoder.decode(buf));
                 if (!Array.isArray(parsed)) return null;
 
