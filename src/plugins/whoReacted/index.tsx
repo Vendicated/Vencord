@@ -88,10 +88,7 @@ function handleClickAvatar(event: React.UIEvent<HTMLElement, Event>) {
     event.stopPropagation();
 }
 
-function ReactionUsers({ message, users }: {
-    message: Message,
-    users: User[];
-}) {
+function ReactionUsers({ message, users }: { message: Message, users: User[]; }) {
     const forceUpdate = useForceUpdater();
 
     useLayoutEffect(() => { // bc need to prevent autoscrolling
