@@ -90,7 +90,7 @@ function TagModal({ channelId, tagId, modalProps }: TagModalProps) {
             {...modalProps}
             title={tagId ? "Edit Tag" : "Create Tag"}
             actions={[{
-                text: tagId ? "Save" : "Create & Set",
+                text: tagId ? "Save" : channelId ? "Create & Set" : "Create",
                 variant: "primary",
                 onClick: onSave,
                 disabled: !name.trim()
