@@ -5,15 +5,15 @@
  */
 
 import { findGroupChildrenByChildId, NavContextMenuPatchCallback } from "@api/ContextMenu";
-import { plugins } from "@api/PluginManager";
 import { MainSettingsIcon, PlusIcon } from "@components/index";
-import { openPluginModal } from "@components/settings";
 import { ContextMenuApi, Menu } from "@webpack/common";
 
 import { addTagToChannel, ChannelTag, ChannelTagMap, compareTags, removeTagFromChannel, TagShape } from "./data";
+import { TagsIcon } from "./icons";
 import { getChannelTagMap, getTagMap, settings } from "./settings";
 import { openCreateTagModal } from "./TagModal";
 import { TagShapeIcon } from "./TagShape";
+import { openTagsModal } from "./TagsModal";
 
 function TagMenuLabel({ color, name, shape }: {
     color: string;
@@ -42,7 +42,8 @@ export function makeChannelTagsMenuChildren(channelId: string, channelTags: Chan
             <Menu.MenuItem
                 id="vc-channel-tags-add"
                 key="vc-channel-tags-add"
-                label="Create Tag"
+                label="Add Tag"
+                icon={TagsIcon}
                 action={() => openCreateTagModal(channelId)}
             />
         ];
@@ -59,20 +60,20 @@ export function makeChannelTagsMenuChildren(channelId: string, channelTags: Chan
         <Menu.MenuItem
             id="vc-channel-tags-add-new"
             key="vc-channel-tags-add-new"
-            label="Create New Tag"
+            label="Create New"
             icon={PlusIcon}
             action={() => openCreateTagModal(channelId)}
         />,
         <Menu.MenuItem
             id="vc-channel-tags-edit"
             key="vc-channel-tags-edit"
-            label="Manage Tags"
+            label="Manage"
             icon={MainSettingsIcon}
-            action={() => openPluginModal(plugins.ChannelTags)}
+            action={openTagsModal}
         />,
         <Menu.MenuSeparator key="vc-channel-tags-separator" />,
         ...[...groupedTags].map(([group, groupTags]) => (
-            <Menu.MenuGroup key={group ?? "vc-channel-tags-ungrouped"} label={group ?? "Ungrouped"}>
+            <Menu.MenuGroup key={group ?? "vc-channel-tags-ungrouped"} label={group}>
                 {groupTags.map(([id, tag]) => {
                     const isAssigned = assignedTagIds.has(id);
                     return (

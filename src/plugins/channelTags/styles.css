@@ -144,11 +144,6 @@
     font-weight: 400;
 }
 
-.vc-channel-tags-action-icon {
-    width: 20px;
-    height: 20px;
-}
-
 .vc-channel-tags-usage-content {
     display: grid;
     gap: 12px;

@@ -5,10 +5,12 @@
  */
 
 import { definePluginSettings } from "@api/Settings";
+import { Button } from "@components/Button";
+import { SettingsSection } from "@components/settings/tabs/plugins/components/Common";
 import { OptionType } from "@utils/types";
 
 import type { ChannelTagMap, TagMap } from "./data";
-import { TagSettings } from "./TagSettings";
+import { openTagsModal } from "./TagsModal";
 
 export const settings = definePluginSettings({
     clickTagsToRemove: {
@@ -19,7 +21,11 @@ export const settings = definePluginSettings({
     },
     manageTags: {
         type: OptionType.COMPONENT,
-        component: TagSettings
+        component: () => (
+            <SettingsSection tag="div" name="Tags" id="" description="" inlineSetting>
+                <Button onClick={openTagsModal}>Manage Tags</Button>
+            </SettingsSection>
+        )
     }
 }).withPrivateSettings<{
     tags?: TagMap;
