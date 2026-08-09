@@ -137,6 +137,7 @@ function TagUsageModal({ tagId, channelIds, modalProps }: {
 
 export function openTagUsageModal(tagId: string) {
     updateStoreMetadata();
+    // Snapshot the IDs here so that any removed tags in the usage modal can be re-added if the user made a mistake.
     const channelIds = getTagUsageChannelIds(tagId);
     openModal(modalProps => <TagUsageModal channelIds={channelIds} modalProps={modalProps} tagId={tagId} />);
 }
