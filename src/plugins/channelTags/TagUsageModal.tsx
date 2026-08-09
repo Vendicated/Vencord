@@ -6,6 +6,7 @@
 
 import { Button } from "@components/Button";
 import { ExpandableSection } from "@components/ExpandableCard";
+import { BaseText, Paragraph } from "@components/index";
 import { classNameFactory } from "@utils/css";
 import type { Channel, Guild, RenderModalProps } from "@vencord/discord-types";
 import { findByPropsLazy } from "@webpack";
@@ -42,7 +43,7 @@ function getChannelName(channel: Channel) {
 }
 
 function GuildIcon({ guild }: { guild?: Guild; }) {
-    if (!guild) return <div className={cl("group-icon", "group-icon-dms")}>@</div>;
+    if (!guild) return <BaseText className={`${cl("group-icon")}`}>@</BaseText>;
 
     const iconUrl = guild.icon && IconUtils.getGuildIconURL({
         id: guild.id,
@@ -53,7 +54,7 @@ function GuildIcon({ guild }: { guild?: Guild; }) {
 
     return iconUrl
         ? <img alt="" className={cl("group-icon")} src={iconUrl} />
-        : <div className={cl("group-icon")}>{guild.name.slice(0, 2).toUpperCase()}</div>;
+        : <BaseText className={cl("group-icon")}>{guild.name.slice(0, 2).toUpperCase()}</BaseText>;
 }
 
 function PrivateChannelAvatar({ channel }: { channel: Channel; }) {
@@ -87,10 +88,10 @@ function ChannelUsageRow({ channel, onNavigate }: { channel: Channel; onNavigate
         >
             <PrivateChannelAvatar channel={channel} />
             <div className={cl("channel-names")}>
-                {parent && <span className={cl("parent-name")}>#{getChannelName(parent)}</span>}
-                <span className={cl("channel-name")}>
+                {parent && <Paragraph size="xs" style={{ color: "var(--text-muted)" }}>#{getChannelName(parent)}</Paragraph>}
+                <Paragraph>
                     {!channel.isPrivate() && !channel.isThread() && "#"}{getChannelName(channel)}
-                </span>
+                </Paragraph>
             </div>
             <ChannelTags channelId={channel.id} />
             <Tooltip position="top" text="Edit Tags">
@@ -138,7 +139,6 @@ function TagUsageModal({ tagId, channelIds, modalProps }: {
     return (
         <Modal {...modalProps} size="lg" title={`Tagged: ${tags[tagId]?.name ?? "Tag"}`}>
             <div className={cl("content")}>
-                {!groups.length && <div className={cl("empty")}>This tag is not used by any channels.</div>}
                 {groups.map(group => (
                     <ExpandableSection
                         className={cl("group")}
@@ -157,8 +157,7 @@ function TagUsageModal({ tagId, channelIds, modalProps }: {
                         )}
                     >
                         <GuildIcon guild={group.guild} />
-                        <span className={cl("group-name")}>{group.name}</span>
-                        <span className={cl("group-count")}>{group.channels.length}</span>
+                        <Paragraph size="md" weight="semibold" className={cl("group-name")}>{group.name}</Paragraph>
                     </ExpandableSection>
                 ))}
             </div>

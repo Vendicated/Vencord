@@ -5,7 +5,9 @@
  */
 
 import { findGroupChildrenByChildId, NavContextMenuPatchCallback } from "@api/ContextMenu";
-import { MainSettingsIcon, PlusIcon } from "@components/index";
+import { MainSettingsIcon, Margins, PlusIcon } from "@components/index";
+import { classNameFactory } from "@utils/css";
+import { classes } from "@utils/index";
 import { ContextMenuApi, Menu } from "@webpack/common";
 
 import { addTagToChannel, ChannelTag, ChannelTagMap, compareTags, removeTagFromChannel, TagShape } from "./data";
@@ -15,20 +17,22 @@ import { openCreateTagModal } from "./TagModal";
 import { TagShapeIcon } from "./TagShape";
 import { openTagsModal } from "./TagsModal";
 
+const cl = classNameFactory("vc-channel-tags-");
+
 function TagMenuLabel({ color, name, shape }: {
     color: string;
     name: string;
     shape?: TagShape;
 }) {
     return (
-        <span className="vc-channel-tags-menu-label">
+        <>
             <TagShapeIcon
-                className="vc-channel-tags-menu-swatch"
+                className={classes(cl("menu-swatch"), Margins.right8)}
                 color={color}
                 tagShape={shape}
             />
-            <span>{name}</span>
-        </span>
+            {name}
+        </>
     );
 }
 

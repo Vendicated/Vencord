@@ -1,11 +1,6 @@
-.vc-channel-tags-tag-shape > g > * {
-    fill: inherit !important;
-    stroke: inherit !important;
-}
-
 .vc-channel-tags-modal-content {
     display: grid;
-    gap: 1.5em;
+    gap: 24px;
 }
 
 .vc-channel-tags-modal-color-picker {
@@ -23,18 +18,13 @@
     gap: 8px;
 }
 
-.vc-channel-tags-modal-name-input {
+.vc-channel-tags-modal-name-row > * {
     flex: 1;
-    min-width: 0;
 }
 
 .vc-channel-tags-modal-shape-button {
     flex: 0 0 auto;
-}
-
-.vc-channel-tags-modal-shape-button svg {
-    width: 20px;
-    height: 20px;
+    padding: 4px;
 }
 
 .vc-channel-tags-decorations {
@@ -46,14 +36,9 @@
 
 .vc-channel-tags-decoration {
     display: flex;
+    flex: 0 0 auto;
     width: 12px;
     height: 12px;
-    flex: 0 0 auto;
-}
-
-.vc-channel-tags-decoration svg {
-    width: 100%;
-    height: 100%;
 }
 
 .vc-channel-tags-decoration-clickable {
@@ -65,95 +50,42 @@
     outline-offset: 2px;
 }
 
-.vc-channel-tags-menu-label {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
 .vc-channel-tags-menu-swatch {
     width: 12px;
     height: 12px;
-    flex: 0 0 auto;
+    vertical-align: -2px;
 }
 
-.vc-channel-tags-settings {
+.vc-channel-tags-list {
     display: grid;
     gap: 8px;
 }
 
-.vc-channel-tags-settings-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-}
-
-.vc-channel-tags-settings-header [class*="formTitle"] {
-    margin-bottom: 0;
-}
-
-.vc-channel-tags-settings-group {
+.vc-channel-tags-list-group {
     display: grid;
     gap: 4px;
 }
 
-.vc-channel-tags-settings-group-title {
-    margin: 8px 10px 0;
-}
-
-.vc-channel-tags-settings-row {
+.vc-channel-tags-list-row {
     display: flex;
     align-items: center;
     gap: 6px;
     min-height: 36px;
 }
 
-.vc-channel-tags-settings-summary {
-    display: flex;
-    align-items: center;
-    min-width: 0;
-    padding: 0;
-    border: 0;
+.vc-channel-tags-list-summary {
     flex: 1;
-    background: none;
-    gap: 8px;
-    text-align: left;
 }
 
-.vc-channel-tags-settings-swatch {
+.vc-channel-tags-list-swatch {
     width: 16px;
     height: 16px;
-    flex: 0 0 auto;
-}
-
-.vc-channel-tags-settings-name {
-    flex: 1;
-    min-width: 0;
-    overflow: hidden;
-    color: var(--text-normal);
-    font-weight: 500;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-
-.vc-channel-tags-settings-usage-count {
-    margin-left: 4px;
-    color: var(--text-muted);
-    font-size: 12px;
-    font-weight: 400;
+    vertical-align: -3px;
 }
 
 .vc-channel-tags-usage-content {
     display: grid;
-    gap: 12px;
-    padding-bottom: 16px;
-}
-
-.vc-channel-tags-usage-empty {
-    padding: 20px;
-    color: var(--text-muted);
-    text-align: center;
+    gap: 24px;
 }
 
 .vc-channel-tags-usage-group-icon {
@@ -161,15 +93,7 @@
     width: 32px;
     height: 32px;
     border-radius: 50%;
-    background: var(--background-tertiary);
-    color: var(--text-normal);
-    font-size: 11px;
-    font-weight: 600;
     place-items: center;
-}
-
-.vc-channel-tags-usage-group-icon-dms {
-    font-size: 18px;
 }
 
 .vc-channel-tags-usage-group .vc-expandable-card-header {
@@ -180,37 +104,18 @@
 .vc-channel-tags-usage-group-name {
     overflow: hidden;
     flex: 1;
-    color: var(--header-primary);
-    font-weight: 600;
     text-overflow: ellipsis;
     white-space: nowrap;
-}
-
-.vc-channel-tags-usage-group-count {
-    color: var(--text-muted);
-    font-size: 12px;
-}
-
-.vc-channel-tags-usage-channels {
-    display: grid;
-    gap: 6px;
 }
 
 .vc-channel-tags-usage-channel-row {
     display: flex;
     align-items: center;
-    min-height: 38px;
+    gap: 6px;
+    min-height: 36px;
     padding: 6px 8px;
+    margin: 0 -8px;
     border-radius: 6px;
-    gap: 8px;
-}
-
-.vc-channel-tags-usage-channel-row .vc-channel-tags-decorations {
-    margin-left: 0;
-}
-
-.vc-channel-tags-usage-channel-avatar {
-    flex: 0 0 auto;
 }
 
 .vc-channel-tags-usage-channel-row:hover {
@@ -218,26 +123,18 @@
 }
 
 .vc-channel-tags-usage-channel-names {
-    display: flex;
-    overflow: hidden;
     flex: 1;
-    flex-direction: column;
-    justify-content: center;
+    display: grid;
     gap: 2px;
 }
 
-.vc-channel-tags-usage-parent-name {
+.vc-channel-tags-usage-channel-names > * {
     overflow: hidden;
-    max-width: 100%;
-    color: var(--text-muted);
-    font-size: 12px;
     text-overflow: ellipsis;
     white-space: nowrap;
 }
 
-.vc-channel-tags-usage-channel-name {
-    overflow: hidden;
-    color: var(--text-normal);
-    text-overflow: ellipsis;
-    white-space: nowrap;
+.vc-channel-tags-tag-shape > g > * {
+    fill: inherit !important;
+    stroke: inherit !important;
 }
