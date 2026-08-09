@@ -89,23 +89,11 @@ function handleClickAvatar(event: React.UIEvent<HTMLElement, Event>) {
 }
 
 function ReactionUsers({ message, users }: { message: Message, users: User[]; }) {
-    const forceUpdate = useForceUpdater();
-
     useLayoutEffect(() => { // bc need to prevent autoscrolling
         if (Scroll?.scrollCounter > 0) {
             Scroll.setAutomaticAnchor(null);
         }
     });
-
-    useEffect(() => {
-        const cb = (e: any) => {
-            if (e?.messageId === message.id)
-                forceUpdate();
-        };
-        FluxDispatcher.subscribe("MESSAGE_REACTION_ADD_USERS", cb);
-
-        return () => FluxDispatcher.unsubscribe("MESSAGE_REACTION_ADD_USERS", cb);
-    }, [message.id, forceUpdate]);
 
     return (
         <div
@@ -157,6 +145,18 @@ export default definePlugin({
     ],
 
     renderUsers: ErrorBoundary.wrap(({ message, emoji, type }: ReactionProps) => {
+        const forceUpdate = useForceUpdater();
+
+        useEffect(() => {
+            const cb = (e: any) => {
+                if (e?.messageId === message.id)
+                    forceUpdate();
+            };
+            FluxDispatcher.subscribe("MESSAGE_REACTION_ADD_USERS", cb);
+
+            return () => FluxDispatcher.unsubscribe("MESSAGE_REACTION_ADD_USERS", cb);
+        }, [message.id, forceUpdate]);
+
         if (message.reactions.length > 10) return null;
 
         const reactionMap = getReactionsWithQueue(message, emoji, type);
