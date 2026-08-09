@@ -14,7 +14,7 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
-*/
+ */
 
 import { definePluginSettings, migratePluginSetting } from "@api/Settings";
 import { Devs } from "@utils/constants";
@@ -29,11 +29,22 @@ interface MessageDeleteProps {
     collapsedReason: () => any;
 }
 
+interface MessageWithReference extends Message {
+    referenced_message?: Message | null;
+}
+
 // Remove this migration once enough time has passed
 migratePluginSetting("NoBlockedMessages", "ignoreBlockedMessages", "ignoreMessages");
+
 const settings = definePluginSettings({
     ignoreMessages: {
         description: "Completely ignores incoming messages from blocked and ignored (if enabled) users",
+        type: OptionType.BOOLEAN,
+        default: false,
+        restartNeeded: true
+    },
+    ignoreRepliesToBlockedUsers: {
+        description: "Completely ignores incoming messages that reply to blocked and ignored (if enabled) users",
         type: OptionType.BOOLEAN,
         default: false,
         restartNeeded: true
@@ -65,7 +76,7 @@ export default definePlugin({
         },
         {
             find: '"MessageStore"',
-            predicate: () => settings.store.ignoreMessages,
+            predicate: () => settings.store.ignoreMessages || settings.store.ignoreRepliesToBlockedUsers,
             replacement: [
                 {
                     match: /(?<=MESSAGE_CREATE:function\((\i)\){)/,
@@ -75,7 +86,7 @@ export default definePlugin({
         },
         {
             find: '"ReadStateStore"',
-            predicate: () => settings.store.ignoreMessages,
+            predicate: () => settings.store.ignoreMessages || settings.store.ignoreRepliesToBlockedUsers,
             replacement: [
                 {
                     match: /(?<=MESSAGE_CREATE:function\((\i)\){)/,
@@ -85,14 +96,45 @@ export default definePlugin({
         }
     ],
 
-    shouldIgnoreMessage(message: Message) {
+    shouldIgnoreMessage(message: MessageWithReference) {
         try {
-            if (RelationshipStore.isBlocked(message.author.id)) {
-                return true;
+            if (settings.store.ignoreMessages) {
+                if (RelationshipStore.isBlocked(message.author.id)) {
+                    return true;
+                }
+
+                if (
+                    settings.store.applyToIgnoredUsers
+                    && RelationshipStore.isIgnored(message.author.id)
+                ) {
+                    return true;
+                }
             }
-            return settings.store.applyToIgnoredUsers && RelationshipStore.isIgnored(message.author.id);
+
+            if (settings.store.ignoreRepliesToBlockedUsers) {
+                const referencedAuthorId = message.referenced_message?.author?.id;
+
+                if (referencedAuthorId) {
+                    if (RelationshipStore.isBlocked(referencedAuthorId)) {
+                        return true;
+                    }
+
+                    if (
+                        settings.store.applyToIgnoredUsers
+                        && RelationshipStore.isIgnored(referencedAuthorId)
+                    ) {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
         } catch (e) {
-            new Logger("NoBlockedMessages").error("Failed to check if user is blocked or ignored:", e);
+            new Logger("NoBlockedMessages").error(
+                "Failed to check if user is blocked or ignored:",
+                e
+            );
+
             return false;
         }
     },
@@ -102,9 +144,14 @@ export default definePlugin({
             const collapsedReason = props.collapsedReason();
             const is = (key: string) => collapsedReason === i18n.t[runtimeHashMessageKey(key)]();
 
-            return is("BLOCKED_MESSAGE_COUNT") || (settings.store.applyToIgnoredUsers && is("IGNORED_MESSAGE_COUNT"));
+            return is("BLOCKED_MESSAGE_COUNT")
+                || (settings.store.applyToIgnoredUsers && is("IGNORED_MESSAGE_COUNT"));
         } catch (e) {
-            new Logger("NoBlockedMessages").error("Failed to check if message should be hidden:", e);
+            new Logger("NoBlockedMessages").error(
+                "Failed to check if message should be hidden:",
+                e
+            );
+
             return false;
         }
     }
