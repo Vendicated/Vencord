@@ -4,12 +4,15 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { classes, classNameFactory } from "@utils/index";
 import { Tooltip } from "@webpack/common";
 
 import { openChannelTagsMenu } from "./contextMenu";
 import { compareTags, removeTagFromChannel } from "./data";
 import { getChannelTagMap, getTagMap, settings } from "./settings";
 import { TagShapeIcon } from "./TagShape";
+
+const cl = classNameFactory("vc-channel-tags-");
 
 export function ChannelTags({ channelId }: { channelId: string; }) {
     settings.use();
@@ -31,14 +34,14 @@ export function ChannelTags({ channelId }: { channelId: string; }) {
     };
 
     return (
-        <div className="vc-channel-tags-decorations">
+        <div className={cl("decorations")}>
             {tags.map(([id, tag]) => (
                 <Tooltip key={id} position="top" text={tag.name}>
                     {tooltipProps => (
                         <span
                             {...tooltipProps}
                             aria-label={clickToRemove ? `Remove ${tag.name} tag` : undefined}
-                            className={`vc-channel-tags-decoration${clickToRemove ? " vc-channel-tags-decoration-clickable" : ""}`}
+                            className={classes(cl("decoration"), clickToRemove && cl("clickable"))}
                             onClick={clickToRemove ? event => remove(event, id) : undefined}
                             onContextMenu={event => openChannelTagsMenu(event, channelId)}
                             onKeyDown={clickToRemove

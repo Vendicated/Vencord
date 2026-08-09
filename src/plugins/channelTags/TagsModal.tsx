@@ -6,8 +6,9 @@
 
 import { Button } from "@components/Button";
 import { ExpandableSection } from "@components/ExpandableCard";
-import { Paragraph } from "@components/index";
+import { BaseText, Margins, Paragraph } from "@components/index";
 import { classNameFactory } from "@utils/css";
+import { classes } from "@utils/index";
 import type { RenderModalProps } from "@vencord/discord-types";
 import { ConfirmModal, Modal, openModal, Tooltip } from "@webpack/common";
 
@@ -18,6 +19,8 @@ import { openCreateTagModal, openEditTagModal } from "./TagModal";
 import { TagShapeIcon } from "./TagShape";
 import { openTagUsageModal } from "./TagUsageModal";
 import { getTagUsageCounts } from "./usage";
+
+const cl = classNameFactory("vc-channel-tags-");
 
 function TagsModal(modalProps: RenderModalProps) {
     settings.use();
@@ -35,9 +38,9 @@ function TagsModal(modalProps: RenderModalProps) {
         <Modal {...modalProps} size="lg" title="Tags" actions={[{
             text: "Create New Tag",
             variant: "primary",
-            onClick: openCreateTagModal
+            onClick: () => openCreateTagModal()
         }]}>
-            <div className={cl("settings")}>
+            <div className={cl("list")}>
                 {!!tags.length && (
                     <Paragraph size="xs" style={{ color: "var(--text-muted)" }}>
                         Hold Shift when clicking Delete to skip confirmation.
@@ -55,27 +58,27 @@ function TagsModal(modalProps: RenderModalProps) {
                         renderContent={() => (
                             groupTags.map(([id, tag]) => (
                                 <div
-                                    className={cl("settings-row")}
+                                    className={cl("list-row")}
                                     key={id}
                                 >
-                                    <div className={cl("settings-summary")}>
+                                    <div className={cl("list-summary")}>
                                         <TagShapeIcon
-                                            className={cl("settings-swatch")}
+                                            className={classes(cl("list-swatch"), Margins.right8)}
                                             color={tag.color}
                                             tagShape={tag.shape}
                                         />
-                                        <span className={cl("settings-name")}>
+                                        <BaseText tag="span" size="md" weight="semibold">
                                             {tag.name}
-                                            <span className={cl("settings-usage-count")}>
-                                                ({usageCounts.get(id) || "Unused"})
-                                            </span>
-                                        </span>
+                                        </BaseText>
+                                        <BaseText tag="span" size="xs" className={Margins.left8} style={{ color: "var(--text-muted)" }}>
+                                            ({usageCounts.get(id) ?? "Unused"})
+                                        </BaseText>
                                     </div>
-                                    <Tooltip position="top" text="View">
+                                    {!!usageCounts.get(id) && <Tooltip position="top" text="View Usages">
                                         {tooltipProps => (
                                             <Button
                                                 {...tooltipProps}
-                                                aria-label="View"
+                                                aria-label="View Usages"
                                                 onClick={event => {
                                                     event.stopPropagation();
                                                     openTagUsageModal(id);
@@ -86,7 +89,7 @@ function TagsModal(modalProps: RenderModalProps) {
                                                 <ViewIcon />
                                             </Button>
                                         )}
-                                    </Tooltip>
+                                    </Tooltip>}
                                     <Tooltip position="top" text="Edit">
                                         {tooltipProps => (
                                             <Button
@@ -138,7 +141,6 @@ export function openTagsModal() {
     openModal(modalProps => <TagsModal {...modalProps} />);
 }
 
-const cl = classNameFactory("vc-channel-tags-");
 
 function confirmDeleteTag(id: string, name: string) {
     openModal(props => (

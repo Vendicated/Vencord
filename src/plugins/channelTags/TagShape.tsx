@@ -4,12 +4,14 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { classes } from "@utils/index";
+import { classes, classNameFactory } from "@utils/index";
 
 import { DEFAULT_TAG_SHAPE, TagShape, TagShapes } from "./data";
 
+const cl = classNameFactory("vc-channel-tags-");
+
 let SHAPES: Record<TagShape, React.JSX.Element> | undefined;
-const getShapes = () => SHAPES || (SHAPES = {
+const getShapes = () => SHAPES ?? (SHAPES = {
     [TagShapes.Square]: <path d="M3 1.99999996h6a1 1 0 0 1 1 1v6a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1v-6a1 1 0 0 1 1-1" />,
     [TagShapes.Triangle]: <path d="m6.50000017 1.47590924 4.4185995 7.65323896a.57735027.57735027 0 0 1-.5.8660254l-8.8371992-2e-7a.57735027.57735027 0 0 1-.5-.8660254l4.4185997-7.65323878a.57735027.57735027 0 0 1 1 2e-8" />,
     [TagShapes.Circle]: <circle cx="6" cy="6" r="4.5" />,
@@ -36,7 +38,7 @@ export function TagShapeIcon({
     return (
         <svg
             aria-hidden="true"
-            className={classes("vc-channel-tags-tag-shape", className)}
+            className={classes(cl("tag-shape"), className)}
             viewBox="0 0 12 12"
             xmlns="http://www.w3.org/2000/svg"
             filter={`drop-shadow(1px 1px 0 ${borderColor}) drop-shadow(1px 1px 0 ${borderColor})`}
