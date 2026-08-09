@@ -10,6 +10,11 @@ import { SettingsSection } from "@components/settings/tabs/plugins/components/Co
 import { OptionType } from "@utils/types";
 
 import type { ChannelTagMap, TagMap } from "./data";
+import {
+    populateMetadata,
+    type TagsChannelMap,
+    type TagsGuildMap
+} from "./metadata";
 import { openTagsModal } from "./TagsModal";
 
 export const settings = definePluginSettings({
@@ -30,12 +35,23 @@ export const settings = definePluginSettings({
 }).withPrivateSettings<{
     tags?: TagMap;
     channelTags?: ChannelTagMap;
+    channels?: TagsChannelMap;
+    guilds?: TagsGuildMap;
 }>();
 
-export function getTagMap() {
-    return settings.store.tags ??= {};
-}
+export const getTagMap = () => settings.store.tags ??= {};
 
-export function getChannelTagMap() {
-    return settings.store.channelTags ??= {};
+export const getChannelTagMap = () => settings.store.channelTags ??= {};
+
+export const getChannelsGuildsMaps = () => ({
+    channels: settings.store.channels ??= {},
+    guilds: settings.store.guilds ??= {}
+});
+
+export function updateStoreMetadata() {
+    populateMetadata(
+        settings.store.channelTags ??= {},
+        settings.store.channels ??= {},
+        settings.store.guilds ??= {}
+    );
 }
