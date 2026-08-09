@@ -4,17 +4,15 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import type { Channel, Guild } from "@vencord/discord-types";
-import { ChannelStore, GuildStore } from "@webpack/common";
-
 import { sortAlphaNum } from "./data";
-import { getChannelTagMap } from "./settings";
+import type { TagsChannel, TagsGuild } from "./metadata";
+import { getChannelsGuildsMaps, getChannelTagMap } from "./settings";
 
 export interface TagUsageGroup {
     id: string;
     name: string;
-    guild?: Guild;
-    channels: Channel[];
+    guild?: TagsGuild;
+    channels: TagsChannel[];
 }
 
 const DMS_GROUP_ID = "@me";
@@ -37,14 +35,15 @@ export function getTagUsageCounts() {
 
 export function groupTagUsageChannels(channelIds: string[]): TagUsageGroup[] {
     const groups = new Map<string, TagUsageGroup>();
+    const { channels, guilds } = getChannelsGuildsMaps();
 
     for (const channelId of channelIds) {
-        const channel = ChannelStore.getChannel(channelId);
+        const channel = channels[channelId];
         if (!channel) continue;
 
-        const isPrivate = channel.isPrivate();
-        const groupId = isPrivate ? DMS_GROUP_ID : channel.guild_id;
-        const guild = isPrivate ? undefined : GuildStore.getGuild(channel.guild_id);
+        const isPrivate = channel.kind !== "guild";
+        const groupId = isPrivate ? DMS_GROUP_ID : channel.guildId!;
+        const guild = isPrivate ? undefined : guilds[groupId];
         if (!isPrivate && !guild) continue;
 
         let group = groups.get(groupId);

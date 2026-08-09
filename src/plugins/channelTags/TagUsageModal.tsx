@@ -8,79 +8,49 @@ import { Button } from "@components/Button";
 import { ExpandableSection } from "@components/ExpandableCard";
 import { BaseText, Paragraph } from "@components/index";
 import { classNameFactory } from "@utils/css";
-import type { Channel, Guild, RenderModalProps } from "@vencord/discord-types";
-import { findByPropsLazy } from "@webpack";
-import { Avatar, ChannelRouter, ChannelStore, closeAllModals, IconUtils, Modal, openModal, Tooltip, UserStore } from "@webpack/common";
+import type { RenderModalProps } from "@vencord/discord-types";
+import { Avatar, closeAllModals, Modal, NavigationRouter, openModal, Tooltip } from "@webpack/common";
 
 import { ChannelTags } from "./ChannelTags";
 import { openChannelTagsMenu } from "./contextMenu";
 import { JumpIcon, TagsIcon } from "./icons";
-import { getTagMap, settings } from "./settings";
+import type { TagsChannel, TagsGuild } from "./metadata";
+import { getTagMap, settings, updateStoreMetadata } from "./settings";
 import { getTagUsageChannelIds, groupTagUsageChannels } from "./usage";
 
 const cl = classNameFactory("vc-channel-tags-usage-");
-const SelectedChannelActionCreators = findByPropsLazy("selectPrivateChannel");
 
-function navigateToChannel(channel: Channel) {
+function navigateToChannel(tagsChannel: TagsChannel) {
     closeAllModals();
 
-    if (channel.isPrivate()) SelectedChannelActionCreators.selectPrivateChannel(channel.id);
-    else if (channel.isThread()) ChannelRouter.transitionToThread(channel);
-    else ChannelRouter.transitionToChannel(channel.id);
+    if (tagsChannel.kind === "guild") {
+        NavigationRouter.transitionTo(`/channels/${tagsChannel.guildId}/${tagsChannel.id}`);
+    } else {
+        NavigationRouter.transitionTo(`/channels/@me/${tagsChannel.id}`);
+    }
 }
 
-function getChannelName(channel: Channel) {
-    if (channel.isDM()) {
-        const recipient = UserStore.getUser(channel.getRecipientId()!);
-        return recipient?.globalName ?? recipient?.username ?? "Direct Message";
-    }
+function GuildIcon({ guild }: { guild?: TagsGuild; }) {
+    if (!guild) return <BaseText className={cl("group-icon")}>@</BaseText>;
 
-    if (channel.isGroupDM()) {
-        return channel.name || channel.rawRecipients.map(user => user.global_name ?? user.username).join(", ") || "Group DM";
-    }
-
-    return channel.name;
-}
-
-function GuildIcon({ guild }: { guild?: Guild; }) {
-    if (!guild) return <BaseText className={`${cl("group-icon")}`}>@</BaseText>;
-
-    const iconUrl = guild.icon && IconUtils.getGuildIconURL({
-        id: guild.id,
-        icon: guild.icon,
-        canAnimate: true,
-        size: 32
-    });
-
-    return iconUrl
-        ? <img alt="" className={cl("group-icon")} src={iconUrl} />
+    return guild.iconUrl
+        ? <img alt="" className={cl("group-icon")} src={guild.iconUrl} />
         : <BaseText className={cl("group-icon")}>{guild.name.slice(0, 2).toUpperCase()}</BaseText>;
 }
 
-function PrivateChannelAvatar({ channel }: { channel: Channel; }) {
-    if (channel.isDM()) {
-        const recipient = UserStore.getUser(channel.getRecipientId()!);
-        return recipient
-            ? <Avatar className={cl("channel-avatar")} size="SIZE_32" src={recipient.getAvatarURL(undefined, 32)} />
-            : null;
-    }
-
-    if (channel.isGroupDM()) {
-        return <Avatar className={cl("channel-avatar")} size="SIZE_32" src={IconUtils.getChannelIconURL(channel)} />;
-    }
-
-    return null;
+function PrivateChannelAvatar({ channel }: { channel: TagsChannel; }) {
+    return channel.kind !== "guild" && channel.avatarUrl
+        ? <Avatar className={cl("channel-avatar")} size="SIZE_32" src={channel.avatarUrl} />
+        : null;
 }
 
-function getJumpTooltip(channel: Channel) {
-    if (channel.isDM() || channel.isGroupDM()) return "Jump to DM";
-    if (channel.isThread()) return "Jump to Thread";
+function getJumpTooltip(channel: TagsChannel) {
+    if (channel.kind !== "guild") return "Jump to DM";
+    if (channel.thread) return "Jump to Thread";
     return "Jump to Channel";
 }
 
-function ChannelUsageRow({ channel, onNavigate }: { channel: Channel; onNavigate(): void; }) {
-    const parent = channel.isThread() ? ChannelStore.getChannel(channel.parent_id) : undefined;
-
+function ChannelUsageRow({ channel, onNavigate }: { channel: TagsChannel; onNavigate(): void; }) {
     return (
         <div
             className={cl("channel-row")}
@@ -88,9 +58,9 @@ function ChannelUsageRow({ channel, onNavigate }: { channel: Channel; onNavigate
         >
             <PrivateChannelAvatar channel={channel} />
             <div className={cl("channel-names")}>
-                {parent && <Paragraph size="xs" style={{ color: "var(--text-muted)" }}>#{getChannelName(parent)}</Paragraph>}
+                {channel.kind === "guild" && channel.parent && <Paragraph size="xs" style={{ color: "var(--text-muted)" }}>#{channel.parent.name}</Paragraph>}
                 <Paragraph>
-                    {!channel.isPrivate() && !channel.isThread() && "#"}{getChannelName(channel)}
+                    {channel.kind === "guild" && !channel.thread && "#"}{channel.name}
                 </Paragraph>
             </div>
             <ChannelTags channelId={channel.id} />
@@ -166,6 +136,7 @@ function TagUsageModal({ tagId, channelIds, modalProps }: {
 }
 
 export function openTagUsageModal(tagId: string) {
+    updateStoreMetadata();
     const channelIds = getTagUsageChannelIds(tagId);
     openModal(modalProps => <TagUsageModal channelIds={channelIds} modalProps={modalProps} tagId={tagId} />);
 }

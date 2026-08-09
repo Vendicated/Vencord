@@ -6,7 +6,7 @@
 
 import { LocaleStore } from "@webpack/common";
 
-import { getChannelTagMap, getTagMap } from "./settings";
+import { getChannelTagMap, getTagMap, updateStoreMetadata } from "./settings";
 
 export interface ChannelTag {
     name: string;
@@ -84,6 +84,7 @@ export function deleteTag(id: string) {
         if (nextTagIds.length) channelTags[channelId] = nextTagIds;
         else delete channelTags[channelId];
     }
+    updateStoreMetadata();
 }
 
 export function addTagToChannel(channelId: string, tagId: string) {
@@ -93,6 +94,7 @@ export function addTagToChannel(channelId: string, tagId: string) {
     const tagIds = (channelTags[channelId] ?? [])
         .filter(id => !group || tags[id]?.group !== group);
     if (!tagIds.includes(tagId)) channelTags[channelId] = sortTagIds([...tagIds, tagId]);
+    updateStoreMetadata();
 }
 
 export function removeTagFromChannel(channelId: string, tagId: string) {
@@ -103,4 +105,5 @@ export function removeTagFromChannel(channelId: string, tagId: string) {
     const nextTagIds = tagIds.filter(id => id !== tagId);
     if (nextTagIds.length) channelTags[channelId] = nextTagIds;
     else delete channelTags[channelId];
+    updateStoreMetadata();
 }
