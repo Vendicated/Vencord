@@ -51,7 +51,7 @@ export default definePlugin({
             find: '"Duplicate keyboard shortcuts defined:"',
             replacement: {
                 match: /\[\.\.\.\i\.\i\.binds,/,
-                replace: "$self.blockedKeybinds||$&"
+                replace: "$self.getBlockedKeybinds()||$&"
             }
         },
         {
@@ -64,7 +64,7 @@ export default definePlugin({
         }
     ],
 
-    blockedKeybinds: (() => {
+    getBlockedKeybinds() {
         // Zoom shortcuts, allowing these would cause unpredictable zooming behavior on macos
         const blocked: string[] = ["mod+plus", "mod+minus", "mod+0"];
 
@@ -72,5 +72,5 @@ export default definePlugin({
             blocked.push("ctrl+shift+tab", "ctrl+tab", "mod+n", "mod+t", "mod+shift+t");
 
         return blocked.map(k => k.replace("mod", IS_MAC ? "cmd" : "ctrl"));
-    })()
+    }
 });
