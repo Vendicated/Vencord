@@ -1,6 +1,6 @@
-.vc-tenorgifsearch-provider-select {
-    width: 45px;
-    min-width: 0;
+.vc-tenorgifsearch-provider-select-clip {
+    width: 105px;
+    overflow: hidden;
     flex: 0 0 auto;
     margin-right: 8px;
 }
