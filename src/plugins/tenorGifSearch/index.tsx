@@ -156,14 +156,9 @@ interface PickerInstance {
     props: { query: string; };
 }
 
-// Immediately re-applying a query right after clearing it didn't force a refetch - possibly
-// an internal debounce/dedup gate tied to timing (the intercepted search code stamps
-// Date.now()), or just that props.query hasn't actually propagated down as empty yet by
-// the time we re-set it. Rather than guess a fixed delay for either, poll for the actual
-// observable effect of the clear (props.query genuinely becoming empty) and fire the
-// requery the moment that's true - with a safety-net cutoff in case it never happens.
 const REQUERY_MAX_WAIT_MS = 500;
 
+// Polls until the picker's query has actually cleared, then calls onCleared().
 function waitForQueryClear(instance: PickerInstance, onCleared: () => void) {
     const deadline = Date.now() + REQUERY_MAX_WAIT_MS;
 
@@ -184,8 +179,8 @@ function ProviderToggle({ instance }: { instance: PickerInstance; }) {
     const onSelect = (v: string) => {
         if (v === settings.store.provider) return;
         settings.store.provider = v;
-        // The search bar / results grid are owned by Discord's own component, so they
-        // won't pick up the setting change on their own.
+
+        // Reload the picker under the new provider.
         const { query } = instance.props;
         instance.handleClearQuery();
         if (query) {
@@ -195,9 +190,7 @@ function ProviderToggle({ instance }: { instance: PickerInstance; }) {
     };
 
     return (
-        // Discord's Select doesn't visibly respect width overrides passed via className,
-        // so clip it to size instead of fighting its internal styling - this doesn't
-        // depend on knowing anything about its internal DOM structure.
+        // Fixed-width clip; Discord's Select ignores plain width overrides.
         <div className={cl("provider-select-clip")}>
             <Select
                 options={providerOptions}
