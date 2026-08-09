@@ -4,9 +4,10 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import { isNonNullish } from "@utils/guards";
-import definePlugin from "@utils/types";
+import definePlugin, { OptionType } from "@utils/types";
 import { FluxDispatcher, LocaleStore } from "@webpack/common";
 
 // API key is taken from the GBoard app on iOS
@@ -126,10 +127,22 @@ async function fetchCategories(): Promise<TrendingCategories | null> {
 
 }
 
+const settings = definePluginSettings({
+    provider: {
+        type: OptionType.SELECT,
+        description: "Which GIF provider to use",
+        options: [
+            { label: "Tenor", value: "tenor", default: true },
+            { label: "Klipy (Discord's default)", value: "klipy" }
+        ]
+    }
+});
+
 export default definePlugin({
     name: "TenorGifSearch",
     description: "Restore Tenor GIF search",
     authors: [Devs.Lunascape],
+    settings,
 
     patches: [
         {
@@ -187,6 +200,10 @@ export default definePlugin({
             }
         }
     ],
+
+    isTenor() {
+        return settings.store.provider === "tenor";
+    },
 
     async start() {
         cachedCategories = await fetchCategories() ?? cachedCategories;
