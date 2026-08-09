@@ -13,6 +13,7 @@ import { Avatar, ChannelRouter, ChannelStore, closeAllModals, IconUtils, Modal, 
 
 import { ChannelTags } from "./ChannelTags";
 import { openChannelTagsMenu } from "./contextMenu";
+import { JumpIcon, TagsIcon } from "./icons";
 import { getTagMap, settings } from "./settings";
 import { getTagUsageChannelIds, groupTagUsageChannels } from "./usage";
 
@@ -68,22 +69,6 @@ function PrivateChannelAvatar({ channel }: { channel: Channel; }) {
     }
 
     return null;
-}
-
-function JumpIcon() {
-    return (
-        <svg aria-hidden="true" className="vc-channel-tags-action-icon" viewBox="0 0 24 24">
-            <path fill="currentColor" d="M13.3 5.3a1 1 0 0 1 1.4 0l6 6a1 1 0 0 1 0 1.4l-6 6a1 1 0 1 1-1.4-1.4L17.6 13H4a1 1 0 1 1 0-2h13.6l-4.3-4.3a1 1 0 0 1 0-1.4Z" />
-        </svg>
-    );
-}
-
-function TagsIcon() {
-    return (
-        <svg aria-hidden="true" className="vc-channel-tags-action-icon" viewBox="0 0 24 24">
-            <path fill="currentColor" d="M3 5a2 2 0 0 1 2-2h6.2a2 2 0 0 1 1.4.6l7.8 7.8a2 2 0 0 1 0 2.8l-6.2 6.2a2 2 0 0 1-2.8 0l-7.8-7.8A2 2 0 0 1 3 11.2V5Zm4 1.5a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3Z" />
-        </svg>
-    );
 }
 
 function getJumpTooltip(channel: Channel) {
