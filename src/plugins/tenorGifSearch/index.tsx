@@ -4,11 +4,16 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import "./styles.css";
+
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
+import { classNameFactory } from "@utils/css";
 import { isNonNullish } from "@utils/guards";
 import definePlugin, { OptionType } from "@utils/types";
-import { FluxDispatcher, LocaleStore } from "@webpack/common";
+import { FluxDispatcher, LocaleStore, Select } from "@webpack/common";
+
+const cl = classNameFactory("vc-tenorgifsearch-");
 
 // API key is taken from the GBoard app on iOS
 const TENOR_KEY = "3Z0688EVWYKH";
@@ -130,6 +135,7 @@ async function fetchCategories(): Promise<TrendingCategories | null> {
 const settings = definePluginSettings({
     provider: {
         type: OptionType.SELECT,
+        displayName: "Default Provider",
         description: "Which GIF provider to use",
         options: [
             { label: "Tenor", value: "tenor", default: true },
@@ -137,6 +143,32 @@ const settings = definePluginSettings({
         ]
     }
 });
+
+const providerOptions = [
+    { label: "Tenor", value: "tenor" },
+    { label: "Klipy", value: "klipy" }
+];
+
+function ProviderToggle({ instance }: { instance: { forceUpdate(): void; }; }) {
+    const { provider } = settings.use(["provider"]);
+
+    return (
+        <Select
+            className={cl("provider-select")}
+            options={providerOptions}
+            isSelected={v => v === provider}
+            select={v => {
+                if (v === settings.store.provider) return;
+                settings.store.provider = v;
+                // The search bar / header content is owned by Discord's own component,
+                // so it won't pick up the setting change on its own - force it to re-render.
+                instance.forceUpdate();
+            }}
+            serialize={v => v}
+            closeOnSelect={true}
+        />
+    );
+}
 
 export default definePlugin({
     name: "TenorGifSearch",
@@ -147,41 +179,48 @@ export default definePlugin({
     patches: [
         {
             find: "renderHeaderContent()",
-            replacement: {
-                match: /placeholder:(\i),"aria-label":(\i)/,
-                replace: 'placeholder:$1?.replace(/Giphy|Klipy/gi,"Tenor"),"aria-label":$2?.replace(/Giphy|Klipy/gi,"Tenor")'
-            }
+            replacement: [
+                {
+                    match: /placeholder:(\i),"aria-label":(\i)/,
+                    replace: 'placeholder:$self.isTenor()?$1?.replace(/Giphy|Klipy/gi,"Tenor"):$1,"aria-label":$self.isTenor()?$2?.replace(/Giphy|Klipy/gi,"Tenor"):$2'
+                },
+                {
+                    // Render the provider toggle to the left of the search bar / header content
+                    match: /children:\[(\i),this\.renderHeaderContent\(\)\]/,
+                    replace: "children:[$1,$self.renderProviderToggle(this),this.renderHeaderContent()]"
+                }
+            ]
         },
         {
             find: '"GIF_PICKER_TRENDING_FETCH_SUCCESS",trendingCategories:',
             replacement: [
                 {
                     match: /let \i=Date\.now\(\);\i\([^)]+\),\i\.\i\.get\(\{url:\i\.\i\.GIFS_SEARCH,query:\{q:(\i),/,
-                    replace: "return $self.handleSearchFetch($1);$&"
+                    replace: "if($self.isTenor())return $self.handleSearchFetch($1);$&"
                 },
                 {
                     match: /""!==(\i)&&null!=\1&&\i\.\i\.get\(\{url:\i\.\i\.GIFS_SUGGEST,/,
-                    replace: "return $self.handleSuggestionsFetch($1);$&"
+                    replace: "if($self.isTenor())return $self.handleSuggestionsFetch($1);$&"
                 },
                 {
                     match: /\i\.\i\.get\(\{url:\i\.\i\.GIFS_TRENDING,/,
-                    replace: "return $self.handleTrendingFetch();$&"
+                    replace: "if($self.isTenor())return $self.handleTrendingFetch();$&"
                 },
                 {
                     match: /let \i=Date\.now\(\);\i\([^)]+\),\i\.\i\.get\(\{url:\i\.\i\.GIFS_TRENDING_GIFS,/,
-                    replace: "return $self.handleTrendingGifsFetch();$&"
+                    replace: "if($self.isTenor())return $self.handleTrendingGifsFetch();$&"
                 },
                 {
                     match: /\i\.\i\.post\(\{url:\i\.\i\.GIFS_SELECT,body:\{id:(\i),q:(\i)\}/,
-                    replace: "$self.handleGifSelect($1,$2)&&false&&$&"
+                    replace: "($self.isTenor()?($self.handleGifSelect($1,$2),false):true)&&$&"
                 }
             ]
         },
         {
             find: '"IntegrationQueryStore"',
             replacement: {
-                match: /(?<=search\((\i),(\i)\)\{)null==\i\.getResults\(\1,\2\)&&/,
-                replace: "return $self.tenorIntegrationSearch($1,$2);null==void 0&&"
+                match: /(?<=search\((\i),(\i)\)\{)null==(\i)\.getResults\(\1,\2\)&&/,
+                replace: "if($self.isTenor())return $self.tenorIntegrationSearch($1,$2);null==$3.getResults($1,$2)&&"
             }
         },
         // Add back tenor command
@@ -189,20 +228,24 @@ export default definePlugin({
             find: 'commandId:"-16"',
             replacement: {
                 match: /commandId:"-16"}/,
-                replace: '$&,TENOR:{type:"GIF",command:"tenor",title:"Tenor",commandId:"-9"}'
+                replace: '$&,...($self.isTenor()?{TENOR:{type:"GIF",command:"tenor",title:"Tenor",commandId:"-9"}}:{})'
             }
         },
         {
             find: "#{intl::COMMAND_GIPHY_DESCRIPTION}",
             replacement: {
                 match: /(\i)===\i\.\i\.GIF\.title/,
-                replace: '$&||$1==="Tenor"'
+                replace: '$&||($self.isTenor()&&$1==="Tenor")'
             }
         }
     ],
 
     isTenor() {
         return settings.store.provider === "tenor";
+    },
+
+    renderProviderToggle(instance: { forceUpdate(): void; }) {
+        return <ProviderToggle instance={instance} />;
     },
 
     async start() {
