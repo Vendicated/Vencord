@@ -1,0 +1,140 @@
+.vc-channel-tags-modal-content {
+    display: grid;
+    gap: 24px;
+}
+
+.vc-channel-tags-modal-color-picker {
+    margin-inline-end: 0;
+    justify-content: space-evenly;
+
+    [class*="defaultContainer"] {
+        display: none;
+    }
+}
+
+.vc-channel-tags-modal-name-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.vc-channel-tags-modal-name-row > * {
+    flex: 1;
+}
+
+.vc-channel-tags-modal-shape-button {
+    flex: 0 0 auto;
+    padding: 4px;
+}
+
+.vc-channel-tags-decorations {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    margin-left: 6px;
+}
+
+.vc-channel-tags-decoration {
+    display: flex;
+    flex: 0 0 auto;
+    width: 12px;
+    height: 12px;
+}
+
+.vc-channel-tags-decoration-clickable {
+    cursor: pointer;
+}
+
+.vc-channel-tags-decoration:focus-visible {
+    outline: 2px solid var(--focus-primary);
+    outline-offset: 2px;
+}
+
+.vc-channel-tags-menu-swatch {
+    width: 12px;
+    height: 12px;
+    vertical-align: -2px;
+}
+
+.vc-channel-tags-list {
+    display: grid;
+    gap: 8px;
+}
+
+.vc-channel-tags-list-group {
+    display: grid;
+    gap: 4px;
+}
+
+.vc-channel-tags-list-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 36px;
+}
+
+.vc-channel-tags-list-summary {
+    flex: 1;
+}
+
+.vc-channel-tags-list-swatch {
+    width: 16px;
+    height: 16px;
+    vertical-align: -3px;
+}
+
+.vc-channel-tags-usage-content {
+    display: grid;
+    gap: 24px;
+}
+
+.vc-channel-tags-usage-group-icon {
+    display: grid;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    place-items: center;
+}
+
+.vc-channel-tags-usage-group .vc-expandable-card-header {
+    align-items: center;
+    gap: 8px;
+}
+
+.vc-channel-tags-usage-group-name {
+    overflow: hidden;
+    flex: 1;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.vc-channel-tags-usage-channel-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 36px;
+    padding: 6px 8px;
+    margin: 0 -8px;
+    border-radius: 6px;
+}
+
+.vc-channel-tags-usage-channel-row:hover {
+    background: var(--message-background-hover);
+}
+
+.vc-channel-tags-usage-channel-names {
+    flex: 1;
+    display: grid;
+    gap: 2px;
+}
+
+.vc-channel-tags-usage-channel-names > * {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.vc-channel-tags-tag-shape > g > * {
+    fill: inherit !important;
+    stroke: inherit !important;
+}

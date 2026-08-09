@@ -1,0 +1,152 @@
+/*
+ * Vencord, a Discord client mod
+ * Copyright (c) 2026 Vendicated and contributors
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
+
+import { findGroupChildrenByChildId, NavContextMenuPatchCallback } from "@api/ContextMenu";
+import { MainSettingsIcon, Margins, PlusIcon } from "@components/index";
+import { classNameFactory } from "@utils/css";
+import { classes } from "@utils/index";
+import { ContextMenuApi, Menu } from "@webpack/common";
+
+import { addTagToChannel, ChannelTag, ChannelTagMap, compareTags, removeTagFromChannel, TagShape } from "./data";
+import { TagsIcon } from "./icons";
+import { getChannelTagMap, getTagMap, settings } from "./settings";
+import { openCreateTagModal } from "./TagModal";
+import { TagShapeIcon } from "./TagShape";
+import { openTagsModal } from "./TagsModal";
+
+const cl = classNameFactory("vc-channel-tags-");
+
+function TagMenuLabel({ color, name, shape }: {
+    color: string;
+    name: string;
+    shape?: TagShape;
+}) {
+    return (
+        <>
+            <TagShapeIcon
+                className={classes(cl("menu-swatch"), Margins.right8)}
+                color={color}
+                tagShape={shape}
+            />
+            {name}
+        </>
+    );
+}
+
+export function makeChannelTagsMenuChildren(channelId: string, channelTags: ChannelTagMap) {
+    const tags = Object.entries(getTagMap())
+        .sort(([, a], [, b]) => compareTags(a, b));
+    const assignedTagIds = new Set(channelTags[channelId] ?? []);
+
+    if (!tags.length) {
+        return [
+            <Menu.MenuItem
+                id="vc-channel-tags-add"
+                key="vc-channel-tags-add"
+                label="Add Tag"
+                icon={TagsIcon}
+                action={() => openCreateTagModal(channelId)}
+            />
+        ];
+    }
+
+    const groupedTags = new Map<string | undefined, [string, ChannelTag][]>();
+    for (const entry of tags) {
+        const groupTags = groupedTags.get(entry[1].group) ?? [];
+        groupTags.push(entry);
+        groupedTags.set(entry[1].group, groupTags);
+    }
+
+    return [
+        <Menu.MenuItem
+            id="vc-channel-tags-add-new"
+            key="vc-channel-tags-add-new"
+            label="Create New"
+            icon={PlusIcon}
+            action={() => openCreateTagModal(channelId)}
+        />,
+        <Menu.MenuItem
+            id="vc-channel-tags-edit"
+            key="vc-channel-tags-edit"
+            label="Manage"
+            icon={MainSettingsIcon}
+            action={openTagsModal}
+        />,
+        <Menu.MenuSeparator key="vc-channel-tags-separator" />,
+        ...[...groupedTags].map(([group, groupTags]) => (
+            <Menu.MenuGroup key={group ?? "vc-channel-tags-ungrouped"} label={group}>
+                {groupTags.map(([id, tag]) => {
+                    const isAssigned = assignedTagIds.has(id);
+                    return (
+                        <Menu.MenuCheckboxItem
+                            id={`vc-channel-tags-toggle-${id}`}
+                            key={`vc-channel-tags-toggle-${id}`}
+                            label={<TagMenuLabel color={tag.color} name={tag.name} shape={tag.shape} />}
+                            checked={isAssigned}
+                            action={() => isAssigned
+                                ? removeTagFromChannel(channelId, id)
+                                : addTagToChannel(channelId, id)}
+                        />
+                    );
+                })}
+            </Menu.MenuGroup>
+        ))
+    ];
+}
+
+export function makeChannelTagsMenuItem(channelId: string, channelTags: ChannelTagMap) {
+    const children = makeChannelTagsMenuChildren(channelId, channelTags);
+    if (!Object.keys(getTagMap()).length) return children[0];
+
+    return (
+        <Menu.MenuItem
+            id="vc-channel-tags"
+            key="vc-channel-tags"
+            label="Tags"
+        >
+            {children}
+        </Menu.MenuItem>
+    );
+}
+
+function ChannelTagsMenu({ channelId }: { channelId: string; }) {
+    settings.use(["channelTags"]);
+
+    return (
+        <Menu.Menu
+            aria-label="Channel Tags"
+            navId="vc-channel-tags-row-menu"
+            onClose={ContextMenuApi.closeContextMenu}
+        >
+            {makeChannelTagsMenuChildren(channelId, getChannelTagMap())}
+        </Menu.Menu>
+    );
+}
+
+export function openChannelTagsMenu(event: React.MouseEvent, channelId: string) {
+    event.preventDefault();
+    event.stopPropagation();
+    ContextMenuApi.openContextMenu(event, () => <ChannelTagsMenu channelId={channelId} />);
+}
+
+export const patchChannelContextMenu: NavContextMenuPatchCallback = (children, props) => {
+    settings.use(["channelTags"]);
+
+    const channel = props?.channel;
+    if (!channel?.id) return;
+
+    const group = findGroupChildrenByChildId("mark-channel-read", children) ?? children;
+    group.push(makeChannelTagsMenuItem(channel.id, getChannelTagMap()));
+};
+
+export const patchDmListContextMenu: NavContextMenuPatchCallback = (children, props) => {
+    settings.use(["channelTags"]);
+
+    const group = findGroupChildrenByChildId("close-dm", children);
+    if (!group || !props?.channel?.id) return;
+
+    group.push(makeChannelTagsMenuItem(props.channel.id, getChannelTagMap()));
+};

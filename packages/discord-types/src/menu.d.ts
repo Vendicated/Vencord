@@ -30,7 +30,7 @@ export interface Menu {
     }>;
     MenuCheckboxItem: RC<{
         id: string;
-        label: string;
+        label: ReactNode;
         checked: boolean;
         action?(e: MouseEvent): void;
         disabled?: boolean;
