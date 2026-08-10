@@ -55,8 +55,8 @@ export default definePlugin({
             display_override: ["window-controls-overlay"],
             dir: "ltr",
             lang: "en-US",
-            background_color: colorToHex(styles.getPropertyValue("--background-base-low")),
-            theme_color: colorToHex(styles.getPropertyValue("--background-base-lower")),
+            background_color: colorToHex(styles.getPropertyValue("--background-base-lower")),
+            theme_color: colorToHex(styles.getPropertyValue("--background-base-lowest")),
             scope: endpoint + "/", // scope of all possible URL"s
             description: "Imagine a place...",
             orientation: "any",
