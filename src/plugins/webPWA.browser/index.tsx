@@ -132,8 +132,6 @@ export default definePlugin({
         }
     },
     stop() {
-        if (!IS_EXTENSION) return;
-
         navigator.setAppBadge(0);
         this.ctrl.abort();
 
