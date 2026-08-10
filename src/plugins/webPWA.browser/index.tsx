@@ -30,6 +30,7 @@ export default definePlugin({
     authors: [Devs.ThaUnknown],
     tags: ["Utility"],
     managedStyle,
+    enabledByDefault: true,
 
     flux: {
         KEYBINDS_REGISTER_GLOBAL_KEYBIND_ACTIONS: ({ keybinds }: { keybinds: Record<string, { onTrigger: () => any; }>; }) => {
