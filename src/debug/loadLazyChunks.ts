@@ -30,9 +30,28 @@ function getWebpackChunkMap() {
     return chunksMap as Record<PropertyKey, string> | null;
 }
 
+const workerAssetCache: Map<string, boolean> = new Map();
+const WORKER_ASSET_REGEX = /importScripts\(|self\.postMessage/;
+
 export async function loadLazyChunks() {
     const LazyChunkLoaderLogger = new Logger("LazyChunkLoader");
     const queue = pLimit(50);
+
+    async function isWorkerAsset(url: string): Promise<boolean> {
+        if (workerAssetCache.has(url)) {
+            return workerAssetCache.get(url)!;
+        }
+        const iwa = await queue(() => {
+            return fetch(url)
+                .then(r => r.text())
+                .then(t => WORKER_ASSET_REGEX.test(t));
+        });
+
+        workerAssetCache.set(url, iwa);
+
+        return iwa;
+    }
+
 
     try {
         LazyChunkLoaderLogger.log("Loading all chunks...");
@@ -93,13 +112,7 @@ export async function loadLazyChunks() {
 
                     if (wreq.u(id) == null || wreq.u(id) === "undefined.js") continue;
 
-                    const isWorkerAsset = await queue(() =>
-                        fetch(wreq.p + wreq.u(id))
-                            .then(r => r.text())
-                            .then(t => /importScripts\(|self\.postMessage/.test(t))
-                    );
-
-                    if (isWorkerAsset) {
+                    if (await isWorkerAsset(wreq.p + wreq.u(id))) {
                         invalidChunks.add(id);
                         invalidChunkGroup = true;
                         continue;
@@ -198,12 +211,10 @@ export async function loadLazyChunks() {
         });
 
         await Promise.all(chunksLeft.map(async id => queue(async () => {
-            const isWorkerAsset = await fetch(wreq.p + wreq.u(id))
-                .then(r => r.text())
-                .then(t => /importScripts\(|self\.postMessage/.test(t));
+            const isWorkerFile = await isWorkerAsset(wreq.p + wreq.u(id));
 
             // Loads the chunk. Currently this only happens with the language packs which are loaded differently
-            if (!isWorkerAsset) {
+            if (!isWorkerFile) {
                 await wreq.e(id);
             }
         })));
