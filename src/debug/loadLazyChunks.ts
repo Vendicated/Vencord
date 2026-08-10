@@ -36,10 +36,15 @@ const WORKER_ASSET_REGEX = /importScripts\(|self\.postMessage/;
 export async function loadLazyChunks() {
     const LazyChunkLoaderLogger = new Logger("LazyChunkLoader");
     const queue = pLimit(50);
+    const pendingWorkerAssetChecks: Map<string, Promise<boolean>> = new Map();
 
     async function isWorkerAsset(url: string, useQueue: boolean = true): Promise<boolean> {
         if (workerAssetCache.has(url)) {
             return workerAssetCache.get(url)!;
+        }
+
+        if (pendingWorkerAssetChecks.has(url)) {
+            return await pendingWorkerAssetChecks.get(url)!;
         }
 
         let qFunc = () => {
@@ -48,9 +53,14 @@ export async function loadLazyChunks() {
                 .then(t => WORKER_ASSET_REGEX.test(t));
         };
 
-        const iwa = await (useQueue ? queue(qFunc) : qFunc());
+        const iwap = (useQueue ? queue(qFunc) : qFunc());
+
+        pendingWorkerAssetChecks.set(url, iwap);
+
+        const iwa = await iwap;
 
         workerAssetCache.set(url, iwa);
+        pendingWorkerAssetChecks.delete(url);
 
         return iwa;
     }
