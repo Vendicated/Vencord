@@ -4,11 +4,13 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { addThemeChangeListener, removeThemeChangeListener } from "@api/Themes";
 import { Devs } from "@utils/constants";
+import { sleep } from "@utils/misc";
 import definePlugin from "@utils/types";
 import { FluxStore } from "@vencord/discord-types";
 import { findStoreLazy } from "@webpack";
-import { NotificationSettingsStore, RelationshipStore } from "@webpack/common";
+import { NotificationSettingsStore, RelationshipStore, ThemeStore } from "@webpack/common";
 
 import managedStyle from "./styles.css?managed";
 
@@ -22,6 +24,71 @@ function colorToHex(color: string) {
     ctx.fillStyle = color;
     ctx.fillRect(0, 0, 1, 1);
     return "#" + [...ctx.getImageData(0, 0, 1, 1).data.slice(0, 3)].map(n => n.toString(16).padStart(2, "0")).join("");
+}
+
+let linkEl: HTMLLinkElement | undefined;
+async function setManifest() {
+    // need to wait for CSS changes to flush
+    await sleep(20);
+    linkEl?.remove();
+
+    const endpoint = "https:" + window.GLOBAL_ENV.WEBAPP_ENDPOINT;
+    const appUrl = endpoint + "/app"; // URL when PWA launches
+    const icon = document.querySelector<HTMLLinkElement>('link[rel="icon"]')!.href;
+    const styles = getComputedStyle(document.body);
+    const manifest = {
+        id: appUrl,
+        name: "Discord",
+        short_name: "Discord",
+        start_url: appUrl,
+        display: "fullscreen",
+        display_override: ["window-controls-overlay"],
+        dir: "ltr",
+        lang: "en-US",
+        background_color: colorToHex(styles.getPropertyValue("--background-base-lower")),
+        theme_color: colorToHex(styles.getPropertyValue("--background-base-lowest")),
+        scope: endpoint + "/", // scope of all possible URL"s
+        description: "Imagine a place...",
+        orientation: "any",
+        categories: ["social"],
+        shortcuts: [
+            {
+                name: "Friends",
+                url: appUrl,
+                icons: [{ src: icon, sizes: "256x256" }]
+            }
+        ],
+        protocol_handlers: [{ protocol: "web+discord", url: endpoint + "/%s" }],
+        launch_handler: { client_mode: "navigate-existing" },
+        // Strange CDN but these links are straight from discord.com
+        screenshots: [
+            { src: "https://cdn.prod.website-files.com/6257adef93867e50d84d30e2/664723dbe91e5ee8db15cfe7_Discord_Website_Refresh_Activities.webp", sizes: "691x720", type: "image/webp", label: "Activities", form_factor: "wide" },
+            { src: "https://cdn.prod.website-files.com/6257adef93867e50d84d30e2/664723da372be4a12a3dc9df_Discord_Website_Refresh_Hop-In.webp", sizes: "939x639", type: "image/webp", label: "Hop In", form_factor: "wide" },
+            { src: "https://cdn.prod.website-files.com/6257adef93867e50d84d30e2/664723da94dd30e64e74357a_Discord_Website_Refresh_StatusHover.webp", sizes: "904x708", type: "image/webp", label: "Status", form_factor: "wide" },
+            { src: "https://cdn.prod.website-files.com/6257adef93867e50d84d30e2/664723da0a2e6be98fa5216b_Discord_Website_Refresh_Emojis%2BSoundboard-p-1080.webp", sizes: "1080x918", type: "image/webp", label: "Emojis", form_factor: "wide" },
+            { src: "https://cdn.prod.website-files.com/6257adef93867e50d84d30e2/6638bdbd1150b7c8509fb2be_Discord_Website_Refresh_SameRoom.webp", sizes: "796x593", type: "image/webp", label: "Rooms", form_factor: "wide" },
+            { src: "https://cdn.prod.website-files.com/6257adef93867e50d84d30e2/68407334ccf9aeca71903bab_home-new.webp", sizes: "1716×1606", type: "image/webp", label: "Discord", form_factor: "wide" },
+            { src: "https://cdn.prod.website-files.com/6257adef93867e50d84d30e2/6638bcb99c2b8dc14e6f67fd_Discord_Website_Refresh_Platforms.webp", sizes: "760x580", type: "image/webp", label: "Platforms", form_factor: "wide" }
+        ],
+        icons: [
+            {
+                src: icon,
+                sizes: "256x256",
+                type: "image/png"
+            },
+            {
+                src: icon,
+                sizes: "256x256",
+                type: "image/png",
+                purpose: "maskable"
+            }
+        ]
+    };
+    const url = URL.createObjectURL(new Blob([JSON.stringify(manifest)], { type: "application/json" }));
+    linkEl = document.createElement("link");
+    linkEl.rel = "manifest";
+    linkEl.href = url;
+    document.head.appendChild(linkEl);
 }
 
 export default definePlugin({
@@ -42,63 +109,10 @@ export default definePlugin({
     start() {
 
         // installability
-        const endpoint = "https:" + window.GLOBAL_ENV.WEBAPP_ENDPOINT;
-        const appUrl = endpoint + "/app"; // URL when PWA launches
-        const icon = document.querySelector<HTMLLinkElement>('link[rel="icon"]')!.href;
-        const styles = getComputedStyle(document.body);
-        const manifest = {
-            id: appUrl,
-            name: "Discord",
-            short_name: "Discord",
-            start_url: appUrl,
-            display: "fullscreen",
-            display_override: ["window-controls-overlay"],
-            dir: "ltr",
-            lang: "en-US",
-            background_color: colorToHex(styles.getPropertyValue("--background-base-lower")),
-            theme_color: colorToHex(styles.getPropertyValue("--background-base-lowest")),
-            scope: endpoint + "/", // scope of all possible URL"s
-            description: "Imagine a place...",
-            orientation: "any",
-            categories: ["social"],
-            shortcuts: [
-                {
-                    name: "Friends",
-                    url: appUrl,
-                    icons: [{ src: icon, sizes: "256x256" }]
-                }
-            ],
-            protocol_handlers: [{ protocol: "web+discord", url: endpoint + "/%s" }],
-            launch_handler: { client_mode: "navigate-existing" },
-            // Strange CDN but these links are straight from discord.com
-            screenshots: [
-                { src: "https://cdn.prod.website-files.com/6257adef93867e50d84d30e2/664723dbe91e5ee8db15cfe7_Discord_Website_Refresh_Activities.webp", sizes: "691x720", type: "image/webp", label: "Activities", form_factor: "wide" },
-                { src: "https://cdn.prod.website-files.com/6257adef93867e50d84d30e2/664723da372be4a12a3dc9df_Discord_Website_Refresh_Hop-In.webp", sizes: "939x639", type: "image/webp", label: "Hop In", form_factor: "wide" },
-                { src: "https://cdn.prod.website-files.com/6257adef93867e50d84d30e2/664723da94dd30e64e74357a_Discord_Website_Refresh_StatusHover.webp", sizes: "904x708", type: "image/webp", label: "Status", form_factor: "wide" },
-                { src: "https://cdn.prod.website-files.com/6257adef93867e50d84d30e2/664723da0a2e6be98fa5216b_Discord_Website_Refresh_Emojis%2BSoundboard-p-1080.webp", sizes: "1080x918", type: "image/webp", label: "Emojis", form_factor: "wide" },
-                { src: "https://cdn.prod.website-files.com/6257adef93867e50d84d30e2/6638bdbd1150b7c8509fb2be_Discord_Website_Refresh_SameRoom.webp", sizes: "796x593", type: "image/webp", label: "Rooms", form_factor: "wide" },
-                { src: "https://cdn.prod.website-files.com/6257adef93867e50d84d30e2/68407334ccf9aeca71903bab_home-new.webp", sizes: "1716×1606", type: "image/webp", label: "Discord", form_factor: "wide" },
-                { src: "https://cdn.prod.website-files.com/6257adef93867e50d84d30e2/6638bcb99c2b8dc14e6f67fd_Discord_Website_Refresh_Platforms.webp", sizes: "760x580", type: "image/webp", label: "Platforms", form_factor: "wide" }
-            ],
-            icons: [
-                {
-                    src: icon,
-                    sizes: "256x256",
-                    type: "image/png"
-                },
-                {
-                    src: icon,
-                    sizes: "256x256",
-                    type: "image/png",
-                    purpose: "maskable"
-                }
-            ]
-        };
-        const url = URL.createObjectURL(new Blob([JSON.stringify(manifest)], { type: "application/json" }));
-        this.linkEl = document.createElement("link");
-        this.linkEl.rel = "manifest";
-        this.linkEl.href = url;
-        document.head.appendChild(this.linkEl);
+        setManifest();
+        // user might change theme before installing the PWA
+        ThemeStore.addChangeListener(setManifest);
+        addThemeChangeListener(setManifest);
 
         // notifications
         NotificationSettingsStore.addChangeListener(this.setBadge);
@@ -123,7 +137,9 @@ export default definePlugin({
         navigator.setAppBadge(0);
         this.ctrl.abort();
 
-        this.linkEl?.remove();
+        linkEl?.remove();
+        ThemeStore.removeChangeListener(setManifest);
+        removeThemeChangeListener(setManifest);
 
         NotificationSettingsStore.removeChangeListener(this.setBadge);
         GuildReadStateStore.removeChangeListener(this.setBadge);
