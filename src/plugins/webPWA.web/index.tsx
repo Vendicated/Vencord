@@ -4,7 +4,6 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { disableStyle, enableStyle } from "@api/Styles";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
@@ -12,9 +11,7 @@ import { FluxStore } from "@vencord/discord-types";
 import { findStoreLazy } from "@webpack";
 import { RelationshipStore } from "@webpack/common";
 
-import style from "./styles.css?managed";
-
-const isMac = navigator.platform.startsWith("Mac");
+import managedStyle from "./styles.css?managed";
 
 const GuildReadStateStore: FluxStore & { getTotalMentionCount: () => number; hasAnyUnread: () => boolean; } = findStoreLazy("GuildReadStateStore");
 const NotificationSettingsStore: FluxStore & { getDisableUnreadBadge: () => boolean; } = findStoreLazy("NotificationSettingsStore");
@@ -34,6 +31,7 @@ export default definePlugin({
   description: "Makes Discord installable as a PWA. Enables notification badges, global keybinds and the custom title bar.",
   authors: [Devs.ThaUnknown],
   tags: ["Utility"],
+  managedStyle,
 
   flux: {
     KEYBINDS_REGISTER_GLOBAL_KEYBIND_ACTIONS: ({ keybinds }: { keybinds: Record<string, { onTrigger: () => any; }>; }) => {
@@ -45,8 +43,6 @@ export default definePlugin({
   start() {
     // because vesktop exists ^^
     if (!IS_EXTENSION) return;
-
-    enableStyle(style);
 
     // installability
     const endpoint = "https:" + window.GLOBAL_ENV.WEBAPP_ENDPOINT;
@@ -127,7 +123,6 @@ export default definePlugin({
     navigator.setAppBadge(0);
     this.ctrl.abort();
 
-    disableStyle(style);
     this.linkEl?.remove();
 
     NotificationSettingsStore.removeChangeListener(this.setBadge);
@@ -189,9 +184,5 @@ export default definePlugin({
     } catch (e) {
       console.error(e);
     }
-  },
-  getPlatformClass() {
-    if (isMac) return "platform-osx";
-    return "platform-win";
   }
 });
