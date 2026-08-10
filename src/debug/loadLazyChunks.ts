@@ -37,15 +37,18 @@ export async function loadLazyChunks() {
     const LazyChunkLoaderLogger = new Logger("LazyChunkLoader");
     const queue = pLimit(50);
 
-    async function isWorkerAsset(url: string): Promise<boolean> {
+    async function isWorkerAsset(url: string, useQueue: boolean = true): Promise<boolean> {
         if (workerAssetCache.has(url)) {
             return workerAssetCache.get(url)!;
         }
-        const iwa = await queue(() => {
+
+        let qFunc = () => {
             return fetch(url)
                 .then(r => r.text())
                 .then(t => WORKER_ASSET_REGEX.test(t));
-        });
+        };
+
+        const iwa = await (useQueue ? queue(qFunc) : qFunc());
 
         workerAssetCache.set(url, iwa);
 
@@ -211,7 +214,8 @@ export async function loadLazyChunks() {
         });
 
         await Promise.all(chunksLeft.map(async id => queue(async () => {
-            const isWorkerFile = await isWorkerAsset(wreq.p + wreq.u(id));
+            // we will deadlock if we use the queue inside a queue func
+            const isWorkerFile = await isWorkerAsset(wreq.p + wreq.u(id), false);
 
             // Loads the chunk. Currently this only happens with the language packs which are loaded differently
             if (!isWorkerFile) {
