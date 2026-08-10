@@ -41,8 +41,6 @@ export default definePlugin({
 
   ctrl: new AbortController(),
   start() {
-    // because vesktop exists ^^
-    if (!IS_EXTENSION) return;
 
     // installability
     const endpoint = "https:" + window.GLOBAL_ENV.WEBAPP_ENDPOINT;
@@ -152,15 +150,13 @@ export default definePlugin({
       find: "#{intl::KEYBIND_IN_BROSWER_NOTICE}",
       replacement: {
         match: /,{type:"info",children:(?=[^}]*#{intl::KEYBIND_IN_BROSWER_NOTICE})([^}]+}\))/,
-        replace: ',{type:"info",children:$self.renderKeybindsButton($1)'
+        replace: ',{type:"info",children:$self.renderKeybindsButton()'
       }
     }
   ],
 
   renderKeybindsButton: ErrorBoundary.wrap(
-    oldChildren => {
-      // because vesktop exists ^^
-      if (!IS_EXTENSION) return oldChildren;
+    () => {
       return (
         <div>
           Custom global Push To X keybinds are supported. Navigate to <a onClick={() => { window.postMessage({ type: "OPEN_SHORTCUTS" }, "*"); }}>about://extensions/shortcuts</a> to change them. Hold To X keybinds are not supported.
