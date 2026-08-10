@@ -30,7 +30,11 @@ let linkEl: HTMLLinkElement | undefined;
 async function setManifest() {
     // need to wait for CSS changes to flush
     await sleep(20);
-    linkEl?.remove();
+
+    if (linkEl) {
+        URL.revokeObjectURL(linkEl.href);
+        linkEl.remove();
+    }
 
     const endpoint = "https:" + window.GLOBAL_ENV.WEBAPP_ENDPOINT;
     const appUrl = endpoint + "/app"; // URL when PWA launches
@@ -84,10 +88,10 @@ async function setManifest() {
             }
         ]
     };
-    const url = URL.createObjectURL(new Blob([JSON.stringify(manifest)], { type: "application/json" }));
+
     linkEl = document.createElement("link");
     linkEl.rel = "manifest";
-    linkEl.href = url;
+    linkEl.href = URL.createObjectURL(new Blob([JSON.stringify(manifest)], { type: "application/json" }));
     document.head.appendChild(linkEl);
 }
 
@@ -135,7 +139,10 @@ export default definePlugin({
         navigator.setAppBadge(0);
         this.ctrl.abort();
 
-        linkEl?.remove();
+        if (linkEl) {
+            URL.revokeObjectURL(linkEl.href);
+            linkEl.remove();
+        }
         ThemeStore.removeChangeListener(setManifest);
         removeThemeChangeListener(setManifest);
 
