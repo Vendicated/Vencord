@@ -47,7 +47,7 @@ export async function loadLazyChunks() {
             return await pendingWorkerAssetChecks.get(url)!;
         }
 
-        let qFunc = () => {
+        const qFunc = () => {
             return fetch(url)
                 .then(r => r.text())
                 .then(t => WORKER_ASSET_REGEX.test(t));
