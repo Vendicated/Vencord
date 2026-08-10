@@ -26,7 +26,7 @@ function colorToHex(color: string) {
 
 export default definePlugin({
     name: "WebPWA",
-    description: "Makes Discord installable as a PWA. Enables notification badges, global keybinds and the custom title bar.",
+    description: "Makes Discord installable as an App (PWA). Enables notification badges, global key-binds and Discord's custom title bar.",
     authors: [Devs.ThaUnknown],
     tags: ["Utility"],
     managedStyle,
