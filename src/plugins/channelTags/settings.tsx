@@ -8,7 +8,8 @@ import { definePluginSettings } from "@api/Settings";
 import { Button } from "@components/Button";
 import { SettingsSection } from "@components/settings/tabs/plugins/components/Common";
 import { OptionType } from "@utils/types";
-import { ChannelStore, Constants, RestAPI } from "@webpack/common";
+import { RawChannel } from "@vencord/discord-types";
+import { ChannelStore, Constants, RestAPI, UserStore } from "@webpack/common";
 
 import type { ChannelTagMap, TagMap, UserDMChannelMap } from "./data";
 import {
@@ -60,7 +61,54 @@ export function updateStoreMetadata() {
     );
 }
 
-const inFlightUserDMPosts: Record<string, Promise<void>> = {};
+function lookupUserIdForDMChannel(channelId: string) {
+    const userDMChannelMap = getUserDMChannelMap();
+
+    return Object.entries(userDMChannelMap).find(
+        ([, v]) => v === channelId
+    )?.[0];
+}
+
+const inFlightUserDMPosts: Map<string, Promise<RawChannel> | "blocked"> = new Map();
+
+/**
+ * Creates the DM channel for the specified userId and returns it.
+ */
+function createDMChannelForUser(userId: string, returnInFlight: boolean = false): Promise<RawChannel> {
+    if (inFlightUserDMPosts[userId] === "blocked")
+        return Promise.reject();
+
+    if (inFlightUserDMPosts[userId])
+        return returnInFlight ? inFlightUserDMPosts[userId] : Promise.reject();
+
+    inFlightUserDMPosts[userId] = RestAPI
+        .post({
+            url: Constants.Endpoints.USER_CHANNELS,
+            body: { recipients: [userId] }
+        })
+        .then(({ body: channel }: { body: RawChannel; }) => {
+            delete inFlightUserDMPosts[userId];
+            return channel;
+        })
+        .catch(() => {
+            // Block this user, avoid spamming the API
+            inFlightUserDMPosts[userId] = "blocked";
+            return Promise.reject();
+        });
+
+    return inFlightUserDMPosts[userId];
+}
+
+export async function ensureDMChannelExists(channelId: string) {
+    const userId = lookupUserIdForDMChannel(channelId);
+    if (!userId) return false;
+
+    const channel = ChannelStore.getChannel(channelId);
+    if (channel) return true;
+
+    const newChannel = await (createDMChannelForUser(userId, true).catch(() => false));
+    return !!newChannel;
+}
 
 export function getChannelIdForDMsWithUser(userId: string) {
     const storeUserDMChannel = getUserDMChannelMap();
@@ -72,20 +120,27 @@ export function getChannelIdForDMsWithUser(userId: string) {
     if (storeUserDMChannel[userId])
         return storeUserDMChannel[userId];
 
-    if (!!inFlightUserDMPosts[userId])
+    const selfUser = UserStore.getCurrentUser();
+    if (selfUser.id === userId)
         return null;
 
-    inFlightUserDMPosts[userId] = RestAPI
-        .post({
-            url: Constants.Endpoints.USER_CHANNELS,
-            body: { recipients: [userId] }
-        })
-        .then(({ body: channel }) => {
+    /**
+     * "Fetch" the DM channel ID from API directly and store it.
+     *
+     * This "creates" the channel, which then causes it to show in the user's messages list.
+     * To avoid complaints about this, we delete the channel immediately.
+     * Deleting DM channels doesn't delete anything permanently.
+     */
+
+    createDMChannelForUser(userId)
+        .then(channel => {
             storeUserDMChannel[userId] = channel.id;
+
+            return RestAPI.del({
+                url: Constants.Endpoints.CHANNEL(channel.id)
+            });
         })
-        .finally(() => {
-            delete inFlightUserDMPosts[userId];
-        });
+        .catch(); // Do nothing, just don't not do nothing.
 
     return null;
 }

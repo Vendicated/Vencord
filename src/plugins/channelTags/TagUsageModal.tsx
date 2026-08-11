@@ -9,25 +9,30 @@ import { ExpandableSection } from "@components/ExpandableCard";
 import { BaseText, Paragraph } from "@components/index";
 import { classNameFactory } from "@utils/css";
 import type { RenderModalProps } from "@vencord/discord-types";
-import { Avatar, closeAllModals, Modal, NavigationRouter, openModal, Tooltip } from "@webpack/common";
+import { Avatar, closeAllModals, Modal, NavigationRouter, openModal, Toasts, Tooltip } from "@webpack/common";
 
 import { ChannelTags } from "./ChannelTags";
 import { openChannelTagsMenu } from "./contextMenu";
 import { JumpIcon, TagsIcon } from "./icons";
 import type { TagsChannel, TagsGuild } from "./metadata";
-import { getTagMap, settings, updateStoreMetadata } from "./settings";
+import { ensureDMChannelExists, getTagMap, settings, updateStoreMetadata } from "./settings";
 import { getTagUsageChannelIds, groupTagUsageChannels } from "./usage";
 
 const cl = classNameFactory("vc-channel-tags-usage-");
 
-function navigateToChannel(tagsChannel: TagsChannel) {
-    closeAllModals();
-
-    if (tagsChannel.kind === "guild") {
+async function navigateToChannel(tagsChannel: TagsChannel) {
+    if (tagsChannel.kind === "guild")
         NavigationRouter.transitionTo(`/channels/${tagsChannel.guildId}/${tagsChannel.id}`);
-    } else {
+    else if (tagsChannel.kind === "dm" && !await ensureDMChannelExists(tagsChannel.id))
+        Toasts.show({
+            type: Toasts.Type.FAILURE,
+            message: `Failed to navigate to DM: ${tagsChannel.name}`,
+            id: Toasts.genId()
+        });
+    else
         NavigationRouter.transitionTo(`/channels/@me/${tagsChannel.id}`);
-    }
+
+    closeAllModals();
 }
 
 function GuildIcon({ guild }: { guild?: TagsGuild; }) {

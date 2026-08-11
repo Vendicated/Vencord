@@ -47,16 +47,60 @@ export interface Collectibles {
     nameplate?: CollectibleItem;
 }
 
+/** Raw channel data from API. */
+export interface RawChannel {
+    id: string;
+    type: ChannelType;
+    guild_id?: string;
+    position?: number;
+    permission_overwrites?: Record<string, PermissionOverwrite>;
+    name?: string;
+    topic?: string;
+    nsfw?: boolean;
+    last_message_id?: string | null;
+    bitrate?: number;
+    user_limit?: number;
+    rate_limit_per_user?: number;
+    recipients?: RawRecipient[];
+    icon?: string;
+    owner_id?: string;
+    application_id?: string;
+    managed?: boolean;
+    parent_id?: string;
+    last_pin_timestamp?: string;
+    rtc_region?: string;
+    video_quality_mode?: number;
+    message_count?: number;
+    member_count?: number;
+    /** A raw instance of {@link ThreadMetadata} */
+    thread_metadata?: any;
+    /** A raw instance of {@link ThreadMember} */
+    member?: any;
+    default_auto_archive_duration?: number;
+    permissions?: string;
+    app_permissions?: string;
+    flags?: number;
+    total_message_sent?: number;
+    /** Raw instances of {@link ForumTag} */
+    available_tags?: any[];
+    applied_tags?: string[];
+    /** A raw instance of {@link DefaultReactionEmoji} */
+    default_reaction_emoji?: any;
+    default_thread_rate_limit_per_user?: number;
+    default_sort_order?: number;
+    default_forum_layout?: number;
+}
+
 /** Raw recipient data from API. */
 export interface RawRecipient {
     id: string;
     avatar: string | null;
     avatar_decoration_data: AvatarDecorationData | null;
-    bot: boolean;
+    bot?: boolean;
     clan: ClanData | null;
     collectibles: Collectibles | null;
     discriminator: string;
-    display_name: string | null;
+    display_name?: string | null;
     display_name_styles: DisplayNameStyles | null;
     global_name: string | null;
     primary_guild: ClanData | null;
