@@ -213,10 +213,9 @@ export async function loadLazyChunks() {
         });
 
         await Promise.all(chunksLeft.map(async id => queue(async () => {
-            // we will deadlock if we use the queue inside a queue func
+            // We will deadlock if we use the queue inside a queue func
             const isWorkerFile = await isWorkerAsset(wreq.p + wreq.u(id), false);
 
-            // Loads the chunk. Currently this only happens with the language packs which are loaded differently
             if (!isWorkerFile) {
                 await wreq.e(id);
             }
