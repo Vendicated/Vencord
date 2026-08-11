@@ -14,7 +14,7 @@ import pLimit from "p-limit";
 
 function getWebpackChunkMap() {
     const sym = Symbol();
-    let chunksMap: unknown;
+    let chunksMap: unknown = null;
 
     Object.defineProperty(Object.prototype, sym, {
         get() {
