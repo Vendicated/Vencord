@@ -1,0 +1,240 @@
+.vc-dml-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    max-height: 60vh;
+    overflow-y: auto;
+}
+
+.vc-dml-list::-webkit-scrollbar,
+.vc-dml-guild-list::-webkit-scrollbar {
+    width: 8px;
+}
+
+.vc-dml-list::-webkit-scrollbar-track,
+.vc-dml-guild-list::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.vc-dml-list::-webkit-scrollbar-thumb,
+.vc-dml-guild-list::-webkit-scrollbar-thumb {
+    background-color: var(--background-tertiary);
+    border-radius: 4px;
+}
+
+.vc-dml-list::-webkit-scrollbar-thumb:hover,
+.vc-dml-guild-list::-webkit-scrollbar-thumb:hover {
+    background-color: var(--interactive-hover);
+}
+
+.vc-dml-empty {
+    text-align: center;
+    color: var(--text-muted);
+    padding: 24px 0;
+}
+
+.vc-dml-item {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    background-color: var(--background-secondary);
+    border-radius: 4px;
+    padding: 8px 10px;
+}
+
+.vc-dml-item-header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+.vc-dml-item-author-group {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    min-width: 0;
+}
+
+.vc-dml-item-avatar {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.vc-dml-item-author {
+    font-weight: 600;
+    font-size: 90%;
+}
+
+.vc-dml-item-author-group:hover .vc-dml-item-author {
+    text-decoration: underline;
+}
+
+.vc-dml-item-relation-badge {
+    margin-left: 6px;
+    font-size: 70%;
+    font-weight: 700;
+    text-transform: uppercase;
+    border-radius: 4px;
+    padding: 1px 5px;
+    vertical-align: middle;
+}
+
+.vc-dml-relation-friend {
+    color: var(--text-positive);
+    background-color: color-mix(in srgb, var(--text-positive) 15%, transparent);
+}
+
+.vc-dml-relation-unknown {
+    color: var(--text-danger);
+    background-color: color-mix(in srgb, var(--text-danger) 15%, transparent);
+}
+
+.vc-dml-item-meta {
+    font-size: 75%;
+    color: var(--text-muted);
+    white-space: nowrap;
+}
+
+.vc-dml-item-location {
+    font-size: 75%;
+    color: var(--text-muted);
+}
+
+.vc-dml-item-content {
+    font-size: 90%;
+    white-space: pre-wrap;
+    overflow-wrap: break-word;
+}
+
+.vc-dml-item-attachment {
+    font-size: 85%;
+    color: var(--text-link);
+}
+
+.vc-dml-item-footer {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 4px;
+}
+
+.vc-dml-search {
+    width: 100%;
+    margin-bottom: 12px;
+}
+
+.vc-dml-toggle-row {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 12px;
+}
+
+.vc-dml-search,
+.vc-dml-search input,
+.vc-dml-search textarea {
+    background-color: var(--input-background-default) !important;
+    color: var(--text-default) !important;
+    border-color: transparent !important;
+    color-scheme: dark;
+}
+
+.vc-dml-search::placeholder,
+.vc-dml-search input::placeholder {
+    color: var(--text-muted) !important;
+}
+
+.vc-dml-serverlist-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+    min-width: 48px;
+    max-width: 48px;
+    flex-shrink: 0;
+    align-self: center;
+    box-sizing: border-box;
+    margin: 4px auto 8px;
+    border-radius: 12px;
+    background-color: var(--background-secondary);
+    color: #fff;
+    cursor: pointer;
+    transition: background-color .15s ease;
+}
+
+.vc-dml-serverlist-btn:hover {
+    background-color: var(--brand-500);
+}
+
+.vc-dml-filter-hint {
+    margin-bottom: 12px;
+}
+
+.vc-dml-guild-list {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    max-height: 50vh;
+    overflow-y: auto;
+}
+
+.vc-dml-guild-item {
+    padding: 6px 8px;
+    border-radius: 4px;
+    font-size: 95%;
+}
+
+.vc-dml-guild-item:hover {
+    background-color: var(--background-secondary);
+}
+
+.vc-dml-guild-item-label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+}
+
+.vc-dml-guild-icon {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.vc-dml-guild-icon-fallback {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--background-tertiary);
+    font-size: 65%;
+    font-weight: 700;
+    color: var(--text-default);
+}
+
+.vc-dml-guild-list-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 8px;
+}
+
+.vc-dml-guild-list-link {
+    font-size: 85%;
+    color: var(--text-link);
+    cursor: pointer;
+}
+
+.vc-dml-guild-list-link:hover {
+    text-decoration: underline;
+}
+
+.vc-dml-guild-list-count {
+    margin-left: auto;
+    font-size: 80%;
+    color: var(--text-muted);
+}
