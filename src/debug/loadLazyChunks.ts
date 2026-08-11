@@ -30,41 +30,30 @@ function getWebpackChunkMap() {
     return chunksMap as Record<PropertyKey, string> | null;
 }
 
-const workerAssetCache: Map<string, boolean> = new Map();
-const WORKER_ASSET_REGEX = /importScripts\(|self\.postMessage/;
-
 export async function loadLazyChunks() {
     const LazyChunkLoaderLogger = new Logger("LazyChunkLoader");
     const queue = pLimit(50);
-    const pendingWorkerAssetChecks: Map<string, Promise<boolean>> = new Map();
+    const workerAssetCache = new Map<string, Promise<boolean>>();
+    const WORKER_ASSET_REGEX = /importScripts\(|self\.postMessage/;
 
     async function isWorkerAsset(url: string, useQueue: boolean = true): Promise<boolean> {
         if (workerAssetCache.has(url)) {
             return workerAssetCache.get(url)!;
         }
 
-        if (pendingWorkerAssetChecks.has(url)) {
-            return await pendingWorkerAssetChecks.get(url)!;
-        }
-
-        const qFunc = () => {
+        const doFetch = () => {
             return fetch(url)
                 .then(r => r.text())
                 .then(t => WORKER_ASSET_REGEX.test(t));
         };
 
-        const iwap = (useQueue ? queue(qFunc) : qFunc());
+        const res = useQueue
+            ? queue(doFetch)
+            : doFetch();
 
-        pendingWorkerAssetChecks.set(url, iwap);
-
-        const iwa = await iwap;
-
-        workerAssetCache.set(url, iwa);
-        pendingWorkerAssetChecks.delete(url);
-
-        return iwa;
+        workerAssetCache.set(url, res);
+        return res;
     }
-
 
     try {
         LazyChunkLoaderLogger.log("Loading all chunks...");
