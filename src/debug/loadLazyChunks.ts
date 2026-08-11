@@ -29,12 +29,12 @@ function getWebpackChunkMap() {
 
     return chunksMap as Record<PropertyKey, string> | null;
 }
+const workerAssetCache = new Map<string, Promise<boolean>>();
+const WORKER_ASSET_REGEX = /importScripts\(|self\.postMessage/;
 
 export async function loadLazyChunks() {
     const LazyChunkLoaderLogger = new Logger("LazyChunkLoader");
     const queue = pLimit(50);
-    const workerAssetCache = new Map<string, Promise<boolean>>();
-    const WORKER_ASSET_REGEX = /importScripts\(|self\.postMessage/;
 
     async function isWorkerAsset(url: string, useQueue: boolean = true): Promise<boolean> {
         if (workerAssetCache.has(url)) {
