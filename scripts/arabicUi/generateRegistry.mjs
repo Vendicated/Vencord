@@ -40,7 +40,7 @@ const header = `/*
  * Add a JSON under locales/plugins/ then re-run the script.
  */
 
-import type { DiscordLocalePack, PluginLocalePack } from "../types";
+import type { DiscordLocalePack, PluginLocalePack } from "@plugins/arabicUi/types";
 
 `;
 
@@ -53,7 +53,6 @@ const pluginData = pluginFiles.map(f => {
 });
 
 const body = `${discordImports.map(d => d.line).join("\n")}
-
 ${pluginImports}
 
 export const discordPacks: DiscordLocalePack[] = [

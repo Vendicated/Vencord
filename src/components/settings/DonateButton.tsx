@@ -16,9 +16,11 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Heart } from "@components/Heart";
+import { LinkIcon } from "@components/Icons";
 import { ButtonProps } from "@vencord/discord-types";
 import { Button } from "@webpack/common";
+
+export const VRR_INVITE_URL = "https://discord.gg/UDQxtE6PdQ";
 
 export default function DonateButton({
     look = Button.Looks.LINK,
@@ -30,11 +32,11 @@ export default function DonateButton({
             {...props}
             look={look}
             color={color}
-            onClick={() => VencordNative.native.openExternal("https://github.com/sponsors/Vendicated")}
+            onClick={() => VencordNative.native.openExternal(VRR_INVITE_URL)}
             className="vc-donate-button"
         >
-            <Heart />
-            Donate
+            <LinkIcon height={16} width={16} className="vc-join-link-icon" />
+            Join the server
         </Button>
     );
 }

@@ -1,28 +1,19 @@
 /**
  * Merge en-text/*.json → _all.json. Do not edit _all.json by hand.
+ * Also writes locales/meta.json englishPhrases from the merge count.
  */
 
 import { readdirSync, readFileSync, writeFileSync } from "fs";
 import { dirname, join } from "path";
 import { fileURLToPath } from "url";
 
-const dir = join(dirname(fileURLToPath(import.meta.url)), "..", "..", "src", "plugins", "arabicUi", "locales", "discord", "en-text");
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const pluginRoot = join(__dirname, "..", "..", "src", "plugins", "arabicUi");
+const dir = join(pluginRoot, "locales", "discord", "en-text");
+const metaPath = join(pluginRoot, "locales", "meta.json");
+const allowPath = join(pluginRoot, "engine", "chromeAllowlist.json");
 
-const ALLOW_CHROME_SINGLE = new Set([
-    "Badges", "Unsubscribe", "Deauthorize", "Reconnect", "Nitro", "Quests",
-    "Permissions", "Domain", "Sound", "None", "Later!", "Relaunch",
-    "Donations", "Contributions", "Settings", "Advanced", "Versions",
-    "Desktop", "Web", "Mobile", "Console", "VR", "Stereo", "Simple",
-    "Framerate", "Open", "Apply", "Mute", "Deafen", "Camera", "Width",
-    "Height", "Hdr", "Remove", "Ignore", "Friends", "Shop", "Search",
-    "Account", "Connections", "Notifications", "Clips", "Plugins",
-    "Themes", "Username", "Email", "Reveal", "Edit", "Password", "Enabled", "Activity",
-    "Hide", "Limited", "Suspended", "and", "Online", "All", "Pending", "Accept", "Decline",
-    "Discover", "Apps", "Servers", "Home", "Gaming", "Music", "Education", "Featured", "Games", "Social", "Utilities", "Content",
-    "Appearance", "Theme", "Messages", "System", "Billing", "Developer", "Vencord", "Updater", "Cloud", "Experience", "More", "Voice", "Video",
-    "Overview", "Sounds", "Streaming", "Soundboard", "General", "Discord", "Everyone", "Unblock",
-    "Activity", "Board", "Wishlist", "Accessibility", "Subscriptions"
-]);
+const ALLOW_CHROME_SINGLE = new Set(JSON.parse(readFileSync(allowPath, "utf8")));
 
 function isSafeKey(english) {
     const n = english.trim();
@@ -76,6 +67,7 @@ for (const f of shardFiles) {
 const out = Object.fromEntries([...merged.entries()].sort((a, b) => a[0].localeCompare(b[0])));
 const outPath = join(dir, "_all.json");
 writeFileSync(outPath, JSON.stringify(out, null, 2) + "\n", "utf8");
+writeFileSync(metaPath, JSON.stringify({ englishPhrases: merged.size }, null, 2) + "\n", "utf8");
 
 console.log(JSON.stringify({
     files,
@@ -83,6 +75,7 @@ console.log(JSON.stringify({
     skippedShortKeys: skipped,
     duplicateConflictsIgnored: warnings.length,
     outPath,
+    metaPath,
 }, null, 2));
 
 if (warnings.length) {

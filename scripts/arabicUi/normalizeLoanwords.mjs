@@ -60,10 +60,12 @@ const REPLACEMENTS = [
     [/\bMod\b/gi, "مود"],
     [/\bAdmins\b/gi, "ادمنز"],
     [/\bAdmin\b/gi, "ادمن"],
-    [/\bBanned\b/gi, "مبند"],
-    [/\bBanning\b/gi, "الباند"],
-    [/\bBans\b/gi, "باندات"],
-    [/\bBan\b/gi, "باند"],
+    [/\bBanned\b/gi, "محظور"],
+    [/\bBanning\b/gi, "الحظر"],
+    [/\bBans\b/gi, "المحظورين"],
+    [/\bBan\b/gi, "حظر"],
+    [/\bUnban\b/gi, "إلغاء الحظر"],
+    [/\bUnbanned\b/gi, "تم إلغاء حظره"],
     [/\bKicked\b/gi, "تم الكيك"],
     [/\bKicking\b/gi, "الكيك"],
     [/\bKick\b/gi, "كيك"],
@@ -108,18 +110,38 @@ const REPLACEMENTS = [
     [/إلغاء الصمم/g, "فك الديفن"],
     [/الصمم/g, "الديفن"],
     [/صمم/g, "ديفن"],
+    [/فشل في إلغاء الإسكات/g, "فشل في فك الديفن"],
+    [/فشل في الإسكات/g, "فشل في الديفن"],
+    [/تم إلغاء إسكات/g, "تم فك ديفن"],
+    [/تم إسكات/g, "تم ديفن"],
+    [/إلغاء الإسكات/g, "فك الديفن"],
+    [/إلغاء إسكات/g, "فك ديفن"],
+    [/تبديل إسكات الصوت/g, "تبديل الديفن"],
+    [/تبديل إسكات/g, "تبديل الديفن"],
+    [/بإسكات/g, "بديفن"],
+    [/الإسكات/g, "الديفن"],
+    [/إسكات/g, "ديفن"],
+    [/اسكات/g, "ديفن"],
     [/غير متصلة/g, "اوفلاين"],
     [/غير متصلين/g, "اوفلاين"],
     [/غير متصل/g, "اوفلاين"],
 
-    [/تأكيد الحظر/g, "تأكيد الباند"],
-    [/مدة الحظر/g, "مدة الباند"],
-    [/سبب الحظر/g, "سبب الباند"],
-    [/حظر الأعضاء/g, "باند الأعضاء"],
-    [/حظر العضو/g, "باند العضو"],
-    [/حظر المستخدم/g, "باند المستخدم"],
-    [/إلغاء الحظر/g, "فك الباند"],
-    [/رفع الحظر/g, "فك الباند"],
+    [/فك الباند/g, "إلغاء الحظر"],
+    [/فك باند/g, "إلغاء حظر"],
+    [/إلغاء باند/g, "إلغاء حظر"],
+    [/تأكيد الباند/g, "تأكيد الحظر"],
+    [/مدة الباند/g, "مدة الحظر"],
+    [/سبب الباند/g, "سبب الحظر"],
+    [/باند الأعضاء/g, "حظر الأعضاء"],
+    [/باند العضو/g, "حظر العضو"],
+    [/باند المستخدم/g, "حظر المستخدم"],
+    [/تم باند المستخدم/g, "تم حظر المستخدم"],
+    [/فشل في باند/g, "فشل حظر"],
+    [/فشل في إلغاء باند/g, "فشل إلغاء حظر"],
+    [/باندات/g, "المحظورين"],
+    [/مبند/g, "محظور"],
+    [/(\s|^)باند(?!ل)(\s|$)/g, "$1حظر$2"],
+    // Do NOT remap generic حظر/إلغاء الحظر — Block ≠ Ban
     [/طرد الأعضاء/g, "كيك الأعضاء"],
     [/طرد العضو/g, "كيك العضو"],
     [/طرد المستخدم/g, "كيك المستخدم"],
@@ -145,17 +167,34 @@ const REPLACEMENTS = [
     [/تعيين دور المشرف/g, "تعيين دور مودريتر"],
     [/تعيين مشرف/g, "تعيين مودريتر"],
     [/تعيين مشرفي المسرح/g, "تعيين مودريترز المسرح"],
+    [/الكليبسات/g, "الكليبات"],
+    [/كليبسات/g, "كليبات"],
+    [/أوامر سلاش/g, "الأوامر"],
+    [/اوامر سلاش/g, "الأوامر"],
+    [/أوامر السلاش/g, "الأوامر"],
 ];
 
 const STRIP_ENGLISH_PARENS = /\s*\([A-Za-z][A-Za-z0-9 .+\-_\/]{0,40}\)/g;
 
 function fixArabic(value) {
-    let s = value;
+    const placeholders = [];
+    let s = value.replace(/\{[^{}]+\}/g, (m) => {
+        placeholders.push(m);
+        return `\u0000PH${placeholders.length - 1}\u0000`;
+    });
     for (const [re, to] of REPLACEMENTS)
         s = s.replace(re, to);
     s = s.replace(/بيتر دسكورد/g, "بيتر ديسكورد");
+    // Undo stacked GIF loanword passes
+    s = s.replace(/صورة\s+صورة\s+متحركة/g, "صورة متحركة");
+    s = s.replace(/صور\s+صورة\s+متحركة/g, "صور متحركة");
+    s = s.replace(/صور\s+صور\s+متحركة/g, "صور متحركة");
+    s = s.replace(/صور صورة متحركة المتحركة/g, "صور متحركة");
+    s = s.replace(/سبوتيفاي/g, "سبوتفاي");
     s = s.replace(STRIP_ENGLISH_PARENS, "");
-    return s.replace(/[ \t]{2,}/g, " ").replace(/\s+([.,!?،])/g, "$1").trim();
+    s = s.replace(/[ \t]{2,}/g, " ").replace(/\s+([.,!?،])/g, "$1").trim();
+    s = s.replace(/\u0000PH(\d+)\u0000/g, (_, i) => placeholders[Number(i)]);
+    return s;
 }
 
 function walk(dir, out = []) {
@@ -179,11 +218,17 @@ for (const file of walk(root)) {
     }
 
     let dirty = false;
+    const isPluginPack = file.replace(/\\/g, "/").includes("/locales/plugins/");
     function visit(node) {
         if (Array.isArray(node)) return node.map(visit);
         if (!node || typeof node !== "object") return node;
         const next = {};
         for (const [k, v] of Object.entries(node)) {
+            // Plugin titles must stay English — never rewrite "name"
+            if (isPluginPack && k === "name" && typeof v === "string") {
+                next[k] = v;
+                continue;
+            }
             if (typeof v === "string") {
                 const fixed = fixArabic(v);
                 if (fixed !== v) {

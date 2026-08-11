@@ -22,7 +22,7 @@ import { _getBadges, BadgePosition, BadgeUserArgs, ProfileBadge } from "@api/Bad
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Flex } from "@components/Flex";
 import { Heart } from "@components/Heart";
-import DonateButton from "@components/settings/DonateButton";
+import DonateButton, { VRR_INVITE_URL } from "@components/settings/DonateButton";
 import { openContributorModal } from "@components/settings/tabs";
 import { Devs } from "@utils/constants";
 import { copyWithToast } from "@utils/discord";
@@ -198,7 +198,7 @@ export default definePlugin({
                 openModal(props => (
                     <ErrorBoundary noop onError={() => {
                         props.onClose();
-                        VencordNative.native.openExternal("https://github.com/sponsors/Vendicated");
+                        VencordNative.native.openExternal(VRR_INVITE_URL);
                     }}>
                         <Modal
                             {...props}

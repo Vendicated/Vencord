@@ -110,6 +110,16 @@ function stripTrailingNitro(s: string): { body: string; hadNitro: boolean } {
     return { body: s.slice(0, m.index).trimEnd(), hadNitro: true };
 }
 
+/** Discord renames "Direct Messages" ↔ "DMs" — try both so old keys still hit. */
+function englishDmAliases(norm: string): string[] {
+    const out: string[] = [];
+    const asDms = norm.replace(/\bDirect Messages\b/gi, "DMs");
+    if (asDms !== norm) out.push(asDms);
+    const asFull = norm.replace(/\bDMs\b/g, "Direct Messages");
+    if (asFull !== norm) out.push(asFull);
+    return out;
+}
+
 function lookupEnglishExact(s: string): string | undefined {
     const direct = englishToArabic.get(s) ?? englishLowerToArabic.get(s.toLowerCase());
     if (direct) return direct;
@@ -118,11 +128,20 @@ function lookupEnglishExact(s: string): string | undefined {
     let hit = englishToArabic.get(norm) ?? englishLowerToArabic.get(norm.toLowerCase());
     if (hit) return hit;
 
+    for (const alias of englishDmAliases(norm)) {
+        hit = englishToArabic.get(alias) ?? englishLowerToArabic.get(alias.toLowerCase());
+        if (hit) return hit;
+    }
+
     const bulletMatch = /^[.\u2022\u2023\u25E6\u2043\u2219]\s*(.+)$/.exec(norm);
     if (bulletMatch) {
         const body = bulletMatch[1].trim();
         hit = englishToArabic.get(body) ?? englishLowerToArabic.get(body.toLowerCase());
         if (hit) return `. ${hit}`;
+        for (const alias of englishDmAliases(body)) {
+            hit = englishToArabic.get(alias) ?? englishLowerToArabic.get(alias.toLowerCase());
+            if (hit) return `. ${hit}`;
+        }
     }
 
     return undefined;
