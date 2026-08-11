@@ -7,6 +7,27 @@
     white-space: break-spaces;
 }
 
+.vc-trans-inplace {
+    color: var(--text-normal, #dbdee1) !important;
+    font-size: inherit;
+    line-height: 1.375rem;
+    white-space: break-spaces;
+    overflow-wrap: break-word;
+}
+
+.vc-trans-inplace,
+.vc-trans-inplace *,
+.vc-trans-inplace span,
+.vc-trans-inplace div,
+.vc-trans-inplace em,
+.vc-trans-inplace strong,
+.vc-trans-inplace a,
+.vc-trans-inplace code,
+.vc-trans-inplace p,
+.vc-trans-inplace [class] {
+    color: var(--text-normal, #dbdee1) !important;
+}
+
 .vc-trans-accessory-icon {
     margin-right: 0.25em;
 }

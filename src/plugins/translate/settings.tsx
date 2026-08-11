@@ -23,6 +23,15 @@ import { OptionType } from "@utils/types";
 import { openTranslateModal } from "./TranslateModal";
 
 export const settings = definePluginSettings({
+    displayMode: {
+        type: OptionType.SELECT,
+        description: "How translations should be displayed in chat",
+        options: [
+            { label: "Show original and translation (Both)", value: "both", default: true },
+            { label: "Show translation only (In-Place)", value: "translation" }
+        ] as const,
+        default: "both"
+    },
     receivedInput: {
         type: OptionType.STRING,
         description: "Language incoming messages are translated from",

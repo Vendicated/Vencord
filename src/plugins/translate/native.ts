@@ -52,3 +52,16 @@ export async function makeKagiTranslateRequest(_: IpcMainInvokeEvent, token: str
         return { status: -1, data: String(e) };
     }
 }
+
+export async function makeGoogleTranslateRequest(_: IpcMainInvokeEvent, url: string) {
+    try {
+        const res = await fetch(url);
+        if (!res.ok) {
+            return { status: res.status, data: null };
+        }
+        const data = await res.json();
+        return { status: res.status, data };
+    } catch (e) {
+        return { status: -1, data: null };
+    }
+}
