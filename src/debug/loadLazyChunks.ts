@@ -44,7 +44,6 @@ export async function loadLazyChunks() {
     const workerAssetCache = new Map<string, Promise<boolean>>();
     const WORKER_ASSET_REGEX = /importScripts\(|self\.postMessage/;
 
-
     async function isWorkerAsset(url: string, useQueue: boolean = true): Promise<boolean> {
         if (workerAssetCache.has(url)) {
             return workerAssetCache.get(url)!;
