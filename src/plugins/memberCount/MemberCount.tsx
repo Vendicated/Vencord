@@ -17,13 +17,17 @@ export function MemberCount({ isTooltip, tooltipGuildId }: { isTooltip?: true; t
     const { voiceActivity } = settings.use(["voiceActivity"]);
     const includeVoice = voiceActivity && !isTooltip;
 
-    const currentChannel = useStateFromStores([SelectedChannelStore], () => getCurrentChannel());
-    const guildId = isTooltip ? tooltipGuildId! : currentChannel?.guild_id;
+    const currentChannel = useStateFromStores(
+        [SelectedChannelStore], () => isTooltip ? undefined : getCurrentChannel(),
+        [], (a, b) => a?.id === b?.id
+    );
+
+    const guildId = tooltipGuildId ?? currentChannel?.guild_id;
 
     const voiceActivityCount = useStateFromStores(
         [VoiceStateStore],
         () => {
-            if (!includeVoice) return 0;
+            if (!includeVoice || !guildId) return 0;
 
             const voiceStates = VoiceStateStore.getVoiceStates(guildId);
             if (!voiceStates) return 0;
@@ -31,6 +35,7 @@ export function MemberCount({ isTooltip, tooltipGuildId }: { isTooltip?: true; t
             return Object.values(voiceStates)
                 .filter(({ channelId }) => {
                     if (!channelId) return false;
+
                     const channel = ChannelStore.getChannel(channelId);
                     return channel && PermissionStore.can(PermissionsBits.VIEW_CHANNEL, channel);
                 })
@@ -40,34 +45,57 @@ export function MemberCount({ isTooltip, tooltipGuildId }: { isTooltip?: true; t
 
     const totalCount = useStateFromStores(
         [GuildMemberCountStore],
-        () => GuildMemberCountStore.getMemberCount(guildId!)
+        () => guildId ? GuildMemberCountStore.getMemberCount(guildId) : null
     );
 
     let onlineCount = useStateFromStores(
         [OnlineMemberCountStore],
-        () => OnlineMemberCountStore.getCount(guildId)
+        () => guildId ? OnlineMemberCountStore.getCount(guildId) : null
     );
 
-    const { groups } = useStateFromStores(
+    const memberListOnlineCount = useStateFromStores(
         [ChannelMemberStore],
-        () => ChannelMemberStore.getProps(guildId, currentChannel?.id)
+        () => {
+            if (isTooltip || !guildId) return null;
+
+            const { groups } = ChannelMemberStore.getProps(guildId, currentChannel?.id);
+
+            if (groups.length >= 1 || groups[0].id !== "unknown") {
+                return groups.reduce(
+                    (total, curr) => total + (curr.id === "offline" ? 0 : curr.count),
+                    0
+                );
+            }
+
+            return null;
+        }
     );
 
-    const threadGroups = useStateFromStores(
+    const threadListOnlineCount = useStateFromStores(
         [ThreadMemberListStore],
-        () => ThreadMemberListStore.getMemberListSections(currentChannel?.id)
+        () => {
+            if (isTooltip) return null;
+
+            const threadGroups = ThreadMemberListStore.getMemberListSections(currentChannel?.id);
+
+            if (threadGroups && !isObjectEmpty(threadGroups)) {
+                return Object.values(threadGroups).reduce(
+                    (total, curr) => total + (curr.sectionId === "offline" ? 0 : curr.userIds.length),
+                    0
+                );
+            }
+
+            return null;
+        }
     );
 
-    if (!isTooltip && (groups.length >= 1 || groups[0].id !== "unknown")) {
-        onlineCount = groups.reduce((total, curr) => total + (curr.id === "offline" ? 0 : curr.count), 0);
-    }
-
-    if (!isTooltip && threadGroups && !isObjectEmpty(threadGroups)) {
-        onlineCount = Object.values(threadGroups).reduce((total, curr) => total + (curr.sectionId === "offline" ? 0 : curr.userIds.length), 0);
-    }
+    if (memberListOnlineCount != null) onlineCount = memberListOnlineCount;
+    if (threadListOnlineCount != null) onlineCount = threadListOnlineCount;
 
     useEffect(() => {
-        OnlineMemberCountStore.ensureCount(guildId);
+        if (guildId) {
+            OnlineMemberCountStore.ensureCount(guildId);
+        }
     }, [guildId]);
 
     if (totalCount == null)
@@ -86,6 +114,7 @@ export function MemberCount({ isTooltip, tooltipGuildId }: { isTooltip?: true; t
                     </div>
                 )}
             </Tooltip>
+
             <Tooltip text={`${numberFormat(totalCount)} total server members`} position="bottom">
                 {props => (
                     <div {...props} className={cl("container")}>
@@ -94,6 +123,7 @@ export function MemberCount({ isTooltip, tooltipGuildId }: { isTooltip?: true; t
                     </div>
                 )}
             </Tooltip>
+
             {includeVoice && voiceActivityCount > 0 &&
                 <Tooltip text={`${formattedVoiceCount} members in voice`} position="bottom">
                     {props => (
