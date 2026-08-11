@@ -21,6 +21,8 @@ export const TagShapes = {
     Square: "square",
     Spark: "spark",
     Star: "star",
+    Heart: "heart",
+    Pin: "pin"
 } as const;
 export type TagShape = (typeof TagShapes)[keyof typeof TagShapes];
 export const TagShapesList: TagShape[] = Object.values(TagShapes);
