@@ -186,8 +186,7 @@ export async function loadLazyChunks() {
         function factoryListener(factory: AnyModuleFactory | ModuleFactory) {
             let isResolved = false;
             searchAndLoadLazyChunks(String(factory))
-                .then(() => isResolved = true)
-                .catch(() => isResolved = true);
+                .finally(() => { isResolved = true; });
 
             chunksSearchPromises.push(() => isResolved);
         }
