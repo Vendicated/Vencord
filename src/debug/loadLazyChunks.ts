@@ -29,12 +29,18 @@ function getWebpackChunkMap() {
 
     return chunksMap as Record<PropertyKey, string> | null;
 }
-const workerAssetCache = new Map<string, Promise<boolean>>();
-const WORKER_ASSET_REGEX = /importScripts\(|self\.postMessage/;
+let didLoadChunks = false;
 
 export async function loadLazyChunks() {
     const LazyChunkLoaderLogger = new Logger("LazyChunkLoader");
+    if (didLoadChunks) {
+        LazyChunkLoaderLogger.log("Already loaded lazy chunks");
+        return;
+    }
     const queue = pLimit(50);
+    const workerAssetCache = new Map<string, Promise<boolean>>();
+    const WORKER_ASSET_REGEX = /importScripts\(|self\.postMessage/;
+
 
     async function isWorkerAsset(url: string, useQueue: boolean = true): Promise<boolean> {
         if (workerAssetCache.has(url)) {
@@ -222,6 +228,7 @@ export async function loadLazyChunks() {
         })));
 
         LazyChunkLoaderLogger.log("Finished loading all chunks!");
+        didLoadChunks = true;
     } catch (e) {
         LazyChunkLoaderLogger.log("A fatal error occurred:", e);
     }
