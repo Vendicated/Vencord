@@ -28,6 +28,7 @@ export const TagShapesList: TagShape[] = Object.values(TagShapes);
 export const DEFAULT_TAG_SHAPE: TagShape = TagShapes.Circle;
 
 export type TagMap = Record<string, ChannelTag>;
+export type UserDMChannelMap = Record<string, string>;
 export type ChannelTagMap = Record<string, string[]>;
 
 export const sortAlphaNum = (a: string, b: string) => a.localeCompare(b, LocaleStore?.locale ?? "en", { numeric: true });

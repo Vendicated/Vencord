@@ -8,8 +8,9 @@ import { definePluginSettings } from "@api/Settings";
 import { Button } from "@components/Button";
 import { SettingsSection } from "@components/settings/tabs/plugins/components/Common";
 import { OptionType } from "@utils/types";
+import { ChannelStore, Constants, RestAPI } from "@webpack/common";
 
-import type { ChannelTagMap, TagMap } from "./data";
+import type { ChannelTagMap, TagMap, UserDMChannelMap } from "./data";
 import {
     populateMetadata,
     type TagsChannelMap,
@@ -35,6 +36,7 @@ export const settings = definePluginSettings({
 }).withPrivateSettings<{
     tags?: TagMap;
     channelTags?: ChannelTagMap;
+    userDMChannels?: UserDMChannelMap;
     channels?: TagsChannelMap;
     guilds?: TagsGuildMap;
 }>();
@@ -42,6 +44,8 @@ export const settings = definePluginSettings({
 export const getTagMap = () => settings.store.tags ??= {};
 
 export const getChannelTagMap = () => settings.store.channelTags ??= {};
+
+export const getUserDMChannelMap = () => settings.store.userDMChannels ??= {};
 
 export const getChannelsGuildsMaps = () => ({
     channels: settings.store.channels ??= {},
@@ -54,4 +58,34 @@ export function updateStoreMetadata() {
         settings.store.channels ??= {},
         settings.store.guilds ??= {}
     );
+}
+
+const inFlightUserDMPosts: Record<string, Promise<void>> = {};
+
+export function getChannelIdForDMsWithUser(userId: string) {
+    const storeUserDMChannel = getUserDMChannelMap();
+
+    const cached = ChannelStore.getDMChannelFromUserId(userId);
+    if (cached && storeUserDMChannel[userId] !== cached.id)
+        return storeUserDMChannel[userId] = cached.id;
+
+    if (storeUserDMChannel[userId])
+        return storeUserDMChannel[userId];
+
+    if (!!inFlightUserDMPosts[userId])
+        return null;
+
+    inFlightUserDMPosts[userId] = RestAPI
+        .post({
+            url: Constants.Endpoints.USER_CHANNELS,
+            body: { recipients: [userId] }
+        })
+        .then(({ body: channel }) => {
+            storeUserDMChannel[userId] = channel.id;
+        })
+        .finally(() => {
+            delete inFlightUserDMPosts[userId];
+        });
+
+    return null;
 }

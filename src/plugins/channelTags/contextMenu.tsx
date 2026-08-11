@@ -8,11 +8,13 @@ import { findGroupChildrenByChildId, NavContextMenuPatchCallback } from "@api/Co
 import { MainSettingsIcon, Margins, PlusIcon } from "@components/index";
 import { classNameFactory } from "@utils/css";
 import { classes } from "@utils/index";
+import { Channel, User } from "@vencord/discord-types";
+import { ChannelType } from "@vencord/discord-types/enums";
 import { ContextMenuApi, Menu } from "@webpack/common";
 
 import { addTagToChannel, ChannelTag, ChannelTagMap, compareTags, removeTagFromChannel, TagShape } from "./data";
 import { TagsIcon } from "./icons";
-import { getChannelTagMap, getTagMap, settings } from "./settings";
+import { getChannelIdForDMsWithUser, getChannelTagMap, getTagMap, settings } from "./settings";
 import { openCreateTagModal } from "./TagModal";
 import { TagShapeIcon } from "./TagShape";
 import { openTagsModal } from "./TagsModal";
@@ -142,11 +144,18 @@ export const patchChannelContextMenu: NavContextMenuPatchCallback = (children, p
     group.push(makeChannelTagsMenuItem(channel.id, getChannelTagMap()));
 };
 
-export const patchDmListContextMenu: NavContextMenuPatchCallback = (children, props) => {
+export const patchDmListContextMenu: NavContextMenuPatchCallback = (children, props: { channel?: Channel, user: User; }) => {
     settings.use(["channelTags"]);
 
-    const group = findGroupChildrenByChildId("close-dm", children);
-    if (!group || !props?.channel?.id) return;
+    const { channel, user } = props;
 
-    group.push(makeChannelTagsMenuItem(props.channel.id, getChannelTagMap()));
+    const channelType = channel?.type;
+    const isValidDMChannel = channelType === ChannelType.DM || channelType === ChannelType.GROUP_DM;
+    const channelId = isValidDMChannel ? channel!.id : getChannelIdForDMsWithUser(user.id);
+
+    const group = findGroupChildrenByChildId("user-profile", children);
+
+    if (!group || !channelId) return;
+
+    group.push(makeChannelTagsMenuItem(channelId, getChannelTagMap()));
 };
