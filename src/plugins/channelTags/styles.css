@@ -27,26 +27,34 @@
 }
 
 .vc-channel-tags-decorations {
-    display: flex;
+    display: grid;
+    max-height: 24px;
     align-items: center;
-    gap: 3px;
-    margin-left: 6px;
-}
+    padding: 1px 2px 2px 1px;
+    grid-template-rows: auto;
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(0, 1fr);
 
-.vc-channel-tags-decoration {
-    display: flex;
-    flex: 0 0 auto;
-    width: 12px;
-    height: 12px;
-}
+    &:has(> :nth-child(8)) {
+        /* 8 children - tooltip component adds a span */
+        grid-template-rows: repeat(2, auto);
+    }
 
-.vc-channel-tags-decoration-clickable {
-    cursor: pointer;
-}
+    .vc-channel-tags-decoration {
+        display: flex;
+        flex: 0 0 auto;
+        width: 12px;
+        height: 12px;
 
-.vc-channel-tags-decoration:focus-visible {
-    outline: 2px solid var(--focus-primary);
-    outline-offset: 2px;
+        &.vc-channel-tags-decoration-clickable {
+            cursor: pointer;
+        }
+
+        &:focus-visible {
+            outline: 2px solid var(--focus-primary);
+            outline-offset: 2px;
+        }
+    }
 }
 
 .vc-channel-tags-list {
