@@ -32,7 +32,6 @@ interface MessageDeleteProps {
 
 // Remove this migration once enough time has passed
 migratePluginSetting("NoBlockedMessages", "ignoreBlockedMessages", "ignoreMessages");
-
 const settings = definePluginSettings({
     ignoreMessages: {
         description: "Completely ignores incoming messages from blocked and ignored (if enabled) users",
