@@ -29,9 +29,6 @@ interface MessageDeleteProps {
     collapsedReason: () => any;
 }
 
-interface MessageWithReference extends Message {
-    referenced_message?: Message | null;
-}
 
 // Remove this migration once enough time has passed
 migratePluginSetting("NoBlockedMessages", "ignoreBlockedMessages", "ignoreMessages");
