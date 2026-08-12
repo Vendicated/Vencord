@@ -368,6 +368,8 @@ export default definePlugin({
             return ignoreBots && message.author?.bot ||
                 ignoreSelf && message.author?.id === myId ||
                 (isEdit ? !logEdits : !logDeletes) ||
+
+                // IsWhitelistedEnabled / IsBlackListDisabled  XAND  IsMessageInFilter
                 !filterIsEmpty && !((filterMode === FilterMode.Whitelist) === messageInFilter) ||
 
                 // Ignore Venbot in the support channels
