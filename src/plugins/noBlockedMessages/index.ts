@@ -112,10 +112,7 @@ export default definePlugin({
                         return true;
                     }
 
-                    if (
-                        settings.store.applyToIgnoredUsers
-                        && RelationshipStore.isIgnored(referencedAuthorId)
-                    ) {
+                    if (settings.store.applyToIgnoredUsers && RelationshipStore.isIgnored(referencedAuthorId)) {
                         return true;
                     }
                 }
