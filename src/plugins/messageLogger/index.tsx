@@ -120,9 +120,14 @@ const settings = definePluginSettings({
         default: "",
         multiline: true
     },
-    exclusiveGuilds: {
+    whitelistEnabled: {
+        type: OptionType.BOOLEAN,
+        description: "Whether to enforce the whitelist, logging only messages in whitelisted guilds",
+        default: false,
+    },
+    whitelistedGuilds: {
         type: OptionType.STRING,
-        description: "If not empty, ignore everything except from specific guilds. Comma-separated list of guild IDs to include",
+        description: "Comma-separated list of guild IDs to whitelist",
         default: "",
         multiline: true
     }
@@ -345,7 +350,7 @@ export default definePlugin({
 
     shouldIgnore(message: any, isEdit = false) {
         try {
-            const { ignoreBots, ignoreSelf, ignoreUsers, ignoreChannels, ignoreGuilds, exclusiveGuilds, logEdits, logDeletes } = settings.store;
+            const { ignoreBots, ignoreSelf, ignoreUsers, ignoreChannels, ignoreGuilds, whitelistEnabled, whitelistedGuilds, logEdits, logDeletes } = settings.store;
             const myId = UserStore.getCurrentUser().id;
 
             return ignoreBots && message.author?.bot ||
@@ -355,7 +360,7 @@ export default definePlugin({
                 ignoreChannels.includes(ChannelStore.getChannel(message.channel_id)?.parent_id) ||
                 (isEdit ? !logEdits : !logDeletes) ||
                 ignoreGuilds.includes(ChannelStore.getChannel(message.channel_id)?.guild_id) ||
-                ((exclusiveGuilds.trim() !== "") && !exclusiveGuilds.includes(ChannelStore.getChannel(message.channel_id)?.guild_id)) ||
+                (whitelistEnabled && !whitelistedGuilds.includes(ChannelStore.getChannel(message.channel_id)?.guild_id)) ||
                 // Ignore Venbot in the support channels
                 (message.author?.id === VENBOT_USER_ID && ChannelStore.getChannel(message.channel_id)?.parent_id === SUPPORT_CATEGORY_ID);
         } catch (e) {
