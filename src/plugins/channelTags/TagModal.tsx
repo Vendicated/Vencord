@@ -4,14 +4,16 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { Button, Heading, Margins, Paragraph } from "@components/index";
+import { Button, Heading, Margins, Paragraph, PencilIcon } from "@components/index";
 import { classNameFactory } from "@utils/css";
 import { RenderModalProps } from "@vencord/discord-types";
 import { extractAndLoadChunksLazy, findComponentByCodeLazy } from "@webpack";
 import { ColorPicker, Modal, openModalLazy, SearchableSelect, TextInput, useRef, useState } from "@webpack/common";
 
-import { addTagToChannel, createTag, DEFAULT_TAG_SHAPE, sortAlphaNum, TagShape, TagShapesList, updateTag } from "./data";
-import { getTagMap } from "./settings";
+import { addTagToChannel, createTag, DEFAULT_TAG_SHAPE, deleteEmptyGroups, ensureGroup, sortAlphaNum, TagShape, TagShapesList, updateTag } from "./data";
+import { openGroupModal } from "./GroupModal";
+import { toGroupName } from "./groups";
+import { getGroupMap, getTagMap } from "./settings";
 import { TagShapeIcon } from "./TagShape";
 
 const SWATCHES = [
@@ -57,10 +59,11 @@ function TagModal({ channelId, tagId, modalProps }: TagModalProps) {
     const lastGroupQuery = useRef("");
     const [color, setColor] = useState(cssColorToInt(existingTag?.color));
     const [shape, setShape] = useState<TagShape>(existingTag?.shape ?? DEFAULT_TAG_SHAPE);
+    const groupName = toGroupName(group);
     const groupOptions = [...new Set([
-        ...Object.values(getTagMap()).map(tag => tag.group),
-        group,
-        groupQuery.trim()
+        ...Object.keys(getGroupMap()),
+        groupName,
+        toGroupName(groupQuery)
     ].filter((group): group is string => group != null && group !== ""))]
         .sort(sortAlphaNum)
         .map(group => ({ label: group, value: group }));
@@ -76,10 +79,13 @@ function TagModal({ channelId, tagId, modalProps }: TagModalProps) {
         const trimmedName = name.trim();
         if (!trimmedName) return;
 
+        const savedGroup = groupName || undefined;
+        if (savedGroup) ensureGroup(savedGroup);
+
         if (tagId) {
-            updateTag(tagId, { name: trimmedName, color: intToCssColor(color), group: group.trim() || undefined, shape });
+            updateTag(tagId, { name: trimmedName, color: intToCssColor(color), group: savedGroup, shape });
         } else {
-            const id = createTag(trimmedName, intToCssColor(color), shape, group.trim() || undefined);
+            const id = createTag(trimmedName, intToCssColor(color), shape, savedGroup);
             if (channelId) addTagToChannel(channelId, id);
         }
         modalProps.onClose();
@@ -128,28 +134,39 @@ function TagModal({ channelId, tagId, modalProps }: TagModalProps) {
                 </div>
                 <section>
                     <Heading>Group</Heading>
-                    <SearchableSelect
-                        clearable
-                        closeOnSelect
-                        maxVisibleItems={5}
-                        onChange={value => {
-                            setGroup(value ?? "");
-                            setGroupQuery("");
-                            lastGroupQuery.current = "";
-                        }}
-                        onSearchChange={query => {
-                            const nextGroup = query.slice(0, 32);
-                            setGroupQuery(nextGroup);
+                    <div className={cl("row")}>
+                        <SearchableSelect
+                            clearable
+                            closeOnSelect
+                            maxVisibleItems={5}
+                            onChange={value => {
+                                setGroup(value ?? "");
+                                setGroupQuery("");
+                                lastGroupQuery.current = "";
+                            }}
+                            onSearchChange={query => {
+                                const nextGroup = query.slice(0, 32);
+                                setGroupQuery(nextGroup);
 
-                            if (nextGroup) setGroup(nextGroup);
-                            else if (lastGroupQuery.current) setGroup("");
+                                if (nextGroup) setGroup(nextGroup);
+                                else if (lastGroupQuery.current) setGroup("");
 
-                            lastGroupQuery.current = nextGroup;
-                        }}
-                        options={groupOptions}
-                        placeholder="Ungrouped"
-                        value={group}
-                    />
+                                lastGroupQuery.current = nextGroup;
+                            }}
+                            options={groupOptions}
+                            placeholder="Ungrouped"
+                            value={group}
+                        />
+                        <Button
+                            type="button"
+                            variant="secondary"
+                            size="iconOnly"
+                            disabled={!groupName}
+                            onClick={() => openGroupModal(groupName, nextGroup => setGroup(nextGroup))}
+                        >
+                            <PencilIcon />
+                        </Button>
+                    </div>
                     {group && <Paragraph size="xs" className={Margins.top8} style={{ color: "var(--text-muted)" }}>
                         Only one tag in "{group}" may be set on a channel/thread/DM at a time.<br />
                         When setting a grouped tag on a channel/thread/DM, the others of that group are removed.
@@ -179,12 +196,12 @@ export function openCreateTagModal(channelId?: string) {
     openModalLazy(async () => {
         await requireSettingsModal();
         return modalProps => <TagModal channelId={channelId} modalProps={modalProps} />;
-    });
+    }, { onCloseCallback: deleteEmptyGroups });
 }
 
 export function openEditTagModal(tagId: string) {
     openModalLazy(async () => {
         await requireSettingsModal();
         return modalProps => <TagModal tagId={tagId} modalProps={modalProps} />;
-    });
+    }, { onCloseCallback: deleteEmptyGroups });
 }

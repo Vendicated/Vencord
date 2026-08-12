@@ -12,6 +12,7 @@ import { RawChannel } from "@vencord/discord-types";
 import { ChannelStore, Constants, RestAPI, UserStore } from "@webpack/common";
 
 import type { ChannelTagMap, TagMap, UserDMChannelMap } from "./data";
+import { DEFAULT_GROUP, type GroupMap } from "./groups";
 import {
     populateMetadata,
     type TagsChannelMap,
@@ -36,6 +37,7 @@ export const settings = definePluginSettings({
     }
 }).withPrivateSettings<{
     tags?: TagMap;
+    groups?: GroupMap;
     channelTags?: ChannelTagMap;
     userDMChannels?: UserDMChannelMap;
     channels?: TagsChannelMap;
@@ -43,6 +45,14 @@ export const settings = definePluginSettings({
 }>();
 
 export const getTagMap = () => settings.store.tags ??= {};
+
+export const getGroupMap = () => {
+    const groups = settings.store.groups ??= {};
+    for (const tag of Object.values(getTagMap())) {
+        if (tag.group && !groups[tag.group]) groups[tag.group] = { ...DEFAULT_GROUP };
+    }
+    return groups;
+};
 
 export const getChannelTagMap = () => settings.store.channelTags ??= {};
 

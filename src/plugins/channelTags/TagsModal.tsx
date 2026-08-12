@@ -12,7 +12,8 @@ import { classes } from "@utils/index";
 import type { RenderModalProps } from "@vencord/discord-types";
 import { ConfirmModal, Modal, openModal, Tooltip } from "@webpack/common";
 
-import { ChannelTag, compareTags, deleteTag } from "./data";
+import { ChannelTag, compareTags, deleteTag, GroupName } from "./data";
+import { openGroupModal } from "./GroupModal";
 import { getTagMap, settings } from "./settings";
 import { openCreateTagModal, openEditTagModal } from "./TagModal";
 import { TagShapeIcon } from "./TagShape";
@@ -52,6 +53,7 @@ function TagsModal(modalProps: RenderModalProps) {
                 )}
                 {[...groupedTags].map(([group, groupTags]) => (
                     <ExpandableSection
+                        className={cl("list-group")}
                         initialExpanded
                         key={group}
                         renderContent={() => (
@@ -89,11 +91,11 @@ function TagsModal(modalProps: RenderModalProps) {
                                             </Button>
                                         )}
                                     </Tooltip>}
-                                    <Tooltip position="top" text="Edit">
+                                    <Tooltip position="top" text="Edit Tag">
                                         {tooltipProps => (
                                             <Button
                                                 {...tooltipProps}
-                                                aria-label="Edit"
+                                                aria-label="Edit Tag"
                                                 onClick={event => {
                                                     event.stopPropagation();
                                                     openEditTagModal(id);
@@ -105,11 +107,11 @@ function TagsModal(modalProps: RenderModalProps) {
                                             </Button>
                                         )}
                                     </Tooltip>
-                                    <Tooltip position="top" text="Delete">
+                                    <Tooltip position="top" text="Delete Tag">
                                         {tooltipProps => (
                                             <Button
                                                 {...tooltipProps}
-                                                aria-label="Delete"
+                                                aria-label="Delete Tag"
                                                 onClick={event => {
                                                     event.stopPropagation();
                                                     if (event.shiftKey) deleteTag(id);
@@ -129,6 +131,23 @@ function TagsModal(modalProps: RenderModalProps) {
                         <Paragraph weight="medium" size="md">
                             {group ?? "Ungrouped"}
                         </Paragraph>
+                        {group &&
+                            <Tooltip position="top" text="Edit Group">
+                                {tooltipProps => (
+                                    <Button
+                                        {...tooltipProps}
+                                        aria-label="Edit Group"
+                                        onClick={event => {
+                                            event.stopPropagation();
+                                            openGroupModal(group as GroupName);
+                                        }}
+                                        size="iconOnly"
+                                        variant="secondary"
+                                    >
+                                        <PencilIcon />
+                                    </Button>
+                                )}
+                            </Tooltip>}
                     </ExpandableSection>
                 ))}
             </div>

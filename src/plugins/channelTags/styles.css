@@ -63,8 +63,14 @@
 }
 
 .vc-channel-tags-list-group {
-    display: grid;
-    gap: 4px;
+    .vc-expandable-card-header {
+        align-items: center;
+        gap: 10px;
+
+        > p {
+            flex: 1 1 auto;
+        }
+    }
 }
 
 .vc-channel-tags-list-row {

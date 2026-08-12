@@ -6,12 +6,15 @@
 
 import { LocaleStore } from "@webpack/common";
 
-import { getChannelTagMap, getTagMap, updateStoreMetadata } from "./settings";
+import { DEFAULT_GROUP, GroupName } from "./groups";
+import { getChannelTagMap, getGroupMap, getTagMap, updateStoreMetadata } from "./settings";
+
+export { Group, GroupMap, GroupName, toGroupName } from "./groups";
 
 export interface ChannelTag {
     name: string;
     color: string;
-    group?: string;
+    group?: GroupName;
     shape?: TagShape;
 }
 
@@ -56,7 +59,7 @@ function sortTagIds(tagIds: string[]) {
     ));
 }
 
-export function createTag(name: string, color: string, shape: TagShape = DEFAULT_TAG_SHAPE, group?: string): string {
+export function createTag(name: string, color: string, shape: TagShape = DEFAULT_TAG_SHAPE, group?: GroupName): string {
     const id = crypto.randomUUID();
     getTagMap()[id] = { name, color, group, shape };
     return id;
@@ -76,6 +79,7 @@ export function updateTag(id: string, tag: ChannelTag) {
             : [...tagIds];
         channelTags[channelId] = sortTagIds(nextTagIds);
     }
+    deleteEmptyGroups();
 }
 
 export function deleteTag(id: string) {
@@ -87,7 +91,33 @@ export function deleteTag(id: string) {
         if (nextTagIds.length) channelTags[channelId] = nextTagIds;
         else delete channelTags[channelId];
     }
+    deleteEmptyGroups();
     updateStoreMetadata();
+}
+
+export function ensureGroup(name: GroupName) {
+    return getGroupMap()[name] ??= { ...DEFAULT_GROUP };
+}
+
+export function renameGroup(oldName: GroupName, newName: GroupName) {
+    if (oldName === newName) return;
+
+    const groups = getGroupMap();
+    const group = groups[oldName] ?? { ...DEFAULT_GROUP };
+    groups[newName] ??= group;
+    delete groups[oldName];
+
+    for (const tag of Object.values(getTagMap())) {
+        if (tag.group === oldName) tag.group = newName;
+    }
+}
+
+export function deleteEmptyGroups() {
+    const tags = Object.values(getTagMap());
+    const groups = getGroupMap();
+    for (const name of Object.keys(groups) as GroupName[]) {
+        if (!tags.some(tag => tag.group === name)) delete groups[name];
+    }
 }
 
 export function addTagToChannel(channelId: string, tagId: string) {
