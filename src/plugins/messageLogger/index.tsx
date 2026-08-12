@@ -354,9 +354,9 @@ export default definePlugin({
             const myId = UserStore.getCurrentUser().id;
 
             const filterIsEmpty = (
-                filteredUsers.trim() == "" &&
-                filteredChannels.trim() == "" &&
-                filteredGuilds.trim() == ""
+                filteredUsers.trim() === "" &&
+                filteredChannels.trim() === "" &&
+                filteredGuilds.trim() === ""
             );
             const messageInFilter = (
                 filteredUsers.includes(message.author?.id) ||
@@ -368,7 +368,7 @@ export default definePlugin({
             return ignoreBots && message.author?.bot ||
                 ignoreSelf && message.author?.id === myId ||
                 (isEdit ? !logEdits : !logDeletes) ||
-                !filterIsEmpty && !((filterMode == FilterMode.Whitelist) == messageInFilter) ||
+                !filterIsEmpty && !((filterMode === FilterMode.Whitelist) === messageInFilter) ||
 
                 // Ignore Venbot in the support channels
                 (message.author?.id === VENBOT_USER_ID && ChannelStore.getChannel(message.channel_id)?.parent_id === SUPPORT_CATEGORY_ID);
