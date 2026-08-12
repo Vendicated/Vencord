@@ -619,10 +619,24 @@ function applyCountPatterns(english: string): string | undefined {
     m = /^Recipients will land in (.+)$/i.exec(norm);
     if (m) return `المدعوون سينتقلون إلى ${m[1]}`;
 
-    m = /^Your invite link expires in (\d+) days?\.$/i.exec(norm);
+    m = /^Your invite link expires in (\d+)\s+(seconds?|minutes?|hours?|days?|weeks?|months?)\.?$/i.exec(norm);
     if (m) {
         const n = Number(m[1]);
-        return n === 1 ? "رابط دعوتك ينتهي خلال يوم واحد." : `رابط دعوتك ينتهي خلال ${n} أيام.`;
+        const unit = m[2].toLowerCase();
+        let timeStr = "";
+        if (unit.startsWith("second"))
+            timeStr = n === 1 ? "ثانية واحدة" : `${n} ثوانٍ`;
+        else if (unit.startsWith("minute"))
+            timeStr = n === 1 ? "دقيقة واحدة" : `${n} دقيقة`;
+        else if (unit.startsWith("hour"))
+            timeStr = n === 1 ? "ساعة واحدة" : `${n} ساعة`;
+        else if (unit.startsWith("day"))
+            timeStr = n === 1 ? "يوم واحد" : `${n} أيام`;
+        else if (unit.startsWith("week"))
+            timeStr = n === 1 ? "أسبوع واحد" : `${n} أسابيع`;
+        else if (unit.startsWith("month"))
+            timeStr = n === 1 ? "شهر واحد" : `${n} أشهر`;
+        return `ينتهي رابط دعوتك خلال ${timeStr}.`;
     }
 
     m = /^(\d+)\s+days?$/i.exec(norm);
@@ -642,6 +656,19 @@ function applyCountPatterns(english: string): string | undefined {
     m = /^\+(\d+)\s+Sticker Slots\s*\((\d+)\s+total\)$/i.exec(norm);
     if (m)
         return `+${m[1]} خانات ستيكر (${m[2]} إجمالي)`;
+
+    m = /^(Received|Sent|Pending|Blocked|Online|All)\s*[\-—–]\s*(\d+)$/i.exec(norm);
+    if (m) {
+        const type = m[1].toLowerCase();
+        let arType = "";
+        if (type === "received") arType = "المستلَمة";
+        else if (type === "sent") arType = "المرسَلة";
+        else if (type === "pending") arType = "المعلقة";
+        else if (type === "blocked") arType = "المحظورون";
+        else if (type === "online") arType = "المتصلون";
+        else if (type === "all") arType = "الكل";
+        return `${arType} — ${m[2]}`;
+    }
 
     m = /^members of (\d+)$/i.exec(norm);
     if (m)
@@ -717,6 +744,10 @@ function applyCountPatterns(english: string): string | undefined {
         const perm = lookupEnglishExact(m[1]) ?? m[1];
         return `${perm} صلاحية تجاوز هذا الحد ويمكنهم نقل مستخدمين آخرين إلى القناة.`;
     }
+
+    m = /^These are settings for games\s+(.+?),\s+that use Discord to power their social experiences\.?$/i.exec(norm);
+    if (m)
+        return `هذه إعدادات لألعاب ${m[1]}، التي تستخدم دسكورد لتشغيل تجاربها الاجتماعية.`;
 
     // "Search {query}" — exact keys like "Search Roles" win first
     m = /^Search (.+)$/i.exec(norm);

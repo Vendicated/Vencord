@@ -47,9 +47,9 @@ export function SpecialCard({ title, subtitle, description, cardImage, backgroun
         <Card className={cl("card", "card-special")} style={cardStyle}>
             <div className={cl("card-flex")}>
                 <div className={cl("card-flex-main")}>
-                    <Forms.FormTitle className={cl("title")} tag="h5">{title}</Forms.FormTitle>
-                    <Forms.FormText className={cl("subtitle")}>{subtitle}</Forms.FormText>
-                    <Forms.FormText className={cl("text")}>{description}</Forms.FormText>
+                    <Forms.FormTitle className={cl("title")} tag="h5" dir="auto">{title}</Forms.FormTitle>
+                    {subtitle && <Forms.FormText className={cl("subtitle")} dir="auto">{subtitle}</Forms.FormText>}
+                    <Forms.FormText className={cl("text")} dir="auto">{description}</Forms.FormText>
 
                     {children}
                 </div>

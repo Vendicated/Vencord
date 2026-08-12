@@ -128,8 +128,9 @@ function VencordSettings() {
     return (
         <SettingsTab>
             <SpecialCard
-                title="Join the server"
-                description="Come hang out with the community on Discord."
+                title="Community"
+                subtitle="Vencord Arabic"
+                description="An enhanced version of Vencord with better support for Arabic."
                 cardImage={VRR_LOGO}
                 backgroundImage={BANNER_BACKGROUND_IMAGE}
                 backgroundColor="#c3a3ce"

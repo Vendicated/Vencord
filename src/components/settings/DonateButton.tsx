@@ -19,14 +19,16 @@
 import { LinkIcon } from "@components/Icons";
 import { ButtonProps } from "@vencord/discord-types";
 import { Button } from "@webpack/common";
+import type { PropsWithChildren } from "react";
 
 export const VRR_INVITE_URL = "https://discord.gg/UDQxtE6PdQ";
 
 export default function DonateButton({
     look = Button.Looks.LINK,
     color = Button.Colors.TRANSPARENT,
+    children = "Join Server",
     ...props
-}: Partial<ButtonProps>) {
+}: PropsWithChildren<Partial<ButtonProps>>) {
     return (
         <Button
             {...props}
@@ -36,7 +38,7 @@ export default function DonateButton({
             className="vc-donate-button"
         >
             <LinkIcon height={16} width={16} className="vc-join-link-icon" />
-            Join the server
+            {children}
         </Button>
     );
 }
