@@ -97,7 +97,7 @@ const settings = definePluginSettings({
     },
     whitelistEnabled: {
         type: OptionType.BOOLEAN,
-        description: "Whether to enforce the whitelist, logging only channels or users",
+        description: "Whether to enforce the whitelist, logging only whitelisted channels or users",
         default: false,
     },
     whitelistedUsers: {
