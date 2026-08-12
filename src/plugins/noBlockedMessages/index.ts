@@ -93,7 +93,7 @@ export default definePlugin({
         }
     ],
 
-    shouldIgnoreMessage(message: MessageWithReference) {
+    shouldIgnoreMessage(message: MessageJSON) {
         try {
             if (settings.store.ignoreMessages) {
                 if (RelationshipStore.isBlocked(message.author.id)) {
