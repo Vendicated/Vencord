@@ -5,38 +5,16 @@
  */
 
 import { findGroupChildrenByChildId, NavContextMenuPatchCallback } from "@api/ContextMenu";
-import { MainSettingsIcon, Margins, PlusIcon } from "@components/index";
-import { classNameFactory } from "@utils/css";
-import { classes } from "@utils/index";
+import { CogWheel, PlusIcon, TagsIcon } from "@components/index";
 import { Channel, User } from "@vencord/discord-types";
 import { ChannelType } from "@vencord/discord-types/enums";
 import { ContextMenuApi, Menu } from "@webpack/common";
 
-import { addTagToChannel, ChannelTag, ChannelTagMap, compareTags, removeTagFromChannel, TagShape } from "./data";
-import { TagsIcon } from "./icons";
+import { addTagToChannel, ChannelTag, ChannelTagMap, compareTags, removeTagFromChannel } from "./data";
 import { getChannelIdForDMsWithUser, getChannelTagMap, getTagMap, settings } from "./settings";
 import { openCreateTagModal } from "./TagModal";
 import { TagShapeIcon } from "./TagShape";
 import { openTagsModal } from "./TagsModal";
-
-const cl = classNameFactory("vc-channel-tags-");
-
-function TagMenuLabel({ color, name, shape }: {
-    color: string;
-    name: string;
-    shape?: TagShape;
-}) {
-    return (
-        <>
-            <TagShapeIcon
-                className={classes(cl("menu-swatch"), Margins.right8)}
-                color={color}
-                tagShape={shape}
-            />
-            {name}
-        </>
-    );
-}
 
 export function makeChannelTagsMenuChildren(channelId: string, channelTags: ChannelTagMap) {
     const tags = Object.entries(getTagMap())
@@ -49,7 +27,7 @@ export function makeChannelTagsMenuChildren(channelId: string, channelTags: Chan
                 id="vc-channel-tags-add"
                 key="vc-channel-tags-add"
                 label="Add Tag"
-                icon={TagsIcon}
+                leadingAccessory={{ type: "icon", icon: TagsIcon }}
                 action={() => openCreateTagModal(channelId)}
             />
         ];
@@ -67,14 +45,14 @@ export function makeChannelTagsMenuChildren(channelId: string, channelTags: Chan
             id="vc-channel-tags-add-new"
             key="vc-channel-tags-add-new"
             label="Create New"
-            icon={PlusIcon}
+            leadingAccessory={{ type: "icon", icon: PlusIcon }}
             action={() => openCreateTagModal(channelId)}
         />,
         <Menu.MenuItem
             id="vc-channel-tags-edit"
             key="vc-channel-tags-edit"
             label="Manage"
-            icon={MainSettingsIcon}
+            leadingAccessory={{ type: "icon", icon: CogWheel }}
             action={openTagsModal}
         />,
         <Menu.MenuSeparator key="vc-channel-tags-separator" />,
@@ -86,7 +64,10 @@ export function makeChannelTagsMenuChildren(channelId: string, channelTags: Chan
                         <Menu.MenuCheckboxItem
                             id={`vc-channel-tags-toggle-${id}`}
                             key={`vc-channel-tags-toggle-${id}`}
-                            label={<TagMenuLabel color={tag.color} name={tag.name} shape={tag.shape} />}
+                            label={tag.name}
+                            leadingAccessory={{
+                                type: "icon", icon: () => <TagShapeIcon color={tag.color} tagShape={tag.shape} />
+                            }}
                             checked={isAssigned}
                             action={() => isAssigned
                                 ? removeTagFromChannel(channelId, id)
@@ -108,6 +89,7 @@ export function makeChannelTagsMenuItem(channelId: string, channelTags: ChannelT
             id="vc-channel-tags"
             key="vc-channel-tags"
             label="Tags"
+            leadingAccessory={{ type: "icon", icon: TagsIcon }}
         >
             {children}
         </Menu.MenuItem>

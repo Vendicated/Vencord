@@ -6,14 +6,13 @@
 
 import { Button } from "@components/Button";
 import { ExpandableSection } from "@components/ExpandableCard";
-import { BaseText, Paragraph } from "@components/index";
+import { BaseText, Paragraph, RightArrow, TagsIcon } from "@components/index";
 import { classNameFactory } from "@utils/css";
 import type { RenderModalProps } from "@vencord/discord-types";
 import { Avatar, closeAllModals, Modal, NavigationRouter, openModal, Toasts, Tooltip } from "@webpack/common";
 
 import { ChannelTags } from "./ChannelTags";
 import { openChannelTagsMenu } from "./contextMenu";
-import { JumpIcon, TagsIcon } from "./icons";
 import type { TagsChannel, TagsGuild } from "./metadata";
 import { ensureDMChannelExists, getTagMap, settings, updateStoreMetadata } from "./settings";
 import { getTagUsageChannelIds, groupTagUsageChannels } from "./usage";
@@ -94,7 +93,7 @@ function ChannelUsageRow({ channel, onNavigate }: { channel: TagsChannel; onNavi
                         size="iconOnly"
                         variant="secondary"
                     >
-                        <JumpIcon />
+                        <RightArrow />
                     </Button>
                 )}
             </Tooltip>

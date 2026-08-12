@@ -6,14 +6,13 @@
 
 import { Button } from "@components/Button";
 import { ExpandableSection } from "@components/ExpandableCard";
-import { BaseText, Margins, Paragraph } from "@components/index";
+import { BaseText, BrowseChannelsIcon, DeleteIcon, Margins, Paragraph, PencilIcon } from "@components/index";
 import { classNameFactory } from "@utils/css";
 import { classes } from "@utils/index";
 import type { RenderModalProps } from "@vencord/discord-types";
 import { ConfirmModal, Modal, openModal, Tooltip } from "@webpack/common";
 
 import { ChannelTag, compareTags, deleteTag } from "./data";
-import { DeleteIcon, PencilIcon, ViewIcon } from "./icons";
 import { getTagMap, settings } from "./settings";
 import { openCreateTagModal, openEditTagModal } from "./TagModal";
 import { TagShapeIcon } from "./TagShape";
@@ -86,7 +85,7 @@ function TagsModal(modalProps: RenderModalProps) {
                                                 size="iconOnly"
                                                 variant="secondary"
                                             >
-                                                <ViewIcon />
+                                                <BrowseChannelsIcon />
                                             </Button>
                                         )}
                                     </Tooltip>}
