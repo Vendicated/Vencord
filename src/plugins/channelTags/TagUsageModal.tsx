@@ -6,7 +6,7 @@
 
 import { Button } from "@components/Button";
 import { ExpandableSection } from "@components/ExpandableCard";
-import { BaseText, Paragraph, RightArrow, TagsIcon } from "@components/index";
+import { BaseText, ChannelIcon, Margins, Paragraph, RightArrow, TagsIcon } from "@components/index";
 import { classNameFactory } from "@utils/css";
 import type { RenderModalProps } from "@vencord/discord-types";
 import { Avatar, closeAllModals, Modal, NavigationRouter, openModal, Toasts, Tooltip } from "@webpack/common";
@@ -62,10 +62,19 @@ function ChannelUsageRow({ channel, onNavigate }: { channel: TagsChannel; onNavi
         >
             <PrivateChannelAvatar channel={channel} />
             <div className={cl("channel-names")}>
-                {channel.kind === "guild" && channel.parent && <Paragraph size="xs" style={{ color: "var(--text-muted)" }}>#{channel.parent.name}</Paragraph>}
-                <Paragraph>
-                    {channel.kind === "guild" && !channel.thread && "#"}{channel.name}
-                </Paragraph>
+                {channel.kind === "guild" && channel.parent &&
+                    <BaseText size="xs" defaultColor={false} style={{ color: "var(--text-muted)" }}>
+                        <ChannelIcon width={15} height={15} />
+                        <span>
+                            {channel.parent.name}
+                        </span>
+                    </BaseText>}
+                <BaseText size="md" weight="medium">
+                    {channel.kind === "guild" && !channel.thread && <ChannelIcon width={20} height={20} />}
+                    <span className={channel.kind === "guild" && channel.parent && Margins.left16 || ""}>
+                        {channel.name}
+                    </span>
+                </BaseText>
             </div>
             <ChannelTags channelId={channel.id} />
             <Tooltip position="top" text="Edit Tags">

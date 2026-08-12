@@ -101,6 +101,10 @@
     white-space: nowrap;
 }
 
+.vc-channel-tags-usage-channels {
+    margin-top: -4px;
+}
+
 .vc-channel-tags-usage-channel-row {
     display: flex;
     align-items: center;
@@ -109,22 +113,35 @@
     padding: 6px 8px;
     margin: 0 -8px;
     border-radius: 6px;
+    line-height: var(--channels-name-line-height);
+
+    &:hover {
+        background: var(--message-background-hover);
+    }
+
+    & > .vc-channel-tags-decorations {
+        padding-bottom: 0;
+    }
 }
 
-.vc-channel-tags-usage-channel-row:hover {
-    background: var(--message-background-hover);
-}
 
 .vc-channel-tags-usage-channel-names {
     flex: 1;
     display: grid;
     gap: 2px;
-}
 
-.vc-channel-tags-usage-channel-names > * {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    & > * {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    & > div {
+        display: flex;
+        align-items: center;
+        gap: 0.5em;
+        line-height: inherit;
+    }
 }
 
 .vc-channel-tags-tag-shape > g > * {
