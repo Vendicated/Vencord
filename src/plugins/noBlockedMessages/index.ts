@@ -99,10 +99,7 @@ export default definePlugin({
                     return true;
                 }
 
-                if (
-                    settings.store.applyToIgnoredUsers
-                    && RelationshipStore.isIgnored(message.author.id)
-                ) {
+                if (settings.store.applyToIgnoredUsers && RelationshipStore.isIgnored(message.author.id)) {
                     return true;
                 }
             }
