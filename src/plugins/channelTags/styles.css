@@ -12,19 +12,18 @@
     }
 }
 
-.vc-channel-tags-modal-name-row {
+.vc-channel-tags-modal-row {
     display: flex;
     align-items: center;
     gap: 8px;
-}
 
-.vc-channel-tags-modal-name-row > * {
-    flex: 1;
-}
+    & > * {
+        flex: 1;
+    }
 
-.vc-channel-tags-modal-shape-button {
-    flex: 0 0 auto;
-    padding: 4px;
+    & > button {
+        flex: 0 0 auto;
+    }
 }
 
 .vc-channel-tags-decorations {

@@ -97,7 +97,7 @@ function TagModal({ channelId, tagId, modalProps }: TagModalProps) {
             }]}
         >
             <div className={cl("content")}>
-                <div className={cl("name-row")}>
+                <div className={cl("row")}>
                     <Button
                         aria-label={`Shape: ${shape}. Click for next shape; right-click for previous shape`}
                         className={cl("shape-button")}
@@ -113,20 +113,18 @@ function TagModal({ channelId, tagId, modalProps }: TagModalProps) {
                     >
                         <TagShapeIcon color={intToCssColor(color)} tagShape={shape} />
                     </Button>
-                    <div className={cl("name-input")}>
-                        <TextInput
-                            autoFocus
-                            maxLength={32}
-                            onKeyDown={event => {
-                                if (event.key !== "Enter") return;
-                                event.preventDefault();
-                                onSave();
-                            }}
-                            placeholder="Tag Name"
-                            value={name}
-                            onChange={setName}
-                        />
-                    </div>
+                    <TextInput
+                        autoFocus
+                        maxLength={32}
+                        onKeyDown={event => {
+                            if (event.key !== "Enter") return;
+                            event.preventDefault();
+                            onSave();
+                        }}
+                        placeholder="Tag Name"
+                        value={name}
+                        onChange={setName}
+                    />
                 </div>
                 <section>
                     <Heading>Group</Heading>
