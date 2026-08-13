@@ -6,13 +6,14 @@ export type Theme = "light" | "dark" | "darker" | "midnight";
 
 export interface ThemeState {
     theme: Theme;
+    /** 0 = not loaded, 1 = loaded */
     status: 0 | 1;
     preferences: Record<ThemePreference, Theme>;
 }
 export class ThemeStore extends FluxStore {
-    get theme(): Theme;
-    get darkSidebar(): boolean;
     get systemTheme(): SystemTheme;
-    themePreferenceForSystemTheme(preference: ThemePreference): Theme;
+    get theme(): Theme;
+
     getState(): ThemeState;
+    themePreferenceForSystemTheme(preference: ThemePreference): Theme;
 }

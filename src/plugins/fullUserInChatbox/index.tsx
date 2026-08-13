@@ -23,11 +23,13 @@ interface UserMentionComponentProps {
 export default definePlugin({
     name: "FullUserInChatbox",
     description: "Makes the user mention in the chatbox have more functionalities, like left/right clicking",
+    tags: ["Shortcuts", "Utility"],
     authors: [Devs.sadan],
 
     patches: [
         {
-            find: ':"text":',
+            // Same find as RoleColorEverywhere chatbox mentions
+            find: '"text":"locked"',
             replacement: {
                 match: /(hidePersonalInformation\).+?)(if\(null!=\i\){.+?return \i)(?=})/,
                 replace: "$1return $self.UserMentionComponent({...arguments[0],originalComponent:()=>{$2}});"

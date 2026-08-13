@@ -1,0 +1,11 @@
+.vc-textReplace-input-grid {
+    display: grid;
+    grid-template-columns: max-content 1fr;
+    gap: 0.25em 1em;
+    align-items: center;
+}
+
+.vc-textReplace-delete-button {
+    width: 100%;
+    margin-block: 0.75em 0.5em
+}

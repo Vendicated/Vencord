@@ -10,5 +10,6 @@ import definePlugin from "@utils/types";
 export default definePlugin({
     name: "FixYoutubeEmbeds",
     description: "Bypasses youtube videos being blocked from display on Discord (for example by UMG)",
+    tags: ["Media", "Utility"],
     authors: [Devs.coolelectronics]
 });

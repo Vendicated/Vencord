@@ -47,7 +47,7 @@
 
 .vc-membercount-total-count {
     fill: none;
-    stroke: var(--status-offline);
+    stroke: var(--icon-status-offline);
     stroke-width: 4px;
     width: 15px;
     height: 15px;

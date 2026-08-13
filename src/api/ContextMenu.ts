@@ -131,6 +131,8 @@ interface ContextMenuProps {
 }
 
 export function _usePatchContextMenu(props: ContextMenuProps) {
+    if (!Menu.MenuItem) return props; // Prevent crashes in case we fail to acquire menu items for some reason
+
     props = {
         ...props,
         children: cloneMenuChildren(props.children),

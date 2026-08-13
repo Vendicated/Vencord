@@ -24,6 +24,7 @@ export default definePlugin({
     name: "DontRoundMyTimestamps",
     authors: [Devs.Lexi],
     description: "Always rounds relative timestamps down, so 7.6y becomes 7y instead of 8y",
+    tags: ["Appearance", "Utility"],
 
     start() {
         moment.relativeTimeRounding(Math.floor);

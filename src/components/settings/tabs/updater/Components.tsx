@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { Card } from "@components/Card";
 import { ErrorCard } from "@components/ErrorCard";
 import { Flex } from "@components/Flex";
 import { Link } from "@components/Link";
@@ -11,7 +12,7 @@ import { Margins } from "@utils/margins";
 import { classes } from "@utils/misc";
 import { relaunch } from "@utils/native";
 import { changes, checkForUpdates, update, updateError } from "@utils/updater";
-import { Alerts, Button, Card, Forms, React, Toasts, useState } from "@webpack/common";
+import { Button, ConfirmModal,Forms, openModal, React, Toasts, useState } from "@webpack/common";
 
 import { runWithDispatch } from "./runWithDispatch";
 
@@ -30,7 +31,7 @@ export function HashLink({ repo, hash, disabled = false }: { repo: string, hash:
 
 export function Changes({ updates, repo, repoPending }: CommonProps & { updates: typeof changes; }) {
     return (
-        <Card style={{ padding: "0 0.5em" }}>
+        <Card style={{ padding: "0 0.5em" }} defaultPadding={false}>
             {updates.map(({ hash, author, message }) => (
                 <div
                     key={hash}
@@ -93,24 +94,27 @@ export function Updatable(props: CommonProps) {
             <Flex className={classes(Margins.bottom8, Margins.top8)}>
                 {isOutdated && (
                     <Button
-                        size={Button.Sizes.SMALL}
                         disabled={isUpdating || isChecking}
                         onClick={runWithDispatch(setIsUpdating, async () => {
                             if (await update()) {
                                 setUpdates([]);
 
                                 await new Promise<void>(r => {
-                                    Alerts.show({
-                                        title: "Update Success!",
-                                        body: "Successfully updated. Restart now to apply the changes?",
-                                        confirmText: "Restart",
-                                        cancelText: "Not now!",
-                                        onConfirm() {
-                                            relaunch();
-                                            r();
-                                        },
-                                        onCancel: r
-                                    });
+                                    openModal(props => (
+                                        <ConfirmModal
+                                            {...props}
+                                            title="Update Success!"
+                                            subtitle="Successfully updated. Restart now to apply the changes?"
+                                            confirmText="Restart"
+                                            cancelText="Not now!"
+                                            variant="primary"
+                                            onConfirm={() => {
+                                                relaunch();
+                                                r();
+                                            }}
+                                            onCancel={r}
+                                        />
+                                    ));
                                 });
                             }
                         })}
@@ -119,7 +123,6 @@ export function Updatable(props: CommonProps) {
                     </Button>
                 )}
                 <Button
-                    size={Button.Sizes.SMALL}
                     disabled={isUpdating || isChecking}
                     onClick={runWithDispatch(setIsChecking, async () => {
                         const outdated = await checkForUpdates();

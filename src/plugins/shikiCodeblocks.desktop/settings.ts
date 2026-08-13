@@ -51,6 +51,7 @@ export const settings = definePluginSettings({
     },
     tryHljs: {
         type: OptionType.SELECT,
+        displayName: "Try Highlight.js",
         description: "Use the more lightweight default Discord highlighter and theme.",
         options: [
             {
@@ -100,8 +101,8 @@ export const settings = definePluginSettings({
         description: "Background opacity",
         markers: [0, 20, 40, 60, 80, 100],
         default: 100,
+        stickToMarkers: false,
         componentProps: {
-            stickToMarkers: false,
             onValueRender: null, // Defaults to percentage
         },
     },

@@ -16,13 +16,14 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { findGroupChildrenByChildId, NavContextMenuPatchCallback } from "@api/ContextMenu";
+import { NavContextMenuPatchCallback } from "@api/ContextMenu";
+import { isPluginEnabled } from "@api/PluginManager";
+import ExpressionClonerPlugin from "@plugins/expressionCloner";
 import { Devs } from "@utils/constants";
-import { copyWithToast } from "@utils/misc";
+import { copyWithToast } from "@utils/discord";
 import definePlugin from "@utils/types";
 import { Message, Sticker } from "@vencord/discord-types";
 import { Menu, React, StickersStore } from "@webpack/common";
-import ExpressionClonerPlugin from "plugins/expressionCloner";
 
 const StickerExt = [, "png", "png", "json", "gif"] as const;
 
@@ -67,9 +68,7 @@ const messageContextMenuPatch: NavContextMenuPatchCallback = (
     const sticker = message.stickerItems.find(s => s.id === favoriteableId);
     if (!sticker?.format_type) return;
 
-    const idx = children.findIndex(c => Array.isArray(c) && findGroupChildrenByChildId("vc-copy-sticker-url", c) != null);
-
-    children.splice(idx, 0, buildMenuItem(sticker, idx !== -1));
+    children.splice(-1, 0, buildMenuItem(sticker, false));
 };
 
 const expressionPickerPatch: NavContextMenuPatchCallback = (children, props: { target: HTMLElement; }) => {
@@ -79,13 +78,14 @@ const expressionPickerPatch: NavContextMenuPatchCallback = (children, props: { t
 
     const sticker = StickersStore.getStickerById(id);
     if (sticker) {
-        children.push(buildMenuItem(sticker, Vencord.Plugins.isPluginEnabled(ExpressionClonerPlugin.name)));
+        children.push(buildMenuItem(sticker, isPluginEnabled(ExpressionClonerPlugin.name)));
     }
 };
 
 export default definePlugin({
     name: "CopyStickerLinks",
     description: "Adds the ability to copy & open Sticker links",
+    tags: ["Emotes", "Utility"],
     authors: [Devs.Ven, Devs.Byeoon],
     contextMenus: {
         "message": messageContextMenuPatch,

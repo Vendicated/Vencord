@@ -1,0 +1,23 @@
+.vc-expandable-card {
+    color: var(--text-default);
+}
+
+.vc-expandable-card-header {
+    display: flex;
+    cursor: pointer;
+    padding: .75em 1em;
+    margin: 4px;
+    border-radius: var(--radius-xs);
+
+    .vc-expandable-card[data-expanded="true"] & {
+        background: var(--card-secondary-bg);
+    }
+}
+
+.vc-expandable-card-icon {
+    margin-left: auto;
+}
+
+.vc-expandable-card-content {
+    padding: 0.5em 1em;
+}

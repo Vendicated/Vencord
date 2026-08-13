@@ -27,7 +27,7 @@ export default definePlugin({
     patches: [
         {
             // Message accessories have a custom logic to decide if they should render again, so we need to make it not ignore changed message reference
-            find: "}renderEmbeds(",
+            find: "}renderStickersAccessories(",
             replacement: {
                 match: /(?<=this.props,\i,\[)"message",/,
                 replace: ""

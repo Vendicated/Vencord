@@ -22,7 +22,7 @@ import { Logger } from "@utils/Logger";
 import { Margins } from "@utils/margins";
 import { wordsToTitle } from "@utils/text";
 import definePlugin, { ReporterTestable } from "@utils/types";
-import { Button, ChannelStore, Forms, GuildMemberStore, SelectedChannelStore, SelectedGuildStore, useMemo, UserStore, VoiceStateStore } from "@webpack/common";
+import { AuthenticationStore, Button, ChannelStore, Forms, GuildMemberStore, SelectedChannelStore, SelectedGuildStore, useMemo, UserStore, VoiceStateStore } from "@webpack/common";
 import { ReactElement } from "react";
 
 import { getCurrentVoice, settings } from "./settings";
@@ -35,6 +35,7 @@ interface VoiceStateChangeEvent {
     mute: boolean;
     selfDeaf: boolean;
     selfMute: boolean;
+    sessionId: string;
 }
 
 // Mute/Deaf for other people than you is commented out, because otherwise someone can spam it and it will be annoying
@@ -42,7 +43,8 @@ interface VoiceStateChangeEvent {
 // not say the second mute, which would lead you to believe they're unmuted
 
 function speak(text: string) {
-    if (!text) return;
+    // Don't narrate in the overlay window, otherwise everything is said twice
+    if (!text || window.__OVERLAY__) return;
 
     const { volume, rate } = settings.store;
 
@@ -154,6 +156,7 @@ function playSample(type: string) {
 export default definePlugin({
     name: "VcNarrator",
     description: "Announces when users join, leave, or move voice channels via narrator",
+    tags: ["Voice", "Accessibility"],
     authors: [Devs.Ven],
     reporterTestable: ReporterTestable.None,
 
@@ -170,6 +173,7 @@ export default definePlugin({
             for (const state of voiceStates) {
                 const { userId, channelId, oldChannelId } = state;
                 const isMe = userId === myId;
+                if (isMe && state.sessionId !== AuthenticationStore.getSessionId()) continue;
                 if (!isMe) {
                     if (!myChanId) continue;
                     if (channelId !== myChanId && oldChannelId !== myChanId) continue;
@@ -181,7 +185,7 @@ export default definePlugin({
                 const template = settings.store[type + "Message"];
                 const user = isMe && !settings.store.sayOwnName ? "" : UserStore.getUser(userId).username;
                 const displayName = user && ((UserStore.getUser(userId) as any).globalName ?? user);
-                const nickname = user && (GuildMemberStore.getNick(myGuildId!, userId) ?? user);
+                const nickname = user && (GuildMemberStore.getNick(myGuildId!, userId) ?? displayName);
                 const channel = ChannelStore.getChannel(id).name;
 
                 speak(formatText(template, user, channel, displayName, nickname));
@@ -242,7 +246,7 @@ export default definePlugin({
         }
 
         return (
-            <Forms.FormSection>
+            <section>
                 <Forms.FormText>
                     You can customise the spoken messages below. You can disable specific messages by setting them to nothing
                 </Forms.FormText>
@@ -270,7 +274,7 @@ export default definePlugin({
                     </>
                 )}
                 {errorComponent}
-            </Forms.FormSection>
+            </section>
         );
     }
 });

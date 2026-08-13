@@ -17,7 +17,7 @@
 */
 
 import { React, useEffect, useMemo, useReducer, useState } from "@webpack/common";
-import { ActionDispatch, ReactNode } from "react";
+import type { ActionDispatch, ReactNode } from "react";
 
 import { checkIntersecting } from "./misc";
 
@@ -113,7 +113,7 @@ export function useAwaiter<T>(factory: () => Promise<T>, providedOpts?: AwaiterO
             })
             .catch(error => {
                 if (!isAlive) return;
-                setState({ value: null, error, pending: false });
+                setState({ value: opts.fallbackValue, error, pending: false });
                 opts.onError?.(error);
             });
 

@@ -1,5 +1,10 @@
 import { FluxStore, GuildMember } from "..";
 
+export interface PendingRoleUpdates {
+    added: string[];
+    removed: string[];
+}
+
 export class GuildMemberStore extends FluxStore {
     /** @returns Format: [guildId-userId: Timestamp (string)] */
     getCommunicationDisabledUserMap(): Record<string, string>;
@@ -11,6 +16,10 @@ export class GuildMemberStore extends FluxStore {
     getTrueMember(guildId: string, userId: string): GuildMember | null;
     getMemberIds(guildId: string): string[];
     getMembers(guildId: string): GuildMember[];
+    getMemberVersion(): number;
+    getMemberRoleWithPendingUpdates(guildId: string, userId: string): string[];
+    getPendingRoleUpdates(guildId: string): PendingRoleUpdates;
+    memberOf(userId: string): string[];
 
     getCachedSelfMember(guildId: string): GuildMember | null;
     getSelfMember(guildId: string): GuildMember | null;
@@ -20,7 +29,6 @@ export class GuildMemberStore extends FluxStore {
     getNicknameGuildsMapping(userId: string): Record<string, string[]>;
     getNicknames(userId: string): string[];
 
-    isMember(guildId: string, userId: string): boolean;
     isMember(guildId: string, userId: string): boolean;
     isGuestOrLurker(guildId: string, userId: string): boolean;
     isCurrentUserGuest(guildId: string): boolean;

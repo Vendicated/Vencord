@@ -1,10 +1,11 @@
-.messagelogger-deleted [class^="buttons"] {
+.messagelogger-deleted [class*="buttons"] {
     display: none;
 }
 
-.messagelogger-deleted
-:is(
-    .messagelogger-deleted-attachment,
+
+/* non-deleted messages can have deleted attachments */
+.messagelogger-deleted-attachment,
+.messagelogger-deleted :is(
     .emoji,
     [data-type="sticker"],
     [class*="embedIframe"],
@@ -14,7 +15,7 @@
     filter: grayscale(1) !important;
     transition: 150ms filter ease-in-out;
 
-    &[class*="hiddenMosaicItem_"] {
+    &[class*="hiddenMosaicItem"] {
         filter: grayscale(1) blur(var(--custom-message-attachment-spoiler-blur-radius, 44px)) !important;
     }
 

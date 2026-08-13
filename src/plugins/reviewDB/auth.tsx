@@ -4,10 +4,9 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { DataStore } from "@api/index";
+import * as DataStore from "@api/DataStore";
 import { Logger } from "@utils/Logger";
-import { openModal } from "@utils/modal";
-import { OAuth2AuthorizeModal, showToast, Toasts, UserStore } from "@webpack/common";
+import { OAuth2AuthorizeModal, openModal, showToast, Toasts, UserStore } from "@webpack/common";
 
 import { ReviewDBAuth } from "./entities";
 
@@ -41,7 +40,7 @@ export async function updateAuth(newAuth: ReviewDBAuth) {
     });
 }
 
-export function authorize(callback?: any) {
+export function authorize(callback?: () => void) {
     openModal(props =>
         <OAuth2AuthorizeModal
             {...props}
@@ -51,7 +50,7 @@ export function authorize(callback?: any) {
             permissions={0n}
             clientId="915703782174752809"
             cancelCompletesFlow={false}
-            callback={async (response: any) => {
+            callback={async (response: { location: string }) => {
                 try {
                     const url = new URL(response.location);
                     url.searchParams.append("clientMod", "vencord");
@@ -61,7 +60,7 @@ export function authorize(callback?: any) {
 
                     if (!res.ok) {
                         const { message } = await res.json();
-                        showToast(message || "An error occured while authorizing", Toasts.Type.FAILURE);
+                        showToast(message ?? "An error occured while authorizing", Toasts.Type.FAILURE);
                         return;
                     }
 

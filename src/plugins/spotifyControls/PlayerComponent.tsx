@@ -18,26 +18,22 @@
 
 import "./spotifyStyles.css";
 
-import { Settings } from "@api/Settings";
-import { classNameFactory } from "@api/Styles";
 import { Flex } from "@components/Flex";
 import { CopyIcon, ImageIcon, LinkIcon, OpenExternalIcon } from "@components/Icons";
+import { Paragraph } from "@components/Paragraph";
+import { Span } from "@components/Span";
 import { debounce } from "@shared/debounce";
-import { openImageModal } from "@utils/discord";
-import { classes, copyWithToast } from "@utils/misc";
-import { ContextMenuApi, FluxDispatcher, Forms, Menu, React, useEffect, useState, useStateFromStores } from "@webpack/common";
+import { classNameFactory } from "@utils/css";
+import { copyWithToast, openImageModal } from "@utils/discord";
+import { classes } from "@utils/misc";
+import { formatDuration } from "@utils/text";
+import { ContextMenuApi, FluxDispatcher, Menu, React, useEffect, useState, useStateFromStores } from "@webpack/common";
 
+import { settings } from ".";
 import { SeekBar } from "./SeekBar";
 import { SpotifyStore, Track } from "./SpotifyStore";
 
 const cl = classNameFactory("vc-spotify-");
-
-function msToHuman(ms: number) {
-    const minutes = ms / 1000 / 60;
-    const m = Math.floor(minutes);
-    const s = Math.floor((minutes - m) * 60);
-    return `${m.toString().padStart(2, "0")}:${s.toString().padStart(2, "0")}`;
-}
 
 function Svg(path: string, label: string) {
     return () => (
@@ -122,7 +118,7 @@ function Controls() {
 
     // the 1 is using position absolute so it does not make the button jump around
     return (
-        <Flex className={cl("button-row")} style={{ gap: 0 }}>
+        <Flex className={cl("button-row")} gap="0">
             <Button
                 className={classes(cl("button"), cl("shuffle"), cl(shuffle ? "shuffle-on" : "shuffle-off"))}
                 onClick={() => SpotifyStore.setShuffle(!shuffle)}
@@ -130,7 +126,7 @@ function Controls() {
                 <Shuffle />
             </Button>
             <Button onClick={() => {
-                Settings.plugins.SpotifyControls.previousButtonRestartsTrack && SpotifyStore.position > 3000 ? SpotifyStore.seek(0) : SpotifyStore.prev();
+                settings.store.previousButtonRestartsTrack && SpotifyStore.position > 3000 ? SpotifyStore.seek(0) : SpotifyStore.prev();
             }}>
                 <SkipPrev />
             </Button>
@@ -185,28 +181,30 @@ function SpotifySeekBar() {
 
     return (
         <div id={cl("progress-bar")}>
-            <Forms.FormText
-                variant="text-xs/medium"
+            <Span
+                size="xs"
+                weight="medium"
                 className={cl("progress-time") + " " + cl("time-left")}
                 aria-label="Progress"
             >
-                {msToHuman(position)}
-            </Forms.FormText>
+                {formatDuration(position)}
+            </Span>
             <SeekBar
                 initialValue={position}
                 minValue={0}
                 maxValue={duration}
                 onValueChange={onChange}
                 asValueChanges={onChange}
-                onValueRender={msToHuman}
+                onValueRender={formatDuration}
             />
-            <Forms.FormText
-                variant="text-xs/medium"
+            <Span
+                size="xs"
+                weight="medium"
                 className={cl("progress-time") + " " + cl("time-right")}
                 aria-label="Total Duration"
             >
-                {msToHuman(duration)}
-            </Forms.FormText>
+                {formatDuration(duration)}
+            </Span>
         </div>
     );
 }
@@ -298,17 +296,17 @@ function Info({ track }: { track: Track; }) {
         <div id={cl("info-wrapper")}>
             {i}
             <div id={cl("titles")}>
-                <Forms.FormText
-                    variant="text-sm/semibold"
+                <Paragraph
+                    weight="semibold"
                     id={cl("song-title")}
                     className={cl("ellipoverflow")}
                     title={track.name}
                     {...makeLinkProps("Song", track.id, track.name, `/track/${track.id}`)}
                 >
                     {track.name}
-                </Forms.FormText>
+                </Paragraph>
                 {track.artists.some(a => a.name) && (
-                    <Forms.FormText variant="text-sm/normal" className={cl(["ellipoverflow", "secondary-song-info"])}>
+                    <Paragraph className={cl(["ellipoverflow", "secondary-song-info"])}>
                         <span className={cl("song-info-prefix")}>by&nbsp;</span>
                         {track.artists.map((a, i) => (
                             <React.Fragment key={a.name}>
@@ -323,10 +321,10 @@ function Info({ track }: { track: Track; }) {
                                 {i !== track.artists.length - 1 && <span className={cl("comma")}>{", "}</span>}
                             </React.Fragment>
                         ))}
-                    </Forms.FormText>
+                    </Paragraph>
                 )}
                 {track.album.name && (
-                    <Forms.FormText variant="text-sm/normal" className={cl(["ellipoverflow", "secondary-song-info"])}>
+                    <Paragraph className={cl(["ellipoverflow", "secondary-song-info"])}>
                         <span className={cl("song-info-prefix")}>on&nbsp;</span>
                         <span
                             id={cl("album-title")}
@@ -337,7 +335,7 @@ function Info({ track }: { track: Track; }) {
                         >
                             {track.album.name}
                         </span>
-                    </Forms.FormText>
+                    </Paragraph>
                 )}
             </div>
         </div>

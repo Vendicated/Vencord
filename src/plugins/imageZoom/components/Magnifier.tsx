@@ -16,13 +16,12 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { classNameFactory } from "@api/Styles";
 import ErrorBoundary from "@components/ErrorBoundary";
+import { settings } from "@plugins/imageZoom";
+import { ELEMENT_ID } from "@plugins/imageZoom/constants";
+import { waitFor } from "@plugins/imageZoom/utils/waitFor";
+import { classNameFactory } from "@utils/css";
 import { FluxDispatcher, useLayoutEffect, useMemo, useRef, useState } from "@webpack/common";
-
-import { ELEMENT_ID } from "../constants";
-import { settings } from "../index";
-import { waitFor } from "../utils/waitFor";
 
 interface Vec2 {
     x: number,
@@ -105,21 +104,19 @@ export const Magnifier = ErrorBoundary.wrap<MagnifierProps>(({ instance, size: i
 
         const onMouseUp = () => {
             setOpacity(0);
-            if (settings.store.saveZoomValues) {
-                settings.store.zoom = zoom.current;
-                settings.store.size = size.current;
-            }
         };
 
         const onWheel = async (e: WheelEvent) => {
             if (instance.state.mouseOver && instance.state.mouseDown && !isShiftDown.current) {
                 const val = zoom.current + ((e.deltaY / 100) * (settings.store.invertScroll ? -1 : 1)) * settings.store.zoomSpeed;
                 zoom.current = val <= 1 ? 1 : val;
+                if (settings.store.saveZoomValues) settings.store.zoom = zoom.current;
                 updateMousePosition(e);
             }
             if (instance.state.mouseOver && instance.state.mouseDown && isShiftDown.current) {
                 const val = size.current + (e.deltaY * (settings.store.invertScroll ? -1 : 1)) * settings.store.zoomSpeed;
                 size.current = val <= 50 ? 50 : val;
+                if (settings.store.saveZoomValues) settings.store.size = size.current;
                 updateMousePosition(e);
             }
         };
@@ -153,16 +150,12 @@ export const Magnifier = ErrorBoundary.wrap<MagnifierProps>(({ instance, size: i
         };
     }, []);
 
-    useLayoutEffect(() => () => {
-        if (settings.store.saveZoomValues) {
-            settings.store.zoom = zoom.current;
-            settings.store.size = size.current;
-        }
-    });
-
     const imageSrc = useMemo(() => {
         try {
             const imageUrl = new URL(instance.props.src);
+            if (imageUrl.pathname.startsWith("/attachments/"))
+                imageUrl.hostname = "cdn.discordapp.com";
+
             imageUrl.searchParams.set("animated", "true");
             return imageUrl.toString();
         } catch {

@@ -1,9 +1,6 @@
 .vc-cfc-button {
-    color: var(--interactive-normal);
+    display: flex;
+    align-items: center;
+    margin-left: 16px;
     cursor: pointer;
-    padding-left: 4px;
-}
-
-.vc-cfc-button:hover {
-    color: var(--interactive-hover);
 }

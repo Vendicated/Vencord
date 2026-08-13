@@ -22,7 +22,7 @@ export const OnlineMemberCountStore = proxyLazy(() => {
         async _ensureCount(guildId: string) {
             if (onlineMemberMap.has(guildId)) return;
 
-            await ChannelActionCreators.preload(guildId, GuildChannelStore.getDefaultChannel(guildId).id);
+            await ChannelActionCreators.preload(guildId, GuildChannelStore.getDefaultChannel(guildId)!.id);
         }
 
         ensureCount(guildId?: string) {
