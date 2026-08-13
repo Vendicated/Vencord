@@ -369,8 +369,10 @@ export default definePlugin({
                 ignoreSelf && message.author?.id === myId ||
                 (isEdit ? !logEdits : !logDeletes) ||
 
-                // IsWhitelistedEnabled / IsBlackListDisabled  XAND  IsMessageInFilter
-                !filterIsEmpty && !((filterMode === FilterMode.Whitelist) === messageInFilter) ||
+                !filterIsEmpty && (
+                    (filterMode === FilterMode.Whitelist) && !messageInFilter ||
+                    (filterMode === FilterMode.Blacklist) && messageInFilter
+                ) ||
 
                 // Ignore Venbot in the support channels
                 (message.author?.id === VENBOT_USER_ID && ChannelStore.getChannel(message.channel_id)?.parent_id === SUPPORT_CATEGORY_ID);
