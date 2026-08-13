@@ -38,11 +38,11 @@ https://discord.gg/D9uwnFnqmd
 
 ## Star History
 
-<a href="https://star-history.com/#Vendicated/Vencord&Timeline">
+<a href="https://star-history.dera.page/#Vendicated/Vencord&Timeline">
   <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=Vendicated/Vencord&type=Timeline&theme=dark" />
-    <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=Vendicated/Vencord&type=Timeline" />
-    <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=Vendicated/Vencord&type=Timeline" />
+    <source media="(prefers-color-scheme: dark)" srcset="https://star-history.dera.page/svg?repos=Vendicated/Vencord&type=Timeline&theme=dark" />
+    <source media="(prefers-color-scheme: light)" srcset="https://star-history.dera.page/svg?repos=Vendicated/Vencord&type=Timeline" />
+    <img alt="Star History Chart" src="https://star-history.dera.page/svg?repos=Vendicated/Vencord&type=Timeline" />
   </picture>
 </a>
 
