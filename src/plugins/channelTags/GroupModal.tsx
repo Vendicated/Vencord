@@ -31,6 +31,12 @@ function GroupModal({ group, modalProps, onRename }: GroupModalProps) {
         modalProps.onClose();
     };
 
+    const notice = !nextGroup
+        ? { message: "A name is required!", type: "critical" }
+        : nameExists
+            ? { message: "A group with this name already exists.", type: "critical" }
+            : undefined;
+
     return (
         <Modal
             {...modalProps}
@@ -39,8 +45,9 @@ function GroupModal({ group, modalProps, onRename }: GroupModalProps) {
                 text: "Save",
                 variant: "primary",
                 onClick: onSave,
-                disabled: !nextGroup || nameExists
+                disabled: notice?.type === "critical"
             }]}
+            notice={notice}
         >
             <TextInput
                 autoFocus
@@ -54,11 +61,6 @@ function GroupModal({ group, modalProps, onRename }: GroupModalProps) {
                 placeholder="Group Name"
                 value={name}
             />
-            {nameExists && (
-                <Paragraph className={Margins.top8} size="xs" style={{ color: "var(--text-danger)" }}>
-                    A group with this name already exists.
-                </Paragraph>
-            )}
         </Modal>
     );
 }

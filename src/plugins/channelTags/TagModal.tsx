@@ -92,6 +92,10 @@ function TagModal({ channelId, tagId, wasFromContext, modalProps }: TagModalProp
         modalProps.onClose();
     };
 
+    const notice = !name.trim()
+        ? { message: "A name is required!", type: "critical" }
+        : undefined;
+
     return (
         <Modal
             {...modalProps}
@@ -101,8 +105,9 @@ function TagModal({ channelId, tagId, wasFromContext, modalProps }: TagModalProp
                 text: tagId ? "Save" : channelId ? "Create & Set" : "Create",
                 variant: "primary",
                 onClick: onSave,
-                disabled: !name.trim()
+                disabled: notice?.type === "critical"
             }]}
+            notice={notice}
         >
             <div className={cl("content")}>
                 <div className={cl("row")}>
