@@ -10,8 +10,8 @@ import { Channel, User } from "@vencord/discord-types";
 import { ChannelType } from "@vencord/discord-types/enums";
 import { ContextMenuApi, Menu } from "@webpack/common";
 
-import { addTagToChannel, ChannelId, ChannelTag, ChannelTagMap, entriesOf, GroupName, compareTags, removeTagFromChannel, TagId } from "./data";
-import { getChannelIdForDMsWithUser, getChannelTagMap, getTagMap, settings } from "./settings";
+import { addTagToChannel, ChannelId, ChannelTag, ChannelTagMap, compareGroups, compareTags, entriesOf, GroupName, isGroupHiddenForChannel, removeTagFromChannel, TagId } from "./data";
+import { getChannelIdForDMsWithUser, getChannelTagMap, getGroupMap, getTagMap, settings } from "./settings";
 import { openCreateTagModal, openEditTagModal } from "./TagModal";
 import { TagShapeIcon } from "./TagShape";
 import { openTagsModal } from "./TagsModal";
@@ -36,6 +36,7 @@ export function makeChannelTagsMenuChildren(channelId: ChannelId, channelTags: C
 
     const groupedTags = new Map<GroupName | undefined, [TagId, ChannelTag][]>();
     for (const entry of tags) {
+        if (isGroupHiddenForChannel(entry[1].group, channelId)) continue;
         const groupTags = groupedTags.get(entry[1].group) ?? [];
         groupTags.push(entry);
         groupedTags.set(entry[1].group, groupTags);
@@ -57,31 +58,41 @@ export function makeChannelTagsMenuChildren(channelId: ChannelId, channelTags: C
             action={openTagsModal}
         />,
         <Menu.MenuSeparator key="vc-channel-tags-separator" />,
-        ...[...groupedTags].map(([group, groupTags]) => (
-            <Menu.MenuGroup key={group ?? "vc-channel-tags-ungrouped"} label={group}>
-                {groupTags.map(([id, tag]) => {
-                    const isAssigned = assignedTagIds.has(id);
-                    return (
-                        <Menu.MenuCheckboxItem
-                            id={`vc-channel-tags-toggle-${id}`}
-                            key={`vc-channel-tags-toggle-${id}`}
-                            label={tag.name}
-                            leadingAccessory={{
-                                type: "icon", icon: () => <TagShapeIcon color={tag.color} tagShape={tag.shape} />
-                            }}
-                            checked={isAssigned}
-                            action={event => event.shiftKey
-                                ? editTagFromContext(event, id)
-                                : event.ctrlKey
-                                    ? openTagUsageFromContext(event, id)
-                                    : isAssigned
-                                        ? removeTagFromChannel(channelId, id)
-                                        : addTagToChannel(channelId, id)}
-                        />
-                    );
-                })}
-            </Menu.MenuGroup>
-        ))
+        ...[...groupedTags].sort(([a], [b]) => compareGroups(a, b)).map(([group, groupTags]) => {
+            const items = groupTags.map(([id, tag]) => {
+                const isAssigned = assignedTagIds.has(id);
+                return (
+                    <Menu.MenuCheckboxItem
+                        id={`vc-channel-tags-toggle-${id}`}
+                        key={`vc-channel-tags-toggle-${id}`}
+                        label={tag.name}
+                        leadingAccessory={{
+                            type: "icon", icon: () => <TagShapeIcon color={tag.color} tagShape={tag.shape} />
+                        }}
+                        checked={isAssigned}
+                        action={event => event.shiftKey
+                            ? editTagFromContext(event, id)
+                            : event.ctrlKey
+                                ? openTagUsageFromContext(event, id)
+                                : isAssigned
+                                    ? removeTagFromChannel(channelId, id)
+                                    : addTagToChannel(channelId, id)}
+                    />
+                );
+            });
+
+            return group && getGroupMap()[group]?.showInSubmenu
+                ? (
+                    <Menu.MenuItem id={`vc-channel-tags-group-${group}`} key={group} label={group}>
+                        {items}
+                    </Menu.MenuItem>
+                )
+                : (
+                    <Menu.MenuGroup key={group ?? "vc-channel-tags-ungrouped"} label={group}>
+                        {items}
+                    </Menu.MenuGroup>
+                );
+        })
     ];
 }
 

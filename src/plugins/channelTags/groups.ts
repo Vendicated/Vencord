@@ -5,10 +5,36 @@
  */
 
 export type GroupName = string & { _brand: "group"; };
-export type Group = Record<never, never>;
+export const HiddenFor = {
+    DM: "dm",
+    GroupDM: "groupDM",
+    Thread: "thread",
+    Channel: "channel"
+} as const;
+export type HiddenFor = (typeof HiddenFor)[keyof typeof HiddenFor];
+
+export type HiddenForMap = Record<HiddenFor, boolean>;
+export interface Group {
+    isExclusive: boolean;
+    showInSubmenu: boolean;
+    hiddenFor: HiddenForMap;
+}
 export type GroupMap = Record<GroupName, Group>;
 
-export const DEFAULT_GROUP: Group = {};
+export const DEFAULT_GROUP: Group = {
+    isExclusive: true,
+    showInSubmenu: false,
+    hiddenFor: {
+        dm: false,
+        groupDM: false,
+        thread: false,
+        channel: false
+    }
+};
+
+export function createDefaultGroup(): Group {
+    return { ...DEFAULT_GROUP, hiddenFor: { ...DEFAULT_GROUP.hiddenFor } };
+}
 
 export const toGroupName = (name: string | undefined) => {
     const trimmed = name?.trim();

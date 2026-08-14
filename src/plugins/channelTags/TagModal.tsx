@@ -174,7 +174,7 @@ function TagModal({ channelId, tagId, wasFromContext, modalProps }: TagModalProp
                             <PencilIcon />
                         </Button>
                     </div>
-                    {group && <Paragraph size="xs" className={Margins.top8} style={{ color: "var(--text-muted)" }}>
+                    {groupName && getGroupMap()[groupName]?.isExclusive && <Paragraph size="xs" className={Margins.top8} style={{ color: "var(--text-muted)" }}>
                         Only one tag in "{group}" may be set on a channel/thread/DM at a time.<br />
                         When setting a grouped tag on a channel/thread/DM, the others of that group are removed.
                     </Paragraph>}

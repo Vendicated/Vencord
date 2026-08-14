@@ -8,7 +8,7 @@ import { classes, classNameFactory } from "@utils/index";
 import { Tooltip } from "@webpack/common";
 
 import { openChannelTagsMenu } from "./contextMenu";
-import { ChannelId, compareTags, removeTagFromChannel, TagId } from "./data";
+import { ChannelId, compareTags, isGroupHiddenForChannel, removeTagFromChannel, TagId } from "./data";
 import { getChannelTagMap, getTagMap, settings } from "./settings";
 import { TagShapeIcon } from "./TagShape";
 
@@ -23,6 +23,7 @@ export function ChannelTags({ channelId }: { channelId: ChannelId; }) {
     const tags = (channelTags[channelId] ?? [])
         .map(id => [id, tagMap[id]] as const)
         .filter((entry): entry is readonly [TagId, NonNullable<typeof entry[1]>] => entry[1] != null)
+        .filter(([, tag]) => !isGroupHiddenForChannel(tag.group, channelId))
         .sort(([, a], [, b]) => compareTags(a, b));
 
     if (!tags.length) return null;

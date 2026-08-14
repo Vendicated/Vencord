@@ -12,9 +12,9 @@ import { classes } from "@utils/index";
 import type { RenderModalProps } from "@vencord/discord-types";
 import { ConfirmModal, Modal, openModal, Tooltip } from "@webpack/common";
 
-import { ChannelTag, compareTags, deleteTag, entriesOf, GroupName, TagId } from "./data";
+import { ChannelTag, compareGroups, compareTags, deleteTag, entriesOf, GroupName, TagId } from "./data";
 import { openGroupModal } from "./GroupModal";
-import { getTagMap, settings } from "./settings";
+import { getGroupMap, getTagMap, settings } from "./settings";
 import { openCreateTagModal, openEditTagModal } from "./TagModal";
 import { TagShapeIcon } from "./TagShape";
 import { openTagUsageModal } from "./TagUsageModal";
@@ -41,20 +41,20 @@ function TagsModal(modalProps: RenderModalProps) {
             title="Tags"
             subtitle={settings.store.showHints && !!tags.length && "Hold Shift when clicking Delete to skip confirmation."}
             actions={[{
-            text: "Create New Tag",
-            variant: "primary",
-            onClick: () => openCreateTagModal()
-        }]}>
+                text: "Create New Tag",
+                variant: "primary",
+                onClick: () => openCreateTagModal()
+            }]}>
             <div className={cl("list")}>
                 {!tags.length && (
                     <Paragraph style={{ color: "var(--text-muted)" }}>
                         No tags have been created yet!
                     </Paragraph>
                 )}
-                {[...groupedTags].map(([group, groupTags]) => (
+                {[...groupedTags].sort(([a], [b]) => compareGroups(a, b)).map(([group, groupTags]) => (
                     <ExpandableSection
                         className={cl("list-group")}
-                        initialExpanded
+                        initialExpanded={!group || !getGroupMap()[group]?.showInSubmenu}
                         key={group}
                         renderContent={() => (
                             groupTags.map(([id, tag]) => (

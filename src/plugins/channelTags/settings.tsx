@@ -11,8 +11,8 @@ import { OptionType } from "@utils/types";
 import { RawChannel } from "@vencord/discord-types";
 import { ChannelStore, Constants, RestAPI, UserStore } from "@webpack/common";
 
-import { type ChannelId, type ChannelTagMap, entriesOf, type TagMap, type UserDMChannelMap, valuesOf } from "./data";
-import { DEFAULT_GROUP, type GroupMap } from "./groups";
+import { type ChannelId, type ChannelTagMap, entriesOf, keysOf, type TagMap, type UserDMChannelMap, valuesOf } from "./data";
+import { createDefaultGroup, DEFAULT_GROUP, type GroupMap } from "./groups";
 import {
     populateMetadata,
     type TagsChannelMap,
@@ -55,7 +55,15 @@ export const getTagMap = () => settings.store.tags ??= {};
 export const getGroupMap = () => {
     const groups = settings.store.groups ??= {};
     for (const tag of valuesOf(getTagMap())) {
-        if (tag.group && !groups[tag.group]) groups[tag.group] = { ...DEFAULT_GROUP };
+        if (tag.group && !groups[tag.group]) groups[tag.group] = createDefaultGroup();
+    }
+    for (const group of valuesOf(groups)) {
+        group.isExclusive ??= DEFAULT_GROUP.isExclusive;
+        group.showInSubmenu ??= DEFAULT_GROUP.showInSubmenu;
+        group.hiddenFor ??= { ...DEFAULT_GROUP.hiddenFor };
+        for (const target of keysOf(DEFAULT_GROUP.hiddenFor)) {
+            group.hiddenFor[target] ??= DEFAULT_GROUP.hiddenFor[target];
+        }
     }
     return groups;
 };
