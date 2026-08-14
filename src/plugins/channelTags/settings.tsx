@@ -27,6 +27,12 @@ export const settings = definePluginSettings({
         description: "Whether clicking a tag decoration removes it from its channel",
         default: true
     },
+    showHints: {
+        type: OptionType.BOOLEAN,
+        displayName: "Show hints & tips",
+        description: "Don't need help with the shortcuts anymore?",
+        default: true
+    },
     manageTags: {
         type: OptionType.COMPONENT,
         component: () => (

@@ -12,9 +12,10 @@ import { ContextMenuApi, Menu } from "@webpack/common";
 
 import { addTagToChannel, ChannelId, ChannelTag, ChannelTagMap, entriesOf, GroupName, compareTags, removeTagFromChannel, TagId } from "./data";
 import { getChannelIdForDMsWithUser, getChannelTagMap, getTagMap, settings } from "./settings";
-import { openCreateTagModal } from "./TagModal";
+import { openCreateTagModal, openEditTagModal } from "./TagModal";
 import { TagShapeIcon } from "./TagShape";
 import { openTagsModal } from "./TagsModal";
+import { openTagUsageModal } from "./TagUsageModal";
 
 export function makeChannelTagsMenuChildren(channelId: ChannelId, channelTags: ChannelTagMap) {
     const tags = entriesOf(getTagMap())
@@ -69,9 +70,13 @@ export function makeChannelTagsMenuChildren(channelId: ChannelId, channelTags: C
                                 type: "icon", icon: () => <TagShapeIcon color={tag.color} tagShape={tag.shape} />
                             }}
                             checked={isAssigned}
-                            action={() => isAssigned
-                                ? removeTagFromChannel(channelId, id)
-                                : addTagToChannel(channelId, id)}
+                            action={event => event.shiftKey
+                                ? editTagFromContext(event, id)
+                                : event.ctrlKey
+                                    ? openTagUsageFromContext(event, id)
+                                    : isAssigned
+                                        ? removeTagFromChannel(channelId, id)
+                                        : addTagToChannel(channelId, id)}
                         />
                     );
                 })}
@@ -114,6 +119,20 @@ export function openChannelTagsMenu(event: React.MouseEvent, channelId: ChannelI
     event.preventDefault();
     event.stopPropagation();
     ContextMenuApi.openContextMenu(event, () => <ChannelTagsMenu channelId={channelId} />);
+}
+
+export function editTagFromContext(event: React.MouseEvent, tagId: TagId) {
+    event.preventDefault();
+    event.stopPropagation();
+    ContextMenuApi.closeContextMenu();
+    openEditTagModal(tagId, true);
+}
+
+export function openTagUsageFromContext(event: React.MouseEvent, tagId: TagId) {
+    event.preventDefault();
+    event.stopPropagation();
+    ContextMenuApi.closeContextMenu();
+    openTagUsageModal(tagId, true);
 }
 
 export const patchChannelContextMenu: NavContextMenuPatchCallback = (children, props) => {

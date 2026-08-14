@@ -35,17 +35,17 @@ function TagsModal(modalProps: RenderModalProps) {
     }
 
     return (
-        <Modal {...modalProps} size="lg" title="Tags" actions={[{
+        <Modal
+            {...modalProps}
+            size="lg"
+            title="Tags"
+            subtitle={settings.store.showHints && !!tags.length && "Hold Shift when clicking Delete to skip confirmation."}
+            actions={[{
             text: "Create New Tag",
             variant: "primary",
             onClick: () => openCreateTagModal()
         }]}>
             <div className={cl("list")}>
-                {!!tags.length && (
-                    <Paragraph size="xs" style={{ color: "var(--text-muted)" }}>
-                        Hold Shift when clicking Delete to skip confirmation.
-                    </Paragraph>
-                )}
                 {!tags.length && (
                     <Paragraph style={{ color: "var(--text-muted)" }}>
                         No tags have been created yet!

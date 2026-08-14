@@ -13,7 +13,7 @@ import { ColorPicker, Modal, openModalLazy, SearchableSelect, TextInput, useRef,
 import { addTagToChannel, ChannelId, createTag, DEFAULT_TAG_SHAPE, deleteEmptyGroups, ensureGroup, keysOf, sortAlphaNum, TagId, TagShape, TagShapesList, updateTag } from "./data";
 import { openGroupModal } from "./GroupModal";
 import { GroupName, toGroupName } from "./groups";
-import { getGroupMap, getTagMap } from "./settings";
+import { getGroupMap, getTagMap, settings } from "./settings";
 import { TagShapeIcon } from "./TagShape";
 
 const SWATCHES = [
@@ -48,10 +48,11 @@ function cssColorToInt(color?: string) {
 interface TagModalProps {
     channelId?: ChannelId;
     tagId?: TagId;
+    wasFromContext?: boolean;
     modalProps: RenderModalProps;
 }
 
-function TagModal({ channelId, tagId, modalProps }: TagModalProps) {
+function TagModal({ channelId, tagId, wasFromContext, modalProps }: TagModalProps) {
     const existingTag = tagId ? getTagMap()[tagId] : undefined;
     const [name, setName] = useState(existingTag?.name ?? "");
     const [group, setGroup] = useState<GroupName | undefined>(existingTag?.group);
@@ -95,6 +96,7 @@ function TagModal({ channelId, tagId, modalProps }: TagModalProps) {
         <Modal
             {...modalProps}
             title={tagId ? "Edit Tag" : "Create Tag"}
+            subtitle={(settings.store.showHints && !wasFromContext && "You can hold shift when clicking a tag in the context menu to go straight to this dialog!")}
             actions={[{
                 text: tagId ? "Save" : channelId ? "Create & Set" : "Create",
                 variant: "primary",
@@ -199,9 +201,9 @@ export function openCreateTagModal(channelId?: ChannelId) {
     }, { onCloseCallback: deleteEmptyGroups });
 }
 
-export function openEditTagModal(tagId: TagId) {
+export function openEditTagModal(tagId: TagId, wasFromContext: boolean = false) {
     openModalLazy(async () => {
         await requireSettingsModal();
-        return modalProps => <TagModal tagId={tagId} modalProps={modalProps} />;
+        return modalProps => <TagModal tagId={tagId} wasFromContext={wasFromContext} modalProps={modalProps} />;
     }, { onCloseCallback: deleteEmptyGroups });
 }

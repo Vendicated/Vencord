@@ -111,9 +111,10 @@ function ChannelUsageRow({ channel, onNavigate }: { channel: TagsChannel; onNavi
     );
 }
 
-function TagUsageModal({ tagId, channelIds, modalProps }: {
+function TagUsageModal({ tagId, channelIds, wasFromContext, modalProps }: {
     tagId: TagId;
     channelIds: string[];
+    wasFromContext: boolean;
     modalProps: RenderModalProps;
 }) {
     settings.use();
@@ -121,7 +122,12 @@ function TagUsageModal({ tagId, channelIds, modalProps }: {
     const groups = groupTagUsageChannels(channelIds);
 
     return (
-        <Modal {...modalProps} size="lg" title={`Tagged: ${tags[tagId].name}`}>
+        <Modal
+            {...modalProps}
+            size="lg"
+            title={`Tagged: ${tags[tagId].name}`}
+            subtitle={(settings.store.showHints && !wasFromContext && "You can hold control when clicking a tag in the context menu to go straight to this dialog!")}
+        >
             <div className={cl("content")}>
                 {groups.map(group => (
                     <ExpandableSection
@@ -149,9 +155,9 @@ function TagUsageModal({ tagId, channelIds, modalProps }: {
     );
 }
 
-export function openTagUsageModal(tagId: TagId) {
+export function openTagUsageModal(tagId: TagId, wasFromContext: boolean = false) {
     updateStoreMetadata();
     // Snapshot the IDs here so that any removed tags in the usage modal can be re-added if the user made a mistake.
     const channelIds = getTagUsageChannelIds(tagId);
-    openModal(modalProps => <TagUsageModal channelIds={channelIds} modalProps={modalProps} tagId={tagId} />);
+    openModal(modalProps => <TagUsageModal channelIds={channelIds} tagId={tagId} wasFromContext={wasFromContext} modalProps={modalProps} />);
 }
