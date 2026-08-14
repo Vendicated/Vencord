@@ -23,6 +23,10 @@
 
     & > button {
         flex: 0 0 auto;
+        width: unset;
+        height: 100%;
+        aspect-ratio: 1;
+        padding: 3px;
     }
 }
 
