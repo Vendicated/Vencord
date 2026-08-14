@@ -10,4 +10,7 @@ export type GroupMap = Record<GroupName, Group>;
 
 export const DEFAULT_GROUP: Group = {};
 
-export const toGroupName = (name: string) => name.trim() as GroupName;
+export const toGroupName = (name: string | undefined) => {
+    const trimmed = name?.trim();
+    return trimmed ? trimmed as GroupName : undefined;
+};

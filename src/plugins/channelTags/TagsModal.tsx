@@ -12,7 +12,7 @@ import { classes } from "@utils/index";
 import type { RenderModalProps } from "@vencord/discord-types";
 import { ConfirmModal, Modal, openModal, Tooltip } from "@webpack/common";
 
-import { ChannelTag, compareTags, deleteTag, GroupName } from "./data";
+import { ChannelTag, compareTags, deleteTag, entriesOf, GroupName, TagId } from "./data";
 import { openGroupModal } from "./GroupModal";
 import { getTagMap, settings } from "./settings";
 import { openCreateTagModal, openEditTagModal } from "./TagModal";
@@ -24,10 +24,10 @@ const cl = classNameFactory("vc-channel-tags-");
 
 function TagsModal(modalProps: RenderModalProps) {
     settings.use();
-    const tags = Object.entries(getTagMap())
+    const tags = entriesOf(getTagMap())
         .sort(([, a], [, b]) => compareTags(a, b));
     const usageCounts = getTagUsageCounts();
-    const groupedTags = new Map<string | undefined, [string, ChannelTag][]>();
+    const groupedTags = new Map<GroupName | undefined, [TagId, ChannelTag][]>();
     for (const entry of tags) {
         const groupTags = groupedTags.get(entry[1].group) ?? [];
         groupTags.push(entry);
@@ -139,7 +139,7 @@ function TagsModal(modalProps: RenderModalProps) {
                                         aria-label="Edit Group"
                                         onClick={event => {
                                             event.stopPropagation();
-                                            openGroupModal(group as GroupName);
+                                            openGroupModal(group);
                                         }}
                                         size="iconOnly"
                                         variant="secondary"
@@ -160,7 +160,7 @@ export function openTagsModal() {
 }
 
 
-function confirmDeleteTag(id: string, name: string) {
+function confirmDeleteTag(id: TagId, name: string) {
     openModal(props => (
         <ConfirmModal
             {...props}

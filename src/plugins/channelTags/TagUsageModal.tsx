@@ -13,6 +13,7 @@ import { Avatar, closeAllModals, Modal, NavigationRouter, openModal, Toasts, Too
 
 import { ChannelTags } from "./ChannelTags";
 import { openChannelTagsMenu } from "./contextMenu";
+import { TagId } from "./data";
 import type { TagsChannel, TagsGuild } from "./metadata";
 import { ensureDMChannelExists, getTagMap, settings, updateStoreMetadata } from "./settings";
 import { getTagUsageChannelIds, groupTagUsageChannels } from "./usage";
@@ -111,7 +112,7 @@ function ChannelUsageRow({ channel, onNavigate }: { channel: TagsChannel; onNavi
 }
 
 function TagUsageModal({ tagId, channelIds, modalProps }: {
-    tagId: string;
+    tagId: TagId;
     channelIds: string[];
     modalProps: RenderModalProps;
 }) {
@@ -120,7 +121,7 @@ function TagUsageModal({ tagId, channelIds, modalProps }: {
     const groups = groupTagUsageChannels(channelIds);
 
     return (
-        <Modal {...modalProps} size="lg" title={`Tagged: ${tags[tagId]?.name ?? "Tag"}`}>
+        <Modal {...modalProps} size="lg" title={`Tagged: ${tags[tagId].name}`}>
             <div className={cl("content")}>
                 {groups.map(group => (
                     <ExpandableSection
@@ -148,7 +149,7 @@ function TagUsageModal({ tagId, channelIds, modalProps }: {
     );
 }
 
-export function openTagUsageModal(tagId: string) {
+export function openTagUsageModal(tagId: TagId) {
     updateStoreMetadata();
     // Snapshot the IDs here so that any removed tags in the usage modal can be re-added if the user made a mistake.
     const channelIds = getTagUsageChannelIds(tagId);

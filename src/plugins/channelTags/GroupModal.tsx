@@ -21,7 +21,7 @@ interface GroupModalProps {
 function GroupModal({ group, modalProps, onRename }: GroupModalProps) {
     const [name, setName] = useState<string>(group);
     const nextGroup = toGroupName(name);
-    const nameExists = nextGroup !== group && Object.hasOwn(getGroupMap(), nextGroup);
+    const nameExists = nextGroup !== group && nextGroup && nextGroup in getGroupMap();
 
     const onSave = () => {
         if (!nextGroup || nameExists) return;

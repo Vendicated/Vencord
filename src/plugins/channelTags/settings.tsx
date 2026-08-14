@@ -11,7 +11,7 @@ import { OptionType } from "@utils/types";
 import { RawChannel } from "@vencord/discord-types";
 import { ChannelStore, Constants, RestAPI, UserStore } from "@webpack/common";
 
-import type { ChannelTagMap, TagMap, UserDMChannelMap } from "./data";
+import { type ChannelId, type ChannelTagMap, entriesOf, type TagMap, type UserDMChannelMap, valuesOf } from "./data";
 import { DEFAULT_GROUP, type GroupMap } from "./groups";
 import {
     populateMetadata,
@@ -48,7 +48,7 @@ export const getTagMap = () => settings.store.tags ??= {};
 
 export const getGroupMap = () => {
     const groups = settings.store.groups ??= {};
-    for (const tag of Object.values(getTagMap())) {
+    for (const tag of valuesOf(getTagMap())) {
         if (tag.group && !groups[tag.group]) groups[tag.group] = { ...DEFAULT_GROUP };
     }
     return groups;
@@ -74,7 +74,7 @@ export function updateStoreMetadata() {
 function lookupUserIdForDMChannel(channelId: string) {
     const userDMChannelMap = getUserDMChannelMap();
 
-    return Object.entries(userDMChannelMap).find(
+    return entriesOf(userDMChannelMap).find(
         ([, v]) => v === channelId
     )?.[0];
 }
@@ -125,7 +125,7 @@ export function getChannelIdForDMsWithUser(userId: string) {
 
     const cached = ChannelStore.getDMChannelFromUserId(userId);
     if (cached && storeUserDMChannel[userId] !== cached.id)
-        return storeUserDMChannel[userId] = cached.id;
+        return storeUserDMChannel[userId] = cached.id as ChannelId;
 
     if (storeUserDMChannel[userId])
         return storeUserDMChannel[userId];
@@ -144,7 +144,7 @@ export function getChannelIdForDMsWithUser(userId: string) {
 
     createDMChannelForUser(userId)
         .then(channel => {
-            storeUserDMChannel[userId] = channel.id;
+            storeUserDMChannel[userId] = channel.id as ChannelId;
 
             return RestAPI.del({
                 url: Constants.Endpoints.CHANNEL(channel.id)

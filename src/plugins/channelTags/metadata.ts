@@ -6,11 +6,11 @@
 
 import { ChannelStore, GuildStore, IconUtils, UserStore } from "@webpack/common";
 
-import type { ChannelTagMap } from "./data";
+import { type ChannelId, type ChannelTagMap, type GuildId, keysOf, valuesOf } from "./data";
 
 export type TagsChannel =
     {
-        id: string;
+        id: ChannelId;
         name: string;
     } & (
         {
@@ -19,7 +19,7 @@ export type TagsChannel =
         } | (
             {
                 kind: "guild";
-                guildId: string;
+                guildId: GuildId;
             } &
             (
                 {
@@ -28,20 +28,20 @@ export type TagsChannel =
                 } |
                 {
                     thread: true;
-                    parent: { id: string; name: string; };
+                    parent: { id: ChannelId; name: string; };
                 }
             )
         )
     );
 
 export interface TagsGuild {
-    id: string;
+    id: GuildId;
     name: string;
     iconUrl: string | null;
 }
 
-export type TagsChannelMap = Record<string, TagsChannel>;
-export type TagsGuildMap = Record<string, TagsGuild>;
+export type TagsChannelMap = Record<ChannelId, TagsChannel>;
+export type TagsGuildMap = Record<GuildId, TagsGuild>;
 
 function captureChannel(channelId: string): { channel: TagsChannel; guild?: TagsGuild; } | undefined {
     const channel = ChannelStore.getChannel(channelId);
@@ -53,7 +53,7 @@ function captureChannel(channelId: string): { channel: TagsChannel; guild?: Tags
 
         return {
             channel: {
-                id: channel.id,
+                id: channel.id as ChannelId,
                 name: recipient.globalName ?? recipient.username,
                 kind: "dm",
                 avatarUrl: IconUtils.getUserAvatarURL(recipient)
@@ -64,7 +64,7 @@ function captureChannel(channelId: string): { channel: TagsChannel; guild?: Tags
     if (channel.isGroupDM()) {
         return {
             channel: {
-                id: channel.id,
+                id: channel.id as ChannelId,
                 name: channel.name || channel.rawRecipients.map(user => user.global_name ?? user.username).join(", ") || "Group DM",
                 kind: "groupDm",
                 avatarUrl: IconUtils.getChannelIconURL(channel) ?? null
@@ -81,28 +81,28 @@ function captureChannel(channelId: string): { channel: TagsChannel; guild?: Tags
 
     const tagsChannel = isThread ?
         {
-            id: channel.id,
+            id: channel.id as ChannelId,
             name: channel.name,
             kind: "guild" as "guild",
-            guildId: guild.id,
+            guildId: guild.id as GuildId,
             thread: true as true,
-            parent: { id: parent!.id, name: parent!.name }
+            parent: { id: parent!.id as ChannelId, name: parent!.name }
         } :
         {
-            id: channel.id,
+            id: channel.id as ChannelId,
             name: channel.name,
             kind: "guild" as "guild",
-            guildId: guild.id,
+            guildId: guild.id as GuildId,
             thread: false as false
         };
 
     return {
         channel: tagsChannel,
         guild: {
-            id: guild.id,
+            id: guild.id as GuildId,
             name: guild.name,
             iconUrl: guild.icon ? IconUtils.getGuildIconURL({
-                id: guild.id,
+                id: guild.id as GuildId,
                 icon: guild.icon,
                 canAnimate: true,
                 size: 32
@@ -116,17 +116,17 @@ export function populateMetadata(
     channels: TagsChannelMap,
     guilds: TagsGuildMap
 ) {
-    const taggedChannelIds = new Set(Object.keys(channelTags));
-    for (const channelId of Object.keys(channels)) {
+    const taggedChannelIds = new Set(keysOf(channelTags));
+    for (const channelId of keysOf(channels)) {
         if (!taggedChannelIds.has(channelId)) delete channels[channelId];
     }
 
-    const usedGuildIds = new Set(Object.values(channels).filter(channel => channel.kind === "guild").map(channel => channel.guildId));
-    for (const guildId of Object.keys(guilds)) {
+    const usedGuildIds = new Set(valuesOf(channels).filter(channel => channel.kind === "guild").map(channel => channel.guildId));
+    for (const guildId of keysOf(guilds)) {
         if (!usedGuildIds.has(guildId)) delete guilds[guildId];
     }
 
-    for (const channelId of Object.keys(channelTags)) {
+    for (const channelId of keysOf(channelTags)) {
         const captured = captureChannel(channelId);
         if (!captured) continue;
 

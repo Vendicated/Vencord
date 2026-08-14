@@ -10,14 +10,14 @@ import { Channel, User } from "@vencord/discord-types";
 import { ChannelType } from "@vencord/discord-types/enums";
 import { ContextMenuApi, Menu } from "@webpack/common";
 
-import { addTagToChannel, ChannelTag, ChannelTagMap, compareTags, removeTagFromChannel } from "./data";
+import { addTagToChannel, ChannelId, ChannelTag, ChannelTagMap, entriesOf, GroupName, compareTags, removeTagFromChannel, TagId } from "./data";
 import { getChannelIdForDMsWithUser, getChannelTagMap, getTagMap, settings } from "./settings";
 import { openCreateTagModal } from "./TagModal";
 import { TagShapeIcon } from "./TagShape";
 import { openTagsModal } from "./TagsModal";
 
-export function makeChannelTagsMenuChildren(channelId: string, channelTags: ChannelTagMap) {
-    const tags = Object.entries(getTagMap())
+export function makeChannelTagsMenuChildren(channelId: ChannelId, channelTags: ChannelTagMap) {
+    const tags = entriesOf(getTagMap())
         .sort(([, a], [, b]) => compareTags(a, b));
     const assignedTagIds = new Set(channelTags[channelId] ?? []);
 
@@ -33,7 +33,7 @@ export function makeChannelTagsMenuChildren(channelId: string, channelTags: Chan
         ];
     }
 
-    const groupedTags = new Map<string | undefined, [string, ChannelTag][]>();
+    const groupedTags = new Map<GroupName | undefined, [TagId, ChannelTag][]>();
     for (const entry of tags) {
         const groupTags = groupedTags.get(entry[1].group) ?? [];
         groupTags.push(entry);
@@ -80,7 +80,7 @@ export function makeChannelTagsMenuChildren(channelId: string, channelTags: Chan
     ];
 }
 
-export function makeChannelTagsMenuItem(channelId: string, channelTags: ChannelTagMap) {
+export function makeChannelTagsMenuItem(channelId: ChannelId, channelTags: ChannelTagMap) {
     const children = makeChannelTagsMenuChildren(channelId, channelTags);
     if (!Object.keys(getTagMap()).length) return children[0];
 
@@ -96,7 +96,7 @@ export function makeChannelTagsMenuItem(channelId: string, channelTags: ChannelT
     );
 }
 
-function ChannelTagsMenu({ channelId }: { channelId: string; }) {
+function ChannelTagsMenu({ channelId }: { channelId: ChannelId; }) {
     settings.use(["channelTags"]);
 
     return (
@@ -110,7 +110,7 @@ function ChannelTagsMenu({ channelId }: { channelId: string; }) {
     );
 }
 
-export function openChannelTagsMenu(event: React.MouseEvent, channelId: string) {
+export function openChannelTagsMenu(event: React.MouseEvent, channelId: ChannelId) {
     event.preventDefault();
     event.stopPropagation();
     ContextMenuApi.openContextMenu(event, () => <ChannelTagsMenu channelId={channelId} />);
@@ -133,7 +133,7 @@ export const patchDmListContextMenu: NavContextMenuPatchCallback = (children, pr
 
     const channelType = channel?.type;
     const isValidDMChannel = channelType === ChannelType.DM || channelType === ChannelType.GROUP_DM;
-    const channelId = isValidDMChannel ? channel!.id : getChannelIdForDMsWithUser(user.id);
+    const channelId = isValidDMChannel ? channel!.id as ChannelId : getChannelIdForDMsWithUser(user.id);
 
     const group = findGroupChildrenByChildId("user-profile", children);
 

@@ -10,9 +10,9 @@ import { RenderModalProps } from "@vencord/discord-types";
 import { extractAndLoadChunksLazy, findComponentByCodeLazy } from "@webpack";
 import { ColorPicker, Modal, openModalLazy, SearchableSelect, TextInput, useRef, useState } from "@webpack/common";
 
-import { addTagToChannel, createTag, DEFAULT_TAG_SHAPE, deleteEmptyGroups, ensureGroup, sortAlphaNum, TagShape, TagShapesList, updateTag } from "./data";
+import { addTagToChannel, ChannelId, createTag, DEFAULT_TAG_SHAPE, deleteEmptyGroups, ensureGroup, keysOf, sortAlphaNum, TagId, TagShape, TagShapesList, updateTag } from "./data";
 import { openGroupModal } from "./GroupModal";
-import { toGroupName } from "./groups";
+import { GroupName, toGroupName } from "./groups";
 import { getGroupMap, getTagMap } from "./settings";
 import { TagShapeIcon } from "./TagShape";
 
@@ -46,25 +46,25 @@ function cssColorToInt(color?: string) {
 }
 
 interface TagModalProps {
-    channelId?: string;
-    tagId?: string;
+    channelId?: ChannelId;
+    tagId?: TagId;
     modalProps: RenderModalProps;
 }
 
 function TagModal({ channelId, tagId, modalProps }: TagModalProps) {
     const existingTag = tagId ? getTagMap()[tagId] : undefined;
     const [name, setName] = useState(existingTag?.name ?? "");
-    const [group, setGroup] = useState(existingTag?.group ?? "");
-    const [groupQuery, setGroupQuery] = useState("");
-    const lastGroupQuery = useRef("");
+    const [group, setGroup] = useState<GroupName | undefined>(existingTag?.group);
+    const [groupQuery, setGroupQuery] = useState<GroupName | undefined>(undefined);
+    const lastGroupQuery = useRef<GroupName | undefined>(undefined);
     const [color, setColor] = useState(cssColorToInt(existingTag?.color));
     const [shape, setShape] = useState<TagShape>(existingTag?.shape ?? DEFAULT_TAG_SHAPE);
     const groupName = toGroupName(group);
     const groupOptions = [...new Set([
-        ...Object.keys(getGroupMap()),
+        ...keysOf(getGroupMap()),
         groupName,
         toGroupName(groupQuery)
-    ].filter((group): group is string => group != null && group !== ""))]
+    ].filter((group): group is GroupName => !!group))]
         .sort(sortAlphaNum)
         .map(group => ({ label: group, value: group }));
 
@@ -140,16 +140,16 @@ function TagModal({ channelId, tagId, modalProps }: TagModalProps) {
                             closeOnSelect
                             maxVisibleItems={5}
                             onChange={value => {
-                                setGroup(value ?? "");
-                                setGroupQuery("");
-                                lastGroupQuery.current = "";
+                                setGroup(value);
+                                setGroupQuery(undefined);
+                                lastGroupQuery.current = undefined;
                             }}
                             onSearchChange={query => {
-                                const nextGroup = query.slice(0, 32);
+                                const nextGroup = toGroupName(query.slice(0, 32));
                                 setGroupQuery(nextGroup);
 
                                 if (nextGroup) setGroup(nextGroup);
-                                else if (lastGroupQuery.current) setGroup("");
+                                else if (lastGroupQuery.current) setGroup(undefined);
 
                                 lastGroupQuery.current = nextGroup;
                             }}
@@ -162,7 +162,7 @@ function TagModal({ channelId, tagId, modalProps }: TagModalProps) {
                             variant="secondary"
                             size="iconOnly"
                             disabled={!groupName}
-                            onClick={() => openGroupModal(groupName, nextGroup => setGroup(nextGroup))}
+                            onClick={() => openGroupModal(groupName!, nextGroup => setGroup(nextGroup))}
                         >
                             <PencilIcon />
                         </Button>
@@ -192,14 +192,14 @@ function TagModal({ channelId, tagId, modalProps }: TagModalProps) {
     );
 }
 
-export function openCreateTagModal(channelId?: string) {
+export function openCreateTagModal(channelId?: ChannelId) {
     openModalLazy(async () => {
         await requireSettingsModal();
         return modalProps => <TagModal channelId={channelId} modalProps={modalProps} />;
     }, { onCloseCallback: deleteEmptyGroups });
 }
 
-export function openEditTagModal(tagId: string) {
+export function openEditTagModal(tagId: TagId) {
     openModalLazy(async () => {
         await requireSettingsModal();
         return modalProps => <TagModal tagId={tagId} modalProps={modalProps} />;

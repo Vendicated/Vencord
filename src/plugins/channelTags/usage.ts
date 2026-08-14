@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { sortAlphaNum } from "./data";
+import { entriesOf, sortAlphaNum, TagId } from "./data";
 import type { TagsChannel, TagsGuild } from "./metadata";
 import { getChannelsGuildsMaps, getChannelTagMap } from "./settings";
 
@@ -17,8 +17,8 @@ export interface TagUsageGroup {
 
 const DMS_GROUP_ID = "@me";
 
-export function getTagUsageChannelIds(tagId: string) {
-    return Object.entries(getChannelTagMap())
+export function getTagUsageChannelIds(tagId: TagId) {
+    return entriesOf(getChannelTagMap())
         .filter(([, tagIds]) => tagIds.includes(tagId))
         .map(([channelId]) => channelId);
 }

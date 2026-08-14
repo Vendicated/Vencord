@@ -12,6 +12,7 @@ import definePlugin from "@utils/types";
 
 import { ChannelTags } from "./ChannelTags";
 import { patchChannelContextMenu, patchDmListContextMenu } from "./contextMenu";
+import { ChannelId } from "./data";
 import { settings } from "./settings";
 
 export default definePlugin({
@@ -44,11 +45,11 @@ export default definePlugin({
     renderChannelTags: (channelId?: string) => channelId
         ? (
             <ErrorBoundary noop>
-                <ChannelTags channelId={channelId} />
+                <ChannelTags channelId={channelId as ChannelId} />
             </ErrorBoundary>
         )
         : null,
     renderMemberListDecorator: ({ channel }) => channel
-        ? <ChannelTags channelId={channel.id} />
+        ? <ChannelTags channelId={channel.id as ChannelId} />
         : null
 });

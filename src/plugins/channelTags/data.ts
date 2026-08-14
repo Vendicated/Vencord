@@ -11,6 +11,22 @@ import { getChannelTagMap, getGroupMap, getTagMap, updateStoreMetadata } from ".
 
 export { Group, GroupMap, GroupName, toGroupName } from "./groups";
 
+type EntriesOf<T> = {
+    [K in keyof T]-?: [K, T[K]];
+}[keyof T][];
+export const entriesOf = Object.entries as <T>(obj: T) => EntriesOf<T>;
+
+type KeysOf<T> = (keyof T)[];
+export const keysOf = Object.keys as <T extends object>(obj: T) => KeysOf<T>;
+
+type ValuesOf<T> = T[keyof T][];
+export const valuesOf = Object.values as <T extends object>(obj: T) => ValuesOf<T>;
+
+
+export type TagId = string & { _brand: "tagId"; };
+export type ChannelId = string & { _brand: "channelId"; };
+export type GuildId = string & { _brand: "guildId"; };
+
 export interface ChannelTag {
     name: string;
     color: string;
@@ -28,13 +44,13 @@ export const TagShapes = {
     Pin: "pin"
 } as const;
 export type TagShape = (typeof TagShapes)[keyof typeof TagShapes];
-export const TagShapesList: TagShape[] = Object.values(TagShapes);
+export const TagShapesList: TagShape[] = valuesOf(TagShapes);
 
 export const DEFAULT_TAG_SHAPE: TagShape = TagShapes.Circle;
 
-export type TagMap = Record<string, ChannelTag>;
-export type UserDMChannelMap = Record<string, string>;
-export type ChannelTagMap = Record<string, string[]>;
+export type TagMap = { [key: TagId]: ChannelTag; };
+export type UserDMChannelMap = { [key: string]: ChannelId; };
+export type ChannelTagMap = { [key: ChannelId]: TagId[]; };
 
 export const sortAlphaNum = (a: string, b: string) => a.localeCompare(b, LocaleStore?.locale ?? "en", { numeric: true });
 
@@ -51,7 +67,7 @@ export function compareTags(a: ChannelTag, b: ChannelTag) {
     return sortAlphaNum(a.name, b.name);
 }
 
-function sortTagIds(tagIds: string[]) {
+function sortTagIds(tagIds: TagId[]) {
     const tags = getTagMap();
     return tagIds.sort((a, b) => compareTags(
         tags[a] ?? { name: "", color: "" },
@@ -59,19 +75,19 @@ function sortTagIds(tagIds: string[]) {
     ));
 }
 
-export function createTag(name: string, color: string, shape: TagShape = DEFAULT_TAG_SHAPE, group?: GroupName): string {
-    const id = crypto.randomUUID();
+export function createTag(name: string, color: string, shape: TagShape = DEFAULT_TAG_SHAPE, group?: GroupName): TagId {
+    const id = crypto.randomUUID() as TagId;
     getTagMap()[id] = { name, color, group, shape };
     return id;
 }
 
-export function updateTag(id: string, tag: ChannelTag) {
+export function updateTag(id: TagId, tag: ChannelTag) {
     const tags = getTagMap();
     if (!tags[id]) return;
 
     tags[id] = tag;
     const channelTags = getChannelTagMap();
-    for (const [channelId, tagIds] of Object.entries(channelTags)) {
+    for (const [channelId, tagIds] of entriesOf(channelTags)) {
         if (!tagIds.includes(id)) continue;
 
         const nextTagIds = tag.group
@@ -82,11 +98,11 @@ export function updateTag(id: string, tag: ChannelTag) {
     deleteEmptyGroups();
 }
 
-export function deleteTag(id: string) {
+export function deleteTag(id: TagId) {
     delete getTagMap()[id];
 
     const channelTags = getChannelTagMap();
-    for (const [channelId, tagIds] of Object.entries(channelTags)) {
+    for (const [channelId, tagIds] of entriesOf(channelTags)) {
         const nextTagIds = tagIds.filter(tagId => tagId !== id);
         if (nextTagIds.length) channelTags[channelId] = nextTagIds;
         else delete channelTags[channelId];
@@ -107,20 +123,20 @@ export function renameGroup(oldName: GroupName, newName: GroupName) {
     groups[newName] ??= group;
     delete groups[oldName];
 
-    for (const tag of Object.values(getTagMap())) {
+    for (const tag of valuesOf(getTagMap())) {
         if (tag.group === oldName) tag.group = newName;
     }
 }
 
 export function deleteEmptyGroups() {
-    const tags = Object.values(getTagMap());
+    const tags = valuesOf(getTagMap());
     const groups = getGroupMap();
-    for (const name of Object.keys(groups) as GroupName[]) {
+    for (const name of keysOf(groups)) {
         if (!tags.some(tag => tag.group === name)) delete groups[name];
     }
 }
 
-export function addTagToChannel(channelId: string, tagId: string) {
+export function addTagToChannel(channelId: ChannelId, tagId: TagId) {
     const channelTags = getChannelTagMap();
     const tags = getTagMap();
     const group = tags[tagId]?.group;
@@ -130,7 +146,7 @@ export function addTagToChannel(channelId: string, tagId: string) {
     updateStoreMetadata();
 }
 
-export function removeTagFromChannel(channelId: string, tagId: string) {
+export function removeTagFromChannel(channelId: ChannelId, tagId: TagId) {
     const channelTags = getChannelTagMap();
     const tagIds = channelTags[channelId];
     if (!tagIds) return;
