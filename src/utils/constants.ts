@@ -64,6 +64,10 @@ export const Devs = /* #__PURE__*/ Object.freeze({
         name: "Cynosphere",
         id: 150745989836308480n
     },
+    Claw: {
+        name: "Claw",
+        id: 1509748811210428538n
+    },
     Trwy: {
         name: "trey",
         id: 354427199023218689n
