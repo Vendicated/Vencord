@@ -10,10 +10,8 @@ import definePlugin from "@utils/types";
 import { ComponentType, ReactNode } from "react";
 
 import { AttachmentAccessory, AttachmentContextProvider, EmbedAccessory, EmbedContext, EmbedMosaicContext, FilePicker } from "./components";
-import { SignedUrlsStore } from "./stores";
 import managedStyle from "./style.css?managed";
-import { AttachmentContextProviderProps, EmbedComponent, ExpressionPickerTabProps, ExpressionPickerView, FavouriteItem, FavouriteItemFormat, FullFavouriteItem } from "./types";
-import { fixFavouriteItem } from "./utils";
+import { AttachmentContextProviderProps, EmbedComponent, ExpressionPickerTabProps, ExpressionPickerView, FavouriteItem, FavouriteItemFormat } from "./types";
 
 export default definePlugin({
     name: "FavouriteAnything",
@@ -95,15 +93,6 @@ export default definePlugin({
                 match: '.sortBy("order").reverse()',
                 replace: "$&.filter($self.filterGifs)"
             }
-        },
-        // PROTOBUF
-        {
-            find: "#{intl::FAVORITE_GIFS_LIMIT_REACHED_BODY}",
-            replacement: {
-                // Intercept add/remove actions to generate a valid thumbnail url before storing the item
-                match: /function (\i)\((\i)\)\{(?=\i\.\i\.updateAsync\("favoriteGifs")/g,
-                replace: "async function $1($2){await $self.convertFavItem($2);await "
-            }
         }
     ],
     renderTabs(Tab: ComponentType<ExpressionPickerTabProps>, activeView: ExpressionPickerView) {
@@ -149,15 +138,5 @@ export default definePlugin({
     },
     renderAttachmentAccessory: () => <AttachmentAccessory />,
     renderEmbedAccessory: () => <EmbedAccessory />,
-    filterGifs: (item: FavouriteItem) => item.format !== FavouriteItemFormat.NONE,
-    convertFavItem: async (item: FullFavouriteItem | string) => {
-        if (typeof item === "string") {
-            SignedUrlsStore.addSigned(item);
-        } else {
-            SignedUrlsStore.addSigned(item.url);
-            SignedUrlsStore.addSigned(item.src);
-
-            Object.assign(item, await fixFavouriteItem(item));
-        }
-    }
+    filterGifs: (item: FavouriteItem) => item.format !== FavouriteItemFormat.NONE
 });

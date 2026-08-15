@@ -12,12 +12,13 @@ import { useForceUpdater } from "@utils/react";
 import { PluginNative } from "@utils/types";
 import { Channel, MessageAttachment } from "@vencord/discord-types";
 import { findByCodeLazy, findByPropsLazy } from "@webpack";
-import { Constants, DraftType, FluxDispatcher, MessageActions, PendingReplyStore, PermissionStore, RestAPI, Toasts, UploadAttachmentStore, UploadHandler, UploadManager, useCallback, useEffect, useRef, UserSettingsActionCreators, UserSettingsProtoStore, useStateFromStores } from "@webpack/common";
+import { createRoot, DraftType, FluxDispatcher, MessageActions, PendingReplyStore, PermissionStore, ReactDOM, Toasts, UploadAttachmentStore, UploadHandler, UploadManager, useCallback, useEffect, useRef, UserSettingsActionCreators, UserSettingsProtoStore, useStateFromStores } from "@webpack/common";
 import { deflateSync, inflateSync } from "fflate";
-import { Key } from "react";
+import { Key, ReactNode } from "react";
 import { JsonValue } from "type-fest";
 
-import { AttachmentTransformer, CustomItemDef, CustomItemFormat, FavouriteItem, FavouriteItemFormat, FullFavouriteItem, ImageUtils as ImageUtils_, ItemsDef, ResizeObserverHook, UnfurledEmbedsResponse } from "./types";
+import { StaticFilePickerItem } from "./components";
+import { AttachmentTransformer, CustomItemDef, CustomItemFormat, FavouriteItem, FavouriteItemFormat, ImageUtils as ImageUtils_, ItemsDef, ResizeObserverHook } from "./types";
 
 const Native = VencordNative.pluginHelpers.FavouriteAnything as PluginNative<typeof import("./native")>;
 
@@ -97,39 +98,38 @@ export const defs = defineItems({
     // This could be expanded in the future with other item types (e.g. voice messages)
 });
 
-export async function fixFavouriteItem(item: FullFavouriteItem): Promise<FullFavouriteItem> {
-    if (item.format !== FavouriteItemFormat.NONE) return item;
-
-    const thumbnail = await getThumbnailUrl(item.src, item.width, item.height);
-    if (!thumbnail) return item;
-
-    thumbnail.search = "";
-    thumbnail.hash = item.src;
-    return { ...item, src: `${thumbnail}` };
+export function getExtension(filename: string): string | null {
+    const ext = filename.lastIndexOf(".");
+    return ext > 0 ? filename.substring(ext) : null;
 }
 
-// TODO: make thumbnails prettier
-const fallbackThumbnail = new URL("https://images-ext-1.discordapp.net/external/pGTJg3YdSHpyGTltH4vZUKEyQoNzf5mtqbSJs7I4ebc/https/equicord.org/assets/plugins/favoriteAnything/invalid.png");
+function renderToHTML(node: ReactNode): Promise<string> {
+    return new Promise(resolve => {
+        const container = document.createElement("div");
+        const root = createRoot(container);
 
-async function getThumbnailUrl(data: string, width: number, height: number): Promise<URL | null> {
-    try {
-        const decoded = defs.decode(data);
-        if (!decoded || !width || !height) return null;
-
-        const text = defs.stringify(decoded.format, decoded.data);
-        const url = new URL(`https://placehold.jp/42/444/fff/${width}x${height}.png`);
-        url.searchParams.append("text", text);
-
-        return await RestAPI.post({
-            url: Constants.Endpoints.UNFURL_EMBED_URLS,
-            body: { urls: [url] },
-            retries: 3
-        }).then(({ body }: { body: UnfurledEmbedsResponse; }) => {
-            const [{ thumbnail } = {}] = body.embeds;
-            return thumbnail?.proxy_url ? new URL(thumbnail.proxy_url) : fallbackThumbnail;
+        // A full render can't happen while another render (or effect in this case) is happening
+        queueMicrotask(() => {
+            ReactDOM.flushSync(() => root.render(node));
+            resolve(container.innerHTML);
+            root.unmount();
         });
+    });
+}
+
+export async function getThumbnailUrl(item: MessageAttachment): Promise<URL | null> {
+    try {
+        const html = await renderToHTML(<StaticFilePickerItem file={item} />);
+        const metadata = defs.encode(CustomItemFormat.ATTACHMENT, item)?.toString();
+        if (!html || !metadata) return null;
+
+        // The base url is the thumbnail itself which is used for vanilla client compatibility, while the hash stores extra metadata.
+        // encodeURIComponent is intentionally avoided since it would bloat the url size by replacing otherwise safe characters
+        const url = new URL("data:image/svg+xml," + html.replaceAll("%", "%25").replaceAll("#", "%23"));
+        url.hash = metadata;
+        return url;
     } catch {
-        return fallbackThumbnail;
+        return null;
     }
 }
 
@@ -187,10 +187,7 @@ export async function sendAttachment(attachment: MessageAttachment, channel: Cha
     UploadManager.setUploads({ uploads, channelId: channel.id, draftType: DraftType.ChannelMessage });
 
     // Empty titles and descriptions are allowed
-    if (title != null) {
-        const ext = upload.filename.lastIndexOf(".");
-        upload.filename = title + (ext > 0 ? upload.filename.substring(ext) : "");
-    }
+    if (title != null) upload.filename = title + (getExtension(upload.filename) ?? "");
     if (description != null) upload.description = description;
 
     FluxDispatcher.dispatch({ type: "DELETE_PENDING_REPLY", channelId: channel.id });

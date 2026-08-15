@@ -215,4 +215,6 @@ export const DateUtils: t.DateUtils = mapMangledModuleLazy("millisecondsInUnit:"
     diffAsUnits: filters.byCode("days:0", "millisecondsInUnit")
 });
 
+export const Humanize: t.Humanize = findByPropsLazy("nl2br", "humanize");
+
 export const MessageTypeSets: t.MessageTypeSets = findByPropsLazy("REPLYABLE", "FORWARDABLE");

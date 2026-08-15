@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { Channel, Embed, EmbedJSON, Message, MessageAttachment, TextInput } from "@vencord/discord-types";
+import { Channel, Embed, Message, MessageAttachment, TextInput } from "@vencord/discord-types";
 import { Component, ComponentClass, ComponentProps, ComponentPropsWithRef, Key, PropsWithChildren, ReactNode, RefObject } from "react";
 import { JsonValue, PartialDeep } from "type-fest";
 
@@ -59,9 +59,12 @@ export interface FilePickerProps {
     onSelectItem: (item: { url: string; }) => void;
 }
 
-export interface FilePickerItemProps {
-    url: string;
+export interface StaticFilePickerItemProps {
     file: MessageAttachment;
+}
+
+export interface FilePickerItemProps extends StaticFilePickerItemProps {
+    url: string;
     channel: Channel | null;
     reducePadding?: boolean;
     onResize: (key: Key, height: number) => void;
@@ -142,10 +145,6 @@ export interface RefreshedUrlsResponse {
             refreshed: string | null;
         }
     ];
-}
-
-export interface UnfurledEmbedsResponse {
-    embeds: EmbedJSON[];
 }
 
 export type ResizeObserverHook = (
