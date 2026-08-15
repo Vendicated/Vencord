@@ -195,8 +195,9 @@ export function StaticFilePickerItem({ file }: StaticFilePickerItemProps) {
     const filename = (file.title ? file.title + (ext ?? "") : file.filename).slice(0, 50);
     const size = Humanize.filesize(file.size);
 
+    // Keep this compact! Long prop names, styles, numbers, etc could be wasteful
     return (
-        <svg viewBox="-2 -2 32 11" xmlns="http://www.w3.org/2000/svg" style={{ font: "2px sans-serif", fill: "#242429" }}>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="-2 -2 32 11" style={{ font: "2px sans-serif", fill: "#242429" }}>
             <path d="M-2-2h32v11H-2" />
             <rect width="5" height="7" rx=".5" fill="#ddf" />
             <g fill="#78e">
@@ -204,8 +205,8 @@ export function StaticFilePickerItem({ file }: StaticFilePickerItemProps) {
                 {ext && <text x=".85" y="6" fontFamily="monospace">{ext.slice(1, 4)}</text>}
             </g>
             <path d="M6 3V-2H1" />
-            <text x="7" y="2.5" fill="#eff">{filename}</text>
-            <text x="7" y="5.5" fill="#777">{size}</text>
+            <text x="7" y="2.8" fill="#eff">{filename}</text>
+            <text x="7" y="5.6" fill="#777">{size}</text>
         </svg>
     );
 }
