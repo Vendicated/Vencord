@@ -165,10 +165,10 @@ export default definePlugin({
             ]
         },
         {
-            find: '"IntegrationQueryStore"',
+            find: '"INTEGRATION_QUERY_SUCCESS"',
             replacement: {
-                match: /(?<=search\((\i),(\i)\)\{)null==\i\.getResults\(\1,\2\)&&/,
-                replace: "return $self.tenorIntegrationSearch($1,$2);null==void 0&&"
+                match: /(async function \i\((\i),(\i)\)\{)(if\(\i\[\i]=)/,
+                replace: "$1return $self.tenorIntegrationSearch($2,$3);$4"
             }
         },
         // Add back tenor command
