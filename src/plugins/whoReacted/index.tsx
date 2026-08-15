@@ -16,7 +16,9 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { isPluginEnabled } from "@api/PluginManager";
 import ErrorBoundary from "@components/ErrorBoundary";
+import NoBlockedMessagesPlugin from "@plugins/noBlockedMessages";
 import { Devs } from "@utils/constants";
 import { sleep } from "@utils/misc";
 import { Queue } from "@utils/Queue";
@@ -86,27 +88,12 @@ function handleClickAvatar(event: React.UIEvent<HTMLElement, Event>) {
     event.stopPropagation();
 }
 
-function ReactionUsers({ message, emoji, type }: ReactionProps) {
-    const forceUpdate = useForceUpdater();
-
+function ReactionUsers({ message, users }: { message: Message, users: User[]; }) {
     useLayoutEffect(() => { // bc need to prevent autoscrolling
         if (Scroll?.scrollCounter > 0) {
             Scroll.setAutomaticAnchor(null);
         }
     });
-
-    useEffect(() => {
-        const cb = (e: any) => {
-            if (e?.messageId === message.id)
-                forceUpdate();
-        };
-        FluxDispatcher.subscribe("MESSAGE_REACTION_ADD_USERS", cb);
-
-        return () => FluxDispatcher.unsubscribe("MESSAGE_REACTION_ADD_USERS", cb);
-    }, [message.id, forceUpdate]);
-
-    const reactions = getReactionsWithQueue(message, emoji, type);
-    const users = Array.from(reactions, ([id]) => UserStore.getUser(id)).filter(Boolean);
 
     return (
         <div
@@ -130,7 +117,7 @@ export default definePlugin({
     name: "WhoReacted",
     description: "Renders the avatars of users who reacted to a message",
     tags: ["Reactions", "Chat", "Appearance"],
-    authors: [Devs.Ven, Devs.KannaDev, Devs.newwares],
+    authors: [Devs.Ven, Devs.KannaDev, Devs.newwares, Devs.paige],
 
     patches: [
         {
@@ -157,10 +144,30 @@ export default definePlugin({
         }
     ],
 
-    renderUsers: ErrorBoundary.wrap((props: ReactionProps) => {
-        return props.message.reactions.length > 10
+    renderUsers: ErrorBoundary.wrap(({ message, emoji, type }: ReactionProps) => {
+        const forceUpdate = useForceUpdater();
+
+        useEffect(() => {
+            const cb = (e: any) => {
+                if (e?.messageId === message.id)
+                    forceUpdate();
+            };
+            FluxDispatcher.subscribe("MESSAGE_REACTION_ADD_USERS", cb);
+
+            return () => FluxDispatcher.unsubscribe("MESSAGE_REACTION_ADD_USERS", cb);
+        }, [message.id, forceUpdate]);
+
+        if (message.reactions.length > 10) return null;
+
+        const reactionMap = getReactionsWithQueue(message, emoji, type);
+        let users = Array.from(reactionMap, ([id]) => UserStore.getUser(id)).filter(Boolean);
+
+        if (isPluginEnabled(NoBlockedMessagesPlugin.name))
+            users = users.filter(user => !NoBlockedMessagesPlugin.shouldIgnoreUser(user.id));
+
+        return users.length === 0
             ? null
-            : <ReactionUsers {...props} />;
+            : <ReactionUsers message={message} users={users} />;
     }, { noop: true }),
 
     setScrollObj(scroll: any) {
