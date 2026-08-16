@@ -1,0 +1,1 @@
+Adds a button to the message bar that lets you draw and then send the image to the chat.

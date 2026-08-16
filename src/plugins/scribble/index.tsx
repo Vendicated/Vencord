@@ -7,6 +7,7 @@
 import { ChatBarButton, ChatBarButtonFactory } from "@api/ChatButtons";
 import { Button } from "@components/Button";
 import { DeleteIcon, PaintbrushIcon, ReplyIcon } from "@components/Icons";
+import { Devs } from "@utils/constants";
 import { classNameFactory } from "@utils/css";
 import definePlugin, { IconComponent } from "@utils/types";
 import { RenderModalProps } from "@vencord/discord-types";
