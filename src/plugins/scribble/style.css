@@ -1,0 +1,67 @@
+.vc-scribble-content {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.vc-scribble-toolbar {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.vc-scribble-toolbar-group {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.vc-scribble-toolbar input[type="color"] {
+    border: 1px solid var(--border-subtle);
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    cursor: pointer;
+    background: none;
+    padding: 0;
+    overflow: hidden;
+    transition: border-color 0.2s;
+}
+
+.vc-scribble-toolbar input[type="color"]:hover {
+    border-color: var(--text-normal);
+}
+
+.vc-scribble-toolbar input[type="color"]::-webkit-color-swatch-wrapper {
+    padding: 0;
+}
+
+.vc-scribble-toolbar input[type="color"]::-webkit-color-swatch {
+    border: none;
+    border-radius: 50%;
+}
+
+.vc-scribble-toolbar input[type="range"] {
+    width: 80px;
+    accent-color: var(--brand-500);
+}
+
+.vc-scribble-btn-gap {
+    gap: 6px;
+}
+
+.vc-scribble-canvas {
+    background: #ffffff;
+    border: 1px solid var(--text-muted, #80848e);
+    border-radius: 6px;
+    cursor: crosshair;
+    touch-action: none;
+    display: block;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.vc-scribble-insert {
+    width: 100%;
+}
