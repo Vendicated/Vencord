@@ -21,7 +21,8 @@ const DefaultEngines = {
     GitHub: "https://github.com/search?q=",
     Reddit: "https://www.reddit.com/search?q=",
     Wikipedia: "https://wikipedia.org/w/index.php?search=",
-    Startpage: "https://www.startpage.com/sp/search?query="
+    Startpage: "https://www.startpage.com/sp/search?query=",
+    Kagi: "https://kagi.com/search?q="
 } as const;
 
 const enum ReplacementEngineValue {
