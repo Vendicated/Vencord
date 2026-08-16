@@ -7,28 +7,23 @@
 import { classes, classNameFactory } from "@utils/index";
 import { Tooltip } from "@webpack/common";
 
+import { removeTagFromChannel } from "./actions";
 import { openChannelTagsMenu } from "./contextMenu";
-import { ChannelId, compareTags, isGroupHiddenForChannel, removeTagFromChannel, TagId } from "./data";
-import { getChannelTagMap, getTagMap, settings } from "./settings";
+import { getChannelHiddenFor, selectVisibleChannelTags } from "./selectors";
+import { settings } from "./settings";
 import { TagShapeIcon } from "./TagShape";
+import { ChannelId, TagId } from "./types";
 
 const cl = classNameFactory("vc-channel-tags-");
 
 export function ChannelTags({ channelId }: { channelId: ChannelId; }) {
-    settings.use();
-    const clickToRemove = settings.store.clickTagsToRemove;
-    const channelTags = getChannelTagMap();
-    const tagMap = getTagMap();
-
-    const tags = (channelTags[channelId] ?? [])
-        .map(id => [id, tagMap[id]] as const)
-        .filter((entry): entry is readonly [TagId, NonNullable<typeof entry[1]>] => entry[1] != null)
-        .filter(([, tag]) => !isGroupHiddenForChannel(tag.group, channelId))
-        .sort(([, a], [, b]) => compareTags(a, b));
+    const store = settings.use(["clickTagsToRemove", "channelTags", "tags", "groups", "channels"]);
+    const clickToRemove = store.clickTagsToRemove;
+    const tags = selectVisibleChannelTags(channelId, store, getChannelHiddenFor(channelId, store.channels));
 
     if (!tags.length) return null;
 
-    const remove = (event: React.MouseEvent | React.KeyboardEvent, tagId: TagId) => {
+    const remove = (event: React.UIEvent, tagId: TagId) => {
         event.preventDefault();
         event.stopPropagation();
         removeTagFromChannel(channelId, tagId);

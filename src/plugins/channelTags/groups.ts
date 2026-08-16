@@ -19,7 +19,7 @@ export interface Group {
     showInSubmenu: boolean;
     hiddenFor: HiddenForMap;
 }
-export type GroupMap = Record<GroupName, Group>;
+export type GroupMap = Partial<Record<GroupName, Group>>;
 
 export const DEFAULT_GROUP: Group = {
     isExclusive: true,

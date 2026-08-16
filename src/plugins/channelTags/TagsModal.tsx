@@ -12,21 +12,26 @@ import { classes } from "@utils/index";
 import type { RenderModalProps } from "@vencord/discord-types";
 import { ConfirmModal, Modal, openModal, Tooltip } from "@webpack/common";
 
-import { ChannelTag, compareGroups, compareTags, deleteTag, entriesOf, GroupName, TagId } from "./data";
+import { deleteTag } from "./actions";
 import { openGroupModal } from "./GroupModal";
-import { getGroupMap, getTagMap, settings } from "./settings";
+import { GroupName } from "./groups";
+import { presentEntries } from "./object";
+import { compareGroups, compareTags } from "./selectors";
+import { settings } from "./settings";
 import { openCreateTagModal, openEditTagModal } from "./TagModal";
 import { TagShapeIcon } from "./TagShape";
 import { openTagUsageModal } from "./TagUsageModal";
+import { ChannelTag, TagId } from "./types";
 import { getTagUsageCounts } from "./usage";
 
 const cl = classNameFactory("vc-channel-tags-");
 
 function TagsModal(modalProps: RenderModalProps) {
-    settings.use();
-    const tags = entriesOf(getTagMap())
+    const store = settings.use();
+    const { groups, tags: tagMap } = store;
+    const tags = presentEntries(tagMap)
         .sort(([, a], [, b]) => compareTags(a, b));
-    const usageCounts = getTagUsageCounts();
+    const usageCounts = getTagUsageCounts(store.channelTags);
     const groupedTags = new Map<GroupName | undefined, [TagId, ChannelTag][]>();
     for (const entry of tags) {
         const groupTags = groupedTags.get(entry[1].group) ?? [];
@@ -39,7 +44,7 @@ function TagsModal(modalProps: RenderModalProps) {
             {...modalProps}
             size="lg"
             title="Tags"
-            subtitle={settings.store.showHints && !!tags.length && "Hold Shift when clicking Delete to skip confirmation."}
+            subtitle={store.showHints && !!tags.length && "Hold Shift when clicking Delete to skip confirmation."}
             actions={[{
                 text: "Create New Tag",
                 variant: "primary",
@@ -51,10 +56,10 @@ function TagsModal(modalProps: RenderModalProps) {
                         No tags have been created yet!
                     </Paragraph>
                 )}
-                {[...groupedTags].sort(([a], [b]) => compareGroups(a, b)).map(([group, groupTags]) => (
+                {[...groupedTags].sort(([a], [b]) => compareGroups(a, b, groups)).map(([group, groupTags]) => (
                     <ExpandableSection
                         className={cl("list-group")}
-                        initialExpanded={!group || !getGroupMap()[group]?.showInSubmenu}
+                        initialExpanded={!group || !groups[group]?.showInSubmenu}
                         key={group}
                         renderContent={() => (
                             groupTags.map(([id, tag]) => (

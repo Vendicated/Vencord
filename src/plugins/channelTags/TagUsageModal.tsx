@@ -13,9 +13,11 @@ import { Avatar, closeAllModals, Modal, NavigationRouter, openModal, Toasts, Too
 
 import { ChannelTags } from "./ChannelTags";
 import { openChannelTagsMenu } from "./contextMenu";
-import { TagId } from "./data";
+import { ensureDMChannelExists } from "./dmChannels";
 import type { TagsChannel, TagsGuild } from "./metadata";
-import { ensureDMChannelExists, getTagMap, settings, updateStoreMetadata } from "./settings";
+import { settings } from "./settings";
+import { getChannelTagMap, updateStoreMetadata } from "./store";
+import { ChannelId, TagId } from "./types";
 import { getTagUsageChannelIds, groupTagUsageChannels } from "./usage";
 
 const cl = classNameFactory("vc-channel-tags-usage-");
@@ -113,20 +115,19 @@ function ChannelUsageRow({ channel, onNavigate }: { channel: TagsChannel; onNavi
 
 function TagUsageModal({ tagId, channelIds, wasFromContext, modalProps }: {
     tagId: TagId;
-    channelIds: string[];
+    channelIds: ChannelId[];
     wasFromContext: boolean;
     modalProps: RenderModalProps;
 }) {
-    settings.use();
-    const tags = getTagMap();
-    const groups = groupTagUsageChannels(channelIds);
+    const store = settings.use(["tags", "channels", "guilds", "showHints"]);
+    const groups = groupTagUsageChannels(channelIds, store.channels, store.guilds);
 
     return (
         <Modal
             {...modalProps}
             size="lg"
-            title={`Tagged: ${tags[tagId].name}`}
-            subtitle={(settings.store.showHints && !wasFromContext && "You can hold control when clicking a tag in the context menu to go straight to this dialog!")}
+            title={`Tagged: ${store.tags[tagId]?.name ?? "Unknown Tag"}`}
+            subtitle={(store.showHints && !wasFromContext && "You can hold control when clicking a tag in the context menu to go straight to this dialog!")}
         >
             <div className={cl("content")}>
                 {groups.map(group => (
@@ -158,6 +159,6 @@ function TagUsageModal({ tagId, channelIds, wasFromContext, modalProps }: {
 export function openTagUsageModal(tagId: TagId, wasFromContext: boolean = false) {
     updateStoreMetadata();
     // Snapshot the IDs here so that any removed tags in the usage modal can be re-added if the user made a mistake.
-    const channelIds = getTagUsageChannelIds(tagId);
+    const channelIds = getTagUsageChannelIds(tagId, getChannelTagMap());
     openModal(modalProps => <TagUsageModal channelIds={channelIds} tagId={tagId} wasFromContext={wasFromContext} modalProps={modalProps} />);
 }

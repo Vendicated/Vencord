@@ -10,9 +10,9 @@ import { classes } from "@utils/index";
 import { RenderModalProps } from "@vencord/discord-types";
 import { Modal, openModal, TextInput, useState } from "@webpack/common";
 
-import { ensureGroup, hasExclusiveConflicts, hasHiddenConflicts, renameGroup, updateGroup } from "./data";
-import { Group, GroupName, HiddenFor, toGroupName } from "./groups";
-import { getGroupMap } from "./settings";
+import { hasExclusiveConflicts, hasHiddenConflicts, saveGroup } from "./actions";
+import { createDefaultGroup, Group, GroupName, HiddenFor, toGroupName } from "./groups";
+import { getGroupMap } from "./store";
 
 interface GroupModalProps {
     group: GroupName;
@@ -22,14 +22,14 @@ interface GroupModalProps {
 
 function GroupModal({ group, modalProps, onRename }: GroupModalProps) {
     const [name, setName] = useState<string>(group);
-    const initialGroup = ensureGroup(group);
+    const initialGroup = getGroupMap()[group] ?? createDefaultGroup();
     const [value, setValue] = useState<Group>(() => ({
         ...initialGroup,
         hiddenFor: { ...initialGroup.hiddenFor }
     }));
     const [cleanUpHidden, setCleanUpHidden] = useState(false);
     const nextGroup = toGroupName(name);
-    const nameExists = nextGroup !== group && nextGroup && nextGroup in getGroupMap();
+    const nameExists = nextGroup !== group && !!nextGroup && Object.hasOwn(getGroupMap(), nextGroup);
     const exclusiveConflict = !initialGroup.isExclusive && value.isExclusive && hasExclusiveConflicts(group);
     const hiddenConflict = hasHiddenConflicts(group, value);
 
@@ -39,8 +39,7 @@ function GroupModal({ group, modalProps, onRename }: GroupModalProps) {
     const onSave = () => {
         if (!nextGroup || nameExists) return;
 
-        renameGroup(group, nextGroup);
-        updateGroup(nextGroup, value, cleanUpHidden);
+        if (!saveGroup(group, nextGroup, value, cleanUpHidden)) return;
         onRename?.(nextGroup);
         modalProps.onClose();
     };
@@ -129,6 +128,5 @@ function GroupModal({ group, modalProps, onRename }: GroupModalProps) {
 }
 
 export function openGroupModal(group: GroupName, onRename?: (group: GroupName) => void) {
-    ensureGroup(group);
     openModal(modalProps => <GroupModal group={group} modalProps={modalProps} onRename={onRename} />);
 }

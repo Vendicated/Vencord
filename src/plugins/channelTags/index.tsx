@@ -12,14 +12,16 @@ import definePlugin from "@utils/types";
 
 import { ChannelTags } from "./ChannelTags";
 import { patchChannelContextMenu, patchDmListContextMenu } from "./contextMenu";
-import { ChannelId } from "./data";
 import { settings } from "./settings";
+import { initializeChannelTagsStore } from "./store";
+import { ChannelId } from "./types";
 
 export default definePlugin({
     name: "ChannelTags",
     description: "Adds custom tags with colors and shapes to channels.",
     authors: [Devs.ruirize],
     settings,
+    start: initializeChannelTagsStore,
     patches: [
         {
             find: "UNREAD_IMPORTANT:",

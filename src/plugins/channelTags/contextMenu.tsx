@@ -10,17 +10,23 @@ import { Channel, User } from "@vencord/discord-types";
 import { ChannelType } from "@vencord/discord-types/enums";
 import { ContextMenuApi, Menu } from "@webpack/common";
 
-import { addTagToChannel, ChannelId, ChannelTag, ChannelTagMap, compareGroups, compareTags, entriesOf, GroupName, isGroupHiddenForChannel, removeTagFromChannel, TagId } from "./data";
-import { getChannelIdForDMsWithUser, getChannelTagMap, getGroupMap, getTagMap, settings } from "./settings";
+import { addTagToChannel, removeTagFromChannel } from "./actions";
+import { getChannelIdForDMsWithUser } from "./dmChannels";
+import { GroupName } from "./groups";
+import { presentEntries } from "./object";
+import { ChannelTagsData, compareGroups, compareTags, getChannelHiddenFor, isGroupHidden } from "./selectors";
+import { settings } from "./settings";
 import { openCreateTagModal, openEditTagModal } from "./TagModal";
 import { TagShapeIcon } from "./TagShape";
 import { openTagsModal } from "./TagsModal";
 import { openTagUsageModal } from "./TagUsageModal";
+import { ChannelId, ChannelTag, TagId, UserId } from "./types";
 
-export function makeChannelTagsMenuChildren(channelId: ChannelId, channelTags: ChannelTagMap) {
-    const tags = entriesOf(getTagMap())
+export function makeChannelTagsMenuChildren(channelId: ChannelId, data: ChannelTagsData) {
+    const tags = presentEntries(data.tags)
         .sort(([, a], [, b]) => compareTags(a, b));
-    const assignedTagIds = new Set(channelTags[channelId] ?? []);
+    const assignedTagIds = new Set(data.channelTags[channelId] ?? []);
+    const hiddenFor = getChannelHiddenFor(channelId, data.channels);
 
     if (!tags.length) {
         return [
@@ -36,7 +42,7 @@ export function makeChannelTagsMenuChildren(channelId: ChannelId, channelTags: C
 
     const groupedTags = new Map<GroupName | undefined, [TagId, ChannelTag][]>();
     for (const entry of tags) {
-        if (isGroupHiddenForChannel(entry[1].group, channelId)) continue;
+        if (isGroupHidden(entry[1].group, data.groups, hiddenFor)) continue;
         const groupTags = groupedTags.get(entry[1].group) ?? [];
         groupTags.push(entry);
         groupedTags.set(entry[1].group, groupTags);
@@ -58,7 +64,7 @@ export function makeChannelTagsMenuChildren(channelId: ChannelId, channelTags: C
             action={openTagsModal}
         />,
         <Menu.MenuSeparator key="vc-channel-tags-separator" />,
-        ...[...groupedTags].sort(([a], [b]) => compareGroups(a, b)).map(([group, groupTags]) => {
+        ...[...groupedTags].sort(([a], [b]) => compareGroups(a, b, data.groups)).map(([group, groupTags]) => {
             const items = groupTags.map(([id, tag]) => {
                 const isAssigned = assignedTagIds.has(id);
                 return (
@@ -81,7 +87,7 @@ export function makeChannelTagsMenuChildren(channelId: ChannelId, channelTags: C
                 );
             });
 
-            return group && getGroupMap()[group]?.showInSubmenu
+            return group && data.groups[group]?.showInSubmenu
                 ? (
                     <Menu.MenuItem id={`vc-channel-tags-group-${group}`} key={group} label={group}>
                         {items}
@@ -96,9 +102,9 @@ export function makeChannelTagsMenuChildren(channelId: ChannelId, channelTags: C
     ];
 }
 
-export function makeChannelTagsMenuItem(channelId: ChannelId, channelTags: ChannelTagMap) {
-    const children = makeChannelTagsMenuChildren(channelId, channelTags);
-    if (!Object.keys(getTagMap()).length) return children[0];
+export function makeChannelTagsMenuItem(channelId: ChannelId, data: ChannelTagsData) {
+    const children = makeChannelTagsMenuChildren(channelId, data);
+    if (!Object.keys(data.tags).length) return children[0];
 
     return (
         <Menu.MenuItem
@@ -113,7 +119,7 @@ export function makeChannelTagsMenuItem(channelId: ChannelId, channelTags: Chann
 }
 
 function ChannelTagsMenu({ channelId }: { channelId: ChannelId; }) {
-    settings.use(["channelTags"]);
+    const data = settings.use(["channelTags", "tags", "groups", "channels"]);
 
     return (
         <Menu.Menu
@@ -121,7 +127,7 @@ function ChannelTagsMenu({ channelId }: { channelId: ChannelId; }) {
             navId="vc-channel-tags-row-menu"
             onClose={ContextMenuApi.closeContextMenu}
         >
-            {makeChannelTagsMenuChildren(channelId, getChannelTagMap())}
+            {makeChannelTagsMenuChildren(channelId, data)}
         </Menu.Menu>
     );
 }
@@ -147,27 +153,27 @@ export function openTagUsageFromContext(event: React.MouseEvent, tagId: TagId) {
 }
 
 export const patchChannelContextMenu: NavContextMenuPatchCallback = (children, props) => {
-    settings.use(["channelTags"]);
+    const data = settings.use(["channelTags", "tags", "groups", "channels"]);
 
     const channel = props?.channel;
     if (!channel?.id) return;
 
     const group = findGroupChildrenByChildId("mark-channel-read", children) ?? children;
-    group.push(makeChannelTagsMenuItem(channel.id, getChannelTagMap()));
+    group.push(makeChannelTagsMenuItem(channel.id, data));
 };
 
 export const patchDmListContextMenu: NavContextMenuPatchCallback = (children, props: { channel?: Channel, user: User; }) => {
-    settings.use(["channelTags"]);
+    const data = settings.use(["channelTags", "tags", "groups", "channels"]);
 
     const { channel, user } = props;
 
     const channelType = channel?.type;
     const isValidDMChannel = channelType === ChannelType.DM || channelType === ChannelType.GROUP_DM;
-    const channelId = isValidDMChannel ? channel!.id as ChannelId : getChannelIdForDMsWithUser(user.id);
+    const channelId = isValidDMChannel ? channel!.id as ChannelId : getChannelIdForDMsWithUser(user.id as UserId);
 
     const group = findGroupChildrenByChildId("user-profile", children);
 
     if (!group || !channelId) return;
 
-    group.push(makeChannelTagsMenuItem(channelId, getChannelTagMap()));
+    group.push(makeChannelTagsMenuItem(channelId, data));
 };

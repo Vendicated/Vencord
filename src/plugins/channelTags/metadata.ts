@@ -6,7 +6,8 @@
 
 import { ChannelStore, GuildStore, IconUtils, UserStore } from "@webpack/common";
 
-import { type ChannelId, type ChannelTagMap, type GuildId, keysOf, valuesOf } from "./data";
+import { keysOf, presentValues } from "./object";
+import { ChannelId, ChannelTagMap, GuildId } from "./types";
 
 export type TagsChannel =
     {
@@ -40,8 +41,8 @@ export interface TagsGuild {
     iconUrl: string | null;
 }
 
-export type TagsChannelMap = Record<ChannelId, TagsChannel>;
-export type TagsGuildMap = Record<GuildId, TagsGuild>;
+export type TagsChannelMap = Partial<Record<ChannelId, TagsChannel>>;
+export type TagsGuildMap = Partial<Record<GuildId, TagsGuild>>;
 
 function captureChannel(channelId: string): { channel: TagsChannel; guild?: TagsGuild; } | undefined {
     const channel = ChannelStore.getChannel(channelId);
@@ -121,7 +122,7 @@ export function populateMetadata(
         if (!taggedChannelIds.has(channelId)) delete channels[channelId];
     }
 
-    const usedGuildIds = new Set(valuesOf(channels).filter(channel => channel.kind === "guild").map(channel => channel.guildId));
+    const usedGuildIds = new Set(presentValues(channels).filter(channel => channel.kind === "guild").map(channel => channel.guildId));
     for (const guildId of keysOf(guilds)) {
         if (!usedGuildIds.has(guildId)) delete guilds[guildId];
     }
@@ -132,5 +133,28 @@ export function populateMetadata(
 
         if (captured.guild) guilds[captured.guild.id] = captured.guild;
         channels[channelId] = captured.channel;
+    }
+}
+
+export function updateChannelMetadata(
+    channelId: ChannelId,
+    channelTags: ChannelTagMap,
+    channels: TagsChannelMap,
+    guilds: TagsGuildMap
+) {
+    if (!channelTags[channelId]?.length) {
+        delete channels[channelId];
+    } else {
+        const captured = captureChannel(channelId);
+        if (captured) {
+            channels[channelId] = captured.channel;
+            if (captured.guild) guilds[captured.guild.id] = captured.guild;
+        }
+    }
+
+    for (const guildId of keysOf(guilds)) {
+        if (!presentValues(channels).some(channel => channel.kind === "guild" && channel.guildId === guildId)) {
+            delete guilds[guildId];
+        }
     }
 }

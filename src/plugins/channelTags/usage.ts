@@ -4,9 +4,10 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { entriesOf, sortAlphaNum, TagId } from "./data";
-import type { TagsChannel, TagsGuild } from "./metadata";
-import { getChannelsGuildsMaps, getChannelTagMap } from "./settings";
+import type { TagsChannel, TagsChannelMap, TagsGuild, TagsGuildMap } from "./metadata";
+import { presentEntries, presentValues } from "./object";
+import { sortAlphaNum } from "./selectors";
+import { ChannelId, ChannelTagMap, TagId } from "./types";
 
 export interface TagUsageGroup {
     id: string;
@@ -17,25 +18,24 @@ export interface TagUsageGroup {
 
 const DMS_GROUP_ID = "@me";
 
-export function getTagUsageChannelIds(tagId: TagId) {
-    return entriesOf(getChannelTagMap())
+export function getTagUsageChannelIds(tagId: TagId, channelTags: ChannelTagMap) {
+    return presentEntries(channelTags)
         .filter(([, tagIds]) => tagIds.includes(tagId))
         .map(([channelId]) => channelId);
 }
 
-export function getTagUsageCounts() {
+export function getTagUsageCounts(channelTags: ChannelTagMap) {
     const counts = new Map<string, number>();
 
-    for (const tagIds of Object.values(getChannelTagMap())) {
+    for (const tagIds of presentValues(channelTags)) {
         for (const tagId of tagIds) counts.set(tagId, (counts.get(tagId) ?? 0) + 1);
     }
 
     return counts;
 }
 
-export function groupTagUsageChannels(channelIds: string[]): TagUsageGroup[] {
+export function groupTagUsageChannels(channelIds: ChannelId[], channels: TagsChannelMap, guilds: TagsGuildMap): TagUsageGroup[] {
     const groups = new Map<string, TagUsageGroup>();
-    const { channels, guilds } = getChannelsGuildsMaps();
 
     for (const channelId of channelIds) {
         const channel = channels[channelId];

@@ -10,11 +10,14 @@ import { RenderModalProps } from "@vencord/discord-types";
 import { extractAndLoadChunksLazy, findComponentByCodeLazy } from "@webpack";
 import { ColorPicker, Modal, openModalLazy, SearchableSelect, TextInput, useRef, useState } from "@webpack/common";
 
-import { addTagToChannel, ChannelId, createTag, DEFAULT_TAG_SHAPE, deleteEmptyGroups, ensureGroup, keysOf, sortAlphaNum, TagId, TagShape, TagShapesList, updateTag } from "./data";
+import { addTagToChannel, createTag, deleteEmptyGroups, ensureGroup, updateTag } from "./actions";
 import { openGroupModal } from "./GroupModal";
 import { GroupName, toGroupName } from "./groups";
-import { getGroupMap, getTagMap, settings } from "./settings";
+import { keysOf } from "./object";
+import { sortAlphaNum } from "./selectors";
+import { settings } from "./settings";
 import { TagShapeIcon } from "./TagShape";
+import { ChannelId, DEFAULT_TAG_SHAPE, TagId, TagShape, TagShapesList } from "./types";
 
 const SWATCHES = [
     0xffffff, 0xe91e22, 0x00dd00, 0x2ecc71, 0x3498db, 0x9b59b6, 0xe91e63, 0xf1c40f, 0xe67e22, 0xe74c3c, 0x95a5a6,
@@ -53,7 +56,8 @@ interface TagModalProps {
 }
 
 function TagModal({ channelId, tagId, wasFromContext, modalProps }: TagModalProps) {
-    const existingTag = tagId ? getTagMap()[tagId] : undefined;
+    const store = settings.use(["showHints", "tags", "groups"]);
+    const existingTag = tagId ? store.tags[tagId] : undefined;
     const [name, setName] = useState(existingTag?.name ?? "");
     const [group, setGroup] = useState<GroupName | undefined>(existingTag?.group);
     const [groupQuery, setGroupQuery] = useState<GroupName | undefined>(undefined);
@@ -62,7 +66,7 @@ function TagModal({ channelId, tagId, wasFromContext, modalProps }: TagModalProp
     const [shape, setShape] = useState<TagShape>(existingTag?.shape ?? DEFAULT_TAG_SHAPE);
     const groupName = toGroupName(group);
     const groupOptions = [...new Set([
-        ...keysOf(getGroupMap()),
+        ...keysOf(store.groups),
         groupName,
         toGroupName(groupQuery)
     ].filter((group): group is GroupName => !!group))]
@@ -100,7 +104,7 @@ function TagModal({ channelId, tagId, wasFromContext, modalProps }: TagModalProp
         <Modal
             {...modalProps}
             title={tagId ? "Edit Tag" : "Create Tag"}
-            subtitle={(settings.store.showHints && !wasFromContext && "You can hold shift when clicking a tag in the context menu to go straight to this dialog!")}
+            subtitle={(store.showHints && !wasFromContext && "You can hold shift when clicking a tag in the context menu to go straight to this dialog!")}
             actions={[{
                 text: tagId ? "Save" : channelId ? "Create & Set" : "Create",
                 variant: "primary",
@@ -174,7 +178,7 @@ function TagModal({ channelId, tagId, wasFromContext, modalProps }: TagModalProp
                             <PencilIcon />
                         </Button>
                     </div>
-                    {groupName && getGroupMap()[groupName]?.isExclusive && <Paragraph size="xs" className={Margins.top8} style={{ color: "var(--text-muted)" }}>
+                    {groupName && store.groups[groupName]?.isExclusive && <Paragraph size="xs" className={Margins.top8} style={{ color: "var(--text-muted)" }}>
                         Only one tag in "{group}" may be set on a channel/thread/DM at a time.<br />
                         When setting a grouped tag on a channel/thread/DM, the others of that group are removed.
                     </Paragraph>}

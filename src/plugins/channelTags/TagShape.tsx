@@ -6,7 +6,7 @@
 
 import { classes, classNameFactory } from "@utils/index";
 
-import { DEFAULT_TAG_SHAPE, TagShape, TagShapes } from "./data";
+import { DEFAULT_TAG_SHAPE, TagShape, TagShapes } from "./types";
 
 const cl = classNameFactory("vc-channel-tags-");
 

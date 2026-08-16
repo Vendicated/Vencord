@@ -8,17 +8,10 @@ import { definePluginSettings } from "@api/Settings";
 import { Button } from "@components/Button";
 import { SettingsSection } from "@components/settings/tabs/plugins/components/Common";
 import { OptionType } from "@utils/types";
-import { RawChannel } from "@vencord/discord-types";
-import { ChannelStore, Constants, RestAPI, UserStore } from "@webpack/common";
 
-import { type ChannelId, type ChannelTagMap, entriesOf, keysOf, type TagMap, type UserDMChannelMap, valuesOf } from "./data";
-import { createDefaultGroup, DEFAULT_GROUP, type GroupMap } from "./groups";
-import {
-    populateMetadata,
-    type TagsChannelMap,
-    type TagsGuildMap
-} from "./metadata";
-import { openTagsModal } from "./TagsModal";
+import { TagsGuildMap } from "./metadata";
+import { ChannelTagsData } from "./selectors";
+import { UserDMChannelMap } from "./types";
 
 export const settings = definePluginSettings({
     clickTagsToRemove: {
@@ -37,134 +30,11 @@ export const settings = definePluginSettings({
         type: OptionType.COMPONENT,
         component: () => (
             <SettingsSection tag="div" name="Tags" id="" description="" inlineSetting>
-                <Button onClick={openTagsModal}>Manage Tags</Button>
+                <Button onClick={() => void import("./TagsModal").then(({ openTagsModal }) => openTagsModal())}>Manage Tags</Button>
             </SettingsSection>
         )
     }
-}).withPrivateSettings<{
-    tags?: TagMap;
-    groups?: GroupMap;
-    channelTags?: ChannelTagMap;
-    userDMChannels?: UserDMChannelMap;
-    channels?: TagsChannelMap;
-    guilds?: TagsGuildMap;
+}).withPrivateSettings<ChannelTagsData & {
+    userDMChannels: UserDMChannelMap;
+    guilds: TagsGuildMap;
 }>();
-
-export const getTagMap = () => settings.store.tags ??= {};
-
-export const getGroupMap = () => {
-    const groups = settings.store.groups ??= {};
-    for (const tag of valuesOf(getTagMap())) {
-        if (tag.group && !groups[tag.group]) groups[tag.group] = createDefaultGroup();
-    }
-    for (const group of valuesOf(groups)) {
-        group.isExclusive ??= DEFAULT_GROUP.isExclusive;
-        group.showInSubmenu ??= DEFAULT_GROUP.showInSubmenu;
-        group.hiddenFor ??= { ...DEFAULT_GROUP.hiddenFor };
-        for (const target of keysOf(DEFAULT_GROUP.hiddenFor)) {
-            group.hiddenFor[target] ??= DEFAULT_GROUP.hiddenFor[target];
-        }
-    }
-    return groups;
-};
-
-export const getChannelTagMap = () => settings.store.channelTags ??= {};
-
-export const getUserDMChannelMap = () => settings.store.userDMChannels ??= {};
-
-export const getChannelsGuildsMaps = () => ({
-    channels: settings.store.channels ??= {},
-    guilds: settings.store.guilds ??= {}
-});
-
-export function updateStoreMetadata() {
-    populateMetadata(
-        settings.store.channelTags ??= {},
-        settings.store.channels ??= {},
-        settings.store.guilds ??= {}
-    );
-}
-
-function lookupUserIdForDMChannel(channelId: string) {
-    const userDMChannelMap = getUserDMChannelMap();
-
-    return entriesOf(userDMChannelMap).find(
-        ([, v]) => v === channelId
-    )?.[0];
-}
-
-const inFlightUserDMPosts: Map<string, Promise<RawChannel> | "blocked"> = new Map();
-
-/**
- * Creates the DM channel for the specified userId and returns it.
- */
-function createDMChannelForUser(userId: string, returnInFlight: boolean = false): Promise<RawChannel> {
-    if (inFlightUserDMPosts[userId] === "blocked")
-        return Promise.reject();
-
-    if (inFlightUserDMPosts[userId])
-        return returnInFlight ? inFlightUserDMPosts[userId] : Promise.reject();
-
-    inFlightUserDMPosts[userId] = RestAPI
-        .post({
-            url: Constants.Endpoints.USER_CHANNELS,
-            body: { recipients: [userId] }
-        })
-        .then(({ body: channel }: { body: RawChannel; }) => {
-            delete inFlightUserDMPosts[userId];
-            return channel;
-        })
-        .catch(() => {
-            // Block this user, avoid spamming the API
-            inFlightUserDMPosts[userId] = "blocked";
-            return Promise.reject();
-        });
-
-    return inFlightUserDMPosts[userId];
-}
-
-export async function ensureDMChannelExists(channelId: string) {
-    const userId = lookupUserIdForDMChannel(channelId);
-    if (!userId) return false;
-
-    const channel = ChannelStore.getChannel(channelId);
-    if (channel) return true;
-
-    const newChannel = await (createDMChannelForUser(userId, true).catch(() => false));
-    return !!newChannel;
-}
-
-export function getChannelIdForDMsWithUser(userId: string) {
-    const storeUserDMChannel = getUserDMChannelMap();
-
-    const cached = ChannelStore.getDMChannelFromUserId(userId);
-    if (cached && storeUserDMChannel[userId] !== cached.id)
-        return storeUserDMChannel[userId] = cached.id as ChannelId;
-
-    if (storeUserDMChannel[userId])
-        return storeUserDMChannel[userId];
-
-    const selfUser = UserStore.getCurrentUser();
-    if (selfUser.id === userId)
-        return null;
-
-    /**
-     * "Fetch" the DM channel ID from API directly and store it.
-     *
-     * This "creates" the channel, which then causes it to show in the user's messages list.
-     * To avoid complaints about this, we delete the channel immediately.
-     * Deleting DM channels doesn't delete anything permanently.
-     */
-
-    createDMChannelForUser(userId)
-        .then(channel => {
-            storeUserDMChannel[userId] = channel.id as ChannelId;
-
-            return RestAPI.del({
-                url: Constants.Endpoints.CHANNEL(channel.id)
-            });
-        })
-        .catch(); // Do nothing, just don't not do nothing.
-
-    return null;
-}
