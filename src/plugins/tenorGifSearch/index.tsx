@@ -178,8 +178,8 @@ export default definePlugin({
         {
             find: '"IntegrationQueryStore"',
             replacement: {
-                match: /(?<=search\((\i),(\i)\)\{)let \i=\i\.getResults\(\1,\2\);/,
-                replace: "return $self.tenorIntegrationSearch($1,$2);"
+                match: /(?<=search\((\i),(\i)\)\{)let \i=\i\.getResults\(\1,\2\)[,;]/,
+                replace: "return $self.tenorIntegrationSearch($1,$2);$&"
             }
         },
         // Add back tenor command
