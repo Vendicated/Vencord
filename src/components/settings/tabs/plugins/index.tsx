@@ -73,7 +73,6 @@ function ReloadRequiredCard({ required }: { required: boolean; }) {
 }
 
 const SearchStatus = {
-    ALL: 0,
     FAVORITES: 1,
     ENABLED: 2,
     DISABLED: 3,
@@ -168,26 +167,10 @@ function PluginSettings() {
 
     const hasUserPlugins = useMemo(() => !IS_STANDALONE && Object.values(PluginMeta).some(m => m.userPlugin), []);
 
-    const [searchValue, setSearchValue] = useState({ value: "", tags: [] as PluginTag[], statuses: [SearchStatus.ALL] as SearchStatus[] });
+    const [searchValue, setSearchValue] = useState({ value: "", tags: [] as PluginTag[], statuses: [] as SearchStatus[] });
 
     const search = searchValue.value.toLowerCase();
     const onSearch = (query: string) => setSearchValue(prev => ({ ...prev, value: query }));
-
-    const onStatusChange = (newStatuses: SearchStatus[]) => {
-        if (newStatuses.includes(SearchStatus.ALL)) {
-            if (!searchValue.statuses.includes(SearchStatus.ALL)) {
-                setSearchValue(prev => ({ ...prev, statuses: [SearchStatus.ALL] }));
-                return;
-            }
-            newStatuses = newStatuses.filter(s => s !== SearchStatus.ALL);
-        }
-
-        if (!newStatuses.length) {
-            newStatuses = [SearchStatus.ALL];
-        }
-
-        setSearchValue(prev => ({ ...prev, statuses: newStatuses }));
-    };
 
     const pluginFilter = (plugin: typeof Plugins[keyof typeof Plugins]) => {
         const { statuses, tags } = searchValue;
@@ -245,7 +228,6 @@ function PluginSettings() {
     }));
 
     const statusOptions = useMemo(() => [
-        { label: "Show All", value: SearchStatus.ALL },
         { label: "Show Favorites", value: SearchStatus.FAVORITES },
         { label: "Show Enabled", value: SearchStatus.ENABLED },
         { label: "Show Disabled", value: SearchStatus.DISABLED },
@@ -326,7 +308,7 @@ function PluginSettings() {
                     <SearchableSelect
                         options={statusOptions}
                         value={searchValue.statuses}
-                        onChange={onStatusChange}
+                        onChange={statuses => setSearchValue(prev => ({ ...prev, statuses }))}
                         closeOnSelect={false}
                         placeholder="Filter by Type"
                         multi

@@ -49,13 +49,6 @@
     align-items: center;
 }
 
-.vc-plugins-filter-controls :has(> [aria-label*="Show All" i]),
-.vc-plugins-filter-controls [aria-label*="Show All" i],
-.vc-plugins-filter-controls :has(> [title*="Show All" i]),
-.vc-plugins-filter-controls [title*="Show All" i] {
-    display: none !important; /* Hide Show All pill tag from the filter bar while keeping it selected in the dropdown */
-}
-
 .vc-plugins-filter-control {
     height: 40px;
 }
