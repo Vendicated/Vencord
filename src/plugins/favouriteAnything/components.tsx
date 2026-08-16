@@ -197,7 +197,7 @@ export function StaticFilePickerItem({ file }: StaticFilePickerItemProps) {
 
     // Keep this compact! Long prop names, styles, numbers, etc could be wasteful
     return (
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="-2 -2 32 11" style={{ font: "2px sans-serif", fill: "#242429" }}>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="-2 -2 32 11" style={{ font: "2px sans-serif" }} fill="#242429">
             <path d="M-2-2h32v11H-2" />
             <rect width="5" height="7" rx=".5" fill="#ddf" />
             <g fill="#78e">
