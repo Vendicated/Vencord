@@ -372,10 +372,18 @@ const messageContextMenuPatch: NavContextMenuPatchCallback = (children, props) =
     const menuItem = (() => {
         switch (favoriteableType) {
             case "emoji":
-                const match = props.message.content.match(RegExp(`<a?:(\\w+)(?:~\\d+)?:${favoriteableId}>|https://cdn\\.discordapp\\.com/emojis/${favoriteableId}\\.`));
+                const match: string = props.message.content.match(RegExp(`<a?:(\\w+)(?:~\\d+)?:${favoriteableId}>|https://cdn\\.discordapp\\.com/emojis/${favoriteableId}\\.[\\w?&=%]*`));
                 const reaction = props.message.reactions.find(reaction => reaction.emoji.id === favoriteableId);
                 if (!match && !reaction) return;
-                const name = (match && match[1]) ?? reaction?.emoji.name ?? "FakeNitroEmoji";
+
+                let url: URL | null = null;
+                try {
+                    url = new URL(match[0]);
+                } catch { }
+                const fakeNitroName = match[0].startsWith("https") ?
+                    EmojiStore.getCustomEmojiById(favoriteableId)?.name ?? url?.searchParams.get("name") ?? undefined :
+                    undefined;
+                const name = match[1] ?? fakeNitroName ?? reaction?.emoji.name ?? "FakeNitroEmoji";
 
                 return buildMenuItem("Emoji", () => ({
                     id: favoriteableId,
@@ -417,7 +425,7 @@ export default definePlugin({
     description: "Allows you to clone Emotes & Stickers to your own server (right click them)",
     tags: ["Emotes", "Servers"],
     searchTerms: ["StickerCloner", "EmoteCloner", "EmojiCloner"],
-    authors: [Devs.Ven, Devs.Nuckyz],
+    authors: [Devs.Ven, Devs.Nuckyz, Devs.scattagain],
     contextMenus: {
         "message": messageContextMenuPatch,
         "expression-picker": expressionPickerPatch
