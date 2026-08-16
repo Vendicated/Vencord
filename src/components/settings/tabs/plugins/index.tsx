@@ -73,12 +73,12 @@ function ReloadRequiredCard({ required }: { required: boolean; }) {
 }
 
 const SearchStatus = {
-    FAVORITES: 1,
-    ENABLED: 2,
-    DISABLED: 3,
-    NEW: 4,
-    USER_PLUGINS: 5,
-    API_PLUGINS: 6,
+    FAVORITES: 0,
+    ENABLED: 1,
+    DISABLED: 2,
+    NEW: 3,
+    USER_PLUGINS: 4,
+    API_PLUGINS: 5,
 } as const;
 
 type SearchStatus = typeof SearchStatus[keyof typeof SearchStatus];
