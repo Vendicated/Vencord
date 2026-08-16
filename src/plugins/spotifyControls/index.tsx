@@ -41,6 +41,27 @@ export const settings = definePluginSettings({
         type: OptionType.BOOLEAN,
         description: "Restart currently playing track when pressing the previous button if playtime is >3s",
         default: true
+    },
+    showVolumeButton: {
+        type: OptionType.BOOLEAN,
+        description: "Show a volume slider button in the controls row",
+        default: true
+    },
+    textAlignment: {
+        description: "Where the song info is aligned",
+        type: OptionType.SELECT,
+        options: [
+            { label: "Left", value: "left", default: true },
+            { label: "Center", value: "center" }
+        ]
+    },
+    coverStyle: {
+        description: "How the album cover is displayed",
+        type: OptionType.SELECT,
+        options: [
+            { label: "Inline", value: "inline", default: true },
+            { label: "Blurred Background", value: "background" }
+        ]
     }
 });
 
@@ -52,7 +73,7 @@ export default definePlugin({
     name: "SpotifyControls",
     description: "Adds a Spotify player above the account panel",
     tags: ["Media", "Activity"],
-    authors: [Devs.Ven, Devs.afn, Devs.KraXen72, Devs.Av32000, Devs.nin0dev],
+    authors: [Devs.Ven, Devs.afn, Devs.KraXen72, Devs.Av32000, Devs.nin0dev, Devs.smuki],
     settings,
     patches: [
         {

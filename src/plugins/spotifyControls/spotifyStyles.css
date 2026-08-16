@@ -106,6 +106,11 @@
     cursor: pointer;
 }
 
+.vc-spotify-cover-background #vc-spotify-album-image,
+.vc-spotify-cover-background #vc-spotify-album-expanded-wrapper {
+    display: none;
+}
+
 #vc-spotify-album-expanded-wrapper #vc-spotify-album-image {
     width: 100%;
     object-fit: contain;
@@ -218,4 +223,33 @@
 .vc-spotify-fallback {
     padding: 0.5em;
     color: var(--text-default);
+}
+
+.vc-spotify-text-centered #vc-spotify-info-wrapper {
+    justify-content: center;
+}
+
+.vc-spotify-text-centered #vc-spotify-titles {
+    align-items: center;
+    text-align: center;
+}
+
+.vc-spotify-cover-background {
+    position: relative;
+    overflow: hidden;
+}
+
+.vc-spotify-cover-background::before {
+    content: "";
+    position: absolute;
+    inset: -20px;
+    background-image: var(--vc-spotify-track-image);
+    background-size: cover;
+    background-position: center;
+    filter: blur(7px);
+    opacity: 0.4;
+}
+
+.vc-spotify-cover-background > * {
+    position: relative;
 }
