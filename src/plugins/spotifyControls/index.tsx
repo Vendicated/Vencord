@@ -60,7 +60,7 @@ export const settings = definePluginSettings({
         type: OptionType.SELECT,
         options: [
             { label: "Inline", value: "inline", default: true },
-            { label: "Blurred Background", value: "background" }
+            { label: "Background", value: "background" }
         ]
     }
 });
