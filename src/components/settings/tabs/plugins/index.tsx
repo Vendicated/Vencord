@@ -35,7 +35,7 @@ import { Margins } from "@utils/margins";
 import { classes } from "@utils/misc";
 import { useAwaiter, useCleanupEffect } from "@utils/react";
 import { PluginTag, PluginTags } from "@utils/types";
-import { Button, ConfirmModal, lodash, openModal, Parser, React, SearchableSelect, Select, TextInput, Tooltip, useMemo, useRef, useState } from "@webpack/common";
+import { Button, ConfirmModal, lodash, openModal, Parser, React, SearchableSelect, TextInput, Tooltip, useMemo, useRef, useState } from "@webpack/common";
 import { JSX } from "react";
 
 import Plugins, { ExcludedPlugins, PluginMeta } from "~plugins";
@@ -72,15 +72,17 @@ function ReloadRequiredCard({ required }: { required: boolean; }) {
     );
 }
 
-const enum SearchStatus {
-    ALL,
-    FAVORITES,
-    ENABLED,
-    DISABLED,
-    NEW,
-    USER_PLUGINS,
-    API_PLUGINS
-}
+const SearchStatus = {
+    ALL: 0,
+    FAVORITES: 1,
+    ENABLED: 2,
+    DISABLED: 3,
+    NEW: 4,
+    USER_PLUGINS: 5,
+    API_PLUGINS: 6,
+} as const;
+
+type SearchStatus = typeof SearchStatus[keyof typeof SearchStatus];
 
 function ExcludedPluginsList({ search }: { search: string; }) {
     const matchingExcludedPlugins = search
@@ -166,33 +168,51 @@ function PluginSettings() {
 
     const hasUserPlugins = useMemo(() => !IS_STANDALONE && Object.values(PluginMeta).some(m => m.userPlugin), []);
 
-    const [searchValue, setSearchValue] = useState({ value: "", tags: [] as PluginTag[], status: SearchStatus.ALL });
+    const [searchValue, setSearchValue] = useState({ value: "", tags: [] as PluginTag[], statuses: [SearchStatus.ALL] as SearchStatus[] });
 
     const search = searchValue.value.toLowerCase();
     const onSearch = (query: string) => setSearchValue(prev => ({ ...prev, value: query }));
 
-    const pluginFilter = (plugin: typeof Plugins[keyof typeof Plugins]) => {
-        const { status, tags } = searchValue;
+    const onStatusChange = (newStatuses: SearchStatus[]) => {
+        if (newStatuses.includes(SearchStatus.ALL)) {
+            if (!searchValue.statuses.includes(SearchStatus.ALL)) {
+                setSearchValue(prev => ({ ...prev, statuses: [SearchStatus.ALL] }));
+                return;
+            }
+            newStatuses = newStatuses.filter(s => s !== SearchStatus.ALL);
+        }
 
-        switch (status) {
-            case SearchStatus.FAVORITES:
-                if (!settings.plugins[plugin.name]?.isFavorite) return false;
-                break;
-            case SearchStatus.DISABLED:
-                if (isPluginEnabled(plugin.name)) return false;
-                break;
-            case SearchStatus.ENABLED:
-                if (!isPluginEnabled(plugin.name)) return false;
-                break;
-            case SearchStatus.NEW:
-                if (!newPlugins?.includes(plugin.name)) return false;
-                break;
-            case SearchStatus.USER_PLUGINS:
-                if (!PluginMeta[plugin.name]?.userPlugin) return false;
-                break;
-            case SearchStatus.API_PLUGINS:
-                if (!plugin.name.endsWith("API")) return false;
-                break;
+        if (!newStatuses.length) {
+            newStatuses = [SearchStatus.ALL];
+        }
+
+        setSearchValue(prev => ({ ...prev, statuses: newStatuses }));
+    };
+
+    const pluginFilter = (plugin: typeof Plugins[keyof typeof Plugins]) => {
+        const { statuses, tags } = searchValue;
+
+        for (const status of statuses) {
+            switch (status) {
+                case SearchStatus.FAVORITES:
+                    if (!settings.plugins[plugin.name]?.isFavorite) return false;
+                    break;
+                case SearchStatus.DISABLED:
+                    if (isPluginEnabled(plugin.name)) return false;
+                    break;
+                case SearchStatus.ENABLED:
+                    if (!isPluginEnabled(plugin.name)) return false;
+                    break;
+                case SearchStatus.NEW:
+                    if (!newPlugins?.includes(plugin.name)) return false;
+                    break;
+                case SearchStatus.USER_PLUGINS:
+                    if (!PluginMeta[plugin.name]?.userPlugin) return false;
+                    break;
+                case SearchStatus.API_PLUGINS:
+                    if (!plugin.name.endsWith("API")) return false;
+                    break;
+            }
         }
 
         if (tags.length && tags.some(t => !plugin.tags?.includes(t))) return false;
@@ -224,49 +244,62 @@ function PluginSettings() {
         return lodash.isEqual(newPlugins, sortedPluginNames) ? [] : newPlugins;
     }));
 
-    const plugins = [] as JSX.Element[];
-    const requiredPlugins = [] as JSX.Element[];
+    const statusOptions = useMemo(() => [
+        { label: "Show All", value: SearchStatus.ALL },
+        { label: "Show Favorites", value: SearchStatus.FAVORITES },
+        { label: "Show Enabled", value: SearchStatus.ENABLED },
+        { label: "Show Disabled", value: SearchStatus.DISABLED },
+        { label: "Show New", value: SearchStatus.NEW },
+        hasUserPlugins && { label: "Show UserPlugins", value: SearchStatus.USER_PLUGINS },
+        { label: "Show API Plugins", value: SearchStatus.API_PLUGINS },
+    ].filter(isTruthy), [hasUserPlugins]);
 
-    const showApi = searchValue.status === SearchStatus.API_PLUGINS;
-    for (const p of sortedPlugins) {
-        if (p.hidden || (!p.settings && p.name.endsWith("API") && !showApi))
-            continue;
+    const { plugins, requiredPlugins } = useMemo(() => {
+        const plugins = [] as JSX.Element[];
+        const requiredPlugins = [] as JSX.Element[];
 
-        if (!pluginFilter(p)) continue;
+        const showApi = searchValue.statuses.includes(SearchStatus.API_PLUGINS);
+        for (const p of sortedPlugins) {
+            if (p.hidden || (!p.settings && p.name.endsWith("API") && !showApi))
+                continue;
 
-        const isRequired = p.required || p.isDependency || depMap[p.name]?.some(d => settings.plugins[d].enabled);
+            if (!pluginFilter(p)) continue;
 
-        if (isRequired) {
-            const tooltipText = p.required || !depMap[p.name]
-                ? "This plugin is required for Vencord to function."
-                : makeDependencyList(depMap[p.name]?.filter(d => settings.plugins[d].enabled));
+            const isRequired = p.required || p.isDependency || depMap[p.name]?.some(d => settings.plugins[d].enabled);
 
-            requiredPlugins.push(
-                <Tooltip text={tooltipText} key={p.name}>
-                    {({ onMouseLeave, onMouseEnter }) => (
-                        <PluginCard
-                            onMouseLeave={onMouseLeave}
-                            onMouseEnter={onMouseEnter}
-                            onRestartNeeded={(name, key) => changes.handleChange(`${name}.${key}`)}
-                            disabled={true}
-                            plugin={p}
-                            key={p.name}
-                        />
-                    )}
-                </Tooltip>
-            );
-        } else {
-            plugins.push(
-                <PluginCard
-                    onRestartNeeded={(name, key) => changes.handleChange(`${name}.${key}`)}
-                    disabled={false}
-                    plugin={p}
-                    isNew={newPlugins?.includes(p.name)}
-                    key={p.name}
-                />
-            );
+            if (isRequired) {
+                const tooltipText = p.required || !depMap[p.name]
+                    ? "This plugin is required for Vencord to function."
+                    : makeDependencyList(depMap[p.name]?.filter(d => settings.plugins[d].enabled));
+
+                requiredPlugins.push(
+                    <Tooltip text={tooltipText} key={p.name}>
+                        {({ onMouseLeave, onMouseEnter }) => (
+                            <PluginCard
+                                onMouseLeave={onMouseLeave}
+                                onMouseEnter={onMouseEnter}
+                                onRestartNeeded={(name, key) => changes.handleChange(`${name}.${key}`)}
+                                disabled={true}
+                                plugin={p}
+                                key={p.name}
+                            />
+                        )}
+                    </Tooltip>
+                );
+            } else {
+                plugins.push(
+                    <PluginCard
+                        onRestartNeeded={(name, key) => changes.handleChange(`${name}.${key}`)}
+                        disabled={false}
+                        plugin={p}
+                        isNew={newPlugins?.includes(p.name)}
+                        key={p.name}
+                    />
+                );
+            }
         }
-    }
+        return { plugins, requiredPlugins };
+    }, [sortedPlugins, searchValue, settings.plugins, depMap, newPlugins, changes]);
 
     return (
         <SettingsTab>
@@ -290,21 +323,13 @@ function PluginSettings() {
 
             <ErrorBoundary noop>
                 <div className={classes(Margins.bottom20, Margins.top8, cl("filter-controls"))}>
-                    <Select
-                        options={[
-                            { label: "Show All", value: SearchStatus.ALL, default: true },
-                            { label: "Show Favorites", value: SearchStatus.FAVORITES },
-                            { label: "Show Enabled", value: SearchStatus.ENABLED },
-                            { label: "Show Disabled", value: SearchStatus.DISABLED },
-                            { label: "Show New", value: SearchStatus.NEW },
-                            hasUserPlugins && { label: "Show UserPlugins", value: SearchStatus.USER_PLUGINS },
-                            { label: "Show API Plugins", value: SearchStatus.API_PLUGINS },
-                        ].filter(isTruthy)}
-                        serialize={String}
-                        select={status => setSearchValue(prev => ({ ...prev, status }))}
-                        isSelected={v => v === searchValue.status}
-                        closeOnSelect={true}
+                    <SearchableSelect
+                        options={statusOptions}
+                        value={searchValue.statuses}
+                        onChange={onStatusChange}
+                        closeOnSelect={false}
                         placeholder="Filter by Type"
+                        multi
                     />
                     <SearchableSelect
                         options={PluginTags.map(tag => ({ label: tag, value: tag }))}
