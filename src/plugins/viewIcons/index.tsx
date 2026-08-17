@@ -44,7 +44,7 @@ interface GroupDMContextProps {
 const settings = definePluginSettings({
     format: {
         type: OptionType.SELECT,
-        description: "Choose the image format to use for non animated images. Animated images will always use .gif",
+        description: "Choose the image format to use for non-animated images. Animated images will always use .webp",
         options: [
             {
                 label: "webp",
@@ -86,7 +86,7 @@ function openImage({ url, width, height, event }: OpenImageProps) {
     const format = url.startsWith("/")
         ? "png"
         : u.searchParams.get("animated") === "true"
-            ? "gif"
+            ? "webp"
             : settings.store.format;
 
     u.searchParams.set("size", settings.store.imgSize);
