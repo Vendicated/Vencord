@@ -71,7 +71,12 @@ async function tryLookup(query: string): Promise<Record<string, unknown> | undef
         .then(json => json.recordings?.[0]);
 }
 
-async function getUrls(additionalInfo: Record<string, string> | undefined, trackName: string, artistName: string, releaseName: string): Promise<Partial<TrackData>> {
+async function getUrls(
+    additionalInfo: Record<string, string> | undefined,
+    trackName: string,
+    artistName: string,
+    releaseName: string
+): Promise<Partial<TrackData>> {
     // Well tagged music will have MBIDs which we can use directly. These are optional but highly recommended in ListenBrainz scrobbles.
     // If your music doesn't have these, it's highly recommended to use https://picard.musicbrainz.org/ to automatically add them
     if (additionalInfo?.recording_mbid) {
@@ -79,58 +84,56 @@ async function getUrls(additionalInfo: Record<string, string> | undefined, track
 
         return {
             imageURL: await fetchCoverArt(release_mbid, release_group_mbid, origin_url),
-            trackURL: recording_mbid ? url(`/track/${recording_mbid}`) : undefined,
-            albumURL: release_group_mbid
-                ? url(`/release-group/${release_group_mbid}`)
-                : release_mbid
-                    ? url(`/release/${release_mbid}`)
+            trackURL: url(`/track/${recording_mbid}`),
+            albumURL: release_mbid
+                ? url(`/release/${release_mbid}`)
+                : release_group_mbid
+                    ? url(`/release-group/${release_group_mbid}`)
                     : undefined,
             artistURL: artist_mbids?.length ? url(`/artist/${artist_mbids[0]}`) : undefined,
         };
     }
 
-    // If no MBIDs are present, try to search for the track on MusicBrainz
-    let query: string = `artist:"${artistName}" AND recording:"${trackName}"${releaseName ? ` AND release:"${releaseName}"` : ""}`;
-    let metadata: Record<string, unknown> | undefined;
+    // If no MBIDs are present, try searching MusicBrainz: first by ISRC (if present), then by name.
+    const nameQuery = encodeURIComponent(
+        `artist:"${artistName}" AND recording:"${trackName}"${releaseName ? ` AND release:"${releaseName}"` : ""}`
+    );
+    const queries = additionalInfo?.isrc
+        ? [encodeURIComponent(`isrc:${additionalInfo.isrc}`), nameQuery]
+        : [nameQuery];
 
-    // Attempt ISRC lookup if present
-    if (additionalInfo?.isrc) {
-        const { isrc } = additionalInfo;
-        query = encodeURIComponent(`isrc:${isrc}`);
+    for (const query of queries) {
         if (metadataCache.has(query)) {
             return metadataCache.get(query) ?? {};
         }
-        metadata = await tryLookup(query);
-    }
 
-    // Attempt name lookup
-    if (!metadata) {
-        query = encodeURIComponent(`artist:"${artistName}" AND recording:"${trackName}"${releaseName ? ` AND release:"${releaseName}"` : ""}`);
-        if (metadataCache.has(query)) {
-            return metadataCache.get(query) ?? {};
-        }
-        metadata = await tryLookup(query);
-    }
+        const metadata = await tryLookup(query);
+        if (!metadata) continue;
 
-    if (!metadata) { // Fall back to image from the orgin url
-        const data = additionalInfo?.origin_url ? { imageURL: fallbackToYoutubeThumbnail(additionalInfo.origin_url) } : {};
+        const artist = metadata["artist-credit"]?.[0]?.artist;
+        const release = metadata.releases?.[0];
+
+        const data: Partial<TrackData> = {
+            imageURL: await fetchCoverArt(release?.id, release?.["release-group"]?.id, additionalInfo?.origin_url),
+            trackURL: url(`/track/${metadata.id}/`),
+            albumURL: release?.id
+                ? url(`/release/${release.id}/`)
+                : release?.["release-group"]?.id
+                    ? url(`/release-group/${release["release-group"].id}/`)
+                    : undefined,
+            artistURL: artist?.id ? url(`/artist/${artist.id}/`) : undefined,
+            album: additionalInfo?.release_name ?? release?.title ?? "Unknown",
+        };
         metadataCache.set(query, data);
         return data;
     }
 
-    const artist = metadata["artist-credit"]?.[0]?.artist;
-    const release = metadata.releases?.[0];
+    const fallback: Partial<TrackData> = additionalInfo?.origin_url
+        ? { imageURL: fallbackToYoutubeThumbnail(additionalInfo.origin_url) }
+        : {};
+    metadataCache.set(queries.at(-1)!, fallback);
 
-    const data: Partial<TrackData> = {
-        imageURL: await fetchCoverArt(release?.id, release?.["release-group"]?.id, additionalInfo?.origin_url),
-        trackURL: url(`/track/${metadata.id}/`),
-        albumURL: release?.id ? url(`/release/${release.id}/`) : release?.["release-group"]?.id ? url(`/release-group/${release["release-group"].id}/`) : undefined,
-        artistURL: artist?.id ? url(`/artist/${artist.id}/`) : undefined,
-        album: additionalInfo?.release_name ?? release?.title ?? "Unknown",
-    };
-    metadataCache.set(query, data);
-
-    return data;
+    return fallback;
 }
 
 export const ListenBrainzScrobbler: ScrobblerBackend = {
