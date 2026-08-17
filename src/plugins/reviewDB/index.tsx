@@ -187,7 +187,6 @@ export default definePlugin({
                                             {reviewData.reviews
                                                 .filter(review => review.id !== 0)
                                                 .slice(0, 4)
-                                                .reverse()
                                                 .map((review, idx) => {
                                                     const showCount = idx === 3 && reviewData.reviewCount > 4;
 
