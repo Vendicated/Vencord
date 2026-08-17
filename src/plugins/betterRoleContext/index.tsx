@@ -150,6 +150,7 @@ export function buildExtraRoleContextMenuItems(role: Role, guild: Guild, popoutR
                                 {...popoutProps}
                             >
                                 <div className={MenuItemClasses.label}>View Role Members</div>
+                                {/* FIXME: update to new icon style */}
                                 <div className={MenuItemClasses.iconContainer}>
                                     <RoleMembersIcon />
                                 </div>
