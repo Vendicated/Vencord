@@ -116,7 +116,7 @@ export default definePlugin({
             find: ".WIDGETS?",
             replacement: [
                 {
-                    match: /items:(\i),initialSection:\i,onClose:\i\}=\i.+?(?=return\(0,\i\.jsxs?\)\()/,
+                    match: /items:(\i),initialSection:\i,onClose:\i\}=\i.{0,200}?(?=return.{0,30}?\(0,\i\.jsxs?\)\()/,
                     replace: "$&$self.pushSection($1,arguments[0].user);"
                 },
                 {

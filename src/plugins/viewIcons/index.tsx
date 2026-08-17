@@ -44,7 +44,7 @@ interface GroupDMContextProps {
 const settings = definePluginSettings({
     format: {
         type: OptionType.SELECT,
-        description: "Choose the image format to use for non animated images. Animated images will always use .gif",
+        description: "Choose the image format to use for non-animated images. Animated images will always use .webp",
         options: [
             {
                 label: "webp",
@@ -86,7 +86,7 @@ function openImage({ url, width, height, event }: OpenImageProps) {
     const format = url.startsWith("/")
         ? "png"
         : u.searchParams.get("animated") === "true"
-            ? "gif"
+            ? "webp"
             : settings.store.format;
 
     u.searchParams.set("size", settings.store.imgSize);
@@ -117,6 +117,7 @@ const UserContext: NavContextMenuPatchCallback = (children, { user, guildId }: U
                 label="View Avatar"
                 action={() => openAvatar(IconUtils.getUserAvatarURL(user, true))}
                 icon={ImageIcon}
+                leadingAccessory={{ type: "icon", icon: ImageIcon }}
             />
             {memberAvatar && (
                 <Menu.MenuItem
@@ -129,6 +130,7 @@ const UserContext: NavContextMenuPatchCallback = (children, { user, guildId }: U
                         canAnimate: true
                     }))}
                     icon={ImageIcon}
+                    leadingAccessory={{ type: "icon", icon: ImageIcon }}
                 />
             )}
             {avatarDecoration && (
@@ -141,6 +143,7 @@ const UserContext: NavContextMenuPatchCallback = (children, { user, guildId }: U
                         canAnimate: true
                     })!)}
                     icon={ImageIcon}
+                    leadingAccessory={{ type: "icon", icon: ImageIcon }}
                 />
             )}
         </Menu.MenuGroup>
@@ -167,6 +170,7 @@ const GuildContext: NavContextMenuPatchCallback = (children, { guild }: GuildCon
                         })!)
                     }
                     icon={ImageIcon}
+                    leadingAccessory={{ type: "icon", icon: ImageIcon }}
                 />
             ) : null}
             {banner ? (
@@ -177,6 +181,7 @@ const GuildContext: NavContextMenuPatchCallback = (children, { guild }: GuildCon
                         openBanner(IconUtils.getGuildBannerURL(guild, true)!)
                     }
                     icon={ImageIcon}
+                    leadingAccessory={{ type: "icon", icon: ImageIcon }}
                 />
             ) : null}
         </Menu.MenuGroup>
@@ -195,6 +200,7 @@ const GroupDMContext: NavContextMenuPatchCallback = (children, { channel }: Grou
                     openAvatar(IconUtils.getChannelIconURL(channel)!)
                 }
                 icon={ImageIcon}
+                leadingAccessory={{ type: "icon", icon: ImageIcon }}
             />
         </Menu.MenuGroup>
     ));
@@ -230,10 +236,10 @@ export default definePlugin({
         },
         // Banners
         {
-            find: 'backgroundColor:"COMPLETE"',
+            find: '"--custom-cutout-radius":',
             replacement: {
-                match: /(overflow:"visible",.{0,125}?!1\),)style:{(?=.+?backgroundImage:null!=(\i)\?`url\(\$\{\2\}\))/,
-                replace: (_, rest, bannerSrc) => `${rest}onClick:vcEvent=>${bannerSrc}!=null&&$self.openBanner(${bannerSrc}, vcEvent),style:{cursor:${bannerSrc}!=null?"pointer":void 0,`
+                match: /style:{(?=\.\.\.\i,backgroundImage:null!=(\i).{0,20}?\?`url\(\$\{\1\}\)`)/,
+                replace: (_, bannerSrc) => `onClick:vcEvent=>${bannerSrc}!=null&&$self.openBanner(${bannerSrc},vcEvent),style:{cursor:${bannerSrc}!=null?"pointer":void 0,`
             }
         },
         // Group DMs top small & large icon
