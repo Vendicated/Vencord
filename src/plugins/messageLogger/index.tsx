@@ -23,6 +23,7 @@ import { updateMessage } from "@api/MessageUpdater";
 import { definePluginSettings } from "@api/Settings";
 import { disableStyle, enableStyle } from "@api/Styles";
 import ErrorBoundary from "@components/ErrorBoundary";
+import { DeleteIcon, EyeIcon } from "@components/Icons";
 import { Devs, SUPPORT_CATEGORY_ID, VENBOT_USER_ID } from "@utils/constants";
 import { getIntlMessage } from "@utils/discord";
 import { Logger } from "@utils/Logger";
@@ -176,6 +177,7 @@ const patchMessageContextMenu: NavContextMenuPatchCallback = (children, props) =
                 id={TOGGLE_DELETE_STYLE_ID}
                 key={TOGGLE_DELETE_STYLE_ID}
                 label="Toggle Deleted Highlight"
+                leadingAccessory={{ type: "icon", icon: EyeIcon }}
                 action={() => domElement.classList.toggle("messagelogger-deleted")}
             />
         ));
@@ -186,6 +188,7 @@ const patchMessageContextMenu: NavContextMenuPatchCallback = (children, props) =
             id={REMOVE_HISTORY_ID}
             key={REMOVE_HISTORY_ID}
             label="Remove Message History"
+            leadingAccessory={{ type: "icon", icon: DeleteIcon }}
             color="danger"
             action={() => {
                 clearMessageHistory(message);
