@@ -34,37 +34,29 @@ function fallbackToYoutubeThumbnail(originUrl: string | undefined): string | und
     return match ? `https://i.ytimg.com/vi/${match[5]}/maxresdefault.jpg` : undefined;
 }
 
-async function fetchCoverArt(releaseMBID: string, releaseGroupMBID: string, originUrl?: string): Promise<string | undefined> {
-    if (!releaseGroupMBID && !releaseMBID) return fallbackToYoutubeThumbnail(originUrl);
-
-    if (releaseMBID) { // Try release fist, since different release variations can have differing cover art
-        if (coverArtCache.has(releaseMBID)) {
-            return coverArtCache.get(releaseMBID);
-        }
-
-        const res = await fetch(`https://coverartarchive.org/release/${releaseMBID}`);
-        if (res.ok) {
-            const url = await res.json()
-                .then(json => json.images[0].thumbnails.large);
-            if (url) {
-                coverArtCache.set(releaseMBID, url);
-                return url;
-            }
-        }
-    }
-    // Fallback to RG if release fails or is missing MBID
-    if (coverArtCache.has(releaseGroupMBID)) {
-        return coverArtCache.get(releaseGroupMBID);
+async function fetchCoverArtArchive(id: string, path: string) {
+    if (coverArtCache.has(id)) {
+        return coverArtCache.get(id);
     }
 
-    const res = await fetch(`https://coverartarchive.org/release-group/${releaseGroupMBID}`);
-    if (!res.ok) return fallbackToYoutubeThumbnail(originUrl);
+    const url = await fetch(`https://coverartarchive.org${path}`)
+        .then(res =>
+            res.ok
+                ? res.json()
+                : Promise.reject(new Error(`${res.status} ${res.statusText}`))
+        )
+        .then(json => json.images[0].thumbnails.large);
 
-    const url = await res.json()
-        .then(json => json.images[0].thumbnails.large ?? fallbackToYoutubeThumbnail(originUrl));
-    coverArtCache.set(releaseGroupMBID, url);
-
+    coverArtCache.set(id, url);
     return url;
+}
+
+async function fetchCoverArt(releaseMBID: string, releaseGroupMBID: string, originUrl?: string): Promise<string | undefined> {
+    return (
+        (releaseMBID && await fetchCoverArtArchive(releaseMBID, `/release/${releaseMBID}`).catch(() => null)) ||
+        (releaseGroupMBID && await fetchCoverArtArchive(releaseGroupMBID, `/release-group/${releaseGroupMBID}`).catch(() => null)) ||
+        fallbackToYoutubeThumbnail(originUrl)
+    );
 }
 
 async function tryLookup(query: string): Promise<Record<string, unknown> | undefined> {
