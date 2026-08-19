@@ -468,7 +468,7 @@ const expressionPickerPatch: NavContextMenuPatchCallback = (children, props: { t
 const settings = definePluginSettings({
     showFullGuilds: {
         type: OptionType.BOOLEAN,
-        default: false,
+        default: true,
         description: "Show guilds that have no free expression slots left in the clone modal"
     }
 });
