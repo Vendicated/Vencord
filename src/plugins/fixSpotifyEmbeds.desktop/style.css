@@ -1,0 +1,23 @@
+.vc-sp-pill {
+    width: 15px;
+    height: 2px;
+    background: #fffa;
+    border-radius: 2px;
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    bottom: 4px;
+    z-index: 100;
+}
+
+/* bigger hitbox */
+.vc-sp-pill::before {
+    content: "";
+    position: absolute;
+    inset: -5px -10px;
+}
+
+.vc-sp-popout {
+    background-color: var(--background-base-low);
+    border-radius: 5px;
+}
