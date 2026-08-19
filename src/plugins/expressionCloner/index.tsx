@@ -157,9 +157,13 @@ interface GuildCandidate {
     usedSlots: number;
 }
 
+function hasFreeSlots(guild: GuildCandidate) {
+    return guild.usedSlots < guild.totalSlots;
+}
+
 function filterGuildCandidate(c: GuildCandidate | null): c is GuildCandidate {
     if (!c) return false;
-    if (!settings.store.showFullGuilds && c.usedSlots >= c.totalSlots) return false;
+    if (!settings.store.showFullGuilds && !hasFreeSlots(c)) return false;
 
     return true;
 }
@@ -202,7 +206,9 @@ function getGuildCandidates(data: Data): GuildCandidate[] {
             };
         })
         .filter(filterGuildCandidate)
-        .sort((a, b) => a.guild.name.localeCompare(b.guild.name));
+        .sort((a, b) => a.guild.name.localeCompare(b.guild.name))
+        // move guilds with no free slots to the end, but keep them sorted by name
+        .sort((a, b) => +hasFreeSlots(b) - +hasFreeSlots(a));
 }
 
 async function fetchBlob(data: Data) {
@@ -361,7 +367,9 @@ function CloneModal({ data }: { data: Sticker | Emoji; }) {
                                             </Forms.FormText>
                                         )}
                                     </Clickable>
-                                    <Span>
+                                    <Span style={{
+                                        color: !hasFreeSlots ? "var(--text-feedback-critical)" : undefined,
+                                    }}>
                                         {usedSlots}/{totalSlots}
                                     </Span>
                                 </Flex>
