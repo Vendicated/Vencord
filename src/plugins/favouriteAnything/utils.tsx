@@ -99,9 +99,9 @@ export const defs = defineItems({
     // This could be expanded in the future with other item types (e.g. voice messages)
 });
 
-export function getExtension(filename: string): string | null {
+export function getFilenameAndExtension(filename: string): [name: string, ext: string | null] {
     const ext = filename.lastIndexOf(".");
-    return ext > 0 ? filename.substring(ext) : null;
+    return ext > 0 ? [filename.substring(0, ext), filename.substring(ext)] : [filename, null];
 }
 
 function renderToHTML(node: ReactNode): Promise<string> {
@@ -120,7 +120,8 @@ function renderToHTML(node: ReactNode): Promise<string> {
 export const FALLBACK_THUMBNAIL = new URL("https://images-ext-1.discordapp.net/external/085KIKMVni8n60G3GHE1rGcA0xgH6OgBKIZqUiQYsXc/%3Fname%3DUnknown%2520file%26subtitle%3D0%2520MB/https/placeholder.nin0.dev/image");
 
 async function getThumbnailBase(item: MessageAttachment): Promise<URL | null> {
-    const name = (item.title ? item.title + (getExtension(item.filename) ?? "") : item.filename).slice(0, 50);
+    const [filename, ext] = getFilenameAndExtension(item.filename);
+    const name = Humanize.truncatechars(item.title ? item.title : filename, 50) + (ext?.slice(0, 6) ?? "");
     const subtitle = Humanize.filesize(item.size);
 
     if (settings.store.localThumbnails) {
@@ -207,7 +208,7 @@ export async function sendAttachment(attachment: MessageAttachment, channel: Cha
     UploadManager.setUploads({ uploads, channelId: channel.id, draftType: DraftType.ChannelMessage });
 
     // Empty titles and descriptions are allowed
-    if (title != null) upload.filename = title + (getExtension(upload.filename) ?? "");
+    if (title != null) upload.filename = title + (getFilenameAndExtension(upload.filename)[1] ?? "");
     if (description != null) upload.description = description;
 
     FluxDispatcher.dispatch({ type: "DELETE_PENDING_REPLY", channelId: channel.id });

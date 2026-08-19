@@ -15,7 +15,7 @@ import { ComponentProps, ReactNode } from "react";
 
 import { SignedUrlsStore } from "./stores";
 import { AttachmentContextProviderProps, AttachmentItem, AttachmentsComponentProps, CustomItemFormat, FavoriteButtonProps, FavouriteItemFormat, FilePickerItemProps, FilePickerProps, ManaSearchBarProps, MessageComponentClass, StaticFilePickerItemProps } from "./types";
-import { cl, getExtension, getFileThumbnailUrl, hasPermission, ImageUtils, sendAttachment, transformAttachment, useFavourites, useListScroller, useResizeObserver } from "./utils";
+import { cl, getFilenameAndExtension, getFileThumbnailUrl, hasPermission, ImageUtils, sendAttachment, transformAttachment, useFavourites, useListScroller, useResizeObserver } from "./utils";
 
 export const EmbedContext = proxyLazyWebpack(() => React.createContext<null | Embed>(null));
 export const EmbedMosaicContext = proxyLazyWebpack(() => React.createContext<null | number>(null));
@@ -179,7 +179,7 @@ function SendIcon({ height = 24, width = 24, ...props }: ComponentProps<"svg">) 
 }
 
 export function StaticFilePickerItem({ name, subtitle }: StaticFilePickerItemProps) {
-    const ext = getExtension(name);
+    const [, ext] = getFilenameAndExtension(name);
 
     // Keep this compact! Long prop names, styles, numbers, etc could be wasteful
     return (
