@@ -256,7 +256,7 @@ const disableStreamPreviews = getUserSettingLazy<boolean>("voiceAndVideo", "disa
 export default definePlugin({
     name: "webScreenShare",
     authors: [Devs.ThaUnknown],
-    description: "Screenshare UI on browser. TODO better description :)",
+    description: "Adds a screenshare options menu. Allows for changing resolution, framerate, encoding hints, and system audio settings.",
     tags: ["Voice"],
     enabledByDefault: true,
     settings,
