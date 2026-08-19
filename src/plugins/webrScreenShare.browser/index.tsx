@@ -5,15 +5,17 @@
  */
 
 import { definePluginSettings, useSettings } from "@api/Settings";
+import { getUserSettingLazy } from "@api/UserSettings";
 import {
-    BaseText,
+    Button,
     Divider,
+    Span,
 } from "@components/index";
 import { Devs } from "@utils/constants";
 import { classNameFactory } from "@utils/css";
 import { Logger } from "@utils/Logger";
 import definePlugin, { OptionType } from "@utils/types";
-import { Checkbox, closeModal, Modal, openModal, Select, Slider } from "@webpack/common";
+import { Checkbox, closeModal, Modal, openModal, Text, } from "@webpack/common";
 
 import managedStyle from "./styles.css?managed";
 
@@ -54,6 +56,34 @@ function openScreenSharePicker(options: DisplayMediaStreamOptions) {
     });
 }
 
+function OptionRadio<Settings extends object, Key extends keyof Settings>(props: {
+    options: Array<string> | ReadonlyArray<string>;
+    labels?: Array<string>;
+    settings: Settings;
+    settingsKey: Key;
+    onChange: (option: string) => void;
+}) {
+    const { options, settings, settingsKey, labels, onChange } = props;
+
+    return (
+        <div className={cl("option-radios", "padding")}>
+            {(options as string[]).map((option, idx) => (
+                <label className={cl("option-radio")} data-checked={settings[settingsKey] === option} key={option}>
+                    <Span weight="bold">{labels?.[idx] ?? option}</Span>
+                    <input
+                        className={cl("option-input")}
+                        type="radio"
+                        name="fps"
+                        value={option}
+                        checked={settings[settingsKey] === option}
+                        onChange={() => onChange(option)}
+                    />
+                </label>
+            ))}
+        </div>
+    );
+}
+
 function ModalComponent({ modalProps, submit, close, options }: {
     modalProps: any;
     submit: (data: Promise<MediaStream>) => void;
@@ -61,6 +91,7 @@ function ModalComponent({ modalProps, submit, close, options }: {
     options: DisplayMediaStreamOptions;
 }) {
     const settings = useSettings(["plugins.webScreenShare.*"]).plugins.webScreenShare;
+    const disableStreamPreviewsValue = disableStreamPreviews.useSetting();
 
     async function stream() {
         try {
@@ -70,7 +101,6 @@ function ModalComponent({ modalProps, submit, close, options }: {
             // const conn = [...MediaEngineStore.getMediaEngine().connections].find(
             //     connection => connection.userId === UserStore.getCurrentUser().id
             // );
-            // console.log(MediaEngineStore.getMediaEngine());
 
             const videoOptions = typeof options?.video !== "boolean" && !!options.video ? options.video : {};
             const audioOptions = typeof options?.audio !== "boolean" && !!options.audio ? options.audio : {};
@@ -105,72 +135,86 @@ function ModalComponent({ modalProps, submit, close, options }: {
                 {...modalProps}
 
                 size="lg"
-                actions={[
-                    {
-                        text: "Stream",
-                        onClick: stream
-                    }
-                ]}
+                actionBarInput={
+                    <div className={cl("flex", "between")}>
+                        <div className={cl("summary")}>
+                            <Text variant="text-md/semibold" color="text-strong" className={cl("source-or-preset-name")}>{settings.contentHint === "motion" ? "Gaming" : settings.contentHint === "detail" ? "Screenshare" : "Custom"}</Text>
+                            <Text variant="text-xs/medium" color="text-muted" className={cl("summary-detail")}>
+                                <span>{settings.contentHint === "motion" ? "Smoother video" : settings.contentHint === "detail" ? "Cleaner text" : "User preset"}</span>
+                                <span className={cl("ellipsis")}>•</span>
+                                <span>{settings.resolution}p</span>
+                                <span className={cl("ellipsis")}>•</span>
+                                <span>{settings.frameRate}fps</span>
+                                {settings.systemAudio ? <span className={cl("ellipsis")}>•</span> : ""}
+                                {settings.systemAudio ? <span>Stream Muted</span> : ""}
+                            </Text>
+                        </div>
+                        <Button size="medium" variant="primary" onClick={stream}>Stream</Button>
+                    </div>
+                }
             >
+
                 <div>
-                    <div style={{ padding: "var(--space-sm) 0" }}>
-                        <BaseText size="md" weight="medium" >Resolution</BaseText>
-                        <Slider
-                            markers={[480, 720, 1080, 1440, 2160]}
-                            minValue={480}
-                            maxValue={2160}
-                            initialValue={Number(settings.resolution)}
-                            onValueChange={value => settings.resolution = value.toString()}
-                            stickToMarkers={true}
-                        />
+                    <div className={cl("flex", "padding")}>
+                        <section className={cl("quality-section")}>
+                            <Text tag="h2" variant="heading-md/semibold" color="text-strong">Resolution</Text>
+                            <OptionRadio
+                                options={StreamResolution}
+                                settings={settings}
+                                settingsKey="resolution"
+                                onChange={value => (settings.resolution = value.toString())}
+                            />
+                        </section>
+
+                        <section className={cl("quality-section")}>
+                            <Text tag="h2" variant="heading-md/semibold" color="text-strong">Frame Rate</Text>
+                            <OptionRadio
+                                options={StreamFps}
+                                settings={settings}
+                                settingsKey="frameRate"
+                                onChange={value => (settings.frameRate = value.toString())}
+                            />
+                        </section>
                     </div>
-                    <div style={{ padding: "var(--space-sm) 0" }}>
-                        <BaseText size="md" weight="medium" >Frame Rate</BaseText>
-                        <Slider
-                            markers={[15, 30, 60]}
-                            minValue={15}
-                            maxValue={60}
-                            initialValue={Number(settings.frameRate)}
-                            onValueChange={value => settings.frameRate = value.toString()}
-                            stickToMarkers={true}
-                        />
+                    <div>
+                        <Text tag="h2" variant="heading-md/semibold" color="text-strong">Stream Mode</Text>
+                        <div>
+                            <OptionRadio
+                                options={["motion", "detail", ""]}
+                                labels={["Smoother video", "Cleaner text", "Custom"]}
+                                settings={settings}
+                                settingsKey="contentHint"
+                                onChange={option => (settings.contentHint = option)}
+                            />
+                        </div>
                     </div>
-                    <div style={{ padding: "var(--space-sm) 0" }}>
-                        <BaseText size="md" weight="medium" >Stream Mode</BaseText>
-                        <Select
-                            options={[
-                                { label: "Smoother video", value: "motion", default: true },
-                                { label: "Cleaner text", value: "detail" },
-                            ]}
-                            serialize={String}
-                            select={value => (settings.contentHint = value)}
-                            isSelected={v => v === settings.contentHint}
-                            closeOnSelect={true}
-                            placeholder="Stream Mode"
-                        />
-                    </div>
-                    <div style={{ padding: "var(--space-sm) 0" }}>
+                    <Divider />
+                    <div className={cl("padding")}>
                         <Checkbox
                             value={settings.systemAudio}
                             onChange={(_e, value) => (settings.systemAudio = value)}
                             shape="box"
                             reverse={true}>
-                            <BaseText size="md" weight="medium" >Mute stream audio</BaseText>
-                            <BaseText size="sm" style={{ color: "var(--text-subtle)" }}>Mute stream audio</BaseText>
+                            <div className={cl("control-content")}>
+                                <Text tag="h2" variant="heading-md/semibold" color="text-strong">Mute stream audio</Text>
+                                <Text variant="text-sm/normal" color="text-subtle">Prevents system audio from being included in your stream.</Text>
+                            </div>
                         </Checkbox>
                     </div>
-                    <div style={{ padding: "var(--space-sm) 0" }}>
+                    <div className={cl("padding")}>
                         <Checkbox
-                            value={false}
-                            onChange={(_e, value) => { }}
+                            value={!disableStreamPreviewsValue}
+                            onChange={(_e, value) => disableStreamPreviews.updateSetting(() => !value)}
                             shape="box"
                             reverse={true}>
-                            <BaseText size="md" weight="medium" >Show Stream Previews</BaseText>
-                            <BaseText size="sm" style={{ color: "var(--text-subtle)" }}>Allows others to see a preview of your stream before they join. // TODO IMPLEMENTME :)</BaseText>
+                            <div className={cl("control-content")}>
+                                <Text tag="h2" variant="heading-md/semibold" color="text-strong">Show Stream Previews</Text>
+                                <Text variant="text-sm/normal" color="text-subtle">Allows others to see a preview of your stream before they join.</Text>
+                            </div>
                         </Checkbox>
                     </div>
+                    <Divider />
                 </div>
-                <Divider />
             </Modal>
         </div>
     );
@@ -178,8 +222,8 @@ function ModalComponent({ modalProps, submit, close, options }: {
 
 // this is kinda shit and it really should be done via videoQualityManager
 const StreamResolution = ["480", "720", "1080", "1440", "2160"] as const;
-const StreamFps = ["15", "30", "60"] as const;
-const StreamContentHint = ["motion", "detail"] as const;
+const StreamFps = ["15", "30", "60", "120"] as const;
+const StreamContentHint = ["motion", "detail", ""] as const;
 
 const settings = definePluginSettings({
     resolution: {
@@ -206,6 +250,8 @@ const settings = definePluginSettings({
         hidden: true
     }
 });
+
+const disableStreamPreviews = getUserSettingLazy<boolean>("voiceAndVideo", "disableStreamPreviews")!;
 
 export default definePlugin({
     name: "webScreenShare",
