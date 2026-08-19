@@ -1,0 +1,23 @@
+:root {
+    /* opt out of auto-dark-mode plugins, which break discord css, such as force-dark, dark-reader etc */
+    color-scheme: only light;
+}
+
+@media all and not (display-mode: browser) {
+    :root {
+        /* force title bar to be same as WCO bar height, regardless of zoom, device pixel ratio or OS, is only set when WCO is defined, otherwise sets to 0 */
+        --custom-app-top-bar-height: env(titlebar-area-height, 0px) !important;
+    }
+
+    /* position trailing titlebar elements alongside WCO */
+    [class*="bar_"] [class*="trailing_"] {
+        padding-right: calc(100vw - env(titlebar-area-width, 100%) - env(titlebar-area-x, 0px));
+    }
+}
+
+/* force hide trailing icons when standalone so there's no ugly pixel overflow */
+@media all and (display-mode: standalone) {
+    [class*="bar_"] [class*="trailing_"] {
+        display: none;
+    }
+}
