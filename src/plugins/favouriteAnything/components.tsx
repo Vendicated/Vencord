@@ -161,7 +161,7 @@ function Demo() {
                     format={FavouriteItemFormat.NONE}
                 />
             </div>
-            <BaseText className={cl("info-text")}>
+            <BaseText className={cl("info-text")} size="md">
                 Click the star to favourite a file.
                 <br />
                 Favourite files will show up here!
