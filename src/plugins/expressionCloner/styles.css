@@ -1,0 +1,56 @@
+.vc-expr-cloner-guild-select-modal {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    padding: 1rem .5rem;
+    justify-content: center;
+    align-items: center;
+}
+
+.vc-expr-cloner-slot-badge-container {
+    position: relative;
+
+    > .vc-expr-cloner-slot-badge {
+        border-radius: 9999px;
+        border: 2px solid var(--background-surface-high);
+        padding: 4px 5px;
+        position: absolute;
+        bottom: 0;
+        right: 0;
+        background: var(--background-brand);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-wrap: nowrap;
+        font-weight: bold;
+        font-size: 12px;
+
+        &.vc-expr-cloner-slot-badge-full {
+            background-color: color-mix(in oklab, hsl(from var(--control-critical-secondary-background-default) h s l / 100%) 12%, var(--background-surface-high));
+            color: var(--control-critical-secondary-text-default);
+        }
+    }
+}
+
+.vc-expr-cloner-guild-icon-container {
+    border-radius: 50%;
+    background-color: var(--background-base-lower);
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    width: 4rem;
+    height: 4rem;
+
+    > .vc-expr-cloner-guild-icon {
+        border-radius: inherit;
+        width: 100%;
+        height: 100%;
+    }
+
+    .vc-expr-cloner-guild-icon-placeholder {
+        width: 100%;
+        overflow: hidden;
+        white-space: nowrap;
+        text-align: center;
+    }
+}

@@ -31,9 +31,32 @@ import definePlugin, { OptionType } from "@utils/types";
 import { Guild, GuildSticker } from "@vencord/discord-types";
 import { StickerFormatType } from "@vencord/discord-types/enums";
 import { findByCodeLazy } from "@webpack";
-import { Clickable, Constants, EmojiStore, FluxDispatcher, Forms, GuildStore, IconUtils, Menu, Modal, openModalLazy, PermissionsBits, PermissionStore, React, RestAPI, StickersStore, Toasts, Tooltip, UserStore } from "@webpack/common";
-import { CSSProperties } from "react";
+import {
+    Clickable,
+    Constants,
+    EmojiStore,
+    FluxDispatcher,
+    Forms,
+    GuildStore,
+    IconUtils,
+    Menu,
+    Modal,
+    openModalLazy,
+    PermissionsBits,
+    PermissionStore,
+    React,
+    RestAPI,
+    StickersStore,
+    Toasts,
+    Tooltip,
+    UserStore,
+} from "@webpack/common";
+import { CSSProperties, PropsWithChildren } from "react";
 import { Promisable } from "type-fest";
+import "./styles.css";
+import { classNameFactory } from "@utils/css";
+
+const cn = classNameFactory("vc-expr-cloner-");
 
 const uploadEmoji = findByCodeLazy(".GUILD_EMOJIS(", "EMOJI_UPLOAD_START");
 
@@ -265,6 +288,29 @@ function getFontSize(s: string) {
 
 const nameValidator = /^\w+$/i;
 
+
+interface SlotBadgeProps extends PropsWithChildren {
+    used: number;
+    total: number;
+}
+
+function SlotBadge({ used, total, children }: SlotBadgeProps) {
+    return (
+        <div
+            className={cn("slot-badge-container")}
+        >
+            {children}
+            <div
+                className={cn("slot-badge", {
+                    "slot-badge-full": used >= total
+                })}
+            >
+                {used}/{total}
+            </div>
+        </div>
+    );
+}
+
 function CloneModal({ data }: { data: Sticker | Emoji; }) {
     const [isCloning, setIsCloning] = React.useState(false);
     const [name, setName] = React.useState(data.name);
@@ -288,91 +334,64 @@ function CloneModal({ data }: { data: Sticker | Emoji; }) {
                     || "Name must be between 2 and 32 characters and only contain alphanumeric characters"
                 }
             />
-            <div style={{
-                display: "flex",
-                flexWrap: "wrap",
-                gap: "1em",
-                padding: "1em 0.5em",
-                justifyContent: "center",
-                alignItems: "center"
-            }}>
+            <div className={cn("guild-select-modal")}>
                 {guilds.map(({ guild: g, totalSlots, usedSlots }) => {
                     const hasFreeSlots = usedSlots < totalSlots;
-                    const cursor: CSSProperties["cursor"] = !hasFreeSlots || isCloning ? "not-allowed" : "pointer";
+                    const canClone = hasFreeSlots && !isCloning;
+                    const cursor: CSSProperties["cursor"] = canClone ? "not-allowed" : "pointer";
                     const filter: CSSProperties["filter"] = !hasFreeSlots
-                        ? "grayscale(1)"
+                        ? "grayscale(1) brightness(50%)"
                         : isCloning
                             ? "brightness(50%)"
                             : undefined;
                     return (
                         <Tooltip key={g.id} text={<Span>{g.name} {EMDASH} {usedSlots}/{totalSlots}</Span>}>
                             {({ onMouseLeave, onMouseEnter }) => (
-                                <Flex
-                                    flexDirection="column"
-                                    gap="0"
-                                    alignItems="center"
+                                <Clickable
+                                    onMouseLeave={onMouseLeave}
+                                    onMouseEnter={onMouseEnter}
+                                    role="button"
+                                    aria-label={`Clone to ${g.name}`}
+                                    aria-disabled={!canClone}
+                                    onClick={canClone ? async () => {
+                                        setIsCloning(true);
+                                        doClone(g.id, data).finally(() => {
+                                            invalidateMemo();
+                                            setIsCloning(false);
+                                        });
+                                    } : void 0}
                                 >
-                                    <Clickable
-                                        onMouseLeave={onMouseLeave}
-                                        onMouseEnter={onMouseEnter}
-                                        role="button"
-                                        aria-label={`Clone to ${g.name}`}
-                                        aria-disabled={!hasFreeSlots || isCloning}
-                                        style={{
-                                            borderRadius: "50%",
-                                            backgroundColor: "var(--background-base-lower)",
-                                            display: "inline-flex",
-                                            justifyContent: "center",
-                                            alignItems: "center",
-                                            width: "4em",
-                                            height: "4em",
-                                            filter,
-                                        }}
-                                        onClick={isCloning ? void 0 : async () => {
-                                            setIsCloning(true);
-                                            doClone(g.id, data).finally(() => {
-                                                invalidateMemo();
-                                                setIsCloning(false);
-                                            });
-                                        }}
-                                    >
-                                        {g.icon ? (
-                                            <img
-                                                aria-hidden
-                                                style={{
-                                                    borderRadius: "50%",
-                                                    width: "100%",
-                                                    height: "100%",
-                                                    cursor,
-                                                }}
-                                                src={IconUtils.getGuildIconURL({
-                                                    id: g.id,
-                                                    icon: g.icon,
-                                                    canAnimate: true,
-                                                    size: 512
-                                                })}
-                                                alt={name} />
-                                        ) : (
-                                            <Forms.FormText
-                                                style={{
-                                                    fontSize: getFontSize(getGuildAcronym(g)),
-                                                    width: "100%",
-                                                    overflow: "hidden",
-                                                    whiteSpace: "nowrap",
-                                                    textAlign: "center",
-                                                    cursor,
-                                                }}
-                                            >
-                                                {getGuildAcronym(g)}
-                                            </Forms.FormText>
-                                        )}
-                                    </Clickable>
-                                    <Span style={{
-                                        color: !hasFreeSlots ? "var(--text-feedback-critical)" : undefined,
-                                    }}>
-                                        {usedSlots}/{totalSlots}
-                                    </Span>
-                                </Flex>
+                                    <SlotBadge total={totalSlots} used={usedSlots}>
+                                        <div
+                                            className={cn("guild-icon-container")}
+                                            style={{ filter }}
+                                        >
+                                            {g.icon ? (
+                                                <img
+                                                    aria-hidden
+                                                    style={{ cursor }}
+                                                    className={cn("guild-icon")}
+                                                    src={IconUtils.getGuildIconURL({
+                                                        id: g.id,
+                                                        icon: g.icon,
+                                                        canAnimate: true,
+                                                        size: 512
+                                                    })}
+                                                    alt={name} />
+                                            ) : (
+                                                <Forms.FormText
+                                                    style={{
+                                                        fontSize: getFontSize(getGuildAcronym(g)),
+                                                        cursor,
+                                                    }}
+                                                    className={cn("guild-icon-placeholder")}
+                                                >
+                                                    {getGuildAcronym(g)}
+                                                </Forms.FormText>
+                                            )}
+                                        </div>
+                                    </SlotBadge>
+                                </Clickable>
                             )}
                         </Tooltip>
                     );
