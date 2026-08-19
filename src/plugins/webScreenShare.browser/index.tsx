@@ -257,7 +257,7 @@ export default definePlugin({
     name: "webScreenShare",
     authors: [Devs.ThaUnknown],
     description: "Adds a screenshare options menu. Allows for changing resolution, framerate, encoding hints, and system audio settings.",
-    tags: ["Voice"],
+    tags: ["Voice", "Utility"],
     enabledByDefault: true,
     settings,
     managedStyle,
