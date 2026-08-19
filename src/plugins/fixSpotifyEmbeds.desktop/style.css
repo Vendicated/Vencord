@@ -21,3 +21,14 @@
     background-color: var(--background-base-low);
     border-radius: 5px;
 }
+
+.vc-sp-slider {
+    display: flex;
+    align-items: center;
+    width: 75px;
+    margin-inline: 5px 10px;
+}
+
+.vc-sp-grabber {
+    transform: scale(0.9);
+}

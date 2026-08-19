@@ -5,7 +5,7 @@
  */
 
 import { RendererSettings } from "@main/settings";
-import { app, WebFrameMain, webFrameMain } from "electron";
+import { app, IpcMainInvokeEvent, WebFrameMain, webFrameMain } from "electron";
 
 // TODO: routingID is deprecated and should be replaced with frameToken, but it's too new
 const ids = [] as Record<"routingId" | "processId", number>[];
@@ -43,6 +43,7 @@ app.on("browser-window-created", (_, win) => {
                     globalThis._vcVolume = ${settings.volume / 100};
                     const original = Audio.prototype.play;
                     Audio.prototype.play = function() {
+                        window._audio = this;
                         this.volume = _vcVolume;
                         return original.apply(this, arguments);
                     }
@@ -61,3 +62,11 @@ RendererSettings.addChangeListener("plugins.FixSpotifyEmbeds.volume", newVolume 
         console.error("FixSpotifyEmbeds: Failed to update volume", e);
     }
 });
+
+export function setVolumeForEmbeds(_event: IpcMainInvokeEvent, path: string, volume: number) {
+    cleanUpAndGetSpotifyFrames().forEach(frame => {
+        if (new URL(frame.url).pathname.endsWith(path)) {
+            frame.executeJavaScript(`globalThis._vcVolume = ${volume / 100};window._audio && (window._audio.volume = _vcVolume)`);
+        }
+    });
+}
