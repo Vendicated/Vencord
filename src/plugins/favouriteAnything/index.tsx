@@ -4,14 +4,24 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import { getIntlMessage } from "@utils/discord";
-import definePlugin from "@utils/types";
+import definePlugin, { OptionType } from "@utils/types";
 import { ComponentType, ReactNode } from "react";
 
 import { AttachmentAccessory, AttachmentContextProvider, EmbedAccessory, EmbedContext, EmbedMosaicContext, FilePicker } from "./components";
+import { SignedUrlsStore } from "./stores";
 import managedStyle from "./style.css?managed";
-import { AttachmentContextProviderProps, EmbedComponent, ExpressionPickerTabProps, ExpressionPickerView, FavouriteItem, FavouriteItemFormat } from "./types";
+import { AttachmentContextProviderProps, EmbedComponent, ExpressionPickerTabProps, ExpressionPickerView, FavouriteItem, FavouriteItemFormat, FullFavouriteItem } from "./types";
+
+export const settings = definePluginSettings({
+    localThumbnails: {
+        type: OptionType.BOOLEAN,
+        default: false,
+        description: "Generate file thumbnails locally instead of using an external service (placeholder.nin0.dev). Not compatible with mobile. Toggling this option will not affect existing favourites.",
+    }
+});
 
 export default definePlugin({
     name: "FavouriteAnything",
@@ -20,6 +30,7 @@ export default definePlugin({
     authors: [Devs.Davri, Devs.nin0dev],
     searchTerms: ["favorite"],
     managedStyle,
+    settings,
     patches: [
         // EMBEDS
         {
@@ -93,6 +104,15 @@ export default definePlugin({
                 match: '.sortBy("order").reverse()',
                 replace: "$&.filter($self.filterGifs)"
             }
+        },
+        // PROTOBUF
+        {
+            find: "#{intl::FAVORITE_GIFS_LIMIT_REACHED_BODY}",
+            replacement: {
+                // Intercept add/remove actions to generate a valid thumbnail url before storing the item
+                match: /function (\i)\((\i)\)\{(?=\i\.\i\.updateAsync\("favoriteGifs")/g,
+                replace: "async function $1($2){await $self.fixFavItem($2);await "
+            }
         }
     ],
     renderTabs(Tab: ComponentType<ExpressionPickerTabProps>, activeView: ExpressionPickerView) {
@@ -138,5 +158,18 @@ export default definePlugin({
     },
     renderAttachmentAccessory: () => <AttachmentAccessory />,
     renderEmbedAccessory: () => <EmbedAccessory />,
-    filterGifs: (item: FavouriteItem) => item.format !== FavouriteItemFormat.NONE
+    filterGifs: (item: FavouriteItem) => item.format !== FavouriteItemFormat.NONE,
+    fixFavItem: async (item: FullFavouriteItem | string) => {
+        if (typeof item === "string") {
+            SignedUrlsStore.addSigned(item);
+        } else {
+            SignedUrlsStore.addSigned(item.url);
+            SignedUrlsStore.addSigned(item.src);
+
+            if (typeof item.gifSrc === "function") {
+                item.src = await item.gifSrc();
+                delete item.gifSrc;
+            }
+        }
+    }
 });

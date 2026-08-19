@@ -12,13 +12,14 @@ import { useForceUpdater } from "@utils/react";
 import { PluginNative } from "@utils/types";
 import { Channel, MessageAttachment } from "@vencord/discord-types";
 import { findByCodeLazy, findByPropsLazy } from "@webpack";
-import { createRoot, DraftType, FluxDispatcher, MessageActions, PendingReplyStore, PermissionStore, ReactDOM, Toasts, UploadAttachmentStore, UploadHandler, UploadManager, useCallback, useEffect, useRef, UserSettingsActionCreators, UserSettingsProtoStore, useStateFromStores } from "@webpack/common";
+import { Constants, createRoot, DraftType, FluxDispatcher, Humanize, MessageActions, PendingReplyStore, PermissionStore, ReactDOM, RestAPI, Toasts, UploadAttachmentStore, UploadHandler, UploadManager, useCallback, useEffect, useRef, UserSettingsActionCreators, UserSettingsProtoStore, useStateFromStores } from "@webpack/common";
 import { deflateSync, inflateSync } from "fflate";
 import { Key, ReactNode } from "react";
 import { JsonValue } from "type-fest";
 
+import { settings } from ".";
 import { StaticFilePickerItem } from "./components";
-import { AttachmentTransformer, CustomItemDef, CustomItemFormat, FavouriteItem, FavouriteItemFormat, ImageUtils as ImageUtils_, ItemsDef, ResizeObserverHook } from "./types";
+import { AttachmentTransformer, CustomItemDef, CustomItemFormat, FavouriteItem, FavouriteItemFormat, ImageUtils as ImageUtils_, ItemsDef, ResizeObserverHook, UnfurledEmbedsResponse } from "./types";
 
 const Native = VencordNative.pluginHelpers.FavouriteAnything as PluginNative<typeof import("./native")>;
 
@@ -108,7 +109,6 @@ function renderToHTML(node: ReactNode): Promise<string> {
         const container = document.createElement("div");
         const root = createRoot(container);
 
-        // A full render can't happen while another render (or effect in this case) is happening
         queueMicrotask(() => {
             ReactDOM.flushSync(() => root.render(node));
             resolve(container.innerHTML);
@@ -117,19 +117,39 @@ function renderToHTML(node: ReactNode): Promise<string> {
     });
 }
 
-export async function getThumbnailUrl(item: MessageAttachment): Promise<URL | null> {
-    try {
-        const html = await renderToHTML(<StaticFilePickerItem file={item} />);
-        const metadata = defs.encode(CustomItemFormat.ATTACHMENT, item)?.toString();
-        if (!html || !metadata) return null;
+export const FALLBACK_THUMBNAIL = new URL("https://images-ext-1.discordapp.net/external/085KIKMVni8n60G3GHE1rGcA0xgH6OgBKIZqUiQYsXc/%3Fname%3DUnknown%2520file%26subtitle%3D0%2520MB/https/placeholder.nin0.dev/image");
 
-        // The base url is the thumbnail itself which is used for vanilla client compatibility, while the hash stores extra metadata.
+async function getThumbnailBase(item: MessageAttachment): Promise<URL | null> {
+    const name = (item.title ? item.title + (getExtension(item.filename) ?? "") : item.filename).slice(0, 50);
+    const subtitle = Humanize.filesize(item.size);
+
+    if (settings.store.localThumbnails) {
+        const html = await renderToHTML(<StaticFilePickerItem name={name} subtitle={subtitle} />);
         // encodeURIComponent is intentionally avoided since it would bloat the url size by replacing otherwise safe characters
-        const url = new URL("data:image/svg+xml," + html.replaceAll("%", "%25").replaceAll("#", "%23"));
-        url.hash = metadata;
-        return url;
+        return URL.parse("data:image/svg+xml," + html.replaceAll("%", "%25").replaceAll("#", "%23"));
+    } else {
+        const url = new URL("https://placeholder.nin0.dev/image");
+        url.searchParams.append("name", name || " ");
+        url.searchParams.append("subtitle", subtitle);
+
+        return await RestAPI.post({ url: Constants.Endpoints.UNFURL_EMBED_URLS, body: { urls: [url] }, retries: 3 })
+            .then(({ body }: { body: UnfurledEmbedsResponse; }) => {
+                const [{ thumbnail } = {}] = body.embeds;
+                return thumbnail?.proxy_url ? URL.parse(thumbnail.proxy_url) : null;
+            });
+    }
+}
+
+export async function getFileThumbnailUrl(item: MessageAttachment): Promise<URL> {
+    try {
+        const base = await getThumbnailBase(item);
+        const metadata = defs.encode(CustomItemFormat.ATTACHMENT, item)?.toString();
+        if (!base || !metadata) return FALLBACK_THUMBNAIL;
+.
+        base.hash = metadata;
+        return base;
     } catch {
-        return null;
+        return FALLBACK_THUMBNAIL;
     }
 }
 

@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { Channel, Embed, Message, MessageAttachment, TextInput } from "@vencord/discord-types";
+import { Channel, Embed, EmbedJSON, Message, MessageAttachment, TextInput } from "@vencord/discord-types";
 import { Component, ComponentClass, ComponentProps, ComponentPropsWithRef, Key, PropsWithChildren, ReactNode, RefObject } from "react";
 import { JsonValue, PartialDeep } from "type-fest";
 
@@ -24,9 +24,7 @@ export interface ExpressionPickerTabProps extends PropsWithChildren {
     viewType: ExpressionPickerView;
 }
 
-export interface FavoriteButtonProps extends Omit<FavouriteItem, "order"> {
-    url: string;
-    gifSrc?: string;
+export interface FavoriteButtonProps extends Omit<FullFavouriteItem, "order"> {
     className?: string;
 }
 
@@ -60,10 +58,12 @@ export interface FilePickerProps {
 }
 
 export interface StaticFilePickerItemProps {
-    file: MessageAttachment;
+    name: string;
+    subtitle: string;
 }
 
-export interface FilePickerItemProps extends StaticFilePickerItemProps {
+export interface FilePickerItemProps {
+    file: MessageAttachment;
     url: string;
     channel: Channel | null;
     reducePadding?: boolean;
@@ -121,6 +121,7 @@ export interface FavouriteItem {
 }
 
 export interface FullFavouriteItem extends FavouriteItem {
+    gifSrc?: () => Promise<string>;
     url: string;
 }
 
@@ -137,6 +138,10 @@ export interface CustomItemDef<A = any, B extends JsonValue = any> {
 export type ItemsDef<T> = T & {
     [K in keyof T]: T[K] extends CustomItemDef<infer A, infer B> ? CustomItemDef<A, B> : never;
 };
+
+export interface UnfurledEmbedsResponse {
+    embeds: EmbedJSON[];
+}
 
 export interface RefreshedUrlsResponse {
     refreshed_urls: [

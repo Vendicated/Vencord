@@ -10,12 +10,12 @@ import { LazyComponentWrapper } from "@utils/lazyReact";
 import { Embed, ListRow, Message, MessageAttachment, ScrollerBaseRef } from "@vencord/discord-types";
 import { ChannelType } from "@vencord/discord-types/enums";
 import { findByCodeLazy, findComponentByCode, findComponentByCodeLazy, findCssClassesLazy, proxyLazyWebpack } from "@webpack";
-import { ChannelStore, ExpressionPickerStore, Humanize, ListScrollerThin, lodash, PermissionsBits, PermissionStore, React, useCallback, useEffect, useMemo, useRef, useState, useStateFromStores } from "@webpack/common";
+import { ChannelStore, ExpressionPickerStore, ListScrollerThin, lodash, PermissionsBits, PermissionStore, React, useCallback, useEffect, useMemo, useRef, useState, useStateFromStores } from "@webpack/common";
 import { ComponentProps, ReactNode } from "react";
 
 import { SignedUrlsStore } from "./stores";
 import { AttachmentContextProviderProps, AttachmentItem, AttachmentsComponentProps, CustomItemFormat, FavoriteButtonProps, FavouriteItemFormat, FilePickerItemProps, FilePickerProps, ManaSearchBarProps, MessageComponentClass, StaticFilePickerItemProps } from "./types";
-import { cl, getExtension, getThumbnailUrl, hasPermission, ImageUtils, sendAttachment, transformAttachment, useFavourites, useListScroller, useResizeObserver } from "./utils";
+import { cl, getExtension, getFileThumbnailUrl, hasPermission, ImageUtils, sendAttachment, transformAttachment, useFavourites, useListScroller, useResizeObserver } from "./utils";
 
 export const EmbedContext = proxyLazyWebpack(() => React.createContext<null | Embed>(null));
 export const EmbedMosaicContext = proxyLazyWebpack(() => React.createContext<null | number>(null));
@@ -118,23 +118,11 @@ export function FilePicker({ onSelectItem }: FilePickerProps) {
     return (
         <div id="files-picker-tab-panel" role="tabpanel" aria-labelledby="files-picker-tab" className={cl("container")}>
             <div className={cl("container-header")}>
-                <ManaSearchBar
-                    autoFocus
-                    placeholder="Search files"
-                    query={query}
-                    onChange={handleChange}
-                    onClear={handleClear}
-                />
+                <ManaSearchBar autoFocus placeholder="Search files" query={query} onChange={handleChange} onClear={handleClear} />
             </div>
             {count > 0 ? (
                 <div className={cl("container-body")}>
-                    <ListScrollerThin
-                        ref={listRef}
-                        sections={[count]}
-                        sectionHeight={0}
-                        rowHeight={rowHeight}
-                        renderRow={renderRow}
-                    />
+                    <ListScrollerThin ref={listRef} sections={[count]} sectionHeight={0} rowHeight={rowHeight} renderRow={renderRow} />
                 </div>
             ) : (
                 <div className={cl("container-body", "container-info")} inert>
@@ -190,10 +178,8 @@ function SendIcon({ height = 24, width = 24, ...props }: ComponentProps<"svg">) 
     );
 }
 
-export function StaticFilePickerItem({ file }: StaticFilePickerItemProps) {
-    const ext = getExtension(file.filename);
-    const filename = (file.title ? file.title + (ext ?? "") : file.filename).slice(0, 50);
-    const size = Humanize.filesize(file.size);
+export function StaticFilePickerItem({ name, subtitle }: StaticFilePickerItemProps) {
+    const ext = getExtension(name);
 
     // Keep this compact! Long prop names, styles, numbers, etc could be wasteful
     return (
@@ -205,8 +191,8 @@ export function StaticFilePickerItem({ file }: StaticFilePickerItemProps) {
                 {ext && <text x=".85" y="6" fontFamily="monospace">{ext.slice(1, 4)}</text>}
             </g>
             <path d="M6 3V-2H1" />
-            <text x="7" y="2.8" fill="#eff">{filename}</text>
-            <text x="7" y="5.6" fill="#777">{size}</text>
+            <text x="7" y="2.8" fill="#eff">{name}</text>
+            <text x="7" y="5.6" fill="#777">{subtitle}</text>
         </svg>
     );
 }
@@ -356,36 +342,26 @@ const visualMediaFormats: Partial<Record<AttachmentItem["type"], FavouriteItemFo
 
 export function AttachmentAccessory() {
     const attachment = React.useContext(AttachmentContext);
-    const [customThumbnail, setCustomThumbnail] = useState<string | null>(null);
-
-    useEffect(() => {
-        if (!attachment?.type || attachment.type in visualMediaFormats) return;
-
-        getThumbnailUrl(attachment.originalItem).then(url => url && setCustomThumbnail(url.toString()));
-    }, [attachment]);
 
     const props: FavoriteButtonProps | null = useMemo(() => {
         if (!attachment?.downloadUrl) return null;
         const { originalItem, type, downloadUrl, srcIsAnimated } = attachment;
-        const width = attachment.width || 320, height = attachment.height || 110;
+        const width = attachment.width || 160, height = attachment.height || 55;
 
         // Do not render the custom accessory if the original attachment component already has a gif accessory
-        const isAnimated = ImageUtils.isAnimated({
-            original: originalItem.url,
-            src: originalItem.proxy_url,
-            animated: false,
-            srcIsAnimated
-        });
+        const isAnimated = ImageUtils.isAnimated({ original: originalItem.url, src: originalItem.proxy_url, animated: false, srcIsAnimated });
         if (isAnimated) return null;
 
         if (type in visualMediaFormats) {
             return { format: visualMediaFormats[type]!, src: originalItem.proxy_url, url: downloadUrl, width, height };
         }
 
-        if (!customThumbnail) return null;
-
-        return { format: FavouriteItemFormat.NONE, src: customThumbnail, url: downloadUrl, width, height };
-    }, [attachment, customThumbnail]);
+        const gifSrc = Object.assign(
+            () => getFileThumbnailUrl(originalItem).then(url => url.toString()),
+            { [Symbol.toPrimitive]: () => "" }
+        );
+        return { format: FavouriteItemFormat.NONE, src: originalItem.proxy_url, url: downloadUrl, width, height, gifSrc };
+    }, [attachment]);
 
     return props && <FavoriteButton {...props} className={cl("attachment-accessory")} />;
 }
