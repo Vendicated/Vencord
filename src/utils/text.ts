@@ -171,7 +171,9 @@ export function stripIndent(strings: TemplateStringsArray, ...values: any[]) {
     return string.replace(new RegExp(`^[ \\t]{${minIndent}}`, "gm"), "").trim();
 }
 
+export const EMDASH = "\u2014";
 export const ZWSP = "\u200b";
+
 export function toInlineCode(s: string) {
     return "``" + ZWSP + s.replaceAll("`", ZWSP + "`" + ZWSP) + ZWSP + "``";
 }

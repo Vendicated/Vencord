@@ -17,19 +17,22 @@
 */
 
 import { findGroupChildrenByChildId, NavContextMenuPatchCallback } from "@api/ContextMenu";
-import { migratePluginSettings } from "@api/Settings";
+import { definePluginSettings, migratePluginSettings } from "@api/Settings";
 import { BaseText } from "@components/BaseText";
 import { CheckedTextInput } from "@components/CheckedTextInput";
 import { Flex } from "@components/Flex";
 import { PlusIcon } from "@components/Icons";
+import { Span } from "@components/Span";
 import { Devs } from "@utils/constants";
 import { getGuildAcronym, hasGuildFeature } from "@utils/discord";
 import { Logger } from "@utils/Logger";
-import definePlugin from "@utils/types";
+import { EMDASH } from "@utils/text";
+import definePlugin, { OptionType } from "@utils/types";
 import { Guild, GuildSticker } from "@vencord/discord-types";
 import { StickerFormatType } from "@vencord/discord-types/enums";
 import { findByCodeLazy } from "@webpack";
-import { Constants, EmojiStore, FluxDispatcher, Forms, GuildStore, IconUtils, Menu, Modal, openModalLazy, PermissionsBits, PermissionStore, React, RestAPI, StickersStore, Toasts, Tooltip, UserStore } from "@webpack/common";
+import { Clickable, Constants, EmojiStore, FluxDispatcher, Forms, GuildStore, IconUtils, Menu, Modal, openModalLazy, PermissionsBits, PermissionStore, React, RestAPI, StickersStore, Text, Toasts, Tooltip, UserStore } from "@webpack/common";
+import { CSSProperties } from "react";
 import { Promisable } from "type-fest";
 
 const uploadEmoji = findByCodeLazy(".GUILD_EMOJIS(", "EMOJI_UPLOAD_START");
@@ -64,7 +67,8 @@ const PremiumTierStickerLimitMap = {
 const MAX_EMOJI_SIZE_BYTES = 256 * 1024;
 const MAX_STICKER_SIZE_BYTES = 512 * 1024;
 
-function getGuildMaxStickerSlots(guild: Guild) {
+// return number instead of inference because tsserver is insane and has some UI issues
+function getGuildMaxStickerSlots(guild: Guild): number {
     if (guild.features.has("MORE_STICKERS") && guild.premiumTier === 3)
         return 120;
 
@@ -139,35 +143,66 @@ async function cloneEmoji(guildId: string, emoji: Emoji) {
     });
 }
 
-function getGuildCandidates(data: Data) {
+interface GuildCandidate {
+    guild: Guild;
+    /**
+     * total number of slots for an expression type
+     */
+    totalSlots: number;
+    /**
+     * number of used slots for an expression type
+     *
+     * could be greater than {@link totalSlots} if the guild has lost slots due to nitro expiring
+     */
+    usedSlots: number;
+}
+
+function filterGuildCandidate(c: GuildCandidate | null): c is GuildCandidate {
+    if (!c) return false;
+    if (!settings.store.showFullGuilds && c.usedSlots >= c.totalSlots) return false;
+
+    return true;
+}
+
+function getGuildCandidates(data: Data): GuildCandidate[] {
     const meId = UserStore.getCurrentUser().id;
 
-    return Object.values(GuildStore.getGuilds()).filter(g => {
-        const canCreate = g.ownerId === meId ||
-            (PermissionStore.getGuildPermissions({ id: g.id }) & PermissionsBits.CREATE_GUILD_EXPRESSIONS) === PermissionsBits.CREATE_GUILD_EXPRESSIONS;
-        if (!canCreate) return false;
+    return Object.values(GuildStore.getGuilds())
+        .map((g): GuildCandidate | null => {
+            const canCreate = g.ownerId === meId ||
+                (PermissionStore.getGuildPermissions({ id: g.id }) & PermissionsBits.CREATE_GUILD_EXPRESSIONS) === PermissionsBits.CREATE_GUILD_EXPRESSIONS;
+            if (!canCreate) return null;
 
-        if (data.t === "Sticker") {
-            const stickerSlots = getGuildMaxStickerSlots(g);
-            const stickers = StickersStore.getStickersByGuildId(g.id);
+            if (data.t === "Sticker") {
+                const stickerSlots = getGuildMaxStickerSlots(g);
+                const stickers = StickersStore.getStickersByGuildId(g.id);
 
-            return !stickers || stickers.length < stickerSlots;
-        }
-
-        const { isAnimated } = data as Emoji;
-
-        const emojiSlots = getGuildMaxEmojiSlots(g);
-        const emojis = EmojiStore.getGuildEmoji(g.id);
-
-        let count = 0;
-        for (const emoji of emojis) {
-            if (emoji.animated === isAnimated && !emoji.managed) {
-                count++;
+                return {
+                    guild: g,
+                    totalSlots: stickerSlots,
+                    usedSlots: stickers?.length ?? 0
+                };
             }
-        }
 
-        return count < emojiSlots;
-    }).sort((a, b) => a.name.localeCompare(b.name));
+            const { isAnimated } = data;
+            const emojiSlots = getGuildMaxEmojiSlots(g);
+            const emojis = EmojiStore.getGuildEmoji(g.id);
+            let usedSlots = 0;
+
+            for (const emoji of emojis) {
+                if (emoji.animated === isAnimated && !emoji.managed) {
+                    usedSlots++;
+                }
+            }
+
+            return {
+                guild: g,
+                totalSlots: emojiSlots,
+                usedSlots,
+            };
+        })
+        .filter(filterGuildCandidate)
+        .sort((a, b) => a.guild.name.localeCompare(b.guild.name));
 }
 
 async function fetchBlob(data: Data) {
@@ -216,11 +251,11 @@ async function doClone(guildId: string, data: Sticker | Emoji) {
     }
 }
 
-const getFontSize = (s: string) => {
+function getFontSize(s: string) {
     // [18, 18, 16, 16, 14, 12, 10]
     const sizes = [20, 20, 18, 18, 16, 14, 12];
     return sizes[s.length] ?? 4;
-};
+}
 
 const nameValidator = /^\w+$/i;
 
@@ -255,68 +290,76 @@ function CloneModal({ data }: { data: Sticker | Emoji; }) {
                 justifyContent: "center",
                 alignItems: "center"
             }}>
-                {guilds.map(g => (
-                    <Tooltip key={g.id} text={g.name}>
-                        {({ onMouseLeave, onMouseEnter }) => (
-                            <div
-                                onMouseLeave={onMouseLeave}
-                                onMouseEnter={onMouseEnter}
-                                role="button"
-                                aria-label={"Clone to " + g.name}
-                                aria-disabled={isCloning}
-                                style={{
-                                    borderRadius: "50%",
-                                    backgroundColor: "var(--background-base-lower)",
-                                    display: "inline-flex",
-                                    justifyContent: "center",
-                                    alignItems: "center",
-                                    width: "4em",
-                                    height: "4em",
-                                    cursor: isCloning ? "not-allowed" : "pointer",
-                                    filter: isCloning ? "brightness(50%)" : "none"
-                                }}
-                                onClick={isCloning ? void 0 : async () => {
-                                    setIsCloning(true);
-                                    doClone(g.id, data).finally(() => {
-                                        invalidateMemo();
-                                        setIsCloning(false);
-                                    });
-                                }}
-                            >
-                                {g.icon ? (
-                                    <img
-                                        aria-hidden
-                                        style={{
-                                            borderRadius: "50%",
-                                            width: "100%",
-                                            height: "100%",
-                                        }}
-                                        src={IconUtils.getGuildIconURL({
-                                            id: g.id,
-                                            icon: g.icon,
-                                            canAnimate: true,
-                                            size: 512
-                                        })}
-                                        alt={g.name}
-                                    />
-                                ) : (
-                                    <Forms.FormText
-                                        style={{
-                                            fontSize: getFontSize(getGuildAcronym(g)),
-                                            width: "100%",
-                                            overflow: "hidden",
-                                            whiteSpace: "nowrap",
-                                            textAlign: "center",
-                                            cursor: isCloning ? "not-allowed" : "pointer",
-                                        }}
-                                    >
-                                        {getGuildAcronym(g)}
-                                    </Forms.FormText>
-                                )}
-                            </div>
-                        )}
-                    </Tooltip>
-                ))}
+                {guilds.map(({ guild: g, totalSlots, usedSlots }) => {
+                    let hasFreeSlots = usedSlots < totalSlots;
+                    const cursor: CSSProperties["cursor"] = !hasFreeSlots || isCloning ? "not-allowed" : "pointer";
+                    const filter: CSSProperties["filter"] = !hasFreeSlots
+                        ? "grayscale(1)"
+                        : isCloning
+                            ? "brightness(50%)"
+                            : undefined;
+                    return (
+                        <Tooltip key={g.id} text={<Span>{g.name} {EMDASH} {usedSlots}/{totalSlots}</Span>}>
+                            {({ onMouseLeave, onMouseEnter }) => (
+                                <Clickable
+                                    onMouseLeave={onMouseLeave}
+                                    onMouseEnter={onMouseEnter}
+                                    role="button"
+                                    aria-label={`Clone to ${g.name}`}
+                                    aria-disabled={!hasFreeSlots || isCloning}
+                                    style={{
+                                        borderRadius: "50%",
+                                        backgroundColor: "var(--background-base-lower)",
+                                        display: "inline-flex",
+                                        justifyContent: "center",
+                                        alignItems: "center",
+                                        width: "4em",
+                                        height: "4em",
+                                        filter,
+                                    }}
+                                    onClick={isCloning ? void 0 : async () => {
+                                        setIsCloning(true);
+                                        doClone(g.id, data).finally(() => {
+                                            invalidateMemo();
+                                            setIsCloning(false);
+                                        });
+                                    }}
+                                >
+                                    {g.icon ? (
+                                        <img
+                                            aria-hidden
+                                            style={{
+                                                borderRadius: "50%",
+                                                width: "100%",
+                                                height: "100%",
+                                                cursor,
+                                            }}
+                                            src={IconUtils.getGuildIconURL({
+                                                id: g.id,
+                                                icon: g.icon,
+                                                canAnimate: true,
+                                                size: 512
+                                            })}
+                                            alt={name} />
+                                    ) : (
+                                        <Forms.FormText
+                                            style={{
+                                                fontSize: getFontSize(getGuildAcronym(g)),
+                                                width: "100%",
+                                                overflow: "hidden",
+                                                whiteSpace: "nowrap",
+                                                textAlign: "center",
+                                                cursor,
+                                            }}
+                                        >
+                                            {getGuildAcronym(g)}
+                                        </Forms.FormText>
+                                    )}
+                                </Clickable>
+                            )}
+                        </Tooltip>
+                    );
+                })}
             </div>
         </>
     );
@@ -413,15 +456,24 @@ const expressionPickerPatch: NavContextMenuPatchCallback = (children, props: { t
     }
 };
 
+const settings = definePluginSettings({
+    showFullGuilds: {
+        type: OptionType.BOOLEAN,
+        default: false,
+        description: "Show guilds that have no free expression slots left in the clone modal"
+    }
+});
+
 migratePluginSettings("ExpressionCloner", "EmoteCloner");
 export default definePlugin({
     name: "ExpressionCloner",
     description: "Allows you to clone Emotes & Stickers to your own server (right click them)",
     tags: ["Emotes", "Servers"],
     searchTerms: ["StickerCloner", "EmoteCloner", "EmojiCloner"],
-    authors: [Devs.Ven, Devs.Nuckyz],
+    authors: [Devs.Ven, Devs.Nuckyz, Devs.sadan],
     contextMenus: {
         "message": messageContextMenuPatch,
         "expression-picker": expressionPickerPatch
-    }
+    },
+    settings,
 });
