@@ -145,7 +145,7 @@ export async function getFileThumbnailUrl(item: MessageAttachment): Promise<URL>
         const base = await getThumbnailBase(item);
         const metadata = defs.encode(CustomItemFormat.ATTACHMENT, item)?.toString();
         if (!base || !metadata) return FALLBACK_THUMBNAIL;
-.
+
         base.hash = metadata;
         return base;
     } catch {
