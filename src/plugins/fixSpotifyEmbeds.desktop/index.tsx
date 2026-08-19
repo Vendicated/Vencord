@@ -132,10 +132,10 @@ export default definePlugin({
                                     initialValue={volume}
                                     onValueChange={v => {
                                         setVolume(v);
-                                        Native.setVolumeForEmbeds(props.path, v);
+                                        Native.setVolumeForEmbeds(path, v);
                                     }}
                                     asValueChanges={v => {
-                                        Native.setVolumeForEmbeds(props.path, v);
+                                        Native.setVolumeForEmbeds(path, v);
                                     }}
                                     minValue={0}
                                     maxValue={100}
