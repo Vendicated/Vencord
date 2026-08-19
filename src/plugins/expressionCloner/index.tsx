@@ -31,7 +31,7 @@ import definePlugin, { OptionType } from "@utils/types";
 import { Guild, GuildSticker } from "@vencord/discord-types";
 import { StickerFormatType } from "@vencord/discord-types/enums";
 import { findByCodeLazy } from "@webpack";
-import { Clickable, Constants, EmojiStore, FluxDispatcher, Forms, GuildStore, IconUtils, Menu, Modal, openModalLazy, PermissionsBits, PermissionStore, React, RestAPI, StickersStore, Text, Toasts, Tooltip, UserStore } from "@webpack/common";
+import { Clickable, Constants, EmojiStore, FluxDispatcher, Forms, GuildStore, IconUtils, Menu, Modal, openModalLazy, PermissionsBits, PermissionStore, React, RestAPI, StickersStore, Toasts, Tooltip, UserStore } from "@webpack/common";
 import { CSSProperties } from "react";
 import { Promisable } from "type-fest";
 
@@ -291,7 +291,7 @@ function CloneModal({ data }: { data: Sticker | Emoji; }) {
                 alignItems: "center"
             }}>
                 {guilds.map(({ guild: g, totalSlots, usedSlots }) => {
-                    let hasFreeSlots = usedSlots < totalSlots;
+                    const hasFreeSlots = usedSlots < totalSlots;
                     const cursor: CSSProperties["cursor"] = !hasFreeSlots || isCloning ? "not-allowed" : "pointer";
                     const filter: CSSProperties["filter"] = !hasFreeSlots
                         ? "grayscale(1)"
@@ -301,61 +301,70 @@ function CloneModal({ data }: { data: Sticker | Emoji; }) {
                     return (
                         <Tooltip key={g.id} text={<Span>{g.name} {EMDASH} {usedSlots}/{totalSlots}</Span>}>
                             {({ onMouseLeave, onMouseEnter }) => (
-                                <Clickable
-                                    onMouseLeave={onMouseLeave}
-                                    onMouseEnter={onMouseEnter}
-                                    role="button"
-                                    aria-label={`Clone to ${g.name}`}
-                                    aria-disabled={!hasFreeSlots || isCloning}
-                                    style={{
-                                        borderRadius: "50%",
-                                        backgroundColor: "var(--background-base-lower)",
-                                        display: "inline-flex",
-                                        justifyContent: "center",
-                                        alignItems: "center",
-                                        width: "4em",
-                                        height: "4em",
-                                        filter,
-                                    }}
-                                    onClick={isCloning ? void 0 : async () => {
-                                        setIsCloning(true);
-                                        doClone(g.id, data).finally(() => {
-                                            invalidateMemo();
-                                            setIsCloning(false);
-                                        });
-                                    }}
+                                <Flex
+                                    flexDirection="column"
+                                    gap="0"
+                                    alignItems="center"
                                 >
-                                    {g.icon ? (
-                                        <img
-                                            aria-hidden
-                                            style={{
-                                                borderRadius: "50%",
-                                                width: "100%",
-                                                height: "100%",
-                                                cursor,
-                                            }}
-                                            src={IconUtils.getGuildIconURL({
-                                                id: g.id,
-                                                icon: g.icon,
-                                                canAnimate: true,
-                                                size: 512
-                                            })}
-                                            alt={name} />
-                                    ) : (
-                                        <Forms.FormText
-                                            style={{
-                                                fontSize: getFontSize(getGuildAcronym(g)),
-                                                width: "100%",
-                                                overflow: "hidden",
-                                                whiteSpace: "nowrap",
-                                                textAlign: "center",
-                                                cursor,
-                                            }}
-                                        >
-                                            {getGuildAcronym(g)}
-                                        </Forms.FormText>
-                                    )}
-                                </Clickable>
+                                    <Clickable
+                                        onMouseLeave={onMouseLeave}
+                                        onMouseEnter={onMouseEnter}
+                                        role="button"
+                                        aria-label={`Clone to ${g.name}`}
+                                        aria-disabled={!hasFreeSlots || isCloning}
+                                        style={{
+                                            borderRadius: "50%",
+                                            backgroundColor: "var(--background-base-lower)",
+                                            display: "inline-flex",
+                                            justifyContent: "center",
+                                            alignItems: "center",
+                                            width: "4em",
+                                            height: "4em",
+                                            filter,
+                                        }}
+                                        onClick={isCloning ? void 0 : async () => {
+                                            setIsCloning(true);
+                                            doClone(g.id, data).finally(() => {
+                                                invalidateMemo();
+                                                setIsCloning(false);
+                                            });
+                                        }}
+                                    >
+                                        {g.icon ? (
+                                            <img
+                                                aria-hidden
+                                                style={{
+                                                    borderRadius: "50%",
+                                                    width: "100%",
+                                                    height: "100%",
+                                                    cursor,
+                                                }}
+                                                src={IconUtils.getGuildIconURL({
+                                                    id: g.id,
+                                                    icon: g.icon,
+                                                    canAnimate: true,
+                                                    size: 512
+                                                })}
+                                                alt={name} />
+                                        ) : (
+                                            <Forms.FormText
+                                                style={{
+                                                    fontSize: getFontSize(getGuildAcronym(g)),
+                                                    width: "100%",
+                                                    overflow: "hidden",
+                                                    whiteSpace: "nowrap",
+                                                    textAlign: "center",
+                                                    cursor,
+                                                }}
+                                            >
+                                                {getGuildAcronym(g)}
+                                            </Forms.FormText>
+                                        )}
+                                    </Clickable>
+                                    <Span>
+                                        {usedSlots}/{totalSlots}
+                                    </Span>
+                                </Flex>
                             )}
                         </Tooltip>
                     );
