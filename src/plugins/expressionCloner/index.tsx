@@ -16,6 +16,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import "./styles.css";
+
 import { findGroupChildrenByChildId, NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { definePluginSettings, migratePluginSettings } from "@api/Settings";
 import { BaseText } from "@components/BaseText";
@@ -24,6 +26,7 @@ import { Flex } from "@components/Flex";
 import { PlusIcon } from "@components/Icons";
 import { Span } from "@components/Span";
 import { Devs } from "@utils/constants";
+import { classNameFactory } from "@utils/css";
 import { getGuildAcronym, hasGuildFeature } from "@utils/discord";
 import { Logger } from "@utils/Logger";
 import { EMDASH } from "@utils/text";
@@ -53,8 +56,6 @@ import {
 } from "@webpack/common";
 import { CSSProperties, PropsWithChildren } from "react";
 import { Promisable } from "type-fest";
-import "./styles.css";
-import { classNameFactory } from "@utils/css";
 
 const cn = classNameFactory("vc-expr-cloner-");
 
