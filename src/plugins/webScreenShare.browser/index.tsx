@@ -196,7 +196,7 @@ function ModalComponent({ modalProps, submit, close, options }: {
                             shape="box"
                             reverse={true}>
                             <div className={cl("control-content")}>
-                                <Text tag="h2" variant="heading-md/semibold" color="text-strong">Mute stream audio</Text>
+                                <Text tag="h2" variant="heading-md/semibold" color="text-strong">Mute Stream Audio</Text>
                                 <Text variant="text-sm/normal" color="text-subtle">Prevents system audio from being included in your stream.</Text>
                             </div>
                         </Checkbox>
