@@ -1,0 +1,12 @@
+.markValue_a562c8 {
+    text-wrap: nowrap;
+}
+
+.vc-screen-picker-modal {
+    display: contents;
+
+    header,
+    [class^="bodySpacerTop_"] {
+        display: none;
+    }
+}
