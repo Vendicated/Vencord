@@ -11,34 +11,55 @@
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(0, 1fr));
         width: 100%;
-        border-radius: 3px;
+
+        border: 1px solid var(--control-primary-border-default);
+        border-radius: var(--radius-xs, 4px);
+        overflow: clip;
+
+        transition: 50ms ease-in;
+        transition-property: background-color, color, border-color, opacity;
+
+        background-color: var(--control-secondary-background-default);
+        color: var(--control-secondary-text-default);
+
+        &:hover {
+            border-color: var(--control-primary-border-hover);
+        }
 
         .vc-screen-picker-option-radio {
             text-align: center;
-            background-color: var(--background-accent);
             padding: 0.3em;
             cursor: pointer;
+
+            transition: 50ms ease-in;
+            transition-property: background-color, color, border-color, opacity;
+
+            &:hover {
+                background-color: var(--control-secondary-background-hover);
+                color: var(--control-secondary-text-hover);
+            }
         }
 
-        .vc-screen-picker-option-radio:first-child {
-            border-radius: 3px 0 0 3px;
-        }
+        .vc-screen-picker-option-radio[data-checked="true"] {
+            background-color: var(--control-primary-background-default);
+            color: var(--control-primary-text-default);
 
-        .vc-screen-picker-option-radio:last-child {
-            border-radius: 0 3px 3px 0;
+            transition: 50ms ease-in;
+            transition-property: background-color, color, border-color, opacity;
+
+            &:hover {
+                background-color: var(--control-primary-background-hover);
+                color: var(--control-primary-text-hover);
+            }
         }
 
         .vc-screen-picker-option-input {
             display: none;
         }
-
-        .vc-screen-picker-option-radio[data-checked="true"] {
-            background-color: var(--brand-500);
-        }
     }
 
     .vc-screen-picker-padding {
-        padding: var(--space-sm) 0;
+        padding: var(--space-sm, 12px) 0;
     }
 
     .vc-screen-picker-flex {
@@ -52,6 +73,10 @@
 
     .vc-screen-picker-quality-section {
         flex: 1 1 auto;
+    }
+
+    .vc-screen-picker-pointer label {
+        cursor: pointer;
     }
 
     .vc-screen-picker-control-content {

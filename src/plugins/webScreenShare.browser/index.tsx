@@ -66,20 +66,22 @@ function OptionRadio<Settings extends object, Key extends keyof Settings>(props:
     const { options, settings, settingsKey, labels, onChange } = props;
 
     return (
-        <div className={cl("option-radios", "padding")}>
-            {(options as string[]).map((option, idx) => (
-                <label className={cl("option-radio")} data-checked={settings[settingsKey] === option} key={option}>
-                    <Span weight="bold">{labels?.[idx] ?? option}</Span>
-                    <input
-                        className={cl("option-input")}
-                        type="radio"
-                        name="fps"
-                        value={option}
-                        checked={settings[settingsKey] === option}
-                        onChange={() => onChange(option)}
-                    />
-                </label>
-            ))}
+        <div className={cl("padding")}>
+            <div className={cl("option-radios")}>
+                {(options as string[]).map((option, idx) => (
+                    <label className={cl("option-radio")} data-checked={settings[settingsKey] === option} key={option}>
+                        <Span weight="bold">{labels?.[idx] ?? option}</Span>
+                        <input
+                            className={cl("option-input")}
+                            type="radio"
+                            name="fps"
+                            value={option}
+                            checked={settings[settingsKey] === option}
+                            onChange={() => onChange(option)}
+                        />
+                    </label>
+                ))}
+            </div>
         </div>
     );
 }
@@ -189,7 +191,7 @@ function ModalComponent({ modalProps, submit, close, options }: {
                         </div>
                     </div>
                     <Divider />
-                    <div className={cl("padding")}>
+                    <div className={cl("padding", "pointer")}>
                         <Checkbox
                             value={settings.systemAudio}
                             onChange={(_e, value) => (settings.systemAudio = value)}
@@ -201,7 +203,7 @@ function ModalComponent({ modalProps, submit, close, options }: {
                             </div>
                         </Checkbox>
                     </div>
-                    <div className={cl("padding")}>
+                    <div className={cl("padding", "pointer")}>
                         <Checkbox
                             value={!disableStreamPreviewsValue}
                             onChange={(_e, value) => disableStreamPreviews.updateSetting(() => !value)}
