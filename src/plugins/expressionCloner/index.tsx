@@ -29,31 +29,11 @@ import { Devs } from "@utils/constants";
 import { classNameFactory } from "@utils/css";
 import { getGuildAcronym, hasGuildFeature } from "@utils/discord";
 import { Logger } from "@utils/Logger";
-import { EMDASH } from "@utils/text";
 import definePlugin, { OptionType } from "@utils/types";
 import { Guild, GuildSticker } from "@vencord/discord-types";
 import { StickerFormatType } from "@vencord/discord-types/enums";
 import { findByCodeLazy } from "@webpack";
-import {
-    Clickable,
-    Constants,
-    EmojiStore,
-    FluxDispatcher,
-    Forms,
-    GuildStore,
-    IconUtils,
-    Menu,
-    Modal,
-    openModalLazy,
-    PermissionsBits,
-    PermissionStore,
-    React,
-    RestAPI,
-    StickersStore,
-    Toasts,
-    Tooltip,
-    UserStore,
-} from "@webpack/common";
+import { Clickable, Constants, EmojiStore, FluxDispatcher, Forms, GuildStore, IconUtils, Menu, Modal, openModalLazy, PermissionsBits, PermissionStore, React, RestAPI, StickersStore, Toasts, Tooltip, UserStore } from "@webpack/common";
 import { CSSProperties, PropsWithChildren } from "react";
 import { Promisable } from "type-fest";
 
@@ -339,14 +319,14 @@ function CloneModal({ data }: { data: Sticker | Emoji; }) {
                 {guilds.map(({ guild: g, totalSlots, usedSlots }) => {
                     const hasFreeSlots = usedSlots < totalSlots;
                     const canClone = hasFreeSlots && !isCloning;
-                    const cursor: CSSProperties["cursor"] = canClone ? "not-allowed" : "pointer";
+                    const cursor: CSSProperties["cursor"] = canClone ? "pointer" : "not-allowed";
                     const filter: CSSProperties["filter"] = !hasFreeSlots
                         ? "grayscale(1) brightness(50%)"
                         : isCloning
                             ? "brightness(50%)"
                             : undefined;
                     return (
-                        <Tooltip key={g.id} text={<Span>{g.name} {EMDASH} {usedSlots}/{totalSlots}</Span>}>
+                        <Tooltip key={g.id} text={<Span>{g.name} &mdash; {usedSlots}/{totalSlots}</Span>}>
                             {({ onMouseLeave, onMouseEnter }) => (
                                 <Clickable
                                     onMouseLeave={onMouseLeave}
