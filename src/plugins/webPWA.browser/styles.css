@@ -13,6 +13,18 @@
     [class*="bar_"] [class*="trailing_"] {
         padding-right: calc(100vw - env(titlebar-area-width, 100%) - env(titlebar-area-x, 0px));
     }
+
+    /* popout windows like screenshare popout, these properties don't work outside WCO so this is safe */
+    [data-popout-root="true"] {
+        [class*="headerWrapper_"] {
+            app-region: drag;
+
+            /* position trailing toolbar elements alongside WCO */
+            [class*="toolbar_"] {
+                padding-right: calc(100vw - env(titlebar-area-width, 100%) - env(titlebar-area-x, 0px));
+            }
+        }
+    }
 }
 
 /* force hide trailing icons when standalone so there's no ugly pixel overflow */
