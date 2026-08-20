@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { definePluginSettings, useSettings } from "@api/Settings";
+import { definePluginSettings } from "@api/Settings";
 import { getUserSettingLazy } from "@api/UserSettings";
 import {
     Divider,
@@ -55,19 +55,19 @@ function openScreenSharePicker(options: DisplayMediaStreamOptions) {
     });
 }
 
-function OptionRadio<Settings extends object, Key extends keyof Settings>(props: {
-    options: Array<string> | ReadonlyArray<string>;
+function OptionRadio<Settings extends object, Key extends keyof Settings, Options extends ReadonlyArray<string>>(props: {
+    options: Options;
     labels?: Array<string>;
     settings: Settings;
     settingsKey: Key;
-    onChange: (option: string) => void;
+    onChange: (option: Options[number]) => void;
 }) {
     const { options, settings, settingsKey, labels, onChange } = props;
 
     return (
         <div className={cl("padding")}>
             <div className={cl("option-radios")}>
-                {(options as string[]).map((option, idx) => (
+                {options.map((option, idx) => (
                     <label className={cl("option-radio")} data-checked={settings[settingsKey] === option} key={option}>
                         <Span weight="bold">{labels?.[idx] ?? option}</Span>
                         <input
@@ -90,13 +90,13 @@ function ModalComponent({ modalProps, submit, close, options }: {
     close: () => void;
     options: DisplayMediaStreamOptions;
 }) {
-    const settings = useSettings(["plugins.webScreenShare.*"]).plugins.webScreenShare;
+    const liveSettings = settings.use();
     const disableStreamPreviewsValue = disableStreamPreviews.useSetting();
 
     async function stream() {
         try {
-            const frameRate = Number(settings.frameRate);
-            const height = Number(settings.resolution);
+            const frameRate = Number(liveSettings.frameRate);
+            const height = Number(liveSettings.resolution);
 
             // const conn = [...MediaEngineStore.getMediaEngine().connections].find(
             //     connection => connection.userId === UserStore.getCurrentUser().id
@@ -119,7 +119,14 @@ function ModalComponent({ modalProps, submit, close, options }: {
                         restrictOwnAudio: true,
                     },
                     surfaceSwitching: "include",
-                    systemAudio: settings.systemAudio ? "exclude" : "include"
+                    systemAudio: liveSettings.systemAudio ? "exclude" : "include"
+                }).then(t => {
+                    // w3c says this can fail, they don't say why, so just to be safe
+                    try {
+                        const video = t.getVideoTracks()?.[0];
+                        if (video) video.contentHint = liveSettings.contentHint;
+                    } catch { }
+                    return t;
                 })
             );
         } catch (error) {
@@ -137,15 +144,15 @@ function ModalComponent({ modalProps, submit, close, options }: {
                 size="lg"
                 actionBarInput={
                     <div className={cl("summary")}>
-                        <Text variant="text-md/semibold" color="text-strong" className={cl("source-or-preset-name")}>{settings.contentHint === "motion" ? "Gaming" : settings.contentHint === "detail" ? "Screenshare" : "Custom"}</Text>
+                        <Text variant="text-md/semibold" color="text-strong" className={cl("source-or-preset-name")}>{liveSettings.contentHint === "motion" ? "Gaming" : liveSettings.contentHint === "detail" ? "Screenshare" : "Custom"}</Text>
                         <Text variant="text-xs/medium" color="text-muted" className={cl("summary-detail")}>
-                            <span>{settings.contentHint === "motion" ? "Smoother video" : settings.contentHint === "detail" ? "Cleaner text" : "User preset"}</span>
+                            <span>{liveSettings.contentHint === "motion" ? "Smoother video" : liveSettings.contentHint === "detail" ? "Cleaner text" : "User preset"}</span>
                             <span className={cl("ellipsis")}>•</span>
-                            <span>{settings.resolution}p</span>
+                            <span>{liveSettings.resolution}p</span>
                             <span className={cl("ellipsis")}>•</span>
-                            <span>{settings.frameRate}fps</span>
-                            {settings.systemAudio ? <span className={cl("ellipsis")}>•</span> : ""}
-                            {settings.systemAudio ? <span>Stream Muted</span> : ""}
+                            <span>{liveSettings.frameRate}fps</span>
+                            {liveSettings.systemAudio ? <span className={cl("ellipsis")}>•</span> : ""}
+                            {liveSettings.systemAudio ? <span>Stream Muted</span> : ""}
                         </Text>
                     </div>
                 }
@@ -164,9 +171,9 @@ function ModalComponent({ modalProps, submit, close, options }: {
                             <Text tag="h2" variant="heading-md/semibold" color="text-strong">Resolution</Text>
                             <OptionRadio
                                 options={StreamResolution}
-                                settings={settings}
+                                settings={liveSettings}
                                 settingsKey="resolution"
-                                onChange={value => (settings.resolution = value.toString())}
+                                onChange={value => (liveSettings.resolution = value)}
                             />
                         </section>
 
@@ -174,9 +181,9 @@ function ModalComponent({ modalProps, submit, close, options }: {
                             <Text tag="h2" variant="heading-md/semibold" color="text-strong">Frame Rate</Text>
                             <OptionRadio
                                 options={StreamFps}
-                                settings={settings}
+                                settings={liveSettings}
                                 settingsKey="frameRate"
-                                onChange={value => (settings.frameRate = value.toString())}
+                                onChange={value => (liveSettings.frameRate = value)}
                             />
                         </section>
                     </div>
@@ -184,19 +191,19 @@ function ModalComponent({ modalProps, submit, close, options }: {
                         <Text tag="h2" variant="heading-md/semibold" color="text-strong">Stream Mode</Text>
                         <div>
                             <OptionRadio
-                                options={["motion", "detail", ""]}
+                                options={StreamContentHint}
                                 labels={["Smoother video", "Cleaner text", "Custom"]}
-                                settings={settings}
+                                settings={liveSettings}
                                 settingsKey="contentHint"
-                                onChange={option => (settings.contentHint = option)}
+                                onChange={option => (liveSettings.contentHint = option)}
                             />
                         </div>
                     </div>
                     <Divider />
                     <div className={cl("padding", "pointer")}>
                         <Checkbox
-                            value={settings.systemAudio}
-                            onChange={(_e, value) => (settings.systemAudio = value)}
+                            value={!!liveSettings.systemAudio}
+                            onChange={(_e, value) => (liveSettings.systemAudio = value)}
                             shape="box"
                             reverse={true}>
                             <div className={cl("control-content")}>
@@ -244,7 +251,7 @@ const settings = definePluginSettings({
     },
     contentHint: {
         type: OptionType.SELECT,
-        description: "Frame Rate",
+        description: "Content Hint",
         hidden: true,
         options: StreamContentHint.map(hint => ({ label: hint, value: hint, default: hint === "motion" }))
     },
@@ -258,7 +265,7 @@ const settings = definePluginSettings({
 const disableStreamPreviews = getUserSettingLazy<boolean>("voiceAndVideo", "disableStreamPreviews")!;
 
 export default definePlugin({
-    name: "webScreenShare",
+    name: "WebScreenShare",
     authors: [Devs.ThaUnknown],
     description: "Adds a screenshare options menu. Allows for changing resolution, framerate, encoding hints, and system audio settings.",
     tags: ["Voice", "Utility"],
