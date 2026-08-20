@@ -59,7 +59,7 @@ async function fetchCoverArt(releaseMBID: string, releaseGroupMBID: string, orig
     );
 }
 
-async function tryLookup(query: string): Promise<Record<string, unknown> | undefined> {
+async function tryLookup(query: string): Promise<Record<string, any> | undefined> {
     const params = new URLSearchParams({
         fmt: "json",
         limit: "1"
@@ -97,7 +97,8 @@ async function getUrls(
     // If no MBIDs are present, try searching MusicBrainz: first by ISRC (if present), then by name.
     const nameQuery = encodeURIComponent(
         `artist:"${artistName}" AND recording:"${trackName}"${releaseName ? ` AND release:"${releaseName}"` : ""}`
-    );
+    ).replace(/[!()*\-~]/g, "\\$&");
+
     const queries = additionalInfo?.isrc
         ? [encodeURIComponent(`isrc:${additionalInfo.isrc}`), nameQuery]
         : [nameQuery];
@@ -111,7 +112,7 @@ async function getUrls(
         if (!metadata) continue;
 
         const artist = metadata["artist-credit"]?.[0]?.artist;
-        const release = metadata.releases?.[0];
+        const release = metadata.releases?.find((release: { title: string; }) => release.title === releaseName) || metadata.releases?.[0];
 
         const data: Partial<TrackData> = {
             imageURL: await fetchCoverArt(release?.id, release?.["release-group"]?.id, additionalInfo?.origin_url),
