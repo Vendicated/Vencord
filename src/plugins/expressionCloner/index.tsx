@@ -286,7 +286,7 @@ function SlotBadge({ used, total, children }: SlotBadgeProps) {
                     "slot-badge-full": used >= total
                 })}
             >
-                {Math.min(total - used, 0)}
+                {Math.max(total - used, 0)}
             </div>
         </div>
     );

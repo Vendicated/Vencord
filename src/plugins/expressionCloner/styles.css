@@ -24,6 +24,7 @@
         text-wrap: nowrap;
         font-weight: bold;
         font-size: 12px;
+        min-width: 10px;
 
         &.vc-expr-cloner-slot-badge-full {
             background-color: color-mix(in oklab, hsl(from var(--control-critical-secondary-background-default) h s l / 100%) 12%, var(--background-surface-high));
