@@ -11,14 +11,11 @@
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(0, 1fr));
         width: 100%;
-
         border: 1px solid var(--control-primary-border-default);
         border-radius: var(--radius-xs, 4px);
         overflow: clip;
-
         transition: 50ms ease-in;
         transition-property: background-color, color, border-color, opacity;
-
         background-color: var(--control-secondary-background-default);
         color: var(--control-secondary-text-default);
 
@@ -30,7 +27,6 @@
             text-align: center;
             padding: 0.3em;
             cursor: pointer;
-
             transition: 50ms ease-in;
             transition-property: background-color, color, border-color, opacity;
 
@@ -43,7 +39,6 @@
         .vc-screen-picker-option-radio[data-checked="true"] {
             background-color: var(--control-primary-background-default);
             color: var(--control-primary-text-default);
-
             transition: 50ms ease-in;
             transition-property: background-color, color, border-color, opacity;
 
