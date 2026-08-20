@@ -7,7 +7,6 @@
 import { definePluginSettings, useSettings } from "@api/Settings";
 import { getUserSettingLazy } from "@api/UserSettings";
 import {
-    Button,
     Divider,
     Span,
 } from "@components/index";
@@ -72,9 +71,8 @@ function OptionRadio<Settings extends object, Key extends keyof Settings>(props:
                     <label className={cl("option-radio")} data-checked={settings[settingsKey] === option} key={option}>
                         <Span weight="bold">{labels?.[idx] ?? option}</Span>
                         <input
-                            className={cl("option-input")}
                             type="radio"
-                            name="fps"
+                            name={settingsKey.toString()}
                             value={option}
                             checked={settings[settingsKey] === option}
                             onChange={() => onChange(option)}
@@ -138,22 +136,26 @@ function ModalComponent({ modalProps, submit, close, options }: {
 
                 size="lg"
                 actionBarInput={
-                    <div className={cl("flex", "between")}>
-                        <div className={cl("summary")}>
-                            <Text variant="text-md/semibold" color="text-strong" className={cl("source-or-preset-name")}>{settings.contentHint === "motion" ? "Gaming" : settings.contentHint === "detail" ? "Screenshare" : "Custom"}</Text>
-                            <Text variant="text-xs/medium" color="text-muted" className={cl("summary-detail")}>
-                                <span>{settings.contentHint === "motion" ? "Smoother video" : settings.contentHint === "detail" ? "Cleaner text" : "User preset"}</span>
-                                <span className={cl("ellipsis")}>•</span>
-                                <span>{settings.resolution}p</span>
-                                <span className={cl("ellipsis")}>•</span>
-                                <span>{settings.frameRate}fps</span>
-                                {settings.systemAudio ? <span className={cl("ellipsis")}>•</span> : ""}
-                                {settings.systemAudio ? <span>Stream Muted</span> : ""}
-                            </Text>
-                        </div>
-                        <Button size="medium" variant="primary" onClick={stream}>Stream</Button>
+                    <div className={cl("summary")}>
+                        <Text variant="text-md/semibold" color="text-strong" className={cl("source-or-preset-name")}>{settings.contentHint === "motion" ? "Gaming" : settings.contentHint === "detail" ? "Screenshare" : "Custom"}</Text>
+                        <Text variant="text-xs/medium" color="text-muted" className={cl("summary-detail")}>
+                            <span>{settings.contentHint === "motion" ? "Smoother video" : settings.contentHint === "detail" ? "Cleaner text" : "User preset"}</span>
+                            <span className={cl("ellipsis")}>•</span>
+                            <span>{settings.resolution}p</span>
+                            <span className={cl("ellipsis")}>•</span>
+                            <span>{settings.frameRate}fps</span>
+                            {settings.systemAudio ? <span className={cl("ellipsis")}>•</span> : ""}
+                            {settings.systemAudio ? <span>Stream Muted</span> : ""}
+                        </Text>
                     </div>
                 }
+                actions={[
+                    {
+                        variant: "primary",
+                        text: "Stream",
+                        onClick: stream
+                    }
+                ]}
             >
 
                 <div>
