@@ -142,7 +142,7 @@ const GuildContextMenuPatch: NavContextMenuPatchCallback = (children, props: Gui
 
 export default definePlugin({
     name: "HardMute",
-    description: "Hard mute servers and channels from the context menu. No @everyone, @here, @role, or @user pings.",
+    description: "Hard mute servers and channels from the context menu. No @everyone, @here, @role, or @member pings.",
     tags: ["Notifications", "Organisation"],
     authors: [Devs.f3tch],
 
