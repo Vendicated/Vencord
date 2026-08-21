@@ -210,6 +210,29 @@ export default definePlugin({
         "guild-header-popout": GuildContextMenuPatch
     },
 
+    flux: {
+        // read messages of hard muted scopes right away, so even if some
+        // other state breaks, nothing can ever pile up. deferred because
+        // discord does not allow dispatching in the middle of a dispatch
+        MESSAGE_CREATE({ message }: { message?: { id: string; channel_id: string; }; }) {
+            if (!message?.channel_id || !isChannelHardMuted(message.channel_id)) return;
+
+            const { channel_id: channelId, id: messageId } = message;
+            setTimeout(() => {
+                try {
+                    FluxDispatcher.dispatch({
+                        type: "MESSAGE_ACK",
+                        channelId,
+                        messageId,
+                        readStateType: 0
+                    });
+                } catch (e) {
+                    logger.error("Failed to ack muted message:", e);
+                }
+            }, 0);
+        }
+    },
+
     async start() {
         const data = await DataStore.get<{ guilds?: string[]; channels?: string[]; }>(DataKey);
         mutedGuilds = new Set(data?.guilds ?? []);
