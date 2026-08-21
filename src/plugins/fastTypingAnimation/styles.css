@@ -1,0 +1,24 @@
+.vc-fast-typing-animation {
+  circle {
+    will-change: opacity, transform;
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: dot-pulse 1.2s cubic-bezier(.45, 0, .55, 1) infinite backwards;
+    animation-delay: calc((sibling-index() - 1) * 150ms);
+  }
+}
+
+@keyframes dot-pulse {
+
+  0%,
+  50%,
+  100% {
+    opacity: .32;
+    transform: scale(.8)
+  }
+
+  25% {
+    opacity: 1;
+    transform: scale(1)
+  }
+}
