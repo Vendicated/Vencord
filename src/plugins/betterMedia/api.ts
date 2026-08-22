@@ -25,7 +25,8 @@ export interface RawAttachment {
     proxy_url: string;
     width?: number;
     height?: number;
-    spoiler?: boolean;
+    /** Attachment flags bitfield. Bit 3 (value 8) is IS_SPOILER. */
+    flags?: number;
 }
 
 export interface RawEmbedMedia {
@@ -82,6 +83,13 @@ export function isImageAttachment(a: RawAttachment) {
 
 export function isVideoAttachment(a: RawAttachment) {
     return a.content_type?.startsWith("video/") || VIDEO_EXT.test(a.filename);
+}
+
+/** Attachment flags bit for IS_SPOILER (see https://discord.com/developers/docs/resources/message#attachment-object-attachment-flags). */
+const ATTACHMENT_FLAG_IS_SPOILER = 1 << 3;
+
+export function isSpoilerAttachment(a: RawAttachment) {
+    return !!((a.flags ?? 0) & ATTACHMENT_FLAG_IS_SPOILER);
 }
 
 export function formatFileSize(bytes: number): string {

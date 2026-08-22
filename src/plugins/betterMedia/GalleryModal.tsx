@@ -7,6 +7,7 @@
 import "./style.css";
 
 import { classNameFactory } from "@utils/css";
+import { classes } from "@utils/misc";
 import { IconComponent } from "@utils/types";
 import { Channel, RenderModalProps } from "@vencord/discord-types";
 import {
@@ -35,6 +36,7 @@ import {
     getAuthorAvatarUrl,
     getMessageJumpPath,
     isImageAttachment,
+    isSpoilerAttachment,
     isVideoAttachment,
     PinEntry,
     RawAttachment,
@@ -129,6 +131,7 @@ interface MediaItem {
     filename?: string;
     messageId: string;
     isGif: boolean;
+    isSpoiler: boolean;
 }
 
 function extractMediaItems(message: RawMessage): MediaItem[] {
@@ -136,17 +139,18 @@ function extractMediaItems(message: RawMessage): MediaItem[] {
 
     for (const a of message.attachments as RawAttachment[]) {
         if (isImageAttachment(a)) {
-            items.push({ key: a.id, type: "IMAGE", url: a.url, proxyUrl: a.proxy_url, width: a.width, height: a.height, filename: a.filename, messageId: message.id, isGif: false });
+            items.push({ key: a.id, type: "IMAGE", url: a.url, proxyUrl: a.proxy_url, width: a.width, height: a.height, filename: a.filename, messageId: message.id, isGif: false, isSpoiler: isSpoilerAttachment(a) });
         } else if (isVideoAttachment(a)) {
-            items.push({ key: a.id, type: "VIDEO", url: a.url, proxyUrl: a.proxy_url, width: a.width, height: a.height, filename: a.filename, messageId: message.id, isGif: false });
+            items.push({ key: a.id, type: "VIDEO", url: a.url, proxyUrl: a.proxy_url, width: a.width, height: a.height, filename: a.filename, messageId: message.id, isGif: false, isSpoiler: isSpoilerAttachment(a) });
         }
     }
 
+    // Embeds (Tenor/Giphy GIFs, direct image links) are never spoilered
     (message.embeds as RawEmbed[]).forEach((e, i) => {
         if (e.type === "gifv" && e.video?.url) {
-            items.push({ key: `${message.id}-e${i}-v`, type: "VIDEO", url: e.video.url, proxyUrl: e.video.proxy_url ?? e.video.url, width: e.video.width, height: e.video.height, messageId: message.id, isGif: true });
+            items.push({ key: `${message.id}-e${i}-v`, type: "VIDEO", url: e.video.url, proxyUrl: e.video.proxy_url ?? e.video.url, width: e.video.width, height: e.video.height, messageId: message.id, isGif: true, isSpoiler: false });
         } else if (e.type === "image" && e.image?.url) {
-            items.push({ key: `${message.id}-e${i}-i`, type: "IMAGE", url: e.image.url, proxyUrl: e.image.proxy_url ?? e.image.url, width: e.image.width, height: e.image.height, messageId: message.id, isGif: false });
+            items.push({ key: `${message.id}-e${i}-i`, type: "IMAGE", url: e.image.url, proxyUrl: e.image.proxy_url ?? e.image.url, width: e.image.width, height: e.image.height, messageId: message.id, isGif: false, isSpoiler: false });
         }
     });
 
@@ -379,35 +383,53 @@ function SearchTabPane({ tab, emptyIcon, emptyLabel, children }: {
 function MediaGrid({ messages, onJump }: { messages: RawMessage[]; onJump(messageId: string): void; }) {
     const items = useMemo(() => messages.flatMap(extractMediaItems), [messages]);
     const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
+    const [revealed, setRevealed] = useState<Set<string>>(new Set());
 
     return (
         <>
             <div className={cl("grid")}>
-                {items.map((it, i) => (
-                    <div key={it.key} className={cl("grid-item")} onClick={() => setLightboxIndex(i)}>
-                        {it.type === "VIDEO"
-                            ? (
-                                <video
-                                    className={cl("grid-media")}
-                                    src={it.proxyUrl}
-                                    muted
-                                    loop={it.isGif}
-                                    autoPlay={it.isGif}
-                                    playsInline={it.isGif}
-                                    preload={it.isGif ? "auto" : "metadata"}
-                                />
-                            )
-                            : <img className={cl("grid-media")} src={it.proxyUrl} loading="lazy" alt={it.filename ?? ""} />}
-                        {it.type === "VIDEO" && !it.isGif && <PlayIcon className={cl("play-icon")} />}
-                        <button
-                            className={cl("grid-jump-btn")}
-                            title="Jump to message"
-                            onClick={e => { e.stopPropagation(); onJump(it.messageId); }}
+                {items.map((it, i) => {
+                    const isHidden = it.isSpoiler && !revealed.has(it.key);
+
+                    return (
+                        <div
+                            key={it.key}
+                            className={cl("grid-item")}
+                            onClick={() => {
+                                if (isHidden) {
+                                    setRevealed(prev => new Set(prev).add(it.key));
+                                } else {
+                                    setLightboxIndex(i);
+                                }
+                            }}
                         >
-                            <JumpIcon />
-                        </button>
-                    </div>
-                ))}
+                            {it.type === "VIDEO"
+                                ? (
+                                    <video
+                                        className={classes(cl("grid-media"), isHidden && cl("media-spoiler"))}
+                                        src={it.proxyUrl}
+                                        muted
+                                        loop={it.isGif}
+                                        autoPlay={it.isGif && !isHidden}
+                                        playsInline={it.isGif}
+                                        preload={it.isGif ? "auto" : "metadata"}
+                                    />
+                                )
+                                : <img className={classes(cl("grid-media"), isHidden && cl("media-spoiler"))} src={it.proxyUrl} loading="lazy" alt={it.filename ?? ""} />}
+                            {it.type === "VIDEO" && !it.isGif && !isHidden && <PlayIcon className={cl("play-icon")} />}
+                            {isHidden && (
+                                <div className={cl("spoiler-badge")}>SPOILER<br />Click to view</div>
+                            )}
+                            <button
+                                className={cl("grid-jump-btn")}
+                                title="Jump to message"
+                                onClick={e => { e.stopPropagation(); onJump(it.messageId); }}
+                            >
+                                <JumpIcon />
+                            </button>
+                        </div>
+                    );
+                })}
             </div>
 
             {lightboxIndex != null && (
@@ -429,18 +451,21 @@ function FilesList({ messages, onJump }: { messages: RawMessage[]; onJump(messag
 
     return (
         <div className={cl("row-list")}>
-            {rows.map(({ message, attachment }) => (
+            {rows.map(({ message, attachment }) => {
+                const isSpoiler = isSpoilerAttachment(attachment);
+
+                return (
                 <div
                     key={attachment.id}
                     className={cl("row")}
                     onClick={() => VencordNative.native.openExternal(attachment.url)}
                 >
                     {isImageAttachment(attachment)
-                        ? <img className={cl("row-thumb")} src={attachment.proxy_url} alt="" loading="lazy" />
+                        ? <img className={classes(cl("row-thumb"), isSpoiler && cl("media-spoiler"))} src={attachment.proxy_url} alt="" loading="lazy" />
                         : <div className={cl("row-icon-wrap")}><FileIcon /></div>}
 
                     <div className={cl("row-info")}>
-                        <div className={cl("row-title")} title={attachment.filename}>{attachment.filename}</div>
+                        <div className={cl("row-title")} title={attachment.filename}>{isSpoiler ? "SPOILER" : attachment.filename}</div>
                         <div className={cl("row-meta")}>
                             {formatFileSize(attachment.size)} · {displayName(message.author)} · <Timestamp timestamp={new Date(message.timestamp)} />
                         </div>
@@ -463,7 +488,8 @@ function FilesList({ messages, onJump }: { messages: RawMessage[]; onJump(messag
                         </button>
                     </div>
                 </div>
-            ))}
+                );
+            })}
         </div>
     );
 }
@@ -510,6 +536,7 @@ function LinksList({ messages, onJump }: { messages: RawMessage[]; onJump(messag
 
 function PinsList({ pins, onJump }: { pins: PinEntry[]; onJump(messageId: string): void; }) {
     const [lightbox, setLightbox] = useState<{ items: LightboxItem[]; index: number; } | null>(null);
+    const [revealed, setRevealed] = useState<Set<string>>(new Set());
 
     return (
         <div className={cl("pins-list")}>
@@ -528,30 +555,46 @@ function PinsList({ pins, onJump }: { pins: PinEntry[]; onJump(messageId: string
                             {message.content && <div className={cl("pin-content")}>{safeParse(message.content)}</div>}
                             {(mediaAttachments.length > 0 || otherAttachments.length > 0) && (
                                 <div className={cl("pin-attachments")}>
-                                    {mediaAttachments.map((a, i) => (
-                                        <div
-                                            key={a.id}
-                                            className={cl("pin-attachment-media")}
-                                            onClick={() => setLightbox({
-                                                items: mediaAttachments.map(m => ({
-                                                    type: isVideoAttachment(m) ? "VIDEO" : "IMAGE",
-                                                    url: m.url,
-                                                    filename: m.filename,
-                                                })),
-                                                index: i,
-                                            })}
-                                        >
-                                            <img className={cl("pin-attachment-thumb")} src={a.proxy_url} alt={a.filename} loading="lazy" />
-                                            {isVideoAttachment(a) && <PlayIcon className={cl("pin-attachment-play")} />}
-                                        </div>
-                                    ))}
+                                    {mediaAttachments.map((a, i) => {
+                                        const isHidden = isSpoilerAttachment(a) && !revealed.has(a.id);
+
+                                        return (
+                                            <div
+                                                key={a.id}
+                                                className={cl("pin-attachment-media")}
+                                                onClick={() => {
+                                                    if (isHidden) {
+                                                        setRevealed(prev => new Set(prev).add(a.id));
+                                                    } else {
+                                                        setLightbox({
+                                                            items: mediaAttachments.map(m => ({
+                                                                type: isVideoAttachment(m) ? "VIDEO" : "IMAGE",
+                                                                url: m.url,
+                                                                filename: m.filename,
+                                                            })),
+                                                            index: i,
+                                                        });
+                                                    }
+                                                }}
+                                            >
+                                                <img
+                                                    className={classes(cl("pin-attachment-thumb"), isHidden && cl("media-spoiler"))}
+                                                    src={a.proxy_url}
+                                                    alt={a.filename}
+                                                    loading="lazy"
+                                                />
+                                                {isVideoAttachment(a) && !isHidden && <PlayIcon className={cl("pin-attachment-play")} />}
+                                                {isHidden && <div className={cl("spoiler-badge", "spoiler-badge-small")}>SPOILER</div>}
+                                            </div>
+                                        );
+                                    })}
                                     {otherAttachments.map(a => (
                                         <span
                                             key={a.id}
                                             className={cl("pin-attachment-file")}
                                             onClick={() => VencordNative.native.openExternal(a.url)}
                                         >
-                                            <FileIcon width={14} height={14} /> {a.filename}
+                                            <FileIcon width={14} height={14} /> {isSpoilerAttachment(a) ? "SPOILER" : a.filename}
                                         </span>
                                     ))}
                                 </div>
