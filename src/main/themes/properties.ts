@@ -4,20 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/**
- * Parser for theme settings declared via `@property` at-rules.
- * The format is shared with BetterDiscord, see https://github.com/BetterDiscord/BetterDiscord/pull/1858
- *
- * ```css
- * @property --my-theme-accent {
- *     syntax: "<color>";
- *     inherits: true;
- *     initial-value: #5865f2;
- *     name: "Accent Colour";
- *     note: "Used for buttons and links";
- * }
- * ```
- */
+// Parses theme settings declared via `@property` at-rules, using the same format as BetterDiscord
 
 export interface ThemePropertyOption {
     value: string;
@@ -25,27 +12,22 @@ export interface ThemePropertyOption {
 }
 
 export interface ThemeProperty {
-    /** The custom property name, without the leading `--` */
+    /** Without the leading `--` */
     name: string;
-    /** The `syntax` descriptor, e.g. `<color>` */
     syntax: string;
-    /** The `initial-value` descriptor. Used as the default value */
     initialValue: string;
 
-    /** Display name (`name` descriptor). Rules without one are plain registrations, not settings */
+    /** The `name` descriptor. Rules without one are plain registrations, not settings */
     label: string;
-    /** Description (`note` descriptor) */
     note?: string;
-    /** Choices for a dropdown (`options: "value=Label | value2=Label 2"`) */
+    /** `options: "value=Label | value2=Label 2"` */
     options?: ThemePropertyOption[];
-    /** Whether to render a toggle (`checkbox: true`) */
     checkbox?: boolean;
-    /** BetterDiscord's `file: true` (file picker). Only a URL input is shown for now */
+    /** File picker in BetterDiscord. Only a URL input is shown for now */
     file?: boolean;
     min?: number;
     max?: number;
     step?: number;
-    /** Unit appended to numeric values. Defaults to `px` for `<length>` and `%` for `<percentage>` */
     unit?: string;
 }
 
@@ -80,7 +62,7 @@ export function parseThemeProperties(css: string): ThemeProperty[] {
     return [...properties.values()];
 }
 
-/** @returns null for rules without a `name` descriptor, as those are plain registrations rather than settings */
+/** Returns null for rules without a `name` descriptor, as those are plain registrations rather than settings */
 function parseProperty(name: string, body: string): ThemeProperty | null {
     const descriptors = new Map<string, string>();
     for (const declaration of splitDeclarations(body)) {
@@ -142,11 +124,15 @@ function parseOptions(raw: string): ThemePropertyOption[] {
         });
 }
 
-/** Splits a declaration block on `;`, ignoring those inside strings or parentheses. Comments are removed */
+/**
+ * Splits a declaration block on `;`, ignoring those inside strings or parentheses. Comments are removed.
+ * Like in CSS, a declaration containing an unterminated string is dropped
+ */
 function splitDeclarations(body: string) {
     const declarations: string[] = [];
     let current = "";
     let depth = 0;
+    let valid = true;
 
     for (let i = 0; i < body.length; i++) {
         const char = body[i];
@@ -155,11 +141,13 @@ function splitDeclarations(body: string) {
             i = skipComment(body, i);
         } else if (char === '"' || char === "'") {
             const end = skipString(body, i);
+            if (body[end] !== char) valid = false;
             current += body.slice(i, end + 1);
             i = end;
         } else if (char === ";" && depth <= 0) {
-            declarations.push(current);
+            if (valid) declarations.push(current);
             current = "";
+            valid = true;
         } else {
             if (char === "(") depth++;
             else if (char === ")") depth--;
@@ -167,7 +155,7 @@ function splitDeclarations(body: string) {
         }
     }
 
-    declarations.push(current);
+    if (valid) declarations.push(current);
     return declarations;
 }
 
@@ -179,13 +167,13 @@ function unquote(value: string) {
     return value;
 }
 
-/** @returns the index of the last character of the comment starting at `start` */
+/** Returns the index of the last character of the comment starting at `start` */
 function skipComment(css: string, start: number) {
     const end = css.indexOf("*/", start + 2);
     return end === -1 ? css.length : end + 1;
 }
 
-/** @returns the index of the closing quote of the string starting at `start` */
+/** Returns the index of the closing quote of the string starting at `start` */
 function skipString(css: string, start: number) {
     const quote = css[start];
     for (let i = start + 1; i < css.length; i++) {
@@ -195,7 +183,7 @@ function skipString(css: string, start: number) {
     return css.length;
 }
 
-/** @returns the index of the `}` closing the block whose content starts at `start`, or -1 if unterminated */
+/** Returns the index of the `}` closing the block whose content starts at `start`, or -1 if unterminated */
 function findBlockEnd(css: string, start: number) {
     let depth = 1;
     for (let i = start; i < css.length; i++) {

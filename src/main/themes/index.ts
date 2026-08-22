@@ -35,7 +35,6 @@ export interface UserThemeHeader {
     source?: string;
     website?: string;
     invite?: string;
-    /** Settings declared by the theme via `@property` at-rules */
     properties: ThemeProperty[];
 }
 
