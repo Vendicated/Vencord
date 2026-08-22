@@ -35,7 +35,7 @@ function getInputKind(prop: ThemeProperty): InputKind {
     if (prop.file || prop.syntax === "<url>") return "url";
     if (prop.syntax === "<color>") return "color";
     if (NUMERIC_SYNTAXES.includes(prop.syntax)) {
-        return prop.min != null && prop.max != null ? "slider" : "number";
+        return prop.min != null && prop.max != null && prop.min < prop.max ? "slider" : "number";
     }
     return "text";
 }
@@ -72,8 +72,12 @@ let colorContext: CanvasRenderingContext2D | null = null;
 
 /** Parses any css color (hex, named, oklch, ...) into a 0xRRGGBB number, or null if invalid */
 function parseCssColor(value: string): number | null {
-    colorContext ??= document.createElement("canvas").getContext("2d", { willReadFrequently: true });
-    if (!colorContext) return null;
+    if (!colorContext) {
+        const canvas = document.createElement("canvas");
+        canvas.width = canvas.height = 1;
+        colorContext = canvas.getContext("2d", { willReadFrequently: true });
+        if (!colorContext) return null;
+    }
 
     // Invalid values leave fillStyle untouched, so use a sentinel to detect them
     const sentinel = "#010203";
