@@ -162,9 +162,18 @@ interface LightboxItem {
     url: string;
     filename?: string;
     isGif?: boolean;
+    isSpoiler?: boolean;
 }
 
-function MediaLightbox({ items, startingIndex, onClose }: { items: LightboxItem[]; startingIndex: number; onClose(): void; }) {
+interface MediaLightboxProps {
+    items: LightboxItem[];
+    startingIndex: number;
+    onClose(): void;
+    revealed: Set<string>;
+    onReveal(url: string): void;
+}
+
+function MediaLightbox({ items, startingIndex, onClose, revealed, onReveal }: MediaLightboxProps) {
     const [index, setIndex] = useState(startingIndex);
     const item = items[index];
 
@@ -182,6 +191,8 @@ function MediaLightbox({ items, startingIndex, onClose }: { items: LightboxItem[
     }, [onClose, prev, next]);
 
     if (!item) return null;
+
+    const isHidden = !!item.isSpoiler && !revealed.has(item.url);
 
     return ReactDOM.createPortal(
         <div className={cl("lightbox-backdrop")} onClick={onClose}>
@@ -201,8 +212,18 @@ function MediaLightbox({ items, startingIndex, onClose }: { items: LightboxItem[
                 </>
             )}
 
-            <div className={cl("lightbox-content")} onClick={e => e.stopPropagation()}>
-                {item.type === "VIDEO"
+            <div
+                className={cl("lightbox-content")}
+                onClick={e => {
+                    e.stopPropagation();
+                    if (isHidden) onReveal(item.url);
+                }}
+            >
+                {isHidden ? (
+                    <div className={cl("lightbox-spoiler")}>
+                        <div className={cl("spoiler-badge")}>SPOILER<br />Click to view</div>
+                    </div>
+                ) : item.type === "VIDEO"
                     ? (
                         item.isGif
                             ? <video key={item.url} className={cl("lightbox-media")} src={item.url} autoPlay loop muted playsInline />
@@ -389,7 +410,7 @@ function MediaGrid({ messages, onJump }: { messages: RawMessage[]; onJump(messag
         <>
             <div className={cl("grid")}>
                 {items.map((it, i) => {
-                    const isHidden = it.isSpoiler && !revealed.has(it.key);
+                    const isHidden = it.isSpoiler && !revealed.has(it.url);
 
                     return (
                         <div
@@ -397,7 +418,7 @@ function MediaGrid({ messages, onJump }: { messages: RawMessage[]; onJump(messag
                             className={cl("grid-item")}
                             onClick={() => {
                                 if (isHidden) {
-                                    setRevealed(prev => new Set(prev).add(it.key));
+                                    setRevealed(prev => new Set(prev).add(it.url));
                                 } else {
                                     setLightboxIndex(i);
                                 }
@@ -434,9 +455,11 @@ function MediaGrid({ messages, onJump }: { messages: RawMessage[]; onJump(messag
 
             {lightboxIndex != null && (
                 <MediaLightbox
-                    items={items.map(it => ({ type: it.type, url: it.url, filename: it.filename, isGif: it.isGif }))}
+                    items={items.map(it => ({ type: it.type, url: it.url, filename: it.filename, isGif: it.isGif, isSpoiler: it.isSpoiler }))}
                     startingIndex={lightboxIndex}
                     onClose={() => setLightboxIndex(null)}
+                    revealed={revealed}
+                    onReveal={url => setRevealed(prev => new Set(prev).add(url))}
                 />
             )}
         </>
@@ -556,7 +579,7 @@ function PinsList({ pins, onJump }: { pins: PinEntry[]; onJump(messageId: string
                             {(mediaAttachments.length > 0 || otherAttachments.length > 0) && (
                                 <div className={cl("pin-attachments")}>
                                     {mediaAttachments.map((a, i) => {
-                                        const isHidden = isSpoilerAttachment(a) && !revealed.has(a.id);
+                                        const isHidden = isSpoilerAttachment(a) && !revealed.has(a.url);
 
                                         return (
                                             <div
@@ -564,13 +587,14 @@ function PinsList({ pins, onJump }: { pins: PinEntry[]; onJump(messageId: string
                                                 className={cl("pin-attachment-media")}
                                                 onClick={() => {
                                                     if (isHidden) {
-                                                        setRevealed(prev => new Set(prev).add(a.id));
+                                                        setRevealed(prev => new Set(prev).add(a.url));
                                                     } else {
                                                         setLightbox({
                                                             items: mediaAttachments.map(m => ({
                                                                 type: isVideoAttachment(m) ? "VIDEO" : "IMAGE",
                                                                 url: m.url,
                                                                 filename: m.filename,
+                                                                isSpoiler: isSpoilerAttachment(m),
                                                             })),
                                                             index: i,
                                                         });
@@ -612,6 +636,8 @@ function PinsList({ pins, onJump }: { pins: PinEntry[]; onJump(messageId: string
                     items={lightbox.items}
                     startingIndex={lightbox.index}
                     onClose={() => setLightbox(null)}
+                    revealed={revealed}
+                    onReveal={url => setRevealed(prev => new Set(prev).add(url))}
                 />
             )}
         </div>

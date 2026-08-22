@@ -245,6 +245,23 @@
     border-radius: 4px;
 }
 
+.vc-bm-lightbox-spoiler {
+    position: relative;
+    width: min(420px, 90vw);
+    height: min(420px, 90vh);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgb(255 255 255 / 6%);
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.vc-bm-lightbox-spoiler .vc-bm-spoiler-badge {
+    font-size: 14px;
+    padding: 10px 18px;
+}
+
 .vc-bm-lightbox-close {
     position: absolute;
     top: 20px;
