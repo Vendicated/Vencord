@@ -152,7 +152,7 @@ function NumberPropertyInput({ prop, value, onChange }: PropertyInputProps) {
 function SliderPropertyInput({ prop, value, onChange }: PropertyInputProps) {
     const min = prop.min!;
     const max = prop.max!;
-    const step = prop.step! > 0 ? prop.step : prop.syntax === "<integer>" ? 1 : undefined;
+    const step = prop.step && prop.step > 0 ? prop.step : prop.syntax === "<integer>" ? 1 : undefined;
     const unit = getUnit(prop);
 
     const round = (v: number) => (step ? snap(v, min, step) : Number(v.toFixed(2)));
