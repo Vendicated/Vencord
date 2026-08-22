@@ -7,12 +7,15 @@
 import "./style.css";
 
 import { classNameFactory } from "@utils/css";
+import { copyWithToast } from "@utils/discord";
 import { classes } from "@utils/misc";
 import { IconComponent } from "@utils/types";
 import { Channel, RenderModalProps } from "@vencord/discord-types";
 import {
+    ContextMenuApi,
     Forms,
     IconUtils,
+    Menu,
     Modal,
     NavigationRouter,
     openModal,
@@ -28,7 +31,7 @@ import {
     UserStore,
     useState,
 } from "@webpack/common";
-import type { ReactNode } from "react";
+import type { MouseEvent as ReactMouseEvent, ReactNode } from "react";
 
 import {
     fetchPins,
@@ -163,6 +166,7 @@ interface LightboxItem {
     filename?: string;
     isGif?: boolean;
     isSpoiler?: boolean;
+    messageId?: string;
 }
 
 interface MediaLightboxProps {
@@ -171,9 +175,10 @@ interface MediaLightboxProps {
     onClose(): void;
     revealed: Set<string>;
     onReveal(url: string): void;
+    onJump(messageId: string): void;
 }
 
-function MediaLightbox({ items, startingIndex, onClose, revealed, onReveal }: MediaLightboxProps) {
+function MediaLightbox({ items, startingIndex, onClose, revealed, onReveal, onJump }: MediaLightboxProps) {
     const [index, setIndex] = useState(startingIndex);
     const item = items[index];
 
@@ -193,6 +198,34 @@ function MediaLightbox({ items, startingIndex, onClose, revealed, onReveal }: Me
     if (!item) return null;
 
     const isHidden = !!item.isSpoiler && !revealed.has(item.url);
+
+    const openMenu = (e: ReactMouseEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+
+        ContextMenuApi.openContextMenu(e, () => (
+            <Menu.Menu navId="vc-bm-lightbox-menu" onClose={ContextMenuApi.closeContextMenu}>
+                {item.messageId && (
+                    <Menu.MenuItem
+                        id="vc-bm-jump"
+                        label="Jump to Message"
+                        icon={JumpIcon}
+                        action={() => onJump(item.messageId!)}
+                    />
+                )}
+                <Menu.MenuItem
+                    id="vc-bm-copy-link"
+                    label="Copy Link"
+                    action={() => copyWithToast(item.url)}
+                />
+                <Menu.MenuItem
+                    id="vc-bm-open-browser"
+                    label="Open in Browser"
+                    action={() => VencordNative.native.openExternal(item.url)}
+                />
+            </Menu.Menu>
+        ));
+    };
 
     return ReactDOM.createPortal(
         <div className={cl("lightbox-backdrop")} onClick={onClose}>
@@ -218,6 +251,7 @@ function MediaLightbox({ items, startingIndex, onClose, revealed, onReveal }: Me
                     e.stopPropagation();
                     if (isHidden) onReveal(item.url);
                 }}
+                onContextMenu={isHidden ? undefined : openMenu}
             >
                 {isHidden ? (
                     <div className={cl("lightbox-spoiler")}>
@@ -455,9 +489,10 @@ function MediaGrid({ messages, onJump }: { messages: RawMessage[]; onJump(messag
 
             {lightboxIndex != null && (
                 <MediaLightbox
-                    items={items.map(it => ({ type: it.type, url: it.url, filename: it.filename, isGif: it.isGif, isSpoiler: it.isSpoiler }))}
+                    items={items.map(it => ({ type: it.type, url: it.url, filename: it.filename, isGif: it.isGif, isSpoiler: it.isSpoiler, messageId: it.messageId }))}
                     startingIndex={lightboxIndex}
                     onClose={() => setLightboxIndex(null)}
+                    onJump={onJump}
                     revealed={revealed}
                     onReveal={url => setRevealed(prev => new Set(prev).add(url))}
                 />
@@ -595,6 +630,7 @@ function PinsList({ pins, onJump }: { pins: PinEntry[]; onJump(messageId: string
                                                                 url: m.url,
                                                                 filename: m.filename,
                                                                 isSpoiler: isSpoilerAttachment(m),
+                                                                messageId: message.id,
                                                             })),
                                                             index: i,
                                                         });
@@ -636,6 +672,7 @@ function PinsList({ pins, onJump }: { pins: PinEntry[]; onJump(messageId: string
                     items={lightbox.items}
                     startingIndex={lightbox.index}
                     onClose={() => setLightbox(null)}
+                    onJump={onJump}
                     revealed={revealed}
                     onReveal={url => setRevealed(prev => new Set(prev).add(url))}
                 />
