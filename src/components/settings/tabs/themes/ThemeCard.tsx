@@ -5,12 +5,14 @@
  */
 
 import { Flex } from "@components/Flex";
-import { DeleteIcon } from "@components/Icons";
+import { CogWheel, DeleteIcon } from "@components/Icons";
 import { Link } from "@components/Link";
 import { AddonCard } from "@components/settings/AddonCard";
 import { UserThemeHeader } from "@main/themes";
 import { openInviteModal } from "@utils/discord";
 import { showToast } from "@webpack/common";
+
+import { openThemeSettingsModal } from "./ThemeSettingsModal";
 
 interface ThemeCardProps {
     theme: UserThemeHeader;
@@ -28,11 +30,21 @@ export function ThemeCard({ theme, enabled, onChange, onDelete }: ThemeCardProps
             enabled={enabled}
             setEnabled={onChange}
             infoButton={
-                IS_WEB && (
-                    <div style={{ cursor: "pointer", color: "var(--status-danger" }} onClick={onDelete}>
-                        <DeleteIcon />
-                    </div>
-                )
+                <>
+                    {theme.properties.length > 0 && (
+                        <button
+                            className="vc-plugins-info-button"
+                            onClick={() => openThemeSettingsModal(theme)}
+                        >
+                            <CogWheel />
+                        </button>
+                    )}
+                    {IS_WEB && (
+                        <div style={{ cursor: "pointer", color: "var(--status-danger" }} onClick={onDelete}>
+                            <DeleteIcon />
+                        </div>
+                    )}
+                </>
             }
             footer={
                 <Flex flexDirection="row" gap="0.2em">

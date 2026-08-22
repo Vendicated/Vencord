@@ -18,6 +18,10 @@
  * limitations under the License.
  */
 
+import { parseThemeProperties, ThemeProperty } from "./properties";
+
+export type { ThemeProperty, ThemePropertyOption } from "./properties";
+
 const splitRegex = /[^\S\r\n]*?\r?(?:\r\n|\n)[^\S\r\n]*?\*[^\S\r\n]?/;
 const escapedAtRegex = /^\\@/;
 
@@ -31,6 +35,8 @@ export interface UserThemeHeader {
     source?: string;
     website?: string;
     invite?: string;
+    /** Settings declared by the theme via `@property` at-rules */
+    properties: ThemeProperty[];
 }
 
 function makeHeader(fileName: string, opts: Partial<UserThemeHeader> = {}): UserThemeHeader {
@@ -43,7 +49,8 @@ function makeHeader(fileName: string, opts: Partial<UserThemeHeader> = {}): User
         license: opts.license,
         source: opts.source,
         website: opts.website,
-        invite: opts.invite
+        invite: opts.invite,
+        properties: opts.properties ?? []
     };
 }
 
@@ -57,8 +64,15 @@ export function stripBOM(fileContent: string) {
 export function getThemeInfo(css: string, fileName: string): UserThemeHeader {
     if (!css) return makeHeader(fileName);
 
+    return makeHeader(fileName, {
+        ...parseMetaBlock(css),
+        properties: parseThemeProperties(css)
+    });
+}
+
+function parseMetaBlock(css: string): Partial<UserThemeHeader> {
     const block = css.split("/**", 2)?.[1]?.split("*/", 1)?.[0];
-    if (!block) return makeHeader(fileName);
+    if (!block) return {};
 
     const header: Partial<UserThemeHeader> = {};
     let field = "";
@@ -77,5 +91,5 @@ export function getThemeInfo(css: string, fileName: string): UserThemeHeader {
     }
     header[field] = accum.trim();
     delete header[""];
-    return makeHeader(fileName, header);
+    return header;
 }

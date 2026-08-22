@@ -203,21 +203,20 @@ export class SettingsStore<T extends object> {
         this.store = this.makeProxy(value);
 
         if (pathToNotify) {
-            let v = value;
+            let v: any = value;
 
+            // The path may not resolve (deleted setting, key containing dots). Still mark as changed so the data is persisted
             const path = pathToNotify.split(".");
-            for (const p of path) {
-                if (!v) {
-                    console.warn(
-                        `Settings#setData: Path ${pathToNotify} does not exist in new data. Not dispatching update`
-                    );
-                    return;
-                }
+            const exists = path.every(p => {
+                if (v == null) return false;
                 v = v[p];
-            }
+                return true;
+            });
 
-            this.pathListeners.get(pathToNotify)?.forEach(cb => cb(v));
-            this.notifyPrefixListeners(pathToNotify, path, v);
+            if (exists) {
+                this.pathListeners.get(pathToNotify)?.forEach(cb => cb(v));
+                this.notifyPrefixListeners(pathToNotify, path, v);
+            }
         }
 
         this.markAsChanged();

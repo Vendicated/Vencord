@@ -30,6 +30,11 @@
     color: var(--text-default);
 }
 
+/* Discord's slider wraps marker labels at 24px, breaking values like "16px" onto two lines */
+.vc-plugins-setting-slider {
+    white-space: nowrap;
+}
+
 .vc-plugins-setting-error {
     color: var(--text-feedback-critical, #FF5C5C);
 }
