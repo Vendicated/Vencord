@@ -51,7 +51,6 @@ let previousThemeBlobObjectURLs = [] as string[];
 
 async function initThemes() {
     themesStyle ??= createAndAppendStyle("vencord-themes", userStyleRootNode);
-    // Created before QuickCSS (initialised after the first initThemes call) so the cascade is themes < theme settings < QuickCSS
     themeSettingsStyle ??= createAndAppendStyle("vencord-theme-settings", userStyleRootNode);
 
     const { themeLinks, enabledThemes } = Settings;
@@ -105,7 +104,6 @@ async function initThemes() {
 function updateThemeSettings() {
     const { enabledThemes, themeSettings } = Settings;
 
-    // built via CSSOM so invalid values are dropped
     const sheet = new CSSStyleSheet();
     const rule = sheet.cssRules[sheet.insertRule(":root {}")] as CSSStyleRule;
 

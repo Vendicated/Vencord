@@ -180,7 +180,6 @@ function SliderPropertyInput({ prop, value, onChange }: PropertyInputProps) {
 
     return (
         <div className={cl("slider-container")}>
-            {/* Wrapped so the slider isn't a flex item, which misplaces its grabber */}
             <div className={cl("slider")}>
                 <Slider
                     className={settingCl("slider")}
