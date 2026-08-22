@@ -203,20 +203,20 @@ export class SettingsStore<T extends object> {
         this.store = this.makeProxy(value);
 
         if (pathToNotify) {
-            let v: any = value;
+            let v = value;
 
-            // The path may not resolve (deleted setting, key containing dots). Still mark as changed so the data is persisted
             const path = pathToNotify.split(".");
-            const exists = path.every(p => {
-                if (v == null) return false;
+            for (const p of path) {
+                // The path may not resolve (deleted setting, key containing dots). Still mark as changed so the data is persisted
+                if (!v) {
+                    this.markAsChanged();
+                    return;
+                }
                 v = v[p];
-                return true;
-            });
-
-            if (exists) {
-                this.pathListeners.get(pathToNotify)?.forEach(cb => cb(v));
-                this.notifyPrefixListeners(pathToNotify, path, v);
             }
+
+            this.pathListeners.get(pathToNotify)?.forEach(cb => cb(v));
+            this.notifyPrefixListeners(pathToNotify, path, v);
         }
 
         this.markAsChanged();
