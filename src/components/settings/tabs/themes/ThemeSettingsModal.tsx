@@ -22,7 +22,6 @@ const cl = classNameFactory("vc-settings-theme-");
 const NUMERIC_SYNTAXES = ["<integer>", "<number>", "<length>", "<percentage>"];
 /** Sliders with more steps than this only get a few evenly spaced labels */
 const MAX_LABELED_STEPS = 12;
-/** How many labels those sliders get */
 const AUTO_MARKER_COUNT = 5;
 
 type InputKind = "toggle" | "select" | "url" | "color" | "slider" | "number" | "text";
@@ -63,8 +62,8 @@ function snap(value: number, min: number, step: number) {
     return Number((Math.round((value - min) / step) * step + min).toFixed(decimals));
 }
 
-/** Number of values from min to max in increments of step */
 function getStepCount(min: number, max: number, step: number) {
+    // 1e-9 guards against float error, e.g. (0.3 - 0) / 0.1 = 2.9999...
     return Math.floor((max - min) / step + 1e-9) + 1;
 }
 
@@ -95,7 +94,6 @@ function formatHexColor(color: number) {
     return `#${color.toString(16).padStart(6, "0")}`;
 }
 
-/** Unwraps a css `url(...)` value. Other values are returned as is */
 function unwrapUrl(value: string) {
     const match = /^\s*url\(\s*(?:"([^"]*)"|'([^']*)'|([^)]*?))\s*\)\s*$/i.exec(value);
     return match ? match[1] ?? match[2] ?? match[3] : value;
@@ -108,7 +106,6 @@ function wrapUrl(url: string) {
 
 interface PropertyInputProps {
     prop: ThemeProperty;
-    /** The current CSS value */
     value: string;
     onChange(value: string): void;
 }
@@ -165,7 +162,6 @@ function SliderPropertyInput({ prop, value, onChange }: PropertyInputProps) {
     const initialValue = Number.isFinite(parsed) ? parsed : min;
     // Controlled so the grabber follows the text input and snaps to the steps while dragging
     const [current, setCurrent] = useState(initialValue);
-    // The text input accepts any value and mirrors the slider while dragging
     const [text, setText] = useState(() => getNumberText(value));
 
     function onSliderChange(v: number) {
