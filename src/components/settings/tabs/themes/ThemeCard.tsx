@@ -36,7 +36,7 @@ export function ThemeCard({ theme, enabled, onChange, onDelete }: ThemeCardProps
                             className="vc-plugins-info-button"
                             onClick={() => openThemeSettingsModal(theme)}
                         >
-                            <CogWheel />
+                            <CogWheel className="vc-plugins-info-icon" />
                         </button>
                     )}
                     {IS_WEB && (

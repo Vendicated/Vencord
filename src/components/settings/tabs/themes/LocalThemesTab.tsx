@@ -121,9 +121,9 @@ export function LocalThemesTab() {
         const themes = await VencordNative.themes.getThemesList();
         setUserThemes(themes);
 
-        // Drop settings of deleted themes. Skip empty lists, as those may be a failed read
         if (!themes.length) return;
 
+        // Prune settings of deleted themes.
         const fileNames = new Set(themes.map(theme => theme.fileName));
         for (const fileName of Object.keys(Settings.themeSettings)) {
             if (!fileNames.has(fileName)) delete Settings.themeSettings[fileName];
