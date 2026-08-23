@@ -25,8 +25,6 @@ import definePlugin, { ReporterTestable } from "@utils/types";
 import { AuthenticationStore, Button, ChannelStore, Forms, GuildMemberStore, SelectedChannelStore, SelectedGuildStore, useMemo, UserStore, VoiceStateStore } from "@webpack/common";
 import { ReactElement } from "react";
 
-import { getCurrentVoice, settings } from "./settings";
-
 interface VoiceStateChangeEvent {
     userId: string;
     channelId?: string;
@@ -38,12 +36,7 @@ interface VoiceStateChangeEvent {
     sessionId: string;
 }
 
-// Mute/Deaf for other people than you is commented out, because otherwise someone can spam it and it will be annoying
-// Filtering out events is not as simple as just dropping duplicates, as otherwise mute, unmute, mute would
-// not say the second mute, which would lead you to believe they're unmuted
-
 function speak(text: string) {
-    // Don't narrate in the overlay window, otherwise everything is said twice
     if (!text || window.__OVERLAY__) return;
 
     const { volume, rate } = settings.store;
@@ -75,16 +68,6 @@ function formatText(str: string, user: string, channel: string, displayName: str
         .replaceAll("{{NICKNAME}}", clean(nickname) || (nickname ? "Someone" : ""));
 }
 
-/*
-let StatusMap = {} as Record<string, {
-    mute: boolean;
-    deaf: boolean;
-}>;
-*/
-
-// For every user, channelId and oldChannelId will differ when moving channel.
-// Only for the local user, channelId and oldChannelId will be the same when moving channel,
-// for some ungodly reason
 let myLastChannelId: string | undefined;
 
 function getTypeAndChannelId({ channelId, oldChannelId }: VoiceStateChangeEvent, isMe: boolean) {
@@ -97,48 +80,8 @@ function getTypeAndChannelId({ channelId, oldChannelId }: VoiceStateChangeEvent,
         if (channelId) return [oldChannelId ? "move" : "join", channelId];
         if (oldChannelId) return ["leave", oldChannelId];
     }
-    /*
-    if (channelId) {
-        if (deaf || selfDeaf) return ["deafen", channelId];
-        if (mute || selfMute) return ["mute", channelId];
-        const oldStatus = StatusMap[userId];
-        if (oldStatus.deaf) return ["undeafen", channelId];
-        if (oldStatus.mute) return ["unmute", channelId];
-    }
-    */
     return ["", ""];
 }
-
-/*
-function updateStatuses(type: string, { deaf, mute, selfDeaf, selfMute, userId, channelId }: VoiceState, isMe: boolean) {
-    if (isMe && (type === "join" || type === "move")) {
-        StatusMap = {};
-        const states = VoiceStateStore.getVoiceStatesForChannel(channelId!) as Record<string, VoiceState>;
-        for (const userId in states) {
-            const s = states[userId];
-            StatusMap[userId] = {
-                mute: s.mute || s.selfMute,
-                deaf: s.deaf || s.selfDeaf
-            };
-        }
-        return;
-    }
-
-    if (type === "leave" || (type === "move" && channelId !== SelectedChannelStore.getVoiceChannelId())) {
-        if (isMe)
-            StatusMap = {};
-        else
-            delete StatusMap[userId];
-
-        return;
-    }
-
-    StatusMap[userId] = {
-        deaf: deaf || selfDeaf,
-        mute: mute || selfMute
-    };
-}
-*/
 
 function playSample(type: string) {
     const currentUser = UserStore.getCurrentUser();
@@ -168,19 +111,25 @@ export default definePlugin({
             const myChanId = SelectedChannelStore.getVoiceChannelId();
             const myId = UserStore.getCurrentUser().id;
 
+            // آيدي روم الانتظار المخصص
+            const WAITING_ROOM_ID = "1477454359309844714";
+
             if (ChannelStore.getChannel(myChanId!)?.type === 13 /* Stage Channel */) return;
 
             for (const state of voiceStates) {
                 const { userId, channelId, oldChannelId } = state;
+                
+                // شرط: إذا لم يكن الروم هو روم الانتظار، تجاهله تماماً
+                if (channelId !== WAITING_ROOM_ID) continue;
+
                 const isMe = userId === myId;
                 if (isMe && state.sessionId !== AuthenticationStore.getSessionId()) continue;
-                if (!isMe) {
-                    if (!myChanId) continue;
-                    if (channelId !== myChanId && oldChannelId !== myChanId) continue;
-                }
 
                 const [type, id] = getTypeAndChannelId(state, isMe);
                 if (!type) continue;
+                
+                // تنبيه فقط عند دخول شخص جديد (join)
+                if (type !== "join") continue;
 
                 const template = settings.store[type + "Message"];
                 const user = isMe && !settings.store.sayOwnName ? "" : UserStore.getUser(userId).username;
@@ -189,8 +138,6 @@ export default definePlugin({
                 const channel = ChannelStore.getChannel(id).name;
 
                 speak(formatText(template, user, channel, displayName, nickname));
-
-                // updateStatuses(type, state, isMe);
             }
         },
 
@@ -220,7 +167,6 @@ export default definePlugin({
             );
             return;
         }
-
     },
 
     settingsAboutComponent() {
