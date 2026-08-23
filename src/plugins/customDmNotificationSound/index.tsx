@@ -303,7 +303,7 @@ export default definePlugin({
 
     patches: [
         {
-            find: ".getDesktopType()===",
+            find: 'notif_type:"MESSAGE_CREATE"',
             replacement: {
                 match: /sound:(\i\?\i:void 0),volume:(\i),onClick/,
                 replace: "sound:$self.getSound($1,arguments[0]?.message,$2),volume:$2,onClick"
