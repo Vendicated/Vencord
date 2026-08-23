@@ -10,12 +10,12 @@ export const settings = definePluginSettings({
     type: OptionType.SELECT,
     description: 'Maximum number of message search results',
     options: [
-      { label: '25 results', value: 25 },
-      { label: '50 results', value: 50 },
-      { label: '100 results (Default)', value: 100, default: true },
-      { label: '250 results', value: 250 },
-      { label: '500 results', value: 500 },
-    ],
+      { label: '25 results', value: '25' },
+      { label: '50 results', value: '50' },
+      { label: '100 results (Default)', value: '100', default: true },
+      { label: '250 results', value: '250' },
+      { label: '500 results', value: '500' },
+    ] as const,
   },
   searchGroupDms: {
     type: OptionType.BOOLEAN,
@@ -40,19 +40,24 @@ export function openAllDmSearchModal() {
   if (isModalOpen) return;
   isModalOpen = true;
 
-  openModal((modalProps: any) => (
-    <SearchModal
-      onClose={() => {
-        isModalOpen = false;
-        if (modalProps?.onClose) {
-          modalProps.onClose();
-        }
-      }}
-      maxResults={settings.store.maxResults ?? 100}
-      searchGroupDms={settings.store.searchGroupDms ?? true}
-      highlightSearchTerms={settings.store.highlightSearchTerms ?? true}
-    />
-  ));
+  try {
+    openModal((modalProps: any) => (
+      <SearchModal
+        onClose={() => {
+          isModalOpen = false;
+          if (modalProps?.onClose) {
+            modalProps.onClose();
+          }
+        }}
+        maxResults={Number(settings.store.maxResults ?? 100)}
+        searchGroupDms={settings.store.searchGroupDms ?? true}
+        highlightSearchTerms={settings.store.highlightSearchTerms ?? true}
+      />
+    ));
+  } catch (e) {
+    isModalOpen = false;
+    console.error('[AllDmSearch] Failed to open modal:', e);
+  }
 }
 
 let keydownListener: ((e: KeyboardEvent) => void) | null = null;
