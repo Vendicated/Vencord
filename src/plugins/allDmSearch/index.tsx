@@ -43,6 +43,7 @@ export function openAllDmSearchModal() {
   try {
     openModal((modalProps: any) => (
       <SearchModal
+        modalProps={modalProps}
         onClose={() => {
           isModalOpen = false;
           if (modalProps?.onClose) {

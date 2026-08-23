@@ -1,9 +1,11 @@
-import { ChannelActionCreators, MessageActions, NavigationRouter, React, useEffect, useMemo, useRef, useState } from '@webpack/common';
+import { RenderModalProps } from '@vencord/discord-types';
+import { ChannelActionCreators, MessageActions, Modal, NavigationRouter, React, useEffect, useMemo, useRef, useState } from '@webpack/common';
 import { SearchMessageResult, SearchPersonResult, SearchProgress, SearchTab } from '../types.js';
 import { searchAllDMs, searchPeople } from '../utils/search.js';
 import '../styles.css';
 
 interface SearchModalProps {
+  modalProps: RenderModalProps;
   onClose: () => void;
   maxResults?: number;
   searchGroupDms?: boolean;
@@ -11,6 +13,7 @@ interface SearchModalProps {
 }
 
 export const SearchModal: React.FC<SearchModalProps> = ({
+  modalProps,
   onClose,
   maxResults = 100,
   searchGroupDms = true,
@@ -27,19 +30,9 @@ export const SearchModal: React.FC<SearchModalProps> = ({
 
   // Focus input on mount
   useEffect(() => {
-    inputRef.current?.focus();
+    const timer = setTimeout(() => inputRef.current?.focus(), 50);
+    return () => clearTimeout(timer);
   }, []);
-
-  // Close on Escape
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        onClose();
-      }
-    };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [onClose]);
 
   // Debounced search effect
   useEffect(() => {
@@ -162,8 +155,12 @@ export const SearchModal: React.FC<SearchModalProps> = ({
   };
 
   return (
-    <div className="vc-alldm-modal-backdrop" onClick={onClose}>
-      <div className="vc-alldm-container" onClick={(e) => e.stopPropagation()}>
+    <Modal.ModalRoot
+      {...modalProps}
+      size={Modal.ModalSize.DYNAMIC}
+      className="vc-alldm-modal-root"
+    >
+      <div className="vc-alldm-container">
         {/* Top Header & Search Bar */}
         <div className="vc-alldm-header">
           <button
@@ -390,6 +387,6 @@ export const SearchModal: React.FC<SearchModalProps> = ({
           )}
         </div>
       </div>
-    </div>
+    </Modal.ModalRoot>
   );
 };
