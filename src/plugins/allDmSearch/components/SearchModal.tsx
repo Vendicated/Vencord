@@ -30,7 +30,7 @@ export const SearchModal: React.FC<SearchModalProps> = ({
 
   // Focus input on mount
   useEffect(() => {
-    const timer = setTimeout(() => inputRef.current?.focus(), 50);
+    const timer = setTimeout(() => inputRef.current?.focus(), 80);
     return () => clearTimeout(timer);
   }, []);
 
@@ -155,11 +155,7 @@ export const SearchModal: React.FC<SearchModalProps> = ({
   };
 
   return (
-    <Modal.ModalRoot
-      {...modalProps}
-      size={Modal.ModalSize.DYNAMIC}
-      className="vc-alldm-modal-root"
-    >
+    <Modal {...modalProps} className="vc-alldm-modal-root">
       <div className="vc-alldm-container">
         {/* Top Header & Search Bar */}
         <div className="vc-alldm-header">
@@ -387,6 +383,6 @@ export const SearchModal: React.FC<SearchModalProps> = ({
           )}
         </div>
       </div>
-    </Modal.ModalRoot>
+    </Modal>
   );
 };
