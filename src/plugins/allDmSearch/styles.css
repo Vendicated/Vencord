@@ -1,22 +1,24 @@
-/* AllDmSearch Modal & UI Styles */
+/* AllDmSearch Modal & UI Styles - Premium Discord Mobile Replica */
 
 .vc-alldm-modal-root {
-  background: transparent !important;
-  box-shadow: none !important;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  width: 820px !important;
+  max-width: 94vw !important;
+  min-width: 680px !important;
+  height: 86vh !important;
+  max-height: 880px !important;
+  background: #111214 !important;
+  border-radius: 16px !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(88, 101, 242, 0.18) !important;
+  overflow: hidden !important;
+  display: flex !important;
+  flex-direction: column !important;
 }
 
 .vc-alldm-container {
-  width: 720px;
-  max-width: 95vw;
-  height: 80vh;
-  max-height: 800px;
-  background: #1e1f22;
-  border-radius: 16px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(88, 101, 242, 0.15);
+  width: 100%;
+  height: 100%;
+  background: #111214;
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -27,11 +29,12 @@
 /* Header & Search Bar */
 .vc-alldm-header {
   padding: 16px 20px;
-  background: #2b2d31;
+  background: #1e1f22;
   border-bottom: 1px solid rgba(255, 255, 255, 0.06);
   display: flex;
   align-items: center;
   gap: 12px;
+  flex-shrink: 0;
 }
 
 .vc-alldm-back-btn {
@@ -39,7 +42,7 @@
   border: none;
   color: #b5bac1;
   cursor: pointer;
-  padding: 6px;
+  padding: 8px;
   border-radius: 8px;
   display: flex;
   align-items: center;
@@ -61,18 +64,18 @@
 
 .vc-alldm-search-icon {
   position: absolute;
-  left: 12px;
+  left: 14px;
   color: #949ba4;
   pointer-events: none;
 }
 
 .vc-alldm-input {
   width: 100%;
-  background: #1e1f22;
+  background: #2b2d31;
   border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 10px;
-  padding: 10px 36px 10px 38px;
-  font-size: 14px;
+  border-radius: 12px;
+  padding: 12px 40px 12px 42px;
+  font-size: 15px;
   color: #fff;
   outline: none;
   transition: border-color 0.2s, box-shadow 0.2s;
@@ -85,12 +88,12 @@
 
 .vc-alldm-clear-btn {
   position: absolute;
-  right: 10px;
-  background: transparent;
+  right: 12px;
+  background: rgba(255, 255, 255, 0.08);
   border: none;
   color: #949ba4;
   cursor: pointer;
-  padding: 4px;
+  padding: 6px;
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -99,25 +102,26 @@
 
 .vc-alldm-clear-btn:hover {
   color: #fff;
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.18);
 }
 
 /* Tabs Bar */
 .vc-alldm-tabs {
   display: flex;
-  background: #2b2d31;
+  background: #1e1f22;
   padding: 0 20px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-  gap: 8px;
+  gap: 16px;
+  flex-shrink: 0;
 }
 
 .vc-alldm-tab {
   background: transparent;
   border: none;
   color: #949ba4;
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 600;
-  padding: 10px 14px;
+  padding: 12px 6px;
   cursor: pointer;
   position: relative;
   display: flex;
@@ -140,9 +144,9 @@
   bottom: 0;
   left: 0;
   right: 0;
-  height: 2px;
+  height: 3px;
   background: #5865f2;
-  border-radius: 2px 2px 0 0;
+  border-radius: 3px 3px 0 0;
 }
 
 .vc-alldm-tab-badge {
@@ -155,24 +159,25 @@
 }
 
 .vc-alldm-tab.active .vc-alldm-tab-badge {
-  background: rgba(88, 101, 242, 0.3);
-  color: #c9cdfb;
+  background: #5865f2;
+  color: #ffffff;
 }
 
 /* Progress Bar */
 .vc-alldm-progress-wrap {
-  background: rgba(0, 0, 0, 0.25);
-  padding: 8px 20px;
+  background: rgba(0, 0, 0, 0.35);
+  padding: 8px 24px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   border-bottom: 1px solid rgba(255, 255, 255, 0.04);
-  font-size: 11px;
+  font-size: 12px;
   color: #949ba4;
+  flex-shrink: 0;
 }
 
 .vc-alldm-progress-bar {
-  width: 140px;
+  width: 180px;
   height: 4px;
   background: rgba(255, 255, 255, 0.1);
   border-radius: 2px;
@@ -182,14 +187,15 @@
 .vc-alldm-progress-fill {
   height: 100%;
   background: #5865f2;
-  transition: width 0.2s ease;
+  transition: width 0.15s ease;
 }
 
-/* Content Area */
+/* Results Scroll Area */
 .vc-alldm-results-scroll {
   flex: 1;
   overflow-y: auto;
-  padding: 12px 16px;
+  overflow-x: hidden;
+  padding: 12px 20px;
 }
 
 /* Empty / Starter State */
@@ -198,57 +204,59 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 60px 20px;
+  padding: 80px 20px;
   text-align: center;
   color: #949ba4;
 }
 
 .vc-alldm-empty-icon {
-  width: 48px;
-  height: 48px;
+  width: 56px;
+  height: 56px;
   color: #4e5058;
   margin-bottom: 16px;
 }
 
 .vc-alldm-empty-title {
-  font-size: 16px;
+  font-size: 18px;
   font-weight: 700;
-  color: #dbdee1;
-  margin-bottom: 6px;
+  color: #f2f3f5;
+  margin-bottom: 8px;
 }
 
 .vc-alldm-empty-desc {
-  font-size: 13px;
+  font-size: 14px;
   color: #949ba4;
-  max-width: 320px;
-  line-height: 1.4;
+  max-width: 380px;
+  line-height: 1.5;
 }
 
-/* Result Row */
+/* Mobile Discord Result Card Row */
 .vc-alldm-result-card {
   display: flex;
   align-items: flex-start;
-  gap: 14px;
-  padding: 12px 14px;
-  border-radius: 10px;
-  margin-bottom: 6px;
+  gap: 16px;
+  padding: 14px 16px;
+  border-radius: 12px;
+  margin-bottom: 8px;
   cursor: pointer;
   transition: background 0.15s ease, transform 0.1s ease;
   border: 1px solid transparent;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .vc-alldm-result-card:hover {
-  background: #2b2d31;
-  border-color: rgba(255, 255, 255, 0.05);
+  background: #1e1f22;
+  border-color: rgba(255, 255, 255, 0.06);
 }
 
 .vc-alldm-avatar {
-  width: 40px;
-  height: 40px;
+  width: 44px;
+  height: 44px;
   border-radius: 50%;
   object-fit: cover;
   flex-shrink: 0;
-  background: #111214;
+  background: #2b2d31;
 }
 
 .vc-alldm-card-body {
@@ -259,92 +267,84 @@
 .vc-alldm-card-header {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  margin-bottom: 3px;
-}
-
-.vc-alldm-author-wrap {
-  display: flex;
-  align-items: center;
   gap: 8px;
-  overflow: hidden;
+  margin-bottom: 4px;
 }
 
 .vc-alldm-author-name {
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 700;
-  color: #f2f3f5;
+  color: #ffffff;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.vc-alldm-time {
+  font-size: 12px;
+  color: #949ba4;
+  font-weight: 500;
 }
 
 .vc-alldm-channel-badge {
   font-size: 11px;
-  font-weight: 500;
+  font-weight: 600;
   color: #949ba4;
-  background: rgba(255, 255, 255, 0.06);
-  padding: 2px 7px;
+  background: rgba(255, 255, 255, 0.08);
+  padding: 2px 8px;
   border-radius: 6px;
+  margin-left: auto;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 180px;
-}
-
-.vc-alldm-time {
-  font-size: 11px;
-  color: #949ba4;
-  font-weight: 500;
-  flex-shrink: 0;
+  max-width: 220px;
 }
 
 .vc-alldm-message-text {
-  font-size: 13px;
+  font-size: 14px;
   color: #dbdee1;
-  line-height: 1.45;
+  line-height: 1.5;
   word-break: break-word;
   white-space: pre-wrap;
-  display: -webkit-box;
-  -webkit-line-clamp: 3;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
 }
 
 /* Search Term Highlighting */
 .vc-alldm-highlight {
-  background: rgba(250, 166, 26, 0.25);
+  background: rgba(250, 166, 26, 0.35);
   color: #fcd53f;
   font-weight: 700;
   border-radius: 3px;
-  padding: 1px 3px;
+  padding: 1px 4px;
 }
 
-/* Embed & Attachment previews */
+/* Embed Card (Discord Mobile style) */
 .vc-alldm-embed-box {
-  margin-top: 6px;
-  padding: 8px 12px;
-  background: rgba(0, 0, 0, 0.25);
-  border-left: 3px solid #5865f2;
-  border-radius: 4px;
-  font-size: 12px;
+  margin-top: 8px;
+  padding: 10px 14px;
+  background: #1e1f22;
+  border-left: 4px solid #5865f2;
+  border-radius: 8px;
+  font-size: 13px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-left-width: 4px;
 }
 
 .vc-alldm-embed-title {
+  font-size: 14px;
   font-weight: 700;
-  color: #f2f3f5;
-  margin-bottom: 2px;
+  color: #ffffff;
+  margin-bottom: 4px;
 }
 
 .vc-alldm-attachment-tag {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
-  margin-top: 6px;
-  font-size: 11px;
+  gap: 6px;
+  margin-top: 8px;
+  font-size: 12px;
   color: #5865f2;
-  background: rgba(88, 101, 242, 0.12);
-  padding: 3px 8px;
+  background: rgba(88, 101, 242, 0.15);
+  padding: 4px 10px;
   border-radius: 6px;
   font-weight: 600;
 }
@@ -353,15 +353,17 @@
 .vc-alldm-person-card {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 10px 14px;
-  border-radius: 10px;
+  gap: 14px;
+  padding: 12px 16px;
+  border-radius: 12px;
   cursor: pointer;
   transition: background 0.15s ease;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .vc-alldm-person-card:hover {
-  background: #2b2d31;
+  background: #1e1f22;
 }
 
 .vc-alldm-person-info {
@@ -370,24 +372,25 @@
 }
 
 .vc-alldm-person-name {
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 700;
-  color: #f2f3f5;
+  color: #ffffff;
 }
 
 .vc-alldm-person-sub {
-  font-size: 12px;
+  font-size: 13px;
   color: #949ba4;
+  margin-top: 2px;
 }
 
 .vc-alldm-dm-action-btn {
   background: #5865f2;
   color: #fff;
   border: none;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 600;
-  padding: 6px 14px;
-  border-radius: 6px;
+  padding: 8px 16px;
+  border-radius: 8px;
   cursor: pointer;
   transition: background 0.15s;
 }

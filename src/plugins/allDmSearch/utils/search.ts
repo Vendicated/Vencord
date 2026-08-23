@@ -1,4 +1,4 @@
-import { ChannelStore, RelationshipStore, RestAPI, UserStore, UserUtils } from '@webpack/common';
+import { ChannelStore, RelationshipStore, RestAPI, UserStore } from '@webpack/common';
 import { SearchMessageResult, SearchPersonResult, SearchProgress } from '../types.js';
 
 // In-memory LRU session cache for search queries
@@ -56,7 +56,7 @@ export function getChannelDisplayName(channel: any): string {
 export function getUserAvatarUrl(user: any, size = 80): string {
   if (!user) return 'https://cdn.discordapp.com/embed/avatars/0.png';
   if (user.avatar) {
-    const isAnimated = user.avatar.startsWith('a_');
+    const isAnimated = typeof user.avatar === 'string' && user.avatar.startsWith('a_');
     const ext = isAnimated ? 'gif' : 'webp';
     return `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.${ext}?size=${size}`;
   }
@@ -128,7 +128,7 @@ export function searchPeople(query: string): SearchPersonResult[] {
 }
 
 /**
- * Execute search across accessible DM channels with controlled concurrency and abort signal
+ * Execute search across accessible DM channels with high concurrency, instant result streaming, and caching
  */
 export async function searchAllDMs(
   query: string,
@@ -137,6 +137,7 @@ export async function searchAllDMs(
     searchGroupDms: boolean;
     signal?: AbortSignal;
     onProgress?: (progress: SearchProgress) => void;
+    onBatchResults?: (results: SearchMessageResult[]) => void;
   }
 ): Promise<SearchMessageResult[]> {
   const cleanQuery = query.trim();
@@ -146,6 +147,7 @@ export async function searchAllDMs(
   const cacheKey = `${cleanQuery.toLowerCase()}_${options.searchGroupDms}_${options.maxResults}`;
   const cached = searchCache.get(cacheKey);
   if (cached && Date.now() - cached.timestamp < CACHE_TTL_MS) {
+    options.onBatchResults?.(cached.results);
     return cached.results;
   }
 
@@ -172,8 +174,8 @@ export async function searchAllDMs(
     isSearching: true,
   });
 
-  // Concurrency worker queue (limit 4 concurrent requests to prevent 429)
-  const CONCURRENCY = 4;
+  // Fast Worker Pool: 8 concurrent workers with instant result streaming
+  const CONCURRENCY = 8;
   let currentIndex = 0;
 
   async function worker(): Promise<void> {
@@ -197,12 +199,14 @@ export async function searchAllDMs(
 
         const body = res?.body;
         if (body && Array.isArray(body.messages)) {
+          let hasNewResults = false;
+
           for (const msgGroup of body.messages) {
-            // Discord search returns arrays of message context; first item is the target match
             const msg = Array.isArray(msgGroup) ? msgGroup[0] : msgGroup;
             if (!msg || !msg.id || seenMessageIds.has(msg.id)) continue;
 
             seenMessageIds.add(msg.id);
+            hasNewResults = true;
 
             const hasMedia =
               (msg.attachments && msg.attachments.length > 0) ||
@@ -249,12 +253,19 @@ export async function searchAllDMs(
               hasLink: Boolean(hasLink),
             });
           }
+
+          // Live stream new results immediately to UI
+          if (hasNewResults && options.onBatchResults && !options.signal?.aborted) {
+            const sorted = [...allResults].sort(
+              (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+            );
+            options.onBatchResults(sorted);
+          }
         }
       } catch (err: any) {
-        // Handle rate limiting retry-after if encountered
         if (err?.status === 429) {
           const retryAfter = (err?.body?.retry_after || 1) * 1000;
-          await new Promise((r) => setTimeout(r, Math.min(retryAfter, 3000)));
+          await new Promise((r) => setTimeout(r, Math.min(retryAfter, 2000)));
         }
       } finally {
         searchedCount++;
@@ -263,11 +274,8 @@ export async function searchAllDMs(
           searchedChannels: searchedCount,
           currentChannelName: chanName,
           foundCount: allResults.length,
-          isSearching: true,
+          isSearching: searchedCount < totalChannels && !options.signal?.aborted,
         });
-
-        // Small yield to keep event loop smooth
-        await new Promise((r) => setTimeout(r, 25));
       }
     }
   }
@@ -276,7 +284,7 @@ export async function searchAllDMs(
   const workers = Array.from({ length: Math.min(CONCURRENCY, targetChannels.length) }, () => worker());
   await Promise.all(workers);
 
-  // Sort descending by timestamp (newest first)
+  // Final sort descending by timestamp (newest first)
   allResults.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
 
   const finalResults = allResults.slice(0, options.maxResults);

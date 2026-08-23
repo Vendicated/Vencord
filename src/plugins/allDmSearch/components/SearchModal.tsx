@@ -34,7 +34,7 @@ export const SearchModal: React.FC<SearchModalProps> = ({
     return () => clearTimeout(timer);
   }, []);
 
-  // Debounced search effect
+  // Debounced search effect with live streaming results
   useEffect(() => {
     const clean = query.trim();
 
@@ -70,6 +70,11 @@ export const SearchModal: React.FC<SearchModalProps> = ({
               setProgress(p);
             }
           },
+          onBatchResults: (streamed) => {
+            if (!abortController.signal.aborted) {
+              setMessages(streamed);
+            }
+          },
         });
 
         if (!abortController.signal.aborted) {
@@ -80,7 +85,7 @@ export const SearchModal: React.FC<SearchModalProps> = ({
           console.warn('[AllDmSearch] Search error:', err);
         }
       }
-    }, 300);
+    }, 200);
 
     return () => {
       clearTimeout(timer);
@@ -330,13 +335,11 @@ export const SearchModal: React.FC<SearchModalProps> = ({
 
                   <div className="vc-alldm-card-body">
                     <div className="vc-alldm-card-header">
-                      <div className="vc-alldm-author-wrap">
-                        <span className="vc-alldm-author-name">{msg.author.displayName}</span>
-                        <span className="vc-alldm-channel-badge">
-                          {msg.isGroupDM ? `👥 ${msg.channelName}` : `💬 ${msg.channelName}`}
-                        </span>
-                      </div>
+                      <span className="vc-alldm-author-name">{msg.author.displayName}</span>
                       <span className="vc-alldm-time">{msg.relativeTime}</span>
+                      <span className="vc-alldm-channel-badge">
+                        {msg.isGroupDM ? `👥 ${msg.channelName}` : `💬 ${msg.channelName}`}
+                      </span>
                     </div>
 
                     {msg.content && (
@@ -349,7 +352,7 @@ export const SearchModal: React.FC<SearchModalProps> = ({
                     {msg.embeds.length > 0 && (
                       <div className="vc-alldm-embed-box">
                         {msg.embeds[0].author?.name && (
-                          <div style={{ fontSize: '11px', color: '#949ba4', marginBottom: '2px' }}>
+                          <div style={{ fontSize: '12px', color: '#949ba4', marginBottom: '3px' }}>
                             {msg.embeds[0].author.name}
                           </div>
                         )}
@@ -359,7 +362,7 @@ export const SearchModal: React.FC<SearchModalProps> = ({
                           </div>
                         )}
                         {msg.embeds[0].description && (
-                          <div style={{ color: '#dbdee1' }}>
+                          <div style={{ color: '#dbdee1', whiteSpace: 'pre-wrap' }}>
                             {renderHighlightedText(msg.embeds[0].description, query)}
                           </div>
                         )}
