@@ -10,7 +10,7 @@ import { getUserSettingLazy } from "@api/UserSettings";
 import definePlugin, { OptionType } from "@utils/types";
 
 const StatusSettings = getUserSettingLazy<string>("status", "status")!;
-const CustomStatusSettings = getUserSettingLazy<{ text: string, emojiId: string | undefined, expiresAtMs: undefined | bigint; }>("status", "customStatus")!;
+const CustomStatusSettings = getUserSettingLazy<{ text: string, emojiId: string | undefined, expiresAtMs: undefined | number; }>("status", "customStatus")!;
 
 const statusMap: string[] = [];
 let currentPosition: number = 0;
