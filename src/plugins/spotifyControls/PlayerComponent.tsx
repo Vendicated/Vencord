@@ -84,18 +84,21 @@ function CopyContextMenu({ name, type, path }: { type: string; name: string; pat
                 label={`Copy ${type} Name`}
                 action={() => copyWithToast(name)}
                 icon={CopyIcon}
+                leadingAccessory={{ type: "icon", icon: CopyIcon }}
             />
             <Menu.MenuItem
                 id="vc-spotify-copy-link"
                 label={`Copy ${type} Link`}
                 action={() => copyWithToast("https://open.spotify.com" + path)}
                 icon={LinkIcon}
+                leadingAccessory={{ type: "icon", icon: LinkIcon }}
             />
             <Menu.MenuItem
                 id="vc-spotify-open"
                 label={`Open ${type} in Spotify`}
                 action={() => SpotifyStore.openExternal(path)}
                 icon={OpenExternalIcon}
+                leadingAccessory={{ type: "icon", icon: OpenExternalIcon }}
             />
         </Menu.Menu>
     );
@@ -225,6 +228,7 @@ function AlbumContextMenu({ track }: { track: Track; }) {
                 label="Open Album"
                 action={() => SpotifyStore.openExternal(`/album/${track.album.id}`)}
                 icon={OpenExternalIcon}
+                leadingAccessory={{ type: "icon", icon: OpenExternalIcon }}
             />
             <Menu.MenuItem
                 key="view-cover"
@@ -233,6 +237,7 @@ function AlbumContextMenu({ track }: { track: Track; }) {
                 // trolley
                 action={() => openImageModal(track.album.image)}
                 icon={ImageIcon}
+                leadingAccessory={{ type: "icon", icon: ImageIcon }}
             />
             <Menu.MenuControlItem
                 id="spotify-volume"

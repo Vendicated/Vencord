@@ -127,11 +127,43 @@ function addDeleteStyle() {
 
 const REMOVE_HISTORY_ID = "ml-remove-history";
 const TOGGLE_DELETE_STYLE_ID = "ml-toggle-style";
+
+/**
+ * Clears a message's history (edit + attachments)
+ *
+ * if the message was deleted, it will be completely removed from the UI and MessageStore
+ */
+function clearMessageHistory(msg: MLMessage) {
+    if (msg.deleted) {
+        FluxDispatcher.dispatch({
+            type: "MESSAGE_DELETE",
+            channelId: msg.channel_id,
+            id: msg.id,
+            mlDeleted: true
+        });
+    } else {
+        const attachments = msg.attachments?.filter((a: MLAttachment) => !a.deleted);
+
+        updateMessage(msg.channel_id, msg.id, { editHistory: [], attachments });
+    }
+}
+
+/**
+ * checks if a message has any history (deleted or edited)
+ * @param message the message to check
+ *
+ * @returns true if the message has any history, false otherwise
+ */
+function doesMessageHaveHistory(message: MLMessage): boolean {
+    return message.deleted || !!message.editHistory?.length || message.attachments?.some((a: MLAttachment) => a.deleted);
+
+}
+
 const patchMessageContextMenu: NavContextMenuPatchCallback = (children, props) => {
     const { message } = props;
-    const { deleted, editHistory, id, channel_id } = message;
+    const { deleted, id, channel_id } = message;
 
-    if (!deleted && !editHistory?.length) return;
+    if (!doesMessageHaveHistory(message)) return;
 
     toggle: {
         if (!deleted) break toggle;
@@ -156,24 +188,15 @@ const patchMessageContextMenu: NavContextMenuPatchCallback = (children, props) =
             label="Remove Message History"
             color="danger"
             action={() => {
-                if (deleted) {
-                    FluxDispatcher.dispatch({
-                        type: "MESSAGE_DELETE",
-                        channelId: channel_id,
-                        id,
-                        mlDeleted: true
-                    });
-                } else {
-                    updateMessage(channel_id, id, { editHistory: [] });
-                }
+                clearMessageHistory(message);
             }}
         />
     ));
 };
 
 const patchChannelContextMenu: NavContextMenuPatchCallback = (children, { channel }) => {
-    const messages = MessageStore.getMessages(channel?.id) as MLMessage[];
-    if (!messages?.some(msg => msg.deleted || msg.editHistory?.length)) return;
+    const messages = MessageStore.getMessages(channel?.id);
+    if (!messages?.some(msg => doesMessageHaveHistory(msg))) return;
 
     const group = findGroupChildrenByChildId("mark-channel-read", children) ?? children;
     group.push(
@@ -183,17 +206,7 @@ const patchChannelContextMenu: NavContextMenuPatchCallback = (children, { channe
             color="danger"
             action={() => {
                 messages.forEach(msg => {
-                    if (msg.deleted)
-                        FluxDispatcher.dispatch({
-                            type: "MESSAGE_DELETE",
-                            channelId: channel.id,
-                            id: msg.id,
-                            mlDeleted: true
-                        });
-                    else
-                        updateMessage(channel.id, msg.id, {
-                            editHistory: []
-                        });
+                    clearMessageHistory(msg);
                 });
             }}
         />
