@@ -82,11 +82,14 @@ export const CloseIcon: IconComponent = ({ height = 20, width = 20, className })
     </svg>
 );
 
-export const ChevronIcon: IconComponent = ({ height = 24, width = 24, className }) => (
-    <svg viewBox="0 0 24 24" width={width} height={height} className={className}>
+export const ArrowIcon: IconComponent = ({ height = 32, width = 32, className }) => (
+    <svg viewBox="0 0 24 24" width={width} height={height} className={className} fill="none">
         <path
-            fill="currentColor"
-            d="M15.7 5.3a1 1 0 0 1 0 1.4L10.42 12l5.3 5.3a1 1 0 0 1-1.42 1.4l-6-6a1 1 0 0 1 0-1.4l6-6a1 1 0 0 1 1.42 0Z"
+            d="M5 12h14M13 6l6 6-6 6"
+            stroke="currentColor"
+            strokeWidth={1.6}
+            strokeLinecap="round"
+            strokeLinejoin="round"
         />
     </svg>
 );

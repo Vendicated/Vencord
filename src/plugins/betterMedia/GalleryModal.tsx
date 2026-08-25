@@ -48,7 +48,7 @@ import {
     searchChannel,
     SearchHasFilter,
 } from "./api";
-import { ChevronIcon, CloseIcon, DownloadIcon, FileIcon, GalleryIcon, JumpIcon, LinkIcon, PinIcon, PlayIcon } from "./Icons";
+import { ArrowIcon, CloseIcon, DownloadIcon, FileIcon, GalleryIcon, JumpIcon, LinkIcon, PinIcon, PlayIcon } from "./Icons";
 
 const cl = classNameFactory("vc-bm-");
 
@@ -236,10 +236,10 @@ function MediaLightbox({ items, startingIndex, onClose, revealed, onReveal, onJu
             {items.length > 1 && (
                 <>
                     <button className={cl("lightbox-nav", "lightbox-prev")} onClick={e => { e.stopPropagation(); prev(); }} title="Previous">
-                        <ChevronIcon />
+                        <ArrowIcon className={cl("lightbox-arrow-prev")} />
                     </button>
                     <button className={cl("lightbox-nav", "lightbox-next")} onClick={e => { e.stopPropagation(); next(); }} title="Next">
-                        <ChevronIcon className={cl("lightbox-chevron-next")} />
+                        <ArrowIcon />
                     </button>
                     <div className={cl("lightbox-counter")}>{index + 1} / {items.length}</div>
                 </>

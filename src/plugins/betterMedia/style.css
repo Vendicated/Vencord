@@ -291,15 +291,17 @@
     justify-content: center;
     width: 48px;
     height: 48px;
-    border-radius: 50%;
-    background: rgb(255 255 255 / 10%);
-    color: #fff;
+    background: transparent;
+    color: rgb(255 255 255 / 80%);
     border: none;
     cursor: pointer;
+    opacity: 0.7;
+    transition: opacity 0.1s ease, color 0.1s ease;
 }
 
 .vc-bm-lightbox-nav:hover {
-    background: rgb(255 255 255 / 20%);
+    color: #fff;
+    opacity: 1;
 }
 
 .vc-bm-lightbox-prev {
@@ -310,7 +312,7 @@
     right: 24px;
 }
 
-.vc-bm-lightbox-chevron-next {
+.vc-bm-lightbox-arrow-prev {
     transform: scaleX(-1);
 }
 
