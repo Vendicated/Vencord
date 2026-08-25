@@ -60,13 +60,13 @@ function getMutualGDMCountText(user: User) {
     return `${count === 0 ? "No" : count} Mutual Group${count !== 1 ? "s" : ""}`;
 }
 
-function renderClickableGDMs(mutualDms: Channel[], onClose: () => void) {
+function renderClickableGDMs(mutualDms: Channel[], onClose?: () => void) {
     return mutualDms.map(c => (
         <Clickable
             key={c.id}
             className={MutualsListClasses.row}
             onClick={() => {
-                onClose();
+                onClose?.();
                 SelectedChannelActionCreators.selectPrivateChannel(c.id);
             }}
         >
@@ -101,7 +101,7 @@ export default definePlugin({
                 },
                 {
                     match: /\(0,\i\.jsx\)\(\i,\{items:\i,section:(\i)/,
-                    replace: "$1==='MUTUAL_GDMS'?$self.renderMutualGDMs({...arguments[0],isLegacyModal:true}):$&"
+                    replace: "$1==='MUTUAL_GDMS'?$self.renderMutualGDMs({...arguments[0],isLegacy:true}):$&"
                 },
                 // Discord adds spacing between each item which pushes our tab off screen.
                 // set the gap to zero to ensure ours stays on screen
@@ -179,13 +179,13 @@ export default definePlugin({
         return props;
     },
 
-    renderMutualGDMs: ErrorBoundary.wrap(({ user, onClose, isLegacyModal }: { user: User, onClose: () => void; isLegacyModal: boolean; }) => {
+    renderMutualGDMs: ErrorBoundary.wrap(({ user, onClose, isLegacy }: { user: User, onClose: () => void; isLegacy: boolean; }) => {
         const mutualGDms = useMemo(() => getMutualGroupDms(user.id), [user.id]);
         const entries = renderClickableGDMs(mutualGDms, onClose);
 
         return (
             <ScrollerThin
-                className={classes(TabBarClasses.tabPanelScroller, !isLegacyModal && "vc-mutual-gdms-scroller")}
+                className={classes(TabBarClasses.tabPanelScroller, !isLegacy && "vc-mutual-gdms-scroller")}
                 fade={true}
                 onClose={onClose}
             >
@@ -211,10 +211,10 @@ export default definePlugin({
             <>
                 {hasDivider && Divider}
                 <ExpandableList
-                    listClassName={listStyle}
+                    listClassName={classes(listStyle, "vc-mutual-gdms-dm-page-list")}
                     header={"Mutual Groups"}
                     isLoading={false}
-                    items={renderClickableGDMs(mutualGDms, () => { })}
+                    items={renderClickableGDMs(mutualGDms)}
                 />
             </>
         );
