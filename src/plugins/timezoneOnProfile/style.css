@@ -1,6 +1,7 @@
 .vc-tzonprofile-container {
     display: inline;
-    /*margin: 0 3px 0 0;*/
+
+    /* margin: 0 3px 0 0; */
 }
 
 .vc-tzonprofile-selector * {
@@ -98,7 +99,7 @@
 }
 
 :has(> .vc-tzonprofile-time) {
-    margin-inline-end: 0px !important;
+    margin-inline-end: 0 !important;
 }
 
 .vc-tzonprofile-time > span > span {
