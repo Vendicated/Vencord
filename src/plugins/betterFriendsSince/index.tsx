@@ -22,12 +22,6 @@ const settings = definePluginSettings({
         description: "Show \"Friends since\" dates in a profile's Mutual Friends tab",
         default: true,
         restartNeeded: true
-    },
-    showInFriendsList: {
-        type: OptionType.BOOLEAN,
-        description: "Show \"Friends since\" dates in your Friends list (Online / All tabs)",
-        default: true,
-        restartNeeded: true
     }
 });
 
