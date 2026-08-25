@@ -134,11 +134,13 @@ export const TimezoneTriggerUsername = (props: { userId: string; timestamp?: str
                 {tooltipProps => (
                     <span
                         {...tooltipProps}
-                        style={{ fontSize: settings.store.timeFontSize }}
                         className="vc-tzonprofile-time"
+                        style={{ "--vc-tzonprofile-font-size": `${settings.store.timeFontSize}px` } as React.CSSProperties}
                     >
-                        {" "}
-                        <Timestamp timestamp={currentTime} />
+                        <Timestamp
+                            className="vc-tzonprofile-username-timestamp"
+                            timestamp={currentTime}
+                        />
                     </span>
                 )}
             </Tooltip>

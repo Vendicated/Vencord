@@ -105,3 +105,7 @@
 .vc-tzonprofile-time > span > span {
     margin-inline-end: .25rem !important;
 }
+
+.vc-tzonprofile-username-timestamp time {
+    font-size: var(--vc-tzonprofile-font-size) !important;
+}
