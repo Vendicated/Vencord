@@ -37,10 +37,15 @@ export const settings = definePluginSettings({
         type: OptionType.CUSTOM,
         default: {} as TimezonesByUser,
     },
-    timeFontSize: {
+    profileTimeFontSize: {
         type: OptionType.NUMBER,
-        description: "The font size of the time.",
+        description: "The font size of the time in Discord profiles.",
         default: 14
+    },
+    usernameTimeFontSize: {
+        type: OptionType.NUMBER,
+        description: "The font size of the time in to Discord messages.",
+        default: 12
     },
     messageTimeMode: {
         type: OptionType.SELECT,

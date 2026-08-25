@@ -107,5 +107,5 @@
 }
 
 .vc-tzonprofile-username-timestamp time {
-    font-size: var(--vc-tzonprofile-font-size) !important;
+    font-size: var(--vc-tzonprofile-username-font-size) !important;
 }
