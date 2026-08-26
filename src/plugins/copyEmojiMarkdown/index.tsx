@@ -5,6 +5,7 @@
  */
 
 import { definePluginSettings } from "@api/Settings";
+import { CopyIcon } from "@components/Icons";
 import { Devs } from "@utils/constants";
 import { copyWithToast } from "@utils/discord";
 import definePlugin, { OptionType } from "@utils/types";
@@ -69,6 +70,7 @@ export default definePlugin({
                             "Success! Copied emoji markdown."
                         );
                     }}
+                    leadingAccessory={{ type: "icon", icon: CopyIcon }}
                 />
             );
         },
