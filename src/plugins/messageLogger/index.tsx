@@ -95,7 +95,7 @@ const settings = definePluginSettings({
     ignoreBots: {
         type: OptionType.BOOLEAN,
         description: "Whether to ignore messages by bots",
-        default: false
+        default: true
     },
     ignoreSelf: {
         type: OptionType.BOOLEAN,
