@@ -7,6 +7,7 @@
 import { showNotification } from "@api/Notifications";
 import { definePluginSettings } from "@api/Settings";
 import { getUserSettingLazy } from "@api/UserSettings";
+import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 
 const StatusSettings = getUserSettingLazy<string>("status", "status")!;
@@ -97,7 +98,6 @@ function setPresence() {
         expiresAtMs: undefined
     });
 
-
     thread = setTimeout(() => {
         currentPosition += 1;
         setPresence();
@@ -112,10 +112,7 @@ export default definePlugin({
     tags: ["Customisation", "Activity"],
     requiresRestart: true,
     authors: [
-        {
-            name: "xslbrst",
-            id: 1136216090725339206n,
-        }
+        Devs.xslbrst
     ],
 
     settings,
