@@ -11,7 +11,7 @@ import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 
 const StatusSettings = getUserSettingLazy<string>("status", "status")!;
-const CustomStatusSettings = getUserSettingLazy<{ text: string, emojiId: string | undefined, expiresAtMs: undefined | number; }>("status", "customStatus")!;
+const CustomStatusSettings = getUserSettingLazy<{ text: string | null, emojiId?: string | undefined, expiresAtMs?: undefined | number; }>("status", "customStatus")!;
 
 const statusMap: string[] = [];
 let currentPosition: number = 0;
@@ -51,9 +51,12 @@ const settings = definePluginSettings({
     },
     statusDuration: {
         type: OptionType.NUMBER,
-        description: "How long should each status be displayed for? (in seconds)",
-        default: 60,
-        restartNeeded: true
+        description: "How long should each status be displayed for? (in seconds, minimum is 600)",
+        default: 300,
+        restartNeeded: true,
+        isValid: (value: number) => {
+            return value >= 600;
+        },
     }
 });
 
@@ -106,7 +109,7 @@ function setPresence() {
 }
 
 export default definePlugin({
-    name: "CustomStatusRotator",
+    name: "CustomStatusRotation",
     description: "Allows you to set a different rotation of statuses.",
     dependencies: ["UserSettingsAPI"],
     tags: ["Customisation", "Activity"],
