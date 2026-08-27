@@ -60,7 +60,7 @@ export function MemberCount({ isTooltip, tooltipGuildId }: { isTooltip?: true; t
 
             const { groups } = ChannelMemberStore.getProps(guildId, currentChannel?.id);
 
-            if (groups.length >= 1 || groups[0].id !== "unknown") {
+            if (groups.length >= 1 && groups[0].id !== "unknown") {
                 return groups.reduce(
                     (total, curr) => total + (curr.id === "offline" ? 0 : curr.count),
                     0
