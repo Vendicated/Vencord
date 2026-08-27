@@ -39,3 +39,7 @@
         margin-left: auto;
     }
 }
+
+.vc-plugin-ui-elements-description {
+    color: var(--text-subtle);
+}
