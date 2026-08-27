@@ -1,6 +1,25 @@
 import type { ComponentType, CSSProperties, ForwardRefRenderFunction, MouseEvent, PropsWithChildren, ReactNode, UIEvent } from "react";
+import { LiteralUnion } from "type-fest";
 
 type RC<C> = ComponentType<PropsWithChildren<C & Record<string, any>>>;
+
+type Accessory =
+    | {
+        type: "icon";
+        icon: ComponentType<any>;
+        color?: string;
+        size?: LiteralUnion<"refresh_sm", string>;
+    }
+    | {
+        type: "emoji";
+        emojiId?: string;
+        src?: string;
+        animated?: boolean;
+    }
+    | {
+        type: "image";
+        src: string;
+    };
 
 export interface Menu {
     Menu: RC<{
@@ -20,6 +39,7 @@ export interface Menu {
         label: ReactNode;
         action?(e: MouseEvent): void;
         icon?: ComponentType<any>;
+        leadingAccessory?: Accessory;
 
         color?: string;
         render?: ComponentType<any>;

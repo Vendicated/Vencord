@@ -72,7 +72,7 @@ export default definePlugin({
     name: "ShowHiddenChannels",
     description: "Show channels that you do not have access to view.",
     tags: ["Servers", "Utility"],
-    authors: [Devs.BigDuck, Devs.AverageReactEnjoyer, Devs.D3SOX, Devs.Ven, Devs.Nuckyz, Devs.Nickyux, Devs.dzshn],
+    authors: [Devs.BigDuck, Devs.AverageReactEnjoyer, Devs.D3SOX, Devs.Ven, Devs.Nuckyz, Devs.Nickyux, Devs.Rini],
     settings,
 
     patches: [
@@ -482,6 +482,13 @@ export default definePlugin({
             replacement: {
                 match: /(?=function (\i)\(\i\){let{channel:.{0,200}?getSortedRoles\()/,
                 replace: "$self.ChannelBeginHeader=$1;"
+            }
+        },
+        {
+            find: "2026-02-private-channel-hiding",
+            replacement: {
+                match: /(?<=enableObfuscation|enableIntegrityCheck):!0/g,
+                replace: ":false"
             }
         }
     ],
