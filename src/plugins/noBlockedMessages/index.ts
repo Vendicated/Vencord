@@ -85,16 +85,17 @@ export default definePlugin({
         }
     ],
 
-    shouldIgnoreMessage(message: Message) {
+    shouldIgnoreUser(userId: string) {
         try {
-            if (RelationshipStore.isBlocked(message.author.id)) {
-                return true;
-            }
-            return settings.store.applyToIgnoredUsers && RelationshipStore.isIgnored(message.author.id);
+            return RelationshipStore.isBlocked(userId) || (settings.store.applyToIgnoredUsers && RelationshipStore.isIgnored(userId));
         } catch (e) {
             new Logger("NoBlockedMessages").error("Failed to check if user is blocked or ignored:", e);
             return false;
         }
+    },
+
+    shouldIgnoreMessage(message: Message) {
+        return this.shouldIgnoreUser(message?.author?.id);
     },
 
     shouldHide(props: MessageDeleteProps): boolean {

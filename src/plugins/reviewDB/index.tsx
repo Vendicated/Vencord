@@ -50,6 +50,7 @@ const guildPopoutPatch: NavContextMenuPatchCallback = (children, { guild }: { gu
             label="View Reviews"
             id="vc-rdb-server-reviews"
             icon={OpenExternalIcon}
+            leadingAccessory={{ type: "icon", icon: OpenExternalIcon }}
             action={() => openReviewsModal(guild.id, guild.name, ReviewType.Server)}
         />
     );
@@ -62,6 +63,7 @@ const userContextPatch: NavContextMenuPatchCallback = (children, { user }: { use
             label="View Reviews"
             id="vc-rdb-user-reviews"
             icon={OpenExternalIcon}
+            leadingAccessory={{ type: "icon", icon: OpenExternalIcon }}
             action={() => openReviewsModal(user.id, user.username, ReviewType.User)}
         />
     );
@@ -87,7 +89,7 @@ export default definePlugin({
             // DM profile sidebar
             find: ".SIDEBAR,disableToolbar:",
             replacement: {
-                match: /user:(\i),widgets:.{0,100}?\}\),(?=.{0,200}?#{intl::USER_PROFILE_WISHLIST})/,
+                match: /user:(\i),widgets:.{0,100}?\}\),(?=.{0,100}unownedWishlistItems:\i,wishlistId:\i)/,
                 replace: "$&$self.renderProfileComponent({user:$1,isSideBar:true}),"
             }
         },
@@ -185,7 +187,6 @@ export default definePlugin({
                                             {reviewData.reviews
                                                 .filter(review => review.id !== 0)
                                                 .slice(0, 4)
-                                                .reverse()
                                                 .map((review, idx) => {
                                                     const showCount = idx === 3 && reviewData.reviewCount > 4;
 

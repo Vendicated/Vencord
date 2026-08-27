@@ -18,13 +18,15 @@
 
 import { ChatBarButton, ChatBarButtonFactory } from "@api/ChatButtons";
 import { generateId, sendBotMessage } from "@api/Commands";
+import { EyeIcon } from "@components/Icons";
 import { Devs } from "@utils/constants";
 import definePlugin, { IconComponent, StartAt } from "@utils/types";
 import { CloudUpload, MessageAttachment } from "@vencord/discord-types";
 import { DraftStore, DraftType, UploadAttachmentStore, UserStore, useStateFromStores } from "@webpack/common";
 
-const getDraft = (channelId: string) => DraftStore.getDraft(channelId, DraftType.ChannelMessage);
+const objectURLMap = new Map<string, string[]>();
 
+const getDraft = (channelId: string) => DraftStore.getDraft(channelId, DraftType.ChannelMessage);
 
 const getImageBox = (url: string): Promise<{ width: number, height: number; } | null> =>
     new Promise(res => {
@@ -44,6 +46,8 @@ const getAttachments = async (channelId: string) =>
         UploadAttachmentStore.getUploads(channelId, DraftType.ChannelMessage)
             .map(async (upload: CloudUpload) => {
                 const { isImage, filename, spoiler, item: { file } } = upload;
+
+                // FIXME: revoke object url to fix memory leak
                 const url = URL.createObjectURL(file);
                 const attachment: MessageAttachment = {
                     id: generateId(),
@@ -59,30 +63,25 @@ const getAttachments = async (channelId: string) =>
 
                 if (isImage) {
                     const box = await getImageBox(url);
-                    if (!box) return attachment;
-
-                    attachment.width = box.width;
-                    attachment.height = box.height;
+                    if (box) {
+                        attachment.width = box.width;
+                        attachment.height = box.height;
+                    }
                 }
 
-                return attachment;
+                return { attachment, objectURL: url };
             })
     );
 
 
 const PreviewIcon: IconComponent = ({ height = 20, width = 20, className }) => {
     return (
-        <svg
-            fill="currentColor"
-            fillRule="evenodd"
+        <EyeIcon
             width={width}
             height={height}
             className={className}
-            viewBox="0 0 24 24"
             style={{ scale: "1.096", translate: "0 -1px" }}
-        >
-            <path d="M22.89 11.7c.07.2.07.4 0 .6C22.27 13.9 19.1 21 12 21c-7.11 0-10.27-7.11-10.89-8.7a.83.83 0 0 1 0-.6C1.73 10.1 4.9 3 12 3c7.11 0 10.27 7.11 10.89 8.7Zm-4.5-3.62A15.11 15.11 0 0 1 20.85 12c-.38.88-1.18 2.47-2.46 3.92C16.87 17.62 14.8 19 12 19c-2.8 0-4.87-1.38-6.39-3.08A15.11 15.11 0 0 1 3.15 12c.38-.88 1.18-2.47 2.46-3.92C7.13 6.38 9.2 5 12 5c2.8 0 4.87 1.38 6.39 3.08ZM15.56 11.77c.2-.1.44.02.44.23a4 4 0 1 1-4-4c.21 0 .33.25.23.44a2.5 2.5 0 0 0 3.32 3.32Z" />
-        </svg>
+        />
     );
 };
 
@@ -99,15 +98,20 @@ const PreviewButton: ChatBarButtonFactory = ({ isAnyChat, isEmpty, type: { attac
     return (
         <ChatBarButton
             tooltip="Preview Message"
-            onClick={async () =>
-                sendBotMessage(
+            onClick={async () => {
+                const attachments = hasAttachments ? await getAttachments(channelId) : undefined;
+                const message = sendBotMessage(
                     channelId,
                     {
                         content: getDraft(channelId),
                         author: UserStore.getCurrentUser(),
-                        attachments: hasAttachments ? await getAttachments(channelId) : undefined,
+                        attachments: attachments?.map(a => a.attachment),
                     }
-                )}
+                );
+
+                if (attachments)
+                    objectURLMap.set(message.id, attachments.map(a => a.objectURL));
+            }}
             buttonProps={{
                 style: {
                     translate: "0 2px"
@@ -132,5 +136,15 @@ export default definePlugin({
     chatBarButton: {
         icon: PreviewIcon,
         render: PreviewButton
+    },
+
+    flux: {
+        MESSAGE_DELETE({ id: messageId }) {
+            const objectURLs = objectURLMap.get(messageId);
+            if (objectURLs) {
+                objectURLs.forEach(url => URL.revokeObjectURL(url));
+                objectURLMap.delete(messageId);
+            }
+        }
     }
 });
