@@ -59,9 +59,6 @@ export default definePlugin({
         }
     ],
 
-    // Note to reviewer(s): I want to be upfront and state that the user ID caching was achieved via
-    // a coding agent's help - just putting this out here so there's not any misunderstanding as per
-    // https://github.com/Vendicated/Vencord/blob/main/CONTRIBUTING.md  (˵• ᴗ -˵)
     Cache: new Map<string, number>(),
 
     getCachedSince(userId: string): number {
