@@ -89,6 +89,7 @@ const makeContextMenuPatch: (shouldAddIcon: boolean) => NavContextMenuPatchCallb
             label="Apply NewGuildSettings"
             id="vc-newguildsettings-apply"
             icon={shouldAddIcon ? CogWheel : void 0}
+            leadingAccessory={shouldAddIcon ? { type: "icon", icon: CogWheel } : void 0}
             action={() => applyDefaultSettings(guild.id)}
         />
     );

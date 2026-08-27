@@ -8,15 +8,17 @@ export interface UserAndActivity {
 
 export type DiscordPlatform = "desktop" | "mobile" | "web" | "embedded" | "vr";
 
+export type ClientStatusMap = Partial<Record<DiscordPlatform, OnlineStatus>>;
+
 export interface PresenceStoreState {
-    presencesForGuilds: Record<string, Record<string, { status: OnlineStatus; activities: Activity[]; clientStatus: Partial<Record<DiscordPlatform, OnlineStatus>>; }>>;
+    presencesForGuilds: Record<string, Record<string, { status: OnlineStatus; activities: Activity[]; clientStatus: ClientStatusMap; }>>;
     statuses: Record<string, OnlineStatus>;
     activities: Record<string, Activity[]>;
     filteredActivities: Record<string, Activity[]>;
     hiddenActivities: Record<string, Activity[]>;
     // TODO: finish typing
     activityMetadata: Record<string, any>;
-    clientStatuses: Record<string, Partial<Record<DiscordPlatform, OnlineStatus>>>;
+    clientStatuses: Record<string, ClientStatusMap>;
 }
 
 export class PresenceStore extends FluxStore {
@@ -26,7 +28,7 @@ export class PresenceStore extends FluxStore {
     getActivityMetadata(userId: string): any;
     getAllApplicationActivities(applicationId: string): UserAndActivity[];
     getApplicationActivity(userId: string, applicationId: string, guildId?: string): Activity | null;
-    getClientStatus(userId: string): Record<DiscordPlatform, OnlineStatus>;
+    getClientStatus(userId: string): ClientStatusMap;
     getHiddenActivities(): Activity[];
     /** literally just getActivities(...)[0] */
     getPrimaryActivity(userId: string, guildId?: string): Activity | null;

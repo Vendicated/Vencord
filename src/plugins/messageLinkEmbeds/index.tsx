@@ -146,7 +146,7 @@ async function fetchMessage(channelID: string, messageID: string) {
     const msg = res?.body?.[0];
     if (!msg) return;
 
-    const message: Message = MessageStore.getMessages(msg.channel_id).receiveMessage(msg).get(msg.id);
+    const message = MessageStore.getMessages(msg.channel_id).receiveMessage(msg).get(msg.id);
     if (!message) return;
 
     messageCache.set(message.id, {
@@ -356,7 +356,7 @@ function AutomodEmbedAccessory(props: MessageEmbedProps): JSX.Element | null {
                     const { width, height } = computeWidthAndHeight(a.width, a.height);
                     return (
                         <div key={idx}>
-                            <img src={a.url} width={width} height={height} />
+                            <img src={a.proxyURL ?? a.url} width={width} height={height} />
                         </div>
                     );
                 })}

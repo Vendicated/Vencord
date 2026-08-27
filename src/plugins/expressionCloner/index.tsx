@@ -21,8 +21,9 @@ import { migratePluginSettings } from "@api/Settings";
 import { BaseText } from "@components/BaseText";
 import { CheckedTextInput } from "@components/CheckedTextInput";
 import { Flex } from "@components/Flex";
+import { PlusIcon } from "@components/Icons";
 import { Devs } from "@utils/constants";
-import { getGuildAcronym } from "@utils/discord";
+import { getGuildAcronym, hasGuildFeature } from "@utils/discord";
 import { Logger } from "@utils/Logger";
 import definePlugin from "@utils/types";
 import { Guild, GuildSticker } from "@vencord/discord-types";
@@ -32,8 +33,6 @@ import { Constants, EmojiStore, FluxDispatcher, Forms, GuildStore, IconUtils, Me
 import { Promisable } from "type-fest";
 
 const uploadEmoji = findByCodeLazy(".GUILD_EMOJIS(", "EMOJI_UPLOAD_START");
-
-const getGuildMaxEmojiSlots = findByCodeLazy(".additionalEmojiSlots") as (guild: Guild) => number;
 
 interface Sticker extends GuildSticker {
     t: "Sticker";
@@ -70,6 +69,13 @@ function getGuildMaxStickerSlots(guild: Guild) {
         return 120;
 
     return PremiumTierStickerLimitMap[guild.premiumTier] ?? PremiumTierStickerLimitMap[0];
+}
+
+function getGuildMaxEmojiSlots(guild: Guild) {
+    return Math.max(
+        hasGuildFeature(guild, "MORE_EMOJI") ? 200 : 50,
+        50 + (guild.premiumFeatures?.additionalEmojiSlots ?? 0)
+    );
 }
 
 function getUrl(data: Data, size: number) {
@@ -322,6 +328,7 @@ function buildMenuItem(type: "Emoji" | "Sticker", fetchData: () => Promisable<Om
             id="emote-cloner"
             key="emote-cloner"
             label={`Clone ${type}`}
+            leadingAccessory={{ type: "icon", icon: PlusIcon }}
             action={() =>
                 openModalLazy(async () => {
                     const res = await fetchData();
