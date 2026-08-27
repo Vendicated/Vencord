@@ -49,7 +49,7 @@ const settings = definePluginSettings({
 
 export default definePlugin({
     name: "SortFriendRequests",
-    authors: [Devs.Megu, Devs["0bi0"]],
+    authors: [Devs.Megu, Devs.Obi0],
     description: "Sorts friend requests by date of receipt, and sorts the friends list by date added",
     tags: ["Friends", "Organisation"],
     settings,
