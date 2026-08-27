@@ -320,7 +320,7 @@ export default definePlugin({
         },
         // Allow users to use custom client themes
         {
-            find: '("custom_themes_editor_footer")',
+            find: '("reset_button",',
             replacement: {
                 match: /(?<=\i=)\(0,\i\.\i\)\(\i\.\i\.TIER_2\)(?=,|;)/g,
                 replace: "true"
