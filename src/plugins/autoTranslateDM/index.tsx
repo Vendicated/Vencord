@@ -26,6 +26,7 @@ type MsgThing = Message & {
     vcAutoSource?: string;
     vcAutoRendered?: string;
     vcAutoTarget?: string;
+    vcAutoMyOriginal?: string;
 };
 
 const langs = [
@@ -74,7 +75,7 @@ const tinyNames: Record<string, string> = {
 const settings = definePluginSettings({
     autoIncoming: {
         type: OptionType.BOOLEAN,
-        description: "Automatically translate foreign incoming messages",
+        description: "Master switch for incoming translation. Enable it per DM/channel from the context menu.",
         default: true
     },
     incomingTarget: {
@@ -85,6 +86,12 @@ const settings = definePluginSettings({
     dmRulesJson: {
         type: OptionType.STRING,
         description: "Stored per-DM/per-channel outgoing translation rules",
+        default: "{}",
+        hidden: true
+    },
+    incomingChannelsJson: {
+        type: OptionType.STRING,
+        description: "Stored per-DM/per-channel incoming translation toggles",
         default: "{}",
         hidden: true
     }
@@ -115,6 +122,32 @@ function grabRule(channelId: string) {
     return grabRules()[channelId];
 }
 
+function incomingChannels(): Record<string, boolean> {
+    try {
+        const parsed = JSON.parse(settings.store.incomingChannelsJson || "{}");
+        return parsed && typeof parsed === "object" ? parsed : {};
+    } catch {
+        return {};
+    }
+}
+
+function incomingOn(channelId: string) {
+    return incomingChannels()[channelId] === true;
+}
+
+function setIncoming(channelId: string, enabled: boolean) {
+    const channels = incomingChannels();
+
+    if (enabled) channels[channelId] = true;
+    else delete channels[channelId];
+
+    settings.store.incomingChannelsJson = JSON.stringify(channels);
+    doBadges();
+
+    if (enabled) window.setTimeout(() => scanChannel(channelId), 50);
+    else restoreChannel(channelId);
+}
+
 function setThing(channelId: string, target: string | null) {
     const rules = grabRules();
 
@@ -131,6 +164,20 @@ function isJunk(text: string) {
     if (/^https?:\/\/\S+$/i.test(t)) return true;
     if (/^```[\s\S]*```$/.test(t)) return true;
     return !/\p{L}/u.test(t);
+}
+
+function tooShortToTrust(text: string) {
+    const words = text.trim().split(/\s+/).filter(Boolean);
+    if (words.length === 1 && words[0].length <= 5) return true;
+
+    const shortStuff = new Set([
+        "wow", "lol", "lmao", "lmfao", "ok", "okay", "yeah", "yea", "yep",
+        "nah", "nope", "bro", "bruh", "dude", "fr", "bet", "real", "true",
+        "nice", "cool", "hey", "hi", "hello", "bye", "thanks", "thx", "wtf",
+        "omg", "idk", "imo", "tbh", "sure"
+    ]);
+
+    return words.length <= 2 && shortStuff.has(text.trim().toLowerCase());
 }
 
 async function doGoogle(text: string, target: string, source = "auto"): Promise<GoogleThing> {
@@ -153,6 +200,7 @@ async function doGoogle(text: string, target: string, source = "auto"): Promise<
 const stash = new Map<string, Promise<GoogleThing>>();
 const busy = new Set<string>();
 const oldStuff = new Map<string, { channelId: string; content: string; }>();
+const myPending = new Map<string, { original: string; translated: string; time: number; }[]>();
 
 function doCached(messageId: string, text: string, target: string) {
     const key = `${messageId}:${target}:${text}`;
@@ -176,9 +224,38 @@ function makeText(sourceLanguage: string, translation: string) {
     return `-# *(translated from ${langName(sourceLanguage)})*\n${translation}`;
 }
 
+function showWhatISaid(message: MsgThing) {
+    if (message.author?.id !== UserStore.getCurrentUser()?.id) return;
+    if (message.vcAutoMyOriginal) return;
+
+    const list = myPending.get(message.channel_id);
+    if (!list?.length) return;
+
+    const now = Date.now();
+    while (list.length && now - list[0].time > 30000) list.shift();
+    if (!list.length) {
+        myPending.delete(message.channel_id);
+        return;
+    }
+
+    const i = list.findIndex(x => x.translated.trim() === message.content.trim());
+    if (i === -1) return;
+
+    const found = list.splice(i, 1)[0];
+    if (!list.length) myPending.delete(message.channel_id);
+
+    const rendered = `${message.content}\n-# *(you said: ${found.original})*`;
+
+    updateMessage(message.channel_id, message.id, {
+        content: rendered,
+        vcAutoMyOriginal: found.original
+    } as any);
+}
+
 async function doIncoming(message: MsgThing) {
     if (!settings.store.autoIncoming) return;
     if (!message?.id || !message.channel_id) return;
+    if (!incomingOn(message.channel_id)) return;
     if (message.author?.id === UserStore.getCurrentUser()?.id) return;
 
     const target = settings.store.incomingTarget;
@@ -193,7 +270,7 @@ async function doIncoming(message: MsgThing) {
             : message.vcAutoSource ?? message.content
     )?.trim() ?? "";
 
-    if (!sourceText || isJunk(sourceText)) return;
+    if (!sourceText || isJunk(sourceText) || tooShortToTrust(sourceText)) return;
 
     const flightKey = `${message.id}:${target}:${sourceText}`;
     if (busy.has(flightKey)) return;
@@ -247,12 +324,36 @@ function scanChannel(channelId: string) {
     });
 }
 
+function restoreChannel(channelId: string) {
+    for (const [messageId, original] of oldStuff) {
+        if (original.channelId !== channelId) continue;
+
+        updateMessage(original.channelId, messageId, {
+            content: original.content,
+            vcAutoTranslated: false,
+            vcAutoSource: undefined,
+            vcAutoRendered: undefined,
+            vcAutoTarget: undefined
+        } as any);
+
+        oldStuff.delete(messageId);
+    }
+}
+
 function makeMenu(channelId: string) {
     const thing = grabRule(channelId);
+    const incoming = incomingOn(channelId);
 
     return (
-        <Menu.MenuItem
-            id="vc-auto-translate-my-messages"
+        <>
+            <Menu.MenuItem
+                id="vc-auto-translate-incoming"
+                label={`Translate Incoming Messages: ${incoming ? "On" : "Off"}`}
+                action={() => setIncoming(channelId, !incoming)}
+            />
+
+            <Menu.MenuItem
+                id="vc-auto-translate-my-messages"
             label={thing
                 ? `Auto Translate My Messages → ${langName(thing.target)}`
                 : "Auto Translate My Messages"}
@@ -273,7 +374,8 @@ function makeMenu(channelId: string) {
                     action={() => setThing(channelId, lang.value)}
                 />
             ))}
-        </Menu.MenuItem>
+            </Menu.MenuItem>
+        </>
     );
 }
 
@@ -307,30 +409,41 @@ function findLink(channelId: string) {
 
 function doBadges() {
     const rules = grabRules();
+    const incoming = incomingChannels();
 
     document.querySelectorAll<HTMLElement>(`.${badgeClass}`).forEach(el => {
         const id = el.dataset.channelId;
-        if (!id || !rules[id]) el.remove();
+        const kind = el.dataset.badgeKind;
+
+        if (!id) {
+            el.remove();
+            return;
+        }
+
+        if (kind === "outgoing" && !rules[id]) el.remove();
+        if (kind === "incoming" && !incoming[id]) el.remove();
     });
 
-    for (const [channelId, rule] of Object.entries(rules)) {
+    const addBadge = (channelId: string, kind: "outgoing" | "incoming", text: string, title: string) => {
         const existing = document.querySelector<HTMLElement>(
-            `.${badgeClass}[data-channel-id="${channelId}"]`
+            `.${badgeClass}[data-channel-id="${channelId}"][data-badge-kind="${kind}"]`
         );
 
         if (existing) {
-            existing.textContent = tinyName(rule.target);
-            continue;
+            existing.textContent = text;
+            existing.title = title;
+            return;
         }
 
         const link = findLink(channelId);
-        if (!link) continue;
+        if (!link) return;
 
         const badge = document.createElement("span");
         badge.className = badgeClass;
         badge.dataset.channelId = channelId;
-        badge.textContent = tinyName(rule.target);
-        badge.title = `My messages translate to ${langName(rule.target)}`;
+        badge.dataset.badgeKind = kind;
+        badge.textContent = text;
+        badge.title = title;
 
         Object.assign(badge.style, {
             display: "inline-flex",
@@ -350,10 +463,20 @@ function doBadges() {
             pointerEvents: "none",
             flexShrink: "0"
         });
+
+        const other = link.querySelector<HTMLElement>(
+            `.${badgeClass}[data-channel-id="${channelId}"]`
+        );
+
+        if (other) {
+            other.insertAdjacentElement("afterend", badge);
+            return;
+        }
+
         const candidates = Array.from(link.querySelectorAll<HTMLElement>("span, div"))
             .filter(el => {
-                const text = el.textContent?.trim();
-                if (!text || el.querySelector("img, svg")) return false;
+                const value = el.textContent?.trim();
+                if (!value || el.querySelector("img, svg")) return false;
                 const rect = el.getBoundingClientRect();
                 return rect.width > 5 && rect.height > 8 && rect.height < 40;
             });
@@ -362,9 +485,22 @@ function doBadges() {
 
         if (name) name.insertAdjacentElement("afterend", badge);
         else link.appendChild(badge);
+    };
+
+    for (const [channelId, rule] of Object.entries(rules)) {
+        addBadge(
+            channelId,
+            "outgoing",
+            tinyName(rule.target),
+            `My messages translate to ${langName(rule.target)}`
+        );
+    }
+
+    for (const channelId of Object.keys(incoming)) {
+        if (!incoming[channelId]) continue;
+        addBadge(channelId, "incoming", "Translate: ON", "Incoming messages auto-translate");
     }
 }
-
 function startBadges() {
     doBadges();
     if (badgeClock !== undefined) clearInterval(badgeClock);
@@ -417,10 +553,12 @@ export default definePlugin({
 
         oldStuff.clear();
         busy.clear();
+        myPending.clear();
     },
 
     flux: {
         MESSAGE_CREATE({ message }: { message: Message; }) {
+            showWhatISaid(message as MsgThing);
             void doIncoming(message as MsgThing);
         },
 
@@ -448,6 +586,15 @@ export default definePlugin({
 
             if (norm(got.sourceLanguage) === norm(rule.target))
                 return;
+
+            const original = message.content;
+            const list = myPending.get(channelId) ?? [];
+            list.push({
+                original,
+                translated: got.translation,
+                time: Date.now()
+            });
+            myPending.set(channelId, list);
 
             message.content = got.translation;
         } catch (err) {
