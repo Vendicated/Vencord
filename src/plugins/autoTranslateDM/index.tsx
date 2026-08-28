@@ -10,7 +10,7 @@ import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { Message } from "@vencord/discord-types";
-import { Menu, useEffect,UserStore } from "@webpack/common";
+import { Menu, MessageStore, useEffect,UserStore } from "@webpack/common";
 
 type RuleThing = {
     target: string;
@@ -200,7 +200,7 @@ async function doIncoming(message: MsgThing) {
     busy.add(flightKey);
 
     try {
-        const result = await doCached(message.id, sourceText, target);
+        const got = await doCached(message.id, sourceText, target);
 
         if (norm(got.sourceLanguage) === norm(target))
             return;
@@ -236,6 +236,15 @@ function LilWorker({ message }: { message: Message; }) {
         void doIncoming(message as MsgThing);
     }, [message.id, message.content, settings.store.autoIncoming, settings.store.incomingTarget]);
     return null;
+}
+
+function scanChannel(channelId: string) {
+    const messages = MessageStore.getMessages(channelId);
+    if (!messages) return;
+
+    messages.forEach(message => {
+        void doIncoming(message as MsgThing);
+    });
 }
 
 function makeMenu(channelId: string) {
@@ -375,7 +384,7 @@ export default definePlugin({
     name: "AutoTranslateDM",
     description: "Automatically translates incoming messages and can translate your messages per DM or channel.",
     authors: [Devs.en],
-    dependencies: ["MessageUpdaterAPI"],
+    dependencies: ["MessageUpdaterAPI", "MessageAccessoriesAPI"],
     settings,
 
     contextMenus: {
@@ -387,6 +396,11 @@ export default definePlugin({
 
     start() {
         startBadges();
+
+        window.setTimeout(() => {
+            const channelId = document.location.pathname.split("/").at(-1);
+            if (channelId) scanChannel(channelId);
+        }, 500);
     },
 
     stop() {
@@ -403,6 +417,20 @@ export default definePlugin({
 
         oldStuff.clear();
         busy.clear();
+    },
+
+    flux: {
+        MESSAGE_CREATE({ message }: { message: Message; }) {
+            void doIncoming(message as MsgThing);
+        },
+
+        MESSAGE_UPDATE({ message }: { message: Message; }) {
+            void doIncoming(message as MsgThing);
+        },
+
+        CHANNEL_SELECT({ channelId }: { channelId: string; }) {
+            window.setTimeout(() => scanChannel(channelId), 100);
+        }
     },
 
     renderMessageAccessory: props => (
@@ -428,3 +456,4 @@ export default definePlugin({
         }
     }
 });
+
