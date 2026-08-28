@@ -21,7 +21,7 @@ export const EmbedContext = proxyLazyWebpack(() => React.createContext<null | Em
 export const EmbedMosaicContext = proxyLazyWebpack(() => React.createContext<null | number>(null));
 const AttachmentContext = proxyLazyWebpack(() => React.createContext<null | AttachmentItem>(null));
 
-const ManaSearchBar = findComponentByCodeLazy<ManaSearchBarProps>("#{intl::SEARCH}),ref");
+const ManaSearchBar = findComponentByCodeLazy<ManaSearchBarProps>(".MagnifyingGlassIcon", ".SEARCH");
 const FavoriteButton = findComponentByCodeLazy<FavoriteButtonProps>("#{intl::GIF_TOOLTIP_ADD_TO_FAVORITES}");
 
 const createChannelRecordFromServer = findByCodeLazy(".GUILD_TEXT]", "fromServer)");
