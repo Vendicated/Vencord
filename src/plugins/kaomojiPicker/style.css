@@ -99,45 +99,6 @@
     color: var(--text-default);
 }
 
-.vc-kaomoji-tab {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    min-width: 48px;
-    height: 24px;
-    padding: 8px 12px;
-    margin-left: 8px;
-    border-radius: 8px;
-    font-size: 12px;
-    font-weight: 600;
-    color: var(--text-default);
-    cursor: pointer;
-    user-select: none;
-    transition: background-color .1s ease-in-out, color .1s ease-in-out;
-}
-
-.vc-kaomoji-tab-face {
-    display: inline-block;
-    transform: translateY(-5px);
-
-    &:hover {
-        background-color: var(--control-secondary-background-hover);
-        color: var(--interactive-text-hover);
-    }
-}
-
-
-.vc-kaomoji-tab[aria-selected="true"] {
-    background-color: var(--background-mod-normal);
-    color: var(--text-default);
-
-    &:hover {
-        background-color: var(--background-mod-strong);
-        color: var(--interactive-text-active);
-    }
-}
-
-
 .vc-kaomoji-panel {
     display: grid;
     overflow: hidden;
