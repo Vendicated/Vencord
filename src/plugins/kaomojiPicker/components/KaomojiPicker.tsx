@@ -244,7 +244,7 @@ export function KaomojiPicker() {
                                     {s.title.charAt(0).toUpperCase() + s.title.slice(1)}
                                 </SectionHeader>
                             )}
-                            {(Boolean(query) || !isFolded(s.title)) && (
+                            {(query || !isFolded(s.title)) && (
                                 <div className={cl("grid")}>
                                     {s.items.map(item => (
                                         <GridItem
