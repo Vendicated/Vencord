@@ -103,12 +103,12 @@ export function KaomojiPicker() {
             if (items.length) _sections.push({ title: cat, items });
         }
 
-        if (misc.length) _sections.push({ title: "Misc", items: misc });
-
         for (const cat of customCategories) {
             const items = grouped.get(cat)!;
             if (items.length) _sections.push({ title: cat, items });
         }
+
+        if (misc.length) _sections.push({ title: "Misc", items: misc });
 
         return _sections;
     }, [version, settings.store.showRecent, settings.store.showCustom]);
