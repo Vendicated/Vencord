@@ -4,7 +4,9 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-export const KAOMOJI_VIEW = "kaomoji";
+import { cl } from "@plugins/kaomojiPicker/cl";
+
+export const KAOMOJI_VIEW = cl("picker-tab");
 
 export type Kaomoji = {
     id: string;
