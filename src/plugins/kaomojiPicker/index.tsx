@@ -15,7 +15,6 @@ import { ComponentType } from "react";
 
 import { cl } from "./cl";
 import { KaomojiPicker } from "./components/KaomojiPicker";
-import { KAOMOJI_VIEW } from "./data/kaomoji";
 import { loadUserData } from "./store";
 
 export const settings = definePluginSettings({
@@ -82,7 +81,7 @@ export default definePlugin({
                 aria-controls={cl("tab-panel")}
                 aria-selected={active}
                 isActive={active}
-                viewType="vc-kaomoji-picker-tab"
+                viewType={cl("picker-tab")}
             >
                 (＾▽＾)
             </Tab>
@@ -110,7 +109,7 @@ export default definePlugin({
 });
 
 export function openKaomojiView() {
-    ExpressionPickerStore.setExpressionPickerView(KAOMOJI_VIEW);
+    ExpressionPickerStore.setExpressionPickerView(cl("picker-tab"));
 }
 
 let chordArmed = false;
