@@ -105,6 +105,10 @@
     border-radius: var(--custom-emoji-picker-border-radius);
 }
 
+.vc-kaomoji-section > .vc-kaomoji-grid:first-child {
+    padding-top: var(--space-12);
+}
+
 .vc-kaomoji-manage-card {
     display: flex;
     align-items: center;
