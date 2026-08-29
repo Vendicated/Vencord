@@ -71,7 +71,7 @@ function AddKaomojiModal({ modalProps }: { modalProps: RenderModalProps; }) {
                     <TextInput
                         value={id}
                         onChange={setId}
-                        placeholder="ur-face"
+                        placeholder="meow"
                         autoFocus
                         error={isDuplicateId ? "This ID already exists" : undefined}
                     />
@@ -82,7 +82,7 @@ function AddKaomojiModal({ modalProps }: { modalProps: RenderModalProps; }) {
                     <TextInput
                         value={value}
                         onChange={setValue}
-                        placeholder="( ,,⩌'︿'⩌ꐦ,,)"
+                        placeholder="/ᐠ - ˕ -マ Ⳋ"
                         error={isDuplicateValue ? "This Kaomoji already exists" : undefined}
                     />
                 </section>
