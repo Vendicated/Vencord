@@ -1,0 +1,176 @@
+.vc-kaomoji-wrapper {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    height: 100%;
+}
+
+.vc-kaomoji-header {
+    flex-shrink: 0;
+    padding: var(--custom-gif-picker-gutter-size);
+    border-bottom: 1px solid var(--border-subtle);
+}
+
+.vc-kaomoji-search-bar {
+    flex: 1;
+}
+
+.vc-kaomoji-header-actions {
+    flex-shrink: 0;
+    overflow: hidden;
+}
+
+.vc-kaomoji-body-wrap {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+}
+
+.vc-kaomoji-body {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    padding: 0 var(--space-4);
+}
+
+.vc-kaomoji-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: calc(var(--space-8) - 2px);
+    padding: 0 var(--space-4) var(--space-12) var(--space-8);
+}
+
+.vc-kaomoji-item {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 28px;
+    padding: 2px var(--space-4);
+    background: var(--background-secondary-alt);
+    border-radius: var(--radius-sm);
+    color: var(--text-default);
+    font-size: 13px;
+    word-break: break-all;
+    user-select: none;
+    cursor: pointer;
+    transition: background 0.1s;
+
+    &:hover {
+        background: var(--background-mod-strong);
+    }
+}
+
+
+.vc-kaomoji-empty {
+    display: flex;
+    flex: 1;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    min-height: 240px;
+    padding: 32px 16px;
+    color: var(--text-muted);
+    font-size: 14px;
+    text-align: center;
+}
+
+.vc-kaomoji-inspector > div:first-child {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: max-content;
+    max-width: 260px;
+    height: 100%;
+    flex-shrink: 0;
+}
+
+.vc-kaomoji-inspector-preview {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: max-content;
+    max-width: 260px;
+    font-size: 20px;
+    line-height: normal;
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: var(--text-default);
+}
+
+.vc-kaomoji-tab {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 48px;
+    height: 24px;
+    padding: 8px 12px;
+    margin-left: 8px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-default);
+    cursor: pointer;
+    user-select: none;
+    transition: background-color .1s ease-in-out, color .1s ease-in-out;
+}
+
+.vc-kaomoji-tab-face {
+    display: inline-block;
+    transform: translateY(-5px);
+
+    &:hover {
+        background-color: var(--control-secondary-background-hover);
+        color: var(--interactive-text-hover);
+    }
+}
+
+
+.vc-kaomoji-tab[aria-selected="true"] {
+    background-color: var(--background-mod-normal);
+    color: var(--text-default);
+
+    &:hover {
+        background-color: var(--background-mod-strong);
+        color: var(--interactive-text-active);
+    }
+}
+
+
+.vc-kaomoji-panel {
+    display: grid;
+    overflow: hidden;
+    min-height: 0;
+    border-radius: var(--custom-emoji-picker-border-radius);
+}
+
+.vc-kaomoji-manage-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 12px;
+    height: 56px;
+    box-sizing: border-box;
+    background-color: var(--background-secondary-alt);
+}
+
+.vc-kaomoji-manage-empty {
+    color: var(--text-muted);
+    text-align: center;
+    padding-bottom: var(--space-8);
+}
+
+.vc-kaomoji-manage-input-wrap {
+    flex: 1;
+    margin-right: 12px;
+}
+
+.vc-kaomoji-manage-list {
+    max-height: 192px;
+    padding-right: var(--space-4);
+}
+
+.vc-kaomoji-create-category-wrap {
+    margin-top: var(--space-8);
+}
