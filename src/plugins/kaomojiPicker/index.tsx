@@ -11,6 +11,7 @@ import { Devs, IS_MAC } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { ActiveView } from "@vencord/discord-types";
 import { ExpressionPickerStore } from "@webpack/common";
+import { ComponentType } from "react";
 
 import { cl } from "./cl";
 import { KaomojiPicker } from "./components/KaomojiPicker";
@@ -48,14 +49,14 @@ export default definePlugin({
             group: true,
             replacement: [
                 {
-                    // https://regex101.com/r/3sNGIb/1
-                    match: /(role:"tablist"[^>}]*?children:\s*\[(?:[\w$]+\s*,\s*)+)/,
-                    replace: "$1$self.renderKaomojiTab($self.useActiveView()===\"kaomoji\",()=>$self.openKaomojiView()),"
+                    // https://regex101.com/r/3sNGIb/2
+                    match: /(role:"tablist"[^>}]*?children:\s*\[(?:[\w$]+\s*,\s*)*([\w$]+),)/,
+                    replace: "$1$self.renderKaomojiTab($2.type,$self.useActiveView()===\"vc-kaomoji-picker-tab\"),"
                 },
                 {
                     // https://regex101.com/r/yjxYE4/1
                     match: /([\w$]+===[\w$.]+\.EMOJI\|\|[\w$.?]+onlyEmojis\s*===?\s*(?:!0|true)\?)/,
-                    replace: "$self.useActiveView()===\"kaomoji\"?$self.renderKaomojiGrid():$1"
+                    replace: "$self.useActiveView()===\"vc-kaomoji-picker-tab\"?$self.renderKaomojiGrid():$1"
                 }
             ]
         }
@@ -72,22 +73,28 @@ export default definePlugin({
         chordArmed = false;
     },
 
-    renderKaomojiTab(active: boolean, onSelect: () => void) {
+    renderKaomojiTab(Tab: ComponentType<any>, active: boolean) {
         return (
-            <div
-                className={cl("tab")}
-                role="tab"
+            <Tab
+                id={cl("picker-tab")}
+                aria-controls={cl("tab-panel")}
                 aria-selected={active}
-                onClick={onSelect}
+                isActive={active}
+                viewType="vc-kaomoji-picker-tab"
             >
-                <span className={cl("tab-face")}>(＾▽＾)</span>
-            </div>
+                (＾▽＾)
+            </Tab>
         );
     },
 
     renderKaomojiGrid() {
         return (
-            <div id="kaomoji-picker-tab-panel" role="tabpanel" className={cl("panel")}>
+            <div
+                id={cl("tab-panel")}
+                aria-labelledby={cl("picker-tab")}
+                role="tabpanel"
+                className={cl("panel")}
+            >
                 <KaomojiPicker />
             </div>
         );
