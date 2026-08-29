@@ -30,9 +30,11 @@ export const settings = definePluginSettings({
         default: true
     },
     recentCap: {
-        type: OptionType.NUMBER,
+        type: OptionType.SLIDER,
         description: "How many recently used kaomoji to keep",
-        default: 16
+        markers: [4, 8, 12, 16, 20],
+        default: 16,
+        stickToMarkers: true
     }
 });
 
