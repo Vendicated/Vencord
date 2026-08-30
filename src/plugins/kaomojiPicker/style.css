@@ -109,6 +109,14 @@
     padding-top: var(--space-12);
 }
 
+.vc-kaomoji-autocomplete-divider {
+    padding-bottom: 0;
+}
+
+.vc-kaomoji-autocomplete-title {
+    padding-top: 0;
+}
+
 .vc-kaomoji-manage-card {
     display: flex;
     align-items: center;
