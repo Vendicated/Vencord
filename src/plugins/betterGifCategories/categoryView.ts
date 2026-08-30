@@ -86,8 +86,12 @@ export const patches = [
             {
                 // Show the active category name in place of "Favourites" when
                 // viewing a custom category.
-                match: /children:(\i\.intl\.string\(\i\.\i\.\i\))(?=\}\);case \i\.dD\.TRENDING_GIFS)/,
-                replace: "children:$self.getHeadingLabel($1)"
+                match: /(case \i\.\i\.FAVORITES:return.{0,200}?children:)(\i\.intl\.string\(\i\.\i\.\i\))/,
+                replace: "$1$self.getHeadingLabel($2)"
+            },
+            {
+                match: /(case \i\.\i\.FAVORITES:return.{0,400}?placeholder:)(\i\.intl\.string\(\i\.\i\["[^"]+"\]\))(,"aria-label":)\2/,
+                replace: "$1$self.getSearchPlaceholder($2)$3$self.getSearchPlaceholder($2)"
             },
             {
                 // Swap the favourites the grid renders to the active
@@ -101,6 +105,10 @@ export const patches = [
 
 export function getHeadingLabel(defaultLabel: string): string {
     return activeCategory?.name ?? defaultLabel;
+}
+
+export function getSearchPlaceholder(defaultPlaceholder: string): string {
+    return activeCategory == null ? defaultPlaceholder : `Search ${activeCategory.name}`;
 }
 
 export function setGridInstance(instance: any): void {
