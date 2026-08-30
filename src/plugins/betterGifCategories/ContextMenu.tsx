@@ -5,10 +5,11 @@
  */
 
 import { findGroupChildrenByChildId, NavContextMenuPatchCallback } from "@api/ContextMenu";
-import { ContextMenuApi, Menu, useState } from "@webpack/common";
+import { DeleteIcon } from "@components/Icons";
+import { ConfirmModal, ContextMenuApi, Menu, openModal, useState } from "@webpack/common";
 import type { MouseEvent } from "react";
 
-import { addGifToCategory, getCategories, type Gif, removeGifFromCategory } from "./data";
+import { addGifToCategory, deleteCategory, getCategories, type Gif, type GifCategory, removeGifFromCategory } from "./data";
 import { isGifMedia } from "./helpers";
 
 function gifFromMessageProps(props: any): Gif | null {
@@ -90,7 +91,7 @@ export const messageContextMenuPatch: NavContextMenuPatchCallback = (children, p
     group.push(buildCategorySubmenu(gif));
 };
 
-function GifPickerContextMenu({ gif, onClose }: { gif: Gif; onClose: () => void; }) {
+function GifPickerContextMenu({ gif }: { gif: Gif; }) {
     const categories = getCategories();
 
     const [checkedIds, setCheckedIds] = useState<ReadonlySet<string>>(
@@ -98,7 +99,7 @@ function GifPickerContextMenu({ gif, onClose }: { gif: Gif; onClose: () => void;
     );
 
     return (
-        <Menu.Menu navId="vc-bgc-gif-picker" onClose={onClose}>
+        <Menu.Menu navId="vc-bgc-gif-picker" onClose={ContextMenuApi.closeContextMenu}>
             <Menu.MenuItem id="vc-bgc-categories" label="Add to Category" disabled={categories.length === 0}>
                 {categories.length === 0
                     ? <Menu.MenuItem id="vc-bgc-empty" label="No categories yet" disabled />
@@ -139,6 +140,54 @@ function GifPickerContextMenu({ gif, onClose }: { gif: Gif; onClose: () => void;
     );
 }
 
+function deletionSubtitle({ name, gifs }: GifCategory): string {
+    if (gifs.length === 0) {
+        return `Are you sure you want to delete "${name}"?`;
+    }
+
+    // TODO make this string depend on the auto-unfavorite setting
+    return `Are you sure you want to delete "${name}"? Its ${gifs.length} gif${gifs.length === 1 ? "" : "s"} stay in your Discord favourites.`;
+}
+
+function CategoryContextMenu({ category, onDeleted }: { category: GifCategory; onDeleted: () => void; }) {
+    return (
+        <Menu.Menu navId="vc-bgc-category" onClose={ContextMenuApi.closeContextMenu} aria-label="Category Options">
+            <Menu.MenuItem
+                id="vc-bgc-delete-category"
+                color="danger"
+                icon={DeleteIcon}
+                label="Delete Category"
+                leadingAccessory={{ type: "icon", icon: DeleteIcon }}
+                action={() => openModal(props => (
+                    <ConfirmModal
+                        {...props}
+                        title="Delete Category"
+                        subtitle={deletionSubtitle(category)}
+                        confirmText="Delete"
+                        cancelText="Cancel"
+                        onConfirm={async () => {
+                            await deleteCategory(category.id);
+                            onDeleted();
+                        }}
+                    />
+                ))}
+            />
+        </Menu.Menu>
+    );
+}
+
+export function handleCategoryContextMenu(event: MouseEvent, categoryId: string, onDeleted: () => void) {
+    const category = getCategories().find(c => c.id === categoryId);
+
+    if (!category) {
+        return;
+    }
+
+    ContextMenuApi.openContextMenu(event, () => (
+        <CategoryContextMenu category={category} onDeleted={onDeleted} />
+    ));
+}
+
 export function handleGifContextMenu(event: MouseEvent, gif: any) {
     const gifData: Gif = {
         url: gif.url || gif.src,
@@ -148,7 +197,7 @@ export function handleGifContextMenu(event: MouseEvent, gif: any) {
         height: gif.height ?? 200,
     };
 
-    ContextMenuApi.openContextMenu(event, ({ onClose }) => (
-        <GifPickerContextMenu gif={gifData} onClose={onClose} />
+    ContextMenuApi.openContextMenu(event, () => (
+        <GifPickerContextMenu gif={gifData} />
     ));
 }

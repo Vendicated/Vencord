@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { handleGifContextMenu } from "./ContextMenu";
+import { handleCategoryContextMenu, handleGifContextMenu } from "./ContextMenu";
 import { openCreateCategoryModal } from "./CreateCategoryModal";
 import { getCategories, GifCategory } from "./data";
 
@@ -155,6 +155,19 @@ export function setInstance(instance: any): void {
                             mouseEvent.preventDefault();
                             mouseEvent.stopPropagation();
                             handleGifContextMenu(mouseEvent as any, p.item);
+                            return;
+                        }
+
+                        if (p?.item?.vcCategoryId) {
+                            mouseEvent.preventDefault();
+                            mouseEvent.stopPropagation();
+
+                            handleCategoryContextMenu(
+                                mouseEvent as any,
+                                p.item.vcCategoryId,
+                                () => gridInstance?.forceUpdate()
+                            );
+
                             return;
                         }
 
