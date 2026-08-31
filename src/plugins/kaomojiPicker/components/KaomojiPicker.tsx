@@ -245,18 +245,19 @@ export function KaomojiPicker() {
                                 </SectionHeader>
                             )}
                             {(query || !isFolded(s.title)) && (
-                                <div className={cl("grid")}>
-                                    {s.items.map(item => (
-                                        <GridItem
-                                            key={item.id + item.value}
-                                            item={item}
-                                            sectionTitle={s.title}
-                                            onInsert={handleInsert}
-                                            onHover={handleHover}
-                                            onContextMenu={handleContextMenu}
-                                        />
+                                <ul className={cl("grid")} role="list">
+                                    {s.items.map((item, idx) => (
+                                        <li key={`${s.title}-${item.id}-${idx}`} role="listitem">
+                                            <GridItem
+                                                item={item}
+                                                sectionTitle={s.title}
+                                                onInsert={handleInsert}
+                                                onHover={handleHover}
+                                                onContextMenu={handleContextMenu}
+                                            />
+                                        </li>
                                     ))}
-                                </div>
+                                </ul>
                             )}
                         </div>
                     ))}
