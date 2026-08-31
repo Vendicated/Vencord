@@ -83,10 +83,27 @@ export const settings = definePluginSettings({
     manageTranslateSettings: {
         type: OptionType.COMPONENT,
         component: () => (
-            <Button onClick={openTranslateModal}>
+            <Button onClick={() => openTranslateModal()}>
                 Customize translation languages & Auto-Translate
             </Button>
         )
+    },
+    perServerAutoTranslate: {
+        type: OptionType.BOOLEAN,
+        description: "Save the auto translate setting per server instead of globally",
+    },
+    perServerScope: {
+        type: OptionType.SELECT,
+        description: "Whether the auto translate setting is saved per server or per channel",
+        options: [
+            { label: "Per Server & DM", value: "server", default: true },
+            { label: "Per Channel & DM", value: "channel" }
+        ]
+    },
+    perServerRecord: {
+        type: OptionType.CUSTOM,
+        hidden: true,
+        default: {} as Record<string, boolean>,
     }
 }, {
     deeplApiKey: {

@@ -199,3 +199,25 @@ async function kagiTranslate(text: string, sourceLang: string, targetLang: strin
         text: translation
     };
 }
+
+// Returns whether the message should be translated based on the current settings and the channel/guild context
+export function shouldTranslate(channelId: string | undefined, guildId: string | undefined): boolean {
+    if (settings.store.perServerAutoTranslate && (channelId || guildId)) {
+        // It's a DM
+        if (!guildId) {
+            const record = settings.store.perServerRecord[channelId!];
+            return record ?? settings.store.autoTranslate;
+        }
+
+        // Search record for guildId or channelId based on the perServerScope setting
+        const record = settings.store.perServerRecord[getScopeKey(channelId, guildId)];
+        return record ?? settings.store.autoTranslate;
+    }
+
+    return settings.store.autoTranslate;
+}
+
+// Return the record key to use in perServerRecord
+export function getScopeKey(channelId: string | undefined, guildId: string | undefined): string {
+    return settings.store.perServerScope === "server" && guildId ? guildId : channelId!;
+}
