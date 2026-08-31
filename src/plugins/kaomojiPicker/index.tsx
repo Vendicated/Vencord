@@ -54,13 +54,13 @@ export default definePlugin({
             group: true,
             replacement: [
                 {
-                    // https://regex101.com/r/3sNGIb/2
+                    // https://regex101.com/r/3sNGIb/3
                     match: /(role:"tablist"[^>}]*?children:\s*\[(?:\i\s*,\s*)*(\i),)/,
                     replace: "$1$self.renderKaomojiTab($2.type,$self.useActiveView()===\"vc-kaomoji-picker-tab\"),"
                 },
                 {
-                    // https://regex101.com/r/yjxYE4/1
-                    match: /(\i===[\w$.]+\.EMOJI\|\|[\w$.?]+onlyEmojis\s*===?\s*(?:!0|true)\?)/,
+                    // https://regex101.com/r/yjxYE4/2
+                    match: /(\i===\i\.\i\.EMOJI\|\|(?:\i\??\.)+onlyEmojis\s*===?\s*(?:!0|true)\?)/,
                     replace: "$self.useActiveView()===\"vc-kaomoji-picker-tab\"?$self.renderKaomojiGrid():$1"
                 }
             ]
@@ -70,7 +70,7 @@ export default definePlugin({
             group: true,
             replacement: [
                 {
-                    // https://regex101.com/r/QHX6nu/1
+                    // https://regex101.com/r/QHX6nu/2
                     match: /return\{results:\{emojis:(\i),stickers:(\i),soundmoji:(\i)\},metadata:/,
                     replace: "return{results:{emojis:$1,stickers:$2,soundmoji:$3,kaomoji:$self.getKaomoji(n)},metadata:"
                 },
@@ -80,12 +80,12 @@ export default definePlugin({
                     replace: "$1...$self.renderKaomojiAutoComplete(arguments[0]),"
                 },
                 {
-                    // https://regex101.com/r/IhJKa2/1
+                    // https://regex101.com/r/IhJKa2/2
                     match: /(key:"(?:stickers|soundmoji)",indexOffset:)(\i)\.length/g,
                     replace: "$1$2.length+($self.getKaomojiCount(arguments[0]))"
                 },
                 {
-                    // https://regex101.com/r/0aVxg5/1
+                    // https://regex101.com/r/0aVxg5/2
                     match: /if\(\(i-=(\i)\.length\)<(\i)\.length\)\{/,
                     replace: "let _km=$self.onSelectKaomoji(e,i-$1.length);if(_km)return _km;if((i-=$1.length+($self.getKaomojiCount(e)))<$2.length){"
                 }
