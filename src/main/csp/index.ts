@@ -72,6 +72,9 @@ export const CspPolicies: PolicyMap = {
     // Tenor, used by TenorSearch plugin and some themes
     "*.tenor.com": ImageAndMediaSrc,
     "*.tenor.co": ImageAndMediaSrc,
+    "*.giphy.com": ImageAndMediaSrc,
+    "*.klipy.com": ImageAndMediaSrc,
+    "*.klipy.co": ImageAndMediaSrc,
 };
 
 const findHeader = (headers: PolicyMap, headerName: Lowercase<string>) => {

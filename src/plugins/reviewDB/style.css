@@ -63,6 +63,14 @@
     font-size: 15px;
 }
 
+.vc-rdb-review-gif {
+    display: block;
+    max-width: min(100%, 400px);
+    max-height: 300px;
+    margin-bottom: 8px;
+    border-radius: 4px;
+}
+
 .vc-rdb-blocked-badge {
     cursor: pointer;
 }
