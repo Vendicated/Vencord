@@ -127,7 +127,14 @@ export default definePlugin({
                 replace: "$&if($1==null)return;"
             }
         },
-
+        {
+            // Expands the experiment regex to allow negative numbers as well as text in the last segment of the URL.
+            find: '"^dev://experiment/',
+            replacement: {
+                match: /(\[0-9\]\+)/,
+                replace: "[a-zA-Z0-9-]+"
+            }
+        },
     ],
 
     start: () => ExperimentStore.getUserExperimentBucket("2026-01-bug-reporter") > 0 && enableStyle(hideBugReport),
