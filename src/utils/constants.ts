@@ -132,6 +132,10 @@ export const Devs = /* #__PURE__*/ Object.freeze({
         name: "Xinto",
         id: 423915768191647755n
     },
+    Xlite: {
+        name: "Xlite",
+        id: 267340529895866369n
+    },
     JacobTm: {
         name: "Jacob.Tm",
         id: 302872992097107991n
