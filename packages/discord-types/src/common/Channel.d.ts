@@ -367,3 +367,88 @@ export class Channel extends DiscordRecord {
      */
     removeRecipient(userId: string): this;
 }
+
+/**
+ * Pre-defined Sets of channel types for grouping related channels.
+ * Each property is a Set<ChannelType> containing channel type numbers.
+ */
+export interface ChannelTypesSets {
+    /** DM and GROUP_DM, channels that support calling. */
+    CALLABLE: Set<ChannelType>;
+    /** Channels that support text messages. */
+    TEXTUAL: Set<ChannelType>;
+    /** Forum and media channels, threads only, no direct messages. */
+    GUILD_THREADS_ONLY: Set<ChannelType>;
+    /** Channels that support stickers. */
+    STICKERS: Set<ChannelType>;
+    /** Channels that can be read/viewed. */
+    READABLE: Set<ChannelType>;
+    /** All guild channel types including threads. */
+    GUILD: Set<ChannelType>;
+    /** Guild channels excluding threads. */
+    GUILD_CHANNEL: Set<ChannelType>;
+    /** All thread types (announcement, public, private). */
+    THREADS: Set<ChannelType>;
+    /** DM and GROUP_DM, private/non-guild channels. */
+    PRIVATE_CHANNEL: Set<ChannelType>;
+    /** Announcement and public threads only. */
+    PUBLIC_THREADS: Set<ChannelType>;
+    /** Guild channels that can have threads. */
+    GUILD_THREADED: Set<ChannelType>;
+    /** Guild channels that are persisted/stored. */
+    GUILD_STORED: Set<ChannelType>;
+    /** Guild channels with text capability. */
+    GUILD_TEXTUAL: Set<ChannelType>;
+    /** Guild voice and stage channels. */
+    GUILD_VOCAL: Set<ChannelType>;
+    /** Thread types that support voice. */
+    VOCAL_THREAD: Set<ChannelType>;
+    /** All channels with voice capability. */
+    VOCAL: Set<ChannelType>;
+    /** Channels that support voice effects. */
+    VOICE_EFFECTS: Set<ChannelType>;
+    /** Guild text-only channels (no voice). */
+    GUILD_TEXT_ONLY: Set<ChannelType>;
+    /** Channels with character-limited names. */
+    LIMITED_CHANNEL_NAME: Set<ChannelType>;
+    /** Channels that support message search. */
+    SEARCHABLE: Set<ChannelType>;
+    /** Guild channels with user-generated content. */
+    GUILD_USER_CONTENT: Set<ChannelType>;
+    /** Guild channels that can have topics. */
+    GUILD_TOPICAL: Set<ChannelType>;
+    /** Guild channels that support webhooks. */
+    GUILD_WEBHOOKS: Set<ChannelType>;
+    /** Guild channels usable as system message channel. */
+    GUILD_SYSTEM_CHANNEL: Set<ChannelType>;
+    /** Guild channels that can have a parent category. */
+    GUILD_PARENTABLE: Set<ChannelType>;
+    /** Guild channels subject to auto-moderation. */
+    GUILD_AUTO_MODERATED: Set<ChannelType>;
+    /** Basic guild channel types for creation. */
+    GUILD_BASIC: Set<ChannelType>;
+    /** Guild channel types that can be created. */
+    CREATEABLE_GUILD_CHANNELS: Set<ChannelType>;
+    /** GROUP_DM only, multi-user DMs. */
+    MULTI_USER_DMS: Set<ChannelType>;
+    /** DM and GROUP_DM. */
+    ALL_DMS: Set<ChannelType>;
+    /** Channels that support invites. */
+    INVITABLE: Set<ChannelType>;
+    /** Guild channels supporting feed-featurable messages. */
+    GUILD_FEED_FEATURABLE_MESSAGES: Set<ChannelType>;
+    /** Channels supporting role subscriptions. */
+    ROLE_SUBSCRIPTIONS: Set<ChannelType>;
+    /** Channels supporting icon emojis. */
+    ICON_EMOJIS: Set<ChannelType>;
+    /** Channels that can be summarized. */
+    SUMMARIZEABLE: Set<ChannelType>;
+    /** Channels supporting content entry embeds. */
+    CONTENT_ENTRY_EMBEDS: Set<ChannelType>;
+    /** Channels that support polls. */
+    POLLS: Set<ChannelType>;
+    /** Channels that can launch activities. */
+    ACTIVITY_LAUNCHABLE: Set<ChannelType>;
+    /** All known channel types. */
+    ALL: Set<ChannelType>;
+}
