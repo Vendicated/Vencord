@@ -1,0 +1,21 @@
+.vc-color-block {
+    aspect-ratio: 1/1;
+    background: var(--color);
+    height: 1rem;
+    vertical-align: middle;
+    margin-bottom: 0.2rem;
+    border-radius: 4px;
+    display: inline-block;
+    user-select: none;
+    box-sizing: border-box;
+}
+
+.vc-color-bg {
+    background: var(--color);
+}
+
+/* Light color in dark theme */
+.theme-dark .vc-color-bg.vc-color-bg-invert,
+.theme-light .vc-color-bg:not(.vc-color-bg-invert) {
+    color: var(--background-secondary);
+}
