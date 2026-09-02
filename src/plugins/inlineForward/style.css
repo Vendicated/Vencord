@@ -1,0 +1,60 @@
+.vc-inlineforward-container {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    background-color: var(--background-base-low);
+    gap: 4px;
+    max-height: 200px;
+    overflow: hidden;
+
+    .vc-inlineforward-header {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+        padding: 8px 16px 4px;
+
+        & > div {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .vc-inlineforward-close {
+            color: var(--interactive-normal);
+            transform: scale(0.8);
+            cursor: pointer;
+
+            &:hover {
+                color: var(--interactive-hover);
+            }
+        }
+
+        .vc-inlineforward-switch {
+            margin-bottom: 0;
+
+            & > div:nth-child(2) {
+                display: none;
+            }
+        }
+    }
+
+    &::before {
+        content: "";
+        width: 100%;
+        height: 200px;
+        position: absolute;
+        top: 0;
+        left: 0;
+        z-index: 10;
+        background: linear-gradient(
+            180deg,
+            #0000 0%,
+            #0000 90%,
+            var(--background-base-low) 100%
+        );
+        pointer-events: none;
+    }
+}
