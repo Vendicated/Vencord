@@ -32,8 +32,8 @@ interface MessageDeleteProps {
 // Remove this migration once enough time has passed
 migratePluginSetting("NoBlockedMessages", "ignoreBlockedMessages", "ignoreMessages");
 const settings = definePluginSettings({
-    ignoreReplies: {
-        description: "Completely ignores messages replying to blocked and ignored (if enabled) users",
+    hideReplies: {
+        description: "Hides replies to blocked and ignored (if enabled) users",
         type: OptionType.BOOLEAN,
         default: false,
         restartNeeded: true
@@ -82,7 +82,7 @@ export default definePlugin({
         },
         {
             find: "_channelMessages={}",
-            predicate: () => settings.store.ignoreReplies,
+            predicate: () => settings.store.hideReplies,
             replacement: {
                 match: /static commit\((\i)\)\{/g,
                 replace: "$&$1=$self.blockReplyingMessages($1);"
