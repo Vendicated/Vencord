@@ -11,13 +11,13 @@
 
 
     /* position trailing/leading titlebar elements alongside WCO */
-    [class*="bar_"] {
+    [data-fullscreen] > [class*="bar_"] {
         [class*="leading_"] {
-            padding-left: env(titlebar-area-x, 0);
+            padding-left: env(titlebar-area-x, 0px);
         }
 
         [class*="trailing_"] {
-            padding-right: calc(100vw - env(titlebar-area-width, 100%) - env(titlebar-area-x, 0));
+            padding-right: calc(100vw - env(titlebar-area-width, 100%) - env(titlebar-area-x, 0px));
         }
     }
 
@@ -27,12 +27,12 @@
             app-region: drag;
 
             [class*="headerBarChildren_"] {
-                padding-left: env(titlebar-area-x, 0);
+                padding-left: env(titlebar-area-x, 0px);
             }
 
             /* position trailing toolbar elements alongside WCO */
             [class*="toolbar_"] {
-                padding-right: calc(100vw - env(titlebar-area-width, 100%) - env(titlebar-area-x, 0));
+                padding-right: calc(100vw - env(titlebar-area-width, 100%) - env(titlebar-area-x, 0px));
             }
         }
     }
