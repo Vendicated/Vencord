@@ -320,7 +320,7 @@ export default definePlugin({
         },
         // Allow users to use custom client themes
         {
-            find: '("custom_themes_editor_footer")',
+            find: ".CLIENT_THEMES_EDITOR?",
             replacement: {
                 match: /(?<=\i=)\(0,\i\.\i\)\(\i\.\i\.TIER_2\)(?=,|;)/g,
                 replace: "true"
