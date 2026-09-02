@@ -139,7 +139,7 @@ export default definePlugin({
         return messages.reset(messages.map(message => {
             return message
                 .set("blocked", message.blocked || (message.messageReference && isReferenceBlocked(message.messageReference)))
-                .set("ignored", message.ignored || (message.messageReference && isReferenceIgnored(message.messageReference)))
-        }))
+                .set("ignored", message.ignored || (message.messageReference && isReferenceIgnored(message.messageReference)));
+        }));
     }
 });
