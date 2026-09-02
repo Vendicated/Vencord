@@ -13,7 +13,7 @@
     /* position trailing/leading titlebar elements alongside WCO */
     [data-fullscreen] > [class*="bar_"] {
         [class*="leading_"] {
-            padding-left: env(titlebar-area-x, 0px);
+            padding-left: env(titlebar-area-x, 0);
         }
 
         [class*="trailing_"] {
@@ -27,7 +27,7 @@
             app-region: drag;
 
             [class*="headerBarChildren_"] {
-                padding-left: env(titlebar-area-x, 0px);
+                padding-left: env(titlebar-area-x, 0);
             }
 
             /* position trailing toolbar elements alongside WCO */
