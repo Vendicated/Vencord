@@ -17,14 +17,13 @@
 */
 
 import { isPluginEnabled } from "@api/PluginManager";
-import { definePluginSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import NoBlockedMessagesPlugin from "@plugins/noBlockedMessages";
 import { Devs } from "@utils/constants";
 import { sleep } from "@utils/misc";
 import { Queue } from "@utils/Queue";
 import { useForceUpdater } from "@utils/react";
-import definePlugin, { OptionType } from "@utils/types";
+import definePlugin from "@utils/types";
 import { CustomEmoji, Message, ReactionEmoji, User } from "@vencord/discord-types";
 import { ChannelStore, Constants, FluxDispatcher, React, RestAPI, useEffect, useLayoutEffect, UserStore, UserSummaryItem } from "@webpack/common";
 
@@ -100,11 +99,7 @@ function ReactionUsers({ message, users }: { message: Message, users: User[]; })
         <div
             style={{ marginLeft: "0.5em", transform: "scale(0.9)" }}
         >
-            <div
-                onClick={handleClickAvatar}
-                onKeyDown={handleClickAvatar}
-                style={settings.store.disableAvatarClick ? {} : { pointerEvents: "none" }}
-            >
+            <div onClick={handleClickAvatar} onKeyDown={handleClickAvatar}>
                 <UserSummaryItem
                     users={users}
                     guildId={ChannelStore.getChannel(message.channel_id)?.guild_id}
@@ -118,21 +113,12 @@ function ReactionUsers({ message, users }: { message: Message, users: User[]; })
     );
 }
 
-const settings = definePluginSettings({
-    disableAvatarClick: {
-        description: "Toggle clicking avatars in reactions",
-        type: OptionType.BOOLEAN,
-        default: false,
-        restartNeeded: true
-    }
-});
-
 export default definePlugin({
     name: "WhoReacted",
     description: "Renders the avatars of users who reacted to a message",
     tags: ["Reactions", "Chat", "Appearance"],
     authors: [Devs.Ven, Devs.KannaDev, Devs.newwares, Devs.paige],
-    settings,
+
     patches: [
         {
             find: ",reactionRef:",
