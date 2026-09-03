@@ -6,7 +6,7 @@
 
 import { Button } from "@components/Button";
 import { Flex } from "@components/Flex";
-import { CogWheel, DeleteIcon, PlusIcon, SearchIcon, StarFilled, StarOutlined } from "@components/Icons";
+import { ClockIcon, CogWheel, DeleteIcon, PlusIcon, SearchIcon, StarFilled, StarOutlined } from "@components/Icons";
 import { cl } from "@plugins/kaomojiPicker/cl";
 import { BUILTIN_CATEGORIES, BUILTIN_KAOMOJI, Kaomoji } from "@plugins/kaomojiPicker/data/kaomoji";
 import { addRecent, deleteCustomEntry, isFavorite, isFolded, removeRecent, toggleFavorite, toggleFolded, useKaomojiStore } from "@plugins/kaomojiPicker/store";
@@ -22,11 +22,13 @@ import { openManageCategoryModal } from "./ManageCategoryModal";
 
 interface Section {
     title: string;
+    icon?: ReactNode;
     items: Kaomoji[];
 }
 
 interface SectionHeaderProps {
     children?: ReactNode;
+    icon?: ReactNode;
     isCollapsed?: boolean;
     onClick?: () => void;
 }
@@ -70,13 +72,13 @@ export function KaomojiPicker() {
         const _sections: Section[] = [];
 
         if (favorites.length)
-            _sections.push({ title: "Favorites", items: favorites.map(lookup) });
+            _sections.push({ title: "Favorites", icon: <StarFilled width={16} height={16} />, items: favorites.map(lookup) });
 
         if (settings.store.showRecent && recent.length)
-            _sections.push({ title: "Recent", items: recent.map(lookup) });
+            _sections.push({ title: "Recent", icon: <ClockIcon width={16} height={16} />, items: recent.map(lookup) });
 
         if (settings.store.showCustom && customEntries.length)
-            _sections.push({ title: "Custom", items: customEntries });
+            _sections.push({ title: "Custom", icon: <CogWheel width={16} height={16} />, items: customEntries });
 
         const allValidCats = [...BUILTIN_CATEGORIES, ...customCategories];
         const allKaomoji = [...BUILTIN_KAOMOJI, ...customEntries];
@@ -113,7 +115,7 @@ export function KaomojiPicker() {
         return _sections;
     }, [version, settings.store.showRecent, settings.store.showCustom]);
 
-    const visible = useMemo(() => {
+    const visible = useMemo<Section[]>(() => {
         if (!query) return groupedSections;
 
         return [{
@@ -238,6 +240,7 @@ export function KaomojiPicker() {
                         >
                             {!query && (
                                 <SectionHeader
+                                    icon={s.icon}
                                     isCollapsed={isFolded(s.title)}
                                     onClick={() => toggleFolded(s.title)}
                                 >
