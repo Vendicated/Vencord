@@ -105,59 +105,56 @@ const customFilters: SearchFilter[] = [
 ];
 
 let lastResolvedFilter: SearchFilter | null = null;
+const customRules: Record<string, SearchRule> = {};
+
+for (const filter of customFilters) {
+    customRules[filter.filterType] = {
+        regex: filter.filterRegex,
+        componentType: "FILTER",
+        key: filter.filterKey,
+        plainText: filter.filterKey.replace(/:$/, ""),
+        getAutocompletions(options: AutocompleteOptions) {
+            return filter.getAutocompletions?.(options) ?? [];
+        }
+    };
+
+    customRules[filter.answerType] = {
+        regex: filter.answerRegex,
+        follows: [filter.filterType],
+        componentType: "ANSWER",
+        queryKey: filter.queryKey
+    };
+}
 
 export default definePlugin({
     name: "BetterSearch",
     authors: [Devs.theo],
-    description: "Allows you to use search parameters that aren't integrated into the Discord client",
+    description: "Allows you to use channel message search parameters that aren't integrated into the Discord client",
 
     patches: [
         {
-            find: "queryKey:null",
+            find: "FILTER_LINK_FROM:",
             replacement: [
                 {
-                    match: /(\i)=\(null==\(\i=null!=\(\i=\i\.\i\[(\i)\]\)\?\i\.queryKey:null\)&&\(\i="content"\),\i\);/,
+                    match: /(\i)=\(.+?\i\.\i\[(\i)\]\).+?queryKey:null.+?;/,
                     replace: "$&$1=$self.getCustomQueryKey($2)??$1;"
                 },
                 {
-                    match: /(\i)\.add\((\i)\.getFullMatch\(\)\.trim\(\)\)/,
-                    replace: "$1.add($self.getCustomFilterValue($2)??$2.getFullMatch().trim())"
+                    match: /\.add\((\i)\.getFullMatch\(\)\.trim\(\)\)/,
+                    replace: ".add($self.getCustomFilterValue($1)??$1.getFullMatch().trim())"
                 }
             ]
         },
         {
             find: "FILTER_AUTHOR_TYPE]:{regex:",
             replacement: {
-                match: /(return\{)(\[\i\.\i\.FILTER_FROM\]:)/,
-                replace: "$1...$self.getCustomRules(),$2"
+                match: /return\{(?=\[\i\.\i\.FILTER_FROM\]:)/,
+                replace: "$&...$self.customRules,"
             }
         }
     ],
 
-    getCustomRules() {
-        const rules: Record<string, SearchRule> = {};
-
-        for (const filter of customFilters) {
-            rules[filter.filterType] = {
-                regex: filter.filterRegex,
-                componentType: "FILTER",
-                key: filter.filterKey,
-                plainText: filter.filterKey.replace(/:$/, ""),
-                getAutocompletions(options: AutocompleteOptions) {
-                    return filter.getAutocompletions?.(options) ?? [];
-                }
-            };
-
-            rules[filter.answerType] = {
-                regex: filter.answerRegex,
-                follows: [filter.filterType],
-                componentType: "ANSWER",
-                queryKey: filter.queryKey
-            };
-        }
-
-        return rules;
-    },
+    customRules,
 
     getCustomQueryKey(answerType: string) {
         const filter = customFilters.find(f => f.answerType === answerType);
@@ -168,6 +165,6 @@ export default definePlugin({
     getCustomFilterValue(token: SearchToken) {
         const filter = lastResolvedFilter;
         lastResolvedFilter = null;
-        return filter ? filter.parse(token) : null;
+        return filter?.parse(token);
     }
 });
