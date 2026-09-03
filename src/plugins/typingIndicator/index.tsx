@@ -175,13 +175,12 @@ export default definePlugin({
                 replace: "$&,$self.TypingIndicator($1.id,$1.getGuildId())"
             }
         },
-        // Theads
+        // Threads
         {
-            // This is the thread "spine" that shows in the left
-            find: "M0 15H2c0 1.6569",
+            find: "countInVoice:",
             replacement: {
-                match: /mentionsCount:\i.+?null(?<=channel:(\i).+?)/,
-                replace: "$&,$self.TypingIndicator($1.id,$1.getGuildId())"
+                match: /(className:\i\.\i,onClick:\i\.\i,onKeyDown:\i\.\i,children:\[)(?=\(0,\i\.jsx\)\(\i,\{thread:(\i),countInVoice:)/,
+                replace: "$1$self.TypingIndicator($2.id,$2.getGuildId()),"
             }
         }
     ],
