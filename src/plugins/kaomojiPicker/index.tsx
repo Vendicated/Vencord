@@ -15,9 +15,10 @@ import { ExpressionPickerStore } from "@webpack/common";
 import { ComponentType } from "react";
 
 import { cl } from "./cl";
+import { ExportKaomoji } from "./components/ExportKaomoji";
 import { KaomojiPicker } from "./components/KaomojiPicker";
-import { BUILTIN_KAOMOJI, Kaomoji } from "./data/kaomoji";
-import { customEntries, loadUserData } from "./store";
+import { getAllKaomoji, Kaomoji } from "./data/kaomoji";
+import { loadUserData } from "./store";
 
 const Autocomplete = findByPropsLazy("Generic", "Title", "Divider");
 
@@ -27,17 +28,16 @@ export const settings = definePluginSettings({
         description: "Show the Recent section",
         default: true
     },
-    showCustom: {
-        type: OptionType.BOOLEAN,
-        description: "Show the Custom section",
-        default: true
-    },
     recentCap: {
         type: OptionType.SLIDER,
         description: "How many recently used kaomoji to keep",
         markers: [4, 8, 12, 16, 20],
         default: 16,
         stickToMarkers: true
+    },
+    userKaomoji: {
+        type: OptionType.COMPONENT,
+        component: () => <ExportKaomoji />
     }
 });
 
@@ -132,15 +132,14 @@ export default definePlugin({
     },
 
     getKaomojiCount(e: any): number {
-        return e.results.kaomoji.length ?? 0;
+        return e.results.kaomoji.length;
     },
 
     getKaomoji(search: string): Kaomoji[] {
         const query = search.toLowerCase().trim();
         if (!query || query.length < 2) return [];
 
-        const allKaomoji = [...customEntries, ...BUILTIN_KAOMOJI];
-        return allKaomoji
+        return getAllKaomoji()
             .filter(e =>
                 e.id.toLowerCase().includes(query)
                 || e.value.toLowerCase().includes(query)
@@ -154,7 +153,7 @@ export default definePlugin({
         const kaomojiList: Kaomoji[] = results.kaomoji;
         if (!kaomojiList.length) return [];
 
-        const offset = results.emojis.length ?? 0;
+        const offset = results.emojis.length;
         const hasEmojis = offset > 0;
 
         return [
@@ -192,10 +191,9 @@ export default definePlugin({
 
         if (kaomojiIndex >= 0 && kaomojiIndex < kaomojiList.length) {
             const selected = kaomojiList[kaomojiIndex];
-            if (selected) {
-                e.options.insertText(selected.value);
-                return { type: "KAOMOJI" };
-            }
+
+            e.options.insertText(selected.value);
+            return { type: "KAOMOJI" };
         }
 
         return null;

@@ -8,19 +8,17 @@ import { get, set } from "@api/DataStore";
 import { React } from "@webpack/common";
 
 import { settings } from ".";
-import { BUILTIN_CATEGORIES, Kaomoji } from "./data/kaomoji";
+import { Kaomoji } from "./data/kaomoji";
 
 const FAVORITES = "KaomojiPicker_Favorites";
 const RECENT = "KaomojiPicker_Recent";
-const CUSTOM = "KaomojiPicker_Custom";
-const CUSTOM_CATS = "KaomojiPicker_CustomCats";
 const FOLDED = "KaomojiPicker_FoldedSections";
+const KAOMOJI = "KaomojiPicker_UserKaomoji";
 
 export let favorites: string[] = [];
 export let recent: string[] = [];
-export let customEntries: Kaomoji[] = [];
-export let customCategories: string[] = [];
 export let foldedSections: string[] = [];
+export let userKaomoji: Kaomoji[] = [];
 
 const listeners = new Set<() => void>();
 
@@ -45,17 +43,15 @@ export function useKaomojiStore() {
         version,
         favorites,
         recent,
-        customEntries,
-        customCategories
+        userKaomoji
     };
 }
 
 export async function loadUserData() {
     favorites = (await get<string[]>(FAVORITES)) ?? [];
     recent = (await get<string[]>(RECENT)) ?? [];
-    customEntries = (await get<Kaomoji[]>(CUSTOM)) ?? [];
-    customCategories = (await get<string[]>(CUSTOM_CATS)) ?? [];
     foldedSections = (await get<string[]>(FOLDED)) ?? [];
+    userKaomoji = (await get<Kaomoji[]>(KAOMOJI)) ?? [];
     notify();
 }
 
@@ -69,30 +65,30 @@ function saveRecent() {
     notify();
 }
 
-function saveCustom() {
-    set(CUSTOM, customEntries);
-    notify();
-}
-
-function saveCustomCategories() {
-    set(CUSTOM_CATS, customCategories);
-    notify();
-}
-
 function saveFolded() {
     set(FOLDED, foldedSections);
     notify();
 }
 
-export function isFolded(sectionTitle: string) {
-    return foldedSections.includes(sectionTitle);
+export async function saveUserKaomoji(kaomoji: Kaomoji[]) {
+    userKaomoji = kaomoji;
+    await set(KAOMOJI, userKaomoji);
+    notify();
 }
 
-export function toggleFolded(sectionTitle: string) {
-    const i = foldedSections.indexOf(sectionTitle);
-    if (i === -1) foldedSections.push(sectionTitle);
-    else foldedSections.splice(i, 1);
-    saveFolded();
+export function getExportString() {
+    const cats: Record<string, any> = {};
+
+    for (const item of userKaomoji) {
+        const cat = item.tags[0] || "custom";
+        cats[cat] ??= [];
+        cats[cat].push({
+            id: item.id,
+            value: item.value
+        });
+    }
+
+    return JSON.stringify(cats);
 }
 
 export function isFavorite(value: string) {
@@ -117,55 +113,32 @@ export function removeRecent(value: string) {
     saveRecent();
 }
 
-export function addCustomEntry(entry: Kaomoji) {
-    customEntries.push(entry);
-    saveCustom();
+export function isFolded(sectionTitle: string) {
+    return foldedSections.includes(sectionTitle);
 }
 
-export function deleteCustomEntry(id: string) {
-    const entry = customEntries.find(e => e.id === id);
-    if (!entry) return;
-
-    customEntries = customEntries.filter(e => e.id !== id);
-    saveCustom();
-
-    if (favorites.includes(entry.value)) {
-        favorites = favorites.filter(v => v !== entry.value);
-        saveFavorites();
-    }
-    if (recent.includes(entry.value)) {
-        recent = recent.filter(v => v !== entry.value);
-        saveRecent();
-    }
+export function toggleFolded(sectionTitle: string) {
+    const i = foldedSections.indexOf(sectionTitle);
+    if (i === -1) foldedSections.push(sectionTitle);
+    else foldedSections.splice(i, 1);
+    saveFolded();
 }
 
-export function addCategory(name: string) {
-    name = name.trim();
-    if (!name || customCategories.some(c => c.toLowerCase() === name.toLowerCase()) || (BUILTIN_CATEGORIES as readonly string[]).includes(name.toLowerCase())) return false;
-    customCategories.push(name);
-    saveCustomCategories();
-    return true;
+export function addUserKaomoji(value: string, id?: string, category = "custom") {
+    const kaomoji: Kaomoji = {
+        id: id || category,
+        value: value.trim(),
+        tags: [category]
+    };
+    saveUserKaomoji([...userKaomoji, kaomoji]);
 }
 
-export function renameCategory(oldName: string, newName: string) {
-    newName = newName.trim();
-    if (!newName || oldName.toLowerCase() === newName.toLowerCase() || customCategories.some(c => c.toLowerCase() === newName.toLowerCase() && c.toLowerCase() !== oldName.toLowerCase()) || (BUILTIN_CATEGORIES as readonly string[]).includes(newName.toLowerCase())) return false;
+export function deleteUserKaomoji(value: string) {
+    userKaomoji = userKaomoji.filter(k => k.value !== value && k.id !== value);
+    favorites = favorites.filter(v => v !== value && v.trim() !== value.trim());
+    recent = recent.filter(v => v !== value && v.trim() !== value.trim());
 
-    customCategories[customCategories.indexOf(oldName)] = newName;
-    for (const entry of customEntries) {
-        const i = entry.tags.indexOf(oldName);
-        if (i !== -1) entry.tags[i] = newName;
-    }
-    saveCustomCategories();
-    saveCustom();
-    return true;
-}
-
-export function deleteCategory(name: string) {
-    customCategories = customCategories.filter(c => c !== name);
-    for (const entry of customEntries) {
-        entry.tags = entry.tags.filter(t => t !== name);
-    }
-    saveCustomCategories();
-    saveCustom();
+    saveFavorites();
+    saveRecent();
+    saveUserKaomoji([...userKaomoji]);
 }
