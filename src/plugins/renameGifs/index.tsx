@@ -11,11 +11,13 @@ import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import { ModalCloseButton, ModalContent, ModalHeader, ModalRoot, ModalSize, openModal } from "@utils/modal";
 import definePlugin, { OptionType, PluginNative } from "@utils/types";
+import { findByPropsLazy } from "@webpack";
 import { Button, Forms, Menu, React, TextInput } from "@webpack/common";
 
 import * as native from "./native";
 
 const Native = VencordNative.pluginHelpers.RenameGifs as PluginNative<typeof native>;
+const ReactDOMModule = findByPropsLazy("createRoot") as any;
 const ModalRootAny = ModalRoot as any;
 const ModalHeaderAny = ModalHeader as any;
 const ModalContentAny = ModalContent as any;
@@ -25,9 +27,10 @@ const backupAvailable = IS_DISCORD_DESKTOP || IS_VESKTOP;
 
 type NameMap = Record<string, string>;
 type SortCache = { arrRef: any[] | null; version: number; sorted: any[]; };
+type HoverState = { name: string; x: number; y: number; centered: boolean; visible: boolean; };
 
 const dataStoreKey = "RenameGifs_names";
-const hoverLabelGapPx = 3;
+const hoverLabelGapPx = 2;
 const emptySortCache: SortCache = { arrRef: null, version: -1, sorted: [] };
 
 // cdn.discordapp.com and media.discordapp.net serve the same attachments, so
@@ -40,7 +43,9 @@ let nameCacheVersion = 0;
 let sortCache: SortCache = emptySortCache;
 let lastFavorites: any[] = [];
 let pickerObserver: MutationObserver | null = null;
-let hoverLabel: HTMLDivElement | null = null;
+let hoverContainer: HTMLDivElement | null = null;
+let hoverRoot: any = null;
+let setHoverState: ((s: HoverState) => void) | null = null;
 
 const settings = definePluginSettings({
     backupFolderPath: {
@@ -492,32 +497,46 @@ function RenameModal({ modalProps, gifUrl, aliasUrl }: { modalProps: any; gifUrl
 
 // hover label
 
-function getHoverLabel(): HTMLDivElement {
-    if (hoverLabel) return hoverLabel;
+function HoverLabel() {
+    const [state, setState] = React.useState<HoverState>({ name: "", x: 0, y: 0, centered: false, visible: false });
+    setHoverState = setState;
 
-    hoverLabel = document.createElement("div");
-    hoverLabel.style.cssText = `
-        position: fixed;
-        z-index: 9999;
-        display: none;
-        color: white;
-        font-size: 12px;
-        font-weight: 600;
-        text-shadow: 0 1px 3px rgba(0,0,0,0.85);
-        pointer-events: none;
-        white-space: nowrap;
-    `;
-    document.body.appendChild(hoverLabel);
-    return hoverLabel;
+    if (!state.visible) return null;
+
+    return (
+        <div
+            style={{
+                position: "fixed",
+                left: state.x,
+                top: state.y,
+                transform: state.centered ? "translate(-50%, -100%)" : undefined,
+                zIndex: 9999,
+                color: "white",
+                fontSize: 12,
+                fontWeight: 600,
+                textShadow: "0 1px 3px rgba(0,0,0,0.85)",
+                pointerEvents: "none",
+                whiteSpace: "nowrap",
+            }}
+        >
+            {state.name}
+        </div>
+    );
 }
 
-// positions the hover label at a point, either anchored by its top left
-// (cursor tooltip) or centered above it (pinned over the favorite button)
-function positionHoverLabel(point: { x: number; y: number; }, centered = false) {
-    if (!hoverLabel) return;
-    hoverLabel.style.left = `${point.x}px`;
-    hoverLabel.style.top = `${point.y}px`;
-    hoverLabel.style.transform = centered ? "translate(-50%, -100%)" : "";
+function mountHoverLabel() {
+    hoverContainer = document.createElement("div");
+    document.body.appendChild(hoverContainer);
+    hoverRoot = ReactDOMModule.createRoot(hoverContainer);
+    hoverRoot.render(<HoverLabel />);
+}
+
+function unmountHoverLabel() {
+    hoverRoot?.unmount();
+    hoverContainer?.remove();
+    hoverContainer = null;
+    hoverRoot = null;
+    setHoverState = null;
 }
 
 // discord keeps the favorite star button in the DOM at all times and just
@@ -537,29 +556,26 @@ function onGifMouseOver(e: MouseEvent) {
     const src = findMediaSrcFromTarget(target, e.clientX, e.clientY);
     const name = src ? displayNameFor(src) : "";
 
-    const label = getHoverLabel();
     if (!name) {
-        label.style.display = "none";
+        setHoverState?.({ name: "", x: 0, y: 0, centered: false, visible: false });
         return;
     }
-
-    label.textContent = name;
-    label.style.display = "block";
 
     const favButton = findFavButtonNear(target);
     if (favButton) {
         const rect = favButton.getBoundingClientRect();
-        positionHoverLabel({ x: rect.left + rect.width / 2, y: rect.top - hoverLabelGapPx }, true);
+        setHoverState?.({ name, x: rect.left + rect.width / 2, y: rect.top - hoverLabelGapPx, centered: true, visible: true });
     } else {
-        positionHoverLabel({ x: e.clientX + 14, y: e.clientY + 14 });
+        setHoverState?.({ name, x: e.clientX + 14, y: e.clientY + 14, centered: false, visible: true });
     }
 }
 
 function onGifMouseOut() {
-    if (hoverLabel) hoverLabel.style.display = "none";
+    setHoverState?.({ name: "", x: 0, y: 0, centered: false, visible: false });
 }
 
 function startHoverLabels() {
+    mountHoverLabel();
     document.addEventListener("mouseover", onGifMouseOver, true);
     document.addEventListener("mouseout", onGifMouseOut, true);
 }
@@ -567,8 +583,7 @@ function startHoverLabels() {
 function stopHoverLabels() {
     document.removeEventListener("mouseover", onGifMouseOver, true);
     document.removeEventListener("mouseout", onGifMouseOut, true);
-    hoverLabel?.remove();
-    hoverLabel = null;
+    unmountHoverLabel();
 }
 
 // plugin
