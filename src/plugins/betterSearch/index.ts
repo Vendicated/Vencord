@@ -12,12 +12,12 @@ interface SearchToken {
     start: number;
     type: string;
     getFullMatch(): string;
-};
+}
 
 interface AutocompleteOptions {
     query: string;
     maxResults: number;
-};
+}
 
 type SearchAutocomplete = (options: AutocompleteOptions) => { text: string; }[];
 
@@ -30,7 +30,7 @@ interface SearchFilter {
     answerRegex: RegExp;
     parse(token: SearchToken): unknown;
     getAutocompletions?: SearchAutocomplete;
-};
+}
 
 interface SearchRule {
     regex: RegExp;
@@ -40,7 +40,7 @@ interface SearchRule {
     follows?: string[];
     queryKey?: string;
     getAutocompletions?: SearchAutocomplete;
-};
+}
 
 function makeFilter(
     name: string,
