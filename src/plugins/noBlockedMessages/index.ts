@@ -21,8 +21,8 @@ import { Devs } from "@utils/constants";
 import { runtimeHashMessageKey } from "@utils/intlHash";
 import { Logger } from "@utils/Logger";
 import definePlugin, { OptionType } from "@utils/types";
-import { Message } from "@vencord/discord-types";
-import { i18n, RelationshipStore } from "@webpack/common";
+import { ChannelMessages, Message } from "@vencord/discord-types";
+import { i18n, MessageStore, RelationshipStore } from "@webpack/common";
 
 interface MessageDeleteProps {
     // Internal intl message for BLOCKED_MESSAGE_COUNT
@@ -32,6 +32,12 @@ interface MessageDeleteProps {
 // Remove this migration once enough time has passed
 migratePluginSetting("NoBlockedMessages", "ignoreBlockedMessages", "ignoreMessages");
 const settings = definePluginSettings({
+    hideReplies: {
+        description: "Hides replies to blocked and ignored (if enabled) users",
+        type: OptionType.BOOLEAN,
+        default: false,
+        restartNeeded: true
+    },
     ignoreMessages: {
         description: "Completely ignores incoming messages from blocked and ignored (if enabled) users",
         type: OptionType.BOOLEAN,
@@ -46,10 +52,21 @@ const settings = definePluginSettings({
     }
 });
 
+type NonNullReference = Message["messageReference"] & {};
+
+function isReferenceBlocked({ channel_id, message_id }: NonNullReference): boolean {
+    return MessageStore.getMessage(channel_id, message_id)?.blocked === true;
+}
+
+function isReferenceIgnored({ channel_id, message_id }: NonNullReference): boolean {
+    return settings.store.applyToIgnoredUsers
+        && MessageStore.getMessage(channel_id, message_id)?.ignored === true;
+}
+
 export default definePlugin({
     name: "NoBlockedMessages",
     description: "Hides all blocked/ignored messages from chat completely",
-    authors: [Devs.rushii, Devs.Samu, Devs.jamesbt365],
+    authors: [Devs.rushii, Devs.Samu, Devs.jamesbt365, Devs.paige],
     tags: ["Accessibility", "Chat"],
     settings,
 
@@ -62,6 +79,14 @@ export default definePlugin({
                     replace: "if($self.shouldHide(arguments[0]))return null;$&"
                 }
             ]
+        },
+        {
+            find: "_channelMessages={}",
+            predicate: () => settings.store.hideReplies,
+            replacement: {
+                match: /static commit\((\i)\)\{/,
+                replace: "$&$1=$self.blockReplyingMessages($1);"
+            }
         },
         {
             find: '"MessageStore"',
@@ -95,7 +120,7 @@ export default definePlugin({
     },
 
     shouldIgnoreMessage(message: Message) {
-        return this.shouldIgnoreUser(message?.author?.id);
+        return message.blocked || (settings.store.ignoreMessages && message.ignored);
     },
 
     shouldHide(props: MessageDeleteProps): boolean {
@@ -108,5 +133,13 @@ export default definePlugin({
             new Logger("NoBlockedMessages").error("Failed to check if message should be hidden:", e);
             return false;
         }
+    },
+
+    blockReplyingMessages(messages: ChannelMessages) {
+        return messages.reset(messages.map(message => {
+            return message
+                .set("blocked", message.blocked || (message.messageReference && isReferenceBlocked(message.messageReference)))
+                .set("ignored", message.ignored || (message.messageReference && isReferenceIgnored(message.messageReference)));
+        }));
     }
 });
