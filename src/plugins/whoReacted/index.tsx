@@ -103,7 +103,7 @@ function ReactionUsers({ message, users }: { message: Message, users: User[]; })
             <div
                 onClick={handleClickAvatar}
                 onKeyDown={handleClickAvatar}
-                style={settings.store.disableAvatarClick ? {} : { pointerEvents: "none" }}
+                style={!settings.store.clickableAvatars ? { pointerEvents: "none" } : {}}
             >
                 <UserSummaryItem
                     users={users}
@@ -119,8 +119,8 @@ function ReactionUsers({ message, users }: { message: Message, users: User[]; })
 }
 
 const settings = definePluginSettings({
-    disableAvatarClick: {
-        description: "Toggle clicking avatars in reactions",
+    clickableAvatars: {
+        description: "While this is enabled, clicking a reacting user's avatar will open their profile instead of adding the reaction",
         type: OptionType.BOOLEAN,
         default: false,
         restartNeeded: true
