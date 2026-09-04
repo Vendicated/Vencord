@@ -54,11 +54,11 @@ const settings = definePluginSettings({
 
 type NonNullReference = Message["messageReference"] & {};
 
-function isReferenceBlocked({ channel_id, message_id }: NonnullReference): boolean {
+function isReferenceBlocked({ channel_id, message_id }: NonNullReference): boolean {
     return MessageStore.getMessage(channel_id, message_id)?.blocked === true;
 }
 
-function isReferenceIgnored({ channel_id, message_id }: NonnullReference): boolean {
+function isReferenceIgnored({ channel_id, message_id }: NonNullReference): boolean {
     return settings.store.applyToIgnoredUsers
         && MessageStore.getMessage(channel_id, message_id)?.ignored === true;
 }
