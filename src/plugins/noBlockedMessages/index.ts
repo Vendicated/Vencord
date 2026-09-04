@@ -52,7 +52,7 @@ const settings = definePluginSettings({
     }
 });
 
-type NonnullReference = Exclude<Message["messageReference"], undefined>;
+type NonNullReference = Message["messageReference"] & {};
 
 function isReferenceBlocked({ channel_id, message_id }: NonnullReference): boolean {
     return MessageStore.getMessage(channel_id, message_id)?.blocked === true;
@@ -84,7 +84,7 @@ export default definePlugin({
             find: "_channelMessages={}",
             predicate: () => settings.store.hideReplies,
             replacement: {
-                match: /static commit\((\i)\)\{/g,
+                match: /static commit\((\i)\)\{/,
                 replace: "$&$1=$self.blockReplyingMessages($1);"
             }
         },

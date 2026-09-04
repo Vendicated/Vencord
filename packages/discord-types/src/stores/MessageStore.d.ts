@@ -39,7 +39,7 @@ export interface ChannelMessages {
     forEach(callback: (message: Message, index: number, array: Message[]) => void, thisArg?: any): void;
     receiveMessage(msg: any): this;
     get(msgId: string): Message | undefined;
-    map(callback: (message: Message) => Message): Message[];
+    map(callback: (message: Message) => Message, thisArg?: any): Message[];
     reset(messages: Message[]): this;
 }
 
