@@ -4,8 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { BUILTIN_CATEGORIES } from "@plugins/kaomojiPicker/data/kaomoji";
-import { useKaomojiStore } from "@plugins/kaomojiPicker/store";
+import { getCategories } from "@plugins/kaomojiPicker/data/kaomoji";
 import { RenderModalProps } from "@vencord/discord-types";
 import { Modal, openModal, TextInput, useState } from "@webpack/common";
 
@@ -16,12 +15,10 @@ export function openCreateCategoryModal(onConfirm: (name: string) => void) {
 }
 
 function CreateCategoryModal({ modalProps, onConfirm }: { modalProps: RenderModalProps; onConfirm: (name: string) => void; }) {
-    const { customCategories } = useKaomojiStore();
     const [name, setName] = useState("");
 
     const trimmed = name.trim();
-    const isDuplicate = customCategories.some(c => c.toLowerCase() === trimmed.toLowerCase())
-        || (BUILTIN_CATEGORIES as readonly string[]).includes(trimmed.toLowerCase());
+    const isDuplicate = getCategories().some(c => c.toLowerCase() === trimmed.toLowerCase());
     const canSubmit = Boolean(trimmed && !isDuplicate);
 
     function handleConfirm() {

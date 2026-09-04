@@ -15,11 +15,6 @@
     flex: 1;
 }
 
-.vc-kaomoji-header-actions {
-    flex-shrink: 0;
-    overflow: hidden;
-}
-
 .vc-kaomoji-body-wrap {
     display: flex;
     flex: 1;
@@ -30,14 +25,14 @@
     display: flex;
     flex: 1;
     flex-direction: column;
-    padding: 0 var(--space-4);
+    padding: 0 4px;
 }
 
 .vc-kaomoji-grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-    gap: calc(var(--space-8) - 2px);
-    padding: 0 var(--space-4) var(--space-12) var(--space-8);
+    gap: 6px;
+    padding: 0 4px 12px 8px;
 }
 
 .vc-kaomoji-item {
@@ -45,7 +40,7 @@
     align-items: center;
     justify-content: center;
     min-height: 28px;
-    padding: 2px var(--space-4);
+    padding: 2px 4px;
     background: var(--background-secondary-alt);
     border-radius: var(--radius-sm);
     color: var(--text-default);
@@ -106,7 +101,7 @@
 }
 
 .vc-kaomoji-section > .vc-kaomoji-grid:first-child {
-    padding-top: var(--space-12);
+    padding-top: 8px;
 }
 
 .vc-kaomoji-autocomplete-divider {
@@ -115,6 +110,28 @@
 
 .vc-kaomoji-autocomplete-title {
     padding-top: 0;
+}
+
+.vc-kaomoji-section-header-wrap {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    margin-bottom: 8px;
+
+    & > * {
+        margin: 0;
+    }
+}
+
+.vc-kaomoji-create-category-wrap {
+    margin-top: 8px;
+}
+
+.vc-kaomoji-manage-header {
+    flex-shrink: 0;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border-subtle);
 }
 
 .vc-kaomoji-manage-card {
@@ -127,22 +144,44 @@
     background-color: var(--background-secondary-alt);
 }
 
+.vc-kaomoji-manage-info {
+    overflow: hidden;
+}
+
 .vc-kaomoji-manage-empty {
     color: var(--text-muted);
     text-align: center;
     padding-bottom: var(--space-8);
 }
 
-.vc-kaomoji-manage-input-wrap {
-    flex: 1;
-    margin-right: 12px;
-}
-
 .vc-kaomoji-manage-list {
-    max-height: 192px;
-    padding-right: var(--space-4);
+    max-height: 262px;
+    padding-right: 4px;
 }
 
-.vc-kaomoji-create-category-wrap {
-    margin-top: var(--space-8);
+.vc-kaomoji-manage-preview-wrap {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 60px;
+    height: 100%;
+}
+
+.vc-kaomoji-error-message {
+    color: var(--text-feedback-critical);
+    animation: slide-down .3s ease-in-out;
+}
+
+@keyframes slide-down {
+    0% {
+        height: 0;
+        width: 0;
+        transform: translateY(-4px);
+    }
+
+    100% {
+        height: auto;
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
