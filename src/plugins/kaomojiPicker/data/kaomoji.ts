@@ -61,7 +61,7 @@ export function parseUserSetting(raw: string | undefined): Kaomoji[] {
 export const BUILTIN_KAOMOJI: Kaomoji[] = parseCategory(builtin);
 
 export function getAllKaomoji(): Kaomoji[] {
-    return [...userKaomoji, ...BUILTIN_KAOMOJI];
+    return [...BUILTIN_KAOMOJI, ...userKaomoji];
 }
 
 export function getCategories(): string[] {
