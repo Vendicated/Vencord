@@ -6,19 +6,18 @@
 
 import { Button } from "@components/Button";
 import { Flex } from "@components/Flex";
-import { ClockIcon, CogWheel, DeleteIcon, PlusIcon, SearchIcon, StarFilled, StarOutlined } from "@components/Icons";
+import { ClockIcon, DeleteIcon, SearchIcon, StarFilled, StarOutlined } from "@components/Icons";
 import { cl } from "@plugins/kaomojiPicker/cl";
-import { BUILTIN_CATEGORIES, BUILTIN_KAOMOJI, Kaomoji } from "@plugins/kaomojiPicker/data/kaomoji";
-import { addRecent, deleteCustomEntry, isFavorite, isFolded, removeRecent, toggleFavorite, toggleFolded, useKaomojiStore } from "@plugins/kaomojiPicker/store";
+import { getAllKaomoji, getCategories, Kaomoji } from "@plugins/kaomojiPicker/data/kaomoji";
+import { addRecent, deleteUserKaomoji, isFavorite, isFolded, removeRecent, toggleFavorite, toggleFolded, useKaomojiStore } from "@plugins/kaomojiPicker/store";
 import { insertTextIntoChatInputBox } from "@utils/discord";
 import { findComponentByCodeLazy } from "@webpack";
-import { ContextMenuApi, ExpressionPickerStore, Menu, ScrollerThin, TextInput, Tooltip, useCallback, useMemo, useState } from "@webpack/common";
+import { ContextMenuApi, ExpressionPickerStore, Menu, ScrollerThin, TextInput, useCallback, useMemo, useState } from "@webpack/common";
 import type { ComponentProps, MouseEvent, ReactNode } from "react";
 
 import { settings } from "..";
-import { openAddKaomojiModal } from "./AddKaomojiModal";
 import { GridItem } from "./GridItem";
-import { openManageCategoryModal } from "./ManageCategoryModal";
+import { openManageKaomojiModal } from "./ManageKaomojiModal";
 
 interface Section {
     title: string;
@@ -56,7 +55,7 @@ const ExpressionPickerInspector = findComponentByCodeLazy<ExpressionPickerInspec
 const SearchAccessory = (props: ComponentProps<typeof SearchIcon>) => <SearchIcon width={16} height={16} {...props} />;
 
 export function KaomojiPicker() {
-    const { favorites, recent, customEntries, customCategories, version } = useKaomojiStore();
+    const { favorites, recent, userKaomoji, version } = useKaomojiStore();
 
     const [search, setSearch] = useState("");
     const [hoveredItem, setHoveredItem] = useState<Kaomoji | null>(null);
@@ -65,9 +64,9 @@ export function KaomojiPicker() {
 
     const groupedSections = useMemo(() => {
         const lookup = (v: string): Kaomoji =>
-            customEntries.find(e => e.value === v)
-            ?? BUILTIN_KAOMOJI.find(e => e.value === v)
-            ?? { id: v, value: v, tags: [] };
+            getAllKaomoji().find(e => e.value === v) ?? { id: v, value: v, tags: [] };
+
+        const categories = getCategories();
 
         const _sections: Section[] = [];
 
@@ -77,43 +76,26 @@ export function KaomojiPicker() {
         if (settings.store.showRecent && recent.length)
             _sections.push({ title: "Recent", icon: <ClockIcon width={16} height={16} />, items: recent.map(lookup) });
 
-        if (settings.store.showCustom && customEntries.length)
-            _sections.push({ title: "Custom", icon: <CogWheel width={16} height={16} />, items: customEntries });
-
-        const allValidCats = [...BUILTIN_CATEGORIES, ...customCategories];
-        const allKaomoji = [...BUILTIN_KAOMOJI, ...customEntries];
-
-        function getPrimaryTag(e: Kaomoji) {
-            return e.tags.find(tag => allValidCats.includes(tag));
-        }
-
         const grouped = new Map<string, Kaomoji[]>();
-        for (const cat of allValidCats) grouped.set(cat, []);
-        const misc: Kaomoji[] = [];
+        for (const cat of categories) grouped.set(cat, []);
 
-        for (const e of allKaomoji) {
-            const primary = getPrimaryTag(e);
-            if (primary && grouped.has(primary)) {
-                grouped.get(primary)!.push(e);
-            } else {
-                misc.push(e);
+        for (const e of getAllKaomoji()) {
+            for (const tag of e.tags) {
+                const lowerTag = tag.toLowerCase();
+                if (grouped.has(lowerTag)) {
+                    grouped.get(lowerTag)!.push(e);
+                    break;
+                }
             }
         }
 
-        for (const cat of BUILTIN_CATEGORIES) {
+        for (const cat of categories) {
             const items = grouped.get(cat)!;
             if (items.length) _sections.push({ title: cat, items });
         }
-
-        for (const cat of customCategories) {
-            const items = grouped.get(cat)!;
-            if (items.length) _sections.push({ title: cat, items });
-        }
-
-        if (misc.length) _sections.push({ title: "Misc", items: misc });
 
         return _sections;
-    }, [version, settings.store.showRecent, settings.store.showCustom]);
+    }, [version, settings.store.showRecent]);
 
     const visible = useMemo<Section[]>(() => {
         if (!query) return groupedSections;
@@ -136,7 +118,7 @@ export function KaomojiPicker() {
     }, [query, groupedSections]);
 
     const handleInsert = useCallback((item: Kaomoji) => {
-        insertTextIntoChatInputBox(item.value);
+        insertTextIntoChatInputBox(item.value + " ");
         addRecent(item.value);
         ExpressionPickerStore.closeExpressionPicker();
     }, []);
@@ -147,7 +129,7 @@ export function KaomojiPicker() {
 
     const handleContextMenu = useCallback((event: MouseEvent, item: Kaomoji, sectionTitle: string) => {
         const fav = isFavorite(item.value);
-        const isCustomItem = customEntries.includes(item);
+        const isCustomItem = userKaomoji.some(e => e.value === item.value || e.id === item.id);
 
         ContextMenuApi.openContextMenu(event, () => (
             <Menu.Menu
@@ -178,12 +160,12 @@ export function KaomojiPicker() {
                         label="Delete Kaomoji"
                         icon={DeleteIcon}
                         leadingAccessory={{ type: "icon", icon: DeleteIcon }}
-                        action={() => { deleteCustomEntry(item.id); }}
+                        action={() => deleteUserKaomoji(item.value)}
                     />
                 )}
             </Menu.Menu>
         ));
-    }, []);
+    }, [userKaomoji]);
 
     const displayItem = hoveredItem ?? visible[0]?.items[0];
 
@@ -199,32 +181,12 @@ export function KaomojiPicker() {
                         {...{ leading: SearchAccessory }}
                     />
                 </div>
-                <Flex gap={8} className={cl("header-actions")}>
-                    <Tooltip text="Add Kaomoji">
-                        {props => (
-                            <Button
-                                {...props}
-                                size="iconOnly"
-                                variant="secondary"
-                                onClick={() => openAddKaomojiModal()}
-                            >
-                                <PlusIcon width={20} height={20} />
-                            </Button>
-                        )}
-                    </Tooltip>
-                    <Tooltip text="Manage Categories">
-                        {props => (
-                            <Button
-                                {...props}
-                                size="iconOnly"
-                                variant="secondary"
-                                onClick={() => openManageCategoryModal()}
-                            >
-                                <CogWheel width={20} height={20} />
-                            </Button>
-                        )}
-                    </Tooltip>
-                </Flex>
+                <Button
+                    variant="secondary"
+                    onClick={() => openManageKaomojiModal()}
+                >
+                    Manage
+                </Button>
             </Flex>
 
             <div className={cl("body-wrap")}>
