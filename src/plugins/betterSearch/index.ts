@@ -7,32 +7,32 @@
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 
-type SearchToken = {
+interface SearchToken {
     match: string[];
     start: number;
     type: string;
     getFullMatch(): string;
 };
 
-type AutocompleteOptions = {
+interface AutocompleteOptions {
     query: string;
     maxResults: number;
 };
 
 type SearchAutocomplete = (options: AutocompleteOptions) => { text: string; }[];
 
-type SearchFilter = {
+interface SearchFilter {
     filterType: string;
     answerType: string;
     filterKey: string;
     queryKey: string;
     filterRegex: RegExp;
     answerRegex: RegExp;
-    parse: (token: SearchToken) => unknown;
+    parse(token: SearchToken): unknown;
     getAutocompletions?: SearchAutocomplete;
 };
 
-type SearchRule = {
+interface SearchRule {
     regex: RegExp;
     componentType: string;
     key?: string;
@@ -129,7 +129,7 @@ for (const filter of customFilters) {
 export default definePlugin({
     name: "BetterSearch",
     authors: [Devs.theo],
-    description: "Allows you to use channel message search parameters that aren't integrated into the Discord client",
+    description: "Allows you to use channel message search options that aren't normally available",
 
     patches: [
         {
