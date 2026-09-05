@@ -100,13 +100,10 @@ function canAddAttachments(msg: Message) {
 }
 
 function handlePaste(e: ClipboardEvent) {
-    if (!e.clipboardData) return;
+    if (!e.clipboardData?.files.length) return;
 
     const msg = EditMessageStore.getEditingMessage(SelectedChannelStore.getChannelId());
     if (!msg) return;
-
-    const images = Array.from(e.clipboardData.files).filter(file => file.type.startsWith("image/"));
-    if (images.length === 0) return;
 
     e.preventDefault();
     e.stopImmediatePropagation();
