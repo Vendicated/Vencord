@@ -1,0 +1,122 @@
+/*
+ * Vencord, a Discord client mod
+ * Copyright (c) 2026 Vendicated and contributors
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
+
+.vc-scheduledStatus-card {
+    padding: 0.5em;
+    padding-left: 1em;
+    display: grid;
+    grid-template-columns: auto 1fr min-content min-content;
+    align-items: center;
+    gap: 0.5em;
+}
+
+.vc-scheduledStatus-card-active {
+    border-color: var(--brand-500) !important;
+}
+
+.vc-scheduledStatus-pills {
+    display: flex;
+    gap: 4px;
+    flex-wrap: wrap;
+}
+
+.vc-scheduledStatus-pill {
+    padding: 6px 12px;
+    border-radius: 16px;
+    border: 1px solid var(--border-subtle);
+    background: var(--card-background-default);
+    color: var(--text-muted);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    user-select: none;
+    transition: background 0.15s, color 0.15s;
+}
+
+.vc-scheduledStatus-pill:hover {
+    background: var(--background-modifier-hover);
+    color: var(--text-normal);
+}
+
+.vc-scheduledStatus-pill-on {
+    background: var(--brand-500);
+    border-color: var(--brand-500);
+    color: #fff;
+}
+
+.vc-scheduledStatus-timeRow {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+.vc-scheduledStatus-timeInput {
+    background: var(--input-background, var(--background-tertiary));
+    color: var(--text-normal);
+    border: 1px solid transparent;
+    border-radius: var(--radius-sm, 4px);
+    padding: 8px 12px;
+    font-size: 14px;
+    font-family: inherit;
+    color-scheme: light dark;
+    width: 100%;
+    box-sizing: border-box;
+    outline: none;
+}
+
+.vc-scheduledStatus-timeInput:focus {
+    border-color: var(--brand-500);
+}
+
+.vc-scheduledStatus-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+    overflow: hidden;
+}
+
+.vc-scheduledStatus-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.vc-scheduledStatus-dot-online { background: var(--status-positive, #23a55a); }
+.vc-scheduledStatus-dot-idle { background: var(--status-warning, #f0b232); }
+.vc-scheduledStatus-dot-dnd { background: var(--status-danger, #f23f43); }
+.vc-scheduledStatus-dot-invisible { background: var(--status-invisible, #80848e); }
+
+.vc-scheduledStatus-badge {
+    display: inline-flex;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 600;
+    background: var(--brand-500);
+    color: #fff;
+}
+
+.vc-scheduledStatus-slotPill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    border-radius: var(--radius-sm, 4px);
+    background: var(--card-background-default);
+    border: 1px solid var(--border-subtle);
+    font-size: 12px;
+    color: var(--text-normal);
+}
+
+.vc-scheduledStatus-weekCard {
+    padding: 0.5em 1em;
+    display: grid;
+    grid-template-columns: 80px 1fr;
+    align-items: center;
+    gap: 0.5em;
+}
