@@ -84,7 +84,7 @@ export default definePlugin({
                 },
                 {
                     // Insert the pinned channels to sections
-                    match: /(?<=renderRow:this\.renderRow,)sections:\[.+?1\)]/,
+                    match: /(?<=,)sections:\[\i,Math\.max\(\i\.length,1\)\]/,
                     replace: "...$self.makeProps(this,{$&})"
                 },
 
@@ -142,7 +142,7 @@ export default definePlugin({
             find: ".APPLICATION_STORE&&",
             replacement: {
                 // channelIds = __OVERLAY__ ? stuff : [...getStaticPaths(),...channelIds)]
-                match: /(?<=\i=__OVERLAY__\?\i:\[\.\.\.\i\(\),\.\.\.)\i/,
+                match: /(?<=\[\.\.\.\i\(\),\.\.\.)\i/,
                 // ....concat(pins).concat(toArray(channelIds).filter(c => !isPinned(c)))
                 replace: "$self.getAllUncollapsedChannels().concat($&.filter(c=>!$self.isPinned(c)))"
             }
@@ -152,7 +152,7 @@ export default definePlugin({
         {
             find: "=()=>!1,ensureChatIsVisible:",
             replacement: {
-                match: /(?<=\i===\i\.ME\?)\i\.\i\.getPrivateChannelIds\(\)/,
+                match: /\i\.\i\.getPrivateChannelIds\(\)/,
                 replace: "$self.getAllUncollapsedChannels().concat($&.filter(c=>!$self.isPinned(c)))"
             }
         },

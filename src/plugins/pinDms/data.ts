@@ -23,7 +23,9 @@ export async function init() {
     const userId = UserStore.getCurrentUser()?.id;
     if (userId == null) return;
 
-    currentUserCategories = settings.store.userBasedCategoryList[userId] ??= [];
+    settings.store.userBasedCategoryList[userId] ??= [];
+    // Read it back through the proxy so a new account gets settings notifications too.
+    currentUserCategories = settings.store.userBasedCategoryList[userId];
     forceUpdateDms?.();
 }
 
