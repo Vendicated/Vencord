@@ -21,7 +21,7 @@ import { Switch } from "@components/Switch";
 import { classes } from "@utils/misc";
 import { React, Select, TextInput, useEffect, useState } from "@webpack/common";
 
-import { evaluate, getActiveRuleId, settings } from ".";
+import { evaluate, settings } from ".";
 import {
     DAY_NAMES,
     DAYS,
@@ -56,6 +56,8 @@ function DayPicker({ selected, onChange }: { selected: number[]; onChange(d: num
                     <button
                         key={d.value}
                         type="button"
+                        aria-pressed={selected.includes(d.value)}
+                        aria-label={d.long}
                         className={classes("vc-scheduledStatus-pill", selected.includes(d.value) && "vc-scheduledStatus-pill-on")}
                         onClick={() => toggle(d.value)}
                         title={d.long}
@@ -96,8 +98,7 @@ export function SettingsPanel() {
 
     const rules: ScheduleRule[] = settings.store.schedules ?? [];
     const now = new Date();
-    const activeId = getActiveRuleId();
-    const activeRule = rules.find(r => r.id === activeId || (activeId == null && isRuleActive(r, now)));
+    const activeRule = rules.find(r => isRuleActive(r, now));
 
     const [days, setDays] = useState<number[]>([0]);
     const [startTime, setStartTime] = useState("08:00");
@@ -110,7 +111,7 @@ export function SettingsPanel() {
     function save(next: ScheduleRule[]) {
         settings.store.schedules = next;
         rerender();
-        evaluate();
+        evaluate().catch(console.error);
     }
 
     function addRule() {
@@ -218,7 +219,7 @@ export function SettingsPanel() {
                                         <Switch checked={rule.enabled} onChange={v => updateRule(idx, { ...rule, enabled: v })} />
                                         <div className="vc-scheduledStatus-info">
                                             <Flex style={{ alignItems: "center", gap: 6 }}>
-                                                <span className={`vc-scheduledStatus-dot vc-scheduledStatus-dot-${rule.status}`} />
+                                                <span aria-hidden="true" className={`vc-scheduledStatus-dot vc-scheduledStatus-dot-${rule.status}`} />
                                                 <Span size="md" weight="semibold">{rule.name}</Span>
                                                 {active && <span className="vc-scheduledStatus-badge">Active</span>}
                                             </Flex>
@@ -289,7 +290,7 @@ export function SettingsPanel() {
                                         <Flex style={{ gap: 6, flexWrap: "wrap" }}>
                                             {slots.map(s => (
                                                 <span key={s.id} className="vc-scheduledStatus-slotPill">
-                                                    <span className={`vc-scheduledStatus-dot vc-scheduledStatus-dot-${s.status}`} />
+                                                    <span aria-hidden="true" className={`vc-scheduledStatus-dot vc-scheduledStatus-dot-${s.status}`} />
                                                     {s.startTime} – {s.endTime}
                                                 </span>
                                             ))}
@@ -311,7 +312,7 @@ export function SettingsPanel() {
                     <Select
                         options={DEFAULT_STATUS_OPTIONS}
                         isSelected={v => v === (settings.store.defaultStatus ?? "previous")}
-                        select={v => { settings.store.defaultStatus = v as DefaultStatusType; rerender(); evaluate(); }}
+                        select={v => { settings.store.defaultStatus = v as DefaultStatusType; rerender(); evaluate().catch(console.error); }}
                         serialize={String}
                         closeOnSelect
                     />

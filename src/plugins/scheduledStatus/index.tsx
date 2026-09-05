@@ -31,10 +31,6 @@ let lastApplied: string | null = null;
 let savedStatus: string | null = null;
 let activeRuleId: string | null = null;
 
-export function getActiveRuleId() {
-    return activeRuleId;
-}
-
 function getStatus() {
     try { return StatusSettings?.getSetting?.(); }
     catch { return undefined; }
@@ -47,44 +43,48 @@ function onSettingsChange() {
 }
 
 export async function evaluate(manual = false) {
-    const status = getStatus();
-    if (!status) return;
+    try {
+        const status = getStatus();
+        if (!status) return;
 
-    const rules: ScheduleRule[] = settings.store.schedules ?? [];
-    const now = new Date();
-    const active = rules.find(r => isRuleActive(r, now));
+        const rules: ScheduleRule[] = settings.store.schedules ?? [];
+        const now = new Date();
+        const active = rules.find(r => isRuleActive(r, now));
 
-    if (active) {
-        if (activeRuleId == null && !savedStatus) savedStatus = status;
-        activeRuleId = active.id;
+        if (active) {
+            if (activeRuleId == null && !savedStatus) savedStatus = status;
+            activeRuleId = active.id;
 
-        if (status !== active.status) {
-            lastApplied = active.status;
-            await StatusSettings.updateSetting(active.status);
+            if (status !== active.status) {
+                lastApplied = active.status;
+                await StatusSettings.updateSetting(active.status);
 
-            if (settings.store.notifyOnChange || manual)
-                showToast(`Set to ${statusName(active.status)} (${active.name})`, Toasts.Type.SUCCESS);
+                if (settings.store.notifyOnChange || manual)
+                    showToast(`Set to ${statusName(active.status)} (${active.name})`, Toasts.Type.SUCCESS);
+            } else if (manual) {
+                showToast(`Already ${statusName(active.status)} (${active.name})`, Toasts.Type.MESSAGE);
+            }
+        } else if (activeRuleId != null) {
+            activeRuleId = null;
+            const def = settings.store.defaultStatus ?? "previous";
+            let restore: string | null = null;
+
+            if (def === "previous") restore = savedStatus ?? "online";
+            else if (def !== "keep") restore = def;
+
+            if (restore && status !== restore) {
+                lastApplied = restore;
+                await StatusSettings.updateSetting(restore);
+
+                if (settings.store.notifyOnChange || manual)
+                    showToast(`Restored to ${statusName(restore)}`, Toasts.Type.MESSAGE);
+            }
+            savedStatus = null;
         } else if (manual) {
-            showToast(`Already ${statusName(active.status)} (${active.name})`, Toasts.Type.MESSAGE);
+            showToast("No active schedule right now.", Toasts.Type.MESSAGE);
         }
-    } else if (activeRuleId != null) {
-        activeRuleId = null;
-        const def = settings.store.defaultStatus ?? "previous";
-        let restore: string | null = null;
-
-        if (def === "previous") restore = savedStatus ?? "online";
-        else if (def !== "keep") restore = def;
-
-        if (restore && status !== restore) {
-            lastApplied = restore;
-            await StatusSettings.updateSetting(restore);
-
-            if (settings.store.notifyOnChange || manual)
-                showToast(`Restored to ${statusName(restore)}`, Toasts.Type.MESSAGE);
-        }
-        savedStatus = null;
-    } else if (manual) {
-        showToast("No active schedule right now.", Toasts.Type.MESSAGE);
+    } catch (e) {
+        console.error(e);
     }
 }
 
@@ -99,8 +99,8 @@ export default definePlugin({
     start() {
         savedStatus = getStatus() ?? null;
         UserSettingsProtoStore.addChangeListener(onSettingsChange);
-        evaluate();
-        checkInterval = setInterval(evaluate, 15_000);
+        evaluate().catch(console.error);
+        checkInterval = setInterval(() => { evaluate().catch(console.error); }, 15_000);
     },
 
     stop() {
@@ -112,7 +112,7 @@ export default definePlugin({
         UserSettingsProtoStore.removeChangeListener(onSettingsChange);
 
         if (activeRuleId && savedStatus && (settings.store.defaultStatus ?? "previous") === "previous") {
-            StatusSettings.updateSetting(savedStatus);
+            StatusSettings.updateSetting(savedStatus).catch(console.error);
         }
 
         activeRuleId = null;

@@ -117,7 +117,7 @@ export function formatDays(days: number[]) {
     if (days.length === 5 && [0, 1, 2, 3, 4].every(d => days.includes(d))) return "Weekdays";
     if (days.length === 2 && [5, 6].every(d => days.includes(d))) return "Weekends";
 
-    const order = [...days].sort();
+    const order = [...days].sort((a, b) => a - b);
     return order.map(d => DAY_NAMES[d]?.slice(0, 3)).join(", ");
 }
 
