@@ -122,7 +122,7 @@ const settings = definePluginSettings({
     clickableAvatars: {
         description: "While this is enabled, clicking a reacting user's avatar will open their profile instead of adding the reaction",
         type: OptionType.BOOLEAN,
-        default: false,
+        default: true,
         restartNeeded: true
     }
 });
