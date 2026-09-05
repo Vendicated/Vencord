@@ -143,7 +143,7 @@ function getNextMessage(isUp: boolean, isReply: boolean) {
         if (!isReply && m.author.id !== meId) return false; // editing only own messages
         if (!MessageTypeSets.REPLYABLE.has(m.type) || m.hasFlag(MessageFlags.EPHEMERAL)) return false;
         if (settings.store.ignoreBlockedAndIgnored && RelationshipStore.isBlockedOrIgnored(m.author.id)) return false;
-        if (hasNoBlockedMessages && NoBlockedMessagesPlugin.shouldIgnoreMessage(m)) return false;
+        if (hasNoBlockedMessages && NoBlockedMessagesPlugin.shouldHideUser(m.author.id)) return false;
 
         return true;
     });

@@ -21,16 +21,17 @@ import { Devs } from "@utils/constants";
 import { runtimeHashMessageKey } from "@utils/intlHash";
 import { Logger } from "@utils/Logger";
 import definePlugin, { OptionType } from "@utils/types";
-import { ChannelMessages, Message } from "@vencord/discord-types";
-import { i18n, MessageStore, RelationshipStore } from "@webpack/common";
+import type { ChannelMessages, Message } from "@vencord/discord-types";
+import { i18n, ReferencedMessageStore, RelationshipStore } from "@webpack/common";
 
-interface MessageDeleteProps {
+interface CollapsedMessageProps {
     // Internal intl message for BLOCKED_MESSAGE_COUNT
     collapsedReason: () => any;
 }
 
 // Remove this migration once enough time has passed
-migratePluginSetting("NoBlockedMessages", "ignoreBlockedMessages", "ignoreMessages");
+migratePluginSetting("NoBlockedMessages", "ignoreBlockedMessages", "suppressUnread");
+migratePluginSetting("NoBlockedMessages", "ignoreMessages", "suppressUnread");
 const settings = definePluginSettings({
     hideReplies: {
         description: "Hides replies to blocked and ignored (if enabled) users",
@@ -38,8 +39,8 @@ const settings = definePluginSettings({
         default: false,
         restartNeeded: true
     },
-    ignoreMessages: {
-        description: "Completely ignores incoming messages from blocked and ignored (if enabled) users",
+    suppressUnread: {
+        description: "Suppresses unread messages from blocked and ignored (if enabled) users",
         type: OptionType.BOOLEAN,
         default: false,
         restartNeeded: true
@@ -51,17 +52,7 @@ const settings = definePluginSettings({
         restartNeeded: false
     }
 });
-
-type NonNullReference = Message["messageReference"] & {};
-
-function isReferenceBlocked({ channel_id, message_id }: NonNullReference): boolean {
-    return MessageStore.getMessage(channel_id, message_id)?.blocked === true;
-}
-
-function isReferenceIgnored({ channel_id, message_id }: NonNullReference): boolean {
-    return settings.store.applyToIgnoredUsers
-        && MessageStore.getMessage(channel_id, message_id)?.ignored === true;
-}
+const logger = new Logger("NoBlockedMessages");
 
 export default definePlugin({
     name: "NoBlockedMessages",
@@ -76,7 +67,7 @@ export default definePlugin({
             replacement: [
                 {
                     match: /let{messages:\i,[^}]*?collapsedReason[^}]*}/,
-                    replace: "if($self.shouldHide(arguments[0]))return null;$&"
+                    replace: "if($self.shouldHideCollapsed(arguments[0]))return null;$&"
                 }
             ]
         },
@@ -85,61 +76,57 @@ export default definePlugin({
             predicate: () => settings.store.hideReplies,
             replacement: {
                 match: /static commit\((\i)\)\{/,
-                replace: "$&$1=$self.blockReplyingMessages($1);"
+                replace: "$&$1=$self.updateChannelMessages($1);"
             }
         },
         {
             find: '"MessageStore"',
-            predicate: () => settings.store.ignoreMessages,
+            predicate: () => settings.store.suppressUnread,
             replacement: [
                 {
                     match: /(?<=MESSAGE_CREATE:function\((\i)\){)/,
-                    replace: (_, props) => `if($self.shouldIgnoreMessage(${props}.message))return;`
+                    replace: (_, props) => `if($self.shouldSuppressUnread(${props}.message))return;`
                 }
             ]
         },
         {
             find: '"ReadStateStore"',
-            predicate: () => settings.store.ignoreMessages,
+            predicate: () => settings.store.suppressUnread,
             replacement: [
                 {
                     match: /(?<=MESSAGE_CREATE:function\((\i)\){)/,
-                    replace: (_, props) => `if($self.shouldIgnoreMessage(${props}.message))return;`
+                    replace: (_, props) => `if($self.shouldSuppressUnread(${props}.message))return;`
                 }
             ]
         }
     ],
 
-    shouldIgnoreUser(userId: string) {
-        try {
-            return RelationshipStore.isBlocked(userId) || (settings.store.applyToIgnoredUsers && RelationshipStore.isIgnored(userId));
-        } catch (e) {
-            new Logger("NoBlockedMessages").error("Failed to check if user is blocked or ignored:", e);
-            return false;
-        }
+    shouldSuppressUnread(message: Message) {
+        return settings.store.suppressUnread && (message.blocked || (settings.store.applyToIgnoredUsers && message.ignored));
     },
 
-    shouldIgnoreMessage(message: Message) {
-        return message.blocked || (settings.store.ignoreMessages && message.ignored);
+    shouldHideUser(userId: string) {
+        return RelationshipStore.isBlocked(userId) || (settings.store.applyToIgnoredUsers && RelationshipStore.isIgnored(userId));
     },
 
-    shouldHide(props: MessageDeleteProps): boolean {
+    shouldHideCollapsed(props: CollapsedMessageProps) {
         try {
             const collapsedReason = props.collapsedReason();
             const is = (key: string) => collapsedReason === i18n.t[runtimeHashMessageKey(key)]();
 
             return is("BLOCKED_MESSAGE_COUNT") || (settings.store.applyToIgnoredUsers && is("IGNORED_MESSAGE_COUNT"));
         } catch (e) {
-            new Logger("NoBlockedMessages").error("Failed to check if message should be hidden:", e);
+            logger.error("Failed to check if message should be hidden:", e);
             return false;
         }
     },
 
-    blockReplyingMessages(messages: ChannelMessages) {
+    updateChannelMessages(messages: ChannelMessages) {
         return messages.reset(messages.map(message => {
-            return message
-                .set("blocked", message.blocked || (message.messageReference && isReferenceBlocked(message.messageReference)))
-                .set("ignored", message.ignored || (message.messageReference && isReferenceIgnored(message.messageReference)));
+            const referenced = ReferencedMessageStore.getMessageByReference(message.messageReference).message;
+            const blocked = message.blocked || referenced?.blocked === true;
+            const ignored = message.ignored || referenced?.ignored === true;
+            return message.set("blocked", blocked).set("ignored", ignored);
         }));
     }
 });
