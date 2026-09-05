@@ -55,6 +55,8 @@ export function GetOsColor(os: string) {
         case "Mac OS X":
         case "iOS":
             return ""; // Default to white/black (theme-dependent)
+        case "Horizon OS": // For Meta Quest (not to be confused with Horizon OS for the Nintendo Switch)
+            return "#0081fb"; // A bright blue, more vibrant and strong and a bit darker than Windows
         default:
             return "#f3799a"; // Pink
     }
@@ -65,6 +67,7 @@ export function GetPlatformIcon(platform: string) {
         case "Discord Android":
         case "Discord iOS":
         case "Discord Client":
+        case "Discord VR":
             return DiscordIcon;
         case "Android Chrome":
         case "Chrome iOS":

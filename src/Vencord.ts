@@ -18,7 +18,6 @@
 
 // DO NOT REMOVE UNLESS YOU WISH TO FACE THE WRATH OF THE CIRCULAR DEPENDENCY DEMON!!!!!!!
 import "~plugins";
-import "./fixWeirdAppRegionBug.css";
 
 export * as Api from "./api";
 export * as Plugins from "./api/PluginManager";
@@ -63,7 +62,8 @@ async function syncSettings() {
             body: "We've noticed you have cloud integrations enabled in another client! Due to limitations, you will " +
                 "need to re-authenticate to continue using them. Click here to go to the settings page to do so!",
             color: "var(--yellow-360)",
-            onClick: () => SettingsRouter.openUserSettings("vencord_cloud_panel")
+            onClick: () => SettingsRouter.openUserSettings("vencord_cloud_panel"),
+            noPersist: true
         });
         return;
     }

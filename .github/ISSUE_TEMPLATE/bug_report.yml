@@ -70,5 +70,7 @@ body:
               - label: I've searched existing issues and this hasn't been reported before
               - label: I am using Discord Stable or tried on Stable and this bug happens there as well
               - label: I installed Vencord via an official method (download from vencord.dev or from source), not via something like AUR or Nix packages
-              - label: This is not a support request
+              - label: This is not a support request (as defined above)
+              - label: I understand that if any of the above conditions are not met, this issue will be deleted and I will be banned from creating future issues without further warning
+                required: true
               - label: I am willing to submit a fix for this myself

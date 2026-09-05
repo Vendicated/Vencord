@@ -50,6 +50,7 @@ const guildPopoutPatch: NavContextMenuPatchCallback = (children, { guild }: { gu
             label="View Reviews"
             id="vc-rdb-server-reviews"
             icon={OpenExternalIcon}
+            leadingAccessory={{ type: "icon", icon: OpenExternalIcon }}
             action={() => openReviewsModal(guild.id, guild.name, ReviewType.Server)}
         />
     );
@@ -62,6 +63,7 @@ const userContextPatch: NavContextMenuPatchCallback = (children, { user }: { use
             label="View Reviews"
             id="vc-rdb-user-reviews"
             icon={OpenExternalIcon}
+            leadingAccessory={{ type: "icon", icon: OpenExternalIcon }}
             action={() => openReviewsModal(user.id, user.username, ReviewType.User)}
         />
     );
@@ -87,7 +89,7 @@ export default definePlugin({
             // DM profile sidebar
             find: ".SIDEBAR,disableToolbar:",
             replacement: {
-                match: /user:(\i),widgets:.{0,100}?\}\),/,
+                match: /user:(\i),widgets:.{0,100}?\}\),(?=.{0,100}unownedWishlistItems:\i,wishlistId:\i)/,
                 replace: "$&$self.renderProfileComponent({user:$1,isSideBar:true}),"
             }
         },
@@ -115,49 +117,51 @@ export default definePlugin({
         setTimeout(async () => {
             if (!Auth.token) return;
 
-            const user = await getCurrentUserInfo(Auth.token);
-            updateAuth({ user });
+            const user = await getCurrentUserInfo();
+            if (user) {
+                updateAuth({ user });
 
-            if (notifyReviews) {
-                if (lastReviewId && lastReviewId < user.lastReviewID) {
-                    s.lastReviewId = user.lastReviewID;
-                    if (user.lastReviewID !== 0)
-                        showToast("You have new reviews on your profile!");
+                if (notifyReviews) {
+                    if (lastReviewId && lastReviewId < user.lastReviewID) {
+                        s.lastReviewId = user.lastReviewID;
+                        if (user.lastReviewID !== 0)
+                            showToast("You have new reviews on your profile!");
+                    }
                 }
-            }
 
-            const { notification } = user;
-            if (notification) {
-                const props = notification.type === NotificationType.Ban ? {
-                    cancelText: "Appeal",
-                    confirmText: "Ok",
-                    onCancel: async () =>
-                        VencordNative.native.openExternal(
-                            "https://reviewdb.mantikafasi.dev/api/redirect?"
-                            + new URLSearchParams({
-                                token: Auth.token!,
-                                page: "dashboard/appeal"
-                            })
-                        )
-                } : {};
+                const { notification } = user;
+                if (notification) {
+                    const props = notification.type === NotificationType.Ban ? {
+                        cancelText: "Appeal",
+                        confirmText: "Ok",
+                        onCancel: async () =>
+                            VencordNative.native.openExternal(
+                                "https://reviewdb.mantikafasi.dev/api/redirect?"
+                                + new URLSearchParams({
+                                    token: Auth.token!,
+                                    page: "dashboard/appeal"
+                                })
+                            )
+                    } : {};
 
-                openModal(modalProps => (
-                    <ConfirmModal
-                        {...modalProps}
-                        title={notification.title}
-                        confirmText={props.confirmText ?? "OK"}
-                        cancelText={props.cancelText}
-                        variant="primary"
-                        onCancel={props.onCancel}
-                    >
-                        {Parser.parse(
-                            notification.content,
-                            false
-                        )}
-                    </ConfirmModal>
-                ));
+                    openModal(modalProps => (
+                        <ConfirmModal
+                            {...modalProps}
+                            title={notification.title}
+                            confirmText={props.confirmText ?? "OK"}
+                            cancelText={props.cancelText}
+                            variant="primary"
+                            onCancel={props.onCancel}
+                        >
+                            {Parser.parse(
+                                notification.content,
+                                false
+                            )}
+                        </ConfirmModal>
+                    ));
 
-                readNotification(notification.id);
+                    readNotification(notification.id);
+                }
             }
         }, 4000);
     },
@@ -183,7 +187,6 @@ export default definePlugin({
                                             {reviewData.reviews
                                                 .filter(review => review.id !== 0)
                                                 .slice(0, 4)
-                                                .reverse()
                                                 .map((review, idx) => {
                                                     const showCount = idx === 3 && reviewData.reviewCount > 4;
 

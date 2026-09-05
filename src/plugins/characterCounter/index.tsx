@@ -11,7 +11,7 @@ import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import { classNameFactory } from "@utils/css";
 import definePlugin, { OptionType } from "@utils/types";
-import { UserStore } from "@webpack/common";
+import { useEffect, UserStore, useState } from "@webpack/common";
 
 const cl = classNameFactory("vc-charCounter-");
 
@@ -34,7 +34,7 @@ function getCounterColor(percentage: number) {
 export default definePlugin({
     name: "CharacterCounter",
     description: "Adds a character counter to the chat input",
-    authors: [Devs.thororen],
+    authors: [Devs.thororen, Devs.creations],
     tags: ["Utility"],
     settings,
     patches: [
@@ -42,8 +42,8 @@ export default definePlugin({
             find: ".CREATE_FORUM_POST||",
             replacement: [
                 {
-                    match: /(?<=textValue:(\i),editorHeight:\i,channelId:\i\.id\}\)),\i/,
-                    replace: ",$self.renderCharCounter({text:$1})"
+                    match: /(?<=,editorRef:(\i),.{0,200}textValue:(\i),editorHeight:\i,channelId:\i\.id\}\)),\i/,
+                    replace: ",$self.renderCharCounter({editorRef:$1,text:$2})"
                 }
             ]
         },
@@ -56,7 +56,19 @@ export default definePlugin({
         }
     ],
 
-    renderCharCounter: ErrorBoundary.wrap(({ text }: { text: string; }) => {
+    renderCharCounter: ErrorBoundary.wrap(({ editorRef, text }: { text: string; editorRef: any; }) => {
+        const [selectedCount, setSelectedCount] = useState(0);
+        const showSelected = selectedCount > 0 && (editorRef?.current?.state?.focused ?? false);
+
+        useEffect(() => {
+            const listener = () => {
+                setSelectedCount(document.getSelection()?.toString()?.length ?? 0);
+            };
+
+            document.addEventListener("selectionchange", listener);
+            return () => document.removeEventListener("selectionchange", listener);
+        }, []);
+
         if (!text.length) return null;
 
         const premiumType = UserStore.getCurrentUser().premiumType ?? 0;
@@ -66,6 +78,12 @@ export default definePlugin({
 
         return (
             <div className={cl("counter")} style={{ color }}>
+                {showSelected && (
+                    <>
+                        <span className={cl("selected")}>{selectedCount}</span>
+                        /
+                    </>
+                )}
                 <span className={cl("count")}>{text.length}</span>
                 /
                 <span className={cl("max")}>{charMax}</span>

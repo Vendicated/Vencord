@@ -2,9 +2,10 @@
     display: none;
 }
 
-.messagelogger-deleted
-:is(
-    .messagelogger-deleted-attachment,
+
+/* non-deleted messages can have deleted attachments */
+.messagelogger-deleted-attachment,
+.messagelogger-deleted :is(
     .emoji,
     [data-type="sticker"],
     [class*="embedIframe"],

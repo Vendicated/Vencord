@@ -19,7 +19,7 @@ import { Margins } from "@utils/margins";
 import { classes } from "@utils/misc";
 import { IconComponent } from "@utils/types";
 import { RenderModalProps } from "@vencord/discord-types";
-import { Clickable, Modal,openModal } from "@webpack/common";
+import { Clickable, Modal, openModal } from "@webpack/common";
 
 
 const cl = classNameFactory("vc-plugin-ui-elements-");
@@ -76,7 +76,7 @@ function Section(props: {
     return (
         <section>
             <BaseText tag="h3" size="lg" weight="semibold">{title}</BaseText>
-            <Paragraph size="sm" className={classes(Margins.top8, Margins.bottom20)}>{description}</Paragraph>
+            <Paragraph size="sm" className={classes(Margins.top8, Margins.bottom20, cl("description"))}>{description}</Paragraph>
 
             <div className={cl("switches")}>
                 {switches.length === 0 && (
