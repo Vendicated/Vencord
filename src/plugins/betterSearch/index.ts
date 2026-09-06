@@ -126,6 +126,13 @@ for (const filter of customFilters) {
     };
 }
 
+const customAutocompleteEntries = customFilters.map(filter => ({
+    type: filter.filterType,
+    isEligible: true,
+    icon: () => null,
+    label: null
+}));
+
 export default definePlugin({
     name: "BetterSearch",
     authors: [Devs.theo],
@@ -151,10 +158,18 @@ export default definePlugin({
                 match: /return\{(?=\[\i\.\i\.FILTER_FROM\]:)/,
                 replace: "$&...$self.customRules,"
             }
+        },
+        {
+            find: "autocompleteGroups",
+            replacement: {
+                match: /(isEligible:\i\.has\(\i\.\i\.FILTER_MENTIONS\).*?\})\]/,
+                replace: "$1,...$self.customAutocompleteEntries]"
+            }
         }
     ],
 
     customRules,
+    customAutocompleteEntries,
 
     getCustomQueryKey(answerType: string) {
         const filter = customFilters.find(f => f.answerType === answerType);
