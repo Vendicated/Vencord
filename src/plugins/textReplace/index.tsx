@@ -174,9 +174,12 @@ function normalizeRule(rule: Rule) {
     rule.id ??= crypto.randomUUID();
 }
 
+type DropIndicator = { index: number; position: "before" | "after"; };
+
 function TextReplace({ title, description, rulesArray, isRegex = false }: TextReplaceProps) {
     const [searchQuery, setSearchQuery] = useState("");
     const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
+    const [dropIndicator, setDropIndicator] = useState<DropIndicator | null>(null);
 
     function onClickRemove(index: number) {
         rulesArray.splice(index, 1);
@@ -199,12 +202,35 @@ function TextReplace({ title, description, rulesArray, isRegex = false }: TextRe
         return acc;
     }, []);
 
-    const handleDrop = (index: number) => (e: React.DragEvent) => {
+    const handleDragOver = (index: number) => (e: React.DragEvent) => {
         e.preventDefault();
-        if (draggedIndex === null || draggedIndex === index || searchQuery) return;
-        const draggedRule = rulesArray.splice(draggedIndex, 1)[0];
-        rulesArray.splice(index, 0, draggedRule);
+        if (draggedIndex === null || searchQuery) return;
+
+        const rect = e.currentTarget.getBoundingClientRect();
+        const position = e.clientY - rect.top < rect.height / 2 ? "before" : "after";
+        setDropIndicator(prev =>
+            prev?.index === index && prev.position === position ? prev : { index, position }
+        );
+    };
+
+    const handleDrop = (e: React.DragEvent) => {
+        e.preventDefault();
+        if (draggedIndex === null || !dropIndicator || searchQuery) {
+            setDraggedIndex(null);
+            setDropIndicator(null);
+            return;
+        }
+
+        let targetIndex = dropIndicator.index + (dropIndicator.position === "after" ? 1 : 0);
+        if (targetIndex > draggedIndex) targetIndex -= 1;
+
+        if (targetIndex !== draggedIndex) {
+            const draggedRule = rulesArray.splice(draggedIndex, 1)[0];
+            rulesArray.splice(targetIndex, 0, draggedRule);
+        }
+
         setDraggedIndex(null);
+        setDropIndicator(null);
     };
 
     return (
@@ -212,11 +238,13 @@ function TextReplace({ title, description, rulesArray, isRegex = false }: TextRe
             <div>
                 <HeadingSecondary>{title}</HeadingSecondary>
                 <Paragraph>{description}</Paragraph>
-                <TextInput
-                    placeholder="Search for a rule..."
-                    value={searchQuery}
-                    onChange={setSearchQuery}
-                />
+                <div className={cl("search-input")}>
+                    <TextInput
+                        placeholder="Search for a rule..."
+                        value={searchQuery}
+                        onChange={setSearchQuery}
+                    />
+                </div>
             </div>
             <Flex flexDirection="column" style={{ gap: "0.5em", paddingBottom: "1.25em" }}>
                 {!filteredRules.length && searchQuery && (
@@ -225,10 +253,16 @@ function TextReplace({ title, description, rulesArray, isRegex = false }: TextRe
                 {filteredRules.map(({ rule, index }) =>
                     <div
                         key={rule.id}
-                        onDragOver={e => e.preventDefault()}
-                        onDrop={handleDrop(index)}
-                        style={{ opacity: draggedIndex === index ? 0.5 : 1 }}
+                        onDragOver={handleDragOver(index)}
+                        onDrop={handleDrop}
+                        style={{ opacity: draggedIndex === index ? 0.5 : 1, position: "relative" }}
                     >
+                        {dropIndicator?.index === index && dropIndicator.position === "before" && (
+                            <div className={cl("drop-indicator")} style={{ top: 0 }} />
+                        )}
+                        {dropIndicator?.index === index && dropIndicator.position === "after" && (
+                            <div className={cl("drop-indicator")} style={{ bottom: 0 }} />
+                        )}
                         <ExpandableSection
                             renderContent={() => (
                                 <>
@@ -275,7 +309,10 @@ function TextReplace({ title, description, rulesArray, isRegex = false }: TextRe
                                     setDraggedIndex(index);
                                     e.dataTransfer.setData("text/plain", index.toString());
                                 }}
-                                onDragEnd={() => setDraggedIndex(null)}
+                                onDragEnd={() => {
+                                    setDraggedIndex(null);
+                                    setDropIndicator(null);
+                                }}
                                 style={{ cursor: searchQuery ? "default" : "grab", flex: 1 }}
                             >
                                 <Paragraph weight="medium" size="md">
