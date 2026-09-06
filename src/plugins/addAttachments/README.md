@@ -1,4 +1,7 @@
 # AddAttachments
 
-Add attachments to an existing message of yours.
-![](https://github.com/user-attachments/assets/6a98da9d-40a5-4cdb-8dfd-146ec5c2dcb6)
+Allows you to add new attachments while editing messages.
+
+Start editing a message and then you can either press the "Add Attachment" button or paste files from your clipboard!
+
+![](https://github.com/user-attachments/assets/3a3a5cda-ab36-4dee-bd28-2d2a08f8f996)
