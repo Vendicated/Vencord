@@ -16,7 +16,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { definePluginSettings } from "@api/Settings";
 import { BaseText } from "@components/BaseText";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { ErrorCard } from "@components/ErrorCard";
@@ -24,7 +23,7 @@ import { Flex } from "@components/Flex";
 import { Paragraph } from "@components/Paragraph";
 import { Devs, IS_MAC } from "@utils/constants";
 import { Margins } from "@utils/margins";
-import definePlugin, { OptionType } from "@utils/types";
+import definePlugin from "@utils/types";
 import { findByPropsLazy } from "@webpack";
 import { React } from "@webpack/common";
 
@@ -32,15 +31,6 @@ import { React } from "@webpack/common";
 const KbdStyles = findByPropsLazy("key", "combo");
 const modKey = IS_MAC ? "cmd" : "ctrl";
 const altKey = IS_MAC ? "opt" : "alt";
-
-const settings = definePluginSettings({
-    toolbarDevMenu: {
-        type: OptionType.BOOLEAN,
-        description: "Change the Help (?) toolbar button (top right in chat) to Discord's developer menu",
-        default: false,
-        restartNeeded: true
-    }
-});
 
 export default definePlugin({
     name: "Experiments",
@@ -53,8 +43,6 @@ export default definePlugin({
         Devs.BanTheNons,
         Devs.Nuckyz,
     ],
-
-    settings,
 
     patches: [
         {
@@ -85,14 +73,6 @@ export default definePlugin({
                     replace: ',flexDirection:"row",alignItems:"center"'
                 }
             ]
-        },
-        // Disable opening the bug report menu when clicking the top right toolbar dev button
-        {
-            find: 'navId:"staff-help-popout"',
-            replacement: {
-                match: /(isShown.+?)onClick:\i/,
-                replace: (_, rest) => `${rest}onClick:()=>{}`
-            }
         },
         // Enable experiment embed on sent experiment links
         {
