@@ -19,6 +19,7 @@
 import { definePluginSettings } from "@api/Settings";
 import { Devs, IS_MAC } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
+import { SettingsRouter } from "@webpack/common";
 
 
 const settings = definePluginSettings({
@@ -63,6 +64,26 @@ export default definePlugin({
             predicate: () => settings.store.showNavigationButtons,
         }
     ],
+
+    start() {
+        document.addEventListener("keydown", this.onKey);
+    },
+
+    stop() {
+        document.removeEventListener("keydown", this.onKey);
+    },
+
+    onKey(e: KeyboardEvent) {
+        const hasCtrl = e.ctrlKey || (e.metaKey && IS_MAC);
+
+        // Cmd+, is a native shortcut on macos (Vesktop/src/main/mainWindow.ts)
+        const hasNativeShortcut = IS_VESKTOP && IS_MAC;
+
+        if (hasCtrl && e.key === "," && !hasNativeShortcut) {
+            e.preventDefault();
+            SettingsRouter.openUserSettings();
+        }
+    },
 
     getBlockedKeybinds() {
         // Zoom shortcuts, allowing these would cause unpredictable zooming behavior on macos

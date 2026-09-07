@@ -7,7 +7,6 @@
             html,
             body,
             #container {
-                position: absolute;
                 left: 0;
                 top: 0;
                 width: 100%;
@@ -15,11 +14,35 @@
                 margin: 0;
                 padding: 0;
                 overflow: hidden;
+                background-color: #1e1e1e;
+            }
+
+            body {
+                display: flex;
+                flex-direction: column;
+            }
+
+            #title-bar {
+                display: none;
+            }
+
+            @media all and (display-mode: window-controls-overlay) {
+                #title-bar {
+                    display: flex;
+                    align-items: center;
+                    padding-left: 14px;
+                    font-family: Consolas, Courier New, monospace;
+                    line-height: 1;
+                    height: env(titlebar-area-height, 0px);
+                    app-region: drag;
+                    color: white;
+                }
             }
         </style>
     </head>
 
     <body>
+        <div id="title-bar">Vencord QuickCSS Editor</div>
         <div id="container"></div>
 
         <script>

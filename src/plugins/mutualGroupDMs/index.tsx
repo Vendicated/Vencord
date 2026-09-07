@@ -23,14 +23,14 @@ import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import { isNonNullish } from "@utils/guards";
 import { Logger } from "@utils/Logger";
+import { classes } from "@utils/misc";
 import definePlugin from "@utils/types";
 import { Channel, User } from "@vencord/discord-types";
 import { findByPropsLazy, findCssClassesLazy } from "@webpack";
-import { Avatar, ChannelStore, Clickable, IconUtils, RelationshipStore, ScrollerThin, Text, useMemo, UserStore } from "@webpack/common";
+import { Avatar, ChannelStore, Clickable, IconUtils, RelationshipStore, ScrollerThin, useMemo, UsernameUtils, UserStore } from "@webpack/common";
 import { ComponentType, JSX } from "react";
 
 const SelectedChannelActionCreators = findByPropsLazy("selectPrivateChannel");
-const UserUtils = findByPropsLazy("getGlobalName");
 
 const ProfileListClasses = findCssClassesLazy("empty", "textContainer", "connectionIcon");
 const TabBarClasses = findCssClassesLazy("tabPanelScroller", "tabBarPanel");
@@ -38,12 +38,14 @@ const MutualsListClasses = findCssClassesLazy("row", "icon", "name", "details");
 
 let ExpandableList: ComponentType<any> = () => null;
 
+const logger = new Logger("MutualGroupDMs");
+
 function getGroupDMName(channel: Channel) {
     return channel.name ||
         channel.recipients
             .map(UserStore.getUser)
             .filter(isNonNullish)
-            .map(c => RelationshipStore.getNickname(c.id) || UserUtils.getName(c))
+            .map(c => RelationshipStore.getNickname(c.id) || UsernameUtils.getName(c))
             .join(", ");
 }
 
@@ -58,13 +60,13 @@ function getMutualGDMCountText(user: User) {
     return `${count === 0 ? "No" : count} Mutual Group${count !== 1 ? "s" : ""}`;
 }
 
-function renderClickableGDMs(mutualDms: Channel[], onClose: () => void) {
+function renderClickableGDMs(mutualDms: Channel[], onClose?: () => void) {
     return mutualDms.map(c => (
         <Clickable
             key={c.id}
             className={MutualsListClasses.row}
             onClick={() => {
-                onClose();
+                onClose?.();
                 SelectedChannelActionCreators.selectPrivateChannel(c.id);
             }}
         >
@@ -76,13 +78,11 @@ function renderClickableGDMs(mutualDms: Channel[], onClose: () => void) {
             </Avatar>
             <div className={MutualsListClasses.details}>
                 <div className={MutualsListClasses.name}>{getGroupDMName(c)}</div>
-                <Text variant="text-xs/medium">{c.recipients.length + 1} Members</Text>
+                <BaseText size="xs" weight="medium">{c.recipients.length + 1} Members</BaseText>
             </div>
         </Clickable>
     ));
 }
-
-const IS_PATCHED = Symbol("MutualGroupDMs.Patched");
 
 export default definePlugin({
     name: "MutualGroupDMs",
@@ -91,17 +91,17 @@ export default definePlugin({
     authors: [Devs.amia],
 
     patches: [
-        // User Profile Modal
+        // Legacy User Profile Modal
         {
             find: ".BOT_DATA_ACCESS?(",
             replacement: [
                 {
-                    match: /\i\.useEffect.{0,100}(\i)\[0\]\.section/,
-                    replace: "$self.pushSection($1,arguments[0].user);$&"
+                    match: /(?<=initialSection:\i=\i\.\i\.USER_INFO,onClose:\i\}=)(\i)/,
+                    replace: "$self.getProps($1)"
                 },
                 {
                     match: /\(0,\i\.jsx\)\(\i,\{items:\i,section:(\i)/,
-                    replace: "$1==='MUTUAL_GDMS'?$self.renderMutualGDMs(arguments[0]):$&"
+                    replace: "$1==='MUTUAL_GDMS'?$self.renderMutualGDMs({...arguments[0],isLegacy:true}):$&"
                 },
                 // Discord adds spacing between each item which pushes our tab off screen.
                 // set the gap to zero to ensure ours stays on screen
@@ -116,12 +116,12 @@ export default definePlugin({
             find: ".WIDGETS?",
             replacement: [
                 {
-                    match: /items:(\i),initialSection:\i,onClose:\i\}=\i.{0,200}?(?=return.{0,30}?\(0,\i\.jsxs?\)\()/,
-                    replace: "$&$self.pushSection($1,arguments[0].user);"
+                    match: /(?<=items:\i,initialSection:\i,onClose:\i\}=)(\i)/,
+                    replace: "$self.getProps($1)"
                 },
                 {
                     match: /children:(?=.{0,100}?component:.+?section:(\i))/,
-                    replace: "$&$1==='MUTUAL_GDMS'?$self.renderMutualGDMs(arguments[0]):"
+                    replace: "$&$1.section==='MUTUAL_GDMS'?$self.renderMutualGDMs(arguments[0]):"
                 },
                 // Make the gap between each item smaller so our tab can fit.
                 {
@@ -130,6 +130,7 @@ export default definePlugin({
                 },
             ]
         },
+        // Legacy DM Sidebar
         {
             find: 'section:"MUTUAL_FRIENDS"',
             replacement: [
@@ -158,33 +159,33 @@ export default definePlugin({
         try {
             return getMutualGroupDms(userId);
         } catch (e) {
-            new Logger("MutualGroupDMs").error("Failed to get mutual group dms:", e);
+            logger.error("Failed to get mutual group dms:", e);
         }
 
         return [];
     },
 
-    pushSection(sections: any[], user: User) {
+    getProps(props: { user: User, items: any[]; }) {
         try {
-            if (isBotOrSelf(user) || sections[IS_PATCHED]) return;
+            if (isBotOrSelf(props.user)) return props;
 
-            sections[IS_PATCHED] = true;
-            sections.push({
-                text: getMutualGDMCountText(user),
-                section: "MUTUAL_GDMS",
-            });
-        } catch (e) {
-            new Logger("MutualGroupDMs").error("Failed to push mutual group dms section:", e);
+            const section = { text: getMutualGDMCountText(props.user), section: "MUTUAL_GDMS" };
+            return { ...props, items: [...props.items, section] };
         }
+        catch (e) {
+            logger.error("Failed to append mutual group dms section:", e);
+        }
+
+        return props;
     },
 
-    renderMutualGDMs: ErrorBoundary.wrap(({ user, onClose }: { user: User, onClose: () => void; }) => {
+    renderMutualGDMs: ErrorBoundary.wrap(({ user, onClose, isLegacy }: { user: User, onClose: () => void; isLegacy: boolean; }) => {
         const mutualGDms = useMemo(() => getMutualGroupDms(user.id), [user.id]);
         const entries = renderClickableGDMs(mutualGDms, onClose);
 
         return (
             <ScrollerThin
-                className={TabBarClasses.tabPanelScroller}
+                className={classes(TabBarClasses.tabPanelScroller, !isLegacy && "vc-mutual-gdms-scroller")}
                 fade={true}
                 onClose={onClose}
             >
@@ -210,10 +211,10 @@ export default definePlugin({
             <>
                 {hasDivider && Divider}
                 <ExpandableList
-                    listClassName={listStyle}
+                    listClassName={classes(listStyle, "vc-mutual-gdms-dm-page-list")}
                     header={"Mutual Groups"}
                     isLoading={false}
-                    items={renderClickableGDMs(mutualGDms, () => { })}
+                    items={renderClickableGDMs(mutualGDms)}
                 />
             </>
         );
