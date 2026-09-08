@@ -50,7 +50,7 @@ export interface Menu {
     }>;
     MenuCheckboxItem: RC<{
         id: string;
-        label: ReactNode;
+        label: ReactNode | ((props: { isFocused: boolean; disabled: boolean; }) => ReactNode);
         checked: boolean;
         action?(e: MouseEvent): void;
         disabled?: boolean;

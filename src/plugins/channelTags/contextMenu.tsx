@@ -5,10 +5,10 @@
  */
 
 import { findGroupChildrenByChildId, NavContextMenuPatchCallback } from "@api/ContextMenu";
-import { CogWheel, PlusIcon, TagsIcon } from "@components/index";
+import { BrowseChannelsIcon, CogWheel, PencilIcon, PlusIcon, TagsIcon } from "@components/index";
 import { Channel, User } from "@vencord/discord-types";
 import { ChannelType } from "@vencord/discord-types/enums";
-import { ContextMenuApi, Menu } from "@webpack/common";
+import { ContextMenuApi, Menu, useEffect, useState } from "@webpack/common";
 
 import { addTagToChannel, removeTagFromChannel } from "./actions";
 import { getChannelIdForDMsWithUser } from "./dmChannels";
@@ -22,9 +22,45 @@ import { openTagsModal } from "./TagsModal";
 import { openTagUsageModal } from "./TagUsageModal";
 import { ChannelId, ChannelTag, TagId, UserId } from "./types";
 
+function ChannelTagMenuLabel({ id, isFocused, name, setHoveredTagId }: {
+    id: TagId;
+    isFocused: boolean;
+    name: string;
+    setHoveredTagId: React.Dispatch<React.SetStateAction<TagId | null>>;
+}) {
+    useEffect(() => {
+        setHoveredTagId(current => isFocused ? id : current === id ? null : current);
+        return () => setHoveredTagId(current => current === id ? null : current);
+    }, [id, isFocused, setHoveredTagId]);
+
+    return name;
+}
+
 export function makeChannelTagsMenuChildren(channelId: ChannelId, data: ChannelTagsData) {
+    const [modifier, setModifier] = useState<"shift" | "ctrl" | null>(null);
+    const [hoveredTagId, setHoveredTagId] = useState<TagId | null>(null);
     const tags = presentEntries(data.tags)
         .sort(([, a], [, b]) => compareTags(a, b));
+    const ModifierIcon = modifier === "shift"
+        ? PencilIcon
+        : modifier === "ctrl"
+            ? BrowseChannelsIcon
+            : null;
+
+    useEffect(() => {
+        const updateModifier = (event: KeyboardEvent) =>
+            setModifier(event.shiftKey ? "shift" : event.ctrlKey ? "ctrl" : null);
+        const clearModifier = () => setModifier(null);
+
+        document.addEventListener("keydown", updateModifier);
+        document.addEventListener("keyup", updateModifier);
+        window.addEventListener("blur", clearModifier);
+        return () => {
+            document.removeEventListener("keydown", updateModifier);
+            document.removeEventListener("keyup", updateModifier);
+            window.removeEventListener("blur", clearModifier);
+        };
+    }, []);
     const assignedTagIds = new Set(data.channelTags[channelId] ?? []);
     const hiddenFor = getChannelHiddenFor(channelId, data.channels);
 
@@ -67,13 +103,24 @@ export function makeChannelTagsMenuChildren(channelId: ChannelId, data: ChannelT
         ...[...groupedTags].sort(([a], [b]) => compareGroups(a, b, data.groups)).map(([group, groupTags]) => {
             const items = groupTags.map(([id, tag]) => {
                 const isAssigned = assignedTagIds.has(id);
+
                 return (
                     <Menu.MenuCheckboxItem
                         id={`vc-channel-tags-toggle-${id}`}
                         key={`vc-channel-tags-toggle-${id}`}
-                        label={tag.name}
+                        label={({ isFocused }) => (
+                            <ChannelTagMenuLabel
+                                id={id}
+                                isFocused={isFocused}
+                                name={tag.name}
+                                setHoveredTagId={setHoveredTagId}
+                            />
+                        )}
                         leadingAccessory={{
-                            type: "icon", icon: () => <TagShapeIcon color={tag.color} tagShape={tag.shape} />
+                            type: "icon",
+                            icon: hoveredTagId === id && ModifierIcon
+                                ? ModifierIcon
+                                : () => <TagShapeIcon color={tag.color} tagShape={tag.shape} />
                         }}
                         checked={isAssigned}
                         action={event => event.shiftKey
