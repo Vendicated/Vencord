@@ -6,21 +6,22 @@
 
 import { isPluginEnabled } from "@api/PluginManager";
 import { settings } from "@plugins/pinDms";
-import { categoryLen } from "@plugins/pinDms/data";
 import { UserStore } from "@webpack/common";
 
-export function getPinnedIds(): Set<string> {
+function getCategories() {
     const userId = UserStore.getCurrentUser()?.id;
-    if (!isPluginEnabled("PinDMs") || !userId) return new Set();
-    return new Set(settings.store.userBasedCategoryList[userId]?.flatMap(category => category.channels));
+    if (!isPluginEnabled("PinDMs") || !userId) return [];
+    return settings.store.userBasedCategoryList[userId] ?? [];
 }
 
+export const getPinnedIds = (): Set<string> => new Set(getCategories().flatMap(category => category.channels));
+
 export const isPinned = (id: string) => getPinnedIds().has(id);
-export const getDMSection = () => 1 + (isPluginEnabled("PinDMs") ? categoryLen() : 0);
+export const getDMSection = () => 1 + getCategories().length;
 export const isDMSectionCollapsed = () => isPluginEnabled("PinDMs") && settings.store.canCollapseDmSection && settings.store.dmSectionCollapsed;
 
-export function getPinDmsVersion() {
+export function getPinDmsState() {
     if (!isPluginEnabled("PinDMs")) return "";
     const { userBasedCategoryList, pinOrder, canCollapseDmSection, dmSectionCollapsed } = settings.store;
-    return JSON.stringify([userBasedCategoryList[UserStore.getCurrentUser()?.id ?? ""], pinOrder, canCollapseDmSection, dmSectionCollapsed]);
+    return [userBasedCategoryList[UserStore.getCurrentUser()?.id ?? ""], pinOrder, canCollapseDmSection, dmSectionCollapsed];
 }

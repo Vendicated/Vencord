@@ -10,8 +10,9 @@ import { classes } from "@utils/misc";
 import { RenderModalProps } from "@vencord/discord-types";
 import { ChannelStore, ContextMenuApi, FluxDispatcher, IconUtils, Menu, Modal, openModal, React, ReadStateStore, SelectedChannelStore, TextInput, UserStore, useState, useStateFromStores } from "@webpack/common";
 
-import { Folder, Placement, Row } from "./model";
-import { accountId, closeAll, dissolveFolder, drop, editFolder, PrivateChannelSortStore } from "./state";
+import { isFolderOpening, markFolderOpening } from "./animation";
+import { DEFAULT_FOLDER_COLOR, Folder, Placement, Row } from "./model";
+import { accountId, closeAll, dissolveFolder, drop, editFolder, getNativePinnedIds, PrivateChannelSortStore } from "./state";
 
 const DRAG_TYPE = "application/x-vencord-dm-folder";
 let dragging: { id: string; userId: string | undefined; folder: boolean; } | undefined;
@@ -20,7 +21,7 @@ export function clearDrag() {
     dragging = undefined;
 }
 
-const DEFAULT_COLOR = 0x5865f2;
+const DEFAULT_COLOR = parseInt(DEFAULT_FOLDER_COLOR.slice(1), 16);
 const SWATCHES = [
     1752220, 3066993, 3447003, 10181046, 15277667, 15844367, 15105570, 15158332, 9807270, 6323595,
     1146986, 2067276, 2123412, 7419530, 11342935, 12745742, 11027200, 10038562, 9936031, 5533306
@@ -39,7 +40,7 @@ function FolderColorPicker({ color, onChange }: { color: number; onChange(color:
                 <button
                     type="button"
                     className="vc-dmf-color-large"
-                    style={{ backgroundColor: "#5865f2" }}
+                    style={{ backgroundColor: DEFAULT_FOLDER_COLOR }}
                     aria-label="Default color"
                     aria-pressed={color === DEFAULT_COLOR}
                     onClick={() => onChange(DEFAULT_COLOR)}
@@ -139,7 +140,9 @@ function avatar(id: string) {
 }
 
 export function FolderRow({ folder }: { folder: Folder; }) {
-    const active = new Set(PrivateChannelSortStore.getPrivateChannelIds());
+    const userId = useStateFromStores([UserStore], accountId);
+    const activeIds = useStateFromStores([PrivateChannelSortStore], () => PrivateChannelSortStore.getPrivateChannelIds());
+    const active = new Set(activeIds);
     const ids = folder.channels.filter(id => active.has(id));
     const unread = useStateFromStores([ReadStateStore], () => ids.some(id => ReadStateStore.hasUnread(id)));
     const mentions = useStateFromStores([ReadStateStore], () => ids.reduce((sum, id) => sum + ReadStateStore.getMentionCount(id), 0));
@@ -152,11 +155,16 @@ export function FolderRow({ folder }: { folder: Folder; }) {
             aria-expanded={folder.expanded}
             aria-label={`${folder.name}, ${ids.length} chats${unread ? ", unread" : ""}${mentions ? `, ${mentions} mentions` : ""}`}
             title={folder.name}
-            onClick={() => editFolder(folder.id, { expanded: !folder.expanded })}
+            onClick={() => {
+                if (!folder.expanded) markFolderOpening(folder.id);
+                editFolder(folder.id, { expanded: !folder.expanded }, userId);
+            }}
             onKeyDown={e => {
                 if (e.key === "ArrowRight" || e.key === "ArrowLeft") {
                     e.preventDefault();
-                    editFolder(folder.id, { expanded: e.key === "ArrowRight" });
+                    const expanded = e.key === "ArrowRight";
+                    if (expanded && !folder.expanded) markFolderOpening(folder.id);
+                    editFolder(folder.id, { expanded }, userId);
                 }
             }}
             onContextMenu={e => folderMenu(e, folder)}
@@ -194,21 +202,21 @@ export function DragRow({ row, height, children }: React.PropsWithChildren<{ row
         if (dragging.folder && placement === "inside") return ratio < 0.5 ? "before" : "after";
         return placement;
     };
+    const nativePinned = getNativePinnedIds().includes(row.id);
     return (
         <div
-            className={classes("vc-dmf-row", row.parent && "vc-dmf-child", row.folder?.expanded && "vc-dmf-expanded")}
+            className={classes("vc-dmf-row", row.parent && "vc-dmf-child", isFolderOpening(row.parent?.id) && "vc-dmf-opening", row.folder?.expanded && "vc-dmf-expanded")}
             style={{ height, "--vc-dmf-color": (row.parent ?? row.folder)?.color } as React.CSSProperties}
             data-dmf-drop={over ?? undefined}
-            draggable
+            draggable={!nativePinned}
             onDragStartCapture={e => {
-                if ((e.target as HTMLElement).closest("button[aria-label*=Close],input")) {
+                if ((e.target as HTMLElement).closest("[class*=closeButton],input")) {
                     e.preventDefault();
                     return;
                 }
                 dragging = { id: row.id, userId: accountId(), folder: !!row.folder };
                 e.dataTransfer.effectAllowed = "move";
                 e.dataTransfer.setData(DRAG_TYPE, row.id);
-                e.dataTransfer.setData("text/plain", row.folder?.name ?? row.id);
                 e.dataTransfer.setDragImage(e.currentTarget, 24, height / 2);
                 // Override native link/image dragging inside Discord's channel row.
                 e.stopPropagation();

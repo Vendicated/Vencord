@@ -83,8 +83,8 @@ export default definePlugin({
                     replace: "privateChannelIds:$1.filter(c=>!$self.isPinned(c))"
                 },
                 {
-                    // Insert the pinned channels to sections
-                    match: /(?<=,)sections:\[\i,Math\.max\(\i\.length,1\)\]/,
+                    // Keep the native anchor, accepting only FlexibleDMs' known render wrapper.
+                    match: /(?<=renderRow:(?:this\.renderRow|Vencord\.Plugins\.plugins(?:\.FlexibleDMs|\["FlexibleDMs"\])\.cachedRenderRow\(this\)),)sections:\[\i,Math\.max\(\i\.length,1\)\]/,
                     replace: "...$self.makeProps(this,{$&})"
                 },
 
@@ -141,8 +141,8 @@ export default definePlugin({
         {
             find: ".APPLICATION_STORE&&",
             replacement: {
-                // channelIds = __OVERLAY__ ? stuff : [...getStaticPaths(),...channelIds)]
-                match: /(?<=\[\.\.\.\i\(\),\.\.\.)\i/,
+                // Keep the overlay branch anchor, with an optional FlexibleDMs wrapper.
+                match: /(?<=\i=__OVERLAY__\?\i:(?:Vencord\.Plugins\.plugins(?:\.FlexibleDMs|\["FlexibleDMs"\])\.navigationIds\()?\[\.\.\.\i\(\),\.\.\.)\i/,
                 // ....concat(pins).concat(toArray(channelIds).filter(c => !isPinned(c)))
                 replace: "$self.getAllUncollapsedChannels().concat($&.filter(c=>!$self.isPinned(c)))"
             }
@@ -152,7 +152,8 @@ export default definePlugin({
         {
             find: "=()=>!1,ensureChatIsVisible:",
             replacement: {
-                match: /\i\.\i\.getPrivateChannelIds\(\)/,
+                // Match the DM branch even when FlexibleDMs wraps its channel IDs.
+                match: /(?<=\i===\i\.ME\?(?:Vencord\.Plugins\.plugins(?:\.FlexibleDMs|\["FlexibleDMs"\])\.navigationIds\()?)\i\.\i\.getPrivateChannelIds\(\)/,
                 replace: "$self.getAllUncollapsedChannels().concat($&.filter(c=>!$self.isPinned(c)))"
             }
         },

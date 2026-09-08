@@ -126,10 +126,13 @@
 }
 
 .vc-dmf-child {
-    animation: vc-dmf-reveal 150ms ease-out;
     margin-left: 16px;
     border-left: 2px solid color-mix(in srgb, var(--vc-dmf-color) 50%, transparent);
     background: color-mix(in srgb, var(--vc-dmf-color) 6%, transparent);
+}
+
+.vc-dmf-child.vc-dmf-opening {
+    animation: vc-dmf-reveal 150ms ease-out;
 }
 
 .vc-dmf-row[data-dmf-drop="inside"] {
@@ -182,7 +185,7 @@
 
 
 @media (prefers-reduced-motion: reduce) {
-    .vc-dmf-child {
+    .vc-dmf-child.vc-dmf-opening {
         animation: none;
     }
 

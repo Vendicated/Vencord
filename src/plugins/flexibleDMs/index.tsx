@@ -14,11 +14,12 @@ import definePlugin from "@utils/types";
 import { Channel } from "@vencord/discord-types";
 import { Menu, React, ReadStateStore, SelectedChannelStore, useEffect, useMemo, useRef, UserStore, useStateFromStores } from "@webpack/common";
 
+import { markFolderOpening } from "./animation";
 import { clearDrag, DragRow, FolderRow } from "./components";
 import { getRows, Row, withoutPinnedChannels } from "./model";
-import { getDMSection, getPinDmsVersion, getPinnedIds, isDMSectionCollapsed, isPinned } from "./pinDms";
+import { getDMSection, getPinDmsState, getPinnedIds, isDMSectionCollapsed, isPinned } from "./pinDms";
 import { settings } from "./settings";
-import { currentRows, drop, editFolder, getLayout, getMessages, removeFromFolder, start, stop, syncPinnedChats } from "./state";
+import { drop, editFolder, getLayout, getMessages, getNativePinnedIds, PrivateChannelSortStore, removeFromFolder, start, stop, syncPinnedChats } from "./state";
 
 migratePluginSettings("FlexibleDMs", "DMFolders");
 
@@ -30,8 +31,12 @@ interface DMList {
         vcDmfVersion?: string;
         vcDmfSection?: number;
     };
+    renderRow(args: { section: number; row: number; }): React.ReactNode;
+    getRowHeight(section: number, row: number): number;
     renderDM(section: number, row: number): React.ReactNode;
 }
+
+const renderers = new WeakMap<DMList, { version: string | undefined; density: string | undefined; render: DMList["renderRow"]; }>();
 
 const contextMenu: NavContextMenuPatchCallback = (children, { channel }: { channel?: Channel; }) => {
     if (!channel || ![1, 3].includes(channel.type) || isPinned(channel.id)) return;
@@ -80,7 +85,7 @@ export default definePlugin({
                 {
                     // The scroller caches rows separately from the outer DM list.
                     match: /renderRow:this\.renderRow,/,
-                    replace: "renderRow:(...args)=>this.renderRow(...args),vcDmfVersion:this.props.vcDmfVersion,"
+                    replace: "vcDmfVersion:this.props.vcDmfVersion,renderRow:$self.cachedRenderRow(this),"
                 },
                 {
                     match: /(reportAnalytics=.{0,300}?let\{privateChannelIds:)(\i)(,channels:\i\}=this.props;)/,
@@ -96,14 +101,15 @@ export default definePlugin({
             // Keep Alt+Up/Down consistent with manually ordered chat rows.
             find: ".APPLICATION_STORE&&",
             replacement: {
-                match: /\[\.\.\.\i\(\),\.\.\..+?\](?=,)/,
+                // PinDMs may expand the second spread; its plugin lookup brackets are not followed by a comma.
+                match: /(?<=\i=__OVERLAY__\?\i:)\[\.\.\.\i\(\),\.\.\..+?\](?=,)/,
                 replace: "$self.navigationIds($&)"
             }
         },
         {
             find: "=()=>!1,ensureChatIsVisible:",
             replacement: {
-                match: /\i\.\i\.getPrivateChannelIds\(\)/,
+                match: /(?<=\i===\i\.ME\?(?:Vencord\.Plugins\.plugins(?:\.PinDMs|\["PinDMs"\])\.getAllUncollapsedChannels\(\)\.concat\()?)\i\.\i\.getPrivateChannelIds\(\)/,
                 replace: "$self.navigationIds($&)"
             }
         }
@@ -135,9 +141,13 @@ export default definePlugin({
         const previousNavigation = useRef<string | undefined>(undefined);
         const reveal = previousNavigation.current !== navigation;
         const pinned = getPinnedIds();
-        const pinsKey = JSON.stringify([...pinned]);
-        const layout = withoutPinnedChannels(accounts[userId ?? ""] ?? getLayout(), pinned);
+        const nativePinned = getNativePinnedIds().filter(id => ids.includes(id) && !pinned.has(id));
+        const allPinned = new Set([...pinned, ...nativePinned]);
+        const pinsKey = JSON.stringify([...allPinned]);
+        const layout = withoutPinnedChannels(accounts[userId ?? ""] ?? getLayout(), allPinned);
         useEffect(syncPinnedChats, [userId, pinsKey]);
+        const selectedParent = layout.folders.find(f => f.channels.includes(selectedId));
+        if (reveal && selectedParent && !selectedParent.expanded) markFolderOpening(selectedParent.id);
         // Reveal in the same render as navigation before native scrolling runs.
         const visibleLayout = reveal ? {
             ...layout,
@@ -146,14 +156,26 @@ export default definePlugin({
         useEffect(() => {
             previousNavigation.current = navigation;
             const parent = getLayout().folders.find(f => f.channels.includes(selectedId));
-            if (parent && !parent.expanded) editFolder(parent.id, { expanded: true });
+            if (parent && !parent.expanded) {
+                editFolder(parent.id, { expanded: true });
+            }
         }, [navigation]);
         // Include metadata, not just IDs: rename and color edits must invalidate cached rows.
-        const version = JSON.stringify([visibleLayout, keepFoldersOnTop, userId, messagesKey, ids, getPinDmsVersion()]);
+        const version = JSON.stringify([visibleLayout, keepFoldersOnTop, userId, selectedId, messagesKey, ids, getPinDmsState()]);
         return useMemo(() => {
-            const rows = getRows(visibleLayout, ids.filter(id => !pinned.has(id)), getMessages(ids), keepFoldersOnTop);
-            return { privateChannelIds: rows.map(r => r.id), vcDmfRows: rows, vcDmfVersion: version, vcDmfSection: getDMSection() };
+            const rows = getRows(visibleLayout, ids.filter(id => !allPinned.has(id)), getMessages(ids), keepFoldersOnTop);
+            const allRows = [...nativePinned.map(id => ({ id })), ...rows];
+            return { privateChannelIds: allRows.map(r => r.id), vcDmfRows: allRows, vcDmfVersion: version, vcDmfSection: getDMSection() };
         }, [version]);
+    },
+
+    cachedRenderRow(instance: DMList) {
+        let cached = renderers.get(instance);
+        if (!cached || cached.version !== instance.props.vcDmfVersion || cached.density !== instance.props.density) {
+            cached = { version: instance.props.vcDmfVersion, density: instance.props.density, render: args => instance.renderRow(args) };
+            renderers.set(instance, cached);
+        }
+        return cached.render;
     },
 
     renderRow(instance: DMList, { section, row }: { section: number; row: number; }) {
@@ -165,7 +187,7 @@ export default definePlugin({
         const data = instance.props.vcDmfRows?.[row];
         if (!data || data.id !== id) return;
         const { folder } = data;
-        const height = instance.props.density === "compact" ? 40 : instance.props.density === "default" || !instance.props.density ? 44 : 50;
+        const height = instance.getRowHeight(section, row);
         return (
             <ErrorBoundary key={id} message="FlexibleDMs could not render this row">
                 <DragRow row={data} height={height}>
@@ -182,10 +204,18 @@ export default definePlugin({
     },
 
     navigationIds(original: string[]) {
-        const allowed = new Set(original);
-        const pinned = getPinnedIds();
-        // Static destinations and PinDMs categories already have their own order.
-        const prefix = original.filter(id => pinned.has(id) || id.startsWith("/"));
-        return [...prefix, ...currentRows().filter(r => !r.folder && allowed.has(r.id)).map(r => r.id)];
+        // Reorder only known chat slots. Preserve static, guild and unknown IDs in place.
+        // Include collapsed children: navigating to one reveals its folder in useRows.
+        const layout = getLayout();
+        const pinned = new Set([...getPinnedIds(), ...getNativePinnedIds()]);
+        const rows = getRows({ ...layout, folders: layout.folders.map(f => ({ ...f, expanded: true })) },
+            PrivateChannelSortStore.getPrivateChannelIds().filter(id => !pinned.has(id)),
+            getMessages(original), settings.store.keepFoldersOnTop);
+        const counts = new Map<string, number>();
+        for (const id of original) counts.set(id, (counts.get(id) ?? 0) + 1);
+        const ordered = rows.filter(r => !r.folder && counts.has(r.id)).flatMap(r => Array<string>(counts.get(r.id)!).fill(r.id));
+        const known = new Set(ordered);
+        let index = 0;
+        return original.map(id => known.has(id) ? ordered[index++] : id);
     }
 });

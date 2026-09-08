@@ -25,6 +25,8 @@ export interface Row {
     parent?: Folder;
 }
 
+export const DEFAULT_FOLDER_COLOR = "#5865f2";
+
 export type Placement = "before" | "inside" | "after";
 export const emptyLayout = (): Layout => ({ folders: [], order: [], seen: {} });
 
@@ -61,6 +63,15 @@ export function getRows(layout: Layout, activeIds: string[], messages: Record<st
     });
 }
 
+/** Refresh visible order without discarding the slots of temporarily closed chats. */
+export function mergeVisibleOrder(saved: string[], visible: string[]): string[] {
+    const active = new Set(visible);
+    const old = new Set(saved);
+    const existing = visible.filter(id => old.has(id));
+    let index = 0;
+    return [...visible.filter(id => !old.has(id)), ...saved.map(id => active.has(id) ? existing[index++] : id)];
+}
+
 export function move(layout: Layout, rows: Row[], sourceId: string, targetId: string, placement: Placement, newId: string): Layout {
     const next: Layout = JSON.parse(JSON.stringify(layout));
     const source = rows.find(r => r.id === sourceId);
@@ -69,7 +80,7 @@ export function move(layout: Layout, rows: Row[], sourceId: string, targetId: st
     if (source.folder && (placement === "inside" || target.parent)) return next;
     if (target.folder && target.folder.id === source.parent?.id && placement === "inside") return next;
 
-    next.order = rows.filter(r => !r.parent).map(r => r.id);
+    next.order = mergeVisibleOrder(layout.order, rows.filter(r => !r.parent).map(r => r.id));
     const folder = (id: string) => next.folders.find(f => f.id === id)!;
     const detach = () => {
         for (const f of next.folders) f.channels = f.channels.filter(id => id !== sourceId);
@@ -84,7 +95,7 @@ export function move(layout: Layout, rows: Row[], sourceId: string, targetId: st
         const parent = target.folder ?? target.parent;
         if (parent) folder(parent.id).channels.push(sourceId);
         else {
-            const created: Folder = { id: newId, name: "New Folder", color: "#3ba55c", channels: [targetId, sourceId], expanded: false };
+            const created: Folder = { id: newId, name: "New Folder", color: DEFAULT_FOLDER_COLOR, channels: [targetId, sourceId], expanded: false };
             next.folders.push(created);
             next.order.splice(next.order.indexOf(targetId), 1, newId);
         }
@@ -92,7 +103,7 @@ export function move(layout: Layout, rows: Row[], sourceId: string, targetId: st
         const parent = folder(target.parent.id);
         if (parent.naturalOrder) {
             const visible = rows.filter(r => r.parent?.id === parent.id && r.id !== sourceId).map(r => r.id);
-            parent.channels = [...visible, ...parent.channels.filter(id => !visible.includes(id))];
+            parent.channels = mergeVisibleOrder(parent.channels, visible);
             parent.naturalOrder = false;
         }
         insert(parent.channels, targetId, sourceId, placement === "after");

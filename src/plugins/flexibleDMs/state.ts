@@ -8,17 +8,27 @@ import { SettingsStore } from "@api/Settings";
 import { findStoreLazy } from "@webpack";
 import { ReadStateStore, UserStore } from "@webpack/common";
 
-import { emptyLayout, Folder, getRows, Layout, move, Placement, resetLayoutOrder, withoutPinnedChannels } from "./model";
+import { emptyLayout, Folder, getRows, Layout, mergeVisibleOrder, move, Placement, resetLayoutOrder, withoutPinnedChannels } from "./model";
 import { getPinnedIds, isPinned } from "./pinDms";
 import { settings } from "./settings";
 
-export const PrivateChannelSortStore = findStoreLazy("PrivateChannelSortStore") as { getPrivateChannelIds(): string[]; };
+export const PrivateChannelSortStore = findStoreLazy("PrivateChannelSortStore") as {
+    getPrivateChannelIds(): string[];
+    getSortedChannels?(): Array<Array<{ channelId: string; }>>;
+    addChangeListener?(listener: () => void): void;
+    removeChangeListener?(listener: () => void): void;
+};
 export const accountId = () => UserStore.getCurrentUser()?.id;
 export const getLayout = (): Layout => settings.store.accounts[accountId() ?? ""] ?? emptyLayout();
 export const getMessages = (ids: string[]) => Object.fromEntries(ids.map(id => [id, ReadStateStore.lastMessageId(id) ?? "0"]));
+export const getNativePinnedIds = () => PrivateChannelSortStore.getSortedChannels?.()[0]?.map(channel => channel.channelId) ?? [];
+
+function allPinnedIds() {
+    return new Set([...getPinnedIds(), ...getNativePinnedIds()]);
+}
 
 export function currentRows() {
-    const pinned = getPinnedIds();
+    const pinned = allPinnedIds();
     const ids = PrivateChannelSortStore.getPrivateChannelIds().filter(id => !pinned.has(id));
     return getRows(getLayout(), ids, getMessages(ids), settings.store.keepFoldersOnTop);
 }
@@ -39,7 +49,7 @@ export function closeAll() {
 }
 
 export function drop(source: string, target: string, placement: Placement) {
-    if (isPinned(source) || isPinned(target)) return;
+    if (isPinned(source) || isPinned(target) || getNativePinnedIds().includes(source) || getNativePinnedIds().includes(target)) return;
     const rows = currentRows();
     if (!rows.some(r => r.id === target)) {
         const folder = getLayout().folders.find(f => f.id === target);
@@ -69,13 +79,14 @@ export function dissolveFolder(id: string) {
     const layout = getLayout();
     const folder = layout.folders.find(f => f.id === id);
     if (!folder) return;
-    const order = currentRows().filter(r => !r.parent).flatMap(r => r.id === id ? folder.channels : [r.id]);
+    const order = mergeVisibleOrder(layout.order, currentRows().filter(r => !r.parent).map(r => r.id))
+        .flatMap(rowId => rowId === id ? folder.channels : [rowId]);
     save({ ...layout, folders: layout.folders.filter(f => f.id !== id), order, seen: getMessages(PrivateChannelSortStore.getPrivateChannelIds()) });
 }
 
 export function syncPinnedChats() {
     const layout = getLayout();
-    const next = withoutPinnedChannels(layout, getPinnedIds());
+    const next = withoutPinnedChannels(layout, allPinnedIds());
     if (next !== layout) save(next);
 }
 
@@ -91,9 +102,11 @@ export function start() {
         )));
     }
     SettingsStore.addChangeListener("plugins.PinDMs.userBasedCategoryList", syncPinnedChats);
+    PrivateChannelSortStore.addChangeListener?.(syncPinnedChats);
     syncPinnedChats();
 }
 
 export function stop() {
     SettingsStore.removeChangeListener("plugins.PinDMs.userBasedCategoryList", syncPinnedChats);
+    PrivateChannelSortStore.removeChangeListener?.(syncPinnedChats);
 }
