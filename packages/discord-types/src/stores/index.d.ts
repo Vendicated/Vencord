@@ -33,6 +33,7 @@ export * from "./PermissionStore";
 export * from "./PopoutWindowStore";
 export * from "./PresenceStore";
 export * from "./ReadStateStore";
+export * from "./ReferencedMessageStore";
 export * from "./RelationshipStore";
 export * from "./RTCConnectionStore";
 export * from "./RunningGameStore";

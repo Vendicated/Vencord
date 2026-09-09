@@ -177,7 +177,7 @@ export default definePlugin({
         let users = Array.from(reactionMap, ([id]) => UserStore.getUser(id)).filter(Boolean);
 
         if (isPluginEnabled(NoBlockedMessagesPlugin.name))
-            users = users.filter(user => !NoBlockedMessagesPlugin.shouldIgnoreUser(user.id));
+            users = users.filter(user => !NoBlockedMessagesPlugin.shouldHideUser(user.id));
 
         return users.length === 0
             ? null
