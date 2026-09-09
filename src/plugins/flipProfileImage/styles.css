@@ -1,0 +1,16 @@
+.vc-flip-profile-image-controls {
+    flex-wrap: wrap;
+    row-gap: 8px;
+}
+
+.vc-flip-profile-image-button-active {
+    background: var(--background-modifier-selected);
+}
+
+.vc-flip-profile-image-button-active:not([aria-disabled="true"]) {
+    color: var(--text-brand);
+}
+
+.vc-flip-profile-image-icon-vertical {
+    transform: rotate(90deg);
+}
