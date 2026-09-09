@@ -266,6 +266,11 @@ export default definePlugin({
                 match: /className:((\i)\.\i),children:\[(.{0,800}?\]\}\)),(?=.{0,300}className:\i\(\)\((\2\.\i),\{\[(\2\.\i)\]:(\i)\}\),onClick:\6\?void 0:)/,
                 replace: (_, controlsClassName, _cssModule, zoomControls, buttonClassName, disabledClassName, controlsDisabled) =>
                     `className:$self.getControlsClass(${controlsClassName}),children:[${zoomControls},$self.renderControls(vcFlipState,${controlsDisabled},${buttonClassName},${disabledClassName}),`
+            },
+            {
+                // Keep clockwise rotation consistent with the crop offset when mirrored.
+                match: /\((\i)\+90\)%360/,
+                replace: "($1+(vcFlipState.horizontal!==vcFlipState.vertical?270:90))%360"
             }
         ]
     }],
