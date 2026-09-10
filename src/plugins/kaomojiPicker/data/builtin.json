@@ -1,0 +1,102 @@
+{
+
+    "wave": [
+        { "id": "hello", "value": "(￣▽￣)ノ" },
+        { "id": "shy-wave", "value": "( *⌒ヮ⌒*)ゞ" },
+        { "id": "happy-wave", "value": "ヽ(o´∀｀o)ﾉ" },
+        { "id": "hello-flower", "value": "ヽ(✿ﾟ▽ﾟ)ノ" },
+        { "id": "waving", "value": "ヾ(\\*’Ｏ’\\*)/" }
+    ],
+
+    "happy": [
+        { "id": "relax", "value": "(＾▽＾)" },
+        { "id": "so-happy", "value": "(*´▽`*)" },
+        { "id": "grin", "value": "（＾ｖ＾）" },
+        { "id": "joy", "value": "ヽ(´▽`)/" },
+        { "id": "sparkle", "value": "✧(≖ ◡ ≖✿)" },
+        { "id": "cheer", "value": "＼(^o^)／" },
+        { "id": "yay", "value": "\\(^o^)/" },
+        { "id": "agree", "value": "ദ്ദി ( ᵔ ᗜ ᵔ )" },
+        { "id": "happy", "value": "(๑ᵔ⤙ᵔ๑)" },
+        { "id": "very-happy", "value": "(˶˃ ᵕ ˂˶)" },
+        { "id": "hug", "value": "(っ˶ ˘ ᵕ˘)ˆᵕ ˆ˶ς)" }
+    ],
+
+    "excited": [
+        { "id": "cute-joy", "value": "(๑>ᴗ<๑)" },
+        { "id": "excited", "value": "o(>ω<)o" },
+        { "id": "very-excited", "value": "(˶˃ ᵕ ˂˶) .ᐟ.ᐟ" },
+        { "id": "sparkle-excited", "value": "ヾ(｡✪ω✪｡)ｼ" },
+        { "id": "cat-excited", "value": ">⩊<" },
+        { "id": "flowercited", "value": "(๑´>᎑<)~*" }
+    ],
+
+    "cute": [
+        { "id": "hello-cat", "value": "ฅ(•˕ •マ⟆" },
+        { "id": "cat-calm", "value": "=^..^=" },
+        { "id": "happy-cat", "value": "ฅ^•ﻌ•^ฅ" },
+        { "id": "excited-cat", "value": "ฅ^>⩊<^ฅ" },
+        { "id": "sleepy-cat", "value": "/ᐠ - ˕ -マ ᶻ 𝗓 𐰁" },
+        { "id": "sparkle-nya", "value": "(ฅ✧ω✧ฅ)ﾆｬ✧" },
+        { "id": "bear", "value": "ʕ•ᴥ•ʔ" },
+        { "id": "happy-bear", "value": "ฅ՞•ﻌ•՞ฅ" },
+        { "id": "sparkle-bunny", "value": "݁ ˖Ი𐑼⋆" },
+        { "id": "ribbon-bunny", "value": "Ი⑅𐑼" },
+        { "id": "patpat", "value": "ヾ(•ω•`)o" },
+        { "id": "pat", "value": "(っ˘ω˘ς )" }
+    ],
+
+    "love": [
+        { "id": "heart", "value": "⸜(｡˃ ᵕ ˂ )⸝♡" },
+        { "id": "kiss", "value": "(˶ ˘ ³˘)ˆᵕ ˆ˶) ❤︎.ᐟ" },
+        { "id": "kiss-calm", "value": "(˶˘ ³˘(´͈ ᵕ `͈˶)" },
+        { "id": "kiss-happy", "value": "( ˶˘ ³˘(ˊᗜˋ*)!♡" },
+        { "id": "in-love", "value": "(⸝⸝ ♡﹏♡⸝⸝)" },
+        { "id": "flustered", "value": "(⸝⸝๑﹏๑⸝⸝)" },
+        { "id": "blush", "value": "(⸝⸝>⸝⸝<⸝⸝)" },
+        { "id": "shy", "value": "(⁄ ⁄•⁄ω⁄•⁄ ⁄)" },
+        { "id": "happy-cry", "value": "(╥‸╥)♡" },
+        { "id": "calm-shy", "value": "(⸝⸝⩌⸝⸝⩌⸝⸝)" },
+        { "id": "calm-shy-1", "value": "(,,¬﹏¬,,)" },
+        { "id": "hug", "value": "(っ˶ ˘ ᵕ˘)ˆᵕ ˆ˶ς)" },
+        { "id": "excited-love", "value": "(≧ヮ≦) 💕" }
+    ],
+
+    "angry": [
+        { "id": "jii", "value": "(￢_￢;)" },
+        { "id": "pout", "value": "(˶˃⤙˂˶)" },
+        { "id": "fume", "value": "(¬_¬)" },
+        { "id": "mad", "value": "( ,,⩌'︿'⩌ꐦ,,)" },
+        { "id": "are-u-kidding-me", "value": "(｀Д´)" },
+        { "id": "yandere", "value": "ヾ(๑╹◡╹)ﾉ🔪" },
+        { "id": "so-mad", "value": "ヽ(｀Д´#)ﾉ ﾑｷｰ!!" }
+    ],
+
+    "sad": [
+        { "id": "cry", "value": "(╥﹏╥)" },
+        { "id": "worried-cry", "value": "(；′⌒`)" },
+        { "id": "huhuu-cry", "value": "(╥ᆺ╥;)" },
+        { "id": "tears", "value": "(ಥ﹏ಥ)" },
+        { "id": "sulk", "value": "(´-ω-`)" },
+        { "id": "worried", "value": "(,,•᷄﹏•᷅,,)" },
+        { "id": "ehh-i-see", "value": "(|lI.‸.)" },
+        { "id": "meh", "value": "（´＿｀）" }
+    ],
+
+    "surprised": [
+        { "id": "wa", "value": "( ˶°ㅁ°) !!" },
+        { "id": "gasp", "value": "Σ(°△°|||)" },
+        { "id": "wow", "value": "w(°ｏ°)w" },
+        { "id": "shock", "value": "(⊙_⊙)" },
+        { "id": "oops", "value": "(・◇・)" },
+        { "id": "what", "value": "Σ(ﾟДﾟ)" }
+    ],
+
+    "misc": [
+        { "id": "its-fine-pat", "value": "( ´･･)ﾉ(._.`)" },
+        { "id": "smug", "value": "(¬‿¬)" },
+        { "id": "shrug", "value": "¯\\_(ツ)_/¯" },
+        { "id": "tableflip", "value": "(╯°□°）╯︵ ┻━┻" },
+        { "id": "sleepy", "value": "(−_−) …zzz" }
+    ]
+}

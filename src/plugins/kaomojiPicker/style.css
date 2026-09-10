@@ -1,0 +1,187 @@
+.vc-kaomoji-wrapper {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    height: 100%;
+}
+
+.vc-kaomoji-header {
+    flex-shrink: 0;
+    padding: var(--custom-gif-picker-gutter-size);
+    border-bottom: 1px solid var(--border-subtle);
+}
+
+.vc-kaomoji-search-bar {
+    flex: 1;
+}
+
+.vc-kaomoji-body-wrap {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+}
+
+.vc-kaomoji-body {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    padding: 0 4px;
+}
+
+.vc-kaomoji-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 6px;
+    padding: 0 4px 12px 8px;
+}
+
+.vc-kaomoji-item {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 28px;
+    padding: 2px 4px;
+    background: var(--background-secondary-alt);
+    border-radius: var(--radius-sm);
+    color: var(--text-default);
+    font-size: 13px;
+    word-break: break-all;
+    user-select: none;
+    cursor: pointer;
+    transition: background 0.1s;
+
+    &:hover {
+        background: var(--background-mod-strong);
+    }
+}
+
+.vc-kaomoji-empty {
+    display: flex;
+    flex: 1;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    min-height: 240px;
+    padding: 32px 16px;
+    color: var(--text-muted);
+    font-size: 14px;
+    text-align: center;
+}
+
+.vc-kaomoji-inspector > div:first-child {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: max-content;
+    max-width: 260px;
+    height: 100%;
+    flex-shrink: 0;
+}
+
+.vc-kaomoji-inspector-preview {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: max-content;
+    max-width: 260px;
+    font-size: 20px;
+    line-height: normal;
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: var(--text-default);
+}
+
+.vc-kaomoji-panel {
+    display: grid;
+    overflow: hidden;
+    min-height: 0;
+    border-radius: var(--custom-emoji-picker-border-radius);
+}
+
+.vc-kaomoji-section > .vc-kaomoji-grid:first-child {
+    padding-top: 8px;
+}
+
+.vc-kaomoji-autocomplete-divider {
+    padding-bottom: 0;
+}
+
+.vc-kaomoji-autocomplete-title {
+    padding-top: 0;
+}
+
+.vc-kaomoji-section-header-wrap {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    margin-bottom: 8px;
+
+    & > * {
+        margin: 0;
+    }
+}
+
+.vc-kaomoji-create-category-wrap {
+    margin-top: 8px;
+}
+
+.vc-kaomoji-manage-header {
+    flex-shrink: 0;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border-subtle);
+}
+
+.vc-kaomoji-manage-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 12px;
+    height: 56px;
+    box-sizing: border-box;
+    background-color: var(--background-secondary-alt);
+}
+
+.vc-kaomoji-manage-info {
+    overflow: hidden;
+}
+
+.vc-kaomoji-manage-empty {
+    color: var(--text-muted);
+    text-align: center;
+    padding-bottom: var(--space-8);
+}
+
+.vc-kaomoji-manage-list {
+    max-height: 262px;
+    padding-right: 4px;
+}
+
+.vc-kaomoji-manage-preview-wrap {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 60px;
+    height: 100%;
+}
+
+.vc-kaomoji-error-message {
+    color: var(--text-feedback-critical);
+    animation: slide-down .3s ease-in-out;
+}
+
+@keyframes slide-down {
+    0% {
+        height: 0;
+        width: 0;
+        transform: translateY(-4px);
+    }
+
+    100% {
+        height: auto;
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
