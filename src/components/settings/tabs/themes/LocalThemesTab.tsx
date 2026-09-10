@@ -120,6 +120,14 @@ export function LocalThemesTab() {
     async function refreshLocalThemes() {
         const themes = await VencordNative.themes.getThemesList();
         setUserThemes(themes);
+
+        if (!themes.length) return;
+
+        // Prune settings of deleted themes.
+        const fileNames = new Set(themes.map(theme => theme.fileName));
+        for (const fileName of Object.keys(Settings.themeSettings)) {
+            if (!fileNames.has(fileName)) delete Settings.themeSettings[fileName];
+        }
     }
 
     return (
