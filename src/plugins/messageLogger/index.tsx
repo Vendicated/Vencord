@@ -54,6 +54,11 @@ interface MLAttachment extends MessageAttachment {
 
 const MessageClasses = findCssClassesLazy("edited", "communicationDisabled", "isSystemMessage");
 
+const enum FilterMode {
+    Whitelist,
+    Blacklist
+}
+
 const settings = definePluginSettings({
     deleteStyle: {
         type: OptionType.SELECT,
@@ -102,24 +107,39 @@ const settings = definePluginSettings({
         description: "Whether to ignore messages by yourself",
         default: false
     },
-    ignoreUsers: {
+    filterMode: {
+        type: OptionType.SELECT,
+        description: "Change the mode of the filter. If filters are empty it will do nothing",
+        options: [
+            {
+                label: "Whitelist",
+                value: FilterMode.Whitelist,
+                default: true
+            },
+            {
+                label: "Blacklist",
+                value: FilterMode.Blacklist,
+            }
+        ]
+    },
+    filteredUsers: {
         type: OptionType.STRING,
-        description: "Comma-separated list of user IDs to ignore",
+        description: "Comma-separated list of user IDs to filter",
         default: "",
         multiline: true
     },
-    ignoreChannels: {
+    filteredChannels: {
         type: OptionType.STRING,
-        description: "Comma-separated list of channel IDs to ignore",
+        description: "Comma-separated list of channel IDs to filter",
         default: "",
         multiline: true
     },
-    ignoreGuilds: {
+    filteredGuilds: {
         type: OptionType.STRING,
-        description: "Comma-separated list of guild IDs to ignore",
+        description: "Comma-separated list of guild IDs to filter",
         default: "",
         multiline: true
-    },
+    }
 });
 
 function addDeleteStyle() {
@@ -339,16 +359,30 @@ export default definePlugin({
 
     shouldIgnore(message: any, isEdit = false) {
         try {
-            const { ignoreBots, ignoreSelf, ignoreUsers, ignoreChannels, ignoreGuilds, logEdits, logDeletes } = settings.store;
+            const { ignoreBots, ignoreSelf, filterMode, filteredChannels, filteredGuilds, filteredUsers, logEdits, logDeletes } = settings.store;
             const myId = UserStore.getCurrentUser().id;
+
+            const filterIsEmpty = (
+                filteredUsers.trim() === "" &&
+                filteredChannels.trim() === "" &&
+                filteredGuilds.trim() === ""
+            );
+            const messageInFilter = (
+                filteredUsers.includes(message.author?.id) ||
+                filteredChannels.includes(message.channel_id) ||
+                filteredChannels.includes(ChannelStore.getChannel(message.channel_id)?.guild_id) ||
+                filteredGuilds.includes(ChannelStore.getChannel(message.channel_id)?.guild_id)
+            );
 
             return ignoreBots && message.author?.bot ||
                 ignoreSelf && message.author?.id === myId ||
-                ignoreUsers.includes(message.author?.id) ||
-                ignoreChannels.includes(message.channel_id) ||
-                ignoreChannels.includes(ChannelStore.getChannel(message.channel_id)?.parent_id) ||
                 (isEdit ? !logEdits : !logDeletes) ||
-                ignoreGuilds.includes(ChannelStore.getChannel(message.channel_id)?.guild_id) ||
+
+                !filterIsEmpty && (
+                    (filterMode === FilterMode.Whitelist) && !messageInFilter ||
+                    (filterMode === FilterMode.Blacklist) && messageInFilter
+                ) ||
+
                 // Ignore Venbot in the support channels
                 (message.author?.id === VENBOT_USER_ID && ChannelStore.getChannel(message.channel_id)?.parent_id === SUPPORT_CATEGORY_ID);
         } catch (e) {
