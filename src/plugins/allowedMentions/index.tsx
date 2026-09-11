@@ -231,7 +231,7 @@ const MentionChatBarIcon: ChatBarButtonFactory = ({ isMainChat }) => {
 export default definePlugin({
     name: "AllowedMentions",
     description: "Allows you to choose whether a mention will actually send a notification to the user",
-    authors: [Devs.imnotplayinginreallife],
+    authors: [Devs.imnotplayinginreallife, Devs.arHSM],
 
     settings: settings,
     patches: [
