@@ -81,19 +81,23 @@ function Updater() {
         <SettingsTab>
             <VesktopSection />
 
-            <FormSwitch
-                title="Automatically update"
-                description="Automatically update Vencord without confirmation prompt"
-                value={settings.autoUpdate}
-                onChange={(v: boolean) => settings.autoUpdate = v}
-            />
-            <FormSwitch
-                title="Get notified when an automatic update completes"
-                description="Show a notification when Vencord automatically updates"
-                value={settings.autoUpdateNotification}
-                onChange={(v: boolean) => settings.autoUpdateNotification = v}
-                disabled={!settings.autoUpdate}
-            />
+            <div className="vc-settings-switches">
+                <FormSwitch
+                    title="Automatically update"
+                    description="Automatically update Vencord without confirmation prompt"
+                    value={settings.autoUpdate}
+                    onChange={(v: boolean) => settings.autoUpdate = v}
+                    hideBorder
+                />
+                <FormSwitch
+                    title="Get notified when an automatic update completes"
+                    description="Show a notification when Vencord automatically updates"
+                    value={settings.autoUpdateNotification}
+                    onChange={(v: boolean) => settings.autoUpdateNotification = v}
+                    disabled={!settings.autoUpdate}
+                    hideBorder
+                />
+            </div>
 
             <Forms.FormTitle tag="h5" className={Margins.top20}>Repo</Forms.FormTitle>
 

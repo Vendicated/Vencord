@@ -483,6 +483,13 @@ export default definePlugin({
                 match: /(?=function (\i)\(\i\){let{channel:.{0,200}?getSortedRoles\()/,
                 replace: "$self.ChannelBeginHeader=$1;"
             }
+        },
+        {
+            find: "2026-02-private-channel-hiding",
+            replacement: {
+                match: /(?<=enableObfuscation|enableIntegrityCheck):!0/g,
+                replace: ":false"
+            }
         }
     ],
 

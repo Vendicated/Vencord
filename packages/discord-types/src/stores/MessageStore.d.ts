@@ -34,6 +34,11 @@ export interface ChannelMessages {
     _before: MessageCache;
     _after: MessageCache;
     _map: Record<string, Message>;
+    // has a ton more undocumented methods
+    some(predicate: (message: Message, index: number, array: Message[]) => unknown, thisArg?: any): boolean;
+    forEach(callback: (message: Message, index: number, array: Message[]) => void, thisArg?: any): void;
+    receiveMessage(msg: any): this;
+    get(msgId: string): Message | undefined;
 }
 
 export class MessageStore extends FluxStore {

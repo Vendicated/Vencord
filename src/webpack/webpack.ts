@@ -55,7 +55,7 @@ export const stringMatches = (s: string, filter: CodeFilter) =>
     );
 
 export function makeClassNameRegex(className: string) {
-    return new RegExp(`(?:\\b|_)${escapeRegExp(className)}(?:\\b|_)`);
+    return new RegExp(`(?<=^|\\s)${escapeRegExp(className)}(?:_\\S*)?(?=$|\\s)`);
 }
 
 export const filters = {

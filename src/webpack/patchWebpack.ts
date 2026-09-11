@@ -506,8 +506,8 @@ function patchFactory(moduleId: PropertyKey, originalFactory: AnyModuleFactory):
     const isArrowFunction = originalFactoryCode.startsWith("(");
 
     // 0, prefix to turn it into an expression: 0,function(){} would be invalid syntax without the 0,
-    let code = "0," + (!isArrowFunction ? "function" : "") + originalFactoryCode.slice(originalFactoryCode.indexOf("("));
-    let patchedSource = code;
+    let patchedCode = "0," + (!isArrowFunction ? "function" : "") + originalFactoryCode.slice(originalFactoryCode.indexOf("("));
+    let patchedSource = patchedCode;
     let patchedFactory = originalFactory;
 
     const patchedBy = new Set<string>();
@@ -520,70 +520,65 @@ function patchFactory(moduleId: PropertyKey, originalFactory: AnyModuleFactory):
 
         if (
             shouldCheckBuildNumber &&
-            (patch.fromBuild != null && buildNumber < patch.fromBuild) ||
-            (patch.toBuild != null && buildNumber > patch.toBuild)
+            ((patch.fromBuild != null && buildNumber < patch.fromBuild) || (patch.toBuild != null && buildNumber > patch.toBuild))
         ) {
             patches.splice(i--, 1);
             continue;
         }
 
         const moduleMatches = typeof patch.find === "string"
-            ? code.includes(patch.find)
-            : (patch.find.global && (patch.find.lastIndex = 0), patch.find.test(code));
+            ? originalFactoryCode.includes(patch.find)
+            : (patch.find.global && (patch.find.lastIndex = 0), patch.find.test(originalFactoryCode));
 
         if (!moduleMatches) {
             continue;
         }
+
+        // Save the result from the previous patch so we can restore it in case a patch group fails.
+        const previousPatchedCode = patchedCode;
+        const previousPatchedSource = patchedSource;
+        const previousPatchedFactory = patchedFactory;
+
+        let shouldRestorePrevious = false;
+        let markedAsPatched = false;
 
         const executePatch = traceFunctionWithResults(`patch by ${patch.plugin}`, (match: string | RegExp, replace: string) => {
             if (typeof match !== "string" && match.global) {
                 match.lastIndex = 0;
             }
 
-            return code.replace(match, replace);
+            return patchedCode.replace(match, replace);
         });
-
-        const previousCode = code;
-        const previousFactory = originalFactory;
-        let markedAsPatched = false;
 
         // We change all patch.replacement to array in PluginManager
         for (const replacement of patch.replacement as PatchReplacement[]) {
             if (
                 shouldCheckBuildNumber &&
-                (replacement.fromBuild != null && buildNumber < replacement.fromBuild) ||
-                (replacement.toBuild != null && buildNumber > replacement.toBuild)
+                ((replacement.fromBuild != null && buildNumber < replacement.fromBuild) || (replacement.toBuild != null && buildNumber > replacement.toBuild))
             ) {
                 continue;
             }
 
-            const lastCode = code;
-            const lastFactory = originalFactory;
-
+            let newPatchedCode: string = "";
             try {
-                const [newCode, totalTime] = executePatch(replacement.match, replacement.replace as string);
+                const [patchResult, totalTime] = executePatch(replacement.match, replacement.replace as string);
+                newPatchedCode = patchResult;
 
                 if (IS_REPORTER) {
                     patchTimings.push([patch.plugin, moduleId, replacement.match, totalTime]);
                 }
 
-                if (newCode === code) {
+                if (newPatchedCode === patchedCode) {
                     if (!(patch.noWarn || replacement.noWarn)) {
                         logger.warn(`Patch by ${patch.plugin} had no effect (Module id is ${String(moduleId)}): ${replacement.match}`);
                         if (IS_DEV) {
-                            logger.debug("Function Source:\n", code);
+                            logger.debug("Function Source:\n", patchedCode);
                         }
                     }
 
                     if (patch.group) {
                         logger.warn(`Undoing patch group ${patch.find} by ${patch.plugin} because replacement ${replacement.match} had no effect`);
-                        code = previousCode;
-                        patchedFactory = previousFactory;
-
-                        if (markedAsPatched) {
-                            patchedBy.delete(patch.plugin);
-                        }
-
+                        shouldRestorePrevious = true;
                         break;
                     }
 
@@ -595,14 +590,17 @@ function patchFactory(moduleId: PropertyKey, originalFactory: AnyModuleFactory):
                     pluginsList.push(patch.plugin);
                 }
 
-                code = newCode;
-                patchedSource = `// Webpack Module ${String(moduleId)} - Patched by ${pluginsList.join(", ")}\n${code}\n//# sourceURL=file:///WebpackModule${String(moduleId)}`;
-                patchedFactory = (0, eval)(patchedSource);
+                const newPatchedSource = `// Webpack Module ${String(moduleId)} - Patched by ${pluginsList.join(", ")}\n${newPatchedCode}\n//# sourceURL=file:///WebpackModule${String(moduleId)}`;
+                const newPatchedFactory = (0, eval)(newPatchedSource);
 
                 if (!patchedBy.has(patch.plugin)) {
                     patchedBy.add(patch.plugin);
                     markedAsPatched = true;
                 }
+
+                patchedCode = newPatchedCode;
+                patchedSource = newPatchedSource;
+                patchedFactory = newPatchedFactory;
             } catch (err) {
                 // FIXME: Maybe fix this properly
                 const shouldSuppressError = patch.plugin === "ContextMenuAPI" && err instanceof SyntaxError && err.message.includes("arguments");
@@ -610,23 +608,25 @@ function patchFactory(moduleId: PropertyKey, originalFactory: AnyModuleFactory):
                     logger.error(`Patch by ${patch.plugin} errored (Module id is ${String(moduleId)}): ${replacement.match}\n`, err);
 
                     if (IS_DEV) {
-                        diffErroredPatch(code, lastCode, lastCode.match(replacement.match)!);
+                        diffErroredPatch(newPatchedCode, patchedCode, patchedCode.match(replacement.match)!);
                     }
-                }
-
-                if (markedAsPatched) {
-                    patchedBy.delete(patch.plugin);
                 }
 
                 if (patch.group) {
                     logger.warn(`Undoing patch group ${patch.find} by ${patch.plugin} because replacement ${replacement.match} errored`);
-                    code = previousCode;
-                    patchedFactory = previousFactory;
+                    shouldRestorePrevious = true;
                     break;
                 }
+            }
+        }
 
-                code = lastCode;
-                patchedFactory = lastFactory;
+        if (shouldRestorePrevious) {
+            patchedCode = previousPatchedCode;
+            patchedSource = previousPatchedSource;
+            patchedFactory = previousPatchedFactory;
+
+            if (markedAsPatched) {
+                patchedBy.delete(patch.plugin);
             }
         }
 
@@ -648,9 +648,12 @@ function patchFactory(moduleId: PropertyKey, originalFactory: AnyModuleFactory):
 function diffErroredPatch(code: string, lastCode: string, match: RegExpMatchArray) {
     const changeSize = code.length - lastCode.length;
 
+    const matchIndex = match?.index ?? 0;
+    const matchLength = match?.[0]?.length ?? 0;
+
     // Use 200 surrounding characters of context
-    const start = Math.max(0, match.index! - 200);
-    const end = Math.min(lastCode.length, match.index! + match[0].length + 200);
+    const start = Math.max(0, matchIndex - 200);
+    const end = Math.min(lastCode.length, matchIndex + matchLength + 200);
     // (changeSize may be negative)
     const endPatched = end + changeSize;
 
