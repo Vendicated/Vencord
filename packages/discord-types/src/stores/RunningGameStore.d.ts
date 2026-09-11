@@ -53,7 +53,7 @@ export class RunningGameStore extends FluxStore {
     getSystemServiceStatus(service: string): SystemServiceStatus;
     getVisibleGame(): RunningGame | null;
     getVisibleRunningGames(): RunningGame[];
-    isDetectionEnabled(type?: string): boolean;
+    isDetectionEnabled(game: RunningGame): boolean;
     isGamesSeenLoaded(): boolean;
     isObservedAppRunning(app: string): boolean;
     isSystemServiceInitialized(service: string): boolean;
