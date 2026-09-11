@@ -37,6 +37,33 @@ const ButtonClasses = findCssClassesLazy("button", "wrapper", "selected");
 const BotTagClasses = findCssClassesLazy("botTagVerified", "botTagRegular", "botText", "px", "rem");
 
 const dateFormat = new Intl.DateTimeFormat();
+const gifLinkRegex = /https:\/\/[^\s<]+/g;
+
+function isGifProvider(hostname: string) {
+    return /(?:^|\.)(?:giphy\.com|klipy\.com|klipy\.co|tenor\.com|tenor\.co)$/.test(hostname);
+}
+
+function getGifLinks(comment: string) {
+    return [...new Set(comment.match(gifLinkRegex)?.filter(link => {
+        try {
+            return isGifProvider(new URL(link).hostname);
+        } catch {
+            return false;
+        }
+    }) ?? [])];
+}
+
+function ReviewGif({ link }: { link: string; }) {
+    try {
+        const url = new URL(link);
+        if (url.protocol === "https:" && isGifProvider(url.hostname) && /(?:\.(?:gif|webp|mp4)|\/mp4)$/i.test(url.pathname)) {
+            return /(?:\.mp4|\/mp4)$/i.test(url.pathname)
+                ? <video className={cl("review-gif")} src={url.href} aria-label="GIF" autoPlay loop muted playsInline />
+                : <img className={cl("review-gif")} src={url.href} alt="GIF" />;
+        }
+    } catch { }
+    return null;
+}
 
 export default function ReviewComponent({ review, refetch, profileId }: { review: Review; refetch(): void; profileId: string; }) {
     const [showAll, setShowAll] = useState(false);
@@ -237,6 +264,7 @@ export default function ReviewComponent({ review, refetch, profileId }: { review
                     )
                     : Parser.parseGuildEventDescription(review.comment)}
             </div>
+            {getGifLinks(review.comment).map(link => <ReviewGif key={link} link={link} />)}
 
             {review.id !== 0 && (
                 <div className={classes(ContainerClasses.container, ContainerClasses.isHeader, MessageClasses.buttons)} style={{
