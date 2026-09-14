@@ -380,10 +380,12 @@ const messageContextMenuPatch: NavContextMenuPatchCallback = (children, props) =
                 try {
                     url = new URL(match[0]);
                 } catch { }
-                const fakeNitroName = match[0].startsWith("https") ?
-                    EmojiStore.getCustomEmojiById(favoriteableId)?.name ?? url?.searchParams.get("name") ?? undefined :
-                    undefined;
-                const name = match[1] ?? fakeNitroName ?? reaction?.emoji.name ?? "FakeNitroEmoji";
+
+                const name = match[1]
+                    ?? reaction?.emoji.name
+                    ?? EmojiStore.getCustomEmojiById(favoriteableId)?.name
+                    ?? url?.searchParams.get("name")
+                    ?? "FakeNitroEmoji";
 
                 return buildMenuItem("Emoji", () => ({
                     id: favoriteableId,
