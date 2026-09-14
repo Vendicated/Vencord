@@ -36,6 +36,7 @@ import { Button, Constants, FluxDispatcher, Forms, lodash, Menu, MessageActions,
 import { ComponentType } from "react";
 
 import { VoiceRecorderDesktop } from "./DesktopRecorder";
+import { isOggOpus } from "./oggOpus";
 import { settings } from "./settings";
 import { VoicePreview } from "./VoicePreview";
 import { VoiceRecorderWeb } from "./WebRecorder";
@@ -77,7 +78,7 @@ export default definePlugin({
     name: "VoiceMessages",
     description: "Allows you to send voice messages like on mobile. To do so, right click the upload button and click Send Voice Message",
     tags: ["Voice"],
-    authors: [Devs.Ven, Devs.Vap, Devs.Nickyux],
+    authors: [Devs.Ven, Devs.Vap, Devs.Nickyux, Devs.noitaPlayer],
     settings,
 
     patches: [
@@ -102,10 +103,12 @@ export default definePlugin({
 type AudioMetadata = {
     waveform: string,
     duration: number,
+    isOggOpus: boolean,
 };
 const EMPTY_META: AudioMetadata = {
     waveform: "AAAAAAAAAAAA",
     duration: 1,
+    isOggOpus: true,
 };
 
 function sendAudio(blob: Blob, meta: AudioMetadata) {
@@ -166,45 +169,50 @@ function VoiceMessageModal({ modalProps }: { modalProps: RenderModalProps; }) {
             URL.revokeObjectURL(blobUrl);
     }, [blobUrl]);
 
-    const [meta, metaError] = useAwaiter(async () => {
+    const [meta, metaError, metaPending] = useAwaiter(async () => {
         if (!blob) return EMPTY_META;
 
         const audioContext = new AudioContext();
-        const audioBuffer = await audioContext.decodeAudioData(await blob.arrayBuffer());
-        const channelData = audioBuffer.getChannelData(0);
+        try {
+            const [header, audioBuffer] = await Promise.all([
+                blob.slice(0, 64).arrayBuffer().then(buf => new Uint8Array(buf)),
+                blob.arrayBuffer().then(buf => audioContext.decodeAudioData(buf)),
+            ]);
+            const channelData = audioBuffer.getChannelData(0);
 
-        // average the samples into much lower resolution bins, maximum of 256 total bins
-        const bins = new Uint8Array(lodash.clamp(Math.floor(audioBuffer.duration * 10), Math.min(32, channelData.length), 256));
-        const samplesPerBin = Math.floor(channelData.length / bins.length);
+            // average the samples into much lower resolution bins, maximum of 256 total bins
+            const bins = new Uint8Array(lodash.clamp(Math.floor(audioBuffer.duration * 10), Math.min(32, channelData.length), 256));
+            const samplesPerBin = Math.floor(channelData.length / bins.length);
 
-        // Get root mean square of each bin
-        for (let binIdx = 0; binIdx < bins.length; binIdx++) {
-            let squares = 0;
-            for (let sampleOffset = 0; sampleOffset < samplesPerBin; sampleOffset++) {
-                const sampleIdx = binIdx * samplesPerBin + sampleOffset;
-                squares += channelData[sampleIdx] ** 2;
+            // Get root mean square of each bin
+            for (let binIdx = 0; binIdx < bins.length; binIdx++) {
+                let squares = 0;
+                for (let sampleOffset = 0; sampleOffset < samplesPerBin; sampleOffset++) {
+                    const sampleIdx = binIdx * samplesPerBin + sampleOffset;
+                    squares += channelData[sampleIdx] ** 2;
+                }
+                bins[binIdx] = ~~(Math.sqrt(squares / samplesPerBin) * 0xFF);
             }
-            bins[binIdx] = ~~(Math.sqrt(squares / samplesPerBin) * 0xFF);
+
+            // Normalize bins with easing
+            const maxBin = Math.max(...bins);
+            const ratio = 1 + (0xFF / maxBin - 1) * Math.min(1, 100 * (maxBin / 0xFF) ** 3);
+            for (let i = 0; i < bins.length; i++) bins[i] = Math.min(0xFF, ~~(bins[i] * ratio));
+
+            return {
+                waveform: window.btoa(String.fromCharCode(...bins)),
+                duration: audioBuffer.duration,
+                isOggOpus: isOggOpus(header),
+            };
+        } finally {
+            void audioContext.close();
         }
-
-        // Normalize bins with easing
-        const maxBin = Math.max(...bins);
-        const ratio = 1 + (0xFF / maxBin - 1) * Math.min(1, 100 * (maxBin / 0xFF) ** 3);
-        for (let i = 0; i < bins.length; i++) bins[i] = Math.min(0xFF, ~~(bins[i] * ratio));
-
-        return {
-            waveform: window.btoa(String.fromCharCode(...bins)),
-            duration: audioBuffer.duration,
-        };
     }, {
         deps: [blob],
         fallbackValue: EMPTY_META,
     });
 
-    const isUnsupportedFormat = blob && (
-        !blob.type.startsWith("audio/ogg")
-        || blob.type.includes("codecs") && !blob.type.includes("opus")
-    );
+    const isUnsupportedFormat = !!blob && !metaPending && !meta.isOggOpus;
 
     return (
         <Modal
@@ -256,7 +264,7 @@ function VoiceMessageModal({ modalProps }: { modalProps: RenderModalProps; }) {
 
             {isUnsupportedFormat && (
                 <Card variant="warning" className={Margins.top16} defaultPadding>
-                    <Forms.FormText>Voice Messages have to be OggOpus to be playable on iOS. This file is <code>{blob.type}</code> so it will not be playable on iOS.</Forms.FormText>
+                    <Forms.FormText>Voice Messages have to be OggOpus to be playable on iOS. This file is not a valid OggOpus container so it will not be playable on iOS.</Forms.FormText>
 
                     <Forms.FormText className={Margins.top8}>
                         To fix it, first convert it to OggOpus, for example using the <Link href="https://convertio.co/mp3-opus/">convertio web converter</Link>

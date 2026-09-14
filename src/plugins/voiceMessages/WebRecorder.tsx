@@ -16,70 +16,81 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Button, MediaEngineStore, useState } from "@webpack/common";
+import { Button, MediaEngineStore, showToast, Toasts, useEffect, useRef, useState } from "@webpack/common";
 
 import type { VoiceRecorder } from ".";
 import { settings } from "./settings";
+import { OggOpusRecording, startOggOpusRecording } from "./webRecording";
 
 export const VoiceRecorderWeb: VoiceRecorder = ({ setAudioBlob, onRecordingChange }) => {
     const [recording, setRecording] = useState(false);
     const [paused, setPaused] = useState(false);
-    const [recorder, setRecorder] = useState<MediaRecorder>();
-    const [chunks, setChunks] = useState<Blob[]>([]);
+    const [busy, setBusy] = useState(false);
+    const sessionRef = useRef<OggOpusRecording | null>(null);
 
     const changeRecording = (recording: boolean) => {
         setRecording(recording);
         onRecordingChange?.(recording);
     };
 
-    function toggleRecording() {
-        const nowRecording = !recording;
+    useEffect(() => () => {
+        sessionRef.current?.stop().catch(() => { });
+        sessionRef.current = null;
+    }, []);
 
-        if (nowRecording) {
+    function toggleRecording() {
+        if (busy) return;
+
+        if (!recording) {
+            setBusy(true);
             navigator.mediaDevices.getUserMedia({
                 audio: {
                     echoCancellation: settings.store.echoCancellation,
                     noiseSuppression: settings.store.noiseSuppression,
                     deviceId: MediaEngineStore.getInputDeviceId()
                 }
-            }).then(stream => {
-                const chunks = [] as Blob[];
-                setChunks(chunks);
-
-                const recorder = new MediaRecorder(stream);
-                setRecorder(recorder);
-                recorder.addEventListener("dataavailable", e => {
-                    chunks.push(e.data);
-                });
-                recorder.start();
-
-                changeRecording(true);
-            });
+            }).then(async stream => {
+                try {
+                    sessionRef.current = await startOggOpusRecording(stream);
+                    setPaused(false);
+                    changeRecording(true);
+                } catch (error) {
+                    stream.getTracks().forEach(track => track.stop());
+                    showToast(error instanceof Error ? error.message : "Failed to start recording", Toasts.Type.FAILURE);
+                }
+            }).catch(() => showToast("Failed to start recording", Toasts.Type.FAILURE))
+                .finally(() => setBusy(false));
         } else {
-            if (recorder) {
-                recorder.addEventListener("stop", () => {
-                    setAudioBlob(new Blob(chunks, { type: "audio/ogg; codecs=opus" }));
-
-                    changeRecording(false);
-                });
-                recorder.stop();
-                recorder.stream.getTracks().forEach(track => track.stop());
-            }
+            const session = sessionRef.current;
+            if (!session) return;
+            sessionRef.current = null;
+            setBusy(true);
+            session.stop().then(blob => {
+                setAudioBlob(blob);
+            }).catch(error => {
+                showToast(error instanceof Error ? error.message : "Failed to finish recording", Toasts.Type.FAILURE);
+            }).finally(() => {
+                setPaused(false);
+                changeRecording(false);
+                setBusy(false);
+            });
         }
     }
 
     return (
         <>
-            <Button onClick={toggleRecording}>
+            <Button disabled={busy} onClick={toggleRecording}>
                 {recording ? "Stop" : "Start"} recording
             </Button>
 
             <Button
-                disabled={!recording}
+                disabled={!recording || busy}
                 onClick={() => {
+                    const session = sessionRef.current;
+                    if (!session) return;
+                    if (paused) session.resume();
+                    else session.pause();
                     setPaused(!paused);
-                    if (paused) recorder?.resume();
-                    else recorder?.pause();
                 }}
             >
                 {paused ? "Resume" : "Pause"} recording
