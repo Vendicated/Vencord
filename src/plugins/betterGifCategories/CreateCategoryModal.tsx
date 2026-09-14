@@ -5,18 +5,20 @@
  */
 
 import { RenderModalProps } from "@vencord/discord-types";
-import { Modal, openModal, React, TextInput, useState } from "@webpack/common";
+import { Modal, openModal, TextInput, useState } from "@webpack/common";
 import type { FC, KeyboardEvent } from "react";
 
-import { addCategory } from "./data";
+import { addCategory, type GifCategory, renameCategory } from "./data";
 
 interface CreateCategoryModalProps {
     modalProps: RenderModalProps;
-    onCreated: () => void;
+    category?: GifCategory;
+    onSubmitted: () => void;
 }
 
-const CreateCategoryModal: FC<CreateCategoryModalProps> = ({ modalProps, onCreated }) => {
-    const [name, setName] = useState("");
+const CreateCategoryModal: FC<CreateCategoryModalProps> = ({ modalProps, category, onSubmitted }) => {
+    const [name, setName] = useState(category?.name ?? "");
+    const isEdit = category != null;
 
     async function submit() {
         const trimmed = name.trim();
@@ -25,18 +27,23 @@ const CreateCategoryModal: FC<CreateCategoryModalProps> = ({ modalProps, onCreat
             return;
         }
 
-        await addCategory(trimmed);
-        onCreated();
+        if (isEdit) {
+            await renameCategory(category.id, trimmed);
+        } else {
+            await addCategory(trimmed);
+        }
+
+        onSubmitted();
         modalProps.onClose();
     }
 
     return (
         <Modal
             {...modalProps}
-            title="New Category"
+            title={isEdit ? "Rename Category" : "New Category"}
             actions={[
                 { text: "Cancel", variant: "secondary", onClick: modalProps.onClose },
-                { text: "Create", variant: "primary", onClick: submit, disabled: !name.trim() }
+                { text: isEdit ? "Save" : "Create", variant: "primary", onClick: submit, disabled: !name.trim() }
             ]}
         >
             <TextInput
@@ -52,5 +59,9 @@ const CreateCategoryModal: FC<CreateCategoryModalProps> = ({ modalProps, onCreat
 };
 
 export function openCreateCategoryModal(onCreated: () => void): void {
-    openModal(props => <CreateCategoryModal modalProps={props} onCreated={onCreated} />);
+    openModal(props => <CreateCategoryModal modalProps={props} onSubmitted={onCreated} />);
+}
+
+export function openRenameCategoryModal(category: GifCategory, onRenamed: () => void): void {
+    openModal(props => <CreateCategoryModal modalProps={props} category={category} onSubmitted={onRenamed} />);
 }

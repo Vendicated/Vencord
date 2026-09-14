@@ -9,8 +9,13 @@ import * as DataStore from "@api/DataStore";
 import { getDataKey, makeId } from "./helpers";
 
 
+export enum GifFormat {
+    Image = 1,
+    Video = 2,
+}
+
 export interface Gif {
-    format: number;
+    format: GifFormat;
     src: string;
     width: number;
     height: number;

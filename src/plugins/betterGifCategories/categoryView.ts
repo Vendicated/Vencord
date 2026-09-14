@@ -6,13 +6,13 @@
 
 import { handleCategoryContextMenu, handleGifContextMenu } from "./ContextMenu";
 import { openCreateCategoryModal } from "./CreateCategoryModal";
-import { getCategories, GifCategory } from "./data";
+import { getCategories, GifCategory, GifFormat } from "./data";
 
 const FAVORITES_RESULT_TYPE = "Favorites";
 const CREATE_NEW_CATEGORY_ACTION = "create";
 
 export interface CategoryTile {
-    format: number;
+    format: GifFormat;
     name: string;
     src?: string;
     type: string;
@@ -46,7 +46,7 @@ function buildTile(category: GifCategory): CategoryTile {
         type: "Category",
         name: category.name,
         src: first?.src,
-        format: first?.format ?? 1,
+        format: first?.format ?? GifFormat.Image,
         vcCategoryId: category.id,
     };
 }
@@ -192,7 +192,7 @@ export function getCategoryTiles(): CategoryTile[] {
 
     return [
         ...getCategories().map(buildTile),
-        { type: "Category", name: "New Category", format: 1, vcAction: CREATE_NEW_CATEGORY_ACTION },
+        { type: "Category", name: "New Category", format: GifFormat.Image, vcAction: CREATE_NEW_CATEGORY_ACTION },
     ];
 }
 

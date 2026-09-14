@@ -9,8 +9,8 @@ import { DeleteIcon } from "@components/Icons";
 import { ConfirmModal, ContextMenuApi, Menu, openModal, useState } from "@webpack/common";
 import type { MouseEvent } from "react";
 
-import { addGifToCategory, deleteCategory, getCategories, type Gif, type GifCategory, removeGifFromCategory } from "./data";
-import { isGifMedia } from "./helpers";
+import { addGifToCategory, deleteCategory, getCategories, type Gif, type GifCategory, GifFormat, removeGifFromCategory } from "./data";
+import { deleteCategorySubtitle, isGifMedia } from "./helpers";
 
 function gifFromMessageProps(props: any): Gif | null {
     const url: string | undefined = props?.itemHref ?? props?.itemSrc;
@@ -31,8 +31,7 @@ function gifFromMessageProps(props: any): Gif | null {
         // malformed URL — keep defaults
     }
 
-    // format 2 = video (.mp4), format 1 = image (.gif / animated WebP)
-    const format = /\.mp4(?:[?#]|$)/i.test(safeSrc) ? 2 : 1;
+    const format = /\.mp4(?:[?#]|$)/i.test(safeSrc) ? GifFormat.Video : GifFormat.Image;
 
     return { url, src: safeSrc, format, width, height };
 }
@@ -140,15 +139,6 @@ function GifPickerContextMenu({ gif }: { gif: Gif; }) {
     );
 }
 
-function deletionSubtitle({ name, gifs }: GifCategory): string {
-    if (gifs.length === 0) {
-        return `Are you sure you want to delete "${name}"?`;
-    }
-
-    // TODO make this string depend on the auto-unfavorite setting
-    return `Are you sure you want to delete "${name}"? Its ${gifs.length} gif${gifs.length === 1 ? "" : "s"} stay in your Discord favourites.`;
-}
-
 function CategoryContextMenu({ category, onDeleted }: { category: GifCategory; onDeleted: () => void; }) {
     return (
         <Menu.Menu navId="vc-bgc-category" onClose={ContextMenuApi.closeContextMenu} aria-label="Category Options">
@@ -162,7 +152,7 @@ function CategoryContextMenu({ category, onDeleted }: { category: GifCategory; o
                     <ConfirmModal
                         {...props}
                         title="Delete Category"
-                        subtitle={deletionSubtitle(category)}
+                        subtitle={deleteCategorySubtitle(category)}
                         confirmText="Delete"
                         cancelText="Cancel"
                         onConfirm={async () => {
@@ -192,7 +182,7 @@ export function handleGifContextMenu(event: MouseEvent, gif: any) {
     const gifData: Gif = {
         url: gif.url || gif.src,
         src: gif.src,
-        format: gif.format ?? 1,
+        format: gif.format ?? GifFormat.Image,
         width: gif.width ?? 200,
         height: gif.height ?? 200,
     };

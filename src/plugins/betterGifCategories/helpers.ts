@@ -6,6 +6,9 @@
 
 import { UserStore } from "@webpack/common/stores";
 
+import type { GifCategory } from "./data";
+import { settings } from "./settings";
+
 
 export function makeId(): string {
     return Date.now().toString(36) + Math.random().toString(36).slice(2);
@@ -13,6 +16,18 @@ export function makeId(): string {
 
 export function getDataKey(): string {
     return `BetterGifCategories_${UserStore.getCurrentUser().id}`;
+}
+
+export function deleteCategorySubtitle({ name, gifs }: GifCategory): string {
+    if (!gifs.length) {
+        return `Are you sure you want to delete "${name}"?`;
+    }
+
+    const fate = settings.store.autoUnfavorite
+        ? "will be removed from your Discord favourites"
+        : "stay in your Discord favourites";
+
+    return `Are you sure you want to delete "${name}"? Its ${gifs.length} gif${gifs.length === 1 ? "" : "s"} ${fate}.`;
 }
 
 

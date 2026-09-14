@@ -19,6 +19,7 @@ import {
 } from "./categoryView";
 import { messageContextMenuPatch } from "./ContextMenu";
 import { loadCategories } from "./data";
+import { settings } from "./settings";
 
 export default definePlugin({
     name: "BetterGifCategories",
@@ -27,6 +28,7 @@ export default definePlugin({
     tags: ["Media", "Customisation"],
 
     patches,
+    settings,
 
     contextMenus: {
         "message": messageContextMenuPatch,
