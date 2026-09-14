@@ -236,10 +236,15 @@ function MessageEmbedAccessory({ message }: { message: Message; }) {
 
     const accessories = [] as (JSX.Element | null)[];
 
+    const seen = new Set<string>();
+    let count = 0;
     for (const [_, channelId, messageId] of message.content!.matchAll(messageLinkRegex)) {
-        if (embeddedBy.includes(messageId) || embeddedBy.length > 2) {
+        if (embeddedBy.includes(messageId) || embeddedBy.length > 2 || seen.has(messageId) || count >= 5) {
             continue;
         }
+
+        seen.add(messageId);
+        count++;
 
         const linkedChannel = ChannelStore.getChannel(channelId);
         if (!linkedChannel || (!linkedChannel.isPrivate() && !PermissionStore.can(PermissionsBits.VIEW_CHANNEL, linkedChannel))) {
