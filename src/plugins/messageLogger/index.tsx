@@ -23,6 +23,7 @@ import { updateMessage } from "@api/MessageUpdater";
 import { definePluginSettings } from "@api/Settings";
 import { disableStyle, enableStyle } from "@api/Styles";
 import ErrorBoundary from "@components/ErrorBoundary";
+import { DeleteIcon, EyeIcon } from "@components/Icons";
 import { Devs, SUPPORT_CATEGORY_ID, VENBOT_USER_ID } from "@utils/constants";
 import { getIntlMessage } from "@utils/discord";
 import { Logger } from "@utils/Logger";
@@ -80,6 +81,12 @@ const settings = definePluginSettings({
         description: "Whether to log edited messages",
         default: true,
     },
+    logDeletedAttachments: {
+        type: OptionType.BOOLEAN,
+        description: "Whether to log deleted attachments",
+        default: true,
+        restartNeeded: true,
+    },
     inlineEdits: {
         type: OptionType.BOOLEAN,
         description: "Whether to display edit history as part of message content",
@@ -88,7 +95,7 @@ const settings = definePluginSettings({
     ignoreBots: {
         type: OptionType.BOOLEAN,
         description: "Whether to ignore messages by bots",
-        default: false
+        default: true
     },
     ignoreSelf: {
         type: OptionType.BOOLEAN,
@@ -127,11 +134,43 @@ function addDeleteStyle() {
 
 const REMOVE_HISTORY_ID = "ml-remove-history";
 const TOGGLE_DELETE_STYLE_ID = "ml-toggle-style";
+
+/**
+ * Clears a message's history (edit + attachments)
+ *
+ * if the message was deleted, it will be completely removed from the UI and MessageStore
+ */
+function clearMessageHistory(msg: MLMessage) {
+    if (msg.deleted) {
+        FluxDispatcher.dispatch({
+            type: "MESSAGE_DELETE",
+            channelId: msg.channel_id,
+            id: msg.id,
+            mlDeleted: true
+        });
+    } else {
+        const attachments = msg.attachments?.filter((a: MLAttachment) => !a.deleted);
+
+        updateMessage(msg.channel_id, msg.id, { editHistory: [], attachments });
+    }
+}
+
+/**
+ * checks if a message has any history (deleted or edited)
+ * @param message the message to check
+ *
+ * @returns true if the message has any history, false otherwise
+ */
+function doesMessageHaveHistory(message: MLMessage): boolean {
+    return message.deleted || !!message.editHistory?.length || message.attachments?.some((a: MLAttachment) => a.deleted);
+
+}
+
 const patchMessageContextMenu: NavContextMenuPatchCallback = (children, props) => {
     const { message } = props;
-    const { deleted, editHistory, id, channel_id } = message;
+    const { deleted, id, channel_id } = message;
 
-    if (!deleted && !editHistory?.length) return;
+    if (!doesMessageHaveHistory(message)) return;
 
     toggle: {
         if (!deleted) break toggle;
@@ -144,6 +183,7 @@ const patchMessageContextMenu: NavContextMenuPatchCallback = (children, props) =
                 id={TOGGLE_DELETE_STYLE_ID}
                 key={TOGGLE_DELETE_STYLE_ID}
                 label="Toggle Deleted Highlight"
+                leadingAccessory={{ type: "icon", icon: EyeIcon }}
                 action={() => domElement.classList.toggle("messagelogger-deleted")}
             />
         ));
@@ -154,26 +194,18 @@ const patchMessageContextMenu: NavContextMenuPatchCallback = (children, props) =
             id={REMOVE_HISTORY_ID}
             key={REMOVE_HISTORY_ID}
             label="Remove Message History"
+            leadingAccessory={{ type: "icon", icon: DeleteIcon }}
             color="danger"
             action={() => {
-                if (deleted) {
-                    FluxDispatcher.dispatch({
-                        type: "MESSAGE_DELETE",
-                        channelId: channel_id,
-                        id,
-                        mlDeleted: true
-                    });
-                } else {
-                    updateMessage(channel_id, id, { editHistory: [] });
-                }
+                clearMessageHistory(message);
             }}
         />
     ));
 };
 
 const patchChannelContextMenu: NavContextMenuPatchCallback = (children, { channel }) => {
-    const messages = MessageStore.getMessages(channel?.id) as MLMessage[];
-    if (!messages?.some(msg => msg.deleted || msg.editHistory?.length)) return;
+    const messages = MessageStore.getMessages(channel?.id);
+    if (!messages?.some(msg => doesMessageHaveHistory(msg))) return;
 
     const group = findGroupChildrenByChildId("mark-channel-read", children) ?? children;
     group.push(
@@ -183,17 +215,7 @@ const patchChannelContextMenu: NavContextMenuPatchCallback = (children, { channe
             color="danger"
             action={() => {
                 messages.forEach(msg => {
-                    if (msg.deleted)
-                        FluxDispatcher.dispatch({
-                            type: "MESSAGE_DELETE",
-                            channelId: channel.id,
-                            id: msg.id,
-                            mlDeleted: true
-                        });
-                    else
-                        updateMessage(channel.id, msg.id, {
-                            editHistory: []
-                        });
+                    clearMessageHistory(msg);
                 });
             }}
         />
@@ -466,6 +488,7 @@ export default definePlugin({
                 // just mark deleted attachments as deleted on MESSAGE_UPDATE
                 {
                     match: /attachments:(\i)\.attachments\?\?\[\],/,
+                    predicate: () => settings.store.logDeletedAttachments,
                     replace: "attachments: $self.handleUpdateAttachments($1),"
                 }
             ]

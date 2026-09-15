@@ -1,0 +1,114 @@
+.vc-screen-picker-modal {
+    display: contents;
+
+    header,
+    [class^="bodySpacerTop_"],
+    [class^="bodySpacerBottom_"] {
+        display: none;
+    }
+
+    .vc-screen-picker-option-radios {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(0, 1fr));
+        width: 100%;
+
+        .vc-screen-picker-option-radio {
+            text-align: center;
+            padding: 0.3em;
+            cursor: pointer;
+            transition: 50ms ease-in;
+            transition-property: background-color, color, border-color, opacity;
+            background-color: var(--control-secondary-background-default);
+            border-top: 1px solid var(--control-primary-border-default);
+            border-bottom: 1px solid var(--control-primary-border-default);
+            overflow: clip;
+
+            &:hover {
+                background-color: var(--control-secondary-background-hover);
+                color: var(--control-secondary-text-hover);
+                border-color: var(--control-primary-border-hover);
+            }
+
+            &:first-child {
+                border-radius: var(--radius-xs, 4px) 0 0 var(--radius-xs, 4px);
+                border-left: 1px solid var(--control-primary-border-default);
+            }
+
+            &:last-child {
+                border-radius: 0 var(--radius-xs, 4px) var(--radius-xs, 4px) 0;
+                border-right: 1px solid var(--control-primary-border-default);
+            }
+        }
+
+        .vc-screen-picker-option-radio[data-checked="true"] {
+            background-color: var(--control-primary-background-default);
+            color: var(--control-primary-text-default);
+
+            &:hover {
+                background-color: var(--control-primary-background-hover);
+                color: var(--control-primary-text-hover);
+            }
+        }
+
+        input {
+            display: none;
+        }
+    }
+
+    .vc-screen-picker-padding {
+        padding: var(--space-sm, 12px) 0;
+    }
+
+    .vc-screen-picker-flex {
+        display: flex;
+        gap: 1em;
+    }
+
+    .vc-screen-picker-quality-section {
+        flex: 1 1 auto;
+    }
+
+    .vc-screen-picker-pointer label {
+        cursor: pointer;
+    }
+
+    .vc-screen-picker-control-content {
+        display: flex;
+        flex-direction: column;
+        flex-grow: 1;
+        gap: var(--space-4);
+        justify-content: center;
+    }
+
+    .vc-screen-picker-summary {
+        display: flex;
+        min-width: 0;
+        flex-direction: column;
+        gap: 2px;
+        justify-content: center;
+
+        .vc-screen-picker-source-or-preset-name {
+            min-width: 0;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+
+        .vc-screen-picker-summary-detail {
+            align-items: center;
+            display: flex;
+            gap: var(--space-8);
+
+            .vc-screen-picker-ellipsis {
+                color: var(--background-mod-subtle);
+            }
+
+            span {
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+            }
+        }
+    }
+}
