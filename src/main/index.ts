@@ -16,14 +16,16 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import "./ipcMain";
+
 import { app, net, protocol } from "electron";
 import { join } from "path";
 import { pathToFileURL } from "url";
 
 import { initCsp } from "./csp";
-import { ensureSafePath } from "./ipcMain";
 import { RendererSettings } from "./settings";
 import { IS_VANILLA, THEMES_DIR } from "./utils/constants";
+import { ensureSafePath } from "./utils/ensureSafePath";
 import { installExt } from "./utils/extensions";
 
 if (IS_VESKTOP || !IS_VANILLA) {
