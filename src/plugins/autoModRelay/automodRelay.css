@@ -1,0 +1,20 @@
+li[id*="automod-relay-"] [id^="message-content-"],
+li[id*="automod-relay-"] [id^="message-content-"] * {
+  color: var(--text-brand, #5865f2);
+}
+
+li[id*="automod-relay-"] [class*="username"] {
+  color: var(--brand-500, #5865f2);
+}
+
+li[id*="automod-relay-"] [class*="headerText"]::after {
+  content: "AUTOMOD";
+  background-color: var(--brand-500, #5865f2);
+  color: var(--white, #ffffff);
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 1px 4px;
+  border-radius: 3px;
+  margin-left: 6px;
+  vertical-align: middle;
+}
