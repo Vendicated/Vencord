@@ -31,8 +31,8 @@ export default definePlugin({
         {
             find: "ApplicationStreamPreviewUploadManager",
             replacement: {
-                match: /(\i)\.removeAttribute\("srcObject"\)/,
-                replace: "$1.pause(),$1.srcObject=null"
+                match: /removeAttribute\("srcObject"\)(?<=(\i)\..+?)/,
+                replace: "pause(),$1.srcObject=null"
             }
         }
     ]

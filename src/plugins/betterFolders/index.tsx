@@ -107,6 +107,11 @@ export const settings = definePluginSettings({
         description: "Close other folders when opening a folder",
         default: false
     },
+    closeServerFolder: {
+        type: OptionType.BOOLEAN,
+        description: "Close folder when selecting a server in that folder",
+        default: false,
+    },
     forceOpen: {
         type: OptionType.BOOLEAN,
         description: "Force a folder to open when switching to a server of that folder",
@@ -276,7 +281,7 @@ export default definePlugin({
 
     flux: {
         CHANNEL_SELECT(data) {
-            if (!settings.store.closeAllFolders && !settings.store.forceOpen)
+            if (!settings.store.closeAllFolders && !settings.store.forceOpen && !settings.store.closeServerFolder)
                 return;
 
             if (lastGuildId !== data.guildId) {
@@ -284,7 +289,12 @@ export default definePlugin({
                 const guildFolder = getGuildFolder(data.guildId);
 
                 if (guildFolder?.folderId) {
-                    if (settings.store.forceOpen && !ExpandedGuildFolderStore.isFolderExpanded(guildFolder.folderId)) {
+                    const wasExpanded = ExpandedGuildFolderStore.isFolderExpanded(guildFolder.folderId);
+
+                    if (settings.store.forceOpen && !wasExpanded) {
+                        FolderUtils.toggleGuildFolderExpand(guildFolder.folderId);
+                    }
+                    if (settings.store.closeServerFolder && wasExpanded) {
                         FolderUtils.toggleGuildFolderExpand(guildFolder.folderId);
                     }
                 } else if (settings.store.closeAllFolders) {
