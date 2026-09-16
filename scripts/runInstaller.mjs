@@ -19,7 +19,7 @@
 import "./checkNodeVersion.js";
 
 import { execFileSync, execSync } from "child_process";
-import { createWriteStream, existsSync, mkdirSync, readFileSync, writeFileSync } from "fs";
+import { createWriteStream, existsSync, mkdirSync, readFileSync, writeFileSync, cpSync, rmSync } from "fs";
 import { dirname, join } from "path";
 import { Readable } from "stream";
 import { finished } from "stream/promises";
@@ -37,7 +37,7 @@ function getFilename() {
         case "win32":
             return "VencordInstallerCli.exe";
         case "darwin":
-            return "VencordInstaller.MacOS.zip";
+            return "VencordInstaller.dmg";
         case "linux":
             return "VencordInstallerCli-linux";
         default:
@@ -53,7 +53,7 @@ async function ensureBinary() {
 
     const downloadName = join(FILE_DIR, filename);
     const outputFile = process.platform === "darwin"
-        ? join(FILE_DIR, "VencordInstaller")
+        ? join(FILE_DIR, INSTALLER_PATH_DARWIN)
         : downloadName;
 
     const etag = existsSync(outputFile) && existsSync(ETAG_FILE)
@@ -77,27 +77,14 @@ async function ensureBinary() {
     writeFileSync(ETAG_FILE, res.headers.get("etag"));
 
     if (process.platform === "darwin") {
-        console.log("Unzipping...");
-        const zip = new Uint8Array(await res.arrayBuffer());
+        console.log("Mounting...");
 
-        const ff = await import("fflate");
-        const bytes = ff.unzipSync(zip, {
-            filter: f => f.name === INSTALLER_PATH_DARWIN
-        })[INSTALLER_PATH_DARWIN];
-
-        writeFileSync(outputFile, bytes, { mode: 0o755 });
-
-        console.log("Overriding security policy for installer binary (this is required to run it)");
-        console.log("xattr might error, that's okay");
-
-        const logAndRun = cmd => {
-            console.log("Running", cmd);
-            try {
-                execSync(cmd);
-            } catch { }
-        };
-        logAndRun(`sudo spctl --add '${outputFile}' --label "Vencord Installer"`);
-        logAndRun(`sudo xattr -d com.apple.quarantine '${outputFile}'`);
+        writeFileSync(downloadName, new Uint8Array(await res.arrayBuffer()));
+        const mountPoint = execSync("mktemp -d").toString().trim();
+        execSync(`hdiutil attach '${downloadName}' -nobrowse -mountpoint '${mountPoint}'`);
+        cpSync(join(mountPoint, "VencordInstaller.app"), join(FILE_DIR, "VencordInstaller.app"), { recursive: true });
+        execSync(`hdiutil detach '${mountPoint}'`);
+        rmSync(mountPoint, { recursive: true, force: true });
     } else {
         // WHY DOES NODE FETCH RETURN A WEB STREAM OH MY GOD
         const body = Readable.fromWeb(res.body);
