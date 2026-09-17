@@ -129,8 +129,11 @@ export function ReviewsInputComponent(
 ) {
     const { token } = Auth;
     const editorRef = useRef<any>(null);
-    const inputType = ChatInputTypes.USER_PROFILE_REPLY;
-    inputType.disableAutoFocus = true;
+    const inputType = {
+        ...ChatInputTypes.USER_PROFILE_REPLY,
+        disableAutoFocus: true,
+        gifs: { button: true, allowSending: true },
+    };
 
     const channel = createChannelRecordFromServer({ id: "0", type: 1 });
 
@@ -159,9 +162,12 @@ export function ReviewsInputComponent(
                     textValue=""
                     onSubmit={
                         async res => {
+                            const gifUrl = res.isGif
+                                ? res.gifMetadata?.gif_src?.replace(/^https:\/\/images-ext-\d+\.discordapp\.net\/external\/[^/]+\/https\//, "https://")
+                                : undefined;
                             const response = await addReview({
                                 userid: discordId,
-                                comment: res.value,
+                                comment: gifUrl?.startsWith("//") ? `https:${gifUrl}` : gifUrl ?? res.value,
                             });
 
                             if (response) {
