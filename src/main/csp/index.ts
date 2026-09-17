@@ -28,6 +28,7 @@ export const CspPolicies: PolicyMap = {
     "*.github.io": ImageAndCssSrc, // GitHub pages, used by most themes
     "github.com": ImageAndCssSrc, // GitHub content (stuff uploaded to markdown forms), used by most themes
     "raw.githubusercontent.com": ImageAndCssSrc, // GitHub raw, used by some themes
+    "gist.githubusercontent.com": ImageAndCssSrc, // GitHub Gist raw, used by some themes
     "*.gitlab.io": ImageAndCssSrc, // GitLab pages, used by some themes
     "gitlab.com": ImageAndCssSrc, // GitLab raw, used by some themes
     "*.codeberg.page": ImageAndCssSrc, // Codeberg pages, used by some themes
