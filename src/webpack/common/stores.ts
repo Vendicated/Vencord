@@ -51,6 +51,7 @@ export let SelectedChannelStore: t.SelectedChannelStore;
 export let SelectedGuildStore: t.SelectedGuildStore;
 export let ChannelStore: t.ChannelStore;
 export let TypingStore: t.TypingStore;
+export let ReferencedMessageStore: t.ReferencedMessageStore;
 export let RelationshipStore: t.RelationshipStore;
 export let VoiceStateStore: t.VoiceStateStore;
 
@@ -119,6 +120,7 @@ waitForStore("WindowStore", m => WindowStore = m);
 waitForStore("EmojiStore", m => EmojiStore = m);
 waitForStore("StickersStore", m => StickersStore = m);
 waitForStore("TypingStore", m => TypingStore = m);
+waitForStore("ReferencedMessageStore", m => ReferencedMessageStore = m);
 waitForStore("VoiceStateStore", m => VoiceStateStore = m);
 waitForStore("StreamerModeStore", m => StreamerModeStore = m);
 waitForStore("SpotifyStore", m => SpotifyStore = m);
