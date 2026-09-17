@@ -216,3 +216,4 @@ export const DateUtils: t.DateUtils = mapMangledModuleLazy("millisecondsInUnit:"
 });
 
 export const MessageTypeSets: t.MessageTypeSets = findByPropsLazy("REPLYABLE", "FORWARDABLE");
+export const ChannelTypeSets: t.ChannelTypesSets = findByPropsLazy("GUILD_TEXT_ONLY", "GUILD_VOCAL");
