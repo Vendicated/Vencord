@@ -1,6 +1,6 @@
 /*
 * Vencord, a Discord client mod
-* Copyright (c) 2025 Vendicated and contributors*
+* Copyright (c) 2026 Vendicated and contributors*
 * SPDX-License-Identifier: GPL-3.0-or-later
 */
 
@@ -9,7 +9,7 @@ import { Devs } from "@utils/constants";
 import { useForceUpdater } from "@utils/react";
 import { formatDuration } from "@utils/text";
 import definePlugin, { OptionType } from "@utils/types";
-import { React, Text } from "@webpack/common";
+import { React, Text, Tooltip } from "@webpack/common";
 
 const settings = definePluginSettings({
     mode: {
@@ -48,6 +48,7 @@ const muteSince = new Map<string, number>();
 const deafSince = new Map<string, number>();
 
 let currentUserId: string | undefined;
+let avatarUserId: string | undefined;
 
 function track(map: Map<string, number>, userId: string, active: boolean) {
     if (active) {
@@ -137,6 +138,14 @@ function renderDurationLabel(map: Map<string, number>, dedupeMap?: Map<string, n
     return <AlwaysDurationLabel since={map.get(currentUserId)} hideIfEquals={dedupeMap?.get(currentUserId)} />;
 }
 
+function AvatarStatusTooltipText({ since, isDeaf }: { since: number; isDeaf: boolean; }) {
+    const { format } = settings.use(["format"]);
+    const duration = useLiveDuration(since);
+    if (duration == null) return null;
+
+    return <>{isDeaf ? "Deafened" : "Muted"} for {formatDuration(duration, format === "human")}</>;
+}
+
 interface CallTileVoiceState {
     userId: string;
     muted: boolean;
@@ -157,6 +166,10 @@ export default definePlugin({
 
     set currentUserId(id: string | undefined) {
         currentUserId = id;
+    },
+
+    set avatarUserId(id: string | undefined) {
+        avatarUserId = id;
     },
 
     trackVoiceState(muted: boolean, deafened: boolean) {
@@ -211,6 +224,22 @@ export default definePlugin({
                     replace: "$self.renderCallTileIcon($1,$2)"
                 }
             ]
+        },
+        {
+            find: "isLocalMute",
+            all: true,
+            replacement: [
+                {
+                    match: /(let\{userId:(\i),(?:(?!\}=).)*?\}=\i,\i=)(\(0,\i\.\i\)\(\[\i\.\i\],\(\)=>null!=\2&&\i\.\i\.isLocalMute\(\2\)\))/,
+                    replace: "$1($self.avatarUserId=$2,$3)",
+                    noWarn: true
+                },
+                {
+                    match: /\(0,\i\.jsx\)\((\i),\{color:(\i\.\i\.colors\.\i\.css),style:\{width:(\i\.\i),height:\i\.\i\}\},"status"\)/,
+                    replace: "$self.renderAvatarStatusIcon($1,$2,$3)",
+                    noWarn: true
+                }
+            ]
         }
     ],
 
@@ -247,6 +276,27 @@ export default definePlugin({
                 {icon}
                 <InlineDuration since={since} white />
             </span>
+        );
+    },
+
+    renderAvatarStatusIcon(Icon: React.ComponentType<any> | null, color: string, size: number) {
+        if (Icon == null) return null;
+
+        const icon = <Icon key="status" color={color} style={{ width: size, height: size }} />;
+        if (!avatarUserId) return icon;
+
+        const isDeaf = deafSince.has(avatarUserId);
+        const since = isDeaf ? deafSince.get(avatarUserId) : muteSince.get(avatarUserId);
+        if (since == null) return icon;
+
+        return (
+            <Tooltip key="status" text={<AvatarStatusTooltipText since={since} isDeaf={isDeaf} />}>
+                {tooltipProps => (
+                    <span {...tooltipProps} style={{ display: "inline-flex" }}>
+                        <Icon color={color} style={{ width: size, height: size }} />
+                    </span>
+                )}
+            </Tooltip>
         );
     },
 
