@@ -1,0 +1,543 @@
+/*
+ * Vencord, a Discord client mod
+ * Copyright (c) 2026 danyx64
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
+
+.vc-desktop-bounties-page {
+    --vc-db-bg: var(--background-primary, rgb(25 26 29));
+    --vc-db-surface: var(--background-secondary, rgb(35 36 40));
+    --vc-db-surface-alt: var(--background-secondary-alt, rgb(40 41 44));
+    --vc-db-hover: var(--background-modifier-hover, rgb(255 255 255 / 6%));
+    --vc-db-border: var(--border-subtle, rgb(255 255 255 / 7%));
+    --vc-db-border-strong: var(--border-strong, rgb(255 255 255 / 12%));
+    --vc-db-text: var(--text-default, #dbdee1);
+    --vc-db-strong: var(--text-strong, #f2f3f5);
+    --vc-db-muted: var(--text-muted, #949ba4);
+    --vc-db-faint: var(--interactive-normal, #80848e);
+    --vc-db-brand: var(--brand-500, #5865f2);
+    --vc-db-danger: var(--status-danger, #f23f43);
+
+    width: 100%;
+    height: 100%;
+    min-height: 0;
+    overflow: auto;
+    background: var(--vc-db-bg);
+    color: var(--vc-db-text);
+}
+
+.vc-desktop-bounties-page *,
+.vc-desktop-bounties-page *::before,
+.vc-desktop-bounties-page *::after {
+    box-sizing: border-box;
+}
+
+/* Keep the Home shortcut on Discord's own generated classes for sizing and hover. */
+.vc-desktop-bounties-navShell,
+.vc-desktop-bounties-navLink {
+    font: inherit;
+}
+
+.vc-desktop-bounties-pageInner {
+    width: min(1200px, calc(100% - 64px));
+    margin: 0 auto;
+    padding: 34px 0 64px;
+}
+
+.vc-desktop-bounties-sectionHeader {
+    position: relative;
+    isolation: isolate;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    margin-bottom: 22px;
+    padding: 18px 20px;
+    overflow: hidden;
+    border: 1px solid var(--vc-db-border);
+    border-radius: 14px;
+    background:
+        radial-gradient(circle at 8% 10%, color-mix(in srgb, var(--vc-db-brand) 16%, transparent), transparent 34%),
+        linear-gradient(135deg, color-mix(in srgb, var(--vc-db-brand) 7%, var(--vc-db-surface)), var(--vc-db-surface));
+}
+
+.vc-desktop-bounties-sectionHeader::after {
+    position: absolute;
+    z-index: -1;
+    right: -52px;
+    bottom: -76px;
+    width: 190px;
+    height: 190px;
+    border-radius: 50%;
+    background: color-mix(in srgb, var(--vc-db-brand) 9%, transparent);
+    content: "";
+    filter: blur(24px);
+    pointer-events: none;
+}
+
+.vc-desktop-bounties-headerLead {
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.vc-desktop-bounties-headerIcon {
+    width: 44px;
+    height: 44px;
+    display: grid;
+    place-items: center;
+    flex: 0 0 44px;
+    border: 1px solid color-mix(in srgb, var(--vc-db-brand) 38%, var(--vc-db-border));
+    border-radius: 12px;
+    background: color-mix(in srgb, var(--vc-db-brand) 18%, var(--vc-db-surface-alt));
+    color: var(--vc-db-strong);
+    box-shadow: inset 0 1px 0 rgb(255 255 255 / 5%);
+}
+
+.vc-desktop-bounties-headerIcon svg {
+    width: 25px;
+    height: 25px;
+}
+
+.vc-desktop-bounties-headingCopy {
+    min-width: 0;
+}
+
+.vc-desktop-bounties-sectionTitleRow {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.vc-desktop-bounties-sectionTitleRow h1 {
+    margin: 0;
+    color: var(--vc-db-strong);
+    font-size: 20px;
+    font-weight: 700;
+    line-height: 1.25;
+}
+
+.vc-desktop-bounties-sectionHeader p {
+    max-width: 660px;
+    margin: 5px 0 0;
+    color: var(--vc-db-muted);
+    font-size: 13px;
+    line-height: 1.45;
+}
+
+.vc-desktop-bounties-sectionCount {
+    min-width: 20px;
+    padding: 2px 6px;
+    border-radius: 999px;
+    background: var(--vc-db-surface-alt);
+    color: var(--vc-db-muted);
+    font-size: 11px;
+    font-weight: 700;
+    line-height: 1.2;
+    text-align: center;
+}
+
+.vc-desktop-bounties-nativeOrb {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    flex: 0 0 auto;
+}
+
+/* Portrait feed: compact cards, 9:16 media, several Bounties per row on wide screens. */
+.vc-desktop-bounties-grid,
+.vc-desktop-bounties-skeletonGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 280px));
+    justify-content: start;
+    align-items: start;
+    gap: 20px;
+}
+
+.vc-desktop-bounties-card,
+.vc-desktop-bounties-skeletonCard {
+    width: 100%;
+    overflow: hidden;
+    border: 1px solid var(--vc-db-border);
+    border-radius: 12px;
+    background: var(--vc-db-surface);
+}
+
+.vc-desktop-bounties-card {
+    color: var(--vc-db-text);
+    box-shadow: 0 8px 24px rgb(0 0 0 / 8%);
+    transition: transform 140ms ease, border-color 140ms ease, box-shadow 140ms ease;
+}
+
+.vc-desktop-bounties-card:hover {
+    transform: translateY(-2px);
+    border-color: color-mix(in srgb, var(--vc-db-brand) 36%, var(--vc-db-border-strong));
+    box-shadow: 0 12px 30px rgb(0 0 0 / 14%);
+}
+
+.vc-desktop-bounties-media {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 9 / 16;
+    overflow: hidden;
+    background: #000;
+}
+
+.vc-desktop-bounties-media video,
+.vc-desktop-bounties-media img {
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+
+.vc-desktop-bounties-media video {
+    object-fit: contain;
+    background: #000;
+}
+
+.vc-desktop-bounties-media img {
+    object-fit: cover;
+}
+
+.vc-desktop-bounties-mediaFallback {
+    width: 100%;
+    height: 100%;
+    display: grid;
+    place-items: center;
+    background: var(--vc-db-surface-alt);
+    color: var(--vc-db-faint);
+}
+
+.vc-desktop-bounties-mediaFallback svg {
+    width: 46px;
+    height: 46px;
+}
+
+.vc-desktop-bounties-statusPill {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    z-index: 2;
+    max-width: calc(100% - 20px);
+    padding: 5px 8px;
+    overflow: hidden;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--vc-db-bg) 82%, transparent);
+    color: var(--vc-db-strong);
+    font-size: 11px;
+    font-weight: 700;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    backdrop-filter: blur(8px);
+}
+
+.vc-desktop-bounties-statusPill-progress {
+    background: color-mix(in srgb, var(--vc-db-brand) 68%, var(--vc-db-bg));
+}
+
+.vc-desktop-bounties-body {
+    display: flex;
+    flex-direction: column;
+    gap: 13px;
+    padding: 14px;
+}
+
+.vc-desktop-bounties-progressBlock {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.vc-desktop-bounties-progressText {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    color: var(--vc-db-muted);
+    font-size: 12px;
+    line-height: 1.3;
+}
+
+.vc-desktop-bounties-progressText span {
+    min-width: 0;
+    color: var(--vc-db-muted);
+}
+
+.vc-desktop-bounties-progressText strong {
+    flex: 0 0 auto;
+    color: var(--vc-db-text);
+    font-weight: 700;
+}
+
+.vc-desktop-bounties-progress {
+    height: 6px;
+    overflow: hidden;
+    border-radius: 999px;
+    background: var(--vc-db-surface-alt);
+}
+
+.vc-desktop-bounties-progress > div {
+    height: 100%;
+    border-radius: inherit;
+    background: linear-gradient(90deg, var(--vc-db-brand), color-mix(in srgb, var(--vc-db-brand) 72%, white));
+    box-shadow: 0 0 10px color-mix(in srgb, var(--vc-db-brand) 28%, transparent);
+    transition: width 180ms linear;
+}
+
+.vc-desktop-bounties-titleRow {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.vc-desktop-bounties-icon {
+    width: 38px;
+    height: 38px;
+    flex: 0 0 38px;
+    border-radius: 8px;
+    object-fit: cover;
+    background: var(--vc-db-surface-alt);
+}
+
+.vc-desktop-bounties-titleText {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.vc-desktop-bounties-titleText strong {
+    overflow: hidden;
+    color: var(--vc-db-strong);
+    font-size: 15px;
+    font-weight: 700;
+    line-height: 1.25;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.vc-desktop-bounties-titleText span {
+    overflow: hidden;
+    color: var(--vc-db-muted);
+    font-size: 12px;
+    line-height: 1.25;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.vc-desktop-bounties-cardFooter {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 12px;
+    padding-top: 1px;
+}
+
+.vc-desktop-bounties-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px;
+    width: 100%;
+}
+
+.vc-desktop-bounties-primaryButton,
+.vc-desktop-bounties-secondaryButton {
+    min-height: 34px;
+    padding: 0 13px;
+    border: 0;
+    outline: 0;
+    border-radius: 7px;
+    font: inherit;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.vc-desktop-bounties-secondaryButton {
+    background: var(--vc-db-surface-alt);
+    color: var(--vc-db-text);
+}
+
+.vc-desktop-bounties-primaryButton {
+    background: var(--vc-db-brand);
+    color: white;
+}
+
+.vc-desktop-bounties-secondaryButton:disabled {
+    opacity: .45;
+    cursor: not-allowed;
+}
+
+.vc-desktop-bounties-primaryButton:focus-visible,
+.vc-desktop-bounties-secondaryButton:focus-visible {
+    outline: 2px solid var(--vc-db-brand);
+    outline-offset: 2px;
+}
+
+.vc-desktop-bounties-secondaryButton:hover:not(:disabled) {
+    background: var(--vc-db-hover);
+    color: var(--vc-db-strong);
+}
+
+.vc-desktop-bounties-infoBox,
+.vc-desktop-bounties-claimError {
+    padding: 9px 10px;
+    border-radius: 7px;
+    font-size: 11px;
+    line-height: 1.4;
+}
+
+.vc-desktop-bounties-infoBox {
+    border: 1px solid var(--vc-db-border);
+    background: var(--vc-db-surface-alt);
+    color: var(--vc-db-muted);
+}
+
+.vc-desktop-bounties-claimError {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    border: 1px solid color-mix(in srgb, var(--vc-db-danger) 35%, var(--vc-db-border));
+    background: color-mix(in srgb, var(--vc-db-danger) 9%, var(--vc-db-surface));
+    color: var(--vc-db-muted);
+}
+
+.vc-desktop-bounties-claimError strong {
+    color: var(--vc-db-danger);
+}
+
+.vc-desktop-bounties-state,
+.vc-desktop-bounties-emptyState {
+    border: 1px solid var(--vc-db-border);
+    border-radius: 12px;
+    background: var(--vc-db-surface);
+}
+
+.vc-desktop-bounties-state {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-bottom: 16px;
+    padding: 14px 16px;
+}
+
+.vc-desktop-bounties-state strong,
+.vc-desktop-bounties-emptyState h3 {
+    color: var(--vc-db-strong);
+}
+
+.vc-desktop-bounties-state span,
+.vc-desktop-bounties-emptyState p {
+    color: var(--vc-db-muted);
+}
+
+.vc-desktop-bounties-error strong {
+    color: var(--vc-db-danger);
+}
+
+.vc-desktop-bounties-emptyState {
+    min-height: 90px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 18px;
+}
+
+.vc-desktop-bounties-emptyIcon {
+    width: 40px;
+    height: 40px;
+    display: grid;
+    place-items: center;
+    flex: 0 0 40px;
+    border-radius: 50%;
+    background: var(--vc-db-surface-alt);
+    color: var(--vc-db-faint);
+}
+
+.vc-desktop-bounties-emptyIcon svg {
+    width: 23px;
+    height: 23px;
+}
+
+.vc-desktop-bounties-emptyState h3 {
+    margin: 0;
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.vc-desktop-bounties-emptyState p {
+    margin: 4px 0 0;
+    font-size: 12px;
+    line-height: 1.45;
+}
+
+.vc-desktop-bounties-skeletonCard {
+    aspect-ratio: 9 / 19;
+    background: linear-gradient(
+        90deg,
+        var(--vc-db-surface) 25%,
+        var(--vc-db-surface-alt) 50%,
+        var(--vc-db-surface) 75%
+    );
+    background-size: 200% 100%;
+    animation: vc-desktop-bounties-shimmer 1.4s infinite linear;
+}
+
+@keyframes vc-desktop-bounties-shimmer {
+    from { background-position: 200% 0; }
+    to { background-position: -200% 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .vc-desktop-bounties-card,
+    .vc-desktop-bounties-progress > div,
+    .vc-desktop-bounties-skeletonCard {
+        animation: none;
+        transition: none;
+    }
+
+    .vc-desktop-bounties-card:hover {
+        transform: none;
+    }
+}
+
+@media (width <= 900px) {
+    .vc-desktop-bounties-pageInner {
+        width: min(100% - 32px, 1200px);
+    }
+
+    .vc-desktop-bounties-grid,
+    .vc-desktop-bounties-skeletonGrid {
+        grid-template-columns: repeat(auto-fill, minmax(240px, 280px));
+    }
+}
+
+@media (width <= 640px) {
+    .vc-desktop-bounties-pageInner {
+        width: calc(100% - 24px);
+        padding-top: 26px;
+    }
+
+    .vc-desktop-bounties-sectionHeader {
+        align-items: stretch;
+        flex-direction: column;
+        gap: 16px;
+        padding: 16px;
+    }
+
+    .vc-desktop-bounties-headerLead {
+        align-items: flex-start;
+    }
+
+    .vc-desktop-bounties-nativeOrb {
+        justify-content: flex-start;
+    }
+
+    .vc-desktop-bounties-grid,
+    .vc-desktop-bounties-skeletonGrid {
+        grid-template-columns: minmax(0, 320px);
+        justify-content: center;
+    }
+}
