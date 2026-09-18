@@ -50,8 +50,7 @@ async function ensureBinary() {
 
     mkdirSync(FILE_DIR, { recursive: true });
 
-    const downloadName = join(FILE_DIR, filename);
-    const outputFile = downloadName;
+    const outputFile = join(FILE_DIR, filename);
 
     const etag = existsSync(outputFile) && existsSync(ETAG_FILE)
         ? readFileSync(ETAG_FILE, "utf-8")
@@ -73,7 +72,6 @@ async function ensureBinary() {
 
     writeFileSync(ETAG_FILE, res.headers.get("etag"));
 
-    // WHY DOES NODE FETCH RETURN A WEB STREAM OH MY GOD
     const body = Readable.fromWeb(res.body);
     await finished(body.pipe(createWriteStream(outputFile, {
         mode: 0o755,
