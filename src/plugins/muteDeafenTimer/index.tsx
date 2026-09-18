@@ -57,26 +57,45 @@ function track(map: Map<string, number>, userId: string, active: boolean) {
     }
 }
 
+const tickListeners = new Set<() => void>();
+let tickInterval: ReturnType<typeof setInterval> | undefined;
+
+function subscribeTick(listener: () => void) {
+    tickListeners.add(listener);
+    tickInterval ??= setInterval(() => {
+        for (const l of tickListeners) l();
+    }, 1000);
+
+    return () => {
+        tickListeners.delete(listener);
+        if (tickListeners.size === 0 && tickInterval != null) {
+            clearInterval(tickInterval);
+            tickInterval = undefined;
+        }
+    };
+}
+
 function useLiveDuration(since: number | undefined) {
     const forceUpdate = useForceUpdater();
 
     React.useEffect(() => {
         if (since == null) return;
-        const interval = setInterval(forceUpdate, 1000);
-        return () => clearInterval(interval);
+        return subscribeTick(forceUpdate);
     }, [since]);
 
     return since == null ? null : Date.now() - since;
 }
 
 function DurationLabel({ label, since }: { label: string; since: number | undefined; }) {
+    const { format } = settings.use(["format"]);
     const duration = useLiveDuration(since);
     if (duration == null) return <>{label}</>;
 
-    return <>{label} ({formatDuration(duration, settings.store.format === "human")})</>;
+    return <>{label} ({formatDuration(duration, format === "human")})</>;
 }
 
 function InlineDuration({ since, white }: { since: number | undefined; white?: boolean; }) {
+    const { format } = settings.use(["format"]);
     const duration = useLiveDuration(since);
     if (duration == null) return null;
 
@@ -86,9 +105,36 @@ function InlineDuration({ since, white }: { since: number | undefined; white?: b
             color={white ? undefined : "text-muted"}
             style={white ? { marginLeft: 4, color: "#fff" } : { marginLeft: 4 }}
         >
-            {formatDuration(duration, settings.store.format === "human")}
+            {formatDuration(duration, format === "human")}
         </Text>
     );
+}
+
+function HoverDurationText({ original, since }: { original: string; since: number | undefined; }) {
+    const { mode } = settings.use(["mode"]);
+    if (mode !== "hover" || since == null) return <>{original}</>;
+
+    return <DurationLabel label={original} since={since} />;
+}
+
+function AlwaysDurationLabel({ since, hideIfEquals }: { since: number | undefined; hideIfEquals?: number; }) {
+    const { mode } = settings.use(["mode"]);
+    if (mode !== "always" || since == null) return null;
+    if (hideIfEquals != null && since === hideIfEquals) return null;
+
+    return <InlineDuration since={since} />;
+}
+
+function wrapDurationText(map: Map<string, number>, originalText: string) {
+    if (!currentUserId) return originalText;
+
+    return <HoverDurationText original={originalText} since={map.get(currentUserId)} />;
+}
+
+function renderDurationLabel(map: Map<string, number>, dedupeMap?: Map<string, number>) {
+    if (!currentUserId) return null;
+
+    return <AlwaysDurationLabel since={map.get(currentUserId)} hideIfEquals={dedupeMap?.get(currentUserId)} />;
 }
 
 interface CallTileVoiceState {
@@ -169,49 +215,36 @@ export default definePlugin({
     ],
 
     wrapMuteText(originalText: string) {
-        if (settings.store.mode !== "hover" || !currentUserId) return originalText;
-
-        const since = muteSince.get(currentUserId);
-        return since == null ? originalText : <DurationLabel label={originalText} since={since} />;
+        return wrapDurationText(muteSince, originalText);
     },
 
     wrapDeafText(originalText: string) {
-        if (settings.store.mode !== "hover" || !currentUserId) return originalText;
-
-        const since = deafSince.get(currentUserId);
-        return since == null ? originalText : <DurationLabel label={originalText} since={since} />;
+        return wrapDurationText(deafSince, originalText);
     },
 
     renderMuteLabel() {
-        if (settings.store.mode !== "always" || !currentUserId) return null;
-
-        const since = muteSince.get(currentUserId);
-        if (since != null && since === deafSince.get(currentUserId)) return null;
-
-        return <InlineDuration since={since} />;
+        return renderDurationLabel(muteSince, deafSince);
     },
 
     renderDeafLabel() {
-        if (settings.store.mode !== "always" || !currentUserId) return null;
-
-        return <InlineDuration since={deafSince.get(currentUserId)} />;
+        return renderDurationLabel(deafSince);
     },
 
     renderCallTileIcon(Icon: React.ComponentType<any> | null, className: string) {
         if (Icon == null) return null;
 
-        const icon = <Icon key="sound-icon" className={className} size="xs" color="currentColor" />;
-        if (!callTileVoiceState) return icon;
+        const icon = <Icon className={className} size="xs" color="currentColor" />;
+        if (!callTileVoiceState) return React.cloneElement(icon, { key: "sound-icon" });
 
         const { userId, muted, deafened, localMuted, serverMuted, serverDeafened } = callTileVoiceState;
         const isDeaf = deafened || serverDeafened;
         const isMute = muted || localMuted || serverMuted;
         const since = isDeaf ? deafSince.get(userId) : isMute ? muteSince.get(userId) : undefined;
-        if (since == null) return icon;
+        if (since == null) return React.cloneElement(icon, { key: "sound-icon" });
 
         return (
             <span key="sound-icon" style={{ display: "inline-flex", alignItems: "center" }}>
-                <Icon className={className} size="xs" color="currentColor" />
+                {icon}
                 <InlineDuration since={since} white />
             </span>
         );
