@@ -26,7 +26,6 @@ import { finished } from "stream/promises";
 import { fileURLToPath } from "url";
 
 const BASE_URL = "https://github.com/Vencord/Installer/releases/latest/download/";
-const INSTALLER_PATH_DARWIN = "VencordInstaller.app/Contents/MacOS/VencordInstaller";
 
 const BASE_DIR = join(dirname(fileURLToPath(import.meta.url)), "..");
 const FILE_DIR = join(BASE_DIR, "dist", "Installer");
@@ -37,7 +36,7 @@ function getFilename() {
         case "win32":
             return "VencordInstallerCli.exe";
         case "darwin":
-            return "VencordInstaller.dmg";
+            return "VencordInstallerCli-darwin";
         case "linux":
             return "VencordInstallerCli-linux";
         default:
@@ -52,9 +51,7 @@ async function ensureBinary() {
     mkdirSync(FILE_DIR, { recursive: true });
 
     const downloadName = join(FILE_DIR, filename);
-    const outputFile = process.platform === "darwin"
-        ? join(FILE_DIR, INSTALLER_PATH_DARWIN)
-        : downloadName;
+    const outputFile = downloadName;
 
     const etag = existsSync(outputFile) && existsSync(ETAG_FILE)
         ? readFileSync(ETAG_FILE, "utf-8")
@@ -76,23 +73,12 @@ async function ensureBinary() {
 
     writeFileSync(ETAG_FILE, res.headers.get("etag"));
 
-    if (process.platform === "darwin") {
-        console.log("Mounting...");
-
-        writeFileSync(downloadName, new Uint8Array(await res.arrayBuffer()));
-        const mountPoint = execSync("mktemp -d").toString().trim();
-        execSync(`hdiutil attach '${downloadName}' -nobrowse -mountpoint '${mountPoint}'`);
-        cpSync(join(mountPoint, "VencordInstaller.app"), join(FILE_DIR, "VencordInstaller.app"), { recursive: true });
-        execSync(`hdiutil detach '${mountPoint}'`);
-        rmSync(mountPoint, { recursive: true, force: true });
-    } else {
-        // WHY DOES NODE FETCH RETURN A WEB STREAM OH MY GOD
-        const body = Readable.fromWeb(res.body);
-        await finished(body.pipe(createWriteStream(outputFile, {
-            mode: 0o755,
-            autoClose: true
-        })));
-    }
+    // WHY DOES NODE FETCH RETURN A WEB STREAM OH MY GOD
+    const body = Readable.fromWeb(res.body);
+    await finished(body.pipe(createWriteStream(outputFile, {
+        mode: 0o755,
+        autoClose: true
+    })));
 
     console.log("Finished downloading!");
 
