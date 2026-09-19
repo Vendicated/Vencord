@@ -30,7 +30,7 @@ import { Logger } from "@utils/Logger";
 import { classes } from "@utils/misc";
 import definePlugin, { OptionType } from "@utils/types";
 import { Message, MessageAttachment } from "@vencord/discord-types";
-import { findCssClassesLazy } from "@webpack";
+import { findByCodeLazy, findByPropsLazy, findCssClassesLazy } from "@webpack";
 import { AuthenticationStore, ChannelStore, FluxDispatcher, Menu, MessageStore, Parser, SelectedChannelStore, SnowflakeUtils, Timestamp, UserStore, useStateFromStores } from "@webpack/common";
 
 import overlayStyle from "./deleteStyleOverlay.css?managed";
@@ -53,6 +53,10 @@ interface MLAttachment extends MessageAttachment {
 }
 
 const MessageClasses = findCssClassesLazy("edited", "communicationDisabled", "isSystemMessage");
+const ChannelMessages = findByPropsLazy("getOrCreate", "commit", "forEach");
+const createMessageRecord = findByCodeLazy(".createFromServer(", ".isBlockedForMessage", "messageReference:");
+
+const uncachedMessages = new Map<string, MLMessage[]>();
 
 const settings = definePluginSettings({
     deleteStyle: {
@@ -121,6 +125,16 @@ const settings = definePluginSettings({
         multiline: true
     },
 });
+
+function isLoggedChannel(channelId: string) {
+    const channel = ChannelStore.getChannel(channelId);
+    if (!channel) return false;
+    if (channel.isPrivate()) return true;
+
+    let opened = false;
+    ChannelMessages.forEach(c => opened ||= c.hasFetched && ChannelStore.getChannel(c.channelId)?.guild_id === channel.guild_id);
+    return opened;
+}
 
 function addDeleteStyle() {
     if (settings.store.deleteStyle === "text") {
@@ -249,6 +263,38 @@ export default definePlugin({
         "gdm-context": patchChannelContextMenu
     },
 
+    flux: {
+        MESSAGE_CREATE({ channelId, message, optimistic }: { channelId: string; message: MLMessage; optimistic: boolean; }) {
+            if (optimistic || ChannelMessages.get(channelId)?.ready || !isLoggedChannel(channelId)) return;
+
+            const messages = uncachedMessages.get(channelId);
+            if (messages) messages.push(message);
+            else uncachedMessages.set(channelId, [message]);
+        },
+        MESSAGE_UPDATE({ message }: { message: MLMessage & { edited_timestamp: string; }; }) {
+            const stored = uncachedMessages.get(message.channel_id)?.find(m => m.id === message.id);
+            if (!stored) return;
+
+            if (message.edited_timestamp && message.content !== stored.content) {
+                stored.editHistory = [...(stored.editHistory ?? []), { timestamp: new Date(message.edited_timestamp), content: stored.content }];
+            }
+            Object.assign(stored, message);
+        },
+        MESSAGE_DELETE({ channelId, id, mlDeleted }: { channelId: string; id: string; mlDeleted?: boolean; }) {
+            const messages = uncachedMessages.get(channelId);
+            const msg = messages?.find(m => m.id === id);
+            if (!messages || !msg) return;
+
+            if (mlDeleted) messages.splice(messages.indexOf(msg), 1);
+            else msg.deleted = true;
+        },
+        MESSAGE_DELETE_BULK({ channelId, ids }: { channelId: string; ids: string[]; }) {
+            uncachedMessages.get(channelId)?.forEach(m => {
+                if (ids.includes(m.id)) m.deleted = true;
+            });
+        },
+    },
+
     start() {
         addDeleteStyle();
     },
@@ -344,15 +390,20 @@ export default definePlugin({
             (!isAfter && !hasMoreBefore || oldest != null && SnowflakeUtils.compare(id, oldest) > 0) &&
             (!isBefore && !hasMoreAfter || newest != null && SnowflakeUtils.compare(id, newest) < 0);
 
+        const stored = uncachedMessages.get(cache.channelId) ?? [];
         const restored = new Map<string, MLMessage>();
         cache.filter((m: MLMessage) => m.deleted).forEach((m: MLMessage) => restored.set(m.id, m));
+        stored
+            .filter(m => m.deleted && !this.shouldIgnore(m))
+            .forEach(m => restored.set(m.id, createMessageRecord({ ...m, attachments: m.attachments.map(a => ({ ...a, deleted: true })) })));
 
         const loaded = messages.map(m => {
             restored.delete(m.id);
-            const history = cache.get(m.id)?.editHistory;
+            const history = stored.find(s => s.id === m.id)?.editHistory ?? cache.get(m.id)?.editHistory;
             return history?.length && !m.editHistory?.length && !this.shouldIgnore(m, true) ? m.set("editHistory", history) : m;
         });
 
+        uncachedMessages.set(cache.channelId, stored.filter(m => !fits(m.id)));
         return loaded
             .concat([...restored.values()].filter(m => fits(m.id)))
             .sort((a, b) => SnowflakeUtils.compare(a.id, b.id));
