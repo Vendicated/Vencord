@@ -31,7 +31,7 @@ import { classes } from "@utils/misc";
 import definePlugin, { OptionType } from "@utils/types";
 import { Message, MessageAttachment } from "@vencord/discord-types";
 import { findCssClassesLazy } from "@webpack";
-import { AuthenticationStore, ChannelStore, FluxDispatcher, Menu, MessageStore, Parser, SelectedChannelStore, Timestamp, UserStore, useStateFromStores } from "@webpack/common";
+import { AuthenticationStore, ChannelStore, FluxDispatcher, Menu, MessageStore, Parser, SelectedChannelStore, SnowflakeUtils, Timestamp, UserStore, useStateFromStores } from "@webpack/common";
 
 import overlayStyle from "./deleteStyleOverlay.css?managed";
 import textStyle from "./deleteStyleText.css?managed";
@@ -337,6 +337,27 @@ export default definePlugin({
         return cache;
     },
 
+    restoreMessages(cache: any, messages: MLMessage[], { isBefore, isAfter, hasMoreBefore, hasMoreAfter }: { isBefore?: boolean; isAfter?: boolean; hasMoreBefore?: boolean; hasMoreAfter?: boolean; }) {
+        const oldest = messages[0]?.id;
+        const newest = messages[messages.length - 1]?.id;
+        const fits = (id: string) =>
+            (!isAfter && !hasMoreBefore || oldest != null && SnowflakeUtils.compare(id, oldest) > 0) &&
+            (!isBefore && !hasMoreAfter || newest != null && SnowflakeUtils.compare(id, newest) < 0);
+
+        const restored = new Map<string, MLMessage>();
+        cache.filter((m: MLMessage) => m.deleted).forEach((m: MLMessage) => restored.set(m.id, m));
+
+        const loaded = messages.map(m => {
+            restored.delete(m.id);
+            const history = cache.get(m.id)?.editHistory;
+            return history?.length && !m.editHistory?.length && !this.shouldIgnore(m, true) ? m.set("editHistory", history) : m;
+        });
+
+        return loaded
+            .concat([...restored.values()].filter(m => fits(m.id)))
+            .sort((a, b) => SnowflakeUtils.compare(a.id, b.id));
+    },
+
     shouldIgnore(message: any, isEdit = false) {
         try {
             const { ignoreBots, ignoreSelf, ignoreUsers, ignoreChannels, ignoreGuilds, logEdits, logDeletes } = settings.store;
@@ -599,6 +620,14 @@ export default definePlugin({
             replacement: {
                 match: /receiveMessage\((\i)\)\{/,
                 replace: "$& $self.normalizeNonce($1);"
+            }
+        },
+        {
+            find: "this.truncateTop",
+            replacement: {
+                // add back deleted and edited messages discord dropped
+                match: /(?<=loadComplete\(\i\)\{.{0,400}?\i=)\i\(\)\(\i\)\.reverse\(\)\.map\(.{0,30}?\)\.value\(\)/,
+                replace: "$self.restoreMessages(this,$&,arguments[0])"
             }
         }
     ]
