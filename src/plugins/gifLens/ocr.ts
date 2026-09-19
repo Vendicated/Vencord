@@ -25,9 +25,19 @@ class OcrWorkerPool {
     private waiting: ((worker: any) => void)[] = [];
     private maxWorkers = 3;
     private createdCount = 0;
+    private languages = ["eng"];
 
     setMaxWorkers(count: number) {
         this.maxWorkers = Math.max(1, Math.min(8, count));
+    }
+
+    setLanguages(langs: string[]) {
+        const sortedNew = [...langs].sort().join(",");
+        const sortedOld = [...this.languages].sort().join(",");
+        if (sortedNew !== sortedOld) {
+            this.languages = [...langs];
+            this.terminateAll();
+        }
     }
 
     async acquire(): Promise<any> {
@@ -39,7 +49,9 @@ class OcrWorkerPool {
             this.createdCount++;
             try {
                 const tesseract = await loadTesseractScript();
-                const worker = await tesseract.createWorker("eng");
+                const worker = await tesseract.createWorker(
+                    this.languages.length === 1 ? this.languages[0] : this.languages
+                );
                 try {
                     await worker.setParameters({
                         preserve_interword_spaces: "1" as any
@@ -80,6 +92,37 @@ class OcrWorkerPool {
 }
 
 const workerPool = new OcrWorkerPool();
+
+const ARABIC_PATTERN = /[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF]/;
+
+export function configureOcrLanguages(enableArabic: boolean): void {
+    workerPool.setLanguages(enableArabic ? ["eng", "ara"] : ["eng"]);
+}
+
+export function isArabicWord(word: string): boolean {
+    return ARABIC_PATTERN.test(word);
+}
+
+export function splitOcrByLanguage(raw: string): { english: string; arabic: string } {
+    if (!raw) return { english: "", arabic: "" };
+
+    const words = raw.split(/\s+/).filter(Boolean);
+    const engWords: string[] = [];
+    const araWords: string[] = [];
+
+    for (const w of words) {
+        if (ARABIC_PATTERN.test(w)) {
+            araWords.push(w);
+        } else if (/[a-zA-Z0-9]/.test(w)) {
+            engWords.push(w);
+        }
+    }
+
+    return {
+        english: engWords.join(" "),
+        arabic: araWords.join(" ")
+    };
+}
 
 export function addProgressListener(listener: ProgressListener): () => void {
     progressListeners.add(listener);
@@ -340,20 +383,36 @@ function enhanceCanvasContrast(sourceCanvas: HTMLCanvasElement): HTMLCanvasEleme
 
 function cleanOcrText(raw: string): string {
     if (!raw) return "";
-    const words = raw
-        .toLowerCase()
-        .replace(/[^a-z0-9\s'-]/g, " ")
-        .split(/\s+/)
-        .filter(w => {
-            if (w.length <= 1) return false;
-            if (w.length === 2 && !/^(ai|in|on|at|to|no|is|it|he|we|go|do|me|my|up|so|or|an|as|by|if|of)$/.test(w)) return false;
-            return true;
-        });
 
-    return Array.from(new Set(words)).join(" ");
+    const sanitized = raw
+        .replace(/[\u064B-\u0652\u0640]/g, "")
+        .replace(/[^a-zA-Z0-9\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF\s'-]/g, " ");
+
+    const tokens = sanitized.split(/\s+/).filter(Boolean);
+    const validWords: string[] = [];
+
+    for (const token of tokens) {
+        if (ARABIC_PATTERN.test(token)) {
+            const cleanedAra = token.replace(/[^\u0621-\u064A\u0660-\u06690-9-]/g, "");
+            if (cleanedAra.length >= 2 || (cleanedAra.length === 1 && /^[\u0648\u0641]$/.test(cleanedAra))) {
+                validWords.push(cleanedAra);
+            }
+        } else {
+            const lower = token.toLowerCase().replace(/[^a-z0-9'-]/g, "");
+            if (lower.length > 1) {
+                if (lower.length === 2 && !/^(ai|in|on|at|to|no|is|it|he|we|go|do|me|my|up|so|or|an|as|by|if|of)$/.test(lower)) {
+                    continue;
+                }
+                validWords.push(lower);
+            }
+        }
+    }
+
+    return Array.from(new Set(validWords)).join(" ");
 }
 
-export async function extractTextFromMedia(url: string, src?: string, deepScan = false): Promise<string> {
+export async function extractTextFromMedia(url: string, src?: string, deepScan = false, enableArabic = false): Promise<string> {
+    configureOcrLanguages(enableArabic);
     const rawTarget = src || url;
     if (!rawTarget) return "";
 
@@ -412,7 +471,7 @@ export async function extractTextFromMedia(url: string, src?: string, deepScan =
     }
 }
 
-export async function indexGif(gif: Gif, enableOcr = true, deepScan = false): Promise<IndexedGifRecord> {
+export async function indexGif(gif: Gif, enableOcr = true, deepScan = false, enableArabic = false): Promise<IndexedGifRecord> {
     const existing = await getGifRecord(gif.url);
     if (existing && (existing.ocrText || !enableOcr)) {
         return existing;
@@ -423,7 +482,7 @@ export async function indexGif(gif: Gif, enableOcr = true, deepScan = false): Pr
 
     if (enableOcr && !ocrText) {
         try {
-            ocrText = await extractTextFromMedia(gif.url, gif.src, deepScan);
+            ocrText = await extractTextFromMedia(gif.url, gif.src, deepScan, enableArabic);
         } catch {}
     }
 
@@ -439,8 +498,9 @@ export async function indexGif(gif: Gif, enableOcr = true, deepScan = false): Pr
     return record;
 }
 
-export function startBackgroundIndexing(gifs: Gif[], enableOcr = true, concurrency = 3, deepScan = false): void {
+export function startBackgroundIndexing(gifs: Gif[], enableOcr = true, concurrency = 3, deepScan = false, enableArabic = false): void {
     if (shouldAbort) shouldAbort = false;
+    configureOcrLanguages(enableArabic);
     workerPool.setMaxWorkers(concurrency);
 
     let added = false;
@@ -461,11 +521,11 @@ export function startBackgroundIndexing(gifs: Gif[], enableOcr = true, concurren
     totalQueueCount = queue.length + completedQueueCount;
 
     if (!isProcessingQueue) {
-        processQueue(enableOcr, concurrency, deepScan);
+        processQueue(enableOcr, concurrency, deepScan, enableArabic);
     }
 }
 
-async function processQueue(enableOcr: boolean, concurrency: number, deepScan = false): Promise<void> {
+async function processQueue(enableOcr: boolean, concurrency: number, deepScan = false, enableArabic = false): Promise<void> {
     if (isProcessingQueue) return;
     isProcessingQueue = true;
 
@@ -488,7 +548,7 @@ async function processQueue(enableOcr: boolean, concurrency: number, deepScan = 
                     notifyProgress(gif.url, true);
 
                     try {
-                        await indexGif(gif, enableOcr, deepScan);
+                        await indexGif(gif, enableOcr, deepScan, enableArabic);
                     } catch {}
 
                     completedQueueCount++;

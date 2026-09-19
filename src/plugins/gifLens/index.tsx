@@ -12,6 +12,7 @@ import { Flex } from "@components/Flex";
 import { Heading } from "@components/Heading";
 import { EyeIcon } from "@components/Icons";
 import { Paragraph } from "@components/Paragraph";
+import { copyToClipboard } from "@utils/clipboard";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import {
@@ -32,7 +33,9 @@ import {
     saveGifRecord } from "./db";
 import {
     addProgressListener,
+    configureOcrLanguages,
     extractTextFromMedia,
+    splitOcrByLanguage,
     startBackgroundIndexing,
     stopBackgroundIndexing,
     terminateOcrWorker,
@@ -49,6 +52,11 @@ const settings = definePluginSettings({
         type: OptionType.BOOLEAN,
         default: true,
         description: "Extract and search text from favorite GIFs and images using OCR"
+    },
+    enableArabicOcr: {
+        type: OptionType.BOOLEAN,
+        default: true,
+        description: "Arabic OCR Support: recognize Arabic text in images and memes alongside English"
     },
     deepScan: {
         type: OptionType.BOOLEAN,
@@ -108,7 +116,7 @@ function getFiber(node: Node | null): any {
     return key ? (node as any)[key] : null;
 }
 
-function findUrlInFiber(fiber: any): { url?: string; src?: string; } | null {
+function findUrlInFiber(fiber: any): { url?: string; src?: string } | null {
     let curr = fiber;
     let depth = 0;
     while (curr && depth < 25) {
@@ -169,7 +177,7 @@ function findUrlInElement(el: HTMLElement | null): string | null {
     return null;
 }
 
-function findUrlInArgs(args: any[]): { url?: string; src?: string; } | null {
+function findUrlInArgs(args: any[]): { url?: string; src?: string } | null {
     for (const arg of args) {
         if (!arg || typeof arg !== "object") continue;
         let u = typeof arg.url === "string" && isCandidateUrl(arg.url) ? arg.url : undefined;
@@ -218,7 +226,7 @@ function findUrlInChildren(items: any[]): string | null {
     return null;
 }
 
-function resolveTargetMedia(args: any[], children: any[]): { url: string; src?: string; } | null {
+function resolveTargetMedia(args: any[], children: any[]): { url: string; src?: string } | null {
     const fromArgs = findUrlInArgs(args);
     if (fromArgs && (fromArgs.url || fromArgs.src)) {
         return {
@@ -417,6 +425,8 @@ function InspectModal({
         initialRecord?.slugTokens || extractSlugTokens(url)
     );
     const [isScanning, setIsScanning] = useState(false);
+    const [copiedEng, setCopiedEng] = useState(false);
+    const [copiedAra, setCopiedAra] = useState(false);
 
     useEffect(() => {
         if (!initialRecord) {
@@ -432,7 +442,7 @@ function InspectModal({
     const handleRescan = async () => {
         setIsScanning(true);
         try {
-            const text = await extractTextFromMedia(url, displaySrc, true);
+            const text = await extractTextFromMedia(url, displaySrc, true, Boolean(settings.store.enableArabicOcr));
             setOcrText(text);
             const tokens = extractSlugTokens(url);
             setSlugTokens(tokens);
@@ -443,11 +453,26 @@ function InspectModal({
                 slugTokens: tokens,
                 timestamp: Date.now()
             });
-        } catch { }
+        } catch {}
         setIsScanning(false);
     };
 
+    const handleCopyEng = (text: string) => {
+        if (!text) return;
+        copyToClipboard(text);
+        setCopiedEng(true);
+        setTimeout(() => setCopiedEng(false), 1500);
+    };
+
+    const handleCopyAra = (text: string) => {
+        if (!text) return;
+        copyToClipboard(text);
+        setCopiedAra(true);
+        setTimeout(() => setCopiedAra(false), 1500);
+    };
+
     const isVideo = /\.(mp4|webm)(\?.*)?$/i.test(displaySrc) || displaySrc.startsWith("data:video/");
+    const { english: englishText, arabic: arabicText } = splitOcrByLanguage(ocrText);
 
     return (
         <Modal
@@ -488,14 +513,94 @@ function InspectModal({
                     )}
                 </div>
 
-                <div>
-                    <Heading tag="h5" style={{ marginBottom: 6 }}>Detected OCR Text:</Heading>
-                    <div style={{ padding: 12, background: "var(--background-secondary)", borderRadius: 6, userSelect: "text" }}>
-                        <Text variant="text-sm/normal" style={{ wordBreak: "break-word", fontFamily: "monospace" }}>
-                            {ocrText ? `"${ocrText}"` : "(No text detected on image)"}
-                        </Text>
+                {(englishText || arabicText) && (
+                    <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
+                        {englishText && (
+                            <span style={{
+                                padding: "2px 8px",
+                                borderRadius: 4,
+                                fontSize: 11,
+                                fontWeight: 700,
+                                background: "rgba(88, 101, 242, 0.2)",
+                                color: "var(--brand-500, #5865f2)",
+                                textTransform: "uppercase"
+                            }}>
+                                English
+                            </span>
+                        )}
+                        {arabicText && (
+                            <span style={{
+                                padding: "2px 8px",
+                                borderRadius: 4,
+                                fontSize: 11,
+                                fontWeight: 700,
+                                background: "rgba(87, 242, 135, 0.2)",
+                                color: "var(--status-positive, #57f287)",
+                                textTransform: "uppercase"
+                            }}>
+                                Arabic
+                            </span>
+                        )}
                     </div>
-                </div>
+                )}
+
+                {englishText && (
+                    <div>
+                        <Flex justifyContent="space-between" alignItems="center" style={{ marginBottom: 6 }}>
+                            <Heading tag="h5" style={{ margin: 0 }}>Detected English Text:</Heading>
+                            <Button
+                                size="small"
+                                variant="secondary"
+                                onClick={() => handleCopyEng(englishText)}
+                            >
+                                {copiedEng ? "Copied!" : "Copy"}
+                            </Button>
+                        </Flex>
+                        <div style={{ padding: 12, background: "var(--background-secondary)", borderRadius: 6, userSelect: "text" }}>
+                            <Text variant="text-sm/normal" style={{ wordBreak: "break-word", fontFamily: "monospace" }}>
+                                "{englishText}"
+                            </Text>
+                        </div>
+                    </div>
+                )}
+
+                {arabicText && (
+                    <div>
+                        <Flex justifyContent="space-between" alignItems="center" style={{ marginBottom: 6 }}>
+                            <Heading tag="h5" style={{ margin: 0 }}>Detected Arabic Text:</Heading>
+                            <Button
+                                size="small"
+                                variant="secondary"
+                                onClick={() => handleCopyAra(arabicText)}
+                            >
+                                {copiedAra ? "Copied!" : "Copy"}
+                            </Button>
+                        </Flex>
+                        <div style={{
+                            padding: 12,
+                            background: "var(--background-secondary)",
+                            borderRadius: 6,
+                            userSelect: "text",
+                            direction: "rtl",
+                            textAlign: "right"
+                        }}>
+                            <Text variant="text-sm/normal" style={{ wordBreak: "break-word", fontSize: 15, lineHeight: "1.6" }}>
+                                "{arabicText}"
+                            </Text>
+                        </div>
+                    </div>
+                )}
+
+                {!englishText && !arabicText && (
+                    <div>
+                        <Heading tag="h5" style={{ marginBottom: 6 }}>Detected OCR Text:</Heading>
+                        <div style={{ padding: 12, background: "var(--background-secondary)", borderRadius: 6, userSelect: "text" }}>
+                            <Text variant="text-sm/normal" style={{ wordBreak: "break-word", color: "var(--text-muted)" }}>
+                                (No text detected on image)
+                            </Text>
+                        </div>
+                    </div>
+                )}
 
                 <div>
                     <Heading tag="h5" style={{ marginBottom: 6 }}>URL Keywords (Instant Search):</Heading>
@@ -555,6 +660,9 @@ function SettingsComponent() {
                 <Text variant="text-md/normal">
                     Stored in Cache: <strong>{storedCount}</strong> GIFs
                 </Text>
+                <Text variant="text-sm/normal" style={{ color: "var(--text-muted)" }}>
+                    OCR Languages: <strong>{settings.store.enableArabicOcr ? "English + Arabic (Bilingual)" : "English"}</strong>
+                </Text>
                 {progress.isIndexing && (
                     <Text variant="text-sm/normal" style={{ color: progress.isPaused ? "var(--status-warning)" : "var(--brand-500)" }}>
                         {progress.isPaused
@@ -600,6 +708,7 @@ export default definePlugin({
     globalContextMenuCallback: null as any,
 
     async start() {
+        configureOcrLanguages(Boolean(settings.store.enableArabicOcr));
         window.addEventListener("contextmenu", onContextMenuCapture, true);
         this.globalContextMenuCallback = (_navId: string, children: any[], ...args: any[]) => {
             patchContextMenu(children, args);
@@ -629,7 +738,8 @@ export default definePlugin({
                 unindexed,
                 settings.store.enableOcr,
                 Number(settings.store.concurrency) || 4,
-                Boolean(settings.store.deepScan)
+                Boolean(settings.store.deepScan),
+                Boolean(settings.store.enableArabicOcr)
             );
         }
 

@@ -7,6 +7,15 @@
 import { extractSlugTokens } from "./slug";
 import type { Gif, IndexedGifRecord } from "./types";
 
+export function normalizeArabic(text: string): string {
+    if (!text) return "";
+    return text
+        .replace(/[\u064B-\u0652\u0640]/g, "")
+        .replace(/[إأآا]/g, "ا")
+        .replace(/ة/g, "ه")
+        .replace(/ى/g, "ي");
+}
+
 function isSubsequence(pattern: string, text: string): boolean {
     let pIdx = 0;
     let tIdx = 0;
@@ -25,29 +34,36 @@ export function searchFavorites(
     const trimmed = query.trim().toLowerCase();
     if (!trimmed) return favorites;
 
+    const normTrimmed = normalizeArabic(trimmed);
     const terms = trimmed.split(/\s+/).filter(Boolean);
+    const normTerms = terms.map(t => normalizeArabic(t));
     const scored: { gif: Gif; score: number }[] = [];
 
     for (const gif of favorites) {
         const record = cache.get(gif.url);
-        const ocr = record?.ocrText ?? "";
+        const ocr = (record?.ocrText ?? "").toLowerCase();
+        const normOcr = normalizeArabic(ocr);
         const slugTokens = record?.slugTokens ?? extractSlugTokens(gif.url, gif.src);
         const slugStr = slugTokens.join(" ");
 
         let score = 0;
 
         if (ocr) {
-            if (ocr.includes(trimmed)) {
+            if (ocr.includes(trimmed) || (normTrimmed && normOcr.includes(normTrimmed))) {
                 score += 180;
             }
 
-            for (const term of terms) {
-                if (ocr === term) {
+            const ocrWords = ocr.split(/\s+/);
+            const normOcrWords = normOcr.split(/\s+/);
+
+            for (let i = 0; i < terms.length; i++) {
+                const term = terms[i];
+                const normTerm = normTerms[i];
+
+                if (ocrWords.includes(term) || (normTerm && normOcrWords.includes(normTerm))) {
                     score += 80;
-                } else if (new RegExp(`\\b${term}\\b`).test(ocr)) {
-                    score += 50;
-                } else if (ocr.includes(term)) {
-                    score += 25;
+                } else if (ocr.includes(term) || (normTerm && normOcr.includes(normTerm))) {
+                    score += 35;
                 }
             }
         }
