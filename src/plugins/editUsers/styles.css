@@ -1,0 +1,14 @@
+.vc-editUsers-modal {
+    padding: 1em 0;
+}
+
+.vc-editUsers-tabBar {
+    gap: 1em;
+    margin-bottom: 16px;
+    border-bottom: 2px solid var(--background-modifier-accent);
+}
+
+.vc-editUsers-tab {
+    padding-bottom: 8px;
+}
+
