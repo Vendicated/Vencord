@@ -1,0 +1,216 @@
+.vc-spotBuddy-host {
+    margin-top: 8px;
+    margin-bottom: 4px;
+    width: 100%;
+    max-width: 100%;
+    overflow: visible;
+    flex-shrink: 0;
+    display: block;
+    position: relative;
+    z-index: 1;
+}
+
+.vc-spotBuddy-card {
+    margin: 0;
+    padding: 12px;
+    border-radius: 8px;
+    background: rgba(0, 0, 0, 0.4);
+    color: #f2f3f5;
+    overflow: hidden;
+}
+
+.vc-spotBuddy-row {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.vc-spotBuddy-art {
+    width: 56px;
+    height: 56px;
+    border-radius: 6px;
+    object-fit: cover;
+    flex-shrink: 0;
+}
+
+.vc-spotBuddy-meta {
+    min-width: 0;
+    flex: 1;
+}
+
+.vc-spotBuddy-title {
+    color: #f2f3f5;
+    font-size: 14px;
+    font-weight: 600;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.vc-spotBuddy-sub {
+    color: rgba(242, 243, 245, 0.65);
+    font-size: 12px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.vc-spotBuddy-bar {
+    margin-top: 10px;
+    height: 3px;
+    border-radius: 99px;
+    background: rgba(255, 255, 255, 0.12);
+    overflow: hidden;
+    width: 100%;
+}
+
+.vc-spotBuddy-fill {
+    height: 100%;
+    background: #1ed760;
+    will-change: width;
+    transform: translateZ(0);
+}
+
+.vc-spotBuddy-lyrics {
+    margin-top: 12px;
+    text-align: center;
+    min-height: 54px;
+}
+
+.vc-spotBuddy-lyrics.vc-spotBuddy-fancy {
+    position: relative;
+    height: 108px;
+    min-height: 108px;
+    margin-top: 12px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 2px;
+    transform: translateZ(0);
+    contain: layout style;
+}
+
+.vc-spotBuddy-line {
+    position: relative;
+    font-size: 12.5px;
+    line-height: 1.35;
+    padding: 0 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    box-sizing: border-box;
+    width: 100%;
+    max-width: 100%;
+    color: rgba(242, 243, 245, 0.55);
+    overflow: hidden;
+}
+
+.vc-spotBuddy-prev,
+.vc-spotBuddy-next {
+    opacity: 1;
+    font-size: 12px;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    color: rgba(242, 243, 245, 0.45);
+}
+
+.vc-spotBuddy-cur {
+    z-index: 2;
+    opacity: 1;
+    font-size: 14px;
+    font-weight: 600;
+    color: #f2f3f5;
+}
+
+.vc-spotBuddy-karaoke {
+    position: relative;
+    display: inline-block;
+    max-width: 100%;
+    vertical-align: middle;
+}
+
+.vc-spotBuddy-karaoke-dim {
+    display: inline-block;
+    max-width: 100%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: rgba(255, 255, 255, 0.4);
+}
+
+.vc-spotBuddy-karaoke-lit {
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 0%;
+    overflow: hidden;
+    white-space: nowrap;
+    pointer-events: none;
+    color: #fff;
+    will-change: width;
+    transform: translateZ(0);
+}
+
+.vc-spotBuddy-karaoke-lit-inner {
+    display: block;
+    white-space: nowrap;
+}
+
+.vc-spotBuddy-star {
+    position: absolute;
+    top: 50%;
+    left: 0%;
+    width: 0;
+    height: 0;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+    z-index: 3;
+    opacity: 0;
+    will-change: left, opacity;
+    transition: opacity 0.1s linear;
+}
+
+.vc-spotBuddy-star.vc-spotBuddy-on {
+    opacity: 1;
+}
+
+.vc-spotBuddy-star-trail {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 28px;
+    height: 2px;
+    transform: translate(0, -50%);
+    border-radius: 99px;
+    background: linear-gradient(to left, rgba(255, 255, 255, 0.9), transparent);
+    pointer-events: none;
+}
+
+.vc-spotBuddy-star-core {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 7px;
+    height: 7px;
+    transform: translate(-50%, -50%) rotate(45deg);
+    background: #fff;
+    pointer-events: none;
+    box-shadow: 0 0 6px rgba(255, 255, 255, 0.55);
+}
+
+.vc-spotBuddy-muted {
+    margin-top: 8px;
+    color: rgba(242, 243, 245, 0.55);
+    font-size: 12px;
+    text-align: center;
+}
+
+.vc-spotBuddy-actions {
+    display: flex;
+    gap: 6px;
+    margin-top: 8px;
+    justify-content: flex-end;
+}
