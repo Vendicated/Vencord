@@ -14,8 +14,10 @@ import definePlugin, { OptionType, PluginNative } from "@utils/types";
 import { findByPropsLazy } from "@webpack";
 import {
     Button,
+    createRoot,
     FluxDispatcher,
     PresenceStore,
+    RelationshipStore,
     SelectedChannelStore,
     useEffect,
     useRef,
@@ -268,6 +270,108 @@ function syncOwnClock() {
         }
         pullApiClock(state);
     } catch { }
+}
+
+function candidateUserIds(extra?: string | null) {
+    const out = new Set<string>();
+    if (extra) out.add(extra);
+    const me = UserStore.getCurrentUser()?.id;
+    if (me) out.add(me);
+    try {
+        for (const id of RelationshipStore.getFriendIDs?.() ?? []) out.add(id);
+    } catch { }
+    try {
+        const users = UserStore.getUsers?.();
+        if (users) {
+            for (const id of Object.keys(users)) out.add(id);
+        }
+    } catch { }
+    return out;
+}
+
+function userIdByPresence(bits: CardBits, prefer: string | null) {
+    const { trackId, title, artist } = bits;
+    let soft: string | null = null;
+
+    for (const id of candidateUserIds(prefer)) {
+        const a = spotifyActivity(id);
+        if (!a) continue;
+        if (trackId && a.sync_id === trackId) return id;
+        if (title && a.details && cleanTitle(a.details) === cleanTitle(title)) {
+            if (!artist || !a.state || cleanArtist(a.state) === cleanArtist(artist))
+                soft = id;
+        }
+    }
+    return soft;
+}
+
+function userIdFromDom(card: HTMLElement) {
+    let el: HTMLElement | null = card;
+    for (let depth = 0; depth < 16 && el; depth++) {
+        for (const img of Array.from(el.querySelectorAll("img[src*='/avatars/']"))) {
+            const m = (img as HTMLImageElement).src.match(/\/avatars\/(\d{17,20})\//);
+            if (m) return m[1];
+        }
+        for (const a of Array.from(el.querySelectorAll('a[href*="/users/"]'))) {
+            const m = (a as HTMLAnchorElement).href.match(/\/users\/(\d{17,20})/);
+            if (m) return m[1];
+        }
+        el = el.parentElement;
+    }
+    return null;
+}
+
+function bitsFromCard(card: HTMLElement): CardBits {
+    const link = card.querySelector(
+        'a[href*="open.spotify.com/track"], a[href*="spotify:track"], a[href*="/track/"]'
+    ) as HTMLAnchorElement | null;
+    const trackId = link?.href.match(/track[/:]([a-zA-Z0-9]+)/)?.[1] ?? null;
+    let title = (link?.textContent || "").trim() || null;
+
+    let artist: string | null = null;
+    if (link) {
+        let n: Element | null = link.parentElement;
+        for (let i = 0; i < 6 && n; i++) {
+            const texts = Array.from(n.querySelectorAll("div, span, a"))
+                .map(x => (x.textContent || "").trim())
+                .filter(t => t && t !== title && !/listening to spotify/i.test(t) && t.length < 80);
+            if (texts.length) {
+                artist = texts.find(t => t !== title) ?? null;
+                break;
+            }
+            n = n.parentElement;
+        }
+    }
+
+    if (!title) {
+        const lines = Array.from(card.querySelectorAll("div, span, h3, h4, a"))
+            .map(x => (x.textContent || "").trim())
+            .filter(t =>
+                t
+                && t.length > 1
+                && t.length < 120
+                && !/^listening to spotify$/i.test(t)
+                && !/^\d{1,2}:\d{2}$/.test(t)
+                && !/^\d{1,2}:\d{2}\s*\/\s*\d{1,2}:\d{2}$/.test(t)
+            );
+        const uniq: string[] = [];
+        for (const t of lines) {
+            if (!uniq.some(u => u === t || u.includes(t) || t.includes(u) && t.length - u.length < 4))
+                uniq.push(t);
+        }
+        title = uniq.find(t => !/^(spotify|activity)$/i.test(t)) || null;
+        artist = uniq.find(t => t !== title) || null;
+    }
+
+    return { trackId, title, artist };
+}
+
+function resolveUserId(card: HTMLElement, bits: CardBits) {
+    const fromDom = userIdFromDom(card);
+    const fromPresence = userIdByPresence(bits, fromDom);
+    if (fromPresence) return fromPresence;
+    if (fromDom) return fromDom;
+    return UserStore.getCurrentUser()?.id ?? null;
 }
 
 const lyricCache = new Map<string, { lines: Line[]; instrumental: boolean; } | null>();
@@ -647,7 +751,14 @@ function Panel({ userId }: { userId: string; }) {
         });
     }, [info?.id, info?.duration, info?.playing]);
 
-    if (!info) return null;
+    if (!info) {
+        return (
+            <div className={cl("card")}>
+                <div className={cl("title")}>SpotBuddy</div>
+                <div className={cl("sub")}>waiting for spotify...</div>
+            </div>
+        );
+    }
 
     let lyricEl: any = null;
     if (settings.store.showLyrics) {
@@ -716,13 +827,239 @@ function Panel({ userId }: { userId: string; }) {
 
 const SafePanel = ErrorBoundary.wrap(Panel, { noop: true });
 
-function isSpotifyActivity(activity: any) {
-    if (!activity) return false;
-    if (activity.name === "Spotify" || activity.sync_id) return true;
-    return typeof activity.party?.id === "string" && activity.party.id.includes("spotify");
+type Mount = { root: ReturnType<typeof createRoot>; host: HTMLElement; userId: string; trackKey: string; };
+const mounts = new Map<Element, Mount>();
+
+let scanning = false;
+let selfMutating = false;
+
+function isShown(el: HTMLElement) {
+    if (!el.isConnected) return false;
+
+    const panel = el.closest('[role="tabpanel"]') as HTMLElement | null;
+    if (panel) {
+        if (panel.hidden || panel.getAttribute("aria-hidden") === "true") return false;
+        const ps = getComputedStyle(panel);
+        if (ps.display === "none" || ps.visibility === "hidden") return false;
+        if (panel.getBoundingClientRect().height < 8) return false;
+    }
+
+    let cur: HTMLElement | null = el;
+    for (let i = 0; i < 12 && cur; i++) {
+        if (cur.hidden) return false;
+        const st = getComputedStyle(cur);
+        if (st.display === "none" || st.visibility === "hidden") return false;
+        cur = cur.parentElement;
+    }
+
+    const r = el.getBoundingClientRect();
+    return r.width >= 8 && r.height >= 8;
 }
 
+function looksLikeSpotifyCard(el: HTMLElement) {
+    const w = el.offsetWidth;
+    const h = el.offsetHeight;
+    if (w < 180 || h < 64 || h > 480) return false;
+    const txt = (el.textContent || "").replace(/\s+/g, " ").trim();
+    if (!/listening to spotify/i.test(txt)) return false;
+    if (txt.length > 600) return false;
+    if (/recent activity/i.test(txt)) return false;
+    const hasTime = /\d{1,2}:\d{2}/.test(txt);
+    const hasArt = !!el.querySelector("img");
+    const hasLink = !!el.querySelector('a[href*="spotify"], a[href*="/track/"]');
+    return hasTime || hasArt || hasLink;
+}
+
+function spotifyCardFromEl(start: HTMLElement) {
+    let el: HTMLElement | null = start;
+    let best: HTMLElement | null = null;
+    for (let i = 0; i < 16 && el; i++) {
+        if (looksLikeSpotifyCard(el)) best = el;
+        if (el.offsetHeight > 800) break;
+        el = el.parentElement;
+    }
+    return best;
+}
+
+function profileRoots(): HTMLElement[] {
+    return ([
+        ...document.querySelectorAll(
+            '[role="dialog"], [class*="userPopout"], [class*="UserProfile"], [class*="focusLock"]'
+        ),
+    ] as HTMLElement[]).filter(r => isShown(r));
+}
+
+function findListeningSeeds(root: ParentNode): HTMLElement[] {
+    const out: HTMLElement[] = [];
+    const seen = new Set<HTMLElement>();
+
+    const push = (el: HTMLElement | null | undefined) => {
+        if (!el || seen.has(el)) return;
+        if (el.closest(".vc-spotBuddy-host")) return;
+        seen.add(el);
+        out.push(el);
+    };
+
+    const walk = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+    let node: Node | null;
+    while ((node = walk.nextNode())) {
+        const t = (node.textContent || "").replace(/\s+/g, " ").trim();
+        if (!t || t.length > 48) continue;
+        if (/listening to spotify/i.test(t) || /^listening to$/i.test(t))
+            push(node.parentElement);
+    }
+
+    const scope = root instanceof Element ? root : document;
+    scope.querySelectorAll(
+        'img[src*="scdn.co"], img[src*="i.scdn.co"], a[href*="open.spotify.com"], a[href*="spotify:track"], a[href*="/track/"]'
+    ).forEach(n => push(n as HTMLElement));
+
+    return out;
+}
+
+function findSpotifyCards(): HTMLElement[] {
+    const raw: HTMLElement[] = [];
+    const seen = new Set<HTMLElement>();
+    const roots = profileRoots();
+    if (!roots.length) return [];
+
+    for (const root of roots) {
+        for (const seed of findListeningSeeds(root)) {
+            const card = spotifyCardFromEl(seed);
+            if (!card || seen.has(card)) continue;
+            if (card.closest(".vc-spotBuddy-host") || card.closest(".vc-spotBuddy-card")) continue;
+            if (!isShown(card)) continue;
+            seen.add(card);
+            raw.push(card);
+        }
+    }
+
+    return raw.filter(c => !raw.some(o => o !== c && o.contains(c)));
+}
+
+function withOwnDom(fn: () => void) {
+    selfMutating = true;
+    try {
+        fn();
+    } finally {
+        requestAnimationFrame(() => { selfMutating = false; });
+    }
+}
+
+function unmount(card: Element) {
+    const mount = mounts.get(card);
+    if (!mount) return;
+    withOwnDom(() => {
+        try { mount.root.unmount(); } catch { }
+        mount.host.remove();
+    });
+    mounts.delete(card);
+}
+
+function mountOn(card: HTMLElement, userId: string, trackKey: string) {
+    const existing = mounts.get(card);
+    if (
+        existing
+        && existing.userId === userId
+        && document.contains(existing.host)
+        && existing.host.previousElementSibling === card
+    ) {
+        existing.trackKey = trackKey;
+        return;
+    }
+    if (existing) unmount(card);
+
+    withOwnDom(() => {
+        let sib = card.nextElementSibling;
+        while (sib?.classList?.contains("vc-spotBuddy-host")) {
+            const orphan = sib as HTMLElement;
+            sib = sib.nextElementSibling;
+            if (![...mounts.values()].some(m => m.host === orphan)) orphan.remove();
+        }
+
+        const host = document.createElement("div");
+        host.className = "vc-spotBuddy-host";
+        host.dataset.userId = userId;
+        card.insertAdjacentElement("afterend", host);
+
+        const root = createRoot(host);
+        root.render(<SafePanel userId={userId} />);
+        mounts.set(card, { root, host, userId, trackKey });
+    });
+}
+
+function scan() {
+    if (scanning || selfMutating) return;
+    scanning = true;
+    try {
+        const cards = findSpotifyCards();
+        const alive = new Set<Element>();
+        const me = UserStore.getCurrentUser()?.id;
+
+        for (const card of cards) {
+            const bits = bitsFromCard(card);
+            const userId = resolveUserId(card, bits) || me;
+            if (!userId) continue;
+
+            const trackKey = bits.trackId || `${bits.title || ""}|${bits.artist || ""}`;
+            const existing = mounts.get(card);
+
+            if (
+                existing
+                && existing.userId === userId
+                && document.contains(existing.host)
+                && existing.host.previousElementSibling === card
+            ) {
+                existing.trackKey = trackKey;
+                alive.add(card);
+                continue;
+            }
+
+            mountOn(card, userId, trackKey);
+            alive.add(card);
+        }
+
+        for (const [card] of mounts) {
+            if (!document.contains(card)) {
+                unmount(card);
+                continue;
+            }
+            if (alive.has(card)) continue;
+            if (!isShown(card as HTMLElement)) unmount(card);
+        }
+    } finally {
+        scanning = false;
+    }
+}
+
+let obs: MutationObserver | null = null;
+let scanTimer: any;
 let clockIv: any;
+let scanIv: any;
+let clickScan: ((e: Event) => void) | null = null;
+
+function queueScan(force = false) {
+    if (selfMutating && !force) return;
+    clearTimeout(scanTimer);
+    scanTimer = setTimeout(scan, 280);
+}
+
+function onMutations(muts: MutationRecord[]) {
+    if (selfMutating) return;
+    for (const m of muts) {
+        const nodes = [...m.addedNodes, ...m.removedNodes];
+        if (
+            nodes.length
+            && nodes.every(n =>
+                n instanceof Element
+                && (n.classList?.contains("vc-spotBuddy-host") || !!(n as Element).closest?.(".vc-spotBuddy-host"))
+            )
+        ) continue;
+        if (m.target instanceof Element && m.target.closest(".vc-spotBuddy-host")) continue;
+        queueScan();
+        return;
+    }
+}
 
 export default definePlugin({
     name: "SpotBuddy",
@@ -730,65 +1067,23 @@ export default definePlugin({
     authors: [Devs.Kyn],
     settings,
 
-    patches: [
-        {
-            find: ".SIDEBAR,disableToolbar:",
-            replacement: {
-                match: /user:(\i),widgets:.{0,100}?\}\),(?=.{0,100}unownedWishlistItems:\i,wishlistId:\i)/,
-                replace: "$&,$self.renderProfile({user:$1}),",
-            },
-        },
-        {
-            find: '"UserProfilePopout");',
-            replacement: {
-                match: /user:(\i),widgets:.{0,100}?\}\),/,
-                replace: "$&,$self.renderProfile({user:$1}),",
-            },
-        },
-        {
-            find: "#{intl::USER_ACTIVITY_PLAYING}",
-            replacement: {
-                match: /activity:(\i),className:\i\.badges\}/,
-                replace: "$&,$self.renderAfterActivity(typeof arguments!=\"undefined\"?arguments[0]:{activity:$1})",
-                all: true,
-            },
-        },
-        {
-            find: ".USER_PROFILE_ACTIVITY_BUTTONS),",
-            replacement: {
-                match: /(?<=\i\.jsxs?\)\()(\i),\{(?=[^}]*?activity:\i)/,
-                replace: "$self.ActivityWrapper,{VencordOriginal:$1,",
-            },
-        },
-    ],
-
-    renderProfile: ErrorBoundary.wrap(({ user }: { user: { id: string; }; }) => {
-        if (!user?.id) return null;
-        return <SafePanel userId={user.id} />;
-    }, { noop: true }),
-
-    renderAfterActivity(props: { activity?: any; user?: { id: string; }; }) {
-        if (!props?.user?.id || !isSpotifyActivity(props.activity)) return null;
-        return <SafePanel userId={props.user.id} />;
-    },
-
-    ActivityWrapper: ErrorBoundary.wrap(({ VencordOriginal, ...props }: any) => {
-        if (!VencordOriginal) return null;
-        const show = isSpotifyActivity(props?.activity) && props?.user?.id;
-        return (
-            <>
-                <VencordOriginal {...props} />
-                {show && <SafePanel userId={props.user.id} />}
-            </>
-        );
-    }, { noop: true }),
-
     start() {
         FluxDispatcher.subscribe("SPOTIFY_PLAYER_STATE", onSpotify);
         FluxDispatcher.subscribe("PRESENCE_UPDATES", ping);
         applyCustomCss();
+        obs = new MutationObserver(onMutations);
+        obs.observe(document.body, { childList: true, subtree: true });
+        clickScan = (e: Event) => {
+            const t = e.target as HTMLElement | null;
+            if (!t) return;
+            if (t.closest?.('[role="tab"], [class*="tabBar"], [class*="TabBar"]'))
+                queueScan(true);
+        };
+        document.addEventListener("click", clickScan, true);
         clockIv = setInterval(syncOwnClock, 400);
+        scanIv = setInterval(() => queueScan(true), 2500);
         syncOwnClock();
+        queueScan(true);
     },
 
     stop() {
@@ -796,7 +1091,15 @@ export default definePlugin({
         FluxDispatcher.unsubscribe("PRESENCE_UPDATES", ping);
         customStyleEl?.remove();
         customStyleEl = null;
+        obs?.disconnect();
+        obs = null;
+        if (clickScan) document.removeEventListener("click", clickScan, true);
+        clickScan = null;
+        clearTimeout(scanTimer);
         clearInterval(clockIv);
+        clearInterval(scanIv);
         clockIv = null;
+        scanIv = null;
+        for (const [card] of mounts) unmount(card);
     },
 });
