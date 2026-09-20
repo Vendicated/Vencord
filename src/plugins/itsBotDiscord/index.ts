@@ -37,7 +37,9 @@ export default definePlugin({
 
 const botTag = new MutationObserver(() => {
   document.querySelectorAll(".botText__82f07").forEach(el => {
-    el.textContent = "BOT";
+  if (el.textContent !== "BOT") {
+      el.textContent = "BOT";
+    }  
   });
 });
 
