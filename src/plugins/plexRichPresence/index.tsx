@@ -1,3 +1,7 @@
+/**
+ * PlexRichPresence — Vencord plugin
+ */
+
 import definePlugin, { OptionType } from "@utils/types";
 import { definePluginSettings } from "@api/Settings";
 import { Link } from "@components/Link";
