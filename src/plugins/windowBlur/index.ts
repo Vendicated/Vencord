@@ -15,8 +15,6 @@ const CLASS = "vc-unfocused-blur";
 
 let style: HTMLStyleElement;
 let timer: ReturnType<typeof setTimeout> | undefined;
-// Discord leaves :hover / mouseenter stuck after alt-tab if the cursor
-// never actually left the window, so we track this ourselves.
 let mouseInside = false;
 
 const settings = definePluginSettings({
@@ -86,7 +84,6 @@ function schedule(skipDelay = false) {
     const delay = skipDelay ? 0 : blur ? settings.store.blurDelay : settings.store.unblurDelay;
     const apply = () => {
         setCss();
-        // re-check in case focus came back while we were waiting
         document.documentElement.classList.toggle(CLASS, shouldBlur());
     };
 
