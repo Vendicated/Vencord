@@ -1,7 +1,3 @@
-/**
- * PlexRichPresence — Vencord userplugin
- */
-
 import definePlugin, { OptionType } from "@utils/types";
 import { definePluginSettings } from "@api/Settings";
 import { Link } from "@components/Link";
@@ -12,8 +8,6 @@ let loginPollActive = false;
 let currentToken: string | null = null;
 let plexAccountUsername: string | null = null;
 let lastRatingKey: string | null = null;
-
-const DEFAULT_APPLICATION_ID = "1101928235281723483";
 
 const artAssetCache = new Map<string, string | null>();
 const ART_CACHE_LIMIT = 200;
@@ -43,7 +37,7 @@ async function registerAsset(applicationId: string, publicImageUrl: string): Pro
     if (!publicImageUrl) return undefined;
 
     try {
-        if (ApplicationAssetUtils?.fetchAssetIds) {
+        if (ApplicationAssetUtils?.fetchAssetIds && applicationId) {
             const [assetId] = await ApplicationAssetUtils.fetchAssetIds(applicationId, [publicImageUrl]);
             if (assetId) return assetId;
         }
@@ -144,7 +138,7 @@ const settings = definePluginSettings({
 async function resolveAlbumArtAsset(track: any): Promise<string | undefined> {
     if (!settings.store.showAlbumArt) return undefined;
 
-    const appId = settings.store.applicationId?.trim() || DEFAULT_APPLICATION_ID;
+    const appId = settings.store.applicationId?.trim() || "";
     const artist = track.grandparentTitle ?? track.originalTitle ?? "";
     const album = track.parentTitle ?? "";
     const title = track.title ?? "";
@@ -163,7 +157,6 @@ async function resolveAlbumArtAsset(track: any): Promise<string | undefined> {
         localPlexUrl = `${baseUrl}${thumb}?X-Plex-Token=${encodeURIComponent(currentToken)}`;
     }
 
-    // Fetch public cover URL via MusicBrainz / iTunes API
     const publicUrl = await native().fetchOnlineCover(artist, album, title, localPlexUrl).catch(() => null);
     const assetId = publicUrl ? await registerAsset(appId, publicUrl) : undefined;
 
@@ -194,7 +187,7 @@ async function buildActivity(track: any) {
     const offsetMs: number = track.viewOffset ?? 0;
     const now = Date.now();
 
-    const appId = settings.store.applicationId?.trim() || DEFAULT_APPLICATION_ID;
+    const appId = settings.store.applicationId?.trim() || undefined;
     const assetId = await resolveAlbumArtAsset(track);
 
     const activity: any = {

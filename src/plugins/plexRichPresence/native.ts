@@ -2,8 +2,6 @@
  * native.ts — runs in Electron's "main" process.
  */
 
-process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
-
 const CLIENT_IDENTIFIER = "vencord-plex-rich-presence";
 
 export async function requestPin(_: any) {
@@ -81,7 +79,7 @@ export async function fetchSessions(_: any, serverUrl: string, token: string) {
 /**
  * Primary: MusicBrainz API -> Cover Art Archive
  * Secondary: iTunes Search API
- * Tertiary: Local Plex Upload
+ * Tertiary: Local Plex Upload via temporary host
  */
 export async function fetchOnlineCover(_: any, artist: string, album: string, title: string, localPlexUrl: string | null) {
     // 1. MusicBrainz API lookup
