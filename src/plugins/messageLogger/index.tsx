@@ -620,7 +620,7 @@ export default definePlugin({
         {
             find: "anyScopeRegex(/^\\+:(.+?): *$/)",
             replacement: {
-                match: /(?<=anyScopeRegex\(\/\^\\\+:\(\.\+\?\): \*\$\/\),action\(\i,\i\)\{.{10,80}\i=)\i\.\i\.getMessages\((\i\.id)\)\.last\(\)/,
+                match: /(?<=anyScopeRegex\(\/\^\\\+:\(\.\+\?\): \*\$\/\),action\(\i,\i\)\{.{10,80}?\i=)\i\.\i\.getMessages\((\i\.id)\)\.last\(\)/,
                 replace: "$self.getReactionTarget($1)"
 
             }
