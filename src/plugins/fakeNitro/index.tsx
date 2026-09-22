@@ -332,8 +332,8 @@ export default definePlugin({
                 {
                     // Call our function to decide whether the emoji link should be kept or not
                     predicate: () => settings.store.transformEmojis,
-                    match: /1!==(\i)\.length\|\|1!==\i\.length/,
-                    replace: (m, content) => `${m}||$self.shouldKeepEmojiLink(${content}[0])`
+                    match: /(\i)=\(0,\i\.\i\)\((\i)\)(?=&&)(?<=\i=\1,\2=\(\i\?\?\i\)\.embeds.{0,50}?)/,
+                    replace: (m, content, _embeds) => `${m} && !$self.shouldKeepEmojiLink(${content}[0])`
                 },
                 {
                     // Patch the rendered message content to add fake nitro emojis or remove sticker links
