@@ -26,6 +26,8 @@ function colorToHex(color: string) {
     return "#" + [...ctx.getImageData(0, 0, 1, 1).data.slice(0, 3)].map(n => n.toString(16).padStart(2, "0")).join("");
 }
 
+const icon = "https://discord.com/assets/favicon.ico";
+
 let linkEl: HTMLLinkElement | undefined;
 async function setManifest() {
     // need to wait for CSS changes to flush
@@ -38,7 +40,6 @@ async function setManifest() {
 
     const endpoint = "https:" + window.GLOBAL_ENV.WEBAPP_ENDPOINT;
     const appUrl = endpoint + "/app"; // URL when PWA launches
-    const icon = document.querySelector<HTMLLinkElement>('link[rel="icon"]')!.href;
     const styles = getComputedStyle(document.body);
     const manifest = {
         id: appUrl,
@@ -122,6 +123,7 @@ export default definePlugin({
         NotificationSettingsStore.addChangeListener(this.setBadge);
         GuildReadStateStore.addChangeListener(this.setBadge);
         RelationshipStore.addChangeListener(this.setBadge);
+        this.setBadge();
 
         if (!IS_USERSCRIPT) {
             // keybinds
