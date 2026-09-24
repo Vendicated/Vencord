@@ -54,16 +54,17 @@ export default definePlugin({
             }
         },
         {
-            find: '="SYSTEM_TAG"',
+            find: "showCommunicationDisabledStyles",
             replacement: {
                 // Add next to username, non-compact
-                match: /(\(0,(\i)\.jsxs\)\(\2\.Fragment,\{children:\[(?:(?!\]\}\)).){0,900}?),(\i)(?=\]\}\))/g,
-                replace: "$1,$3,!arguments[0].compact&&(0,$2.jsx)($self.TimezoneTriggerUsername,{userId:arguments[0].message.author.id,timestamp:arguments[0].message.timestamp,isDM:arguments[0].channel?.isPrivate?.()})"
+                match: /(\(0,(\i)\.jsx\)\("span",\{id:\i,className:\i,children:\i\}\)),(\i)&&!(\i)&&/,
+                replace: "$1,!$4&&(0,$2.jsx)($self.TimezoneTriggerUsername,{userId:arguments[0].message.author.id,timestamp:arguments[0].message.timestamp,isDM:!arguments[0].message.guild_id}),$3&&!$4&&"
             }
         },
         {
             find: "forceUsername:!0,className",
             replacement: {
+                // Profile
                 match: /(children:\[)(null!=\i&&null!=\i\?\(0,(\i)\.jsx\)\(\i\.D,\{.{0,160}?children:\i\}\):\i)/,
                 replace: "$1(0,$3.jsx)($self.TimezoneTriggerProfile,{userId:arguments[0].user.id}),$2"
             }
