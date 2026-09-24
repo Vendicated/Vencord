@@ -330,6 +330,7 @@ export default definePlugin({
         },
         {
             find: '["strong","em","u","text","inlineCode","s","spoiler"]',
+            predicate: () => settings.store.transformEmojis || settings.store.transformStickers,
             replacement: {
                 match: /\(\{ast:(\i)(?=,inline:\i)/,
                 replace: "({ast:$self.transformAst($1)"
