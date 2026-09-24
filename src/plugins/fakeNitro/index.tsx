@@ -515,6 +515,9 @@ export default definePlugin({
 
     transformAst(ast: any[]) {
         try {
+            if (!settings.store.transformCompoundSentence && ast.length > 1) {
+                return ast;
+            }
             // Filter out sticker links. These are transformed into actual stickers later, so we don't want duplicate links
             if (settings.store.transformStickers) {
                 ast = ast.filter(node => {
