@@ -1,0 +1,64 @@
+.vc-caesarcipher-active-icon {
+    color: var(--status-positive);
+}
+
+.vc-caesarcipher-translation {
+    margin-top: 2px;
+    padding: 0;
+}
+
+.vc-caesarcipher-result {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+
+    color: var(--text-default) !important;
+
+    font-size: 15px;
+    line-height: 20px;
+
+    white-space: pre-wrap;
+    word-wrap: break-word;
+}
+
+.vc-caesarcipher-translation-icon {
+    width: 16px;
+    height: 16px;
+
+    flex-shrink: 0;
+
+    color: var(--text-muted);
+}
+
+.vc-caesarcipher-info {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+
+    margin-top: 1px;
+
+    color: var(--text-muted) !important;
+
+    font-size: 13px;
+    line-height: 18px;
+
+    font-style: italic;
+}
+
+.vc-caesarcipher-dismiss {
+    padding: 0;
+    border: 0;
+
+    background: transparent;
+
+    color: var(--text-link) !important;
+
+    font: inherit;
+    font-style: italic;
+
+    cursor: pointer;
+}
+
+.vc-caesarcipher-dismiss:hover {
+    text-decoration: underline;
+}
