@@ -535,8 +535,8 @@ export default definePlugin({
                     const { type, target } = node;
 
                     if (type !== "link") return node;
-                    const fakeNitroMatch = target.match(fakeNitroEmojiRegex);
 
+                    const fakeNitroMatch = target.match(fakeNitroEmojiRegex);
                     if (!fakeNitroMatch) return node;
 
                     let url: URL | null = null;
