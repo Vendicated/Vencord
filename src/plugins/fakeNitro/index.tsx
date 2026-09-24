@@ -523,8 +523,10 @@ export default definePlugin({
                     if (type !== "link") return true;
                     if (fakeNitroStickerRegex.test(target)) return false;
 
-                    const gifMatch = target.match(fakeNitroGifStickerRegex);
-                    return !(gifMatch && StickersStore.getStickerById(gifMatch[1]));
+                    const gifStickerLinkMatch = target.match(fakeNitroGifStickerRegex);
+                    const isGifStickerLink = gifStickerLinkMatch && StickersStore.getStickerById(gifStickerLinkMatch[1]);
+
+                    return !isGifStickerLink;
                 });
             }
 
