@@ -57,14 +57,13 @@ export default definePlugin({
             find: "showCommunicationDisabledStyles",
             replacement: {
                 // Add next to username, non-compact
-                match: /(\(0,(\i)\.jsx\)\("span",\{id:\i,className:\i,children:\i\}\)),(\i)&&!(\i)&&/,
-                replace: "$1,!$4&&(0,$2.jsx)($self.TimezoneTriggerUsername,{userId:arguments[0].message.author.id,timestamp:arguments[0].message.timestamp,isDM:!arguments[0].message.guild_id}),$3&&!$4&&"
+                match: /(\i)&&!(\i)&&(\(0,(\i)\.jsx\)\(\i\.A,\{id:\(0,\i\.xl\)\((\i)\),timestamp:\5\.timestamp,className:\i,application:\i\}\))/,
+                replace: "$1&&!$2?$3:null,!$2&&(0,$4.jsx)($self.TimezoneTriggerUsername,{userId:$5.author.id,timestamp:$5.timestamp,isDM:!$5.guild_id})"
             }
         },
         {
             find: "forceUsername:!0,className",
             replacement: {
-                // Profile
                 match: /(children:\[)(null!=\i&&null!=\i\?\(0,(\i)\.jsx\)\(\i\.D,\{.{0,160}?children:\i\}\):\i)/,
                 replace: "$1(0,$3.jsx)($self.TimezoneTriggerProfile,{userId:arguments[0].user.id}),$2"
             }
