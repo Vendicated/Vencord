@@ -1,11 +1,14 @@
 import type { ComponentType, CSSProperties, ForwardRefRenderFunction, MouseEvent, PropsWithChildren, ReactNode, UIEvent } from "react";
+import { LiteralUnion } from "type-fest";
 
 type RC<C> = ComponentType<PropsWithChildren<C & Record<string, any>>>;
 
-type LeadingAccessory =
+type Accessory =
     | {
         type: "icon";
         icon: ComponentType<any>;
+        color?: string;
+        size?: LiteralUnion<"refresh_sm", string>;
     }
     | {
         type: "emoji";
@@ -36,7 +39,7 @@ export interface Menu {
         label: ReactNode;
         action?(e: MouseEvent): void;
         icon?: ComponentType<any>;
-        leadingAccessory?: LeadingAccessory;
+        leadingAccessory?: Accessory;
 
         color?: string;
         render?: ComponentType<any>;
