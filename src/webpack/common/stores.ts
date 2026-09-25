@@ -101,6 +101,10 @@ export let CollapsedVoiceChannelStore: t.CollapsedVoiceChannelStore;
 export let ReferencedMessageStore: t.ReferencedMessageStore;
 export let SessionsStore: t.SessionsStore;
 export let UserGuildJoinRequestStore: t.UserGuildJoinRequestStore;
+export let SelfPresenceStore: t.SelfPresenceStore;
+export let MessageRequestStore: t.MessageRequestStore;
+export let GIFPickerViewStore: t.GIFPickerViewStore;
+export let GuildReadStateStore: t.GuildReadStateStore;
 
 /**
  * @see jsdoc of {@link t.useStateFromStores}
@@ -174,6 +178,10 @@ waitForStore("CollapsedVoiceChannelStore", m => CollapsedVoiceChannelStore = m);
 waitForStore("ReferencedMessageStore", m => ReferencedMessageStore = m);
 waitForStore("SessionsStore", m => SessionsStore = m);
 waitForStore("UserGuildJoinRequestStore", m => UserGuildJoinRequestStore = m);
+waitForStore("SelfPresenceStore", m => SelfPresenceStore = m);
+waitForStore("MessageRequestStore", m => MessageRequestStore = m);
+waitForStore("GIFPickerViewStore", m => GIFPickerViewStore = m);
+waitForStore("GuildReadStateStore", m => GuildReadStateStore = m);
 waitForStore("ThemeStore", m => {
     ThemeStore = m;
     // Importing this directly causes all webpack commons to be imported, which can easily cause circular dependencies.
