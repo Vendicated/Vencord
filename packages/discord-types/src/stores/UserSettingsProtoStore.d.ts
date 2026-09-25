@@ -223,4 +223,7 @@ export class UserSettingsProtoStore extends FluxStore {
     // TODO: finish typing
     getGuildDismissedContentState(guildId: string): any;
     getGuildsProto(): Record<string, GuildProto>;
+    getDefaultGuildThemePreference(): number;
+    getGuildThemeSourcePreferenceOverride(guildId: string | null | undefined): number;
+    resolveGuildThemeSourcePreference(guildId: string | null | undefined): number;
 }

@@ -4,13 +4,14 @@ import { RelationshipType } from "../../enums";
 
 export class RelationshipStore extends FluxStore {
     getBlockedIDs(): string[];
-    getBlockedOrIgnoredIDs(): string[];
+    getBlockedOrIgnoredIDs(): Set<string>;
     getFriendCount(): number;
     getFriendIDs(): string[];
     getIgnoredIDs(): string[];
 
     getMutableRelationships(): Map<string, RelationshipType>;
-    getNickname(userId: string): string;
+    getNickname(userId: string): string | undefined;
+    getNote(userId: string): string | undefined;
     getOriginApplicationId(userId: string): string | undefined;
     getOutgoingCount(): number;
     getPendingCount(): number;
@@ -38,6 +39,6 @@ export class RelationshipStore extends FluxStore {
     isIgnored(userId: string): boolean;
     isIgnoredForMessage(message: Message | MessageJSON): boolean;
     isSpam(userId: string): boolean;
-    isStranger(userId: string): boolean;
+    isStranger(userId: string): boolean | undefined;
     isUnfilteredPendingIncoming(userId: string): boolean;
 }
