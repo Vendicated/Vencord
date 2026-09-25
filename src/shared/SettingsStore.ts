@@ -207,10 +207,9 @@ export class SettingsStore<T extends object> {
 
             const path = pathToNotify.split(".");
             for (const p of path) {
+                // The path may not resolve (deleted setting, key containing dots). Still mark as changed so the data is persisted
                 if (!v) {
-                    console.warn(
-                        `Settings#setData: Path ${pathToNotify} does not exist in new data. Not dispatching update`
-                    );
+                    this.markAsChanged();
                     return;
                 }
                 v = v[p];
