@@ -15,6 +15,7 @@ export interface NotificationSettingsState {
 
 export class NotificationSettingsStore extends FluxStore {
     get taskbarFlash(): boolean;
+    get screenDowntimeReminder(): boolean;
     getUserAgnosticState(): NotificationSettingsState;
     getDesktopType(): DesktopNotificationType;
     getTTSType(): TTSNotificationType;

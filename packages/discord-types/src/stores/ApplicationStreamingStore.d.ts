@@ -10,6 +10,9 @@ export interface StreamMetadata {
     id: string | null,
     pid: number | null,
     sourceName: string | null;
+    previewDisabled?: boolean;
+    sourceIcon?: string | null;
+    sourceId?: string | null;
 }
 
 export interface StreamingStoreState {
@@ -28,12 +31,18 @@ export interface ApplicationStreamingStore extends FluxStore {
     getAllApplicationStreamsForChannel: (channelId: string | bigint) => ApplicationStream[];
     getAllActiveStreamsForChannel: (channelId: string | bigint) => Stream[];
     getAnyStreamForUser: (userId: string | bigint) => Stream | ApplicationStream | null;
+    getAnyDiscoverableStreamForUser: (userId: string | bigint) => ApplicationStream | null;
     getStreamForUser: (userId: string | bigint, guildId?: string | bigint | null) => Stream | null;
     getCurrentUserActiveStream: () => Stream | null;
     getLastActiveStream: () => Stream | null;
     getState: () => StreamingStoreState;
     getRTCStream: (streamKey: string) => RTCStream | null;
-    getStreamerActiveStreamMetadata: () => StreamMetadata;
-    getViewerIds: (stream: ApplicationStream) => string[];
+    getStreamerActiveStreamMetadata: () => StreamMetadata | null;
+    getStreamerActiveStreamMetadataForStream: (streamKey: string) => StreamMetadata | null;
+    getIsActiveStreamPreviewDisabled: (streamKey: string) => boolean;
+    getCurrentAppIntent: () => unknown;
+    getStreamingState: () => Omit<StreamingStoreState, "activeStreams"> & { activeStreams: [string, Stream][]; };
+    isStreamMarkedFull: (streamKey: string) => boolean;
+    getViewerIds: (stream: ApplicationStream | string) => string[];
     isSelfStreamHidden: (channelId: string | bigint | null) => boolean;
 }
