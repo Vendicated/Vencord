@@ -111,7 +111,7 @@ export default definePlugin({
             replacement: {
                 // Intercept add/remove actions to generate a valid thumbnail url before storing the item
                 match: /function (\i)\((\i)\)\{(?=\i\.\i\.updateAsync\("favoriteGifs")/g,
-                replace: "async function $1($2){await $self.fixFavItem($2);await "
+                replace: "async function $1($2){if(!await $self.fixFavItem($2))return;await "
             }
         }
     ],
@@ -167,9 +167,13 @@ export default definePlugin({
             SignedUrlsStore.addSigned(item.src);
 
             if (typeof item.gifSrc === "function") {
-                item.src = await item.gifSrc();
+                const thumbnail = await item.gifSrc().catch(() => null);
+                if (!thumbnail) return false;
+                item.src = thumbnail;
                 delete item.gifSrc;
             }
         }
+
+        return true;
     }
 });

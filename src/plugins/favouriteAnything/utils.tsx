@@ -7,12 +7,13 @@
 import { classNameFactory } from "@utils/css";
 import { sendMessage } from "@utils/discord";
 import { proxyLazy } from "@utils/lazy";
+import { Logger } from "@utils/Logger";
 import { Queue } from "@utils/Queue";
 import { useForceUpdater } from "@utils/react";
 import { PluginNative } from "@utils/types";
 import { Channel, MessageAttachment } from "@vencord/discord-types";
 import { findByCodeLazy, findByPropsLazy } from "@webpack";
-import { Constants, createRoot, DraftType, FluxDispatcher, Humanize, MessageActions, PendingReplyStore, PermissionStore, ReactDOM, RestAPI, Toasts, UploadAttachmentStore, UploadHandler, UploadManager, useCallback, useEffect, useRef, UserSettingsActionCreators, UserSettingsProtoStore, useStateFromStores } from "@webpack/common";
+import { Constants, createRoot, DraftType, FluxDispatcher, Humanize, MessageActions, PendingReplyStore, PermissionStore, ReactDOM, RestAPI, showToast, Toasts, UploadAttachmentStore, UploadHandler, UploadManager, useCallback, useEffect, useRef, UserSettingsActionCreators, UserSettingsProtoStore, useStateFromStores } from "@webpack/common";
 import { deflateSync, inflateSync } from "fflate";
 import { Key, ReactNode } from "react";
 import { JsonValue } from "type-fest";
@@ -23,6 +24,7 @@ import { AttachmentTransformer, CustomItemDef, CustomItemFormat, FavouriteItem, 
 
 const Native = VencordNative.pluginHelpers.FavouriteAnything as PluginNative<typeof import("./native")>;
 
+const logger = new Logger("FavouriteAnything");
 export const cl = classNameFactory("vc-favouriteAnything-");
 
 export const useResizeObserver: ResizeObserverHook = findByCodeLazy("borderBoxSize", "blockSize", "inlineSize");
@@ -31,7 +33,7 @@ export const transformAttachment: AttachmentTransformer = findByCodeLazy("return
 
 const encoder = new TextEncoder(), decoder = new TextDecoder();
 
-const defineItem = <const A, const B extends JsonValue>(item: CustomItemDef<A, B>) => item;
+const defineItem = <const A, const B extends JsonValue,>(item: CustomItemDef<A, B>) => item;
 function defineItems<T extends Record<CustomItemFormat, CustomItemDef>>(def: ItemsDef<T>) {
     type Type<F extends CustomItemFormat> = T[F] extends CustomItemDef<infer A> ? A : never;
 
@@ -43,6 +45,7 @@ function defineItems<T extends Record<CustomItemFormat, CustomItemDef>>(def: Ite
                 const buf = deflateSync(encoder.encode(JSON.stringify(obj)));
                 return buf.toBase64({ alphabet: "base64url", omitPadding: true });
             } catch {
+                logger.warn(`Failed to encode data for format ${format}: `, data);
                 return null;
             }
         },
@@ -61,6 +64,7 @@ function defineItems<T extends Record<CustomItemFormat, CustomItemDef>>(def: Ite
                     [F in CustomItemFormat]: { format: F; data: Type<F>; };
                 }[CustomItemFormat];
             } catch {
+                logger.warn("Failed to decode data from raw string: ", raw);
                 return null;
             }
         },
@@ -134,24 +138,28 @@ async function getThumbnailBase(item: MessageAttachment): Promise<URL | null> {
         url.searchParams.append("subtitle", subtitle);
 
         return await RestAPI.post({ url: Constants.Endpoints.UNFURL_EMBED_URLS, body: { urls: [url] }, retries: 3 })
-            .then(({ body }: { body: UnfurledEmbedsResponse; }) => {
-                const [{ thumbnail } = {}] = body.embeds;
-                return thumbnail?.proxy_url ? URL.parse(thumbnail.proxy_url) : null;
+            .then(({ body: { embeds: [embed] } }: { body: UnfurledEmbedsResponse; }) => {
+                const embedUrl = embed?.thumbnail?.proxy_url ? URL.parse(embed.thumbnail.proxy_url) : null;
+                if (!embedUrl) logger.error(`Invalid or missing thumbnail for url "${url}":`, embed);
+                return embedUrl;
+            }).catch((e: unknown) => {
+                logger.error(`Failed to generate thumbnail for url ${url}: `, e);
+                return null;
             });
     }
 }
 
-export async function getFileThumbnailUrl(item: MessageAttachment): Promise<URL> {
-    try {
-        const base = await getThumbnailBase(item);
-        const metadata = defs.encode(CustomItemFormat.ATTACHMENT, item)?.toString();
-        if (!base || !metadata) return FALLBACK_THUMBNAIL;
+export async function getFileThumbnailUrl(item: MessageAttachment): Promise<URL | null> {
+    const base = await getThumbnailBase(item).then(url => {
+        if (!url) showToast("Failed to generate file thumbnail - thumbnail service might be down", Toasts.Type.FAILURE);
+        return url ?? new URL(FALLBACK_THUMBNAIL);
+    });
 
-        base.hash = metadata;
-        return base;
-    } catch {
-        return FALLBACK_THUMBNAIL;
-    }
+    const metadata = defs.encode(CustomItemFormat.ATTACHMENT, item)?.toString();
+    if (!metadata) return null;
+
+    base.hash = metadata;
+    return base;
 }
 
 export const isAllowedHost = proxyLazy(() => {
@@ -188,15 +196,17 @@ async function fetchAttachment(attachment: MessageAttachment): Promise<File> {
 
 export async function sendAttachment(attachment: MessageAttachment, channel: Channel) {
     const { filename, title, description } = attachment;
-    const file = await fetchAttachment(attachment).catch(() =>
-        Toasts.show({ message: `Couldn't fetch ${filename}`, id: Toasts.genId(), type: Toasts.Type.FAILURE })
-    );
+    const file = await fetchAttachment(attachment).catch((e: unknown) => {
+        logger.error(e);
+        showToast(`Couldn't fetch ${filename}`, Toasts.Type.FAILURE);
+    });
     if (!file) return;
 
     // Using promptToUpload instead of addFiles directly since it has file size checks with error popups
-    await UploadHandler.promptToUpload([file], channel, DraftType.ChannelMessage).catch(() =>
-        Toasts.show({ message: `Couldn't upload ${filename}`, id: Toasts.genId(), type: Toasts.Type.FAILURE })
-    );
+    await UploadHandler.promptToUpload([file], channel, DraftType.ChannelMessage).catch((e: unknown) => {
+        logger.error(e);
+        showToast(`Couldn't upload ${filename}`, Toasts.Type.FAILURE);
+    });
 
     const uploads = [...UploadAttachmentStore.getUploads(channel.id, DraftType.ChannelMessage)];
     const uploadIdx = uploads.findIndex(({ item }) => item.file === file);

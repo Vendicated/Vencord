@@ -357,7 +357,7 @@ export function AttachmentAccessory() {
         }
 
         const gifSrc = Object.assign(
-            () => getFileThumbnailUrl(originalItem).then(url => url.toString()),
+            () => getFileThumbnailUrl(originalItem).then(url => url ? url.toString() : null),
             { [Symbol.toPrimitive]: () => "" }
         );
         return { format: FavouriteItemFormat.NONE, src: originalItem.proxy_url, url: downloadUrl, width, height, gifSrc };

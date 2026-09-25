@@ -121,7 +121,7 @@ export interface FavouriteItem {
 }
 
 export interface FullFavouriteItem extends FavouriteItem {
-    gifSrc?: () => Promise<string>;
+    gifSrc?: () => Promise<string | null>;
     url: string;
 }
 
