@@ -49,6 +49,11 @@ const settings = definePluginSettings({
         description: "Enable double click to reply",
         default: true
     },
+    enableDoubleClickToReplyToOwnMessage: {
+        type: OptionType.BOOLEAN,
+        description: "Enable double click to reply to your own messages (Double click to reply must be on. Double click to edit must be off.)",
+        default: true
+    },
     requireModifier: {
         type: OptionType.BOOLEAN,
         description: "Only do double click actions when shift/ctrl is held",
@@ -86,7 +91,7 @@ export default definePlugin({
             if (channel.guild_id && !PermissionStore.can(PermissionsBits.SEND_MESSAGES, channel)) return;
             if (msg.deleted === true) return;
 
-            if (isMe) {
+            if (isMe && !settings.store.enableDoubleClickToReplyToOwnMessage && !settings.store.enableDoubleClickToReply) {
                 if (!settings.store.enableDoubleClickToEdit || EditStore.isEditing(channel.id, msg.id) || msg.state !== "SENT") return;
 
                 MessageActions.startEditMessage(channel.id, msg.id, msg.content);
