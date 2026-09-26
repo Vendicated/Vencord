@@ -24,7 +24,7 @@ export interface CommonProps {
 export function HashLink({ repo, hash, disabled = false }: { repo: string, hash: string, disabled?: boolean; }) {
     return (
         <Link href={`${repo}/commit/${hash}`} disabled={disabled}>
-            {hash}
+            {hash.slice(0, 7)}
         </Link>
     );
 }
