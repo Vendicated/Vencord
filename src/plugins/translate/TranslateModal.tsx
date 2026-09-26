@@ -20,10 +20,10 @@ import { Divider } from "@components/Divider";
 import { FormSwitch } from "@components/FormSwitch";
 import { Margins } from "@utils/margins";
 import { RenderModalProps } from "@vencord/discord-types";
-import { Forms, Modal,openModal, SearchableSelect, useMemo } from "@webpack/common";
+import { Forms, Modal, openModal, SearchableSelect, useMemo } from "@webpack/common";
 
 import { settings } from "./settings";
-import { getLanguages } from "./utils";
+import { getLanguages, getScopeKey } from "./utils";
 
 const LanguageSettingKeys = ["receivedInput", "receivedOutput", "sentInput", "sentOutput"] as const;
 
@@ -58,22 +58,37 @@ function LanguageSelect({ settingsKey, includeAuto }: { settingsKey: typeof Lang
     );
 }
 
-function AutoTranslateToggle() {
-    const value = settings.use(["autoTranslate"]).autoTranslate;
+function AutoTranslateToggle({ channelId, guildId }: { channelId?: string; guildId?: string; }) {
+    const { autoTranslate: globalAutoTranslate, perServerAutoTranslate: perServer, perServerScope, perServerRecord } = settings.use([
+        "autoTranslate", "perServerAutoTranslate", "perServerScope", "perServerRecord"
+    ]);
+
+    const isScoped = perServer && (channelId || guildId);
+    const value = isScoped
+        ? perServerRecord[getScopeKey(channelId, guildId)] ?? globalAutoTranslate
+        : globalAutoTranslate;
+
+    const appendedText = isScoped ? ` (in this ${perServerScope === "server" ? (guildId ? "Server" : "Channel") : "Channel"})` : "";
 
     return (
         <FormSwitch
-            title="Auto Translate"
+            title={`Auto Translate${appendedText}`}
             description={settings.def.autoTranslate.description}
             value={value}
-            onChange={v => settings.store.autoTranslate = v}
+            onChange={v => {
+                if (isScoped) {
+                    const key = getScopeKey(channelId, guildId);
+                    settings.store.perServerRecord = { ...settings.store.perServerRecord, [key]: v };
+                } else {
+                    settings.store.autoTranslate = v;
+                }
+            }}
             hideBorder
         />
     );
 }
 
-
-function TranslateModal({ rootProps }: { rootProps: RenderModalProps; }) {
+function TranslateModal({ rootProps, channelId, guildId }: { rootProps: RenderModalProps; channelId?: string; guildId?: string; }) {
     return (
         <Modal
             {...rootProps}
@@ -89,11 +104,11 @@ function TranslateModal({ rootProps }: { rootProps: RenderModalProps; }) {
 
             <Divider className={Margins.bottom16} />
 
-            <AutoTranslateToggle />
+            <AutoTranslateToggle channelId={channelId} guildId={guildId} />
         </Modal>
     );
 }
 
-export function openTranslateModal() {
-    openModal(props => <TranslateModal rootProps={props} />);
+export function openTranslateModal(channelId?: string, guildId?: string) {
+    openModal(props => <TranslateModal rootProps={props} channelId={channelId} guildId={guildId} />);
 }
