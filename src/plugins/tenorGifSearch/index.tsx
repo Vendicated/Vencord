@@ -7,7 +7,7 @@
 import { Devs } from "@utils/constants";
 import { isNonNullish } from "@utils/guards";
 import definePlugin from "@utils/types";
-import { FluxDispatcher, LocaleStore } from "@webpack/common";
+import { FluxDispatcher, GIFPickerViewStore, LocaleStore } from "@webpack/common";
 
 // API key is taken from the GBoard app on iOS
 const TENOR_KEY = "3Z0688EVWYKH";
@@ -21,6 +21,8 @@ interface TenorMedia {
 }
 interface TenorResult {
     id: string;
+    title: string;
+    h1_title: string;
     media: Array<Record<string, TenorMedia>>;
     itemurl: string;
 }
@@ -46,17 +48,23 @@ interface TrendingCategories {
 }
 
 function toDiscordGif(item: TenorResult): DiscordGif | null {
-    const { gif, webm } = item.media[0];
+    // Discord uses tinywebp on Linux, webm on rest (including web Linux). Tenor only has "webp", not "tinywebp"
+    const format = GIFPickerViewStore.getSelectedFormat() === "tinywebp"
+        ? "webp"
+        : "tinywebm";
+
+    const { title, h1_title, id, itemurl } = item;
+    const { gif, [format]: mediaItem } = item.media[0];
 
     return {
-        id: item.id,
-        title: "", // discord always returns a blank string
-        url: item.itemurl,
+        id: id,
+        title: title || h1_title,
+        url: itemurl,
         gif_src: gif.url,
-        src: webm.url,
-        width: webm.dims[0],
-        height: webm.dims[1],
-        preview: webm.preview
+        src: mediaItem.url,
+        width: mediaItem.dims[0],
+        height: mediaItem.dims[1],
+        preview: mediaItem.preview
     };
 }
 
@@ -167,8 +175,8 @@ export default definePlugin({
         {
             find: '"IntegrationQueryStore"',
             replacement: {
-                match: /(?<=search\((\i),(\i)\)\{)null==\i\.getResults\(\1,\2\)&&/,
-                replace: "return $self.tenorIntegrationSearch($1,$2);null==void 0&&"
+                match: /(?<=search\((\i),(\i)\)\{)let \i=\i\.getResults\(\1,\2\)[,;]/,
+                replace: "return $self.tenorIntegrationSearch($1,$2);$&"
             }
         },
         // Add back tenor command

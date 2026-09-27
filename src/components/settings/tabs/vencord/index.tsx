@@ -57,11 +57,7 @@ function Switches() {
         {
             key: "useQuickCss",
             title: "Enable Custom CSS",
-        },
-        !IS_WEB && {
-            key: "enableReactDevtools",
-            title: "Enable React Developer Tools",
-            restartRequired: true
+            description: "Apply your configured QuickCSS"
         },
         !IS_WEB && (!IS_DISCORD_DESKTOP || !IS_WINDOWS ? {
             key: "frameless",
@@ -81,11 +77,18 @@ function Switches() {
         IS_DISCORD_DESKTOP && {
             key: "disableMinSize",
             title: "Disable minimum window size",
+            description: "Allows you to resize the window to any size, even smaller than Discord's minimum size",
             restartRequired: true
         },
         !IS_WEB && IS_WINDOWS && {
             key: "winCtrlQ",
             title: "Register Ctrl+Q as shortcut to close Discord (Alternative to Alt+F4)",
+            restartRequired: true
+        },
+        !IS_WEB && {
+            key: "enableReactDevtools",
+            title: "Enable React Developer Tools",
+            description: "Mainly useful for plugin developers. Ignore this if you don't know what it is",
             restartRequired: true
         },
     ] satisfies Array<false | {
@@ -108,6 +111,7 @@ function Switches() {
                 title={title}
                 description={description}
                 value={settings[key]}
+                hideBorder
                 onChange={v => {
                     settings[key] = v;
 
@@ -226,7 +230,9 @@ function VencordSettings() {
                     </a>!
                 </Forms.FormText>
 
-                <Switches />
+                <div className="vc-settings-switches">
+                    <Switches />
+                </div>
             </section>
 
 
