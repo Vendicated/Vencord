@@ -376,9 +376,9 @@ function resolveEmojiName(favoriteableId: string, message: Message) {
     const match = message.content.match(RegExp(`<a?:(\\w+)(?:~\\d+)?:${favoriteableId}>|https://cdn\\.discordapp\\.com/emojis/${favoriteableId}\\.[\\w?&=%]*`));
     if (!match) return null;
 
-    if (match[1]) return match[1];
-
-    return URL.parse(match[0])?.searchParams.get("name") ?? "FakeNitroEmoji";
+    return match[1]
+        ?? URL.parse(match[0])?.searchParams.get("name")
+        ?? "FakeNitroEmoji";
 }
 
 const messageContextMenuPatch: NavContextMenuPatchCallback = (children, props: Record<"favoriteableId" | "itemHref" | "itemSrc" | "favoriteableType", string> & { message: Message; }) => {
