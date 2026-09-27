@@ -41,12 +41,14 @@ function ContributorModal({ user, modalProps }: { user: User; modalProps: Render
 
     const plugins = useMemo(() => {
         const allPlugins = Object.values(Plugins);
-        const pluginsByAuthor = DevsById[user.id]
-            ? allPlugins.filter(p => p.authors.includes(DevsById[user.id]))
-            : allPlugins.filter(p => p.authors.some(a => a.name === user.username));
+        
+        // Blindage renforcé : on vérifie que p.authors existe et que chaque auteur 'a' est défini avant d'accéder à ses propriétés
+        const pluginsByAuthor = (user.id && DevsById[user.id])
+            ? allPlugins.filter(p => p.authors?.some(a => a && p.authors.includes(DevsById[user.id])))
+            : allPlugins.filter(p => p.authors?.some(a => a && a.name === user.username));
 
-        return pluginsByAuthor
-            .filter(p => !p.name.endsWith("API"))
+        return (pluginsByAuthor || [])
+            .filter(p => p && p.name && !p.name.endsWith("API"))
             .sort((a, b) => Number(a.required ?? false) - Number(b.required ?? false));
     }, [user.id, user.username]);
 
