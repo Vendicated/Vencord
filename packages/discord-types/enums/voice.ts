@@ -48,3 +48,28 @@ export const enum VideoQualityMode {
     AUTO = 1,
     FULL = 2,
 }
+
+export const enum ApplicationStreamPresets {
+    PRESET_VIDEO = 1,
+    PRESET_DOCUMENTS = 2,
+    PRESET_CUSTOM = 3,
+    PRESET_AUTO = 4,
+    PRESET_MOBILE_DEFAULT = 5,
+    PRESET_MOBILE_PERFORMANCE = 6,
+    PRESET_MOBILE_HIGH_QUALITY = 7,
+}
+
+export const enum ApplicationStreamResolutions {
+    RESOLUTION_SOURCE = 0,
+    RESOLUTION_480 = 480,
+    RESOLUTION_720 = 720,
+    RESOLUTION_1080 = 1080,
+    RESOLUTION_1440 = 1440,
+}
+
+export const enum ApplicationStreamFPS {
+    FPS_5 = 5,
+    FPS_15 = 15,
+    FPS_30 = 30,
+    FPS_60 = 60,
+}
