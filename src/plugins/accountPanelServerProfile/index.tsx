@@ -19,7 +19,7 @@ interface UserProfileProps {
     originalRenderPopout: () => React.ReactNode;
 }
 
-const UserProfile = findComponentByCodeLazy(".POPOUT,user");
+const UserProfile = findComponentByCodeLazy(".isNonUserBot()?", ",onClickContainer:");
 
 let openAlternatePopout = false;
 let accountPanelRef: React.RefObject<HTMLDivElement | null> = { current: null };

@@ -38,7 +38,7 @@ export function SliderSetting({ setting, pluginSettings, definedSettings, id, on
     }
 
     return (
-        <SettingsSection name={id} description={setting.description} error={error}>
+        <SettingsSection name={setting.displayName} id={id} description={setting.description} error={error}>
             <Slider
                 markers={setting.markers}
                 minValue={setting.markers[0]}
