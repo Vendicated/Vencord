@@ -11,6 +11,7 @@ import definePlugin, { OptionType } from "@utils/types";
 import { findByPropsLazy } from "@webpack";
 import { UserStore } from "@webpack/common";
 import { Menu } from "@webpack/common";
+import { Channel, User } from "@vencord/discord-types";
 
 const MediaEngineStore = findByPropsLazy("getMediaEngine");
 const AudioActions = findByPropsLazy("setLocalVolume");
@@ -20,7 +21,7 @@ interface VolumeState {
     sourceNode: MediaStreamAudioSourceNode;
     audioContext: AudioContext;
     currentVolume: number;
-    sampleBuffer: Float32Array;
+    sampleBuffer: Float32Array<ArrayBuffer>;
     recentLevels: number[];
     monitorInterval: ReturnType<typeof setInterval> | null;
     lastAdjustmentTime: number;
