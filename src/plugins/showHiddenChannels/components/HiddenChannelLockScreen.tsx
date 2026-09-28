@@ -25,10 +25,10 @@ import { classes } from "@utils/misc";
 import { formatDurationVerbose } from "@utils/text";
 import type { Channel, RoleOrUserPermission } from "@vencord/discord-types";
 import { findByPropsLazy, findComponentByCodeLazy, findCssClassesLazy } from "@webpack";
-import { EmojiStore, FluxDispatcher, GuildMemberStore, GuildStore, Parser, PermissionsBits, PermissionStore, SnowflakeUtils, Text, Timestamp, Tooltip, useEffect, useState } from "@webpack/common";
+import { EmojiStore, FluxDispatcher, GuildChannelStore, GuildMemberStore, GuildStore, Parser, PermissionsBits, PermissionStore, SnowflakeUtils, Text, Timestamp, Tooltip, useEffect, useState, useStateFromStores } from "@webpack/common";
 import { ComponentType } from "react";
 
-import { cl, settings } from "..";
+import { cl, isEnabledForGuild, settings } from "..";
 
 const enum SortOrderTypes {
     LATEST_ACTIVITY = 0,
@@ -103,6 +103,7 @@ const HiddenChannelLogo = "/assets/433e3ec4319a9d11b0cbe39342614982.svg";
 function HiddenChannelLockScreen({ channel }: { channel: Channel; }) {
     const { defaultAllowedUsersAndRolesDropdownState } = settings.use(["defaultAllowedUsersAndRolesDropdownState"]);
     const [permissions, setPermissions] = useState<RoleOrUserPermission[]>([]);
+    const enabled = useStateFromStores([GuildChannelStore], () => isEnabledForGuild(channel.guild_id));
 
     const {
         type,
@@ -153,6 +154,8 @@ function HiddenChannelLockScreen({ channel }: { channel: Channel; }) {
             })), guild_id));
         }
     }, [channelId]);
+
+    if (!enabled) return null;
 
     return (
         <div className={classes(ChatScrollClasses.auto, ChatScrollClasses.customTheme, ChatScrollClasses.managedReactiveScroller)}>

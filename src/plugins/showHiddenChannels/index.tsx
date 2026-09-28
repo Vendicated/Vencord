@@ -18,15 +18,18 @@
 
 import "./style.css";
 
+import { findGroupChildrenByChildId, NavContextMenuPatchCallback } from "@api/ContextMenu";
+import { get, set } from "@api/DataStore";
 import { definePluginSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import { classNameFactory } from "@utils/css";
+import { Logger } from "@utils/Logger";
 import { classes } from "@utils/misc";
 import definePlugin, { OptionType } from "@utils/types";
-import type { Channel, Role } from "@vencord/discord-types";
+import type { Channel, Guild, Role } from "@vencord/discord-types";
 import { findCssClassesLazy } from "@webpack";
-import { ChannelStore, PermissionsBits, PermissionStore, Tooltip } from "@webpack/common";
+import { ChannelStore, FluxDispatcher, GuildChannelStore, Menu, PermissionsBits, PermissionStore, Tooltip, useStateFromStores } from "@webpack/common";
 
 import HiddenChannelLockScreen, { setChannelBeginHeader } from "./components/HiddenChannelLockScreen";
 
@@ -40,6 +43,47 @@ const enum ShowMode {
 }
 
 const CONNECT = 1n << 20n;
+
+const HIDDEN_GUILDS_KEY = "ShowHiddenChannels_HiddenGuilds";
+const logger = new Logger("ShowHiddenChannels");
+let hiddenGuilds = new Set<string>();
+let loadHiddenGuilds: Promise<void>;
+
+export function isEnabledForGuild(guildId: string | null | undefined) {
+    return guildId != null && !hiddenGuilds.has(guildId);
+}
+
+function refreshGuild(guildId: string) {
+    // The store patches reuse Discord's cache invalidation handlers, without touching
+    // category collapse state or dispatching actions that sync guild settings.
+    FluxDispatcher.dispatch({ type: "VC_SHC_GUILD_TOGGLE", guildId });
+}
+
+async function toggleGuild(guildId: string) {
+    // Do not let a click during startup overwrite the saved choices.
+    await loadHiddenGuilds;
+    if (!hiddenGuilds.delete(guildId)) hiddenGuilds.add(guildId);
+    const savedGuilds = new Set(hiddenGuilds);
+    refreshGuild(guildId);
+    await set(HIDDEN_GUILDS_KEY, savedGuilds);
+}
+
+const GuildContextMenuPatch: NavContextMenuPatchCallback = (children, { guild }: { guild?: Guild; }) => {
+    const checked = useStateFromStores([GuildChannelStore], () => guild != null && hiddenGuilds.has(guild.id));
+    if (!guild) return;
+
+    const item = (
+        <Menu.MenuCheckboxItem
+            id="vc-shc-hide-hidden-channels"
+            label="Hide Hidden Channels"
+            checked={checked}
+            action={() => toggleGuild(guild.id).catch(e => logger.error("Failed to save hidden guilds", e))}
+        />
+    );
+    const group = findGroupChildrenByChildId("privacy", children);
+    if (group) group.push(item);
+    else children.push(<Menu.MenuGroup>{item}</Menu.MenuGroup>);
+};
 
 export const settings = definePluginSettings({
     hideUnreads: {
@@ -72,8 +116,24 @@ export default definePlugin({
     name: "ShowHiddenChannels",
     description: "Show channels that you do not have access to view.",
     tags: ["Servers", "Utility"],
-    authors: [Devs.BigDuck, Devs.AverageReactEnjoyer, Devs.D3SOX, Devs.Ven, Devs.Nuckyz, Devs.Nickyux, Devs.Rini],
+    authors: [Devs.BigDuck, Devs.AverageReactEnjoyer, Devs.D3SOX, Devs.Ven, Devs.Nuckyz, Devs.Nickyux, Devs.Rini, Devs.f3tch],
     settings,
+
+    start() {
+        loadHiddenGuilds = get<Set<string>>(HIDDEN_GUILDS_KEY).then(guilds => {
+            hiddenGuilds = guilds ?? new Set();
+            // Startup may already have populated the Discord caches before IndexedDB resolves.
+            FluxDispatcher.wait(() => hiddenGuilds.forEach(refreshGuild));
+        });
+        loadHiddenGuilds.catch(e => logger.error("Failed to load hidden guilds", e));
+    },
+
+    contextMenus: {
+        "guild-context": GuildContextMenuPatch,
+        "guild-header-popout": GuildContextMenuPatch
+    },
+
+    isEnabledForGuild,
 
     patches: [
         {
@@ -83,7 +143,7 @@ export default definePlugin({
                 // Remove the special logic for channels we don't have access to
                 {
                     match: /if\(!\i\.\i\.can\(\i\.\i\.VIEW_CHANNEL.+?{if\(this\.id===\i\).+?threadIds:\[\]}}/,
-                    replace: ""
+                    replace: m => `if(!$self.isEnabledForGuild(this.record.guild_id)){${m}}`
                 },
                 // Do not check for unreads when selecting the render level if the channel is hidden
                 {
@@ -92,15 +152,23 @@ export default definePlugin({
                 },
                 // Make channels we dont have access to be the same level as normal ones
                 {
-                    match: /(this\.record\)\?{renderLevel:(.+?),threadIds.+?renderLevel:).+?(?=,threadIds)/g,
-                    replace: (_, rest, defaultRenderLevel) => `${rest}${defaultRenderLevel}`
+                    match: /(this\.record\)\?{renderLevel:(.+?),threadIds.+?renderLevel:)(.+?)(?=,threadIds)/g,
+                    replace: (_, rest, defaultRenderLevel, originalRenderLevel) => `${rest}$self.isEnabledForGuild(this.record.guild_id)?${defaultRenderLevel}:${originalRenderLevel}`
                 },
                 // Remove permission checking for getRenderLevel function
                 {
-                    match: /(getRenderLevel\(\i\){.+?return)!\i\.\i\.can\(\i\.\i\.VIEW_CHANNEL,this\.record\)\|\|/,
-                    replace: (_, rest) => `${rest} `
+                    match: /(getRenderLevel\(\i\){.+?return)(!\i\.\i\.can\(\i\.\i\.VIEW_CHANNEL,this\.record\))\|\|/,
+                    replace: (_, rest, permissionCheck) => `${rest}(!$self.isEnabledForGuild(this.record.guild_id)&&${permissionCheck})||`
                 }
             ]
+        },
+        {
+            find: '"ChannelListStore"',
+            replacement: {
+                match: /CATEGORY_COLLAPSE_ALL:(\i),/,
+                // Favorites may contain channels from the guild being toggled, too.
+                replace: "$&VC_SHC_GUILD_TOGGLE:e=>{$1(e);$1({guildId:\"@favorites\"})},"
+            }
         },
         {
             find: "VoiceChannel, transitionTo: Channel does not have a guildId",
@@ -177,8 +245,10 @@ export default definePlugin({
                 },
                 // Make voice channels also appear as muted if they are muted
                 {
-                    match: /(?<=\?\i\.\i:\i\.\i,)(.{0,150}?)if\((\i)(?:\)return |\?)(\i\.MUTED)/,
-                    replace: (_, otherClasses, isMuted, mutedClassExpression) => `${isMuted}?${mutedClassExpression}:"",${otherClasses}if(${isMuted})return ""`
+                    match: /(?<=\?\i\.\i:\i\.\i,)(.{0,150}?)if\((\i)(?:\)return |\?)(\i\.MUTED)(?<={channel:(\i).+?)/,
+                    replace: (_, otherClasses, isMuted, mutedClassExpression, channel) => "" +
+                        `$self.isEnabledForGuild(${channel}.guild_id)&&${isMuted}?${mutedClassExpression}:"",${otherClasses}` +
+                        `if(${isMuted})return $self.isEnabledForGuild(${channel}.guild_id)?"":${mutedClassExpression}`
                 }
             ]
         },
@@ -288,7 +358,7 @@ export default definePlugin({
                 {
                     // Change the permissionOverwrite check to CONNECT if the channel is locked
                     match: /permissionOverwrites\[.+?\i=(?<=context:(\i)}.+?)(?=(.+?)VIEW_CHANNEL)/,
-                    replace: (m, channel, permCheck) => `${m}!Vencord.Webpack.Common.PermissionStore.can(${CONNECT}n,${channel})?${permCheck}CONNECT):`
+                    replace: (m, channel, permCheck) => `${m}$self.isEnabledForGuild(${channel}.guild_id)&&!Vencord.Webpack.Common.PermissionStore.can(${CONNECT}n,${channel})?${permCheck}CONNECT):`
                 },
                 {
                     // Include the @everyone role in the allowed roles list for Hidden Channels
@@ -312,8 +382,8 @@ export default definePlugin({
                 },
                 {
                     // Always render the component for multiple allowed users
-                    match: /1!==\i\.length(?=\|\|)/,
-                    replace: "true"
+                    match: /1!==\i\.length(?=\|\|.{0,150}?guildId:(\i)\.guild_id)/,
+                    replace: (m, channel) => `($self.isEnabledForGuild(${channel}.guild_id)||${m})`
                 }
             ]
         },
@@ -434,8 +504,8 @@ export default definePlugin({
             find: "\"^/guild-stages/(\\\\d+)(?:/)?(\\\\d+)?\"",
             replacement: {
                 // Make mentions of hidden channels work
-                match: /\i\.\i\.can\(\i\.\i\.VIEW_CHANNEL,\i\)/,
-                replace: "true"
+                match: /\i\.\i\.can\(\i\.\i\.VIEW_CHANNEL,(\i)\)/,
+                replace: (m, channel) => `($self.isEnabledForGuild(${channel}.guild_id)||${m})`
             },
         },
         {
@@ -451,13 +521,17 @@ export default definePlugin({
             replacement: [
                 {
                     // Make GuildChannelStore contain hidden channels
-                    match: /isChannelGated\(.+?\)(?=&&)/,
-                    replace: m => `${m}&&false`
+                    match: /isChannelGated\((\i)\.guild_id,\1\.id\)(?=&&)/,
+                    replace: (m, channel) => `${m}&&!$self.isEnabledForGuild(${channel}.guild_id)`
                 },
                 {
                     // Filter hidden channels from GuildChannelStore.getChannels unless told otherwise
                     match: /(?<=getChannels\(\i)(\){.*?)return (.+?)}/,
                     replace: (_, rest, channels) => `,shouldIncludeHidden${rest}return $self.resolveGuildChannels(${channels},shouldIncludeHidden??arguments[0]==="@favorites");}`
+                },
+                {
+                    match: /GUILD_ROLE_UPDATE:(\i),/,
+                    replace: "$&VC_SHC_GUILD_TOGGLE:e=>{$1(e);$1({guildId:\"@favorites\"})},"
                 },
             ]
         },
@@ -471,11 +545,15 @@ export default definePlugin({
         },
         {
             find: '"NowPlayingViewStore"',
-            replacement: {
+            replacement: [{
                 // Make active now voice states on hidden channels
-                match: /(getVoiceStateForUser.{0,150}?)&&\i\.\i\.canWithPartialContext.{0,20}VIEW_CHANNEL.+?}\)(?=\?)/,
-                replace: "$1"
-            }
+                match: /(getVoiceStateForUser.{0,150}?)&&(\i\.\i\.canWithPartialContext\(\i\.\i\.VIEW_CHANNEL,{channelId:(\i\.channelId)}\))(?=\?)/,
+                replace: (_, rest, permissionCheck, channelId) => `${rest}&&($self.isEnabledForGuild(Vencord.Webpack.Common.ChannelStore.getChannel(${channelId})?.guild_id)||${permissionCheck})`
+            }, {
+                // Recompute cached cards immediately, including when toggling a non-selected guild.
+                match: /NOW_PLAYING_MOUNTED:function\(\){\i=!0,(\i)\(\)}/,
+                replace: "$&,VC_SHC_GUILD_TOGGLE:()=>{$1();$1.flush()}"
+            }]
         },
         {
             find: "#{intl::ROLE_REQUIRED_SINGLE_USER_MESSAGE}",
@@ -485,6 +563,8 @@ export default definePlugin({
             }
         },
         {
+            // Gateway obfuscation is negotiated for the entire session, not per guild.
+            // Keep full records available; the per-guild checks control their visibility.
             find: "2026-02-private-channel-hiding",
             replacement: {
                 match: /(?<=enableObfuscation|enableIntegrityCheck):!0/g,
@@ -498,7 +578,7 @@ export default definePlugin({
     },
 
     swapViewChannelWithConnectPermission(mergedPermissions: bigint, channel: Channel) {
-        if (!PermissionStore.can(PermissionsBits.CONNECT, channel)) {
+        if (isEnabledForGuild(channel.guild_id) && !PermissionStore.can(PermissionsBits.CONNECT, channel)) {
             mergedPermissions &= ~PermissionsBits.VIEW_CHANNEL;
             mergedPermissions |= PermissionsBits.CONNECT;
         }
@@ -507,6 +587,11 @@ export default definePlugin({
     },
 
     isHiddenChannel(channel: Channel & { channelId?: string; }, checkConnect = false) {
+        const resolvedChannel = channel?.channelId != null ? ChannelStore.getChannel(channel.channelId) : channel;
+        return isEnabledForGuild(resolvedChannel?.guild_id) && this.isHiddenChannelRaw(channel, checkConnect);
+    },
+
+    isHiddenChannelRaw(channel: Channel & { channelId?: string; }, checkConnect = false) {
         try {
             if (channel == null || Object.hasOwn(channel, "channelId") && channel.channelId == null) return false;
 
@@ -522,7 +607,7 @@ export default definePlugin({
     },
 
     resolveGuildChannels(channels: Record<string | number, Array<{ channel: Channel; comparator: number; }> | string | number>, shouldIncludeHidden: boolean) {
-        if (shouldIncludeHidden) return channels;
+        if (shouldIncludeHidden && hiddenGuilds.size === 0) return channels;
 
         const res = {};
         for (const [key, maybeObjChannels] of Object.entries(channels)) {
@@ -534,7 +619,10 @@ export default definePlugin({
             res[key] ??= [];
 
             for (const objChannel of maybeObjChannels) {
-                if (isUncategorized(objChannel) || objChannel.channel.id === null || !this.isHiddenChannel(objChannel.channel)) res[key].push(objChannel);
+                const { channel } = objChannel;
+                if (isUncategorized(objChannel) || channel.id === null
+                    || shouldIncludeHidden && isEnabledForGuild(channel.guild_id)
+                    || !this.isHiddenChannelRaw(channel)) res[key].push(objChannel);
             }
         }
 
@@ -544,6 +632,7 @@ export default definePlugin({
     makeAllowedRolesReduce(guildId: string) {
         return [
             (prev: Array<Role>, _: Role, index: number, originalArray: Array<Role>) => {
+                if (!isEnabledForGuild(guildId)) return originalArray;
                 if (index !== 0) return prev;
 
                 const everyoneRole = originalArray.find(role => role.id === guildId);
