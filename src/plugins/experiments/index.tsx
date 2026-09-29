@@ -46,9 +46,9 @@ export default definePlugin({
 
     patches: [
         {
-            find: "Object.defineProperties(this,{isDeveloper",
+            find: "#{intl::+gHUHA::raw}", // "Staff only"
             replacement: {
-                match: /(?<={isDeveloper:\{[^}]+?,get:\(\)=>)\i/,
+                match: /(?<=#{intl::+gHUHA::raw}\),usePredicate:\(\)=>)\i\.\i\.isDeveloper/,
                 replace: "true"
             }
         },
