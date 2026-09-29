@@ -53,10 +53,10 @@ export default definePlugin({
             }
         },
         {
-            find: 'type:"user",revision',
+            find: ".APEX_EXPERIMENTS_METADATA,",
             replacement: {
-                match: /!(\i)(?=&&"CONNECTION_OPEN")/,
-                replace: "!($1=true)"
+                match: /await \i\.\i\.get\(\{url:\i\.\i\.APEX_EXPERIMENTS_METADATA/,
+                replace: "await Promise.reject(new Error(\"Not fetching apex experiment metadata because it's staff only\"))||$&"
             }
         },
         {
