@@ -46,9 +46,9 @@ export default definePlugin({
 
     patches: [
         {
-            find: "#{intl::+gHUHA::raw}", // "Staff only"
+            find: "#{intl::USER_SETTINGS_STAFF_ONLY_SECTION}",
             replacement: {
-                match: /(?<=#{intl::+gHUHA::raw}\),usePredicate:\(\)=>)\i\.\i\.isDeveloper/,
+                match: /(?<=#{intl::USER_SETTINGS_STAFF_ONLY_SECTION}\),usePredicate:\(\)=>)\i\.\i\.isDeveloper/,
                 replace: "true"
             }
         },
@@ -73,6 +73,14 @@ export default definePlugin({
                     replace: ',flexDirection:"row",alignItems:"center"'
                 }
             ]
+        },
+        // Allow dev://experiment and dev://playground links to be parsed
+        {
+            find: "=!1,allowDevLinks:",
+            replacement: {
+                match: /allowDevLinks:(\i)=!1/,
+                replace: "_allowDevLinks:$1=true"
+            }
         },
         // Enable experiment embed on sent experiment links
         {
@@ -105,13 +113,6 @@ export default definePlugin({
             replacement: {
                 match: "isStaff()||",
                 replace: "$& true||"
-            }
-        },
-        {
-            find: "=!1,allowDevLinks:",
-            replacement: {
-                match: /allowDevLinks:(\i)=!1/,
-                replace: "_allowDevLinks:$1=true"
             }
         },
         {
