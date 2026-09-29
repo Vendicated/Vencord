@@ -108,6 +108,13 @@ export default definePlugin({
             }
         },
         {
+            find: "=!1,allowDevLinks:",
+            replacement: {
+                match: /allowDevLinks:(\i)=!1/,
+                replace: "_allowDevLinks:$1=true"
+            }
+        },
+        {
             // Expands the experiment uri regex to allow negative numbers, e.g. dev://experiment/2026-02-mana-playground-access/-1
             // -1 is "Not Eligible"
             find: '"^dev://experiment/',
