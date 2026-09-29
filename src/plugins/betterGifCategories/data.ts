@@ -96,8 +96,6 @@ export async function addGifToCategory(categoryId: string, gif: Gif): Promise<vo
         return { ...c, gifs: [gif, ...c.gifs] };
     });
 
-    // TODO check for not-yet-implemented setting for auto-favs is set
-    await mirrorFavorite(gif);
     await persist();
 }
 
@@ -108,11 +106,5 @@ export async function removeGifFromCategory(categoryId: string, gifUrl: string):
             : c
     );
 
-    // TODO check if not-yet-implemented setting for unfav gifs is set
     await persist();
-}
-
-
-async function mirrorFavorite(gif: Gif): Promise<void> {
-    // TODO implement me
 }

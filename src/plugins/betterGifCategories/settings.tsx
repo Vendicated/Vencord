@@ -10,16 +10,19 @@ import { OptionType } from "@utils/types";
 import CategoryManager from "./components/CategoryManager";
 
 export const settings = definePluginSettings({
-    autoFavorite: {
-        type: OptionType.BOOLEAN,
-        description: "When adding a gif to a category, also add it to native favorites (not yet implemented)",
-        default: true,
-    },
-    autoUnfavorite: {
-        type: OptionType.BOOLEAN,
-        description: "When removing a gif from its last category, also remove it from native favorites (not yet implemented)",
-        default: false,
-    },
+    // Very much would have been nice to have.
+    // FakeNitro was a good example for some parts, but I don't know how to implement or maintain proper favorite syncing.
+    //
+    // autoFavorite: {
+    //     type: OptionType.BOOLEAN,
+    //     description: "When adding a gif to a category, also add it to your native Discord favorites",
+    //     default: true,
+    // },
+    // autoUnfavorite: {
+    //     type: OptionType.BOOLEAN,
+    //     description: "When removing a gif from its last category, also remove it from your native Discord favorites",
+    //     default: false,
+    // },
     manageCategories: {
         type: OptionType.COMPONENT,
         component: () => <CategoryManager />,
