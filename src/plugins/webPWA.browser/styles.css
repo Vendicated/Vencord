@@ -9,15 +9,26 @@
         --custom-app-top-bar-height: env(titlebar-area-height, 0px) !important;
     }
 
-    /* position trailing titlebar elements alongside WCO */
-    [data-fullscreen] > [class*="bar_"] [class*="trailing_"] {
-        padding-right: calc(100vw - env(titlebar-area-width, 100%) - env(titlebar-area-x, 0px));
+
+    /* position trailing/leading titlebar elements alongside WCO */
+    [data-fullscreen] > [class*="bar_"] {
+        [class*="leading_"] {
+            padding-left: env(titlebar-area-x, 0);
+        }
+
+        [class*="trailing_"] {
+            padding-right: calc(100vw - env(titlebar-area-width, 100%) - env(titlebar-area-x, 0px));
+        }
     }
 
     /* popout windows like screenshare popout, these properties don't work outside WCO so this is safe */
     [data-popout-root="true"] {
         [class*="headerWrapper_"] {
             app-region: drag;
+
+            [class*="headerBarChildren_"] {
+                padding-left: env(titlebar-area-x, 0);
+            }
 
             /* position trailing toolbar elements alongside WCO */
             [class*="toolbar_"] {
