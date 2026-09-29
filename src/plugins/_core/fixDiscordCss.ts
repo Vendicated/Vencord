@@ -8,7 +8,7 @@ import { Devs } from "@utils/constants";
 import { Logger } from "@utils/Logger";
 import definePlugin, { StartAt } from "@utils/types";
 
-let observer: MutationObserver;
+let observer: MutationObserver | null;
 
 function cleanSheet(sheet: CSSStyleSheet) {
     try {
@@ -21,7 +21,8 @@ function cleanSheet(sheet: CSSStyleSheet) {
             if ((rule as CSSStyleRule).selectorText?.includes(":has(.gameOption_")) {
                 new Logger("FixDiscordCss").info("Removed problematic CSS rule", rule.cssText);
                 sheet.deleteRule(i);
-                observer.disconnect();
+                observer!.disconnect();
+                observer = null;
                 break;
             }
         }
