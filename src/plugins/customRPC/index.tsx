@@ -31,7 +31,7 @@ import definePlugin, { OptionType } from "@utils/types";
 import { Activity } from "@vencord/discord-types";
 import { ActivityType } from "@vencord/discord-types/enums";
 import { findByCodeLazy, findComponentByCodeLazy } from "@webpack";
-import { ApplicationAssetUtils, Button, FluxDispatcher, Forms, React, UserStore } from "@webpack/common";
+import { ApplicationAssetUtils, Button, FluxDispatcher, Forms, Menu, React, UserStore } from "@webpack/common";
 
 import { RPCSettings } from "./RpcSettings";
 
@@ -52,6 +52,12 @@ export const enum TimestampMode {
 }
 
 export const settings = definePluginSettings({
+    enablePresence: {
+        type: OptionType.BOOLEAN,
+        description: "Enable Custom RPC",
+        default: true,
+        onChange: (v) => setRpc(!v)
+    },
     config: {
         type: OptionType.COMPONENT,
         component: RPCSettings
@@ -201,11 +207,12 @@ async function createActivity(): Promise<Activity | undefined> {
 }
 
 export async function setRpc(disable?: boolean) {
+    const shouldDisable = disable ?? !settings.store.enablePresence;
     const activity: Activity | undefined = await createActivity();
 
     FluxDispatcher.dispatch({
         type: "LOCAL_ACTIVITY_UPDATE",
-        activity: !disable ? activity : null,
+        activity: !shouldDisable ? activity : null,
         socketId: "CustomRPC",
     });
 }
@@ -214,11 +221,27 @@ export default definePlugin({
     name: "CustomRPC",
     description: "Add a fully customisable Rich Presence (Game status) to your Discord profile",
     tags: ["Activity", "Customisation"],
-    authors: [Devs.captain, Devs.AutumnVN, Devs.nin0dev],
+    authors: [Devs.captain, Devs.AutumnVN, Devs.nin0dev, Devs.c0nnorgg],
     dependencies: ["UserSettingsAPI"],
     // This plugin's patch is not important for functionality, so don't require a restart
     requiresRestart: false,
     settings,
+
+    toolboxActions() {
+        const { enablePresence } = settings.use(["enablePresence"]);
+
+        return (
+            <Menu.MenuCheckboxItem
+                id="custom-rpc-toggle-toolbox"
+                label="Enable Custom RPC"
+                checked={enablePresence}
+                action={() => {
+                    settings.store.enablePresence = !enablePresence;
+                    setRpc();
+                }}
+            />
+        );
+    },
 
     start: setRpc,
     stop: () => setRpc(true),
