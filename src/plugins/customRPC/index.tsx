@@ -18,20 +18,21 @@
 
 import { definePluginSettings } from "@api/Settings";
 import { getUserSettingLazy } from "@api/UserSettings";
+import { BaseText } from "@components/BaseText";
+import { Button } from "@components/Button";
+import { Card } from "@components/Card";
 import { Divider } from "@components/Divider";
-import { ErrorCard } from "@components/ErrorCard";
 import { Flex } from "@components/Flex";
 import { Link } from "@components/Link";
+import { Paragraph } from "@components/Paragraph";
 import { Devs } from "@utils/constants";
 import { isTruthy } from "@utils/guards";
-import { Margins } from "@utils/margins";
-import { classes } from "@utils/misc";
 import { useAwaiter } from "@utils/react";
 import definePlugin, { OptionType } from "@utils/types";
 import { Activity } from "@vencord/discord-types";
 import { ActivityType } from "@vencord/discord-types/enums";
 import { findByCodeLazy, findComponentByCodeLazy } from "@webpack";
-import { ApplicationAssetUtils, Button, FluxDispatcher, Forms, Menu, React, UserStore } from "@webpack/common";
+import { ApplicationAssetUtils, FluxDispatcher, Menu, React, UserStore } from "@webpack/common";
 
 import { RPCSettings } from "./RpcSettings";
 
@@ -54,9 +55,9 @@ export const enum TimestampMode {
 export const settings = definePluginSettings({
     enablePresence: {
         type: OptionType.BOOLEAN,
-        description: "Enable Custom RPC",
+        description: "Whether to show the presence",
         default: true,
-        onChange: (v) => setRpc(!v)
+        onChange: v => setRpc(!v)
     },
     config: {
         type: OptionType.COMPONENT,
@@ -233,7 +234,7 @@ export default definePlugin({
         return (
             <Menu.MenuCheckboxItem
                 id="custom-rpc-toggle-toolbox"
-                label="Enable Custom RPC"
+                label="Show Custom RPC"
                 checked={enablePresence}
                 action={() => {
                     settings.store.enablePresence = !enablePresence;
@@ -258,59 +259,66 @@ export default definePlugin({
     ],
 
     settingsAboutComponent: () => {
+        const { enablePresence } = settings.use(["enablePresence"]);
         const [activity] = useAwaiter(createActivity, { fallbackValue: undefined, deps: Object.values(settings.store) });
         const gameActivityEnabled = ShowCurrentGame.useSetting();
         const { profileThemeStyle } = useProfileThemeStyle({});
 
         return (
-            <>
+            <Flex flexDirection="column" gap=".5em">
+                {!enablePresence && (
+                    <Card variant="warning">
+                        <Flex flexDirection="column" gap=".5em" alignItems="flex-start">
+                            <BaseText size="md" weight="bold">Custom RPC disabled</BaseText>
+                            <Paragraph>The "Enable Presence" setting is disabled, so your presence won't show. If this was unintentional, enable it below.</Paragraph>
+                        </Flex>
+                    </Card>
+                )}
                 {!gameActivityEnabled && (
-                    <ErrorCard
-                        className={classes(Margins.top16, Margins.bottom16)}
-                        style={{ padding: "1em" }}
-                    >
-                        <Forms.FormTitle>Notice</Forms.FormTitle>
-                        <Forms.FormText>Activity Sharing isn't enabled, people won't be able to see your custom rich presence!</Forms.FormText>
+                    <Card variant="danger">
+                        <Flex flexDirection="column" gap=".5em" alignItems="flex-start">
+                            <BaseText size="md" weight="bold">Activity Sharing disabled</BaseText>
+                            <Paragraph>Activity Sharing isn't enabled, so people won't be able to see your custom rich presence!</Paragraph>
 
-                        <Button
-                            color={Button.Colors.TRANSPARENT}
-                            className={Margins.top8}
-                            onClick={() => ShowCurrentGame.updateSetting(true)}
-                        >
-                            Enable
-                        </Button>
-                    </ErrorCard>
+                            <Button
+                                variant="overlayPrimary"
+                                onClick={() => ShowCurrentGame.updateSetting(true)}
+                            >
+                                Enable Activity Sharing
+                            </Button>
+                        </Flex>
+                    </Card>
                 )}
 
-                <Flex flexDirection="column" gap=".5em" className={Margins.top16}>
-                    <Forms.FormText>
+                <Flex flexDirection="column" gap=".5em">
+                    <Paragraph>
                         Go to the <Link href="https://discord.com/developers/applications">Discord Developer Portal</Link> to create an application and
                         get the application ID.
-                    </Forms.FormText>
-                    <Forms.FormText>
+                    </Paragraph>
+                    <Paragraph>
                         Upload images in the Rich Presence tab to get the image keys.
-                    </Forms.FormText>
-                    <Forms.FormText>
+                    </Paragraph>
+                    <Paragraph>
                         If you want to use an image link, download your image and reupload the image to <Link href="https://imgur.com">Imgur</Link> and get the image link by right-clicking the image and selecting "Copy image address".
-                    </Forms.FormText>
-                    <Forms.FormText>
+                    </Paragraph>
+                    <Paragraph>
                         You can't see your own buttons on your profile, but everyone else can see it fine.
-                    </Forms.FormText>
-                    <Forms.FormText>
+                    </Paragraph>
+                    <Paragraph>
                         Some weird unicode text ("fonts" 𝖑𝖎𝖐𝖊 𝖙𝖍𝖎𝖘) may cause the rich presence to not show up, try using normal letters instead.
-                    </Forms.FormText>
+                    </Paragraph>
                 </Flex>
 
-                <Divider className={Margins.top8} />
+                <Divider />
 
-                <div style={{ width: "284px", ...profileThemeStyle, marginTop: 8, borderRadius: 8, background: "var(--background-mod-muted)" }}>
+                <div style={{ width: "284px", ...profileThemeStyle, borderRadius: 8, background: "var(--background-mod-muted)" }}>
                     {activity && <ActivityView
                         activity={activity}
                         user={UserStore.getCurrentUser()}
                         currentUser={UserStore.getCurrentUser()}
                     />}
                 </div>
-            </>
+            </Flex>
         );
     }
 });
