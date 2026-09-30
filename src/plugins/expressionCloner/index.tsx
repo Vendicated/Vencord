@@ -21,19 +21,18 @@ import { migratePluginSettings } from "@api/Settings";
 import { BaseText } from "@components/BaseText";
 import { CheckedTextInput } from "@components/CheckedTextInput";
 import { Flex } from "@components/Flex";
+import { PlusIcon } from "@components/Icons";
 import { Devs } from "@utils/constants";
-import { getGuildAcronym } from "@utils/discord";
+import { getGuildAcronym, hasGuildFeature } from "@utils/discord";
 import { Logger } from "@utils/Logger";
 import definePlugin from "@utils/types";
-import { Guild, GuildSticker } from "@vencord/discord-types";
+import { Guild, GuildSticker, Message } from "@vencord/discord-types";
 import { StickerFormatType } from "@vencord/discord-types/enums";
 import { findByCodeLazy } from "@webpack";
 import { Constants, EmojiStore, FluxDispatcher, Forms, GuildStore, IconUtils, Menu, Modal, openModalLazy, PermissionsBits, PermissionStore, React, RestAPI, StickersStore, Toasts, Tooltip, UserStore } from "@webpack/common";
 import { Promisable } from "type-fest";
 
 const uploadEmoji = findByCodeLazy(".GUILD_EMOJIS(", "EMOJI_UPLOAD_START");
-
-const getGuildMaxEmojiSlots = findByCodeLazy(".additionalEmojiSlots") as (guild: Guild) => number;
 
 interface Sticker extends GuildSticker {
     t: "Sticker";
@@ -70,6 +69,13 @@ function getGuildMaxStickerSlots(guild: Guild) {
         return 120;
 
     return PremiumTierStickerLimitMap[guild.premiumTier] ?? PremiumTierStickerLimitMap[0];
+}
+
+function getGuildMaxEmojiSlots(guild: Guild) {
+    return Math.max(
+        hasGuildFeature(guild, "MORE_EMOJI") ? 200 : 50,
+        50 + (guild.premiumFeatures?.additionalEmojiSlots ?? 0)
+    );
 }
 
 function getUrl(data: Data, size: number) {
@@ -322,6 +328,7 @@ function buildMenuItem(type: "Emoji" | "Sticker", fetchData: () => Promisable<Om
             id="emote-cloner"
             key="emote-cloner"
             label={`Clone ${type}`}
+            leadingAccessory={{ type: "icon", icon: PlusIcon }}
             action={() =>
                 openModalLazy(async () => {
                     const res = await fetchData();
@@ -359,18 +366,31 @@ function isGifUrl(url: string) {
     return u.pathname.endsWith(".gif") || u.searchParams.get("animated") === "true";
 }
 
-const messageContextMenuPatch: NavContextMenuPatchCallback = (children, props) => {
-    const { favoriteableId, itemHref, itemSrc, favoriteableType } = props ?? {};
+function resolveEmojiName(favoriteableId: string, message: Message) {
+    const emoji = EmojiStore.getCustomEmojiById(favoriteableId);
+    if (emoji) return emoji.name;
+
+    const reaction = message.reactions.find(reaction => reaction.emoji.id === favoriteableId);
+    if (reaction) return reaction.emoji.name;
+
+    const match = message.content.match(RegExp(`<a?:(\\w+)(?:~\\d+)?:${favoriteableId}>|https://cdn\\.discordapp\\.com/emojis/${favoriteableId}\\.[\\w?&=%]*`));
+    if (!match) return null;
+
+    return match[1]
+        ?? URL.parse(match[0])?.searchParams.get("name")
+        ?? "FakeNitroEmoji";
+}
+
+const messageContextMenuPatch: NavContextMenuPatchCallback = (children, props: Record<"favoriteableId" | "itemHref" | "itemSrc" | "favoriteableType", string> & { message: Message; }) => {
+    const { favoriteableId, itemHref, itemSrc, favoriteableType, message } = props ?? {};
 
     if (!favoriteableId) return;
 
     const menuItem = (() => {
         switch (favoriteableType) {
             case "emoji":
-                const match = props.message.content.match(RegExp(`<a?:(\\w+)(?:~\\d+)?:${favoriteableId}>|https://cdn\\.discordapp\\.com/emojis/${favoriteableId}\\.`));
-                const reaction = props.message.reactions.find(reaction => reaction.emoji.id === favoriteableId);
-                if (!match && !reaction) return;
-                const name = (match && match[1]) ?? reaction?.emoji.name ?? "FakeNitroEmoji";
+                const name = resolveEmojiName(favoriteableId, message);
+                if (!name) return;
 
                 return buildMenuItem("Emoji", () => ({
                     id: favoriteableId,
@@ -378,7 +398,7 @@ const messageContextMenuPatch: NavContextMenuPatchCallback = (children, props) =
                     isAnimated: isGifUrl(itemHref ?? itemSrc)
                 }));
             case "sticker":
-                const sticker = props.message.stickerItems.find(s => s.id === favoriteableId);
+                const sticker = message.stickerItems.find(s => s.id === favoriteableId);
                 if (sticker?.format_type === 3 /* LOTTIE */) return;
 
                 return buildMenuItem("Sticker", () => fetchSticker(favoriteableId));
@@ -412,7 +432,7 @@ export default definePlugin({
     description: "Allows you to clone Emotes & Stickers to your own server (right click them)",
     tags: ["Emotes", "Servers"],
     searchTerms: ["StickerCloner", "EmoteCloner", "EmojiCloner"],
-    authors: [Devs.Ven, Devs.Nuckyz],
+    authors: [Devs.Ven, Devs.Nuckyz, Devs.scattagain],
     contextMenus: {
         "message": messageContextMenuPatch,
         "expression-picker": expressionPickerPatch

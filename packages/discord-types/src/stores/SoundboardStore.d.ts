@@ -11,14 +11,15 @@ export interface SoundboardSound {
     userId?: string;
 }
 
-export interface TopSoundForGuild {
-    soundId: string;
-    rank: number;
+export interface TopSoundboardSoundsMetadata {
+    soundIds: string[];
+    topSoundsTTL: number;
 }
 
 export interface SoundboardOverlayState {
     soundboardSounds: Record<string, SoundboardSound[]>;
     favoritedSoundIds: string[];
+    orderedFavoritedSoundIds: string[];
     localSoundboardMutes: string[];
 }
 
@@ -37,11 +38,14 @@ export class SoundboardStore extends FluxStore {
     isPlayingSound(soundId: string): boolean;
     isFavoriteSound(soundId: string): boolean;
     getFavorites(): Set<string>;
-    getAllTopSoundsForGuilds(): Map<string, TopSoundForGuild[]>;
+    getFrequentlyUsedSoundIds(): string[];
+    getTopSoundboardSoundsMetadata(guildId: string): TopSoundboardSoundsMetadata | undefined;
+    getTopSoundboardSoundIds(guildId: string | null | undefined): string[];
+    hasPendingUsage(): boolean;
+    get playedSoundFrecencyWithoutFetchingLatest(): { frequently: string[]; };
     isLocalSoundboardMuted(userId: string): boolean;
+    isSoundboardVolumeMuted(): boolean;
     hasHadOtherUserPlaySoundInSession(): boolean;
-    shouldFetchTopSoundsForGuilds(): boolean;
-    hasFetchedTopSoundsForGuilds(): boolean;
     hasFetchedAllSounds(): boolean;
     isFetchingAnySounds(): boolean;
 }

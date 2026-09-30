@@ -212,7 +212,7 @@ export default definePlugin({
         const sectionHeaderSizePx = sections.length * 40;
         // (header heights + DM heights + DEFAULT_CHUNK_SIZE) * 1.5
         // we multiply everything by 1.5 so it only gets unmounted after the entire list is off screen
-        return (sectionHeaderSizePx + sections.reduce((acc, v) => acc += v + 44, 0) + DEFAULT_CHUNK_SIZE) * 1.5;
+        return (sectionHeaderSizePx + sections.reduce((acc, v) => acc += v * 44, 0) + DEFAULT_CHUNK_SIZE) * 1.5;
     },
 
     isCategoryIndex(sectionIndex: number) {
