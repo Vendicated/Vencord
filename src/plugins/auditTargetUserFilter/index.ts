@@ -17,7 +17,6 @@
 */
 
 import { ApplicationCommandInputType, ApplicationCommandOptionType, registerCommand, sendBotMessage } from "@api/Commands";
-import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 import { GuildStore, PermissionsBits, PermissionStore, SelectedGuildStore } from "@webpack/common";
 
@@ -28,7 +27,7 @@ let current_session_target_id: string | null = null;
 
 export default definePlugin({
     name: "AuditTargetUserFilter",
-    authors: [Devs.Pixeluted],
+    authors: [{ name: "Pixeluted", id: 761262205810638868n }],
     description: "Adds a command to filter server audit logs by a specific target user.",
     patches: [
         {
