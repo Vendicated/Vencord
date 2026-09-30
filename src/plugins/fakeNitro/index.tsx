@@ -573,6 +573,7 @@ export default definePlugin({
         const contentItems = message.content.split(/\s/);
         if (settings.store.transformCompoundSentence) itemsToMaybePush.push(...contentItems);
         else if (contentItems.length === 1) itemsToMaybePush.push(contentItems[0]);
+        else if (message.content.match(hyperLinkRegex)) itemsToMaybePush.push(message.content);
 
         itemsToMaybePush.push(...message.attachments.filter(attachment => attachment.content_type === "image/gif").map(attachment => attachment.url));
 
@@ -617,7 +618,7 @@ export default definePlugin({
     shouldIgnoreEmbed(embed: Message["embeds"][number], message: Message) {
         try {
             const contentItems = message.content.split(/\s/);
-            if (contentItems.length > 1 && !settings.store.transformCompoundSentence) return false;
+            if (contentItems.length > 1 && !settings.store.transformCompoundSentence && !message.content.match(hyperLinkRegex)) return false;
 
             switch (embed.type) {
                 case "image": {
@@ -626,6 +627,7 @@ export default definePlugin({
                     if (
                         !settings.store.transformCompoundSentence
                         && !contentItems.some(item => item === url || item.match(hyperLinkRegex)?.[1] === url)
+                        && !message.content.match(hyperLinkRegex)
                     ) return false;
 
                     if (settings.store.transformEmojis) {
