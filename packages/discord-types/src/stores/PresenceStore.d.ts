@@ -29,7 +29,7 @@ export class PresenceStore extends FluxStore {
     getAllApplicationActivities(applicationId: string): UserAndActivity[];
     getApplicationActivity(userId: string, applicationId: string, guildId?: string): Activity | null;
     getClientStatus(userId: string): ClientStatusMap;
-    getHiddenActivities(): Activity[];
+    getHiddenActivities(userId: string, guildId?: string | null): Activity[];
     /** literally just getActivities(...)[0] */
     getPrimaryActivity(userId: string, guildId?: string): Activity | null;
     getState(): PresenceStoreState;
@@ -37,4 +37,6 @@ export class PresenceStore extends FluxStore {
     getUnfilteredActivities(userId: string, guildId?: string): Activity[];
     getUserIds(): string[];
     isMobileOnline(userId: string): boolean;
+    isVROnline(userId: string): boolean;
+    setCurrentUserOnConnectionOpen(status: OnlineStatus, activities: Activity[]): void;
 }

@@ -46,7 +46,6 @@ export class UserGuildSettingsStore extends FluxStore {
 
     allowAllMessages(channel: Channel): boolean;
     allowNoMessages(channel: Channel): boolean;
-    getAddedToMessages(): string[];
     // TODO: finish typing
     getAllSettings(): { userGuildSettings: Record<string, GuildSettings>; };
     getChannelFlags(channel: Channel): ChannelOverrideFlags;
@@ -69,9 +68,8 @@ export class UserGuildSettingsStore extends FluxStore {
     getOptedInChannelsWithPendingUpdates(guildId: string): Record<string, any>;
     getPendingChannelUpdates(guildId: string): Record<string, any>;
     getState(): UserGuildSettingsState;
-    isAddedToMessages(channelId: string): boolean;
     isCategoryMuted(guildId: string, channelId: string): boolean;
-    isChannelMuted(guildId: string, channelId: string): boolean;
+    isChannelMuted(guildId: string | null, channelId: string): boolean;
     isChannelOptedIn(guildId: string, channelId: string, usePending?: boolean): boolean;
     isChannelOrParentOptedIn(guildId: string, channelId: string, usePending?: boolean): boolean;
     isChannelRecordOrParentOptedIn(channel: Channel, usePending?: boolean): boolean;
