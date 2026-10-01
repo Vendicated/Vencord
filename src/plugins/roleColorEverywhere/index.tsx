@@ -102,23 +102,24 @@ export default definePlugin({
             ],
             predicate: () => settings.store.chatMentions
         },
-        // Member List Role Headers
+        // Member List Role Headers (in threads)
         {
             find: 'tutorialId:"whos-online',
             replacement: [
                 {
-                    match: /(#{intl::CHANNEL_MEMBERS_A11Y_LABEL}.+}\):null,).{0,100}?(?:—|\\u2014) ",\i\]\}\)\]/,
+                    match: /(#{intl::CHANNEL_MEMBERS_A11Y_LABEL}.{0,200}?}\):null,).{0,200}?(?:—|\\u2014) ",\i\]\}\)\]/,
                     replace: "$1$self.RoleGroupColor(arguments[0])]"
                 },
             ],
             predicate: () => settings.store.memberList
         },
+        // Member List Role Headers
         {
-            find: "#{intl::THREAD_BROWSER_PRIVATE}",
+            find: "?null:new Intl.NumberFormat",
             replacement: [
                 {
-                    match: /children:\[\i," (?:—|\\u2014) ",\i\]/,
-                    replace: "children:[$self.RoleGroupColor(arguments[0])]"
+                    match: /\(0,\i\.jsx\)\("span",\{[^}]+\}\),null==\i\?null:\(0,\i\.jsxs\)\("span",\{children:\["\\xa0\\u2014 ",\i\]\}\)\]/,
+                    replace: "$self.RoleGroupColor(arguments[0])]"
                 },
             ],
             predicate: () => settings.store.memberList
