@@ -15,9 +15,11 @@ export default definePlugin({
 
     patches: [
         {
-            find: ".stickers,previewSticker:",
+            // This function is a util func from another module
+            // but it only has once use here so it's inlined
+            find: ".CREATE_FORUM_POST||function(",
             replacement: {
-                match: /if\(\i\.\i\.getUploadCount/,
+                match: /(?<=\){)if\(\i\.\i\.getUploadCount/,
                 replace: "return true;$&",
             }
         }
