@@ -415,3 +415,23 @@ export interface EmojiUtils {
     triggerFullscreenAnimation(emoji: any, node: HTMLElement): void;
     applyPlatformToThemedEmojiColorPalette(colors: any): any;
 }
+
+export interface OpenUserSettingsOpts {
+    /**
+     * a *sub*section of settings to navigate to
+     *
+     * to navigate to a top-level section, use the navigationTarget parameter of {@link SettingsRouter.openUserSettings} instead
+     *
+     * discord has an enum with all the possible values (go dig in the openUserSettings source)
+     */
+    path?: string;
+    /**
+     * modal stacking behavior, defaults to "replaceAll"
+     */
+    stackingBehavior?: "replaceAll" | "stack" | "replace";
+    // ... misc analytics options
+}
+
+export interface SettingsRouter {
+    openUserSettings(navigationTarget?: string, opts?: OpenUserSettingsOpts, onOpen?: () => void): Promise<void>;
+}
