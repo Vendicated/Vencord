@@ -16,6 +16,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { isTruthy } from "./guards";
+
 // Utils for readable text transformations eg: `toTitle(fromKebab())`
 
 // Case style to words
@@ -51,7 +53,7 @@ function getUnitStr(unit: Units, isOne: boolean, short: boolean) {
  * @param unit The unit the time is on
  * @param short Whether to use short units like "d" instead of "days"
  */
-export function formatDuration(time: number, unit: Units, short: boolean = false) {
+export function formatDurationVerbose(time: number, unit: Units, short: boolean = false) {
     const { moment } = require("@webpack/common") as typeof import("@webpack/common");
     const dur = moment.duration(time, unit);
 
@@ -91,6 +93,33 @@ export function formatDuration(time: number, unit: Units, short: boolean = false
     }
 
     return res.length ? res : `0 ${getUnitStr(unit, false, short)}`;
+}
+
+export function formatDuration(ms: number, human = false) {
+    const DAY = 86_400_000;
+    const HOUR = 3_600_000;
+    const MINUTE = 60_000;
+
+    const days = Math.floor(ms / DAY);
+    const hours = Math.floor((ms % DAY) / HOUR);
+    const minutes = Math.floor((ms % HOUR) / MINUTE);
+    const seconds = Math.floor((ms % MINUTE) / 1000);
+
+    const pad = (n: number) => human ? n : n.toString().padStart(2, "0");
+    const unit = (s: string) => human ? s : "";
+
+    const showDays = days !== 0;
+    const showHours = showDays || hours !== 0;
+    const showMinutes = showHours || minutes !== 0 || !human;
+
+    const duration = [
+        showHours && `${pad(hours)}${unit("h")}`,
+        showMinutes && `${pad(minutes)}${unit("m")}`,
+        `${pad(seconds)}${unit("s")}`
+    ].filter(isTruthy).join(human ? " " : ":");
+
+    const prefix = showDays ? `${days}d ` : "";
+    return prefix + duration;
 }
 
 /**

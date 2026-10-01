@@ -17,7 +17,8 @@
 */
 
 import { app } from "electron";
-import { existsSync, mkdirSync, readdirSync, renameSync, statSync, writeFileSync } from "original-fs";
+import EventEmitter from "events";
+import { copyFileSync, existsSync, readdirSync, renameSync } from "original-fs";
 import { basename, dirname, join } from "path";
 
 function isNewer($new: string, old: string) {
@@ -47,26 +48,36 @@ function patchLatest() {
 
         if (latestVersion === currentVersion) return;
 
+        const oldResources = join(discordPath, currentVersion, "resources");
+        const oldVencordAsar = join(oldResources, "app.asar");
+
         const resources = join(discordPath, latestVersion, "resources");
-        const app = join(resources, "app.asar");
-        const _app = join(resources, "_app.asar");
+        const newAppAsar = join(resources, "app.asar");
+        const newAppAsarBackup = join(resources, "_app.asar");
 
-        if (!existsSync(app) || statSync(app).isDirectory()) return;
+        if (!existsSync(oldVencordAsar) || !existsSync(newAppAsar) || existsSync(newAppAsarBackup)) return;
 
-        console.info("[Vencord] Detected Host Update. Repatching...");
+        console.info(`[Vencord] Detected Host Update (${currentVersion} -> ${latestVersion}). Repatching...`);
 
-        renameSync(app, _app);
-        mkdirSync(app);
-        writeFileSync(join(app, "package.json"), JSON.stringify({
-            name: "discord",
-            main: "index.js"
-        }));
-        writeFileSync(join(app, "index.js"), `require(${JSON.stringify(join(__dirname, "patcher.js"))});`);
+        renameSync(newAppAsar, newAppAsarBackup);
+        copyFileSync(oldVencordAsar, newAppAsar);
     } catch (err) {
         console.error("[Vencord] Failed to repatch latest host update", err);
     }
 }
 
-// Try to patch latest on before-quit
-// Discord's Win32 updater will call app.quit() on restart and open new version on will-quit
-app.on("before-quit", patchLatest);
+if (process.platform === "win32" || process.platform === "linux") {
+    EventEmitter.prototype.emit = new Proxy(EventEmitter.prototype.emit, {
+        apply(target, thisArg, argArray) {
+            if (argArray[0] === "host-updated") {
+                patchLatest();
+            }
+
+            return Reflect.apply(target, thisArg, argArray);
+        },
+    });
+
+    // Try to patch latest on before-quit
+    // Discord's Win32 updater will call app.quit() on restart and open new version on will-quit
+    app.on("before-quit", patchLatest);
+}

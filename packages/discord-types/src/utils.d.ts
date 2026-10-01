@@ -1,4 +1,4 @@
-import { Channel, Guild, GuildMember, Message, User } from ".";
+import { AvatarDecorationData, Channel, Guild, GuildMember, Message, User } from ".";
 import type { ReactNode } from "react";
 import { LiteralUnion } from "type-fest";
 
@@ -203,7 +203,7 @@ export interface IconUtils {
     getUserAvatarURL(user: User, canAnimate?: boolean, size?: number, format?: string): string;
     getDefaultAvatarURL(id: string, discriminator?: string): string;
     getUserBannerURL(data: { id: string, banner: string, canAnimate?: boolean, size: number; }): string | undefined;
-    getAvatarDecorationURL(data: { avatarDecoration: string, size: number; canCanimate?: boolean; }): string | undefined;
+    getAvatarDecorationURL(data: { avatarDecoration: AvatarDecorationData, size: number; canAnimate?: boolean; }): string | undefined;
 
     getGuildMemberAvatarURL(member: GuildMember, canAnimate?: string): string | null;
     getGuildMemberAvatarURLSimple(data: { guildId: string, userId: string, avatar: string, canAnimate?: boolean; size?: number; }): string;
@@ -255,16 +255,17 @@ export interface ExpressionPickerStoreState extends Record<PropertyKey, any> {
     activeView: ActiveView | null;
     lastActiveView: ActiveView | null;
     activeViewType: any | null;
+    activeChannelId: string | null;
     searchQuery: string;
     isSearchSuggestion: boolean,
     pickerId: string;
 }
 
 export interface ExpressionPickerStore {
-    openExpressionPicker(activeView: ActiveView, activeViewType?: any): void;
-    closeExpressionPicker(activeViewType?: any): void;
-    toggleMultiExpressionPicker(activeViewType?: any): void;
-    toggleExpressionPicker(activeView: ActiveView, activeViewType?: any): void;
+    openExpressionPicker(activeView: ActiveView, activeViewType?: any, channelId?: string): void;
+    closeExpressionPicker(activeViewType?: any, channelId?: string): void;
+    toggleMultiExpressionPicker(activeViewType?: any, channelId?: string): void;
+    toggleExpressionPicker(activeView: ActiveView, activeViewType?: any, channelId?: string): void;
     setExpressionPickerView(activeView: ActiveView): void;
     setSearchQuery(searchQuery: string, isSearchSuggestion?: boolean): void;
     useExpressionPickerStore(): ExpressionPickerStoreState;

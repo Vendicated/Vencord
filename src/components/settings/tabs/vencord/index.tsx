@@ -51,27 +51,19 @@ type KeysOfType<Object, Type> = {
 }[keyof Object];
 
 function Switches() {
-    const settings = useSettings(["useQuickCss", "enableReactDevtools", "frameless", "winNativeTitleBar", "transparent", "winCtrlQ", "disableMinSize"]);
+    const settings = useSettings(["useQuickCss", "enableReactDevtools", "frameless", "nativeTitleBar", "transparent", "winCtrlQ", "disableMinSize"]);
 
     const Switches = [
         {
             key: "useQuickCss",
             title: "Enable Custom CSS",
+            description: "Apply your configured QuickCSS"
         },
-        !IS_WEB && {
-            key: "enableReactDevtools",
-            title: "Enable React Developer Tools",
+        IS_DISCORD_DESKTOP && {
+            key: "nativeTitleBar",
+            title: "Enable the system's title bar in addition to Discord's custom one",
             restartRequired: true
         },
-        !IS_WEB && (!IS_DISCORD_DESKTOP || !IS_WINDOWS ? {
-            key: "frameless",
-            title: "Disable the window frame",
-            restartRequired: true
-        } : {
-            key: "winNativeTitleBar",
-            title: "Use Windows' native title bar instead of Discord's custom one",
-            restartRequired: true
-        }),
         !IS_WEB && {
             key: "transparent",
             title: "Enable window transparency",
@@ -81,11 +73,18 @@ function Switches() {
         IS_DISCORD_DESKTOP && {
             key: "disableMinSize",
             title: "Disable minimum window size",
+            description: "Allows you to resize the window to any size, even smaller than Discord's minimum size",
             restartRequired: true
         },
         !IS_WEB && IS_WINDOWS && {
             key: "winCtrlQ",
             title: "Register Ctrl+Q as shortcut to close Discord (Alternative to Alt+F4)",
+            restartRequired: true
+        },
+        !IS_WEB && {
+            key: "enableReactDevtools",
+            title: "Enable React Developer Tools",
+            description: "Mainly useful for plugin developers. Ignore this if you don't know what it is",
             restartRequired: true
         },
     ] satisfies Array<false | {
@@ -108,6 +107,7 @@ function Switches() {
                 title={title}
                 description={description}
                 value={settings[key]}
+                hideBorder
                 onChange={v => {
                     settings[key] = v;
 
@@ -226,7 +226,9 @@ function VencordSettings() {
                     </a>!
                 </Forms.FormText>
 
-                <Switches />
+                <div className="vc-settings-switches">
+                    <Switches />
+                </div>
             </section>
 
 
