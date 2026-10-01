@@ -186,10 +186,6 @@ export async function openUserProfile(id: string) {
         userId: id,
         guildId,
         channelId: SelectedChannelStore.getChannelId(),
-        analyticsLocation: {
-            page: guildId ? "Guild Channel" : "DM Channel",
-            section: "Profile Popout"
-        }
     });
 }
 

@@ -435,3 +435,28 @@ export interface OpenUserSettingsOpts {
 export interface SettingsRouter {
     openUserSettings(navigationTarget?: string, opts?: OpenUserSettingsOpts, onOpen?: () => void): Promise<void>;
 }
+
+export interface OpenUserProfileModalOpts {
+    userId: string;
+    guildId?: string | null;
+    originGuildId?: string | null;
+    channelId?: string | null;
+    messageId?: string | null;
+    roleId?: string | null;
+    sessionId?: unknown | null;
+    joinRequestId?: unknown;
+    tabSection?: unknown;
+    scrollTarget?: unknown;
+    hideRestrictedProfile?: boolean;
+    sourceAnalyticsLocations?: string[];
+    appContext?: unknown;
+    /**
+     * defaults to null
+     */
+    customStatusPrompt?: unknown;
+    onModalOpen?: unknown;
+}
+
+export interface UserProfileModalActionCreators {
+    openUserProfileModal(opts: OpenUserProfileModalOpts): Promise<void>;
+}
