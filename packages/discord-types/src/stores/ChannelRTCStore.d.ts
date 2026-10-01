@@ -78,15 +78,14 @@ export interface ChannelRTCState {
 
 export class ChannelRTCStore extends FluxStore {
     getActivityParticipants(channelId: string): ActivityParticipant[];
-    getAllChatOpen(): Record<string, boolean>;
     getChatOpen(channelId: string): boolean;
     getFilteredParticipants(channelId: string): Participant[];
     getGuildRingingUsers(channelId: string): Set<string>;
     getLayout(channelId: string, context?: RTCLayoutContext): RTCLayout;
     getMode(channelId: string): RTCMode;
+    getOpenChatChannelIds(): Set<string>;
     getParticipant(channelId: string, participantId: string): Participant | null;
     getParticipants(channelId: string): Participant[];
-    getParticipantsListOpen(channelId: string): boolean;
     getParticipantsOpen(channelId: string): boolean;
     getParticipantsVersion(channelId: string): number;
     getSelectedParticipant(channelId: string): Participant | null;

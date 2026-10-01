@@ -12,6 +12,7 @@ export const enum DraftType {
     SlashCommand = 5,
     ForwardContextMessage = 6,
     InteractionModal = 7,
+    ScheduledMessage = 8,
 }
 
 export const enum EmojiIntention {
