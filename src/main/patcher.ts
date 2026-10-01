@@ -45,7 +45,7 @@ if (!IS_VANILLA) {
     const settings = RendererSettings.store;
 
     patchTrayMenu();
-  
+
     // Repatch after host updates on Windows and Linux
     if (process.platform === "win32" || process.platform === "linux") {
         require("./persistAfterDiscordUpdates");
