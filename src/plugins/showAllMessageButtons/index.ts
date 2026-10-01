@@ -22,11 +22,12 @@ import definePlugin from "@utils/types";
 export default definePlugin({
     name: "ShowAllMessageButtons",
     description: "Always show all message buttons no matter if you are holding the shift key or not.",
+    tags: ["Chat", "Utility"],
     authors: [Devs.Nuckyz],
 
     patches: [
         {
-            find: "#{intl::MESSAGE_UTILITIES_A11Y_LABEL}",
+            find: "#{intl::MESSAGE_UTILITIES_A11Y_LABEL}),children",
             replacement: {
                 // isExpanded: isShiftPressed && other conditions...
                 match: /isExpanded:\i&&(.+?),/,

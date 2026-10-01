@@ -18,18 +18,17 @@
 
 import "./style.css";
 
-import { definePluginSettings, Settings } from "@api/Settings";
+import { isPluginEnabled } from "@api/PluginManager";
+import { definePluginSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
-import { buildSeveralUsers } from "@plugins/typingTweaks";
+import TypingTweaksPlugin, { buildSeveralUsers } from "@plugins/typingTweaks";
 import { Devs } from "@utils/constants";
 import { getIntlMessage } from "@utils/discord";
 import definePlugin, { OptionType } from "@utils/types";
-import { findComponentByCodeLazy, findStoreLazy } from "@webpack";
-import { GuildMemberStore, RelationshipStore, SelectedChannelStore, Tooltip, TypingStore, UserStore, UserSummaryItem, useStateFromStores } from "@webpack/common";
+import { findComponentByCodeLazy } from "@webpack";
+import { GuildMemberStore, RelationshipStore, SelectedChannelStore, Tooltip, TypingStore, UserGuildSettingsStore, UserStore, UserSummaryItem, useStateFromStores } from "@webpack/common";
 
-const ThreeDots = findComponentByCodeLazy(".dots,", "dotRadius:");
-
-const UserGuildSettingsStore = findStoreLazy("UserGuildSettingsStore");
+const ThreeDots = findComponentByCodeLazy("Math.min(1,Math.max(", "dotRadius:");
 
 const enum IndicatorMode {
     Dots = 1 << 0,
@@ -67,7 +66,7 @@ function TypingIndicator({ channelId, guildId }: { channelId: string; guildId: s
     const myId = UserStore.getCurrentUser()?.id;
 
     const typingUsersArray = Object.keys(typingUsers).filter(id =>
-        id !== myId && !(RelationshipStore.isBlocked(id) && !settings.store.includeBlockedUsers)
+        id !== myId && !(RelationshipStore.isBlocked(id) && !settings.store.includeBlockedUsers) && !(RelationshipStore.isIgnored(id) && !settings.store.includeIgnoredUsers)
     );
     const [a, b, c] = typingUsersArray;
     let tooltipText: string;
@@ -87,7 +86,7 @@ function TypingIndicator({ channelId, guildId }: { channelId: string; guildId: s
             break;
         }
         default: {
-            tooltipText = Settings.plugins.TypingTweaks.enabled
+            tooltipText = isPluginEnabled(TypingTweaksPlugin.name)
                 ? buildSeveralUsers({ users: [a, b].map(UserStore.getUser), count: typingUsersArray.length - 2, guildId })
                 : getIntlMessage("SEVERAL_USERS_TYPING");
             break;
@@ -144,6 +143,11 @@ const settings = definePluginSettings({
         description: "Whether to show the typing indicator for muted channels.",
         default: false
     },
+    includeIgnoredUsers: {
+        type: OptionType.BOOLEAN,
+        description: "Whether to show the typing indicator for ignored users.",
+        default: false
+    },
     includeBlockedUsers: {
         type: OptionType.BOOLEAN,
         description: "Whether to show the typing indicator for blocked users.",
@@ -163,6 +167,7 @@ const settings = definePluginSettings({
 export default definePlugin({
     name: "TypingIndicator",
     description: "Adds an indicator if someone is typing on a channel.",
+    tags: ["Notifications", "Appearance", "Servers"],
     authors: [Devs.Nuckyz, Devs.fawn, Devs.Sqaaakoi],
     settings,
 

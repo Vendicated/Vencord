@@ -4,15 +4,19 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { definePluginSettings, Settings } from "@api/Settings";
+import { NavContextMenuPatchCallback } from "@api/ContextMenu";
+import { definePluginSettings } from "@api/Settings";
 import { getUserSettingLazy } from "@api/UserSettings";
+import { Button } from "@components/Button";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Flex } from "@components/Flex";
+import { Heading } from "@components/Heading";
+import { Paragraph } from "@components/Paragraph";
+import CustomRpcPlugin from "@plugins/customRPC";
 import { Devs } from "@utils/constants";
 import { Margins } from "@utils/margins";
 import definePlugin, { OptionType } from "@utils/types";
-import { findStoreLazy } from "@webpack";
-import { Button, Forms, showToast, TextInput, Toasts, Tooltip, useEffect, useState } from "@webpack/common";
+import { FluxDispatcher, Menu, RunningGameStore, showToast, TextArea, Toasts, Tooltip, useEffect, useState } from "@webpack/common";
 
 const enum ActivitiesTypes {
     Game,
@@ -30,18 +34,17 @@ const enum FilterMode {
     Blacklist
 }
 
-const RunningGameStore = findStoreLazy("RunningGameStore");
-
-const ShowCurrentGame = getUserSettingLazy("status", "showCurrentGame")!;
+const ShowCurrentGame = getUserSettingLazy<boolean>("status", "showCurrentGame")!;
 
 function ToggleIcon(activity: IgnoredActivity, tooltipText: string, path: string, fill: string) {
     return (
         <Tooltip text={tooltipText}>
             {tooltipProps => (
-                <button
+                <div
                     {...tooltipProps}
+                    role="button"
                     onClick={e => handleActivityToggle(e, activity)}
-                    style={{ all: "unset", cursor: "pointer", display: "flex", justifyContent: "center", alignItems: "center" }}
+                    style={{ cursor: "pointer", display: "flex", justifyContent: "center", alignItems: "center" }}
                 >
                     <svg
                         width="24"
@@ -50,24 +53,24 @@ function ToggleIcon(activity: IgnoredActivity, tooltipText: string, path: string
                     >
                         <path fill={fill} d={path} />
                     </svg>
-                </button>
+                </div>
             )}
         </Tooltip>
     );
 }
 
-const ToggleIconOn = (activity: IgnoredActivity, fill: string) => ToggleIcon(activity, "Disable activity", "M480-320q75 0 127.5-52.5T660-500q0-75-52.5-127.5T480-680q-75 0-127.5 52.5T300-500q0 75 52.5 127.5T480-320Zm0-72q-45 0-76.5-31.5T372-500q0-45 31.5-76.5T480-608q45 0 76.5 31.5T588-500q0 45-31.5 76.5T480-392Zm0 192q-146 0-266-81.5T40-500q54-137 174-218.5T480-800q146 0 266 81.5T920-500q-54 137-174 218.5T480-200Zm0-300Zm0 220q113 0 207.5-59.5T832-500q-50-101-144.5-160.5T480-720q-113 0-207.5 59.5T128-500q50 101 144.5 160.5T480-280Z", fill);
-const ToggleIconOff = (activity: IgnoredActivity, fill: string) => ToggleIcon(activity, "Enable activity", "m644-428-58-58q9-47-27-88t-93-32l-58-58q17-8 34.5-12t37.5-4q75 0 127.5 52.5T660-500q0 20-4 37.5T644-428Zm128 126-58-56q38-29 67.5-63.5T832-500q-50-101-143.5-160.5T480-720q-29 0-57 4t-55 12l-62-62q41-17 84-25.5t90-8.5q151 0 269 83.5T920-500q-23 59-60.5 109.5T772-302Zm20 246L624-222q-35 11-70.5 16.5T480-200q-151 0-269-83.5T40-500q21-53 53-98.5t73-81.5L56-792l56-56 736 736-56 56ZM222-624q-29 26-53 57t-41 67q50 101 143.5 160.5T480-280q20 0 39-2.5t39-5.5l-36-38q-11 3-21 4.5t-21 1.5q-75 0-127.5-52.5T300-500q0-11 1.5-21t4.5-21l-84-82Zm319 93Zm-151 75Z", fill);
+const ToggleIconOn = (activity: IgnoredActivity, fill: string) => ToggleIcon(activity, "Disable Activity", "M480-320q75 0 127.5-52.5T660-500q0-75-52.5-127.5T480-680q-75 0-127.5 52.5T300-500q0 75 52.5 127.5T480-320Zm0-72q-45 0-76.5-31.5T372-500q0-45 31.5-76.5T480-608q45 0 76.5 31.5T588-500q0 45-31.5 76.5T480-392Zm0 192q-146 0-266-81.5T40-500q54-137 174-218.5T480-800q146 0 266 81.5T920-500q-54 137-174 218.5T480-200Zm0-300Zm0 220q113 0 207.5-59.5T832-500q-50-101-144.5-160.5T480-720q-113 0-207.5 59.5T128-500q50 101 144.5 160.5T480-280Z", fill);
+const ToggleIconOff = (activity: IgnoredActivity, fill: string) => ToggleIcon(activity, "Enable Activity", "m644-428-58-58q9-47-27-88t-93-32l-58-58q17-8 34.5-12t37.5-4q75 0 127.5 52.5T660-500q0 20-4 37.5T644-428Zm128 126-58-56q38-29 67.5-63.5T832-500q-50-101-143.5-160.5T480-720q-29 0-57 4t-55 12l-62-62q41-17 84-25.5t90-8.5q151 0 269 83.5T920-500q-23 59-60.5 109.5T772-302Zm20 246L624-222q-35 11-70.5 16.5T480-200q-151 0-269-83.5T40-500q21-53 53-98.5t73-81.5L56-792l56-56 736 736-56 56ZM222-624q-29 26-53 57t-41 67q50 101 143.5 160.5T480-280q20 0 39-2.5t39-5.5l-36-38q-11 3-21 4.5t-21 1.5q-75 0-127.5-52.5T300-500q0-11 1.5-21t4.5-21l-84-82Zm319 93Zm-151 75Z", fill);
 
-function ToggleActivityComponent(activity: IgnoredActivity, isPlaying = false) {
+function ToggleActivityComponent(activity: IgnoredActivity) {
     const s = settings.use(["ignoredActivities"]);
     const { ignoredActivities } = s;
 
     if (ignoredActivities.some(act => act.id === activity.id)) return ToggleIconOff(activity, "var(--status-danger)");
-    return ToggleIconOn(activity, isPlaying ? "var(--green-300)" : "var(--interactive-normal)");
+    return ToggleIconOn(activity, "var(--interactive-icon-default)");
 }
 
-function handleActivityToggle(e: React.MouseEvent<HTMLButtonElement, MouseEvent>, activity: IgnoredActivity) {
+function handleActivityToggle(e: React.MouseEvent<HTMLDivElement, MouseEvent>, activity: IgnoredActivity) {
     e.stopPropagation();
 
     const ignoredActivityIndex = settings.store.ignoredActivities.findIndex(act => act.id === activity.id);
@@ -76,17 +79,17 @@ function handleActivityToggle(e: React.MouseEvent<HTMLButtonElement, MouseEvent>
 }
 
 function recalculateActivities() {
-    ShowCurrentGame.updateSetting(old => old);
+    ShowCurrentGame.updateSetting(current => current);
 }
 
 function ImportCustomRPCComponent() {
     return (
         <Flex flexDirection="column">
-            <Forms.FormText>Import the application id of the CustomRPC plugin to the filter list</Forms.FormText>
+            <Paragraph>Import the application id of the CustomRPC plugin to the filter list</Paragraph>
             <div>
                 <Button
                     onClick={() => {
-                        const id = Settings.plugins.CustomRPC?.appID as string | undefined;
+                        const id = CustomRpcPlugin.settings.store.appID;
                         if (!id) {
                             return showToast("CustomRPC application ID is not set.", Toasts.Type.FAILURE);
                         }
@@ -132,9 +135,9 @@ function IdsListComponent(props: { setValue: (value: string) => void; }) {
 
     return (
         <section>
-            <Forms.FormTitle tag="h3">Filter List</Forms.FormTitle>
-            <Forms.FormText className={Margins.bottom8}>Comma separated list of activity IDs to filter (Useful for filtering specific RPC activities and CustomRPC</Forms.FormText>
-            <TextInput
+            <Heading tag="h3">Filter List</Heading>
+            <Paragraph className={Margins.bottom8}>Comma separated list of activity IDs to filter (Useful for filtering specific RPC activities and CustomRPC</Paragraph>
+            <TextArea
                 type="text"
                 value={idsList}
                 onChange={handleChange}
@@ -143,6 +146,57 @@ function IdsListComponent(props: { setValue: (value: string) => void; }) {
         </section>
     );
 }
+
+interface RawGame {
+    id?: string;
+    exePath: string;
+    name: string;
+}
+
+interface ContextMenuProps {
+    rawGame: RawGame;
+}
+
+const registeredGameOverflowContextMenuPatch: NavContextMenuPatchCallback = (children, { rawGame }: ContextMenuProps) => {
+    const s = settings.use(["ignoredActivities"]);
+    const { ignoredActivities } = s;
+
+    const id = rawGame.id ?? rawGame.exePath;
+    const isCurrentlyIgnored = ignoredActivities.some(act => act.id === id);
+
+    function handleToggleActivity() {
+        const activity: IgnoredActivity = {
+            id,
+            name: rawGame.name,
+            type: ActivitiesTypes.Game
+        };
+
+        const ignoredActivityIndex = settings.store.ignoredActivities.findIndex(act => act.id === activity.id);
+        const isGettingIgnored = ignoredActivityIndex === -1;
+
+        if (isGettingIgnored) settings.store.ignoredActivities.push(activity);
+        else settings.store.ignoredActivities.splice(ignoredActivityIndex, 1);
+
+        const game = RunningGameStore.getRunningGames().find(game => game.id === rawGame.id || game.exePath === rawGame.exePath)!;
+        const isDetectionEnabled = RunningGameStore.isDetectionEnabled(game);
+
+        if (!isGettingIgnored && !isDetectionEnabled) {
+            FluxDispatcher.dispatch({
+                type: "RUNNING_GAME_TOGGLE_DETECTION",
+                game
+            });
+        }
+    }
+
+    children.push(
+        <Menu.MenuCheckboxItem
+            id="ignore-activities-toggle-activity"
+            label="Enable Activity"
+            checked={!isCurrentlyIgnored}
+            action={handleToggleActivity}
+        />
+    );
+};
 
 const settings = definePluginSettings({
     importCustomRPC: {
@@ -189,7 +243,7 @@ const settings = definePluginSettings({
     },
     ignoreListening: {
         type: OptionType.BOOLEAN,
-        description: "Ignore all listening activities (These are usually spotify activities)",
+        description: "Ignore all listening activities (These are usually Spotify activities)",
         default: false,
         onChange: recalculateActivities
     },
@@ -232,8 +286,8 @@ export default definePlugin({
     name: "IgnoreActivities",
     authors: [Devs.Nuckyz, Devs.Kylie],
     description: "Ignore activities from showing up on your status ONLY. You can configure which ones are specifically ignored from the Registered Games and Activities tabs, or use the general settings below",
+    tags: ["Activity", "Privacy", "Customisation"],
     dependencies: ["UserSettingsAPI"],
-
     settings,
 
     patches: [
@@ -254,37 +308,19 @@ export default definePlugin({
             }
         },
 
-        // FIXME(Bundler minifier change related): Remove the non used compability once enough time has passed
-        {
-            find: "#{intl::SETTINGS_GAMES_TOGGLE_OVERLAY}",
-            replacement: {
-                // let { ... nowPlaying: a = !1 ...
-                // let { overlay: b ... } = Props
-                match: /#{intl::SETTINGS_GAMES_TOGGLE_OVERLAY}.+?}\(\),(?<=nowPlaying:(\i)=!1,.+?overlay:\i,[^}]+?\}=(\i).+?)/,
-                replace: (m, nowPlaying, props) => `${m}$self.renderToggleGameActivityButton(${props},${nowPlaying}),`,
-                noWarn: true,
-            }
-        },
-        {
-            find: "#{intl::SETTINGS_GAMES_TOGGLE_OVERLAY}",
-            replacement: {
-                // let { ... nowPlaying: a = !1 ...
-                // let { overlay: b ... } = Props ...
-                // ToggleOverLayButton(), nowPlaying && ... RemoveGameButton()
-                match: /\.gameNameLastPlayed.+?,\i\(\),(?<=nowPlaying:(\i)=!1,.+?overlay:\i,[^}]+?\}=(\i).+?)(?=\1&&)/,
-                replace: (m, nowPlaying, props) => `${m}$self.renderToggleGameActivityButton(${props},${nowPlaying}),`,
-            }
-        },
-
         // Activities from the apps launcher in the bottom right of the chat bar
         {
-            find: ".promotedLabelWrapperNonBanner,children",
+            find: "#{intl::EMBEDDED_ACTIVITIES_DEVELOPER_ACTIVITY}",
             replacement: {
-                match: /\.appDetailsHeaderContainer.+?children:\i.*?}\),(?<=application:(\i).+?)/,
-                replace: (m, props) => `${m}$self.renderToggleActivityButton(${props}),`
+                match: /lineClamp:1.{0,50}?(?=!\i&&\i\?.+?application:(\i))/,
+                replace: "$&$self.ToggleActivityButton($1),"
             }
         }
     ],
+
+    contextMenus: {
+        "registered-game-overflow-menu": registeredGameOverflowContextMenuPatch
+    },
 
     async start() {
         if (settings.store.ignoredActivities.length !== 0) {
@@ -315,17 +351,7 @@ export default definePlugin({
         return true;
     },
 
-    renderToggleGameActivityButton(props: { id?: string; name: string, exePath: string; }, nowPlaying: boolean) {
-        return (
-            <ErrorBoundary noop>
-                <div style={{ marginLeft: 12, zIndex: 0 }}>
-                    {ToggleActivityComponent({ id: props.id ?? props.exePath, name: props.name, type: ActivitiesTypes.Game }, nowPlaying)}
-                </div>
-            </ErrorBoundary>
-        );
-    },
-
-    renderToggleActivityButton(props: { id: string; name: string; }) {
+    ToggleActivityButton(props: { id: string; name: string; }) {
         return (
             <ErrorBoundary noop>
                 {ToggleActivityComponent({ id: props.id, name: props.name, type: ActivitiesTypes.Embedded })}

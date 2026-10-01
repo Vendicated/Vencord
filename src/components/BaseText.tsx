@@ -6,7 +6,7 @@
 
 import "./BaseText.css";
 
-import { classNameFactory } from "@api/Styles";
+import { classNameFactory } from "@utils/css";
 import { classes } from "@utils/misc";
 import type { Text as DiscordText } from "@vencord/discord-types";
 import type { ComponentPropsWithoutRef, ReactNode } from "react";
@@ -56,6 +56,7 @@ export type BaseTextProps<Tag extends TextTag = "div"> = ComponentPropsWithoutRe
     size?: TextSize;
     weight?: TextWeight;
     tag?: Tag;
+    defaultColor?: boolean;
 };
 
 export function BaseText<T extends TextTag = "div">(props: BaseTextProps<T>): ReactNode {
@@ -63,13 +64,14 @@ export function BaseText<T extends TextTag = "div">(props: BaseTextProps<T>): Re
         size = "md",
         weight = "normal",
         tag: Tag = "div",
+        defaultColor = true,
         children,
         className,
         ...restProps
     } = props;
 
     return (
-        <Tag className={classes(textCls("base", size, weight), className)} {...restProps}>
+        <Tag className={classes(textCls("base", size, weight, defaultColor && "defaultColor"), className)} {...restProps}>
             {children}
         </Tag>
     );

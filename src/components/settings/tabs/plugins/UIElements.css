@@ -1,13 +1,13 @@
 .vc-plugin-ui-elements-button {
     display: flex;
     align-items: center;
-    color: var(--interactive-normal);
+    color: var(--interactive-icon-default);
     margin-top: 0.5em;
     cursor: pointer;
 
     &:hover {
-        background-color: var(--background-modifier-hover);
-        color: var(--interactive-hover);
+        background-color: var(--background-mod-subtle);
+        color: var(--interactive-icon-hover);
     }
 }
 
@@ -18,10 +18,9 @@
 }
 
 .vc-plugin-ui-elements-modal-content {
-    padding: 1em;
     display: flex;
     flex-direction: column;
-    gap: 1.5em;
+    gap: 2em;
 }
 
 .vc-plugin-ui-elements-switches {
@@ -39,4 +38,8 @@
     :last-child {
         margin-left: auto;
     }
+}
+
+.vc-plugin-ui-elements-description {
+    color: var(--text-subtle);
 }

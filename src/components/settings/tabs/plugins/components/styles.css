@@ -23,13 +23,13 @@
 }
 
 .vc-plugins-setting-title {
-    color: var(--header-primary);
+    color: var(--text-strong);
 }
 
 .vc-plugins-setting-description {
-    color: var(--text-default);
+    color: var(--text-subtle);
 }
 
 .vc-plugins-setting-error {
-    color: var(--text-danger);
+    color: var(--text-feedback-critical, #FF5C5C);
 }

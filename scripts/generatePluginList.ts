@@ -23,6 +23,7 @@ import { normalize as posixNormalize, sep as posixSep } from "path/posix";
 import { BigIntLiteral, createSourceFile, Identifier, isArrayLiteralExpression, isCallExpression, isExportAssignment, isIdentifier, isObjectLiteralExpression, isPropertyAccessExpression, isPropertyAssignment, isSatisfiesExpression, isStringLiteral, isVariableStatement, NamedDeclaration, NodeArray, ObjectLiteralExpression, ScriptTarget, StringLiteral, SyntaxKind } from "typescript";
 
 import { getPluginTarget } from "./utils.mjs";
+import { PluginTarget, PluginTargets } from "@utils/pluginTargets";
 
 interface Dev {
     name: string;
@@ -33,13 +34,14 @@ interface PluginData {
     name: string;
     description: string;
     tags: string[];
+    searchTerms: string[];
     authors: Dev[];
     dependencies: string[];
     hasPatches: boolean;
     hasCommands: boolean;
     required: boolean;
     enabledByDefault: boolean;
-    target: "discordDesktop" | "vesktop" | "desktop" | "web" | "dev";
+    target?: PluginTarget;
     filePath: string;
 }
 
@@ -111,7 +113,8 @@ async function parseFile(fileName: string) {
             hasCommands: false,
             enabledByDefault: false,
             required: false,
-            tags: [] as string[]
+            tags: [] as string[],
+            searchTerms: [] as string[],
         } as PluginData;
 
         for (const prop of pluginObj.properties) {
@@ -140,9 +143,10 @@ async function parseFile(fileName: string) {
                     });
                     break;
                 case "tags":
-                    if (!isArrayLiteralExpression(value)) throw fail("tags is not an array literal");
-                    data.tags = value.elements.map(e => {
-                        if (!isStringLiteral(e)) throw fail("tags array contains non-string literals");
+                case "searchTerms":
+                    if (!isArrayLiteralExpression(value)) throw fail(`${key} is not an array literal`);
+                    data[key] = value.elements.map(e => {
+                        if (!isStringLiteral(e)) throw fail(`${key} array contains non-string literals`);
                         return e.text;
                     });
                     break;
@@ -163,7 +167,7 @@ async function parseFile(fileName: string) {
 
         const target = getPluginTarget(fileName);
         if (target) {
-            if (!["web", "discordDesktop", "vesktop", "desktop", "dev"].includes(target)) throw fail(`invalid target ${target}`);
+            if (!PluginTargets.includes(target as PluginTarget)) throw fail(`invalid target ${target}`);
             data.target = target as any;
         }
 

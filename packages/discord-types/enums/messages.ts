@@ -1,3 +1,54 @@
+export const enum ComponentType {
+    UNKNOWN = -1,
+    ACTION_ROW = 1,
+    BUTTON = 2,
+    STRING_SELECT = 3,
+    TEXT_INPUT = 4,
+    USER_SELECT = 5,
+    ROLE_SELECT = 6,
+    MENTIONABLE_SELECT = 7,
+    CHANNEL_SELECT = 8,
+    SECTION = 9,
+    TEXT_DISPLAY = 10,
+    THUMBNAIL = 11,
+    MEDIA_GALLERY = 12,
+    FILE = 13,
+    SEPARATOR = 14,
+    CONTENT_INVENTORY_ENTRY = 16,
+    CONTAINER = 17,
+    LABEL = 18,
+    FILE_UPLOAD = 19,
+    CHECKPOINT_CARD = 20,
+}
+
+export const enum ButtonStyle {
+    PRIMARY = 1,
+    SECONDARY = 2,
+    SUCCESS = 3,
+    DESTRUCTIVE = 4,
+    LINK = 5,
+    PREMIUM = 6,
+}
+
+export const enum MessageReferenceType {
+    DEFAULT = 0,
+    FORWARD = 1,
+}
+
+export const enum PollLayoutType {
+    UNKNOWN = 0,
+    DEFAULT = 1,
+    IMAGE_ONLY_ANSWERS = 2
+}
+
+export const enum MessageActivityType {
+    JOIN = 1,
+    LISTEN = 3,
+    WATCH = 4,
+    JOIN_REQUEST = 5,
+    STREAM_REQUEST = 6,
+}
+
 export const enum StickerType {
     /** an official sticker in a pack */
     STANDARD = 1,
@@ -92,6 +143,8 @@ export const enum MessageType {
      * Name: PREMIUM_GUILD_SUBSCRIPTION
      * Rendered Content: "{author} just boosted the server{content ? " {content} times"}!"
      * Deletable: true
+     *
+     * @remarks Discord API calls this GUILD_BOOST
      */
     PREMIUM_GUILD_SUBSCRIPTION = 8,
     /**
@@ -101,6 +154,8 @@ export const enum MessageType {
      * Name: PREMIUM_GUILD_SUBSCRIPTION_TIER_1
      * Rendered Content: "{author} just boosted the server{content ? " {content} times"}! {guild} has achieved Level 1! "
      * Deletable: true
+     *
+     * @remarks Discord API calls this GUILD_BOOST_TIER_1
      */
     PREMIUM_GUILD_SUBSCRIPTION_TIER_1 = 9,
     /**
@@ -110,6 +165,8 @@ export const enum MessageType {
      * Name: PREMIUM_GUILD_SUBSCRIPTION_TIER_2
      * Rendered Content: "{author} just boosted the server{content ? " {content} times"}! {guild} has achieved Level 2! "
      * Deletable: true
+     *
+     * @remarks Discord API calls this GUILD_BOOST_TIER_2
      */
     PREMIUM_GUILD_SUBSCRIPTION_TIER_2 = 10,
     /**
@@ -119,6 +176,8 @@ export const enum MessageType {
      * Name: PREMIUM_GUILD_SUBSCRIPTION_TIER_3
      * Rendered Content: "{author} just boosted the server{content ? " {content} times"}! {guild} has achieved Level 3! "
      * Deletable: true
+     *
+     * @remarks Discord API calls this GUILD_BOOST_TIER_3
      */
     PREMIUM_GUILD_SUBSCRIPTION_TIER_3 = 11,
     /**
@@ -130,6 +189,14 @@ export const enum MessageType {
      * Deletable: true
      */
     CHANNEL_FOLLOW_ADD = 12,
+    /**
+     * A message sent when a user starts a stream in a guild.
+     *
+     * Value: 13
+     * Name: GUILD_STREAM
+     * Deletable: true
+     */
+    GUILD_STREAM = 13,
     /**
      * A message sent when a guild is disqualified from discovery
      *
@@ -302,6 +369,22 @@ export const enum MessageType {
      */
     GUILD_APPLICATION_PREMIUM_SUBSCRIPTION = 32,
     /**
+     * A message sent when an integration is added to a private channel
+     *
+     * Value: 33
+     * Name: PRIVATE_CHANNEL_INTEGRATION_ADDED
+     * Deletable: true
+     */
+    PRIVATE_CHANNEL_INTEGRATION_ADDED = 33,
+    /**
+     * A message sent when an integration is removed from a private channel
+     *
+     * Value: 34
+     * Name: PRIVATE_CHANNEL_INTEGRATION_REMOVED
+     * Deletable: true
+     */
+    PRIVATE_CHANNEL_INTEGRATION_REMOVED = 34,
+    /**
      * A message sent when a user gifts a premium (Nitro) referral
      *
      * Value: 35
@@ -380,6 +463,14 @@ export const enum MessageType {
      * Deletable: true
      */
     PURCHASE_NOTIFICATION = 44,
+    /**
+     * A message sent as a voice hangout invite
+     *
+     * Value: 45
+     * Name: VOICE_HANGOUT_INVITE
+     * Deletable: true
+     */
+    VOICE_HANGOUT_INVITE = 45,
     /**
      * A message sent when a poll is finalized
      *
@@ -471,6 +562,22 @@ export const enum MessageType {
      */
     HD_STREAMING_UPGRADED = 55,
     /**
+     * A message sent when a chat wallpaper is set
+     *
+     * Value: 56
+     * Name: CHAT_WALLPAPER_SET
+     * Deletable: true
+     */
+    CHAT_WALLPAPER_SET = 56,
+    /**
+     * A message sent when a chat wallpaper is removed
+     *
+     * Value: 57
+     * Name: CHAT_WALLPAPER_REMOVED
+     * Deletable: true
+     */
+    CHAT_WALLPAPER_REMOVED = 57,
+    /**
      * A message sent when a user resolves a moderation report by deleting the offending message
      *
      * Value: 58
@@ -524,6 +631,14 @@ export const enum MessageType {
      * Deletable: true
      */
     EMOJI_ADDED = 63,
+    /**
+     * A message sent as a premium group invite
+     *
+     * Value: 64
+     * Name: PREMIUM_GROUP_INVITE
+     * Deletable: true
+     */
+    PREMIUM_GROUP_INVITE = 64,
 }
 
 export const enum MessageFlags {

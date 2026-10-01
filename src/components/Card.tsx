@@ -6,14 +6,14 @@
 
 import "./Card.css";
 
-import { classNameFactory } from "@api/Styles";
+import { classNameFactory } from "@utils/css";
 import { classes } from "@utils/misc";
 import { ComponentPropsWithRef } from "react";
 
 const cl = classNameFactory("vc-card-");
 
 export interface CardProps extends ComponentPropsWithRef<"div"> {
-    variant?: "normal" | "warning" | "danger";
+    variant?: "normal" | "warning" | "danger" | "info" | "success";
     /** Add a default padding of 1em to the card. This is implied if no className prop is passed */
     defaultPadding?: boolean;
 }

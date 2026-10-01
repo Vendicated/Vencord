@@ -1,5 +1,5 @@
 .vc-ranb-button {
-    color: var(--interactive-normal);
+    color: var(--interactive-icon-default);
     padding: 0 0.5em;
     width: 100%;
     font-size: 14px;
@@ -8,5 +8,5 @@
 }
 
 .vc-ranb-button:hover {
-    color: var(--interactive-active);
+    color: var(--interactive-icon-active);
 }

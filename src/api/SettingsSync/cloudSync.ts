@@ -6,6 +6,7 @@
 
 import { showNotification } from "@api/Notifications";
 import { PlainSettings, Settings } from "@api/Settings";
+import { localStorage } from "@utils/localStorage";
 import { Logger } from "@utils/Logger";
 import { relaunch } from "@utils/native";
 import { deflateSync, inflateSync } from "fflate";
@@ -14,6 +15,20 @@ import { checkCloudUrlCsp, deauthorizeCloud, getCloudAuth, getCloudUrl } from ".
 import { exportSettings, importSettings } from "./offline";
 
 const logger = new Logger("SettingsSync:Cloud", "#39b7e0");
+
+const SYNC_DIRECTION_KEY = "Vencord_cloudSyncDirection";
+const SETTINGS_DIRTY_KEY = "Vencord_settingsDirty";
+export const getCloudSyncDirection = () => localStorage.getItem(SYNC_DIRECTION_KEY) || "both";
+export const setCloudSyncDirection = (direction: "push" | "pull" | "both" | "manual") => localStorage.setItem(SYNC_DIRECTION_KEY, direction);
+export const areLocalSettingsDirty = () => localStorage.getItem(SETTINGS_DIRTY_KEY) === "true";
+export const markLocalSettingsDirty = () => localStorage.setItem(SETTINGS_DIRTY_KEY, "true");
+export const markLocalSettingsClean = () => localStorage.removeItem(SETTINGS_DIRTY_KEY);
+
+export function shouldCloudSync(direction: "push" | "pull") {
+    const localDirection = getCloudSyncDirection();
+
+    return localDirection === direction || localDirection === "both";
+}
 
 export async function putCloudSettings(manual?: boolean) {
     const settings = await exportSettings({ minify: true });
@@ -53,6 +68,8 @@ export async function putCloudSettings(manual?: boolean) {
                 noPersist: true,
             });
         }
+
+        markLocalSettingsClean();
     } catch (e: any) {
         logger.error("Failed to sync up", e);
         showNotification({
@@ -140,6 +157,8 @@ export async function getCloudSettings(shouldNotify = true, force = false) {
                 onClick: IS_WEB ? () => location.reload() : relaunch,
                 noPersist: true
             });
+
+        markLocalSettingsClean();
 
         return true;
     } catch (e: any) {

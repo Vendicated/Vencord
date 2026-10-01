@@ -21,6 +21,7 @@ import { Devs } from "@utils/constants";
 import { Logger } from "@utils/Logger";
 import definePlugin, { OptionType, StartAt } from "@utils/types";
 import { WebpackRequire } from "@vencord/discord-types/webpack";
+import { Flux, FluxDispatcher } from "@webpack/common";
 
 const settings = definePluginSettings({
     disableAnalytics: {
@@ -44,8 +45,8 @@ export default definePlugin({
             find: "AnalyticsActionHandlers.handle",
             predicate: () => settings.store.disableAnalytics,
             replacement: {
-                match: /^.+$/,
-                replace: "()=>{}",
+                match: /\(0,\i\.analyticsTrackingStoreMaker\)/,
+                replace: "$self.analyticsTrackingStoreMaker",
             },
         },
         {
@@ -86,14 +87,14 @@ export default definePlugin({
         // It has everything it needs preloaded, so, it doesn't include any chunk loading functionality.
         // Because of that, its WebpackInstance doesnt export wreq.m or wreq.c
 
-        // To circuvent this and disable Sentry we are gonna hook when wreq.g of its WebpackInstance is set.
+        // To circuvent this and disable Sentry we are gonna hook when wreq.d of its WebpackInstance is set.
         // When that happens we are gonna forcefully throw an error and abort everything.
-        Object.defineProperty(Function.prototype, "g", {
+        Object.defineProperty(Function.prototype, "d", {
             configurable: true,
 
-            set(this: WebpackRequire, globalObj: WebpackRequire["g"]) {
-                Object.defineProperty(this, "g", {
-                    value: globalObj,
+            set(this: WebpackRequire, esmDeclareFunc: WebpackRequire["d"]) {
+                Object.defineProperty(this, "d", {
+                    value: esmDeclareFunc,
                     configurable: true,
                     enumerable: true,
                     writable: true
@@ -123,7 +124,7 @@ export default definePlugin({
 
                 new Logger("NoTrack", "#8caaee").info("Disabling Sentry by erroring its WebpackInstance");
 
-                Reflect.deleteProperty(Function.prototype, "g");
+                Reflect.deleteProperty(Function.prototype, "d");
                 Reflect.deleteProperty(window, "DiscordSentry");
 
                 throw new Error("Sentry successfully disabled");
@@ -136,9 +137,41 @@ export default definePlugin({
             set() {
                 new Logger("NoTrack", "#8caaee").error("Failed to disable Sentry. Falling back to deleting window.DiscordSentry");
 
-                Reflect.deleteProperty(Function.prototype, "g");
+                Reflect.deleteProperty(Function.prototype, "d");
                 Reflect.deleteProperty(window, "DiscordSentry");
             }
         });
+    },
+
+    analyticsTrackingStoreMaker() {
+        class AnalyticsTrackingStoreStub extends Flux.Store {
+            static displayName = "AnalyticsTrackingStore";
+
+            requestDrain() { }
+
+            async submitEventsImmediately() {
+                // This is supposed to return a Discord rest response but we can't know what the correct shape would be, because
+                // 1. It's not used anywhere
+                // 2. It takes a dynamic url
+                // Instead we throw an error with the same structure as a Discord rest error which they probably should handle gracefully.
+                // Discord also throws a plain object instead of Error class
+
+                throw {
+                    ok: false,
+                    status: 500,
+                    body: {
+                        message: "Analytics tracking is disabled by NoTrack",
+                        code: 0
+                    },
+                    headers: {},
+                    text: JSON.stringify({
+                        message: "Analytics tracking is disabled by NoTrack",
+                        code: 0
+                    })
+                };
+            }
+        }
+
+        return new AnalyticsTrackingStoreStub(FluxDispatcher);
     }
 });

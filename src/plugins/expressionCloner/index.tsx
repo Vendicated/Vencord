@@ -18,22 +18,21 @@
 
 import { findGroupChildrenByChildId, NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { migratePluginSettings } from "@api/Settings";
+import { BaseText } from "@components/BaseText";
 import { CheckedTextInput } from "@components/CheckedTextInput";
+import { Flex } from "@components/Flex";
+import { PlusIcon } from "@components/Icons";
 import { Devs } from "@utils/constants";
-import { getGuildAcronym } from "@utils/discord";
+import { getGuildAcronym, hasGuildFeature } from "@utils/discord";
 import { Logger } from "@utils/Logger";
-import { Margins } from "@utils/margins";
-import { ModalContent, ModalHeader, ModalRoot, openModalLazy } from "@utils/modal";
 import definePlugin from "@utils/types";
-import { Guild, GuildSticker } from "@vencord/discord-types";
+import { Guild, GuildSticker, Message } from "@vencord/discord-types";
 import { StickerFormatType } from "@vencord/discord-types/enums";
 import { findByCodeLazy } from "@webpack";
-import { Constants, EmojiStore, FluxDispatcher, Forms, GuildStore, IconUtils, Menu, PermissionsBits, PermissionStore, React, RestAPI, StickersStore, Toasts, Tooltip, UserStore } from "@webpack/common";
+import { Constants, EmojiStore, FluxDispatcher, Forms, GuildStore, IconUtils, Menu, Modal, openModalLazy, PermissionsBits, PermissionStore, React, RestAPI, StickersStore, Toasts, Tooltip, UserStore } from "@webpack/common";
 import { Promisable } from "type-fest";
 
 const uploadEmoji = findByCodeLazy(".GUILD_EMOJIS(", "EMOJI_UPLOAD_START");
-
-const getGuildMaxEmojiSlots = findByCodeLazy(".additionalEmojiSlots") as (guild: Guild) => number;
 
 interface Sticker extends GuildSticker {
     t: "Sticker";
@@ -62,6 +61,9 @@ const PremiumTierStickerLimitMap = {
     3: 60
 } as const;
 
+const MAX_EMOJI_SIZE_BYTES = 256 * 1024;
+const MAX_STICKER_SIZE_BYTES = 512 * 1024;
+
 function getGuildMaxStickerSlots(guild: Guild) {
     if (guild.features.has("MORE_STICKERS") && guild.premiumTier === 3)
         return 120;
@@ -69,11 +71,18 @@ function getGuildMaxStickerSlots(guild: Guild) {
     return PremiumTierStickerLimitMap[guild.premiumTier] ?? PremiumTierStickerLimitMap[0];
 }
 
-function getUrl(data: Data) {
-    if (data.t === "Emoji")
-        return `${location.protocol}//${window.GLOBAL_ENV.CDN_HOST}/emojis/${data.id}.${data.isAnimated ? "gif" : "png"}?size=4096&lossless=true`;
+function getGuildMaxEmojiSlots(guild: Guild) {
+    return Math.max(
+        hasGuildFeature(guild, "MORE_EMOJI") ? 200 : 50,
+        50 + (guild.premiumFeatures?.additionalEmojiSlots ?? 0)
+    );
+}
 
-    return `${window.GLOBAL_ENV.MEDIA_PROXY_ENDPOINT}/stickers/${data.id}.${StickerExtMap[data.format_type]}?size=4096&lossless=true`;
+function getUrl(data: Data, size: number) {
+    if (data.t === "Emoji")
+        return `${location.protocol}//${window.GLOBAL_ENV.CDN_HOST}/emojis/${data.id}.webp?size=${size}&lossless=true&animated=true`;
+
+    return `${window.GLOBAL_ENV.MEDIA_PROXY_ENDPOINT}/stickers/${data.id}.${StickerExtMap[data.format_type]}?size=${size}&lossless=true&animated=true`;
 }
 
 async function fetchSticker(id: string) {
@@ -97,7 +106,7 @@ async function cloneSticker(guildId: string, sticker: Sticker) {
     data.append("name", sticker.name);
     data.append("tags", sticker.tags);
     data.append("description", sticker.description);
-    data.append("file", await fetchBlob(getUrl(sticker)));
+    data.append("file", await fetchBlob(sticker));
 
     const { body } = await RestAPI.post({
         url: Constants.Endpoints.GUILD_STICKER_PACKS(guildId),
@@ -115,7 +124,7 @@ async function cloneSticker(guildId: string, sticker: Sticker) {
 }
 
 async function cloneEmoji(guildId: string, emoji: Emoji) {
-    const data = await fetchBlob(getUrl(emoji));
+    const data = await fetchBlob(emoji);
 
     const dataUrl = await new Promise<string>(resolve => {
         const reader = new FileReader();
@@ -161,12 +170,23 @@ function getGuildCandidates(data: Data) {
     }).sort((a, b) => a.name.localeCompare(b.name));
 }
 
-async function fetchBlob(url: string) {
-    const res = await fetch(url);
-    if (!res.ok)
-        throw new Error(`Failed to fetch ${url} - ${res.status}`);
+async function fetchBlob(data: Data) {
+    const MAX_SIZE = data.t === "Sticker"
+        ? MAX_STICKER_SIZE_BYTES
+        : MAX_EMOJI_SIZE_BYTES;
 
-    return res.blob();
+    for (let size = 4096; size >= 16; size /= 2) {
+        const url = getUrl(data, size);
+        const res = await fetch(url);
+        if (!res.ok)
+            throw new Error(`Failed to fetch ${url} - ${res.status}`);
+
+        const blob = await res.blob();
+        if (blob.size <= MAX_SIZE)
+            return blob;
+    }
+
+    throw new Error(`Failed to fetch ${data.t} within size limit of ${MAX_SIZE / 1000}kB`);
 }
 
 async function doClone(guildId: string, data: Sticker | Emoji) {
@@ -214,9 +234,9 @@ function CloneModal({ data }: { data: Sticker | Emoji; }) {
 
     return (
         <>
-            <Forms.FormTitle className={Margins.top20}>Custom Name</Forms.FormTitle>
+            <Forms.FormTitle>Custom Name</Forms.FormTitle>
             <CheckedTextInput
-                value={name}
+                initialValue={name}
                 onChange={v => {
                     data.name = v;
                     setName(v);
@@ -308,30 +328,32 @@ function buildMenuItem(type: "Emoji" | "Sticker", fetchData: () => Promisable<Om
             id="emote-cloner"
             key="emote-cloner"
             label={`Clone ${type}`}
+            leadingAccessory={{ type: "icon", icon: PlusIcon }}
             action={() =>
                 openModalLazy(async () => {
                     const res = await fetchData();
                     const data = { t: type, ...res } as Sticker | Emoji;
-                    const url = getUrl(data);
+                    const url = getUrl(data, 128);
 
                     return modalProps => (
-                        <ModalRoot {...modalProps}>
-                            <ModalHeader>
-                                <img
-                                    role="presentation"
-                                    aria-hidden
-                                    src={url}
-                                    alt=""
-                                    height={24}
-                                    width={24}
-                                    style={{ marginRight: "0.5em" }}
-                                />
-                                <Forms.FormText>Clone {data.name}</Forms.FormText>
-                            </ModalHeader>
-                            <ModalContent>
-                                <CloneModal data={data} />
-                            </ModalContent>
-                        </ModalRoot>
+                        <Modal
+                            {...modalProps}
+                            title={
+                                <Flex gap="0.5em" alignItems="center">
+                                    <img
+                                        role="presentation"
+                                        aria-hidden
+                                        src={url}
+                                        alt=""
+                                        height={24}
+                                        width={24}
+                                    />
+                                    <BaseText tag="h3" size="md" weight="medium">Clone {data.name}</BaseText>
+                                </Flex>
+                            }
+                        >
+                            <CloneModal data={data} />
+                        </Modal>
                     );
                 })
             }
@@ -344,18 +366,31 @@ function isGifUrl(url: string) {
     return u.pathname.endsWith(".gif") || u.searchParams.get("animated") === "true";
 }
 
-const messageContextMenuPatch: NavContextMenuPatchCallback = (children, props) => {
-    const { favoriteableId, itemHref, itemSrc, favoriteableType } = props ?? {};
+function resolveEmojiName(favoriteableId: string, message: Message) {
+    const emoji = EmojiStore.getCustomEmojiById(favoriteableId);
+    if (emoji) return emoji.name;
+
+    const reaction = message.reactions.find(reaction => reaction.emoji.id === favoriteableId);
+    if (reaction) return reaction.emoji.name;
+
+    const match = message.content.match(RegExp(`<a?:(\\w+)(?:~\\d+)?:${favoriteableId}>|https://cdn\\.discordapp\\.com/emojis/${favoriteableId}\\.[\\w?&=%]*`));
+    if (!match) return null;
+
+    return match[1]
+        ?? URL.parse(match[0])?.searchParams.get("name")
+        ?? "FakeNitroEmoji";
+}
+
+const messageContextMenuPatch: NavContextMenuPatchCallback = (children, props: Record<"favoriteableId" | "itemHref" | "itemSrc" | "favoriteableType", string> & { message: Message; }) => {
+    const { favoriteableId, itemHref, itemSrc, favoriteableType, message } = props ?? {};
 
     if (!favoriteableId) return;
 
     const menuItem = (() => {
         switch (favoriteableType) {
             case "emoji":
-                const match = props.message.content.match(RegExp(`<a?:(\\w+)(?:~\\d+)?:${favoriteableId}>|https://cdn\\.discordapp\\.com/emojis/${favoriteableId}\\.`));
-                const reaction = props.message.reactions.find(reaction => reaction.emoji.id === favoriteableId);
-                if (!match && !reaction) return;
-                const name = (match && match[1]) ?? reaction?.emoji.name ?? "FakeNitroEmoji";
+                const name = resolveEmojiName(favoriteableId, message);
+                if (!name) return;
 
                 return buildMenuItem("Emoji", () => ({
                     id: favoriteableId,
@@ -363,7 +398,7 @@ const messageContextMenuPatch: NavContextMenuPatchCallback = (children, props) =
                     isAnimated: isGifUrl(itemHref ?? itemSrc)
                 }));
             case "sticker":
-                const sticker = props.message.stickerItems.find(s => s.id === favoriteableId);
+                const sticker = message.stickerItems.find(s => s.id === favoriteableId);
                 if (sticker?.format_type === 3 /* LOTTIE */) return;
 
                 return buildMenuItem("Sticker", () => fetchSticker(favoriteableId));
@@ -395,8 +430,9 @@ migratePluginSettings("ExpressionCloner", "EmoteCloner");
 export default definePlugin({
     name: "ExpressionCloner",
     description: "Allows you to clone Emotes & Stickers to your own server (right click them)",
-    tags: ["StickerCloner", "EmoteCloner", "EmojiCloner"],
-    authors: [Devs.Ven, Devs.Nuckyz],
+    tags: ["Emotes", "Servers"],
+    searchTerms: ["StickerCloner", "EmoteCloner", "EmojiCloner"],
+    authors: [Devs.Ven, Devs.Nuckyz, Devs.scattagain],
     contextMenus: {
         "message": messageContextMenuPatch,
         "expression-picker": expressionPickerPatch

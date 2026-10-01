@@ -1,6 +1,6 @@
 #vc-spotify-player {
     padding: 12px;
-    background: var(--bg-overlay-floating, var(--background-base-low, var(--background-base-lower-alt)));
+    background: var(--background-base-low);
     margin: 0;
     border-top-left-radius: 10px;
     border-top-right-radius: 10px;
@@ -12,19 +12,11 @@
     --vc-spotify-green-80: color-mix(in hsl, var(--vc-spotify-green), transparent 80%);
 }
 
-.theme-light #vc-spotify-player {
-    background: var(--bg-overlay-3, var(--background-base-lower-alt));
-}
-
-.theme-dark #vc-spotify-player {
-    background: var(--bg-overlay-1, var(--background-base-lower-alt));
-}
-
 .vc-spotify-button {
     margin: 0 2px;
     border-radius: var(--radius-sm);
     background: none;
-    color: var(--interactive-normal);
+    color: var(--interactive-icon-default);
     padding: 0;
     width: 32px;
     height: 32px;
@@ -34,8 +26,8 @@
 }
 
 .vc-spotify-button:hover {
-    color: var(--interactive-hover);
-    background-color: var(--background-modifier-selected);
+    color: var(--interactive-icon-hover);
+    background-color: var(--background-mod-strong);
 }
 
 .vc-spotify-button-icon {
@@ -129,7 +121,7 @@
 }
 
 #vc-spotify-song-title {
-    color: var(--header-primary);
+    color: var(--text-strong);
     font-size: 14px;
     font-weight: 600;
 }
@@ -145,7 +137,7 @@
 .vc-spotify-album {
     font-size: 12px;
     text-decoration: none;
-    color: var(--header-primary);
+    color: var(--text-strong);
 }
 
 .vc-spotify-comma {
@@ -167,39 +159,39 @@
     margin-bottom: 5px;
 }
 
-#vc-spotify-progress-bar > [class^="slider"] {
+#vc-spotify-progress-bar > [class*="slider"] {
     flex-grow: 1;
     width: 100%;
     padding: 0 !important;
 }
 
-#vc-spotify-progress-bar > [class^="slider"] [class^="bar"] {
+#vc-spotify-progress-bar > [class*="slider"] [class*="bar"] {
     height: 3px !important;
     top: calc(12px - 4px / 2 + var(--bar-offset));
 }
 
-#vc-spotify-progress-bar > [class^="slider"] [class^="barFill"] {
-    background-color: var(--interactive-active);
+#vc-spotify-progress-bar > [class*="slider"] [class*="barFill"] {
+    background-color: var(--interactive-icon-active);
 }
 
-#vc-spotify-progress-bar > [class^="slider"]:hover [class^="barFill"] {
+#vc-spotify-progress-bar > [class*="slider"]:hover [class*="barFill"] {
     background-color: var(--vc-spotify-green);
 }
 
-#vc-spotify-progress-bar > [class^="slider"] [class^="grabber"] {
+#vc-spotify-progress-bar > [class*="slider"] [class*="grabber"] {
     /* these importants are necessary, it applies a width and height through inline styles */
     height: 16px !important;
     width: 16px !important;
     margin-top: calc(17px/-2 + var(--bar-offset)/2);
     margin-left: -0.5px;
-    background-color: var(--interactive-active);
-    border-color: var(--interactive-normal);
-    color: var(--interactive-normal);
+    background-color: var(--interactive-icon-active);
+    border-color: var(--interactive-icon-default);
+    color: var(--interactive-icon-default);
     opacity: 0;
     transition: opacity 0.1s;
 }
 
-#vc-spotify-progress-bar:hover > [class^="slider"] [class^="grabber"] {
+#vc-spotify-progress-bar:hover > [class*="slider"] [class*="grabber"] {
     opacity: 1;
 }
 
