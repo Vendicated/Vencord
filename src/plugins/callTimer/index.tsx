@@ -20,6 +20,7 @@ import { definePluginSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import { useTimer } from "@utils/react";
+import { formatDuration } from "@utils/text";
 import definePlugin, { OptionType } from "@utils/types";
 import { React } from "@webpack/common";
 
@@ -39,32 +40,9 @@ const settings = definePluginSettings({
                 label: "30d 23h 00m 42s",
                 value: "human"
             }
-        ]
+        ] as const
     }
 });
-
-function formatDuration(ms: number) {
-    // here be dragons (moment fucking sucks)
-    const human = settings.store.format === "human";
-
-    const format = (n: number) => human ? n : n.toString().padStart(2, "0");
-    const unit = (s: string) => human ? s : "";
-    const delim = human ? " " : ":";
-
-    // thx copilot
-    const d = Math.floor(ms / 86400000);
-    const h = Math.floor((ms % 86400000) / 3600000);
-    const m = Math.floor(((ms % 86400000) % 3600000) / 60000);
-    const s = Math.floor((((ms % 86400000) % 3600000) % 60000) / 1000);
-
-    let res = "";
-    if (d) res += `${d}d `;
-    if (h || res) res += `${format(h)}${unit("h")}${delim}`;
-    if (m || res || !human) res += `${format(m)}${unit("m")}${delim}`;
-    res += `${format(s)}${unit("s")}`;
-
-    return res;
-}
 
 
 
@@ -94,7 +72,7 @@ export default definePlugin({
 
         return (
             <p style={{ margin: 0, fontFamily: "var(--font-code)" }}>
-                {formatDuration(time)}
+                {formatDuration(time, settings.store.format === "human")}
             </p>
         );
     }, { noop: true }),

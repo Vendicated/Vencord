@@ -427,3 +427,9 @@ export type PluginNative<PluginExports extends Record<string, (event: Electron.I
 };
 
 export type AllOrNothing<T> = T | { [K in keyof T]?: never; };
+
+export type ConstEnumToRuntimeEnum<T> = {
+    [K in keyof T as T[K] extends number ? T[K] : never]: K;
+} & {
+    [K in keyof T]: T[K];
+};
