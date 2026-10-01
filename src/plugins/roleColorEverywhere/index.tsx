@@ -16,8 +16,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { isPluginEnabled } from "@api/PluginManager";
 import { definePluginSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
+import BetterRoleContext from "@plugins/betterRoleContext";
 import { Devs } from "@utils/constants";
 import { Logger } from "@utils/Logger";
 import definePlugin, { makeRange, OptionType } from "@utils/types";
@@ -216,13 +218,18 @@ export default definePlugin({
 
     RoleGroupColor: ErrorBoundary.wrap(({ id, count, title, guildId, label }: { id: string; count: number; title: string; guildId: string; label: string; }) => {
         const role = GuildRoleStore.getRole(guildId, id);
+        // we overwrite the context menu event added by BetterRoleContext in our patch
+        const wantsRoleContext = isPluginEnabled(BetterRoleContext.name);
 
         return (
-            <span style={{
-                color: role?.colorString,
-                fontWeight: "unset",
-                letterSpacing: ".05em"
-            }}>
+            <span
+                style={{
+                    color: role?.colorString,
+                    fontWeight: "unset",
+                    letterSpacing: ".05em"
+                }}
+                onContextMenu={wantsRoleContext ? e => BetterRoleContext.openRoleContextMenu(e, { guildId, id }) : undefined}
+            >
                 {title ?? label} &mdash; {count}
             </span>
         );
