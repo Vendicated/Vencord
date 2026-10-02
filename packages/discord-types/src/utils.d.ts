@@ -416,7 +416,7 @@ export interface EmojiUtils {
     applyPlatformToThemedEmojiColorPalette(colors: any): any;
 }
 
-export interface OpenUserSettingsOpts {
+export interface OpenUserSettingsOptions {
     /**
      * a *sub*section of settings to navigate to
      *
@@ -433,7 +433,7 @@ export interface OpenUserSettingsOpts {
 }
 
 export interface SettingsRouter {
-    openUserSettings(navigationTarget?: string, opts?: OpenUserSettingsOpts, onOpen?: () => void): Promise<void>;
+    openUserSettings(navigationTarget?: string, opts?: OpenUserSettingsOptions, onOpen?: () => void): Promise<void>;
 }
 
 export interface OpenUserProfileModalOpts {
