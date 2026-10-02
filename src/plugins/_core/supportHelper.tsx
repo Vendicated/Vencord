@@ -43,8 +43,6 @@ import plugins, { PluginMeta } from "~plugins";
 
 import SettingsPlugin from "./settings";
 
-const CodeBlockRe = /```js\n(.+?)```/s;
-
 const AdditionalAllowedChannelIds = [
     "1024286218801926184", // Vencord > #bot-commands
 ];
@@ -54,8 +52,6 @@ const TrustedRolesIds = [
     REGULAR_ROLE_ID, // regular
     DONOR_ROLE_ID, // donor
 ];
-
-const AsyncFunction = async function () { }.constructor;
 
 const ShowCurrentGame = getUserSettingLazy<boolean>("status", "showCurrentGame")!;
 
@@ -314,28 +310,6 @@ export default definePlugin({
                         onClick={async () => sendMessage(props.channel.id, { content: generatePluginList() })}
                     >
                         Run /vencord-plugins
-                    </Button>
-                );
-            }
-        }
-
-        if (props.channel.parent_id === KNOWN_ISSUES_CHANNEL_ID || (props.channel.parent_id === SUPPORT_CATEGORY_ID && props.message.author.id === VENBOT_USER_ID)) {
-            const match = CodeBlockRe.exec(props.message.content || props.message.embeds[0]?.rawDescription || "");
-            if (match) {
-                buttons.push(
-                    <Button
-                        key="vc-run-snippet"
-                        onClick={async () => {
-                            try {
-                                await AsyncFunction(match[1])();
-                                showToast("Success!", "success");
-                            } catch (e) {
-                                new Logger(this.name).error("Error while running snippet:", e);
-                                showToast("Failed to run snippet :(", "failure");
-                            }
-                        }}
-                    >
-                        Run Snippet
                     </Button>
                 );
             }
