@@ -35,7 +35,7 @@ import { makeCodeblock } from "@utils/text";
 import definePlugin from "@utils/types";
 import { checkForUpdates, isOutdated, update } from "@utils/updater";
 import { Channel, RenderModalProps } from "@vencord/discord-types";
-import { Button, ChannelStore, ConfirmModal, Forms, GuildMemberStore, openModal, Parser, PermissionsBits, PermissionStore, RelationshipStore, showToast, Text, Toasts, UserStore } from "@webpack/common";
+import { Button, ChannelStore, ConfirmModal, Forms, GuildMemberStore, openModal, Parser, PermissionsBits, PermissionStore, RelationshipStore, showToast, Text, UserStore } from "@webpack/common";
 import { JSX } from "react";
 
 import gitHash from "~git-hash";
@@ -284,12 +284,12 @@ export default definePlugin({
                     onClick={async () => {
                         try {
                             if (await forceUpdate())
-                                showToast("Success! Restarting...", Toasts.Type.SUCCESS);
+                                showToast("Success! Restarting...", "success");
                             else
-                                showToast("Already up to date!", Toasts.Type.MESSAGE);
+                                showToast("Already up to date!");
                         } catch (e) {
                             new Logger(this.name).error("Error while updating:", e);
-                            showToast("Failed to update :(", Toasts.Type.FAILURE);
+                            showToast("Failed to update :(", "failure");
                         }
                     }}
                 >
@@ -328,10 +328,10 @@ export default definePlugin({
                         onClick={async () => {
                             try {
                                 await AsyncFunction(match[1])();
-                                showToast("Success!", Toasts.Type.SUCCESS);
+                                showToast("Success!", "success");
                             } catch (e) {
                                 new Logger(this.name).error("Error while running snippet:", e);
-                                showToast("Failed to run snippet :(", Toasts.Type.FAILURE);
+                                showToast("Failed to run snippet :(", "failure");
                             }
                         }}
                     >
