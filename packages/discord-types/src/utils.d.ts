@@ -436,7 +436,7 @@ export interface SettingsRouter {
     openUserSettings(navigationTarget?: string, opts?: OpenUserSettingsOptions, onOpen?: () => void): Promise<void>;
 }
 
-export interface OpenUserProfileModalOpts {
+export interface OpenUserProfileModalOptions {
     userId: string;
     guildId?: string | null;
     originGuildId?: string | null;
@@ -458,5 +458,5 @@ export interface OpenUserProfileModalOpts {
 }
 
 export interface UserProfileModalActionCreators {
-    openUserProfileModal(opts: OpenUserProfileModalOpts): Promise<void>;
+    openUserProfileModal(opts: OpenUserProfileModalOptions): Promise<void>;
 }
