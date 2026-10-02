@@ -422,7 +422,7 @@ export interface OpenUserSettingsOptions {
      *
      * to navigate to a top-level section, use the navigationTarget parameter of {@link SettingsRouter.openUserSettings} instead
      *
-     * discord has an enum with all the possible values (go dig in the openUserSettings source)
+     * discord has an enum with all the possible values (go dig in the {@link openUserSettings} source)
      */
     path?: string;
     /**
