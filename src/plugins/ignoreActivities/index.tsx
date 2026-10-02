@@ -295,8 +295,8 @@ export default definePlugin({
             find: '"LocalActivityStore"',
             replacement: [
                 {
-                    match: /\.LISTENING.+?(?=!?\i\(\)\(\i,\i\))(?<=(\i)\.push.+?)/,
-                    replace: (m, activities) => `${m}${activities}=${activities}.filter($self.isActivityNotIgnored);`
+                    match: /\.LISTENING.+?([,:])(?=!?\i\(\)\(\i,\i\))(?<=(\i)\.push.+?)/,
+                    replace: (m, commaOrSemiColon, activities) => `${m}${activities}=${activities}.filter($self.isActivityNotIgnored)${commaOrSemiColon}`
                 }
             ]
         },
