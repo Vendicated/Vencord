@@ -58,7 +58,7 @@ export async function update() {
 
     if (res) {
         isOutdated = false;
-        if (!await Unwrap(VencordNative.updater.rebuild()))
+        if (!await Unwrap(VencordNative.updater.applyUpdate()))
             throw new Error("Failed to apply the update.");
     }
 

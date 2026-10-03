@@ -5,7 +5,7 @@
  */
 
 import { gitHash } from "@shared/vencordUserAgent";
-import { app, BrowserWindow, Menu, MenuItemConstructorOptions, Notification, shell } from "electron";
+import { app, BaseWindow, BrowserWindow, dialog, Menu, MenuItemConstructorOptions, shell } from "electron";
 import aboutHtml from "file://about.html?minify";
 
 import updater from "./updater";
@@ -74,6 +74,8 @@ function openAboutWindow() {
     });
 }
 
+const notify = (window: BaseWindow, title: string, message: string) => dialog.showMessageBox(window, { title, message });
+
 function createVencordMenuItems(): MenuItemConstructorOptions[] {
     return [
         {
@@ -84,26 +86,26 @@ function createVencordMenuItems(): MenuItemConstructorOptions[] {
                     click: () => openAboutWindow()
                 },
                 {
-                    label: "Repair Vencord",
-                    click: async () => {
-                        const updateAvailable = await updater.fetchUpdate();
-                        if (!updateAvailable) {
-                            new Notification({
-                                title: "No Update Available",
-                                body: "You are already using the latest version of Vencord."
-                            }).show();
-                            return;
-                        }
+                    label: "Update Vencord",
+                    async click(_item, window) {
+                        if (!window) return;
 
-                        const result = await updater.applyUpdate();
-                        if (result) {
+                        try {
+                            const updateAvailable = await updater.fetchUpdate();
+                            if (!updateAvailable) {
+                                return notify(window, "No Update Available", "You are already using the latest version of Vencord.");
+                            }
+
+                            const result = await updater.applyUpdate();
+                            if (!result) {
+                                return notify(window, "Update Failed", "Failed to apply the update for Vencord.");
+                            }
+
+                            await notify(window, "Update Successful", "Now relaunching Vencord to apply the update.");
                             app.relaunch();
                             app.exit();
-                        } else {
-                            new Notification({
-                                title: "Update Failed",
-                                body: "Failed to apply the update for Vencord."
-                            }).show();
+                        } catch (e) {
+                            notify(window, "Update Error", `An error occurred while updating Vencord.\n\n${String(e)}`);
                         }
                     }
                 },
