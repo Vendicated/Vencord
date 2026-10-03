@@ -26,3 +26,36 @@
 
     --custom-button-button-md-height: 26px;
 }
+
+.vc-settings-theme-slider-container {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+}
+
+.vc-settings-theme-slider {
+    flex: 1;
+    min-width: 0;
+}
+
+/* Center the input on the slider's track, which sits below a 24px row of marker labels */
+.vc-settings-theme-slider-input {
+    flex-shrink: 0;
+    width: 5em;
+    box-sizing: border-box;
+    height: 48px;
+    padding-top: 24px;
+    display: flex;
+    align-items: center;
+}
+
+.vc-settings-theme-color-container {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.vc-settings-theme-color-input {
+    flex: 1;
+    min-width: 0;
+}
