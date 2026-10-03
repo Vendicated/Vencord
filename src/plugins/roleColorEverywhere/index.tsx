@@ -118,8 +118,8 @@ export default definePlugin({
             find: "?null:new Intl.NumberFormat",
             replacement: [
                 {
-                    match: /(?<=#{intl::CHANNEL_MEMBERS_A11Y_LABEL},\{title:\i,count:\i\}\)\}\),\(0,\i\.jsxs\)\()"div",{/,
-                    replace: "$self.RoleGroupColorWrapper,{discordProps:arguments[0],"
+                    match: /(?<=#{intl::CHANNEL_MEMBERS_A11Y_LABEL},\{title:\i,count:\i\}\)\}\),\(0,\i\.jsxs\)\("div",\{)/,
+                    replace: "style:{color:$self.getRoleColor(arguments[0])},"
                 },
             ],
             predicate: () => settings.store.memberList
@@ -228,18 +228,9 @@ export default definePlugin({
         );
     }, { noop: true }),
 
-    RoleGroupColorWrapper: ErrorBoundary.wrap(({ discordProps: { id, guildId }, ...props }) => {
-        const role = GuildRoleStore.getRole(guildId, id);
-
-        return (
-            <div
-                {...props}
-                style={{
-                    color: role?.colorString,
-                    fontWeight: "unset",
-                    letterSpacing: ".05em"
-                }}
-            />
-        );
-    }, { noop: true })
+    getRoleColor(props: any) {
+        try {
+            return GuildRoleStore.getRole(props?.guildId, props?.id)?.colorString;
+        } catch (e) { }
+    }
 });
