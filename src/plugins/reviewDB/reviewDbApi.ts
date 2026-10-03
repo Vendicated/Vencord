@@ -4,8 +4,6 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { Toasts } from "@webpack/common";
-
 import { Auth, authorize, getToken, updateAuth } from "./auth";
 import { Review, ReviewDBCurrentUser, ReviewDBUser, ReviewType } from "./entities";
 import { settings } from "./settings";
@@ -51,7 +49,7 @@ async function rdbRequest<T = unknown>(path: string, options: RequestInit = {}):
         ...options,
         headers,
     }).catch(err => {
-        showToast("Network error: Failed to connect to ReviewDB.", Toasts.Type.FAILURE);
+        showToast("Network error: Failed to connect to ReviewDB.", "failure");
         return null;
     });
 
@@ -61,14 +59,14 @@ async function rdbRequest<T = unknown>(path: string, options: RequestInit = {}):
 
     if (!res.ok) {
         const message = data?.message ?? `ReviewDB: Request failed with status ${res.status}`;
-        showToast(message, Toasts.Type.FAILURE);
+        showToast(message, "failure");
         return null;
     }
 
     return data as T;
 }
 
-export async function getReviews(id: string, { limit, offset = 0, fetchVotes = false }: { limit?: number; offset?: number; fetchVotes?: boolean } = {}): Promise<UserReviewsData> {
+export async function getReviews(id: string, { limit, offset = 0, fetchVotes = false }: { limit?: number; offset?: number; fetchVotes?: boolean; } = {}): Promise<UserReviewsData> {
     let flags = 0;
     if (!settings.store.showWarning) flags |= WarningFlag;
 
@@ -92,7 +90,7 @@ export async function getReviews(id: string, { limit, offset = 0, fetchVotes = f
         };
 
     if (!req.ok) {
-        showToast(res.message, Toasts.Type.FAILURE);
+        showToast(res.message, "failure");
         return {
             ...res,
             reviews: [
@@ -140,7 +138,7 @@ export async function getReviewVotes(id: string): Promise<ReviewVote[]> {
     return res?.votes ?? [];
 }
 
-export async function addReview(review: { userid: string; comment: string }): Promise<UserReviewsData | null> {
+export async function addReview(review: { userid: string; comment: string; }): Promise<UserReviewsData | null> {
 
     const token = await getToken();
     if (!token) {
@@ -186,7 +184,7 @@ export async function voteReview(id: number, isUpvote: boolean) {
         return false;
     }
 
-    const data = await rdbRequest<{ message?: string }>(`/reviews/${id}/vote`, {
+    const data = await rdbRequest<{ message?: string; }>(`/reviews/${id}/vote`, {
         method: "POST",
         body: JSON.stringify({ isUpvote })
     });
@@ -204,7 +202,7 @@ export async function deleteReviewVote(id: number) {
         return false;
     }
 
-    const data = await rdbRequest<{ message?: string }>(`/reviews/${id}/vote`, {
+    const data = await rdbRequest<{ message?: string; }>(`/reviews/${id}/vote`, {
         method: "DELETE",
     });
 
@@ -224,7 +222,7 @@ async function patchBlock(action: "block" | "unblock", userId: string) {
 
     if (!data) return;
 
-    showToast(`Successfully ${action}ed user`, Toasts.Type.SUCCESS);
+    showToast(`Successfully ${action}ed user`, "success");
 
     if (Auth?.user?.blockedUsers) {
         const newBlockedUsers = action === "block"

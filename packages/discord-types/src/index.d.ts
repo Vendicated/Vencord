@@ -7,5 +7,6 @@ export * from "./fluxEvents";
 export * from "./menu";
 export * from "./modules";
 export * from "./stores";
+export * from "./toasts";
 export * from "./utils";
 export * as Webpack from "../webpack";
