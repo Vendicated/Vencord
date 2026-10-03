@@ -1,8 +1,18 @@
+/* Preserve the normal text color before overriding it on the children. */
 .messagelogger-deleted {
+    --vc-normal-text: var(--text-default);
+}
+
+.messagelogger-deleted > * {
     --text-default: var(--status-danger, #f04747);
     --interactive-icon-default: var(--status-danger, #f04747);
     --text-muted: var(--status-danger, #f04747);
     --embed-title: var(--red-460, #be3535);
     --text-link: var(--red-460, #be3535);
     --text-strong: var(--red-460, #be3535);
+}
+
+/* Make sure the deleted message color isn't leaked into user tag */
+.messagelogger-deleted [class*="chipletContainerInner"] {
+    --text-default: var(--vc-normal-text);
 }

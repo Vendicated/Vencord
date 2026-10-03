@@ -238,7 +238,7 @@ export default definePlugin({
     name: "MessageLogger",
     description: "Temporarily logs deleted and edited messages.",
     tags: ["Chat", "Utility"],
-    authors: [Devs.rushii, Devs.Ven, Devs.AutumnVN, Devs.Nickyux, Devs.Kyuuhachi, Devs.sadan],
+    authors: [Devs.rushii, Devs.Ven, Devs.AutumnVN, Devs.Nickyux, Devs.Kyuuhachi, Devs.sadan, Devs.f3tch],
     dependencies: ["MessageUpdaterAPI"],
     settings,
     contextMenus: {
