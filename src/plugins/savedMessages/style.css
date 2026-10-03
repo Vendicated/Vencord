@@ -1,0 +1,100 @@
+.vc-saved-messages-chatbar-btn {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    font-size: 20px;
+    line-height: 1;
+    padding: 4px;
+    border-radius: 4px;
+    color: #b5b8be;
+    transition: background-color 0.15s ease-out, color 0.15s ease-out;
+}
+
+.vc-saved-messages-chatbar-btn:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: #f2f3f5;
+}
+
+.vc-saved-messages-chatbar-btn:active {
+    background-color: rgba(255, 255, 255, 0.16);
+    color: #ffffff;
+}
+
+.vc-saved-messages-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 8px 0 16px;
+}
+
+.vc-saved-messages-row {
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 8px;
+    padding: 10px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.vc-saved-messages-row-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: #b5b8be;
+}
+
+.vc-saved-messages-avatar {
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.vc-saved-messages-author {
+    color: #f2f3f5;
+    font-weight: 600;
+}
+
+.vc-saved-messages-location {
+    color: #b5b8be;
+    flex-grow: 1;
+}
+
+.vc-saved-messages-content {
+    color: #dbdee1;
+    font-size: 14px;
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+.vc-saved-messages-content,
+.vc-saved-messages-content * {
+    color: #dbdee1 !important;
+}
+
+.vc-saved-messages-content a {
+    color: #00a8fc !important;
+}
+
+.vc-saved-messages-row-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.vc-saved-messages-btn {
+    background: rgba(255, 255, 255, 0.08);
+    color: #f2f3f5;
+    border: none;
+    border-radius: 4px;
+    padding: 4px 10px;
+    font-size: 12px;
+    cursor: pointer;
+}
+
+.vc-saved-messages-btn:hover {
+    background: rgba(255, 255, 255, 0.16);
+}
+
+.vc-saved-messages-btn-danger {
+    color: #f23f42;
+}
