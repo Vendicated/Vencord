@@ -218,13 +218,11 @@ export default definePlugin({
         const role = GuildRoleStore.getRole(guildId, id);
 
         return (
-            <span
-                style={{
-                    color: role?.colorString,
-                    fontWeight: "unset",
-                    letterSpacing: ".05em"
-                }}
-            >
+            <span style={{
+                color: role?.colorString,
+                fontWeight: "unset",
+                letterSpacing: ".05em"
+            }}>
                 {title ?? label} &mdash; {count}
             </span>
         );
