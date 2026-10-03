@@ -181,9 +181,7 @@ export const { zustandPersist } = mapMangledModuleLazy(".onRehydrateStorage)?", 
 
 export const MessageActions = findByPropsLazy("editMessage", "sendMessage");
 export const MessageCache = findByPropsLazy("clearCache", "_channelMessages");
-export const UserProfileActions: t.UserProfileModalActionCreators = mapMangledModuleLazy(".log(`Failed to fetch profile for $", {
-    openUserProfileModal: filters.byCode('type:"USER_PROFILE_MODAL_OPEN"')
-});
+export const openUserProfileModal: t.OpenUserProfileModal = findByCodeLazy('type:"USER_PROFILE_MODAL_OPEN"');
 export const InviteActions = findByPropsLazy("resolveInvite");
 export const ChannelActionCreators = findByPropsLazy("openPrivateChannel");
 

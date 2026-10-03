@@ -457,6 +457,4 @@ export interface OpenUserProfileModalOptions {
     onModalOpen?: unknown;
 }
 
-export interface UserProfileModalActionCreators {
-    openUserProfileModal(opts: OpenUserProfileModalOptions): Promise<void>;
-}
+export type OpenUserProfileModal = (opts: OpenUserProfileModalOptions) => Promise<void>;
