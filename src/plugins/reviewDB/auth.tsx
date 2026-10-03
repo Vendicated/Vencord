@@ -6,7 +6,7 @@
 
 import * as DataStore from "@api/DataStore";
 import { Logger } from "@utils/Logger";
-import { OAuth2AuthorizeModal, openModal, showToast, Toasts, UserStore } from "@webpack/common";
+import { OAuth2AuthorizeModal, openModal, showToast, UserStore } from "@webpack/common";
 
 import { ReviewDBAuth } from "./entities";
 
@@ -50,7 +50,7 @@ export function authorize(callback?: () => void) {
             permissions={0n}
             clientId="915703782174752809"
             cancelCompletesFlow={false}
-            callback={async (response: { location: string }) => {
+            callback={async (response: { location: string; }) => {
                 try {
                     const url = new URL(response.location);
                     url.searchParams.append("clientMod", "vencord");
@@ -60,13 +60,13 @@ export function authorize(callback?: () => void) {
 
                     if (!res.ok) {
                         const { message } = await res.json();
-                        showToast(message ?? "An error occured while authorizing", Toasts.Type.FAILURE);
+                        showToast(message ?? "An error occured while authorizing", "failure");
                         return;
                     }
 
                     const { token } = await res.json();
                     updateAuth({ token });
-                    showToast("Successfully logged in!", Toasts.Type.SUCCESS);
+                    showToast("Successfully logged in!", "success");
                     callback?.();
                 } catch (e) {
                     new Logger("ReviewDB").error("Failed to authorize", e);

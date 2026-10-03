@@ -17,7 +17,7 @@
 */
 
 import { PluginNative } from "@utils/types";
-import { Button, MediaEngineStore, showToast, Toasts, useState } from "@webpack/common";
+import { Button, MediaEngineStore, showToast, useState } from "@webpack/common";
 
 import type { VoiceRecorder } from ".";
 import { settings } from "./settings";
@@ -47,7 +47,7 @@ export const VoiceRecorderDesktop: VoiceRecorder = ({ setAudioBlob, onRecordingC
                     if (success)
                         changeRecording(true);
                     else
-                        showToast("Failed to start recording", Toasts.Type.FAILURE);
+                        showToast("Failed to start recording", "failure");
                 }
             );
         } else {
@@ -57,7 +57,7 @@ export const VoiceRecorderDesktop: VoiceRecorder = ({ setAudioBlob, onRecordingC
                     if (buf)
                         setAudioBlob(new Blob([buf], { type: "audio/ogg; codecs=opus" }));
                     else
-                        showToast("Failed to finish recording", Toasts.Type.FAILURE);
+                        showToast("Failed to finish recording", "failure");
                 }
                 changeRecording(false);
             });
