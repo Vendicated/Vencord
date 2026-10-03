@@ -64,12 +64,12 @@ export default definePlugin({
         find: "this.renderAttachments(",
         replacement: [
             {
-                match: /(?<=\i=)this\.render(?:Attachments|Embeds|StickersAccessories|ComponentAccessories)\((\i)\)/g,
+                match: /(?<=\i=)this\.render(?:Attachments|Embeds|StickersAccessories)\((\i)\)/g,
                 replace: "$self.shouldHide($1?.id)?null:$&"
             },
             {
-                match: /(?<=\i=)this\.renderReactions\((\i)\)/,
-                replace: "$self.renderMediaHidden($1,$&)"
+                match: /(?<=\i=)this\.renderComponentAccessories\((\i)\)/,
+                replace: "$self.shouldHide($1?.id)?$self.renderMediaHidden($1):$&"
             }
         ]
     }],
