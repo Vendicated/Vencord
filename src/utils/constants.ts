@@ -638,6 +638,10 @@ export const Devs = /* #__PURE__*/ Object.freeze({
         name: "prism",
         id: 390884143749136386n,
     },
+    Noah: {
+        name: "Noah;",
+        id: 459374864067723275n
+    },
     creations: {
         name: "creations",
         id: 209830981060788225n
