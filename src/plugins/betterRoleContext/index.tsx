@@ -209,7 +209,7 @@ export default definePlugin({
         {
             find: 'tutorialId:"whos-online',
             replacement: {
-                match: /(?<=#{intl::CHANNEL_MEMBERS_A11Y_LABEL}.{0,200}?"aria-hidden":!0,)children:.{0,200}?(?:—|\\u2014) ",\i\]\}\)\]/,
+                match: /(?<=#{intl::CHANNEL_MEMBERS_A11Y_LABEL}.{0,400}?)children:(?=.{0,20}?(?:—|\\u2014) ",\i\])/,
                 replace: "onContextMenu:e=>$self.openRoleContextMenu(e,arguments[0]),$&"
             }
         },

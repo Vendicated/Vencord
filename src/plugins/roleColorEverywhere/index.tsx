@@ -17,7 +17,6 @@
 */
 
 import { definePluginSettings } from "@api/Settings";
-import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import { Logger } from "@utils/Logger";
 import definePlugin, { makeRange, OptionType } from "@utils/types";
@@ -107,8 +106,8 @@ export default definePlugin({
             find: 'tutorialId:"whos-online',
             replacement: [
                 {
-                    match: /(#{intl::CHANNEL_MEMBERS_A11Y_LABEL}.{0,200}?}\):null,).{0,200}?(?:—|\\u2014) ",\i\]\}\)\]/,
-                    replace: "$1$self.RoleGroupColor(arguments[0])]"
+                    match: /(?<=#{intl::CHANNEL_MEMBERS_A11Y_LABEL}.{0,400}?)children:(?=.{0,20}?(?:—|\\u2014) ",\i\])/,
+                    replace: "style:{color:$self.getRoleColor(arguments[0])},$&"
                 },
             ],
             predicate: () => settings.store.memberList
@@ -213,20 +212,6 @@ export default definePlugin({
 
         return null;
     },
-
-    RoleGroupColor: ErrorBoundary.wrap(({ id, count, title, guildId, label }: { id: string; count: number; title: string; guildId: string; label: string; }) => {
-        const role = GuildRoleStore.getRole(guildId, id);
-
-        return (
-            <span style={{
-                color: role?.colorString,
-                fontWeight: "unset",
-                letterSpacing: ".05em"
-            }}>
-                {title ?? label} &mdash; {count}
-            </span>
-        );
-    }, { noop: true }),
 
     getRoleColor(props: any) {
         try {
