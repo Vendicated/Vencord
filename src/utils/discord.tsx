@@ -186,6 +186,10 @@ export async function openUserProfile(id: string) {
         userId: id,
         guildId,
         channelId: SelectedChannelStore.getChannelId(),
+        sourceAnalyticsLocations: [
+            "username",
+            "user profile popout",
+        ]
     });
 }
 
