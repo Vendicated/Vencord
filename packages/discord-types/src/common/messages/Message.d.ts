@@ -291,6 +291,8 @@ export interface MessageAttachment {
     content_type?: string;
     width?: number;
     height?: number;
+    title?: string;
+    description?: string;
 }
 
 export interface ReactionEmoji {
