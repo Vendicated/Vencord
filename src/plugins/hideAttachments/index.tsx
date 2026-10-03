@@ -27,6 +27,7 @@ import { classes } from "@utils/misc";
 import definePlugin from "@utils/types";
 import { Message } from "@vencord/discord-types";
 import { ChannelStore } from "@webpack/common";
+import { ReactNode } from "react";
 
 const KEY = "HideAttachments_HiddenIds";
 
@@ -56,15 +57,21 @@ export default definePlugin({
     name: "HideMedia",
     description: "Hide attachments and embeds for individual messages via hover button",
     tags: ["Chat", "Appearance"],
-    authors: [Devs.Ven],
+    authors: [Devs.Ven, Devs.c0nnorgg],
     dependencies: ["MessageUpdaterAPI"],
 
     patches: [{
         find: "this.renderAttachments(",
-        replacement: {
-            match: /(?<=\i=)this\.render(?:Attachments|Embeds|StickersAccessories|ComponentAccessories)\((\i)\)/g,
-            replace: "$self.shouldHide($1?.id)?null:$&"
-        }
+        replacement: [
+            {
+                match: /(?<=\i=)this\.render(?:Attachments|Embeds|StickersAccessories|ComponentAccessories)\((\i)\)/g,
+                replace: "$self.shouldHide($1?.id)?null:$&"
+            },
+            {
+                match: /(?<=\i=)this\.renderReactions\((\i)\)/,
+                replace: "$self.renderMediaHidden($1,$&)"
+            }
+        ]
     }],
 
     messagePopoverButton: {
@@ -84,13 +91,16 @@ export default definePlugin({
         },
     },
 
-    renderMessageAccessory({ message }) {
-        if (!this.shouldHide(message.id)) return null;
+    renderMediaHidden(message: Message, reactions: ReactNode) {
+        if (!this.shouldHide(message.id)) return reactions;
 
         return (
-            <span className={classes("vc-hideAttachments-accessory", !message.content && "vc-hideAttachments-no-content")}>
-                Media Hidden
-            </span>
+            <>
+                <span className={classes("vc-hideAttachments-accessory", !message.content && "vc-hideAttachments-no-content")}>
+                    Media Hidden
+                </span>
+                {reactions}
+            </>
         );
     },
 
