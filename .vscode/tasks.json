@@ -5,15 +5,26 @@
     "tasks": [
         {
             "label": "Build",
+            "detail": "Build vencord in development mode",
             "type": "shell",
-            "command": "pnpm build",
+            "command": "pnpm build --dev",
             "group": {
                 "kind": "build",
                 "isDefault": true
             }
         },
         {
+            "label": "Reporter",
+            "detail": "Build with the reporter that will test all patches and finds, then report errors to console",
+            "type": "shell",
+            "command": "pnpm build --dev --reporter",
+            "group": {
+                "kind": "build"
+            }
+        },
+        {
             "label": "Watch",
+            "detail": "Build and watch for changes",
             "type": "shell",
             "command": "pnpm watch",
             "problemMatcher": [],
