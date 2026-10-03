@@ -29,7 +29,7 @@ import definePlugin from "@utils/types";
 import { Guild, GuildSticker, Message } from "@vencord/discord-types";
 import { StickerFormatType } from "@vencord/discord-types/enums";
 import { findByCodeLazy } from "@webpack";
-import { Constants, EmojiStore, FluxDispatcher, Forms, GuildStore, IconUtils, Menu, Modal, openModalLazy, PermissionsBits, PermissionStore, React, RestAPI, StickersStore, Toasts, Tooltip, UserStore } from "@webpack/common";
+import { Constants, EmojiStore, FluxDispatcher, Forms, GuildStore, IconUtils, Menu, Modal, openModalLazy, PermissionsBits, PermissionStore, React, RestAPI, showToast, StickersStore, Tooltip, UserStore } from "@webpack/common";
 import { Promisable } from "type-fest";
 
 const uploadEmoji = findByCodeLazy(".GUILD_EMOJIS(", "EMOJI_UPLOAD_START");
@@ -196,11 +196,7 @@ async function doClone(guildId: string, data: Sticker | Emoji) {
         else
             await cloneEmoji(guildId, data);
 
-        Toasts.show({
-            message: `Successfully cloned ${data.name} to ${GuildStore.getGuild(guildId)?.name ?? "your server"}!`,
-            type: Toasts.Type.SUCCESS,
-            id: Toasts.genId()
-        });
+        showToast(`Successfully cloned ${data.name} to ${GuildStore.getGuild(guildId)?.name ?? "your server"}!`, "success");
     } catch (e: any) {
         let message = "Something went wrong (check console!)";
         try {
@@ -208,11 +204,7 @@ async function doClone(guildId: string, data: Sticker | Emoji) {
         } catch { }
 
         new Logger("ExpressionCloner").error("Failed to clone", data.name, "to", guildId, e);
-        Toasts.show({
-            message: "Failed to clone: " + message,
-            type: Toasts.Type.FAILURE,
-            id: Toasts.genId()
-        });
+        showToast("Failed to clone: " + message, "failure");
     }
 }
 

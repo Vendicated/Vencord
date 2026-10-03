@@ -12,7 +12,8 @@ import { Margins } from "@utils/margins";
 import { classes } from "@utils/misc";
 import { relaunch } from "@utils/native";
 import { changes, checkForUpdates, update, updateError } from "@utils/updater";
-import { Button, ConfirmModal,Forms, openModal, React, Toasts, useState } from "@webpack/common";
+import { ToastPosition } from "@vencord/discord-types/enums";
+import { Button, ConfirmModal, Forms, openModal, React, showToast, useState } from "@webpack/common";
 
 import { runWithDispatch } from "./runWithDispatch";
 
@@ -132,13 +133,8 @@ export function Updatable(props: CommonProps) {
                         } else {
                             setUpdates([]);
 
-                            Toasts.show({
-                                message: "No updates found!",
-                                id: Toasts.genId(),
-                                type: Toasts.Type.MESSAGE,
-                                options: {
-                                    position: Toasts.Position.BOTTOM
-                                }
+                            showToast("No updates found!", "message", {
+                                position: ToastPosition.BOTTOM
                             });
                         }
                     })}
