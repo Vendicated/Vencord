@@ -206,8 +206,6 @@ export default definePlugin({
     settings,
     openRoleContextMenu,
     patches: [
-        // This patch is completely overwritten by RoleColorEverywhere, but RoleColorEverywhere handles it itself
-        // member list role headers (in threads)
         {
             find: 'tutorialId:"whos-online',
             replacement: {
