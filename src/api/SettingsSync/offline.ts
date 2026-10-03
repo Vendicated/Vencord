@@ -7,20 +7,13 @@
 import { PlainSettings } from "@api/Settings";
 import { Logger } from "@utils/Logger";
 import { chooseFile, saveFile } from "@utils/web";
-import { moment, Toasts } from "@webpack/common";
-
-const toast = (type: string, message: string) =>
-    Toasts.show({
-        type,
-        message,
-        id: Toasts.genId()
-    });
+import { moment, showToast } from "@webpack/common";
 
 const toastSuccess = () =>
-    toast(Toasts.Type.SUCCESS, "Settings successfully imported. Restart to apply changes!");
+    showToast("Settings successfully imported. Restart to apply changes!", "success");
 
 const toastFailure = (err: any) =>
-    toast(Toasts.Type.FAILURE, `Failed to import settings: ${String(err)}`);
+    showToast(`Failed to import settings: ${String(err)}`, "failure");
 
 const logger = new Logger("SettingsSync:Offline", "#39b7e0");
 

@@ -1,0 +1,7 @@
+[class*="bar_"] {
+    margin-inline-end: 12px !important;
+}
+
+[class*="winButtons_"] {
+    display: none !important;
+}
