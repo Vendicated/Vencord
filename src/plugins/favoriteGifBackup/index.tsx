@@ -4,15 +4,19 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import "./style.css";
+
 import { definePluginSettings } from "@api/Settings";
 import { Button } from "@components/Button";
+import ErrorBoundary from "@components/ErrorBoundary";
 import { Flex } from "@components/Flex";
 import { Devs } from "@utils/constants";
 import { pluralise } from "@utils/misc";
 import definePlugin, { OptionType } from "@utils/types";
 import { chooseFile, saveFile } from "@utils/web";
 import { proxyLazyWebpack } from "@webpack";
-import { Modal, moment, openModal, showToast, UserSettingsActionCreators } from "@webpack/common";
+import { Modal, moment, openModal, showToast, Tooltip, UserSettingsActionCreators } from "@webpack/common";
+import type { ComponentType } from "react";
 
 interface FavoriteGif {
     format: number;
@@ -149,6 +153,30 @@ async function importGifs() {
     ));
 }
 
+const DownloadIcon = () => (
+    <svg width="24" height="24" viewBox="0 0 24 24">
+        <path fill="currentColor" d="M12 2a1 1 0 0 1 1 1v10.59l3.3-3.3a1 1 0 1 1 1.4 1.42l-5 5a1 1 0 0 1-1.4 0l-5-5a1 1 0 1 1 1.4-1.42l3.3 3.3V3a1 1 0 0 1 1-1ZM3 20a1 1 0 1 0 0 2h18a1 1 0 1 0 0-2H3Z" />
+    </svg>
+);
+
+const UploadIcon = () => (
+    <svg width="24" height="24" viewBox="0 0 24 24">
+        <path fill="currentColor" d="M13 16V5.41l3.3 3.3a1 1 0 1 0 1.4-1.42l-5-5a1 1 0 0 0-1.4 0l-5 5a1 1 0 0 0 1.4 1.42L11 5.4V16a1 1 0 1 0 2 0ZM3 20a1 1 0 1 0 0 2h18a1 1 0 1 0 0-2H3Z" />
+    </svg>
+);
+
+function PickerButton({ text, icon: Icon, onClick }: { text: string; icon: ComponentType; onClick(): void; }) {
+    return (
+        <Tooltip text={text}>
+            {tooltipProps => (
+                <Button {...tooltipProps} variant="none" size="iconOnly" aria-label={text} onClick={onClick}>
+                    <Icon />
+                </Button>
+            )}
+        </Tooltip>
+    );
+}
+
 const settings = definePluginSettings({
     backup: {
         type: OptionType.COMPONENT,
@@ -168,8 +196,24 @@ export default definePlugin({
     authors: [Devs.mahdi],
     settings,
 
-    toolboxActions: {
-        "Export Favorite GIFs": exportGifs,
-        "Import Favorite GIFs": importGifs
-    }
+    patches: [
+        {
+            find: "renderHeaderContent(){",
+            replacement: {
+                match: /this\.renderHeaderContent\(\)(?=\])/,
+                replace: "$&,$self.renderPickerButtons(this.props)"
+            }
+        }
+    ],
+
+    renderPickerButtons: ErrorBoundary.wrap(({ hideFavorites }: { hideFavorites?: boolean; }) => {
+        if (hideFavorites) return null;
+
+        return (
+            <div className="vc-favoriteGifBackup-buttons">
+                <PickerButton text="Export Favorite GIFs" icon={DownloadIcon} onClick={exportGifs} />
+                <PickerButton text="Import Favorite GIFs" icon={UploadIcon} onClick={importGifs} />
+            </div>
+        );
+    }, { noop: true })
 });
