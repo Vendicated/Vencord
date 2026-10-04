@@ -684,7 +684,7 @@ export const Devs = /* #__PURE__*/ Object.freeze({
     },
     mahdi: {
         name: "mahdi",
-        id: 1169786557478223983n
+        id: 1494821097349320861n
     }
 } satisfies Record<string, Dev>);
 
