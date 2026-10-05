@@ -61,6 +61,7 @@ export const settings = definePluginSettings({
     },
     deeplApiKey: {
         type: OptionType.STRING,
+        displayName: "DeepL API Key",
         description: "Your DeepL API key (from deepl.com/your-account)",
         default: ""
     },
@@ -95,7 +96,7 @@ export const settings = definePluginSettings({
         hidden() { return this.store.service !== "kagi"; }
     }
 }).withPrivateSettings<{
-    showAutoTranslateAlert: boolean;
+    dismissedAutoTranslateAlert?: boolean;
 }>();
 
 export function resetLanguageDefaults() {

@@ -18,6 +18,9 @@
 
 // DO NOT REMOVE UNLESS YOU WISH TO FACE THE WRATH OF THE CIRCULAR DEPENDENCY DEMON!!!!!!!
 import "~plugins";
+import "./fixWeirdAppRegionBug.css";
+
+import nativeTitleBarStyles from "./nativeTitleBar.css?managed";
 
 export * as Api from "./api";
 export * as Plugins from "./api/PluginManager";
@@ -28,11 +31,9 @@ export * as Webpack from "./webpack";
 export * as WebpackPatcher from "./webpack/patchWebpack";
 export { PlainSettings, Settings };
 
-import { coreStyleRootNode, initStyles } from "@api/Styles";
+import { enableStyle, initStyles } from "@api/Styles";
 import { openSettingsTabModal, UpdaterTab } from "@components/settings";
 import { debounce } from "@shared/debounce";
-import { IS_WINDOWS } from "@utils/constants";
-import { createAndAppendStyle } from "@utils/css";
 import { StartAt } from "@utils/types";
 import { SettingsRouter } from "@webpack/common";
 
@@ -62,7 +63,8 @@ async function syncSettings() {
             body: "We've noticed you have cloud integrations enabled in another client! Due to limitations, you will " +
                 "need to re-authenticate to continue using them. Click here to go to the settings page to do so!",
             color: "var(--yellow-360)",
-            onClick: () => SettingsRouter.openUserSettings("vencord_cloud_panel")
+            onClick: () => SettingsRouter.openUserSettings("vencord_cloud_panel"),
+            noPersist: true
         });
         return;
     }
@@ -179,8 +181,7 @@ init();
 document.addEventListener("DOMContentLoaded", () => {
     startAllPlugins(StartAt.DOMContentLoaded);
 
-    // FIXME
-    if (IS_DISCORD_DESKTOP && Settings.winNativeTitleBar && IS_WINDOWS) {
-        createAndAppendStyle("vencord-native-titlebar-style", coreStyleRootNode).textContent = "[class*=titleBar]{display: none!important}";
+    if (IS_DISCORD_DESKTOP && Settings.nativeTitleBar) {
+        enableStyle(nativeTitleBarStyles);
     }
 }, { once: true });

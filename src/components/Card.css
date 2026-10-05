@@ -4,7 +4,7 @@
 }
 
 .vc-card-normal {
-    border: 1px var(--border-subtle);
+    border: 1px solid var(--border-subtle);
 }
 
 .vc-card-warning {

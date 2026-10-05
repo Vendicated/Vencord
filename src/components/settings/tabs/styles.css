@@ -61,10 +61,7 @@
     height: 1.25em;
 }
 
-.vc-settings-modal-root {
-    background: var(--background-base-low);
-}
-
-.vc-settings-modal {
-    padding-bottom: 1em;
+.vc-settings-switches {
+    display: grid;
+    gap: 8px;
 }

@@ -40,7 +40,7 @@ export function SelectSetting({ setting, pluginSettings, definedSettings, onChan
     }
 
     return (
-        <SettingsSection name={id} description={setting.description} error={error}>
+        <SettingsSection name={setting.displayName} id={id} description={setting.description} error={error}>
             <Select
                 placeholder={setting.placeholder ?? "Select an option"}
                 options={setting.options}

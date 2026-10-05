@@ -192,6 +192,7 @@ export type TextInput = ComponentType<PropsWithChildren<{
 export type TextArea = ComponentType<Omit<HTMLProps<HTMLTextAreaElement>, "onChange"> & {
     onChange(v: string): void;
     inputRef?: Ref<HTMLTextAreaElement>;
+    autosize?: boolean;
 }>;
 
 export interface SelectOption {
@@ -539,4 +540,11 @@ export type ColorPicker = ComponentType<{
     suggestedColors?: string[];
     label?: ReactNode;
     onChange(value: number | null): void;
+}>;
+
+export type RoleMemberPopout = ComponentType<{
+    popoutProps: PopoutProps;
+    guildId: string;
+    channelId: string;
+    roleId: string;
 }>;

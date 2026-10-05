@@ -19,12 +19,13 @@
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType, PluginNative, SettingsDefinition } from "@utils/types";
-import { showToast, Toasts } from "@webpack/common";
+import { showToast } from "@webpack/common";
 import type { MouseEvent } from "react";
 
 interface URLReplacementRule {
     match: RegExp;
     replace: (...matches: string[]) => string;
+    displayName?: string;
     description: string;
     shortlinkMatch?: RegExp;
     accountViewReplace?: (userId: string) => string;
@@ -59,6 +60,7 @@ const UrlReplacementRules: Record<string, URLReplacementRule> = {
     itunes: {
         match: /^https:\/\/(?:geo\.)?music\.apple\.com\/([a-z]{2}\/)?(album|artist|playlist|song|curator)\/([^/?#]+)\/?([^/?#]+)?(?:\?.*)?(?:#.*)?$/,
         replace: (_, lang, type, name, id) => id ? `itunes://music.apple.com/us/${type}/${name}/${id}` : `itunes://music.apple.com/us/${type}/${name}`,
+        displayName: "iTunes",
         description: "Open Apple Music links in the iTunes app"
     },
 };
@@ -67,6 +69,7 @@ const pluginSettings = definePluginSettings(
     Object.entries(UrlReplacementRules).reduce((acc, [key, rule]) => {
         acc[key] = {
             type: OptionType.BOOLEAN,
+            displayName: rule.displayName,
             description: rule.description,
             default: true,
         };
@@ -132,7 +135,7 @@ export default definePlugin({
             }
 
             if (rule.match.test(url)) {
-                showToast("Opened link in native app", Toasts.Type.SUCCESS);
+                showToast("Opened link in native app", "success");
 
                 const newUrl = url.replace(rule.match, rule.replace);
                 VencordNative.native.openExternal(newUrl);

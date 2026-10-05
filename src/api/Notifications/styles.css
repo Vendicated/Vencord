@@ -89,12 +89,6 @@
     margin-bottom: 40px;
 }
 
-.vc-notification-log-container {
-    padding: 1em;
-    max-height: min(750px, 75vh);
-    width: 100%;
-}
-
 .vc-notification-log-wrapper {
     height: 120px;
     width: 100%;

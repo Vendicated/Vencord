@@ -28,15 +28,16 @@ import { openContributorModal } from "@components/settings/tabs/plugins/Contribu
 import { openPluginModal } from "@components/settings/tabs/plugins/PluginModal";
 import SettingsPlugin from "@plugins/_core/settings";
 import { gitRemote } from "@shared/vencordUserAgent";
-import { IS_MAC, IS_WINDOWS } from "@utils/constants";
+import { IS_WINDOWS } from "@utils/constants";
 import { Margins } from "@utils/margins";
 import { isPluginDev } from "@utils/misc";
 import { relaunch } from "@utils/native";
-import { Alerts, Forms, React, useMemo, UserStore } from "@webpack/common";
+import { ConfirmModal, Forms, openModal, React, useMemo, UserStore } from "@webpack/common";
 
 import { DonateButtonComponent, isDonor } from "./DonateButton";
-import { VibrancySettings } from "./MacVibrancySettings";
+import { MacOSVibrancySettings } from "./MacVibrancySettings";
 import { NotificationSection } from "./NotificationSettings";
+import { WindowsMaterialSettings } from "./WindowsMaterialSettings";
 
 const DEFAULT_DONATE_IMAGE = "https://cdn.discordapp.com/emojis/1026533090627174460.png";
 const SHIGGY_DONATE_IMAGE = "https://media.discordapp.net/stickers/1039992459209490513.png";
@@ -50,27 +51,19 @@ type KeysOfType<Object, Type> = {
 }[keyof Object];
 
 function Switches() {
-    const settings = useSettings(["useQuickCss", "enableReactDevtools", "frameless", "winNativeTitleBar", "transparent", "winCtrlQ", "disableMinSize"]);
+    const settings = useSettings(["useQuickCss", "enableReactDevtools", "frameless", "nativeTitleBar", "transparent", "winCtrlQ", "disableMinSize"]);
 
     const Switches = [
         {
             key: "useQuickCss",
             title: "Enable Custom CSS",
+            description: "Apply your configured QuickCSS"
         },
-        !IS_WEB && {
-            key: "enableReactDevtools",
-            title: "Enable React Developer Tools",
+        IS_DISCORD_DESKTOP && {
+            key: "nativeTitleBar",
+            title: "Enable the system's title bar in addition to Discord's custom one",
             restartRequired: true
         },
-        !IS_WEB && (!IS_DISCORD_DESKTOP || !IS_WINDOWS ? {
-            key: "frameless",
-            title: "Disable the window frame",
-            restartRequired: true
-        } : {
-            key: "winNativeTitleBar",
-            title: "Use Windows' native title bar instead of Discord's custom one",
-            restartRequired: true
-        }),
         !IS_WEB && {
             key: "transparent",
             title: "Enable window transparency",
@@ -80,11 +73,18 @@ function Switches() {
         IS_DISCORD_DESKTOP && {
             key: "disableMinSize",
             title: "Disable minimum window size",
+            description: "Allows you to resize the window to any size, even smaller than Discord's minimum size",
             restartRequired: true
         },
         !IS_WEB && IS_WINDOWS && {
             key: "winCtrlQ",
             title: "Register Ctrl+Q as shortcut to close Discord (Alternative to Alt+F4)",
+            restartRequired: true
+        },
+        !IS_WEB && {
+            key: "enableReactDevtools",
+            title: "Enable React Developer Tools",
+            description: "Mainly useful for plugin developers. Ignore this if you don't know what it is",
             restartRequired: true
         },
     ] satisfies Array<false | {
@@ -107,17 +107,22 @@ function Switches() {
                 title={title}
                 description={description}
                 value={settings[key]}
+                hideBorder
                 onChange={v => {
                     settings[key] = v;
 
                     if (restartRequired) {
-                        Alerts.show({
-                            title: "Restart Required",
-                            body: "A restart is required to apply this change",
-                            confirmText: "Restart now",
-                            cancelText: "Later!",
-                            onConfirm: relaunch
-                        });
+                        openModal(props => (
+                            <ConfirmModal
+                                {...props}
+                                title="Restart Required"
+                                subtitle="A restart is required to apply this change"
+                                confirmText="Restart now"
+                                cancelText="Later!"
+                                variant="primary"
+                                onConfirm={relaunch}
+                            />
+                        ));
                     }
                 }}
             />
@@ -130,8 +135,6 @@ function VencordSettings() {
         Math.random() > 0.5 ? DEFAULT_DONATE_IMAGE : SHIGGY_DONATE_IMAGE,
         []
     );
-
-    const needsVibrancySettings = IS_DISCORD_DESKTOP && IS_MAC;
 
     const user = UserStore?.getCurrentUser();
 
@@ -223,11 +226,14 @@ function VencordSettings() {
                     </a>!
                 </Forms.FormText>
 
-                <Switches />
+                <div className="vc-settings-switches">
+                    <Switches />
+                </div>
             </section>
 
 
-            {needsVibrancySettings && <VibrancySettings />}
+            <MacOSVibrancySettings />
+            <WindowsMaterialSettings />
 
             <NotificationSection />
         </SettingsTab>

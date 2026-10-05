@@ -6,7 +6,7 @@
 
 import { ErrorCard } from "@components/ErrorCard";
 import { UpdateLogger } from "@utils/updater";
-import { Alerts, Parser } from "@webpack/common";
+import { ConfirmModal,openModal, Parser } from "@webpack/common";
 
 function getErrorMessage(e: any) {
     if (!e?.code || !e.cmd)
@@ -33,16 +33,20 @@ export function runWithDispatch(dispatch: React.Dispatch<React.SetStateAction<bo
 
             const err = getErrorMessage(e);
 
-            Alerts.show({
-                title: "Oops!",
-                body: (
+            openModal(props => (
+                <ConfirmModal
+                    {...props}
+                    title="Oops!"
+                    confirmText="OK"
+                    variant="primary"
+                >
                     <ErrorCard>
                         {err.split("\n").map((line, idx) =>
                             <div key={idx}>{Parser.parse(line)}</div>
                         )}
                     </ErrorCard>
-                )
-            });
+                </ConfirmModal>
+            ));
         } finally {
             dispatch(false);
         }
