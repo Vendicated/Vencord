@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import type * as t from "@vencord/discord-types";
+import * as t from "@vencord/discord-types";
 import { _resolveReady, filters, findByCodeLazy, findByPropsLazy, findLazy, mapMangledModuleLazy, waitFor } from "@webpack";
 import type * as TSPattern from "ts-pattern";
 
@@ -66,23 +66,6 @@ waitFor("parseTopic", m => Parser = m);
 export let Alerts: t.Alerts;
 waitFor(["show", "close"], m => Alerts = m);
 
-const ToastType = {
-    MESSAGE: "message",
-    SUCCESS: "success",
-    FAILURE: "failure",
-    CUSTOM: "custom",
-    CLIP: "clip",
-    LINK: "link",
-    FORWARD: "forward",
-    BOOKMARK: "bookmark",
-    CLOCK: "clock"
-};
-
-const ToastPosition = {
-    TOP: 0,
-    BOTTOM: 1
-};
-
 export interface ToastData {
     message: string,
     id: string,
@@ -102,40 +85,18 @@ export interface ToastOptions {
     duration?: number;
 }
 
-interface ToastsExports {
-    showToast: (data: ToastData) => void;
-    popToast(): void;
-}
-
-const ToastsExports = mapMangledModuleLazy(".currentToastMap.has(", {
-    showToast: filters.byCode(".currentToastMap.has("),
-    popToast: filters.byCode(".delete(")
+export const Toasts: t.Toasts = mapMangledModuleLazy(".currentToastMap.has(", {
+    show: filters.byCode(".currentToastMap.has("),
+    pop: filters.byCode(".delete(")
 });
 
-export function createToast(message: string, type: string, options?: ToastOptions): ToastData {
-    return {
-        message,
-        id: Toasts.genId(),
-        type,
-        options
-    };
-}
-
-export const Toasts = {
-    Type: ToastType,
-    Position: ToastPosition,
-    genId: () => (Math.random() || Math.random()).toString(36).slice(2),
-
-    show: ToastsExports.showToast,
-    pop: ToastsExports.popToast,
-    create: createToast,
-};
+export const createToast: t.createToast = findByCodeLazy('variant:"default",icon:', ".duration");
 
 /**
  * Show a simple toast. If you need more options, use Toasts.show manually
  */
-export function showToast(message: string, type = ToastType.MESSAGE, options?: ToastOptions) {
-    Toasts.show(Toasts.create(message, type, options));
+export function showToast(message: string, type: t.ToastType = "message", options?: ToastOptions) {
+    Toasts.show(createToast({ message, type, options }));
 }
 
 export const UserUtils = {

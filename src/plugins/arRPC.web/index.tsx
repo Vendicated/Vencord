@@ -21,7 +21,7 @@ import { Link } from "@components/Link";
 import { Devs } from "@utils/constants";
 import definePlugin, { ReporterTestable } from "@utils/types";
 import { findByCodeLazy } from "@webpack";
-import { ApplicationAssetUtils, FluxDispatcher, Forms, Toasts } from "@webpack/common";
+import { ApplicationAssetUtils, FluxDispatcher, Forms, showToast } from "@webpack/common";
 
 const fetchApplicationsRPC = findByCodeLazy('"Invalid Origin"', ".application");
 
@@ -89,15 +89,7 @@ export default definePlugin({
             return;
         }
 
-        Toasts.show({ // show toast on success
-            message: "Connected to arRPC",
-            type: Toasts.Type.SUCCESS,
-            id: Toasts.genId(),
-            options: {
-                duration: 1000,
-                position: Toasts.Position.BOTTOM
-            }
-        });
+        showToast("Connected to arRPC", "success");
     },
 
     stop() {
