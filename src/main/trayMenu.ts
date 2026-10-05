@@ -74,7 +74,10 @@ function openAboutWindow() {
     });
 }
 
-const notify = (window: BaseWindow, title: string, message: string) => dialog.showMessageBox(window, { title, message });
+const notify = (window: BaseWindow | undefined, title: string, message: string) =>
+    window && !window.isDestroyed()
+        ? dialog.showMessageBox(window, { title, message })
+        : dialog.showMessageBox({ title, message });
 
 function createVencordMenuItems(): MenuItemConstructorOptions[] {
     return [
@@ -88,8 +91,6 @@ function createVencordMenuItems(): MenuItemConstructorOptions[] {
                 {
                     label: "Update Vencord",
                     async click(_item, window) {
-                        if (!window) return;
-
                         try {
                             const updateAvailable = await updater.fetchUpdate();
                             if (!updateAvailable) {
