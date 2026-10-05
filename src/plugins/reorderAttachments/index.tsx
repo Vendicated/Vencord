@@ -108,7 +108,7 @@ export default definePlugin({
             find: ')("attachments",',
             replacement: [
                 {
-                    match: /:(\i).map\(\i=>.*?(channelId:\i,.*?\i\.\i\.MEDIUM)},\i\.id\)\)(?<=\1=(\i).filter\(\i=>\i.filename!==(\i)\).{0,500})/,
+                    match: /:(\i).map\(\i=>.*?(channelId:\i,.*?\i\.\i\.MEDIUM)},\i\.id\)\)(?<=\1=(\i).filter\(\i=>\i.id!==(\i)\).{0,500})/,
                     replace: ":$self.DraggableList({$2,attachments:$3,ignoredFilename:$4})"
                 }
             ]
