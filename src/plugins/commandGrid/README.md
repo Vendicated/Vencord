@@ -4,6 +4,8 @@ The slash command menu as a grid of tiles. Arrow keys move between tiles by row 
 
 ![commandGrid](screenshot.png)
 
+![commandGrid settings](settings.png)
+
 | Setting | Default |
 | --- | --- |
 | Columns | 3 |
