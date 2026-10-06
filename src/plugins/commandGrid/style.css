@@ -1,0 +1,186 @@
+[class*="autocomplete__"]:has(.vc-command-grid-list) {
+    width: 100%;
+    max-width: calc(100vw - 24px);
+    height: auto !important;
+    max-height: min(480px, 55vh) !important;
+    box-sizing: border-box;
+}
+
+[class*="autocomplete__"]:has(.vc-command-grid-list) > [class*="autocompleteInner__"] {
+    width: 100%;
+    min-width: 0;
+    height: auto !important;
+    max-height: inherit !important;
+}
+
+.vc-command-grid-list {
+    flex: 1 1 auto;
+    min-width: 0;
+    height: auto !important;
+    max-height: min(480px, 55vh) !important;
+    overflow-y: auto;
+}
+
+.vc-command-grid-list [class*="listItems"] {
+    position: relative !important;
+    inset: auto !important;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    height: auto !important;
+    padding: 8px 12px 12px 8px;
+    box-sizing: border-box;
+}
+
+.vc-command-grid-list [class*="listHeight"] {
+    display: none !important;
+}
+
+.vc-command-grid-list ul[class*="categorySection"] {
+    position: relative !important;
+    display: grid;
+    grid-template-columns: repeat(var(--vc-command-grid-columns, 3), minmax(0, 1fr));
+    gap: 6px;
+    height: auto !important;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.vc-command-grid-list [class*="categoryHeader"] {
+    grid-column: 1 / -1;
+    position: static !important;
+    height: auto !important;
+    margin: 0;
+    padding: 0 2px 2px;
+}
+
+.vc-command-grid-list [class*="autocompleteRow__"] {
+    position: relative !important;
+    display: flex;
+    align-items: center;
+    min-width: 0;
+    height: auto !important;
+    min-height: var(--vc-command-grid-height, 52px);
+    margin: 0;
+    padding: 8px 12px;
+    box-sizing: border-box;
+    border-radius: 8px;
+    background-color: var(--background-modifier-hover, rgb(255 255 255 / 4%));
+    cursor: pointer;
+}
+
+.vc-command-grid-list [class*="autocompleteRow__"]:hover {
+    background-color: var(--background-modifier-active, rgb(255 255 255 / 7%));
+}
+
+.vc-command-grid-list [class*="autocompleteRow__"][aria-selected="true"] {
+    background-color: var(--background-modifier-selected, rgb(255 255 255 / 10%));
+}
+
+.vc-command-grid-list [class*="autocompleteRow__"] > [class*="base__"] {
+    width: 100%;
+    min-width: 0;
+    padding: 0;
+    background: none !important;
+    border-radius: 0 !important;
+}
+
+.vc-command-grid-list [class*="autocompleteRow__"] [class*="wrapper__"] {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+    width: 100%;
+    min-width: 0;
+    padding: 0;
+}
+
+.vc-command-grid-list [class*="autocompleteRow__"] [class*="infoWrapper__"],
+.vc-command-grid-list [class*="autocompleteRow__"] [class*="usageWrapper__"] {
+    display: block;
+    width: 100%;
+    min-width: 0;
+}
+
+.vc-command-grid-list [class*="autocompleteRow__"] [class*="usageWrapper__"] {
+    display: flex !important;
+    align-items: center;
+    flex-wrap: nowrap;
+    gap: 6px;
+    overflow: hidden;
+}
+
+.vc-command-grid-list [class*="usageWrapper__"] > [class*="autocompleteRowHeading__"] {
+    flex: 0 0 auto;
+    max-width: 100%;
+}
+
+.vc-command-grid-list [class*="autocompleteRow__"] [class*="option__"] {
+    flex: 0 100 auto;
+    min-width: 0;
+    margin: 0 !important;
+    padding: 0 6px !important;
+    border-radius: 4px;
+    font-size: 12px;
+    line-height: 18px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.vc-command-grid-list [class*="autocompleteRow__"] [class*="infoWrapper__"] {
+    flex: 0 0 auto !important;
+    height: auto !important;
+    overflow: visible !important;
+}
+
+.vc-command-grid-list [class*="autocompleteRow__"] [class*="autocompleteRowHeading__"],
+.vc-command-grid-list [class*="autocompleteRow__"] [class*="autocompleteRowSubheading__"],
+.vc-command-grid-list [class*="autocompleteRow__"] [class*="autocompleteRowContentSecondary__"] {
+    display: block;
+    max-width: 100%;
+    margin: 0 !important;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    text-align: left;
+    flex: 0 0 auto !important;
+    height: auto !important;
+    align-self: flex-start !important;
+}
+
+.vc-command-grid-list [class*="autocompleteRow__"] [class*="autocompleteRowHeading__"] {
+    font-weight: 500;
+    line-height: 1.25;
+}
+
+.vc-command-grid-list [class*="autocompleteRow__"] [class*="autocompleteRowContentSecondary__"] {
+    font-size: 12px;
+    line-height: 1.2;
+    opacity: 0.6;
+}
+
+.vc-command-grid-list [class*="autocompleteRow__"] [class*="autocompleteRowSubheading__"] {
+    display: none;
+}
+
+.vc-command-grid-list [class*="autocompleteRow__"] > [class*="base__"],
+.vc-command-grid-list [class*="autocompleteRow__"] [class*="wrapper__"] {
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    overflow: visible !important;
+}
+
+.vc-command-grid-list ul[class*="categorySection"] > [class*="autocompleteRow__"] {
+    align-self: stretch;
+}
+
+.vc-command-grid-list.vc-command-grid-hide-source [class*="autocompleteRow__"] [class*="autocompleteRowContentSecondary__"] {
+    display: none !important;
+}
+
+.vc-command-grid-list.vc-command-grid-show-description [class*="autocompleteRow__"] [class*="autocompleteRowSubheading__"] {
+    display: block !important;
+}
