@@ -125,13 +125,11 @@ function gridTarget(index: number | null, direction: number, total: number) {
             nextSection += Math.sign(direction);
         if (nextSection < 0 || nextSection >= lengths.length) return index;
         if (direction > 0) {
-            const nextStart = lengths.slice(0, nextSection).reduce((sum, count) => sum + count, 0);
-            return Math.min(nextStart + lengths[nextSection] - 1, nextStart + column);
+            return Math.min(end + lengths[nextSection] - 1, end + column);
         }
-        const previousEnd = lengths.slice(0, nextSection + 1).reduce((sum, count) => sum + count, 0);
-        const previousStart = previousEnd - lengths[nextSection];
+        const previousStart = start - lengths[nextSection];
         const previousRow = previousStart + Math.floor((lengths[nextSection] - 1) / columns) * columns;
-        return Math.min(previousEnd - 1, previousRow + column);
+        return Math.min(start - 1, previousRow + column);
     }
 
     return index;
