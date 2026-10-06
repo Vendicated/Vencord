@@ -4,15 +4,23 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import "./styles.css";
+
+import { definePluginSettings } from "@api/Settings";
+import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import { isNonNullish } from "@utils/guards";
+import { identity } from "@utils/misc";
 import definePlugin from "@utils/types";
-import { FluxDispatcher, GIFPickerViewStore, LocaleStore } from "@webpack/common";
+import { FluxDispatcher, GIFPickerViewStore, LocaleStore, Select } from "@webpack/common";
 
 // API key is taken from the GBoard app on iOS
 const TENOR_KEY = "3Z0688EVWYKH";
 
+type Provider = "tenor" | "klipy";
+
 let cachedCategories: TrendingCategories | null = null;
+const settings = definePluginSettings({}).withPrivateSettings<{ provider?: Provider; }>();
 
 interface TenorMedia {
     url: string;
@@ -46,6 +54,7 @@ interface TrendingCategories {
     trendingCategories: Record<"name" | "src", string>[];
     trendingGIFPreview: { src: string; };
 }
+
 
 function toDiscordGif(item: TenorResult): DiscordGif | null {
     // Discord uses tinywebp on Linux, webm on rest (including web Linux). Tenor only has "webp", not "tinywebp"
@@ -134,41 +143,45 @@ async function fetchCategories(): Promise<TrendingCategories | null> {
 
 }
 
+
 export default definePlugin({
     name: "TenorGifSearch",
     description: "Restore Tenor GIF search",
     authors: [Devs.Lunascape],
+    settings,
 
     patches: [
         {
             find: "renderHeaderContent()",
-            replacement: {
-                match: /placeholder:(\i),"aria-label":(\i)/,
-                replace: 'placeholder:$1?.replace(/Giphy|Klipy/gi,"Tenor"),"aria-label":$2?.replace(/Giphy|Klipy/gi,"Tenor")'
-            }
+            replacement: [
+                {
+                    match: /(?<=return\(0,\i\.jsxs?\)\()(\i\.\i),{(?=query:\i.{0,100}?placeholder:)/,
+                    replace: "$self.SearchWrapper,{Component:$1,"
+                }
+            ]
         },
         {
             find: '"GIF_PICKER_TRENDING_FETCH_SUCCESS",trendingCategories:',
             replacement: [
                 {
                     match: /let \i=Date\.now\(\);\i\([^)]+\),\i\.\i\.get\(\{url:\i\.\i\.GIFS_SEARCH,query:\{q:(\i),/,
-                    replace: "return $self.handleSearchFetch($1);$&"
+                    replace: "if($self.shouldReplace)return $self.handleSearchFetch($1);$&"
                 },
                 {
                     match: /""!==(\i)&&null!=\1&&\i\.\i\.get\(\{url:\i\.\i\.GIFS_SUGGEST,/,
-                    replace: "return $self.handleSuggestionsFetch($1);$&"
+                    replace: "if($self.shouldReplace)return $self.handleSuggestionsFetch($1);$&"
                 },
                 {
                     match: /\i\.\i\.get\(\{url:\i\.\i\.GIFS_TRENDING,/,
-                    replace: "return $self.handleTrendingFetch();$&"
+                    replace: "if($self.shouldReplace)return $self.handleTrendingFetch();$&"
                 },
                 {
                     match: /let \i=Date\.now\(\);\i\([^)]+\),\i\.\i\.get\(\{url:\i\.\i\.GIFS_TRENDING_GIFS,/,
-                    replace: "return $self.handleTrendingGifsFetch();$&"
+                    replace: "if($self.shouldReplace)return $self.handleTrendingGifsFetch();$&"
                 },
                 {
                     match: /\i\.\i\.post\(\{url:\i\.\i\.GIFS_SELECT,body:\{id:(\i),q:(\i)\}/,
-                    replace: "$self.handleGifSelect($1,$2)&&false&&$&"
+                    replace: "!$self.handleGifSelect($1,$2)&&$&"
                 }
             ]
         },
@@ -176,7 +189,7 @@ export default definePlugin({
             find: '"IntegrationQueryStore"',
             replacement: {
                 match: /(?<=search\((\i),(\i)\)\{)let \i=\i\.getResults\(\1,\2\)[,;]/,
-                replace: "return $self.tenorIntegrationSearch($1,$2);$&"
+                replace: "if($self.shouldReplace)return $self.tenorIntegrationSearch($1,$2);$&"
             }
         },
         // Add back tenor command
@@ -199,6 +212,42 @@ export default definePlugin({
     async start() {
         cachedCategories = await fetchCategories() ?? cachedCategories;
     },
+
+    get shouldReplace() {
+        return (settings.store.provider || "tenor") === "tenor";
+    },
+
+    SearchWrapper: ErrorBoundary.wrap(({ Component, placeholder, "aria-label": ariaLabel, ...restProps }) => {
+        const { provider } = settings.use(["provider"]);
+
+        if (provider !== "klipy") {
+            placeholder &&= placeholder.replace("Klipy", "Tenor");
+            ariaLabel &&= ariaLabel.replace("Klipy", "Tenor");
+        }
+
+        return (
+            <div className="vc-tenorGifSearch-wrapper">
+                <Component placeholder={placeholder} aria-label={ariaLabel} {...restProps} />
+                <Select
+                    placeholder="Provider"
+                    options={[
+                        {
+                            label: "Tenor",
+                            value: "tenor",
+                            default: true
+                        },
+                        {
+                            label: "Klipy",
+                            value: "klipy"
+                        }
+                    ]}
+                    isSelected={v => v === (provider || "tenor")}
+                    select={v => settings.store.provider = v}
+                    serialize={identity}
+                />
+            </div>
+        );
+    }, { noop: true }),
 
     handleSearchFetch(query: string) {
         // Discord has a 100 result limit for normal search
@@ -235,7 +284,10 @@ export default definePlugin({
     },
 
     handleGifSelect(id: string, query: string) {
+        if (!this.shouldReplace) return false;
+
         tenorFetch("/registershare", { id, q: query });
+        return true;
     },
 
     handleTrendingGifsFetch() {
