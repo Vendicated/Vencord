@@ -1,6 +1,6 @@
 # commandGrid
 
-The slash command menu as a grid of tiles.
+The slash command menu as a grid of tiles. Arrow keys move between tiles by row and column.
 
 ![commandGrid](screenshot.jpg)
 

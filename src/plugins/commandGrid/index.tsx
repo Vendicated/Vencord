@@ -96,11 +96,12 @@ function setSectionLengths(lengths: number[]) {
 }
 
 function gridTarget(index: number | null, direction: number, total: number) {
+    if (total <= 0) return 0;
     if (index == null) return 0;
 
     const { columns } = settings.store;
     const lengths = sectionLengths;
-    if (!lengths?.length || lengths.reduce((sum, count) => sum + count, 0) < total)
+    if (!lengths?.length || lengths.reduce((sum, count) => sum + count, 0) !== total)
         return Math.max(0, Math.min(total - 1, index + (Math.abs(direction) === 1 ? direction * columns : Math.sign(direction))));
 
     let start = 0;
@@ -119,13 +120,15 @@ function gridTarget(index: number | null, direction: number, total: number) {
         if (nextRow >= start && nextRow < end)
             return Math.min(end - 1, nextRow + column);
 
-        const nextSection = section + Math.sign(direction);
+        let nextSection = section + Math.sign(direction);
+        while (nextSection >= 0 && nextSection < lengths.length && lengths[nextSection] === 0)
+            nextSection += Math.sign(direction);
         if (nextSection < 0 || nextSection >= lengths.length) return index;
         if (direction > 0) {
-            const nextStart = end;
+            const nextStart = lengths.slice(0, nextSection).reduce((sum, count) => sum + count, 0);
             return Math.min(nextStart + lengths[nextSection] - 1, nextStart + column);
         }
-        const previousEnd = start;
+        const previousEnd = lengths.slice(0, nextSection + 1).reduce((sum, count) => sum + count, 0);
         const previousStart = previousEnd - lengths[nextSection];
         const previousRow = previousStart + Math.floor((lengths[nextSection] - 1) / columns) * columns;
         return Math.min(previousEnd - 1, previousRow + column);
