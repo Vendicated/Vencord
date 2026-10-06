@@ -88,9 +88,68 @@ function allRows(props: CommandListProps) {
     return { visibleItems: items, listOffset: listPadding?.[0] ?? 0 };
 }
 
+let sectionLengths: number[] | null = null;
+
+function setSectionLengths(lengths: number[]) {
+    sectionLengths = lengths;
+    return lengths;
+}
+
+function gridTarget(index: number | null, direction: number, total: number) {
+    if (index == null) return 0;
+
+    const { columns } = settings.store;
+    const lengths = sectionLengths;
+    if (!lengths?.length || lengths.reduce((sum, count) => sum + count, 0) < total)
+        return Math.max(0, Math.min(total - 1, index + (Math.abs(direction) === 1 ? direction * columns : Math.sign(direction))));
+
+    let start = 0;
+    for (let section = 0; section < lengths.length; section++) {
+        const end = start + lengths[section];
+        if (index >= end) {
+            start = end;
+            continue;
+        }
+
+        if (Math.abs(direction) === 2)
+            return Math.max(start, Math.min(end - 1, index + Math.sign(direction)));
+
+        const column = (index - start) % columns;
+        const nextRow = start + Math.floor((index - start) / columns) * columns + direction * columns;
+        if (nextRow >= start && nextRow < end)
+            return Math.min(end - 1, nextRow + column);
+
+        const nextSection = section + Math.sign(direction);
+        if (nextSection < 0 || nextSection >= lengths.length) return index;
+        if (direction > 0) {
+            const nextStart = end;
+            return Math.min(nextStart + lengths[nextSection] - 1, nextStart + column);
+        }
+        const previousEnd = start;
+        const previousStart = previousEnd - lengths[nextSection];
+        const previousRow = previousStart + Math.floor((lengths[nextSection] - 1) / columns) * columns;
+        return Math.min(previousEnd - 1, previousRow + column);
+    }
+
+    return index;
+}
+
+function handleHorizontal(event: KeyboardEvent, moveSelection: (direction: number) => boolean) {
+    if (event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) return false;
+    if (event.key !== "ArrowLeft" && event.key !== "ArrowRight") return false;
+
+    const editor = event.currentTarget as HTMLElement & { value?: string; };
+    if ((editor.value ?? editor.textContent)?.trim() !== "/") return false;
+    if (!moveSelection(event.key === "ArrowLeft" ? -2 : 2)) return false;
+
+    event.preventDefault();
+    event.stopPropagation();
+    return true;
+}
+
 export default definePlugin({
     name: "commandGrid",
-    description: "Renders the slash command menu as a compact multi-column grid of tiles.",
+    description: "Shows slash commands in a grid with arrow-key navigation.",
     authors: [
         { name: "Vantin", id: 1214563713428889623n },
         { name: "Descent", id: 1079711314907250719n },
@@ -100,13 +159,16 @@ export default definePlugin({
         { name: "Grout", id: 1556827063363706890n },
     ],
     settings,
+    setSectionLengths,
+    gridTarget,
+    handleHorizontal,
 
     patches: [
         {
             find: "rowHeight:56,sectionHeaderHeight:32",
             replacement: {
                 match: /className:(\i\.\i),listPadding:(\i),onScroll:(\i),renderRow:(\i),renderSection:(\i),renderSectionHeader:(\i),rowCount:(\i)\.length,rowCountBySection:(\i),rowHeight:56,sectionHeaderHeight:32,sectionMarginBottom:(\i),ref:(\i),stickyHeaders:!0/,
-                replace: 'className:$1+" vc-command-grid-list"+($self.settings.store.showSource?"":" vc-command-grid-hide-source")+($self.settings.store.showDescription?" vc-command-grid-show-description":""),style:{"--vc-command-grid-columns":$self.settings.store.columns,"--vc-command-grid-height":$self.settings.store.tileHeight+"px"},listPadding:$2,onScroll:$3,renderRow:$4,renderSection:$5,renderSectionHeader:$6,rowCount:$7.length,rowCountBySection:$8,rowHeight:56,sectionHeaderHeight:32,sectionMarginBottom:$9,ref:$10,stickyHeaders:!0,vcCommandGrid:!0'
+                replace: 'className:$1+" vc-command-grid-list vc-command-grid-cols-"+$self.settings.store.columns+" vc-command-grid-height-"+$self.settings.store.tileHeight+($self.settings.store.showSource?"":" vc-command-grid-hide-source")+($self.settings.store.showDescription?" vc-command-grid-show-description":""),listPadding:$2,onScroll:$3,renderRow:$4,renderSection:$5,renderSectionHeader:$6,rowCount:$7.length,rowCountBySection:$self.setSectionLengths($8),rowHeight:56,sectionHeaderHeight:32,sectionMarginBottom:$9,ref:$10,stickyHeaders:!0,vcCommandGrid:!0'
             }
         },
         {
@@ -122,6 +184,20 @@ export default definePlugin({
                     replace: ".useMemo(()=>{if(vcProps.vcCommandGrid)return $self.allRows(vcProps);if(-1==="
                 }
             ]
+        },
+        {
+            find: "rowHeight:56,sectionHeaderHeight:32",
+            replacement: {
+                match: /onMoveSelection:(\i)=>\{if\(0===(\i)\.length\)return!0;let (\i)=7\*!!(\i),(\i)=\2\.length\+\3,(\i)=null==(\i)\?0:\7\+\1;/,
+                replace: "onMoveSelection:$1=>{if(0===$2.length)return!0;let $3=7*!!$4,$5=$2.length+$3,$6=$self.gridTarget($7,$1,$5);"
+            }
+        },
+        {
+            find: /moveSelection:\i\}=\i;return\{handleKeyDown:\i\.useCallback/,
+            replacement: {
+                match: /(moveSelection:(\i)\}=(\i);return\{handleKeyDown:(\i)\.useCallback\((\i)=>\{)switch\(\5\.which\)\{/,
+                replace: "$1if($self.handleHorizontal($5,$2))return;switch($5.which){"
+            }
         }
     ],
 

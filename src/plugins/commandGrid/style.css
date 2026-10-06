@@ -6,6 +6,16 @@
     box-sizing: border-box;
 }
 
+.vc-command-grid-cols-2 { --vc-command-grid-columns: 2; }
+.vc-command-grid-cols-3 { --vc-command-grid-columns: 3; }
+.vc-command-grid-cols-4 { --vc-command-grid-columns: 4; }
+.vc-command-grid-cols-5 { --vc-command-grid-columns: 5; }
+
+.vc-command-grid-height-32 { --vc-command-grid-height: 32px; }
+.vc-command-grid-height-42 { --vc-command-grid-height: 42px; }
+.vc-command-grid-height-52 { --vc-command-grid-height: 52px; }
+.vc-command-grid-height-64 { --vc-command-grid-height: 64px; }
+
 [class*="autocomplete__"]:has(.vc-command-grid-list) > [class*="autocompleteInner__"] {
     width: 100%;
     min-width: 0;
