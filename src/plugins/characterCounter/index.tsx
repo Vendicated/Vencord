@@ -23,12 +23,29 @@ const settings = definePluginSettings({
     }
 });
 
-function getCounterColor(percentage: number) {
+export function getCounterColor(percentage: number) {
     if (!settings.store.colorEffects) return "var(--primary-330)";
     if (percentage < 50) return "var(--text-muted)";
     if (percentage < 75) return "var(--yellow-330)";
     if (percentage < 90) return "var(--orange-330)";
     return "var(--red-360)";
+}
+
+export function getCharMax(type?: any, editorRef?: any): number {
+    if (
+        type?.analyticsName === "voice_channel_status" ||
+        editorRef?.current?.props?.type?.analyticsName === "voice_channel_status"
+    ) {
+        return 500;
+    }
+
+    const maxFromProps = editorRef?.current?.props?.maxCharacterCount;
+    if (typeof maxFromProps === "number" && maxFromProps > 0) {
+        return maxFromProps;
+    }
+
+    const premiumType = UserStore.getCurrentUser()?.premiumType ?? 0;
+    return premiumType === 2 ? 4000 : 2000;
 }
 
 export default definePlugin({
@@ -42,8 +59,8 @@ export default definePlugin({
             find: ".CREATE_FORUM_POST||",
             replacement: [
                 {
-                    match: /(?<=,editorRef:(\i),.{0,200}textValue:(\i),editorHeight:\i,channelId:\i\.id\}\)),\i/,
-                    replace: ",$self.renderCharCounter({editorRef:$1,text:$2})"
+                    match: /(?<=type:(\i),.{0,100}editorRef:(\i),.{0,200}textValue:(\i),editorHeight:\i,channelId:\i\.id\}\)),\i/,
+                    replace: ",$self.renderCharCounter({type:$1,editorRef:$2,text:$3})"
                 }
             ]
         },
@@ -56,7 +73,7 @@ export default definePlugin({
         }
     ],
 
-    renderCharCounter: ErrorBoundary.wrap(({ editorRef, text }: { text: string; editorRef: any; }) => {
+    renderCharCounter: ErrorBoundary.wrap(({ type, editorRef, text }: { text: string; editorRef: any; type?: any; }) => {
         const [selectedCount, setSelectedCount] = useState(0);
         const showSelected = selectedCount > 0 && (editorRef?.current?.state?.focused ?? false);
 
@@ -71,9 +88,7 @@ export default definePlugin({
 
         if (!text.length) return null;
 
-        const premiumType = UserStore.getCurrentUser().premiumType ?? 0;
-        const charMax = premiumType === 2 ? 4000 : 2000;
-
+        const charMax = getCharMax(type, editorRef);
         const color = getCounterColor((text.length / charMax) * 100);
 
         return (
