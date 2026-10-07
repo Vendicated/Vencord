@@ -118,7 +118,7 @@ export function PatchPreview({ module, match, replacement, setReplacementError }
 
     return (
         <>
-            <Forms.FormTitle>Module {id}</Forms.FormTitle>
+            <Forms.FormTitle style={{ userSelect: "text" }}>Module {id}</Forms.FormTitle>
 
             <Match matchResult={matchResult} />
             <Diff diff={diff} />

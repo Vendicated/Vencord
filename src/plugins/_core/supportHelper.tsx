@@ -35,15 +35,13 @@ import { makeCodeblock } from "@utils/text";
 import definePlugin from "@utils/types";
 import { checkForUpdates, isOutdated, update } from "@utils/updater";
 import { Channel, RenderModalProps } from "@vencord/discord-types";
-import { Button, ChannelStore, ConfirmModal, Forms, GuildMemberStore, openModal, Parser, PermissionsBits, PermissionStore, RelationshipStore, showToast, Text, Toasts, UserStore } from "@webpack/common";
+import { Button, ChannelStore, ConfirmModal, Forms, GuildMemberStore, openModal, Parser, PermissionsBits, PermissionStore, RelationshipStore, showToast, Text, UserStore } from "@webpack/common";
 import { JSX } from "react";
 
 import gitHash from "~git-hash";
 import plugins, { PluginMeta } from "~plugins";
 
 import SettingsPlugin from "./settings";
-
-const CodeBlockRe = /```js\n(.+?)```/s;
 
 const AdditionalAllowedChannelIds = [
     "1024286218801926184", // Vencord > #bot-commands
@@ -54,8 +52,6 @@ const TrustedRolesIds = [
     REGULAR_ROLE_ID, // regular
     DONOR_ROLE_ID, // donor
 ];
-
-const AsyncFunction = async function () { }.constructor;
 
 const ShowCurrentGame = getUserSettingLazy<boolean>("status", "showCurrentGame")!;
 
@@ -264,6 +260,8 @@ export default definePlugin({
     },
 
     renderMessageAccessory(props) {
+        if (props.message.vencordEmbeddedBy) return null;
+
         const buttons = [] as JSX.Element[];
 
         const shouldAddUpdateButton =
@@ -282,12 +280,12 @@ export default definePlugin({
                     onClick={async () => {
                         try {
                             if (await forceUpdate())
-                                showToast("Success! Restarting...", Toasts.Type.SUCCESS);
+                                showToast("Success! Restarting...", "success");
                             else
-                                showToast("Already up to date!", Toasts.Type.MESSAGE);
+                                showToast("Already up to date!");
                         } catch (e) {
                             new Logger(this.name).error("Error while updating:", e);
-                            showToast("Failed to update :(", Toasts.Type.FAILURE);
+                            showToast("Failed to update :(", "failure");
                         }
                     }}
                 >
@@ -312,28 +310,6 @@ export default definePlugin({
                         onClick={async () => sendMessage(props.channel.id, { content: generatePluginList() })}
                     >
                         Run /vencord-plugins
-                    </Button>
-                );
-            }
-        }
-
-        if (props.channel.parent_id === KNOWN_ISSUES_CHANNEL_ID || (props.channel.parent_id === SUPPORT_CATEGORY_ID && props.message.author.id === VENBOT_USER_ID)) {
-            const match = CodeBlockRe.exec(props.message.content || props.message.embeds[0]?.rawDescription || "");
-            if (match) {
-                buttons.push(
-                    <Button
-                        key="vc-run-snippet"
-                        onClick={async () => {
-                            try {
-                                await AsyncFunction(match[1])();
-                                showToast("Success!", Toasts.Type.SUCCESS);
-                            } catch (e) {
-                                new Logger(this.name).error("Error while running snippet:", e);
-                                showToast("Failed to run snippet :(", Toasts.Type.FAILURE);
-                            }
-                        }}
-                    >
-                        Run Snippet
                     </Button>
                 );
             }

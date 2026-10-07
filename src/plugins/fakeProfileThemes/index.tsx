@@ -51,26 +51,22 @@ function encode(primary: number, accent: number): string {
     return (padding || "") + " " + encoded;
 }
 
-// Courtesy of Cynthia.
+const DecodeRegex = /\[#([a-fA-F0-9]{1,6}),#([a-fA-F0-9]{1,6})\]/;
 function decode(bio: string): Array<number> | null {
     if (bio == null) return null;
 
-    const colorString = bio.match(
-        /\u{e005b}\u{e0023}([\u{e0061}-\u{e0066}\u{e0041}-\u{e0046}\u{e0030}-\u{e0039}]{1,6})\u{e002c}\u{e0023}([\u{e0061}-\u{e0066}\u{e0041}-\u{e0046}\u{e0030}-\u{e0039}]{1,6})\u{e005d}/u,
-    );
-    if (colorString != null) {
-        const parsed = [...colorString[0]]
-            .map(x => String.fromCodePoint(x.codePointAt(0)! - 0xe0000))
-            .join("");
-        const colors = parsed
-            .substring(1, parsed.length - 1)
-            .split(",")
-            .map(x => parseInt(x.replace("#", "0x"), 16));
-
-        return colors;
-    } else {
-        return null;
+    let ascii = "";
+    for (const ch of bio) {
+        const cp = ch.codePointAt(0)!;
+        if (cp >= 0xe0000 && cp <= 0xe007f) {
+            ascii += String.fromCodePoint(cp - 0xe0000);
+        }
     }
+
+    const match = ascii.match(DecodeRegex);
+    if (!match) return null;
+
+    return [parseInt(match[1], 16), parseInt(match[2], 16)];
 }
 
 const settings = definePluginSettings({

@@ -19,7 +19,7 @@
 import { classNameFactory } from "@utils/css";
 import { onlyOnce } from "@utils/onlyOnce";
 import { PluginNative } from "@utils/types";
-import { showToast, Toasts } from "@webpack/common";
+import { showToast } from "@webpack/common";
 
 import { DeeplLanguages, deeplLanguageToGoogleLanguage, GoogleLanguages, KagiLanguages } from "./languages";
 import { resetLanguageDefaults, settings } from "./settings";
@@ -89,7 +89,7 @@ export async function translate(kind: "received" | "sent", text: string): Promis
             ? e
             : "Something went wrong. If this issue persists, please check the console or ask for help in the support server.";
 
-        showToast(userMessage, Toasts.Type.FAILURE);
+        showToast(userMessage, "failure");
 
         throw e instanceof Error
             ? e
@@ -131,12 +131,12 @@ function fallbackToGoogle(text: string, sourceLang: string, targetLang: string):
 }
 
 const showDeeplApiQuotaToast = onlyOnce(
-    () => showToast("Deepl API quota exceeded. Falling back to Google Translate", Toasts.Type.FAILURE)
+    () => showToast("Deepl API quota exceeded. Falling back to Google Translate", "failure")
 );
 
 async function deeplTranslate(text: string, sourceLang: string, targetLang: string): Promise<TranslationValue> {
     if (!settings.store.deeplApiKey) {
-        showToast("DeepL API key is not set. Resetting to Google", Toasts.Type.FAILURE);
+        showToast("DeepL API key is not set. Resetting to Google", "failure");
 
         settings.store.service = "google";
         resetLanguageDefaults();

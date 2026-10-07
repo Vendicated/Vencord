@@ -26,10 +26,10 @@ import { Devs } from "@utils/constants";
 import { getGuildAcronym, hasGuildFeature } from "@utils/discord";
 import { Logger } from "@utils/Logger";
 import definePlugin from "@utils/types";
-import { Guild, GuildSticker } from "@vencord/discord-types";
+import { Guild, GuildSticker, Message } from "@vencord/discord-types";
 import { StickerFormatType } from "@vencord/discord-types/enums";
 import { findByCodeLazy } from "@webpack";
-import { Constants, EmojiStore, FluxDispatcher, Forms, GuildStore, IconUtils, Menu, Modal, openModalLazy, PermissionsBits, PermissionStore, React, RestAPI, StickersStore, Toasts, Tooltip, UserStore } from "@webpack/common";
+import { Constants, EmojiStore, FluxDispatcher, Forms, GuildStore, IconUtils, Menu, Modal, openModalLazy, PermissionsBits, PermissionStore, React, RestAPI, showToast, StickersStore, Tooltip, UserStore } from "@webpack/common";
 import { Promisable } from "type-fest";
 
 const uploadEmoji = findByCodeLazy(".GUILD_EMOJIS(", "EMOJI_UPLOAD_START");
@@ -196,11 +196,7 @@ async function doClone(guildId: string, data: Sticker | Emoji) {
         else
             await cloneEmoji(guildId, data);
 
-        Toasts.show({
-            message: `Successfully cloned ${data.name} to ${GuildStore.getGuild(guildId)?.name ?? "your server"}!`,
-            type: Toasts.Type.SUCCESS,
-            id: Toasts.genId()
-        });
+        showToast(`Successfully cloned ${data.name} to ${GuildStore.getGuild(guildId)?.name ?? "your server"}!`, "success");
     } catch (e: any) {
         let message = "Something went wrong (check console!)";
         try {
@@ -208,11 +204,7 @@ async function doClone(guildId: string, data: Sticker | Emoji) {
         } catch { }
 
         new Logger("ExpressionCloner").error("Failed to clone", data.name, "to", guildId, e);
-        Toasts.show({
-            message: "Failed to clone: " + message,
-            type: Toasts.Type.FAILURE,
-            id: Toasts.genId()
-        });
+        showToast("Failed to clone: " + message, "failure");
     }
 }
 
@@ -366,18 +358,31 @@ function isGifUrl(url: string) {
     return u.pathname.endsWith(".gif") || u.searchParams.get("animated") === "true";
 }
 
-const messageContextMenuPatch: NavContextMenuPatchCallback = (children, props) => {
-    const { favoriteableId, itemHref, itemSrc, favoriteableType } = props ?? {};
+function resolveEmojiName(favoriteableId: string, message: Message) {
+    const emoji = EmojiStore.getCustomEmojiById(favoriteableId);
+    if (emoji) return emoji.name;
+
+    const reaction = message.reactions.find(reaction => reaction.emoji.id === favoriteableId);
+    if (reaction) return reaction.emoji.name;
+
+    const match = message.content.match(RegExp(`<a?:(\\w+)(?:~\\d+)?:${favoriteableId}>|https://cdn\\.discordapp\\.com/emojis/${favoriteableId}\\.[\\w?&=%]*`));
+    if (!match) return null;
+
+    return match[1]
+        ?? URL.parse(match[0])?.searchParams.get("name")
+        ?? "FakeNitroEmoji";
+}
+
+const messageContextMenuPatch: NavContextMenuPatchCallback = (children, props: Record<"favoriteableId" | "itemHref" | "itemSrc" | "favoriteableType", string> & { message: Message; }) => {
+    const { favoriteableId, itemHref, itemSrc, favoriteableType, message } = props ?? {};
 
     if (!favoriteableId) return;
 
     const menuItem = (() => {
         switch (favoriteableType) {
             case "emoji":
-                const match = props.message.content.match(RegExp(`<a?:(\\w+)(?:~\\d+)?:${favoriteableId}>|https://cdn\\.discordapp\\.com/emojis/${favoriteableId}\\.`));
-                const reaction = props.message.reactions.find(reaction => reaction.emoji.id === favoriteableId);
-                if (!match && !reaction) return;
-                const name = (match && match[1]) ?? reaction?.emoji.name ?? "FakeNitroEmoji";
+                const name = resolveEmojiName(favoriteableId, message);
+                if (!name) return;
 
                 return buildMenuItem("Emoji", () => ({
                     id: favoriteableId,
@@ -385,7 +390,7 @@ const messageContextMenuPatch: NavContextMenuPatchCallback = (children, props) =
                     isAnimated: isGifUrl(itemHref ?? itemSrc)
                 }));
             case "sticker":
-                const sticker = props.message.stickerItems.find(s => s.id === favoriteableId);
+                const sticker = message.stickerItems.find(s => s.id === favoriteableId);
                 if (sticker?.format_type === 3 /* LOTTIE */) return;
 
                 return buildMenuItem("Sticker", () => fetchSticker(favoriteableId));
@@ -419,7 +424,7 @@ export default definePlugin({
     description: "Allows you to clone Emotes & Stickers to your own server (right click them)",
     tags: ["Emotes", "Servers"],
     searchTerms: ["StickerCloner", "EmoteCloner", "EmojiCloner"],
-    authors: [Devs.Ven, Devs.Nuckyz],
+    authors: [Devs.Ven, Devs.Nuckyz, Devs.scattagain],
     contextMenus: {
         "message": messageContextMenuPatch,
         "expression-picker": expressionPickerPatch
