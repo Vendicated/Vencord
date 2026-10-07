@@ -6,40 +6,40 @@
 
 import "./styles.css";
 
-import { definePluginSettings } from "@api/Settings";
+import { definePluginSettings, migratePluginSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
-import { isNonNullish } from "@utils/guards";
 import { identity } from "@utils/misc";
-import definePlugin from "@utils/types";
-import { FluxDispatcher, GIFPickerViewStore, LocaleStore, Select } from "@webpack/common";
+import definePlugin, { OptionType } from "@utils/types";
+import { FluxDispatcher, GIFPickerViewStore, LocaleStore, RestAPI, Select } from "@webpack/common";
 
-// API key is taken from the GBoard app on iOS
-const TENOR_KEY = "3Z0688EVWYKH";
+import * as GiphyProvider from "./giphy";
+import * as TenorProvider from "./tenor";
 
-type Provider = "tenor" | "klipy";
+let cachedCategories: TrendingCategoriesData | null = null;
 
-let cachedCategories: TrendingCategories | null = null;
-const settings = definePluginSettings({}).withPrivateSettings<{ provider?: Provider; }>();
+const settings = definePluginSettings({
+    provider: {
+        type: OptionType.SELECT,
+        description: "The provider to use. You can also change this directly in the GIF picker",
+        options: [
+            { label: "Tenor", value: "tenor", default: true },
+            { label: "Giphy", value: "giphy" },
+            { label: "Klipy", value: "klipy" },
+        ] as const,
+        onChange: () => {
+            cachedCategories = null;
+            fetchCategories();
+        }
+    }
+});
 
-interface TenorMedia {
-    url: string;
-    preview: string;
-    dims: [number, number];
-}
-interface TenorResult {
-    id: string;
-    title: string;
-    h1_title: string;
-    media: Array<Record<string, TenorMedia>>;
-    itemurl: string;
-}
-interface TenorCategoryTag {
-    searchterm: string;
-    image: string;
-}
+const providers = {
+    tenor: TenorProvider,
+    giphy: GiphyProvider
+};
 
-interface DiscordGif {
+export interface DiscordGif {
     id: string;
     title: string;
     url: string;
@@ -50,104 +50,42 @@ interface DiscordGif {
     preview: string;
 }
 
-interface TrendingCategories {
+export interface TrendingCategoriesData {
     trendingCategories: Record<"name" | "src", string>[];
     trendingGIFPreview: { src: string; };
 }
 
+async function fetchCategories() {
+    if (!cachedCategories) {
+        if (settings.store.provider === "klipy") {
+            const res = await RestAPI.get({
+                url: "/gifs/trending",
+                query: {
+                    locale: LocaleStore.locale,
+                    media_format: GIFPickerViewStore.getSelectedFormat()
+                },
+            });
+            cachedCategories = {
+                trendingCategories: res.body.categories,
+                trendingGIFPreview: res.body.gifs[0]
+            };
+        } else {
+            cachedCategories = await providers[settings.store.provider!].getCategories();
 
-function toDiscordGif(item: TenorResult): DiscordGif | null {
-    // Discord uses tinywebp on Linux, webm on rest (including web Linux). Tenor only has "webp", not "tinywebp"
-    const format = GIFPickerViewStore.getSelectedFormat() === "tinywebp"
-        ? "webp"
-        : "tinywebm";
-
-    const { title, h1_title, id, itemurl } = item;
-    const { gif, [format]: mediaItem } = item.media[0];
-
-    return {
-        id: id,
-        title: title || h1_title,
-        url: itemurl,
-        gif_src: gif.url,
-        src: mediaItem.url,
-        width: mediaItem.dims[0],
-        height: mediaItem.dims[1],
-        preview: mediaItem.preview
-    };
-}
-
-function mapToDiscordGifs(items: TenorResult[]) {
-    return items.map(toDiscordGif).filter(isNonNullish);
-}
-
-async function tenorFetch<TResult>(path: string, params: Record<string, string>) {
-    const url = `https://api.tenor.com/v1${path}?` + new URLSearchParams({
-        key: TENOR_KEY,
-        locale: LocaleStore.locale.replace("-", "_").toLowerCase(),
-        ...params
-    });
-
-    const res = await fetch(url);
-    if (!res.ok)
-        throw new Error(`GET ${path}: Tenor API request failed with status ${res.status}`);
-
-    return res.json() as Promise<TResult>;
-}
-
-// function contributed by taep96
-async function fetchTenorResults(path: string, limit: number, extra: Record<string, string> = {}) {
-    const pageSize = Math.min(limit, 50);
-    const items: TenorResult[] = [];
-    const seen = new Set<string>();
-    let pos = "";
-
-    while (items.length < limit) {
-        const params: Record<string, string> = {
-            ...extra,
-            limit: String(Math.min(limit - items.length, pageSize))
-        };
-        if (pos) params.pos = pos;
-
-        const { next, results: page } = await tenorFetch<{ next?: string; results: TenorResult[]; }>(path, params);
-        if (!page.length) break;
-
-        const previousLength = items.length;
-        for (const item of page) {
-            if (seen.has(item.id)) continue;
-            seen.add(item.id);
-
-            items.push(item);
-            if (items.length >= limit) break;
+            if (!cachedCategories) return;
         }
-        if (items.length === previousLength) break;
-
-        if (!next || next === pos) break;
-        pos = next;
     }
 
-    return items;
+    FluxDispatcher.dispatch({ type: "GIF_PICKER_TRENDING_FETCH_SUCCESS", ...cachedCategories });
 }
 
-async function fetchCategories(): Promise<TrendingCategories | null> {
-    return tenorFetch<{ tags?: TenorCategoryTag[]; }>("/categories", { type: "featured" })
-        .then(({ tags }) => {
-            if (!tags?.length) return null;
-
-            return {
-                trendingCategories: tags.map(t => ({ name: t.searchterm, src: t.image })),
-                trendingGIFPreview: { src: tags[0].image }
-            };
-        })
-        .catch(() => null);
-
-}
-
-
+migratePluginSettings("GifProviderSwitcher", "TenorGifSearch");
 export default definePlugin({
-    name: "TenorGifSearch",
-    description: "Restore Tenor GIF search",
-    authors: [Devs.Lunascape],
+    name: "GifProviderSwitcher",
+    description: "Allows you to use Tenor or Giphy GIF search instead of Klipy",
+    authors: [Devs.Lunascape, Devs.Ven],
+    tags: ["Media", "Chat", "Emotes"],
+    searchTerms: ["TenorGifSearch"],
     settings,
 
     patches: [
@@ -210,19 +148,27 @@ export default definePlugin({
     ],
 
     async start() {
-        cachedCategories = await fetchCategories() ?? cachedCategories;
+        cachedCategories = await this.provider.getCategories() ?? cachedCategories;
     },
 
     get shouldReplace() {
-        return (settings.store.provider || "tenor") === "tenor";
+        return settings.store.provider !== "klipy";
+    },
+
+    get provider() {
+        if (settings.store.provider === "klipy")
+            throw new Error("Provider should never be klipy here");
+
+        return providers[settings.store.provider!];
     },
 
     SearchWrapper: ErrorBoundary.wrap(({ Component, placeholder, "aria-label": ariaLabel, ...restProps }) => {
         const { provider } = settings.use(["provider"]);
 
         if (provider !== "klipy") {
-            placeholder &&= placeholder.replace("Klipy", "Tenor");
-            ariaLabel &&= ariaLabel.replace("Klipy", "Tenor");
+            const name = provider![0].toUpperCase() + provider!.slice(1);
+            placeholder &&= placeholder.replace("Klipy", name);
+            ariaLabel &&= ariaLabel.replace("Klipy", name);
         }
 
         return (
@@ -230,18 +176,8 @@ export default definePlugin({
                 <Component placeholder={placeholder} aria-label={ariaLabel} {...restProps} />
                 <Select
                     placeholder="Provider"
-                    options={[
-                        {
-                            label: "Tenor",
-                            value: "tenor",
-                            default: true
-                        },
-                        {
-                            label: "Klipy",
-                            value: "klipy"
-                        }
-                    ]}
-                    isSelected={v => v === (provider || "tenor")}
+                    options={settings.def.provider.options}
+                    isSelected={v => v === provider}
                     select={v => settings.store.provider = v}
                     serialize={identity}
                 />
@@ -250,10 +186,8 @@ export default definePlugin({
     }, { noop: true }),
 
     handleSearchFetch(query: string) {
-        // Discord has a 100 result limit for normal search
-        fetchTenorResults("/search", 100, { q: query })
-            .then(results => {
-                const items = mapToDiscordGifs(results);
+        this.provider.search(query, 100)
+            .then(items => {
                 FluxDispatcher.dispatch(
                     items.length
                         ? { type: "GIF_PICKER_QUERY_SUCCESS", query, items }
@@ -268,14 +202,14 @@ export default definePlugin({
     async handleSuggestionsFetch(query: string) {
         if (!query) return;
 
-        const { results } = await tenorFetch<{ results?: string[]; }>("/search_suggestions", { q: query, limit: "5" });
+        const items = await this.provider.searchSuggestions(query);
 
-        FluxDispatcher.dispatch({ type: "GIF_PICKER_SUGGESTIONS_SUCCESS", query, items: results });
+        FluxDispatcher.dispatch({ type: "GIF_PICKER_SUGGESTIONS_SUCCESS", query, items });
     },
 
     async handleTrendingFetch() {
         if (!cachedCategories) {
-            cachedCategories = await fetchCategories();
+            cachedCategories = await this.provider.getCategories();
 
             if (!cachedCategories) return;
         }
@@ -286,14 +220,14 @@ export default definePlugin({
     handleGifSelect(id: string, query: string) {
         if (!this.shouldReplace) return false;
 
-        tenorFetch("/registershare", { id, q: query });
+        this.provider.registerShare(id, query);
+
         return true;
     },
 
     handleTrendingGifsFetch() {
-        fetchTenorResults("/trending", 50)
-            .then(results => {
-                const items = mapToDiscordGifs(results);
+        this.provider.getTrending(50)
+            .then(items => {
                 FluxDispatcher.dispatch(
                     items.length
                         ? { type: "GIF_PICKER_QUERY_SUCCESS", items }
@@ -308,12 +242,11 @@ export default definePlugin({
     tenorIntegrationSearch(integration: string, query: string) {
         FluxDispatcher.dispatch({ type: "INTEGRATION_QUERY", integration, query });
 
-        fetchTenorResults("/search", 20, { q: query })
+        this.provider.search(query, 20)
             .then(results => {
-                const items = mapToDiscordGifs(results);
                 FluxDispatcher.dispatch(
-                    items.length
-                        ? { type: "INTEGRATION_QUERY_SUCCESS", integration, query, results: items }
+                    results.length
+                        ? { type: "INTEGRATION_QUERY_SUCCESS", integration, query, results }
                         : { type: "INTEGRATION_QUERY_FAILURE", integration, query }
                 );
             })
