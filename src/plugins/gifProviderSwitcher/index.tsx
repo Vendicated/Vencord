@@ -11,7 +11,7 @@ import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import { identity } from "@utils/misc";
 import definePlugin, { OptionType } from "@utils/types";
-import { FluxDispatcher, GIFPickerViewStore, LocaleStore, RestAPI, Select } from "@webpack/common";
+import { FluxDispatcher, GIFPickerViewStore, LocaleStore, RestAPI, Select, useEffect } from "@webpack/common";
 
 import * as GiphyProvider from "./giphy";
 import * as TenorProvider from "./tenor";
@@ -162,8 +162,13 @@ export default definePlugin({
         return providers[settings.store.provider!];
     },
 
-    SearchWrapper: ErrorBoundary.wrap(({ Component, placeholder, "aria-label": ariaLabel, ...restProps }) => {
+    SearchWrapper: ErrorBoundary.wrap(({ Component, placeholder, "aria-label": ariaLabel, ref, ...restProps }) => {
         const { provider } = settings.use(["provider"]);
+
+        // restProps contains `autoFocus: true`, which should in theory focus the input automatically.
+        // However, for whatever reason it focuses our Select instead, despite that not having autoFocus.
+        // Discord is probably focusing it somewhere else for whatever reason, solved via this effect
+        useEffect(() => ref?.current?.focus(), [ref]);
 
         if (provider !== "klipy") {
             const name = provider![0].toUpperCase() + provider!.slice(1);
@@ -173,7 +178,7 @@ export default definePlugin({
 
         return (
             <div className="vc-tenorGifSearch-wrapper">
-                <Component placeholder={placeholder} aria-label={ariaLabel} {...restProps} />
+                <Component placeholder={placeholder} aria-label={ariaLabel} ref={ref} {...restProps} />
                 <Select
                     placeholder="Provider"
                     options={settings.def.provider.options}
