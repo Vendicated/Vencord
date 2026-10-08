@@ -82,7 +82,7 @@ function redactUser(data: object) {
 }
 
 function cleanMessage(msg: Message) {
-    msg = structuredClone(msg);
+    msg = JSON.parse(JSON.stringify(msg));
     redactUser(msg.author);
 
     // message logger added properties
@@ -168,7 +168,7 @@ function MakeContextCallback(name: "Guild" | "Role" | "User" | "Channel" | "Mess
         const action = isMessage
             ? () => openViewRawModalMessage(value)
             : name === "User"
-                ? () => openViewRawModal(redactUser(structuredClone(value)), name)
+                ? () => openViewRawModal(redactUser(JSON.parse(JSON.stringify(value))), name)
                 : () => openViewRawModal(value, name);
 
         const devContainer = findGroupChildrenByChildId(`devmode-copy-id-${value.id}`, children);
