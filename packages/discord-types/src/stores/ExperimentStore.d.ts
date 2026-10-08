@@ -63,6 +63,25 @@ interface TrackedExposures {
     [key: GuildExposureKey]: ExperimentExposureEntry;
 }
 
+interface ExperimentExposureDescriptor {
+    type: "user" | "guild";
+    bucket: number;
+    revision: number;
+    guildId?: string;
+    triggerDebuggingEnabled?: boolean;
+}
+
+interface TrackExposureOptions {
+    experimentId: string;
+    descriptor: (UserExperimentAssignment | GuildExperimentAssignment) & ExperimentExposureDescriptor;
+    location?: string;
+    location_stack?: string[];
+    context?: { guildId?: string; };
+    fingerprint?: string;
+    excluded?: boolean;
+    exposureType?: string;
+}
+
 interface ExperimentState {
     assignmentFingerprint: string | null;
     assignmentSessionId: string;
@@ -94,8 +113,9 @@ export class ExperimentStore extends FluxStore {
     getUserExperimentDescriptor(experimentId: string): ExperimentAssignmentOverride;
     hasRegisteredExperiment(experimentId: string): boolean;
 
-    // has two args
-    getRecentExposures(): unknown;
-    // has four args
-    hasExperimentTrackedExposure(): unknown;
+    trackExposure: (options: TrackExposureOptions) => false | void;
+    getRecentExposures(type: "user" | "guild", experimentId: string): [string, number][];
+    hasExperimentTrackedExposure(experimentId: string, descriptor: ExperimentExposureDescriptor, location?: string, triggerDebugging?: boolean): boolean;
+    loadCache(): void;
+    takeSnapshot(): { version: number; data: Record<string, unknown>; };
 }

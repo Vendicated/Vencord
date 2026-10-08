@@ -8,7 +8,7 @@ import * as DataStore from "@api/DataStore";
 import { AUTHORIZE_URL, CLIENT_ID } from "@plugins/decor/lib/constants";
 import { proxyLazy } from "@utils/lazy";
 import { Logger } from "@utils/Logger";
-import { OAuth2AuthorizeModal, openModal, showToast, Toasts, UserStore, zustandCreate, zustandPersist } from "@webpack/common";
+import { OAuth2AuthorizeModal, openModal, showToast, UserStore, zustandCreate, zustandPersist } from "@webpack/common";
 
 interface AuthorizationState {
     token: string | null;
@@ -74,7 +74,7 @@ export const useAuthorizationStore = proxyLazy(() => zustandCreate(
                                 resolve(void 0);
                             } catch (e) {
                                 if (e instanceof Error) {
-                                    showToast(`Failed to authorize: ${e.message}`, Toasts.Type.FAILURE);
+                                    showToast(`Failed to authorize: ${e.message}`, "failure");
                                     new Logger("Decor").error("Failed to authorize", e);
                                     reject(e);
                                 }
