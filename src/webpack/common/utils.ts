@@ -96,7 +96,13 @@ export const createToast: t.createToast = findByCodeLazy('variant:"default",icon
  * Show a simple toast. If you need more options, use Toasts.show manually
  */
 export function showToast(message: string, type: t.ToastType = "message", options?: ToastOptions) {
-    Toasts.show(createToast({ message, type, options }));
+    // FIXME once Discord makes up their mind and stops changing this API every update
+    try {
+        Toasts.show(createToast(message, type, options));
+    } catch {
+        // @ts-ignore
+        Toasts.show({ text: message, variant: type });
+    }
 }
 
 export const UserUtils = {
@@ -122,7 +128,7 @@ export const NavigationRouter: t.NavigationRouter = mapMangledModuleLazy("transi
     forward: filters.byCode("goForward()"),
 });
 export const ChannelRouter: t.ChannelRouter = mapMangledModuleLazy('"Thread must have a parent ID."', {
-    transitionToChannel: filters.byCode(".preload"),
+    transitionToChannel: filters.byCode(".openTextInVoiceIfVoiceChannel"),
     transitionToThread: filters.byCode('"Thread must have a parent ID."')
 });
 
