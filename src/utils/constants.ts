@@ -678,6 +678,10 @@ export const Devs = /* #__PURE__*/ Object.freeze({
         name: "Kaede",
         id: 1492642701320126504n
     },
+    logix: {
+        name: "logix",
+        id: 804066391614423061n
+    },
     c0nnorgg: {
         name: "c0nnorgg",
         id: 1088882977985003620n,

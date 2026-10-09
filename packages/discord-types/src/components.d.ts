@@ -239,7 +239,7 @@ export type Select = ComponentType<PropsWithChildren<{
     renderOptionValue?(option: SelectOption[]): ReactNode;
 
     "aria-label"?: boolean;
-    "aria-labelledby"?: boolean;
+    "aria-labelledby"?: string;
 }>>;
 
 export type SearchableSelect = ComponentType<PropsWithChildren<{
