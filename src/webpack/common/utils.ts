@@ -96,7 +96,7 @@ export const createToast: t.createToast = findByCodeLazy('variant:"default",icon
  * Show a simple toast. If you need more options, use Toasts.show manually
  */
 export function showToast(message: string, type: t.ToastType = "message", options?: ToastOptions) {
-    Toasts.show(createToast({ message, type, options }));
+    Toasts.show(createToast(message, type, options));
 }
 
 export const UserUtils = {
