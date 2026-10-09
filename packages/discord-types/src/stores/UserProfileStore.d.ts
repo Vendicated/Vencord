@@ -48,6 +48,8 @@ export interface ConnectedAccount {
     name: string;
     verified: boolean;
     metadata?: Record<string, string>;
+    revoked: boolean;
+    showActivity: boolean;
 }
 
 export interface ProfileApplication {
