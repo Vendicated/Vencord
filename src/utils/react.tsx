@@ -140,6 +140,8 @@ interface TimerOpts {
 
 export function useTimer({ interval = 1000, deps = [] }: TimerOpts) {
     const [time, setTime] = useState(0);
+    // use performance.now() over date.now() as the former is monotonic and not
+    // affetted by changes in the system clock (eg: timezone)
     const start = useMemo(() => Math.round(performance.now()), deps);
 
     useEffect(() => {
