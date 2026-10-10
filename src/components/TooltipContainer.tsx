@@ -11,9 +11,9 @@ export function TooltipContainer({ children, ...props }: Omit<TooltipProps, "chi
     return (
         <Tooltip {...props}>
             {tooltipProps =>
-                <div {...tooltipProps}>
+                <span {...tooltipProps}>
                     {children}
-                </div>
+                </span>
             }
         </Tooltip>
     );
