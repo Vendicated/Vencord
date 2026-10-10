@@ -1,0 +1,83 @@
+.vc-better-experiments-refresh-button {
+    margin-top: 4px;
+    margin-bottom: 8px;
+    font-size: 16px;
+}
+
+.vc-better-experiments-experiment-info {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding-top: 12px;
+    background-color: var(--background-secondary);
+    border-radius: 8px;
+    margin-bottom: 12px;
+}
+
+.vc-better-experiments-experiment-info-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.vc-better-experiments-experiment-info-label {
+    color: var(--text-muted);
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.vc-better-experiments-experiment-info-value {
+    color: var(--text-normal);
+    font-size: 14px;
+    font-family: var(--font-code);
+}
+
+.vc-better-experiments-guild-experiment-bucket-name,
+.vc-better-experiments-user-experiment-bucket-name {
+    color: var(--text-primary);
+    padding: 4px 0;
+    font-size: 14px;
+}
+
+.vc-better-experiments-experiment-bucket-icons {
+    display: flex;
+    gap: 4px;
+    margin-top: 4px;
+    flex-flow: row wrap;
+}
+
+.vc-better-experiments-experiment-bucket-icons img,
+.vc-better-experiments-guild-acronym {
+    border-radius: 50%;
+    width: 32px;
+    height: 32px;
+}
+
+.vc-better-experiments-guild-acronym {
+    background-color: var(--background-base-lower);
+    color: var(--text-normal);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    white-space: nowrap;
+    font-weight: 500;
+}
+
+.vc-better-experiments-experiment-bucket-empty {
+    color: var(--text-muted);
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 20px;
+}
+
+.vc-better-experiments-api-provider {
+    padding: 8px;
+}
+
+.vc-better-experiments-api-text {
+    color: var(--text-muted);
+    font-size: 14px;
+}
