@@ -48,6 +48,11 @@ const CopyRawIcon: IconComponent = ({ height = 20, width = 20, className }) => {
     );
 };
 
+// We can't use structuredClone because some objects may contain methods, which cause a DataCloneError.
+function cloneObject<T>(obj: T): T {
+    return JSON.parse(JSON.stringify(obj));
+}
+
 function sortObject<T>(obj: T): T {
     if (!settings.store.sortKeys) return obj;
 
@@ -82,7 +87,7 @@ function redactUser(data: object) {
 }
 
 function cleanMessage(msg: Message) {
-    msg = structuredClone(msg);
+    msg = cloneObject(msg);
     redactUser(msg.author);
 
     // message logger added properties
@@ -168,7 +173,7 @@ function MakeContextCallback(name: "Guild" | "Role" | "User" | "Channel" | "Mess
         const action = isMessage
             ? () => openViewRawModalMessage(value)
             : name === "User"
-                ? () => openViewRawModal(redactUser(structuredClone(value)), name)
+                ? () => openViewRawModal(redactUser(cloneObject(value)), name)
                 : () => openViewRawModal(value, name);
 
         const devContainer = findGroupChildrenByChildId(`devmode-copy-id-${value.id}`, children);
