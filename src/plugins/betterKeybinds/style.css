@@ -1,0 +1,119 @@
+.vc-better-keybinds-groups {
+    display: flex;
+    grid-column: 1 / -1;
+    flex-direction: column;
+    gap: 12px;
+    min-width: 0;
+}
+
+.vc-better-keybinds-help {
+    margin: 0;
+    color: var(--text-muted);
+}
+
+.vc-better-keybinds-group .vc-expandable-card-header {
+    align-items: center;
+    gap: 12px;
+}
+
+.vc-better-keybinds-group-heading {
+    display: flex;
+    flex: 1;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+    text-align: left;
+}
+
+.vc-better-keybinds-group-name {
+    min-width: 0;
+    overflow-wrap: anywhere;
+    font-weight: 600;
+}
+
+.vc-better-keybinds-group-count {
+    padding: 2px 8px;
+    border: 1px solid var(--border-subtle);
+    border-radius: 12px;
+    font-size: 12px;
+    white-space: nowrap;
+}
+
+.vc-better-keybinds-group-status {
+    margin-left: auto;
+    color: var(--text-muted);
+    font-size: 12px;
+    white-space: nowrap;
+}
+
+.vc-better-keybinds-row {
+    position: relative;
+    container-name: vc-better-keybinds-row;
+    container-type: inline-size;
+    contain: layout;
+    min-width: 0;
+}
+
+.vc-better-keybinds-row:focus-within {
+    z-index: 1;
+}
+
+.vc-better-keybinds-groups .vc-better-keybinds-row > * {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto;
+    gap: 12px 16px;
+    min-width: 0;
+}
+
+.vc-better-keybinds-groups .vc-better-keybinds-row > * > * {
+    min-width: 0;
+}
+
+.vc-better-keybinds-row + .vc-better-keybinds-row {
+    padding-top: 16px;
+    margin-top: 16px;
+    border-top: 1px solid var(--border-subtle);
+}
+
+.vc-better-keybinds-assignment {
+    display: flex;
+    grid-column: 1 / -1;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+}
+
+.vc-better-keybinds-assignment-label {
+    flex-shrink: 0;
+    margin: 0;
+}
+
+.vc-better-keybinds-assignment-select {
+    width: 280px;
+    max-width: 100%;
+    min-width: 0;
+}
+
+@container vc-better-keybinds-row (max-width: 520px) {
+    .vc-better-keybinds-groups .vc-better-keybinds-row > * {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .vc-better-keybinds-groups .vc-better-keybinds-row > * > * {
+        grid-column: 1 / -1;
+        padding-top: 0;
+        margin-inline-start: 0;
+    }
+
+    .vc-better-keybinds-assignment {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 8px;
+    }
+
+    .vc-better-keybinds-assignment-select {
+        width: 100%;
+    }
+}
