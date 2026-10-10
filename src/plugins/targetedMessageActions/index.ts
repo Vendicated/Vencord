@@ -16,10 +16,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 import { findStoreLazy } from "@webpack";
 import { ComponentDispatch, MessageStore,UserStore } from "@webpack/common";
-import { Devs } from "@utils/constants";
 
 const PendingReplyStore = findStoreLazy("PendingReplyStore");
 
