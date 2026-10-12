@@ -97,7 +97,7 @@ function ImportModal(props: any & { onImport(script: ActivityUserScript): void; 
         setIsFetching(false);
 
         if (!result.ok) {
-            showToast(`Failed to import UserScript: ${result.error}`, Toasts.Type.FAILURE);
+            showToast(`Failed to import UserScript: ${result.error}`, "failure");
             return;
         }
 
@@ -192,7 +192,7 @@ function ScriptEditor({ script: initialScript, onBack }: { script: ActivityUserS
 
     function openCodeEditor() {
         Native.openEditor(script.id, script.code, `Vencord UserScript Editor - ${getScriptDisplayName(script)}`).catch(error => {
-            showToast(`Failed to open editor: ${error instanceof Error ? error.message : String(error)}`, Toasts.Type.FAILURE);
+            showToast(`Failed to open editor: ${error instanceof Error ? error.message : String(error)}`, "failure");
         });
     }
 
@@ -240,12 +240,12 @@ function ScriptEditor({ script: initialScript, onBack }: { script: ActivityUserS
         setIsCheckingUpdate(false);
 
         if (!result.ok) {
-            showToast(`Failed to check for updates: ${result.error}`, Toasts.Type.FAILURE);
+            showToast(`Failed to check for updates: ${result.error}`, "failure");
             return;
         }
 
         if (result.value === (script.lastImportedCode ?? script.code)) {
-            showToast("UserScript is already up to date.", Toasts.Type.SUCCESS);
+            showToast("UserScript is already up to date.", "success");
             return;
         }
 
