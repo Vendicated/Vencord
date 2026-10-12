@@ -16,7 +16,7 @@ import { Paragraph } from "@components/Paragraph";
 import { Switch } from "@components/Switch";
 import { classNameFactory } from "@utils/css";
 import type { PluginNative } from "@utils/types";
-import { ConfirmModal, Forms, Modal, openModal, showToast, Text, TextInput, Toasts, useEffect, useState } from "@webpack/common";
+import { ConfirmModal, Forms, Modal, openModal, showToast, Text, TextInput, useEffect, useState } from "@webpack/common";
 
 import { getScripts, loadScripts, removeScript, saveScript, settings } from "./settings";
 import { ActivityUserScript, createUserScript, getScriptDisplayName, getScriptEnabled, parseActivityIds, refreshUserScriptMetadata, RunAt, setScriptEnabled } from "./shared";
