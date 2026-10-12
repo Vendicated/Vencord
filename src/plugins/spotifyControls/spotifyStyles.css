@@ -47,14 +47,13 @@
 
 .vc-spotify-repeat-context,
 .vc-spotify-repeat-track,
-.vc-spotify-shuffle-on {
-    background-color: var(--vc-spotify-green-90);
-}
+.vc-spotify-shuffle-on,
+.vc-spotify-repeat-1 {
+    color: var(--vc-spotify-green);
 
-.vc-spotify-repeat-context:hover,
-.vc-spotify-repeat-track:hover,
-.vc-spotify-shuffle-on:hover {
-    background-color: var(--vc-spotify-green-80);
+    :hover {
+        color: var(--vc-spotify-green);
+    }
 }
 
 .vc-spotify-tooltip-text {
