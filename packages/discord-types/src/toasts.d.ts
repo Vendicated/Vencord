@@ -6,16 +6,13 @@ export type ToastType = "message" | "success" | "failure" | "custom" | "clip" | 
 export type NewToastVariant = "default" | "success" | "critical";
 export type NewToastPosition = "top" | "bottom";
 
-export interface ToastData {
-    message: string;
-    type?: ToastType;
-    options?: {
-        position?: ToastPosition;
-        duration?: number;
-    };
+export interface ToastOptions {
+    position?: ToastPosition;
+    duration?: number;
 }
 
-export interface NewToastData {
+/* Can be created via createToast */
+export interface ToastData {
     text: string;
     variant: NewToastVariant;
     position?: NewToastPosition;
@@ -25,9 +22,9 @@ export interface NewToastData {
     iconColor?: any;
 }
 
-export type showToast = (data: NewToastData) => void;
+export type showToast = (data: ToastData) => void;
 export type popToast = (context?: string) => void;
-export type createToast = (data: ToastData) => NewToastData;
+export type createToast = (message: string, type?: ToastType, options?: ToastOptions) => ToastData;
 
 export interface Toasts {
     show: showToast;
