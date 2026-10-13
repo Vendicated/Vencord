@@ -51,13 +51,18 @@ type KeysOfType<Object, Type> = {
 }[keyof Object];
 
 function Switches() {
-    const settings = useSettings(["useQuickCss", "enableReactDevtools", "frameless", "nativeTitleBar", "transparent", "winCtrlQ", "disableMinSize"]);
+    const settings = useSettings(["useQuickCss", "disableHolidayNotifications", "enableReactDevtools", "frameless", "nativeTitleBar", "transparent", "winCtrlQ", "disableMinSize"]);
 
     const Switches = [
         {
             key: "useQuickCss",
             title: "Enable Custom CSS",
             description: "Apply your configured QuickCSS"
+        },
+        {
+            key: "disableHolidayNotifications",
+            title: "Disable Holiday Notifications",
+            description: "Always use Discord's default notification sounds, even when a holiday sound pack is enabled"
         },
         IS_DISCORD_DESKTOP && {
             key: "nativeTitleBar",
