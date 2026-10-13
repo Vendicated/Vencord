@@ -44,7 +44,6 @@ export interface Settings {
     eagerPatches: boolean;
     enabledThemes: string[];
     enableReactDevtools: boolean;
-    disableHolidayNotifications: boolean;
     themeLinks: string[];
     frameless: boolean;
     transparent: boolean;
@@ -102,7 +101,6 @@ const DefaultSettings: Settings = {
     eagerPatches: false, // Eagerly patching no longer works due to module factories with the same id being able to have different sources now.
     enabledThemes: [],
     enableReactDevtools: false,
-    disableHolidayNotifications: false,
     frameless: false,
     transparent: false,
     winCtrlQ: false,
