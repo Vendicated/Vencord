@@ -29,7 +29,6 @@ import { Message } from "@vencord/discord-types";
 import { ChannelStore, MessageStore, SelectedChannelStore, UserStore } from "@webpack/common";
 
 const KEY = "HideMessages_HiddenIds";
-const VERSION = "0.3.3";
 const logger = new Logger("HideMessages");
 
 const settings = definePluginSettings({
@@ -44,7 +43,7 @@ const settings = definePluginSettings({
     },
     showHiddenMessageText: {
         type: OptionType.BOOLEAN,
-        description: "Show a 'Message Hidden' label below hidden messages",
+        description: "Show a 'Message Hidden' label below hidden messages. If you disable this, you can only restore hidden messages by reenabling this option.",
         default: true,
         onChange: refreshCurrentChannel
     }
@@ -110,7 +109,7 @@ async function toggleHide(channelId: string, messageId: string) {
 
 export default definePlugin({
     name: "HideMessages",
-    description: `Hide messages from other users in DMs via a hover button (v${VERSION})`,
+    description: `Hide messages from other users in DMs via a hover button`,
     tags: ["Chat", "Privacy"],
     authors: [Devs.Ven],
     dependencies: ["MessageUpdaterAPI"],
@@ -161,7 +160,7 @@ export default definePlugin({
     },
 
     async start() {
-        logger.info(`Starting HideMessages v${VERSION}`);
+        logger.info(`Starting HideMessages`);
         await getHiddenMessages();
     },
 
