@@ -116,7 +116,7 @@ export function insertTextIntoChatInputBox(text: string) {
 
 export async function copyWithToast(text: string, toastMessage = "Copied to clipboard!") {
     await copyToClipboard(text);
-    showToast(toastMessage, "success");
+    showToast({ text: toastMessage, variant: "success" });
 }
 
 interface MessageOptions {

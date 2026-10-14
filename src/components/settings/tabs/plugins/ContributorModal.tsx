@@ -101,7 +101,7 @@ function ContributorModal({ user, modalProps }: { user: User; modalProps: Render
                             key={p.name}
                             plugin={p}
                             disabled={p.required ?? false}
-                            onRestartNeeded={() => showToast("Restart to apply changes!")}
+                            onRestartNeeded={() => showToast({ text: "Restart to apply changes!" })}
                         />
                     )}
                 </div>

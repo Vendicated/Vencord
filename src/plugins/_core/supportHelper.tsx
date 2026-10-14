@@ -280,12 +280,12 @@ export default definePlugin({
                     onClick={async () => {
                         try {
                             if (await forceUpdate())
-                                showToast("Success! Restarting...", "success");
+                                showToast({ text: "Success! Restarting...", variant: "success" });
                             else
-                                showToast("Already up to date!");
+                                showToast({ text: "Already up to date!" });
                         } catch (e) {
                             new Logger(this.name).error("Error while updating:", e);
-                            showToast("Failed to update :(", "failure");
+                            showToast({ text: "Failed to update :(", variant: "critical" });
                         }
                     }}
                 >

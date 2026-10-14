@@ -137,7 +137,7 @@ export default definePlugin({
         {
             find: "{joinGuild:",
             replacement: {
-                match: /guildId:(\i),lurker:(\i).{0,20}}\)\);/,
+                match: /guildId:(\i),lurker:(\i).{0,20}}\);/,
                 replace: (m, guildId, lurker) => `${m}if(!${lurker})$self.applyDefaultSettings(${guildId});`
             }
         }
