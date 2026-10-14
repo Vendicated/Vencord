@@ -11,3 +11,17 @@
 .vc-hideMessages-hidden [class*="attachments"] {
     display: none;
 }
+
+.vc-hideMessages-hidden.vc-hideMessages-no-label {
+    display: none;
+}
+
+div:has(> .vc-hideMessages-reply) > :not(.vc-hideMessages-reply) {
+    display: none;
+}
+
+.vc-hideMessages-reply {
+    color: var(--text-muted);
+    font-size: 0.875rem;
+    font-style: italic;
+}
