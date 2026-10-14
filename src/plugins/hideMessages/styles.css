@@ -1,0 +1,27 @@
+.vc-hideMessages-accessory {
+    color: var(--text-muted);
+    font-style: italic;
+    font-weight: 400;
+}
+
+.vc-hideMessages-hidden .messageContent,
+.vc-hideMessages-hidden [class*="messageContent"],
+.vc-hideMessages-hidden [class*="markup"],
+.vc-hideMessages-hidden [class*="container"][class*="embed"],
+.vc-hideMessages-hidden [class*="attachments"] {
+    display: none;
+}
+
+.vc-hideMessages-hidden.vc-hideMessages-no-label {
+    display: none;
+}
+
+div:has(> .vc-hideMessages-reply) > :not(.vc-hideMessages-reply) {
+    display: none;
+}
+
+.vc-hideMessages-reply {
+    color: var(--text-muted);
+    font-size: 0.875rem;
+    font-style: italic;
+}
