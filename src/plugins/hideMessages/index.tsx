@@ -26,7 +26,7 @@ import { Devs } from "@utils/constants";
 import { Logger } from "@utils/Logger";
 import definePlugin, { OptionType } from "@utils/types";
 import { Message } from "@vencord/discord-types";
-import { ChannelStore, MessageStore, SelectedChannelStore, UserStore } from "@webpack/common";
+import { ChannelStore, MessageStore, SelectedChannelStore } from "@webpack/common";
 
 const KEY = "HideMessages_HiddenIds";
 const logger = new Logger("HideMessages");
@@ -81,13 +81,10 @@ function isAllowedChannel(channelId: string) {
 
 function canHide(message: Message) {
     const channel = ChannelStore.getChannel(message.channel_id);
-    const currentUser = UserStore.getCurrentUser();
 
     return channel != null
-        && currentUser != null
         && message.author?.id != null
-        && isAllowedChannel(message.channel_id)
-        && message.author.id !== currentUser.id;
+        && isAllowedChannel(message.channel_id);
 }
 
 async function toggleHide(channelId: string, messageId: string) {
@@ -109,7 +106,7 @@ async function toggleHide(channelId: string, messageId: string) {
 
 export default definePlugin({
     name: "HideMessages",
-    description: `Hide messages from other users in DMs via a hover button`,
+    description: `Hide messages via a hover button`,
     tags: ["Chat", "Privacy"],
     authors: [Devs.konne],
     dependencies: ["MessageUpdaterAPI"],
