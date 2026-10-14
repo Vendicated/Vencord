@@ -140,7 +140,7 @@ function sendAudio(blob: Blob, meta: AudioMetadata) {
             }
         });
     });
-    upload.on("error", () => showToast("Failed to upload voice message", "failure"));
+    upload.on("error", () => showToast({ text: "Failed to upload voice message", variant: "critical" }));
 
     upload.upload();
 }
@@ -216,7 +216,7 @@ function VoiceMessageModal({ modalProps }: { modalProps: RenderModalProps; }) {
                 onClick: () => {
                     sendAudio(blob!, meta ?? EMPTY_META);
                     modalProps.onClose();
-                    showToast("Now sending voice message... Please be patient", "clock");
+                    showToast({ text: "Now sending voice message... Please be patient" });
                 },
                 disabled: !blob
             }]}

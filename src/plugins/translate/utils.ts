@@ -89,7 +89,7 @@ export async function translate(kind: "received" | "sent", text: string): Promis
             ? e
             : "Something went wrong. If this issue persists, please check the console or ask for help in the support server.";
 
-        showToast(userMessage, "failure");
+        showToast({ text: userMessage, variant: "critical" });
 
         throw e instanceof Error
             ? e
@@ -131,12 +131,12 @@ function fallbackToGoogle(text: string, sourceLang: string, targetLang: string):
 }
 
 const showDeeplApiQuotaToast = onlyOnce(
-    () => showToast("Deepl API quota exceeded. Falling back to Google Translate", "failure")
+    () => showToast({ text: "Deepl API quota exceeded. Falling back to Google Translate", variant: "critical" })
 );
 
 async function deeplTranslate(text: string, sourceLang: string, targetLang: string): Promise<TranslationValue> {
     if (!settings.store.deeplApiKey) {
-        showToast("DeepL API key is not set. Resetting to Google", "failure");
+        showToast({ text: "DeepL API key is not set. Resetting to Google", variant: "critical" });
 
         settings.store.service = "google";
         resetLanguageDefaults();
