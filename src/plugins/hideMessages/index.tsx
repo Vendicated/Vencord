@@ -97,7 +97,15 @@ async function toggleHide(channelId: string, messageId: string) {
         ids.add(messageId);
 
     await saveHiddenMessages(ids);
+
+    const messages = MessageStore.getMessages(channelId);
     updateMessage(channelId, messageId);
+
+    messages.forEach(message => {
+        const reference = message.messageReference;
+        if (reference?.message_id === messageId)
+            updateMessage(channelId, message.id);
+    });
 }
 
 export default definePlugin({
