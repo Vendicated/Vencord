@@ -21,7 +21,7 @@ import "./styles.css";
 import { get, set } from "@api/DataStore";
 import { updateMessage } from "@api/MessageUpdater";
 import { definePluginSettings } from "@api/Settings";
-import { EyeIcon, ImageInvisible } from "@components/Icons";
+import { EyeIcon, EyeSlashIcon } from "@components/Icons";
 import { Devs } from "@utils/constants";
 import { Logger } from "@utils/Logger";
 import definePlugin, { OptionType } from "@utils/types";
@@ -131,7 +131,7 @@ export default definePlugin({
     }],
 
     messagePopoverButton: {
-        icon: ImageInvisible,
+        icon: EyeSlashIcon,
         render(message) {
             if (!canHide(message)) return null;
 
@@ -139,7 +139,7 @@ export default definePlugin({
 
             return {
                 label: isHidden ? "Show Message" : "Hide Message",
-                icon: isHidden ? EyeIcon : ImageInvisible,
+                icon: isHidden ? EyeIcon : EyeSlashIcon,
                 message,
                 channel: ChannelStore.getChannel(message.channel_id),
                 onClick: () => toggleHide(message.channel_id, message.id)
