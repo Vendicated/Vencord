@@ -29,7 +29,7 @@ import { Message } from "@vencord/discord-types";
 import { ChannelStore, MessageStore, SelectedChannelStore, UserStore } from "@webpack/common";
 
 const KEY = "HideMessages_HiddenIds";
-const VERSION = "0.3.1";
+const VERSION = "0.3.3";
 const logger = new Logger("HideMessages");
 
 const settings = definePluginSettings({
@@ -58,6 +58,13 @@ async function getHiddenMessages() {
 }
 
 const saveHiddenMessages = (ids: Set<string>) => set(KEY, ids);
+
+function ReplyHidden({ referencedMessage }: { referencedMessage?: { state: number; message?: Message; }; }) {
+    const message = referencedMessage?.message;
+    if (referencedMessage?.state !== 0 || message == null || !hiddenMessages.has(message.id) || !isAllowedChannel(message.channel_id)) return null;
+
+    return <span className="vc-hideMessages-reply">{settings.store.showHiddenMessageText ? "Message not found" : ""}</span>;
+}
 
 function refreshCurrentChannel() {
     const channelId = SelectedChannelStore.getChannelId();
@@ -105,7 +112,13 @@ export default definePlugin({
         find: "Message must not be a thread starter message",
         replacement: {
             match: /\)\("li",\{(.+?),className:/,
-            replace: ")(\"li\",{$1,className:($self.shouldHide(arguments[0]?.message?.id,arguments[0]?.message?.channel_id)?\"vc-hideMessages-hidden \":\"\")+"
+            replace: ")(\"li\",{$1,className:($self.shouldHide(arguments[0]?.message?.id,arguments[0]?.message?.channel_id)?(\"vc-hideMessages-hidden \"+($self.shouldShowLabel()?\"\":\"vc-hideMessages-no-label \")):\"\")+"
+        }
+    }, {
+        find: "#{intl::REPLY_QUOTE_MESSAGE_NOT_LOADED}",
+        replacement: {
+            match: /\.onClickReply,.+?}\),(?=\i,\i,\i\])/,
+            replace: "$&$self.ReplyHidden(arguments[0]),"
         }
     }],
 
@@ -131,6 +144,12 @@ export default definePlugin({
         if (!settings.store.showHiddenMessageText) return null;
 
         return <span className="vc-hideMessages-accessory">Message Hidden</span>;
+    },
+
+    ReplyHidden,
+
+    shouldShowLabel() {
+        return settings.store.showHiddenMessageText;
     },
 
     async start() {
