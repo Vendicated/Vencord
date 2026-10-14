@@ -5,7 +5,7 @@
  */
 
 import { ChatBarButton } from "@api/ChatButtons";
-import { UploadIcon } from "@components/Icons";
+import { ClockIcon, UploadIcon } from "@components/Icons";
 import { Devs } from "@utils/constants";
 import { pluralise } from "@utils/misc";
 import definePlugin from "@utils/types";
@@ -47,7 +47,7 @@ async function addAttachments(channelId: string, messageId: string, existingAtta
         return;
     }
 
-    showToast({ text: "Uploading, this can take a while..." });
+    showToast({ text: "Uploading, this can take a while...", icon: ClockIcon, iconColor: "var(--text-default)" });
 
     const { body: { attachments } } = await RestAPI.post({
         url: `/channels/${channelId}/attachments`,
