@@ -51,7 +51,7 @@ type KeysOfType<Object, Type> = {
 }[keyof Object];
 
 function Switches() {
-    const settings = useSettings(["useQuickCss", "enableReactDevtools", "frameless", "winNativeTitleBar", "transparent", "winCtrlQ", "disableMinSize"]);
+    const settings = useSettings(["useQuickCss", "enableReactDevtools", "frameless", "nativeTitleBar", "transparent", "winCtrlQ", "disableMinSize"]);
 
     const Switches = [
         {
@@ -59,15 +59,11 @@ function Switches() {
             title: "Enable Custom CSS",
             description: "Apply your configured QuickCSS"
         },
-        !IS_WEB && (!IS_DISCORD_DESKTOP || !IS_WINDOWS ? {
-            key: "frameless",
-            title: "Disable the window frame",
+        IS_DISCORD_DESKTOP && {
+            key: "nativeTitleBar",
+            title: "Enable the system's title bar in addition to Discord's custom one",
             restartRequired: true
-        } : {
-            key: "winNativeTitleBar",
-            title: "Use Windows' native title bar instead of Discord's custom one",
-            restartRequired: true
-        }),
+        },
         !IS_WEB && {
             key: "transparent",
             title: "Enable window transparency",
