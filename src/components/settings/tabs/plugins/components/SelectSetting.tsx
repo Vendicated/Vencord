@@ -18,7 +18,7 @@
 
 import { isSettingDisabled } from "@api/PluginManager";
 import { PluginSettingSelectDef } from "@utils/types";
-import { React, Select, useState } from "@webpack/common";
+import { React, Select, useEffect, useState } from "@webpack/common";
 
 import { resolveError, SettingProps, SettingsSection } from "./Common";
 
@@ -27,6 +27,11 @@ export function SelectSetting({ setting, pluginSettings, definedSettings, onChan
 
     const [state, setState] = useState<any>(def ?? null);
     const [error, setError] = useState<string | null>(null);
+
+    useEffect(() => {
+        setState(def ?? null);
+        setError(null);
+    }, [def]);
 
     function handleChange(newValue: any) {
         const isValid = setting.isValid?.call(definedSettings, newValue) ?? true;

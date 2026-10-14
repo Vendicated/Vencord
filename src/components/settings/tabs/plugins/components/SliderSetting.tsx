@@ -18,7 +18,7 @@
 
 import { isSettingDisabled } from "@api/PluginManager";
 import { PluginSettingSliderDef } from "@utils/types";
-import { React, Slider, useState } from "@webpack/common";
+import { React, Slider, useEffect, useRef, useState } from "@webpack/common";
 
 import { resolveError, SettingProps, SettingsSection } from "./Common";
 
@@ -26,6 +26,17 @@ export function SliderSetting({ setting, pluginSettings, definedSettings, id, on
     const def = pluginSettings[id] ?? setting.default;
 
     const [error, setError] = useState<string | null>(null);
+    const lastInternalValue = useRef(def);
+    const remountKey = useRef(0);
+
+    if (def !== lastInternalValue.current) {
+        lastInternalValue.current = def;
+        remountKey.current += 1;
+    }
+
+    useEffect(() => {
+        setError(null);
+    }, [def]);
 
     function handleChange(newValue: number): void {
         const isValid = setting.isValid?.call(definedSettings, newValue) ?? true;
@@ -33,6 +44,7 @@ export function SliderSetting({ setting, pluginSettings, definedSettings, id, on
         setError(resolveError(isValid));
 
         if (isValid === true) {
+            lastInternalValue.current = newValue;
             onChange(newValue);
         }
     }
@@ -40,6 +52,7 @@ export function SliderSetting({ setting, pluginSettings, definedSettings, id, on
     return (
         <SettingsSection name={setting.displayName} id={id} description={setting.description} error={error}>
             <Slider
+                key={remountKey.current}
                 markers={setting.markers}
                 minValue={setting.markers[0]}
                 maxValue={setting.markers[setting.markers.length - 1]}
@@ -53,4 +66,3 @@ export function SliderSetting({ setting, pluginSettings, definedSettings, id, on
         </SettingsSection>
     );
 }
-

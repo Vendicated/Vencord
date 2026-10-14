@@ -18,11 +18,9 @@
 
 import { isSettingDisabled } from "@api/PluginManager";
 import { OptionType, PluginSettingBigIntDef, PluginSettingNumberDef } from "@utils/types";
-import { React, TextInput, useState } from "@webpack/common";
+import { React, TextInput, useEffect, useState } from "@webpack/common";
 
 import { resolveError, SettingProps, SettingsSection } from "./Common";
-
-const MAX_SAFE_NUMBER = BigInt(Number.MAX_SAFE_INTEGER);
 
 export function NumberSetting({ setting, pluginSettings, definedSettings, id, onChange }: SettingProps<PluginSettingNumberDef | PluginSettingBigIntDef>) {
     function serialize(value: any) {
@@ -30,23 +28,42 @@ export function NumberSetting({ setting, pluginSettings, definedSettings, id, on
         return Number(value);
     }
 
-    const [state, setState] = useState<any>(`${pluginSettings[id] ?? setting.default ?? 0}`);
+    function canSerialize(value: any) {
+        const str = String(value ?? "").trim();
+        if (!str) return false;
+        if (setting.type === OptionType.BIGINT) {
+            return /^-?\d+$/.test(str);
+        }
+        return Number.isFinite(Number(str));
+    }
+
+    const def = `${pluginSettings[id] ?? setting.default ?? 0}`;
+
+    const [state, setState] = useState<any>(def);
     const [error, setError] = useState<string | null>(null);
 
+    useEffect(() => {
+        setState((prev: any) => {
+            if (canSerialize(prev) && `${serialize(prev)}` === def) {
+                return prev;
+            }
+            return def;
+        });
+        setError(null);
+    }, [def]);
+
     function handleChange(newValue: any) {
-        const isValid = setting.isValid?.call(definedSettings, newValue) ?? true;
+        const isClamped = setting.type === OptionType.NUMBER && Number(newValue) >= Number.MAX_SAFE_INTEGER;
+        const effectiveValue = isClamped ? `${Number.MAX_SAFE_INTEGER}` : newValue;
+        const isValid = setting.isValid?.call(definedSettings, effectiveValue) ?? true;
 
         setError(resolveError(isValid));
 
-        if (isValid === true) {
-            onChange(serialize(newValue));
+        if (isValid === true && canSerialize(effectiveValue)) {
+            onChange(serialize(effectiveValue));
         }
 
-        if (setting.type === OptionType.NUMBER && BigInt(newValue) >= MAX_SAFE_NUMBER) {
-            setState(`${Number.MAX_SAFE_INTEGER}`);
-        } else {
-            setState(newValue);
-        }
+        setState(effectiveValue);
     }
 
     return (

@@ -19,7 +19,7 @@
 import { isSettingDisabled } from "@api/PluginManager";
 import { Switch } from "@components/Switch";
 import { PluginSettingBooleanDef } from "@utils/types";
-import { React, useState } from "@webpack/common";
+import { React, useEffect, useState } from "@webpack/common";
 
 import { resolveError, SettingProps, SettingsSection } from "./Common";
 
@@ -28,6 +28,11 @@ export function BooleanSetting({ setting, pluginSettings, definedSettings, id, o
 
     const [state, setState] = useState(def ?? false);
     const [error, setError] = useState<string | null>(null);
+
+    useEffect(() => {
+        setState(def ?? false);
+        setError(null);
+    }, [def]);
 
     function handleChange(newValue: boolean): void {
         const isValid = setting.isValid?.call(definedSettings, newValue) ?? true;
@@ -50,4 +55,3 @@ export function BooleanSetting({ setting, pluginSettings, definedSettings, id, o
         </SettingsSection>
     );
 }
-
