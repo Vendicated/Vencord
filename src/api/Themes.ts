@@ -26,6 +26,7 @@ import { userStyleRootNode, vencordRootNode } from "./Styles";
 
 let style: HTMLStyleElement;
 let themesStyle: HTMLStyleElement;
+let themeSettingsStyle: HTMLStyleElement;
 
 const themeChangeListeners = new Set<() => void>();
 
@@ -50,6 +51,7 @@ let previousThemeBlobObjectURLs = [] as string[];
 
 async function initThemes() {
     themesStyle ??= createAndAppendStyle("vencord-themes", userStyleRootNode);
+    themeSettingsStyle ??= createAndAppendStyle("vencord-theme-settings", userStyleRootNode);
 
     const { themeLinks, enabledThemes } = Settings;
 
@@ -90,8 +92,31 @@ async function initThemes() {
     }
 
     themesStyle.textContent = links.map(link => `@import url("${link.trim()}");`).join("\n");
+    updateThemeSettings();
     updatePopoutWindows();
     themeChangeListeners.forEach(listener => listener());
+}
+
+/**
+ * Applies the user's theme settings by overriding the custom properties on `:root`.
+ * The style comes after the themes and before QuickCSS, so no `!important` is needed
+ */
+function updateThemeSettings() {
+    const { enabledThemes, themeSettings } = Settings;
+
+    const sheet = new CSSStyleSheet();
+    const rule = sheet.cssRules[sheet.insertRule(":root {}")] as CSSStyleRule;
+
+    for (const theme of enabledThemes) {
+        const values = themeSettings[theme];
+        if (!values) continue;
+
+        for (const [name, value] of Object.entries(values)) {
+            rule.style.setProperty(`--${name}`, value);
+        }
+    }
+
+    themeSettingsStyle.textContent = rule.cssText;
 }
 
 function applyToPopout(popoutWindow: Window | undefined, key: string) {
@@ -114,6 +139,19 @@ function updatePopoutWindows() {
     }
 }
 
+/** Only updates the theme settings style in popouts instead of re-cloning all styles */
+function updatePopoutThemeSettings() {
+    if (!PopoutWindowStore) return;
+
+    for (const key of PopoutWindowStore.getWindowKeys()) {
+        const popoutWindow = PopoutWindowStore.getWindow(key);
+        const popoutStyle = popoutWindow?.document?.getElementById(themeSettingsStyle.id);
+
+        if (popoutStyle) popoutStyle.textContent = themeSettingsStyle.textContent;
+        else applyToPopout(popoutWindow, key);
+    }
+}
+
 document.addEventListener("DOMContentLoaded", () => {
     if (IS_USERSCRIPT) return;
 
@@ -124,6 +162,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
     SettingsStore.addChangeListener("themeLinks", initThemes);
     SettingsStore.addChangeListener("enabledThemes", initThemes);
+    SettingsStore.addPrefixChangeListener("themeSettings", () => {
+        updateThemeSettings();
+        updatePopoutThemeSettings();
+    });
 
     window.addEventListener("message", event => {
         const { discordPopoutEvent } = event.data || {};
