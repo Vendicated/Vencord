@@ -111,7 +111,7 @@ export default definePlugin({
     name: "HideMessages",
     description: `Hide messages from other users in DMs via a hover button`,
     tags: ["Chat", "Privacy"],
-    authors: [Devs.Ven],
+    authors: [Devs.konne],
     dependencies: ["MessageUpdaterAPI"],
     settings,
 
