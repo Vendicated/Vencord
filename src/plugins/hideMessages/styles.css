@@ -1,0 +1,13 @@
+.vc-hideMessages-accessory {
+    color: var(--text-muted);
+    font-style: italic;
+    font-weight: 400;
+}
+
+.vc-hideMessages-hidden .messageContent,
+.vc-hideMessages-hidden [class*="messageContent"],
+.vc-hideMessages-hidden [class*="markup"],
+.vc-hideMessages-hidden [class*="container"][class*="embed"],
+.vc-hideMessages-hidden [class*="attachments"] {
+    display: none;
+}
