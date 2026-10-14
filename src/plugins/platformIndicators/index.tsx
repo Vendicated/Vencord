@@ -153,30 +153,48 @@ function getOwnStatus() {
     }, {} as ClientStatusMap);
 }
 
+function sameClientStatus(a: ClientStatusMap | null, b: ClientStatusMap | null) {
+    if (a === b) return true;
+    if (a == null || b == null) return false;
+
+    const aPlatforms = Object.keys(a);
+    const bPlatforms = Object.keys(b) as DiscordPlatform[];
+    return aPlatforms.length === bPlatforms.length && bPlatforms.every(platform => a[platform] === b[platform]);
+}
+
+function copyClientStatus(clientStatus: ClientStatusMap | undefined): ClientStatusMap | null {
+    if (clientStatus == null) return null;
+
+    const copy: ClientStatusMap = {};
+    for (const [platform, status] of Object.entries(clientStatus) as Array<[DiscordPlatform, OnlineStatus]>) {
+        if (status === "offline" || status === "invisible") continue;
+        copy[platform] = status;
+    }
+
+    return Object.keys(copy).length ? copy : null;
+}
+
+function getUserClientStatus(userId: string): ClientStatusMap | null {
+    const status = PresenceStore.getStatus(userId);
+    if (status === "offline" || status === "invisible") return null;
+    return copyClientStatus(PresenceStore.getClientStatus(userId));
+}
+
 function getBadges({ userId }: BadgeUserArgs): ProfileBadge[] {
     const user = UserStore.getUser(userId);
-
     if (!user || user.bot) return [];
 
-    const status = user.id === AuthenticationStore.getId()
-        ? getOwnStatus()
-        : PresenceStore.getClientStatus(user.id);
+    const isSelf = userId === AuthenticationStore.getId();
+    const status = isSelf ? getOwnStatus() : getUserClientStatus(userId);
+    if (status == null || Object.keys(status).length === 0) return [];
 
-    if (!status) return [];
-
-    return Object.entries(status).map(([platform, status]) => ({
-        key: `vc-platform-indicator-${platform}`,
-        id: `vc-platform-indicator-${platform}`,
-        component: () => (
-            <span key={platform} className="vc-platform-indicator">
-                <PlatformIcon
-                    platform={platform as DiscordPlatform}
-                    status={status}
-                    small={false}
-                />
-            </span>
-        ),
-    }));
+    return [{
+        key: "vc-platform-indicator",
+        id: "vc-platform-indicator",
+        component: () => isSelf
+            ? <CurrentUserPlatformIndicators small={false} />
+            : <OtherUserPlatformIndicators user={user} small={false} />
+    }];
 }
 
 function PlatformIndicators({ statusMap, small }: { statusMap: ClientStatusMap; small: boolean; }) {
@@ -208,12 +226,17 @@ function renderPlatformIndicators(user: User, small: boolean) {
 }
 
 function CurrentUserPlatformIndicators({ small }: { small: boolean; }) {
-    const statusMap = useStateFromStores([SessionsStore], getOwnStatus);
+    const statusMap = useStateFromStores([SessionsStore], getOwnStatus, null, sameClientStatus);
     return statusMap ? <PlatformIndicators statusMap={statusMap} small={small} /> : null;
 }
 
 function OtherUserPlatformIndicators({ user, small = false }: { user: User; small?: boolean; }) {
-    const statusMap = useStateFromStores([PresenceStore], () => PresenceStore.getClientStatus(user.id));
+    const statusMap = useStateFromStores(
+        [PresenceStore],
+        () => getUserClientStatus(user.id),
+        [user.id],
+        sameClientStatus
+    );
     return statusMap ? <PlatformIndicators statusMap={statusMap} small={small} /> : null;
 }
 
@@ -238,6 +261,26 @@ export default definePlugin({
     },
 
     patches: [
+        {
+            // missing or mixed-unit timestamps keep the first snapshot, so a server and a DM can disagree
+            find: 'displayName="PresenceStore"',
+            group: true,
+            replacement: [
+                {
+                    match: /return (\i)>(\i)\|\|\1===\2&&(\i)>(\i)\?t:e/,
+                    replace: "return ($1=($1??0)<1e11?($1??0)*1e3:$1)>($2=($2??0)<1e11?($2??0)*1e3:$2)||$1===$2&&$3>$4?t:e"
+                },
+                {
+                    // still store an offline winner, otherwise an older guild snapshot stays online
+                    match: /(\i)\.status!==(\i\.\i\.OFFLINE)\|\|null!=\1\.hiddenActivities&&\1\.hiddenActivities\.length>0\?\(f\[(\i)\]=\1\.status,/,
+                    replace: "(f[$3]=$1.status,$1.status!==$2)||null!=$1.hiddenActivities&&$1.hiddenActivities.length>0?("
+                },
+                {
+                    match: /null==(\i)\)return f\[(\i)\]\?\?(\i);let (\i)=S\(\2,\1\);return \4\?\.status\?\?\3/,
+                    replace: "null==$1||f[$2]!=null)return f[$2]??$3;let $4=S($2,$1);return $4?.status??$3"
+                }
+            ]
+        },
         {
             find: ".Masks.STATUS_ONLINE_MOBILE",
             predicate: () => settings.store.colorMobileIndicator,
