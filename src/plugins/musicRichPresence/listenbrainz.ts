@@ -137,6 +137,29 @@ async function getUrls(
     return fallback;
 }
 
+interface MbidMappingArtist {
+    artist_credit_name?: string;
+    join_phrase?: string;
+    artist_mbid?: string;
+}
+
+interface MbidMapping {
+    artists?: MbidMappingArtist[];
+}
+
+function buildArtistCredit(mapping?: MbidMapping | null): string | null {
+    const artists = mapping?.artists;
+    if (!Array.isArray(artists) || artists.length === 0) return null;
+
+    const credit = artists
+        .filter(a => typeof a?.artist_credit_name === "string" && a.artist_credit_name.length > 0)
+        .map(a => a.artist_credit_name + (a.join_phrase ?? ""))
+        .join("")
+        .trim();
+
+    return credit || null;
+}
+
 export const ListenBrainzScrobbler: ScrobblerBackend = {
     name: "ListenBrainz",
     id: "listenbrainz",
@@ -150,11 +173,12 @@ export const ListenBrainzScrobbler: ScrobblerBackend = {
             if (!data?.playing_now || !data?.track_metadata)
                 return null;
 
-            const { track_name, artist_name, release_name, additional_info } = data.track_metadata;
+            const { track_name, artist_name, release_name, additional_info, mbid_mapping } = data.track_metadata;
+            const artist = buildArtistCredit(mbid_mapping) ?? artist_name;
 
             const trackData = {
                 name: track_name || "Unknown",
-                artist: artist_name,
+                artist,
                 album: release_name || "Unknown",
                 serviceName: additional_info?.music_service_name || additional_info?.submission_client,
                 ...await getUrls(additional_info, track_name, artist_name, release_name)
