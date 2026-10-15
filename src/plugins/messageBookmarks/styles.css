@@ -1,0 +1,16 @@
+.vc-messageBookmarks-toolbar {
+    color: var(--interactive-icon-default);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.vc-messageBookmarks-toolbar:hover {
+    color: var(--interactive-icon-hover);
+}
+
+.vc-messageBookmarks-toolbar-icon {
+    flex-shrink: 0;
+    display: block;
+}
