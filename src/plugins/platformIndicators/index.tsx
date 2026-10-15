@@ -160,7 +160,9 @@ function getBadges({ userId }: BadgeUserArgs): ProfileBadge[] {
 
     const status = user.id === AuthenticationStore.getId()
         ? getOwnStatus()
-        : PresenceStore.getClientStatus(user.id);
+        : PresenceStore.getStatus(user.id) === "offline"
+            ? null
+            : PresenceStore.getClientStatus(user.id);
 
     if (!status) return [];
 
@@ -213,7 +215,11 @@ function CurrentUserPlatformIndicators({ small }: { small: boolean; }) {
 }
 
 function OtherUserPlatformIndicators({ user, small = false }: { user: User; small?: boolean; }) {
-    const statusMap = useStateFromStores([PresenceStore], () => PresenceStore.getClientStatus(user.id));
+    const statusMap = useStateFromStores(
+        [PresenceStore],
+        () => PresenceStore.getStatus(user.id) === "offline" ? null : PresenceStore.getClientStatus(user.id),
+        [user.id]
+    );
     return statusMap ? <PlatformIndicators statusMap={statusMap} small={small} /> : null;
 }
 
@@ -277,12 +283,35 @@ export default definePlugin({
         },
         {
             find: "}isMobileOnline(",
-            predicate: () => settings.store.colorMobileIndicator,
-            replacement: {
-                // Make isMobileOnline return true no matter what is the user status
-                match: /(?<=\i\[\i\.\i\.MOBILE\])===\i\.\i\.ONLINE/,
-                replace: "!= null"
-            }
+            replacement: [
+                {
+                    // Make isMobileOnline return true no matter what is the user status
+                    predicate: () => settings.store.colorMobileIndicator,
+                    match: /(?<=\i\[\i\.\i\.MOBILE\])===\i\.\i\.ONLINE/,
+                    replace: "!= null"
+                },
+                {
+                    // Fix PresenceStore.setPresenceState failing to update when an existing guild presence has an undefined processedAtTimestamp
+                    match: /let (\i)=(\i\.processedAtTimestamp),(\i)=(\i\.processedAtTimestamp),/,
+                    replace: "let $1=$2??0,$3=$4??0,"
+                },
+                {
+                    match: /processedAtTimestamp:(\i)\}=\i;if\(\i===\i\.default\.getId\(\)\)return!1;let \i=\i===\i\.\i\.OFFLINE.+?,(\i)=\i\[\i\];if\(null==\2\)\{if\(\i\)return!1;\2=\i\[\i\]=\{\}\}/,
+                    replace: "$&$1=$1||Math.max(0,...Object.values($2).map(x=>x.processedAtTimestamp||0))+1;"
+                },
+                {
+                    match: /processedAtTimestamp:(\i)(?=\}=\i;if\(\i===\i\.default\.getId\(\)\)return;)/,
+                    replace: "processedAtTimestamp:$1=0"
+                },
+                {
+                    match: /(?<=GUILD_CREATE.+?)clientStatus:(\i),activities:(\i),hiddenActivities:(\i),processedAtTimestamp:(\i)(?=\}=(\i))/,
+                    replace: "clientStatus:$1=$5.client_status,activities:$2,hiddenActivities:$3=$5.hidden_activities,processedAtTimestamp:$4=$5.processed_at_timestamp"
+                },
+                {
+                    match: /clientStatus:(\i\.presence)\.clientStatus/g,
+                    replace: "clientStatus:$1.clientStatus??$1.client_status"
+                }
+            ]
         }
     ]
 });
