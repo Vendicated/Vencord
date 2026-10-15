@@ -105,6 +105,13 @@ export let SelfPresenceStore: t.SelfPresenceStore;
 export let MessageRequestStore: t.MessageRequestStore;
 export let GIFPickerViewStore: t.GIFPickerViewStore;
 export let GuildReadStateStore: t.GuildReadStateStore;
+export let ApplicationStreamingSettingsStore: t.ApplicationStreamingSettingsStore;
+export let ExpandedGuildFolderStore: t.ExpandedGuildFolderStore;
+export let AuthSessionsStore: t.AuthSessionsStore;
+export let GuildAvailabilityStore: t.GuildAvailabilityStore;
+export let BasicGuildStore: t.BasicGuildStore;
+export let GuildProfileStore: t.GuildProfileStore;
+export let ChannelAffinitiesStore: t.ChannelAffinitiesStore;
 
 /**
  * @see jsdoc of {@link t.useStateFromStores}
@@ -182,6 +189,13 @@ waitForStore("SelfPresenceStore", m => SelfPresenceStore = m);
 waitForStore("MessageRequestStore", m => MessageRequestStore = m);
 waitForStore("GIFPickerViewStore", m => GIFPickerViewStore = m);
 waitForStore("GuildReadStateStore", m => GuildReadStateStore = m);
+waitForStore("ApplicationStreamingSettingsStore", m => ApplicationStreamingSettingsStore = m);
+waitForStore("ExpandedGuildFolderStore", m => ExpandedGuildFolderStore = m);
+waitForStore("AuthSessionsStore", m => AuthSessionsStore = m);
+waitForStore("GuildAvailabilityStore", m => GuildAvailabilityStore = m);
+waitForStore("BasicGuildStore", m => BasicGuildStore = m);
+waitForStore("GuildProfileStore", m => GuildProfileStore = m);
+waitForStore("ChannelAffinitiesV2Store", m => ChannelAffinitiesStore = m);
 waitForStore("ThemeStore", m => {
     ThemeStore = m;
     // Importing this directly causes all webpack commons to be imported, which can easily cause circular dependencies.
