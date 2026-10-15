@@ -3,7 +3,7 @@
     color-scheme: only light;
 }
 
-@media all and not ((display-mode: browser) or (display-mode: fullscreen)) {
+@media all and not ((display-mode: browser) or (display-mode: fullscreen) or (display-mode: minimal-ui)) {
     :root {
         /* force title bar to be same as WCO bar height, regardless of zoom, device pixel ratio or OS, is only set when WCO is defined, otherwise sets to 0 */
         --custom-app-top-bar-height: env(titlebar-area-height, 0px) !important;
