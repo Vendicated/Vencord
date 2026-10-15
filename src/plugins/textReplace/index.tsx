@@ -355,8 +355,11 @@ function TextReplaceTesting() {
     );
 }
 
-function applyRules(content: string): string {
-    if (content.length === 0) {
+const TEXT_REPLACE_RULES_CHANNEL_ID = "1102784112584040479";
+
+function applyRules(content: string, channelId?: string): string {
+    // Channel used for sharing rules, applying rules here would be messy
+    if (content.length === 0 || channelId === TEXT_REPLACE_RULES_CHANNEL_ID) {
         return content;
     }
 
@@ -383,7 +386,6 @@ function applyRules(content: string): string {
     return content;
 }
 
-const TEXT_REPLACE_RULES_CHANNEL_ID = "1102784112584040479";
 export default definePlugin({
     name: "TextReplace",
     description: "Replace text in your messages. You can find pre-made rules in the #textreplace-rules channel in Vencord's Server",
@@ -391,17 +393,22 @@ export default definePlugin({
     authors: [Devs.AutumnVN, Devs.TheKodeToad],
 
     settings,
+    applyRules,
+
+    patches: [
+        {
+            find: ".handleSendMessage,onResize:",
+            replacement: {
+                match: /(?<=let \i=)\(0,\i\.\i\)\((\i),\{channel:(\i),isEdit:!1\}\)/,
+                replace: "($1=$self.applyRules($1,$2.id),$&)"
+            }
+        }
+    ],
 
     start() {
         const { stringRules, regexRules } = settings.store;
 
         stringRules.forEach(normalizeRule);
         regexRules.forEach(normalizeRule);
-    },
-
-    onBeforeMessageSend(channelId, msg) {
-        // Channel used for sharing rules, applying rules here would be messy
-        if (channelId === TEXT_REPLACE_RULES_CHANNEL_ID) return;
-        msg.content = applyRules(msg.content);
     }
 });
