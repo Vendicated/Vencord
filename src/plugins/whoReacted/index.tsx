@@ -124,6 +124,16 @@ const settings = definePluginSettings({
         type: OptionType.BOOLEAN,
         default: true,
         restartNeeded: true
+    },
+    reactionLimit: {
+        description: "Only show for messages with fewer than this many reactions (0 to always show)",
+        type: OptionType.NUMBER,
+        default: 8
+    },
+    reactorLimit: {
+        description: "Only show for messages with fewer than this many unique users who reacted (0 to always show)",
+        type: OptionType.NUMBER,
+        default: 12
     }
 });
 
@@ -131,7 +141,7 @@ export default definePlugin({
     name: "WhoReacted",
     description: "Renders the avatars of users who reacted to a message",
     tags: ["Reactions", "Chat", "Appearance"],
-    authors: [Devs.Ven, Devs.KannaDev, Devs.newwares, Devs.paige],
+    authors: [Devs.Ven, Devs.KannaDev, Devs.newwares, Devs.paige, Devs.BioTomateDE],
     settings,
     patches: [
         {
@@ -171,7 +181,8 @@ export default definePlugin({
             return () => FluxDispatcher.unsubscribe("MESSAGE_REACTION_ADD_USERS", cb);
         }, [message.id, forceUpdate]);
 
-        if (message.reactions.length > 10) return null;
+        const { reactionLimit, reactorLimit } = settings.store;
+        if (reactionLimit !== 0 && message.reactions.length >= reactionLimit) return null;
 
         const reactionMap = getReactionsWithQueue(message, emoji, type);
         let users = Array.from(reactionMap, ([id]) => UserStore.getUser(id)).filter(Boolean);
@@ -179,9 +190,10 @@ export default definePlugin({
         if (isPluginEnabled(NoBlockedMessagesPlugin.name))
             users = users.filter(user => !NoBlockedMessagesPlugin.shouldIgnoreUser(user.id));
 
-        return users.length === 0
-            ? null
-            : <ReactionUsers message={message} users={users} />;
+        if (users.length === 0) return null;  // nothing to render
+        if (reactorLimit !== 0 && users.length >= reactorLimit) return null;
+
+        return <ReactionUsers message={message} users={users} />;
     }, { noop: true }),
 
     setScrollObj(scroll: any) {
