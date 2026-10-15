@@ -248,6 +248,14 @@ export default definePlugin({
             }
         },
         {
+            // Prevent held Escape from repeatedly requesting the latest messages.
+            find: '"esc","shift+pagedown"',
+            replacement: {
+                match: /action\((\i)\)\{/,
+                replace: "$&if($1?.repeat&&$1.key===\"Escape\"&&$self.isActive())return!1;"
+            }
+        },
+        {
             find: "mergePropsAndUpdate_(",
             group: true,
             replacement: [
@@ -275,6 +283,22 @@ export default definePlugin({
                 match: /(?<=channelId:(\i)\.props\.channel\.id,before:\i,after:\i,limit:)Math\.min\(\i\.\i,2\*\(0,\i\.\i\)\("scrollManager\.loadMore"\)\)/,
                 replace: "$self.getMessageCount($&,$1)"
             }
+        },
+        {
+            find: "MessageActionCreators",
+            group: true,
+            replacement: [
+                {
+                    // Use the custom batch size when jumping to a linked message.
+                    match: /(?<=limit:)\i\.\i(?=,jump:\{messageId:)/,
+                    replace: "$self.getMessageCount($&)"
+                },
+                {
+                    // Use the custom batch size when jumping to the latest messages.
+                    match: /jumpToPresent\(\i,(\i)\)\{/,
+                    replace: "$&$1=$self.getMessageCount($1);"
+                }
+            ]
         },
         {
             // Keep visible messages and the preload area when Discord trims its message list.
