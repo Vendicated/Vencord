@@ -14,7 +14,6 @@
 
 .vc-st-format-select {
     margin-bottom: 1em;
-
     --border-subtle: transparent;
 }
 
@@ -36,4 +35,109 @@
 
 .vc-st-preview-text {
     margin-bottom: 1em;
+}
+
+.vc-retime-toggle-group {
+    display: flex;
+    background-color: var(--background-secondary-alt);
+    border-radius: 8px;
+    padding: 4px;
+    margin-bottom: 16px;
+    gap: 4px;
+}
+
+.vc-retime-toggle-btn {
+    flex: 1;
+    padding: 8px 16px;
+    border: none;
+    background: none;
+    color: var(--text-muted);
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    border-radius: 6px;
+    transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.vc-retime-toggle-btn:hover {
+    color: var(--text-normal);
+    background-color: var(--background-modifier-hover);
+}
+
+.vc-retime-toggle-btn.active {
+    color: var(--text-normal);
+    background-color: var(--background-secondary);
+    box-shadow: var(--elevation-low);
+}
+
+.vc-retime-input-group {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 16px;
+}
+
+.vc-retime-input-group label {
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+}
+
+.vc-retime-input {
+    background-color: var(--input-background-default);
+    color: var(--text-default);
+    padding: 10px;
+    border: 1px solid var(--input-background-default);
+    border-radius: 4px;
+    font-size: 15px;
+    outline: none;
+    transition: border-color 0.2s ease;
+}
+
+.vc-retime-input:focus {
+    border-color: var(--brand-experiment);
+}
+
+.vc-retime-select-container {
+    margin-bottom: 8px;
+}
+
+.vc-retime-preview-card {
+    background-color: var(--background-secondary);
+    border-radius: 8px;
+    padding: 12px;
+    margin-bottom: 16px;
+    border: 1px solid var(--background-modifier-accent);
+}
+
+.vc-retime-preview-title {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 6px;
+}
+
+.vc-retime-preview-value {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-normal);
+    margin-bottom: 4px;
+}
+
+.vc-retime-preview-code {
+    font-family: var(--font-code);
+    font-size: 12px;
+    color: var(--text-link);
+    background-color: var(--background-tertiary);
+    padding: 4px 8px;
+    border-radius: 4px;
+    display: inline-block;
+}
+
+.vc-retime-switch-container {
+    margin-top: 12px;
+    border-top: 1px solid var(--background-modifier-accent);
+    padding-top: 12px;
 }
