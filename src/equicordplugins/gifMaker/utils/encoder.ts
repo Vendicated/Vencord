@@ -7,16 +7,17 @@
 import { sleep } from "@utils/misc";
 import type { PluginNative } from "@utils/types";
 import { applyPalette, GIFEncoder, quantize } from "gifenc";
-import { decompressFrames, parseGIF } from "gifuct-js";
+import { decompressFrame, type ParsedFrame,parseGIF } from "gifuct-js";
 
 import { CAPTIONS } from "../captions";
 import { measureTextLines } from "../captions/caption";
 import type { GifMakerOptions } from "../types";
+import { stripDiscordFormatParam } from "./gifPicker";
 
 const MAX_FRAMES = 200;
 const INTERNAL_FPS = 30;
 const PALETTE_COLORS = 255;
-const MAX_GIF_SCAN_BYTES = 524288; // 512KB
+const FETCH_TIMEOUT_MS = 30_000;
 
 const ALLOWED_MEDIA_HOSTS = new Set([
     "cdn.discordapp.com",
@@ -25,6 +26,7 @@ const ALLOWED_MEDIA_HOSTS = new Set([
     "media.discordapp.net",
     "media.tenor.com",
     "tenor.com",
+    "static.klipy.com",
     "media.giphy.com",
     "media0.giphy.com",
     "media1.giphy.com",
@@ -51,7 +53,7 @@ async function fetchFullGifBytes(url: string): Promise<Uint8Array> {
         const { data } = await MediaNative.fetchMedia(resolved);
         return new Uint8Array(data);
     }
-    const res = await fetch(resolved);
+    const res = await fetch(resolved, { signal: AbortSignal.timeout(FETCH_TIMEOUT_MS) });
     if (!res.ok) throw new Error(`fetch failed: ${res.status}`);
     return new Uint8Array(await res.arrayBuffer());
 }
@@ -61,7 +63,7 @@ async function getMediaBlobUrl(url: string): Promise<string> {
         const { data, type } = await MediaNative.fetchMedia(url);
         if (data) return URL.createObjectURL(new Blob([data], { type }));
     }
-    const res = await fetch(url);
+    const res = await fetch(url, { signal: AbortSignal.timeout(FETCH_TIMEOUT_MS) });
     const blob = await res.blob();
     return URL.createObjectURL(blob);
 }
@@ -70,12 +72,13 @@ const mediaProxyParser = /^https:\/\/(?:images-ext-\d+|cdn)\.discord(?:app|cdn)\
 
 function resolveMediaUrl(url: string): string {
     const normalized = url.startsWith("//") ? `https:${url}` : url;
-    const match = normalized.match(mediaProxyParser);
+    const stripped = stripDiscordFormatParam(normalized);
+    const match = stripped.match(mediaProxyParser);
     if (match?.groups) {
         const { protocol, rest } = match.groups;
         return `${decodeURIComponent(protocol)}://${decodeURIComponent(rest)}`;
     }
-    return normalized;
+    return stripped;
 }
 
 export function cleanupBlobUrl(el: HTMLElement) {
@@ -111,10 +114,21 @@ function createVideoElement(src: string): Promise<HTMLVideoElement> {
         v.preload = "auto";
         v.muted = true;
         v.crossOrigin = "anonymous";
+        // mount offscreen in the document: chromium skips frame presentation for
+        // elements never attached or offscreen, so rvfc/waiting on frames hangs (crbug 40727525)
+        v.setAttribute("style", "position:fixed;left:-99999px;top:0;width:1px;height:1px;pointer-events:none;");
+        document.body.append(v);
+
+        const timer = setTimeout(() => {
+            v.remove();
+            reject(new Error("Video load timed out"));
+        }, 60_000);
 
         v.addEventListener("loadedmetadata", () => {
+            clearTimeout(timer);
             const { duration, videoWidth, videoHeight } = v;
             if (!isFinite(duration) || duration <= 0 || !videoWidth || !videoHeight) {
+                v.remove();
                 reject(new Error(`Invalid video: duration=${duration} w=${videoWidth} h=${videoHeight}`));
                 return;
             }
@@ -122,6 +136,8 @@ function createVideoElement(src: string): Promise<HTMLVideoElement> {
         }, { once: true });
 
         v.addEventListener("error", () => {
+            clearTimeout(timer);
+            v.remove();
             reject(new Error(`Video load failed: ${src} (code=${v.error?.code})`));
         }, { once: true });
 
@@ -143,14 +159,15 @@ export function loadVideo(url: string): Promise<HTMLVideoElement> {
     return createVideoElement(resolved);
 }
 
-function waitForSeek(video: HTMLVideoElement): Promise<void> {
-    return new Promise(resolve => {
-        if (video.seeking) {
-            video.addEventListener("seeked", () => resolve(), { once: true });
-        } else {
-            resolve();
-        }
-    });
+async function waitForMediaTime(video: HTMLVideoElement, t: number, isCancelled?: () => boolean): Promise<void> {
+    // poll playback position instead of presented frames: drawImage reads the
+    // decoder's current frame, which never needs compositing (see createVideoElement)
+    while (true) {
+        if (video.error) throw new Error(`Video failed while playing (code=${video.error.code})`);
+        if (isCancelled?.()) throw new Error("Video capture timed out");
+        if (video.ended || video.currentTime >= t) return;
+        await sleep(15);
+    }
 }
 
 export function getCaptionHeight(ctx: CanvasRenderingContext2D, width: number, options: GifMakerOptions): number {
@@ -196,17 +213,18 @@ async function encodeFrames(
         }
 
         frameData.push(ctx.getImageData(0, 0, width, gifHeight).data);
+        if (i % 20 === 19) await sleep(0);
     }
 
-    const totalLength = frameData.reduce((sum, data) => sum + data.length, 0);
-    const combined = new Uint8ClampedArray(totalLength);
-    let offset = 0;
-    for (const data of frameData) {
-        combined.set(data, offset);
-        offset += data.length;
+    // palette from up to 32 evenly spaced frames; the full set doubles peak memory
+    const frameLen = width * gifHeight * 4;
+    const sampleCount = Math.min(frameCount, 32);
+    const samples = new Uint8ClampedArray(sampleCount * frameLen);
+    for (let i = 0; i < sampleCount; i++) {
+        samples.set(frameData[Math.floor((i * frameCount) / sampleCount)], i * frameLen);
     }
 
-    const palette = quantize(combined, PALETTE_COLORS);
+    const palette = quantize(samples, PALETTE_COLORS);
     const gif = GIFEncoder();
 
     for (let i = 0; i < frameCount; i++) {
@@ -215,6 +233,7 @@ async function encodeFrames(
             delay: delays ? delays[i] : defaultDelay,
             palette: i === 0 ? palette : undefined,
         });
+        if (i % 20 === 19) await sleep(0);
     }
 
     gif.finish();
@@ -237,30 +256,55 @@ async function createGifFromVideo(url: string, options: GifMakerOptions): Promis
     const video = await loadVideo(url);
     try {
         const { duration } = video;
-        const frameCount = Math.min(
+        const frameCount = Math.max(1, Math.min(
             Math.floor(duration * INTERNAL_FPS),
             MAX_FRAMES
-        );
+        ));
 
         const interval = duration / frameCount;
         const delay = Math.round(interval * 1000);
         const delays = new Array(frameCount).fill(delay);
 
-        return await encodeFrames(options.width, options.height, options, frameCount, async (ctx, i) => {
-            video.currentTime = i * interval;
-            await waitForSeek(video);
-            ctx.drawImage(video, 0, 0, options.width, options.height);
-        }, delays);
+        // seeking throws MEDIA_ERR_DECODE on discord's gif->mp4 transcodes; play through once and sample rendered frames
+        const rate = Math.min(16, Math.max(1, duration / 8));
+        video.playbackRate = rate;
+        let captureTimer: ReturnType<typeof setTimeout> | undefined;
+        let cancelled = false;
+        let rejectCapture: (err: Error) => void = () => {};
+        const captureTimeout = new Promise<never>((_, reject) => { rejectCapture = reject; });
+        const captureFail = () => {
+            cancelled = true;
+            rejectCapture(new Error("Video capture timed out"));
+        };
+        // encodes can outlast playback, so re-arm the deadline after each sampled frame
+        const bumpDeadline = (ms: number) => {
+            clearTimeout(captureTimer);
+            captureTimer = setTimeout(captureFail, ms);
+        };
+        bumpDeadline(Math.max(30_000, (duration / rate) * 1000 + 15_000));
+        try {
+            return await Promise.race([
+                (async () => {
+                    await video.play();
+                    // wait for the first decoded frame so frame 0 isn't blank
+                    await waitForMediaTime(video, 0.01, () => cancelled);
+                    return encodeFrames(options.width, options.height, options, frameCount, async (ctx, i) => {
+                        if (cancelled) throw new Error("Video capture timed out");
+                        await waitForMediaTime(video, i * interval, () => cancelled);
+                        ctx.drawImage(video, 0, 0, options.width, options.height);
+                        bumpDeadline(30_000);
+                    }, delays);
+                })(),
+                captureTimeout,
+            ]);
+        } finally {
+            clearTimeout(captureTimer);
+            video.pause();
+            video.remove();
+        }
     } finally {
         cleanupBlobUrl(video);
     }
-}
-
-export interface SourceFrameInfo {
-    fps?: number;
-    frameCount?: number;
-    frameWidth: number;
-    frameHeight: number;
 }
 
 function hasExt(url: string, ext: string): boolean {
@@ -276,16 +320,9 @@ function hasExt(url: string, ext: string): boolean {
     }
 }
 
-export async function getSourceFrameInfo(url: string, isVideo: boolean): Promise<SourceFrameInfo | null> {
-    if (isVideo) return getVideoSourceInfo(url);
-    if (hasExt(url, ".gif")) return getGifInfo(url);
-    if (hasExt(url, ".webp")) return getWebpInfo(url);
-    return null;
-}
-
 export async function createGif(url: string, isVideo: boolean, options: GifMakerOptions): Promise<Blob> {
     if (isVideo) return createGifFromVideo(url, options);
-    if (hasExt(url, ".gif")) {
+    if (hasExt(url, ".gif") || hasExt(url, ".webp")) {
         try {
             return await createGifFromAnimatedImage(url, options);
         } catch (err) {
@@ -297,184 +334,84 @@ export async function createGif(url: string, isVideo: boolean, options: GifMaker
     return createGifFromImage(url, options);
 }
 
-export function parseGifBytes(bytes: Uint8Array): SourceFrameInfo | null {
-    if (bytes[0] !== 0x47 || bytes[1] !== 0x49 || bytes[2] !== 0x46) return null;
-
-    const frameWidth = bytes[6] | (bytes[7] << 8);
-    const frameHeight = bytes[8] | (bytes[9] << 8);
-
-    let frameCount = 0;
-    let totalDelay = 0;
-    let delayCount = 0;
-
-    const scanLimit = Math.min(bytes.length, MAX_GIF_SCAN_BYTES);
-    for (let i = 0; i < scanLimit - 8; i++) {
-        if (bytes[i] === 0x2C) {
-            frameCount++;
-            if (frameCount > MAX_FRAMES) break;
-        }
-        if (bytes[i] === 0x21 && bytes[i + 1] === 0xF9 && bytes[i + 2] === 0x04) {
-            const delay = bytes[i + 4] | (bytes[i + 5] << 8);
-            if (delay > 0) {
-                totalDelay += delay;
-                delayCount++;
-            }
-        }
-    }
-
-    if (frameCount > 1 && delayCount > 0) {
-        const avgFps = Math.round(100 / (totalDelay / delayCount));
-        return { fps: Math.max(1, Math.min(60, avgFps)), frameCount, frameWidth, frameHeight };
-    }
+function sniffType(bytes: Uint8Array): string | null {
+    // mp4 boxes start with a size then "ftyp"; extension-based routing lies when klipy serves mp4 as .gif
+    if (bytes.length >= 12 && bytes[4] === 0x66 && bytes[5] === 0x74 && bytes[6] === 0x79 && bytes[7] === 0x70) return "video/mp4";
+    if (bytes.length >= 6 && bytes[0] === 0x47 && bytes[1] === 0x49 && bytes[2] === 0x46) return "image/gif";
+    if (bytes.length >= 12 && bytes[0] === 0x52 && bytes[1] === 0x49 && bytes[2] === 0x46 && bytes[3] === 0x46
+        && bytes[8] === 0x57 && bytes[9] === 0x45 && bytes[10] === 0x42 && bytes[11] === 0x50) return "image/webp";
+    if (bytes.length >= 8 && bytes[0] === 0x89 && bytes[1] === 0x50 && bytes[2] === 0x4e && bytes[3] === 0x47) return "image/png";
     return null;
 }
 
-export async function getGifInfo(url: string): Promise<SourceFrameInfo | null> {
-    try {
-        const resolved = resolveMediaUrl(url);
+type DecodedFrame = { duration: number | null; close(): void; } & CanvasImageSource;
 
-        let bytes: Uint8Array;
-
-        if (MediaNative) {
-            const { data } = await MediaNative.fetchMedia(resolved);
-            bytes = new Uint8Array(data);
-        } else {
-            bytes = await fetchGifBytes(resolved);
-        }
-
-        return parseGifBytes(bytes);
-    } catch {
-        return null;
-    }
+interface ImageDecoderInstance {
+    tracks: { ready: Promise<void>; selectedTrack?: { frameCount: number; }; };
+    decode(options: { frameIndex: number; }): Promise<{ image: DecodedFrame; }>;
+    close(): void;
 }
 
-async function fetchGifBytes(url: string): Promise<Uint8Array> {
-    const res = await fetch(url, {
-        headers: { Range: `bytes=0-${MAX_GIF_SCAN_BYTES}` }
-    });
-    if (res.ok) {
-        return new Uint8Array(await res.arrayBuffer());
-    }
-
-    const full = await fetch(url);
-    if (!full.ok) throw new Error(`fetch failed: ${full.status}`);
-    const reader = full.body?.getReader();
-    if (!reader) return new Uint8Array(await full.arrayBuffer()).slice(0, MAX_GIF_SCAN_BYTES);
-    const chunks: Uint8Array[] = [];
-    let total = 0;
-    while (total < MAX_GIF_SCAN_BYTES) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        chunks.push(value);
-        total += value.length;
-    }
-    reader.cancel();
-    const combined = new Uint8Array(total);
-    let offset = 0;
-    for (const chunk of chunks) {
-        combined.set(chunk, offset);
-        offset += chunk.length;
-    }
-    return combined;
+function getImageDecoderCtor(): (new (init: { data: Uint8Array; type: string; }) => ImageDecoderInstance) | undefined {
+    const ctor: unknown = (globalThis as { ImageDecoder?: unknown; }).ImageDecoder;
+    return typeof ctor === "function"
+        ? ctor as new (init: { data: Uint8Array; type: string; }) => ImageDecoderInstance
+        : undefined;
 }
 
-async function getWebpInfo(url: string): Promise<SourceFrameInfo | null> {
-    if (!MediaNative) return null;
+async function createGifFromDecodableImage(bytes: Uint8Array, type: string, options: GifMakerOptions): Promise<Blob> {
+    const Decoder = getImageDecoderCtor();
+    if (!Decoder) throw new Error("Unsupported animated image format");
+    const decoder = new Decoder({ data: bytes, type });
     try {
-        const resolved = resolveMediaUrl(url);
-        const { data } = await MediaNative.fetchMedia(resolved);
-        const bytes = new Uint8Array(data);
-
-        if (bytes[0] !== 0x52 || bytes[1] !== 0x49 || bytes[2] !== 0x46 || bytes[3] !== 0x46 ||
-            bytes[8] !== 0x57 || bytes[9] !== 0x45 || bytes[10] !== 0x42 || bytes[11] !== 0x50) {
-            return null;
-        }
-
-        let hasAnimation = false;
-        let canvasWidth = 0;
-        let canvasHeight = 0;
-        let frameCount = 0;
-        let totalDelay = 0;
-        let delayCount = 0;
-
-        let offset = 12;
-        while (offset + 8 <= bytes.length) {
-            const chunkSize = bytes[offset + 4] | (bytes[offset + 5] << 8) | (bytes[offset + 6] << 16) | (bytes[offset + 7] << 24);
-            const fourCC = String.fromCharCode(bytes[offset], bytes[offset + 1], bytes[offset + 2], bytes[offset + 3]);
-
-            if (fourCC === "VP8X" && offset + 18 <= bytes.length) {
-                hasAnimation = !!(bytes[offset + 8] & 0x02);
-                canvasWidth = ((bytes[offset + 12] | (bytes[offset + 13] << 8) | (bytes[offset + 14] << 16)) & 0xFFFFFF) + 1;
-                canvasHeight = ((bytes[offset + 15] | (bytes[offset + 16] << 8) | (bytes[offset + 17] << 16)) & 0xFFFFFF) + 1;
-            } else if (fourCC === "ANMF" && offset + 23 <= bytes.length) {
-                frameCount++;
-                const delayMs = bytes[offset + 20] | (bytes[offset + 21] << 8) | (bytes[offset + 22] << 16);
-                if (delayMs > 0) {
-                    totalDelay += delayMs;
-                    delayCount++;
+        await decoder.tracks.ready;
+        const count = Math.min(decoder.tracks.selectedTrack?.frameCount ?? 0, MAX_FRAMES);
+        if (count <= 1) throw new Error("No animated frames found");
+        const delays: number[] = [];
+        // decode one frame at a time inside the draw callback; holding every decoded
+        // frame at once can exceed memory on large sources (200 frames ≈ full bitmaps)
+        return await encodeFrames(
+            options.width, options.height, options, count,
+            async (ctx, i) => {
+                const frame = (await decoder.decode({ frameIndex: i })).image;
+                delays.push(Math.round((frame.duration || 33_333) / 1000)); // VideoFrame.duration is microseconds
+                try {
+                    ctx.drawImage(frame, 0, 0, options.width, options.height);
+                } finally {
+                    frame.close();
                 }
-            }
-
-            offset += 8 + chunkSize;
-            if (chunkSize % 2 === 1) offset++;
-        }
-
-        if (hasAnimation && frameCount > 1 && delayCount > 0) {
-            const avgFps = Math.round(1000 / (totalDelay / delayCount));
-            return { fps: Math.max(1, Math.min(60, avgFps)), frameCount, frameWidth: canvasWidth, frameHeight: canvasHeight };
-        }
-        return null;
-    } catch {
-        return null;
-    }
-}
-
-async function getVideoSourceInfo(url: string): Promise<SourceFrameInfo | null> {
-    try {
-        const resolved = resolveMediaUrl(url);
-        let src: string;
-        let needsCleanup = false;
-
-        if (isDiscordCdnUrl(resolved)) {
-            src = await getMediaBlobUrl(resolved);
-            needsCleanup = true;
-        } else {
-            src = resolved;
-        }
-
-        return new Promise(resolve => {
-            const v = document.createElement("video");
-            v.preload = "metadata";
-            v.muted = true;
-            v.crossOrigin = "anonymous";
-
-            v.addEventListener("loadedmetadata", () => {
-                const info: SourceFrameInfo = { frameWidth: v.videoWidth, frameHeight: v.videoHeight };
-                if (needsCleanup) URL.revokeObjectURL(src);
-                v.remove();
-                resolve(info);
-            }, { once: true });
-
-            v.addEventListener("error", () => {
-                if (needsCleanup) URL.revokeObjectURL(src);
-                v.remove();
-                resolve(null);
-            }, { once: true });
-
-            v.src = src;
-            v.load();
-        });
-    } catch {
-        return null;
+            },
+            delays
+        );
+    } finally {
+        decoder.close();
     }
 }
 
 async function createGifFromAnimatedImage(url: string, options: GifMakerOptions): Promise<Blob> {
     const bytes = await fetchFullGifBytes(url);
-    const parsedGif = parseGIF(bytes.buffer as ArrayBuffer);
-    const frames = decompressFrames(parsedGif, true);
+    const type = sniffType(bytes);
+    if (type === "video/mp4") {
+        // play the already-downloaded bytes instead of re-downloading
+        const blobUrl = URL.createObjectURL(new Blob([bytes.buffer as ArrayBuffer], { type: "video/mp4" }));
+        try {
+            return await createGifFromVideo(blobUrl, options);
+        } finally {
+            URL.revokeObjectURL(blobUrl);
+        }
+    }
+    if (type === "image/gif") return createGifFromParsedImages(bytes, options);
+    if (!type) throw new Error("Unsupported animated image format");
+    return createGifFromDecodableImage(bytes, type, options);
+}
 
-    if (frames.length <= 1) throw new Error("No animated frames found");
+async function createGifFromParsedImages(bytes: Uint8Array, options: GifMakerOptions): Promise<Blob> {
+    const parsedGif = parseGIF(bytes.buffer as ArrayBuffer);
+    const gifFrames = parsedGif.frames
+        .filter((f): f is Parameters<typeof decompressFrame>[0] => "image" in f && !!f.image)
+        .slice(0, MAX_FRAMES);
+
+    if (gifFrames.length <= 1) throw new Error("No animated frames found");
 
     const gifW = parsedGif.lsd.width;
     const gifH = parsedGif.lsd.height;
@@ -487,26 +424,25 @@ async function createGifFromAnimatedImage(url: string, options: GifMakerOptions)
 
     const patchCanvas = document.createElement("canvas");
 
-    const totalFrames = frames.length;
+    const totalFrames = gifFrames.length;
     const rendered: HTMLCanvasElement[] = [];
     const delays: number[] = [];
+    let prev: ParsedFrame | undefined;
+    let restoreState: ImageData | null = null;
 
     for (let i = 0; i < totalFrames; i++) {
-        const frame = frames[i];
+        const frame = decompressFrame(gifFrames[i], parsedGif.gct, true);
         delays.push(frame.delay);
 
-        if (i > 0) {
-            const prev = frames[i - 1];
+        if (prev) {
             if (prev.disposalType === 2) {
                 ctx.clearRect(prev.dims.left, prev.dims.top, prev.dims.width, prev.dims.height);
-            } else if (prev.disposalType === 3 && i > 1) {
-                const prevCtx = rendered[i - 2].getContext("2d");
-                if (prevCtx) {
-                    const prevState = prevCtx.getImageData(0, 0, gifW, gifH);
-                    ctx.putImageData(prevState, 0, 0);
-                }
+            } else if (prev.disposalType === 3 && restoreState) {
+                ctx.putImageData(restoreState, 0, 0);
             }
         }
+
+        if (frame.disposalType === 3) restoreState = ctx.getImageData(0, 0, gifW, gifH);
 
         const patchData = new ImageData(
             new Uint8ClampedArray(frame.patch),
@@ -520,13 +456,15 @@ async function createGifFromAnimatedImage(url: string, options: GifMakerOptions)
         patchCtx.putImageData(patchData, 0, 0);
         ctx.drawImage(patchCanvas, frame.dims.left, frame.dims.top);
 
+        // snapshot at output size; the encode pass draws each frame 1:1 from here
         const snap = document.createElement("canvas");
-        snap.width = gifW;
-        snap.height = gifH;
+        snap.width = options.width;
+        snap.height = options.height;
         const snapCtx = snap.getContext("2d");
         if (!snapCtx) throw new Error("Failed to get canvas context for frame snapshot.");
-        snapCtx.drawImage(composite, 0, 0);
+        snapCtx.drawImage(composite, 0, 0, options.width, options.height);
         rendered.push(snap);
+        prev = frame;
 
         if (i % 20 === 19) {
             await sleep(0);
@@ -536,7 +474,7 @@ async function createGifFromAnimatedImage(url: string, options: GifMakerOptions)
     return await encodeFrames(
         options.width, options.height, options, totalFrames,
         (encodeCtx, i) => {
-            encodeCtx.drawImage(rendered[i], 0, 0, options.width, options.height);
+            encodeCtx.drawImage(rendered[i], 0, 0);
         },
         delays
     );

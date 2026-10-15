@@ -11,6 +11,7 @@ const ALLOWED_MEDIA_HOSTS = new Set([
     "media.discordapp.net",
     "media.tenor.com",
     "tenor.com",
+    "static.klipy.com",
     "media.giphy.com",
     "media0.giphy.com",
     "media1.giphy.com",
@@ -24,7 +25,7 @@ export async function fetchMedia(_: unknown, url: string) {
     if (!parsed || !ALLOWED_MEDIA_HOSTS.has(parsed.hostname))
         throw new Error("Invalid URL");
 
-    const res = await fetch(parsed, { headers: { Accept: "*/*" } });
+    const res = await fetch(parsed, { headers: { Accept: "*/*" }, signal: AbortSignal.timeout(30_000) });
     if (!res.ok) throw new Error(`Server error ${res.status}`);
 
     const blob = await res.blob();

@@ -57,19 +57,23 @@ export function scoreUrl(url: string) {
     if (host.includes("media.discordapp.net") || host.includes("cdn.discordapp.com")) score += 10;
     if (host.endsWith("klipy.com")) score += 5;
     if (host.endsWith("tenor.com")) score += 5;
-    if (url.includes(".gif")) score += 1;
 
     return score;
 }
 
+function mediaExtScore(url: string) {
+    const path = url.split(/[?#]/, 1)[0].toLowerCase();
+    if (/\.(gif|webp|mp4|webm|m4v)$/.test(path)) return 2;
+    if (/\.(png|jpe?g)$/.test(path)) return 1;
+    return 0;
+}
+
 export function orderCandidateUrls(preferred: string | null, candidates: Set<string>) {
-    const all = Array.from(candidates);
-    if (!all.length) return [];
-
-    const rest = preferred ? all.filter(url => url !== preferred) : all;
-    rest.sort((a, b) => scoreUrl(b) - scoreUrl(a));
-
-    return preferred ? [preferred, ...rest] : rest;
+    return Array.from(candidates).sort((a, b) =>
+        mediaExtScore(b) - mediaExtScore(a) ||
+        (a === preferred ? -1 : b === preferred ? 1 : 0) ||
+        scoreUrl(b) - scoreUrl(a)
+    );
 }
 
 export function isLikelyVideoUrl(url: string) {
@@ -82,24 +86,28 @@ export function ensureGifUrl(url: string): string {
     const parsed = new URL(url);
     const host = parsed.hostname;
 
+    // verified against the live CDNs (2026-10): tenor ignores the filename and picks the
+    // format by the id segment's suffix key (mp4 "Po" -> gif "d", thumbnail "P1" -> "AM");
+    // giphy ids are the last dash-separated group of the page path (i.giphy.com/<id>.gif)
     if (host.includes("tenor.com")) {
-        const paths = parsed.pathname.split("/").filter(Boolean);
-        if (paths.length >= 2) {
-            const idSegment = paths[paths.length - 2];
-            paths[paths.length - 2] = idSegment.replace(/[PA].$/, "Ad");
-            paths[paths.length - 1] = "tenor.gif";
-            parsed.pathname = "/" + paths.join("/");
-        }
-        parsed.search = "";
+        const segs = parsed.pathname.split("/").filter(Boolean);
+        const file = segs[segs.length - 1];
+        if (!file || !/\.mp4$/i.test(file)) return url;
+
+        const id = segs[segs.length - 2];
+        const gifId = id.replace(/Po$/, "d").replace(/P1$/, "AM");
+        if (gifId === id) return url;
+
+        segs[segs.length - 2] = gifId;
+        segs[segs.length - 1] = file.replace(/\.mp4$/i, ".gif");
+        parsed.pathname = "/" + segs.join("/");
         return parsed.href;
     }
 
     if (host.includes("giphy.com")) {
-        const paths = parsed.pathname.split("/").filter(Boolean);
-        if (paths.length >= 2) {
-            const gifId = paths[paths.length - 2];
-            return `https://i.giphy.com/${gifId}.gif`;
-        }
+        const last = parsed.pathname.split("/").filter(Boolean).pop();
+        const gifId = last?.split("-").pop() ?? "";
+        if (/^[A-Za-z0-9]{10,}$/.test(gifId)) return `https://i.giphy.com/${gifId}.gif`;
         return url;
     }
 
@@ -111,6 +119,8 @@ export function stripDiscordFormatParam(url: string): string {
     if (/discord(app)?\.(com|net|gg)/i.test(parsed.hostname)) {
         parsed.searchParams.delete("format");
         parsed.searchParams.delete("animated");
+        parsed.searchParams.delete("width");
+        parsed.searchParams.delete("height");
     }
     return parsed.href;
 }

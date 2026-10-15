@@ -8,7 +8,6 @@ import type { GoogleFontMetadata } from "./types";
 
 const loadedFontFamilies = new Set<string>(["Arial"]);
 const loadingFontFamilies = new Map<string, Promise<void>>();
-const fontObjectUrls = new Set<string>();
 
 export const createGoogleFontUrl = (family: string, options = "") =>
     `https://fonts.googleapis.com/css2?family=${encodeURIComponent(family).replace(/%20/g, "+")}${options}&display=swap`;
@@ -56,7 +55,6 @@ async function loadFontFace(family: string, url: string, descriptors: FontFaceDe
         if (!response.ok) return false;
         const blob = await response.blob();
         const objectUrl = URL.createObjectURL(blob);
-        fontObjectUrls.add(objectUrl);
 
         try {
             const font = new FontFace(family, `url(${objectUrl})`, descriptors);
@@ -67,7 +65,6 @@ async function loadFontFace(family: string, url: string, descriptors: FontFaceDe
             return false;
         } finally {
             URL.revokeObjectURL(objectUrl);
-            fontObjectUrls.delete(objectUrl);
         }
     } catch {
         return false;
