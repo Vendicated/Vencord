@@ -422,7 +422,7 @@ export type IpcRes<V = any> = { ok: true; value: V; } | { ok: false, error: any;
 export type PluginNative<PluginExports extends Record<string, (event: Electron.IpcMainInvokeEvent, ...args: any[]) => any>> = {
     [key in keyof PluginExports]:
     PluginExports[key] extends (event: Electron.IpcMainInvokeEvent, ...args: infer Args) => infer Return
-    ? (...args: Args) => Return extends Promise<any> ? Return : Promise<Return>
+    ? (...args: Args) => Return
     : never;
 };
 
