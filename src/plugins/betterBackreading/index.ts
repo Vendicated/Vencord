@@ -9,6 +9,10 @@ import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { ChannelMessages } from "@vencord/discord-types";
 
+interface GuardedMessages extends ChannelMessages {
+    readonly betterBackreadingTrimGuard?: boolean;
+}
+
 interface ScrollAnchor {
     id: string;
     offsetTop: number;
@@ -17,7 +21,7 @@ interface ScrollAnchor {
 }
 
 interface ScrollManager {
-    props: { messages: ChannelMessages; };
+    props: { messages: GuardedMessages; };
     ref: { current: { getScrollerNode(): HTMLElement | null; } | null; };
     messageFetchAnchor: ScrollAnchor | null;
     automaticAnchor: ScrollAnchor | null;
@@ -87,20 +91,30 @@ export default definePlugin({
     settings,
     scrollManagers,
 
+    isActive(manager?: ScrollManager): boolean {
+        if (manager) {
+            return scrollManagers.has(manager) && manager.props.messages.betterBackreadingTrimGuard === true;
+        }
+
+        return Array.from(scrollManagers).some(manager => this.isActive(manager));
+    },
+
     getImageScrollMargin() {
-        return `${Math.min(boundedInteger(settings.store.imageScrollMargin, 300, 3000, 1500), this.getLoadMoreBuffer())}px`;
+        const imageScrollMargin = boundedInteger(settings.store.imageScrollMargin, 300, 3000, 1500);
+        const messageLoadBuffer = boundedInteger(settings.store.messageLoadBuffer, 500, 3000, 1500);
+        return `${Math.min(imageScrollMargin, messageLoadBuffer)}px`;
     },
 
-    getLoadMoreBuffer() {
-        return boundedInteger(settings.store.messageLoadBuffer, 500, 3000, 1500);
+    getLoadMoreBuffer(manager?: ScrollManager) {
+        return this.isActive(manager) ? boundedInteger(settings.store.messageLoadBuffer, 500, 3000, 1500) : 500;
     },
 
-    getMessageCount(nativeCount: number) {
-        return settings.store.useDiscordMessageCount ? nativeCount : getCustomMessageCount();
+    getMessageCount(nativeCount: number, manager?: ScrollManager) {
+        return !this.isActive(manager) || settings.store.useDiscordMessageCount ? nativeCount : getCustomMessageCount();
     },
 
     getWindowThreshold(nativeThreshold: number) {
-        return settings.store.useDiscordMessageCount ? nativeThreshold : Math.max(nativeThreshold, 4 * getCustomMessageCount());
+        return !this.isActive() || settings.store.useDiscordMessageCount ? nativeThreshold : Math.max(nativeThreshold, 4 * getCustomMessageCount());
     },
 
     getAutomaticAnchorScrollTop(manager: ScrollManager, anchor: ScrollAnchor, fallback: number) {
@@ -123,7 +137,11 @@ export default definePlugin({
         return target;
     },
 
-    getWindowTarget(nativeTarget: number, messages: ChannelMessages, edge: "Top" | "Bottom") {
+    getWindowTarget(nativeTarget: number, messages: GuardedMessages, edge: "Top" | "Bottom") {
+        if (!this.isActive() || messages.betterBackreadingTrimGuard !== true) {
+            return nativeTarget;
+        }
+
         const minimum = settings.store.useDiscordMessageCount ? nativeTarget : Math.max(nativeTarget, 2 * getCustomMessageCount());
         const target = Math.max(minimum, Math.ceil(messages.length / 2));
 
@@ -183,17 +201,17 @@ export default definePlugin({
                 {
                     // Keep the saved anchor offset current while the user scrolls, preventing height correction rubberbanding.
                     match: /(this\.updateAutomaticAnchor\(\i\.scrollTop),!0(?=\):this\.setAutomaticAnchor)/,
-                    replace: "$1"
+                    replace: "$1,!$self.isActive(this)"
                 },
                 {
                     // Remember where the saved message was before an embed changed height.
                     match: /(\i)\.offsetFromTop=this\.automaticAnchor\.offsetFromTop(?=\))/,
-                    replace: "$&,$1.offsetTop=this.automaticAnchor.offsetTop"
+                    replace: "$&,$self.isActive(this)&&($1.offsetTop=this.automaticAnchor.offsetTop)"
                 },
                 {
                     // Keep ongoing scrolling when correcting for embed height changes.
                     match: /(?<=fixedScrollTop:)\i\.offsetTop-\((\i)\.offsetFromTop\+\i\)/,
-                    replace: "$1===this.automaticAnchor?$self.getAutomaticAnchorScrollTop(this,$1,$&):$&"
+                    replace: "$self.isActive(this)&&$1===this.automaticAnchor?$self.getAutomaticAnchorScrollTop(this,$1,$&):$&"
                 }
             ]
         },
@@ -212,12 +230,12 @@ export default definePlugin({
                 {
                     // Request messages earlier as scrolling approaches a loading boundary.
                     match: /500(?=;return \i\.hasMoreAfter)|(?<=\i\.hasMoreAfter\?\i-\i-\i-)500/g,
-                    replace: "$self.getLoadMoreBuffer()"
+                    replace: "$self.getLoadMoreBuffer(this)"
                 },
                 {
                     // Include unread history without changing where Discord restores the unread view.
                     match: /(\i<=this\.getOffsetToTriggerLoading\("top",\i\))(?=&&\i>\i\?1:)/,
-                    replace: "$1+(this.props.hasUnreads?$self.getLoadMoreBuffer():0)"
+                    replace: "$1+(this.props.hasUnreads&&$self.isActive(this)?$self.getLoadMoreBuffer(this):0)"
                 }
             ]
         },
@@ -226,7 +244,7 @@ export default definePlugin({
             find: "handleScrollSpeed(",
             replacement: {
                 match: /([12]===\i&&)(?=\i\+\i[<>]=)/g,
-                replace: "$1!this.isLoading()&&"
+                replace: "$1(!$self.isActive(this)||!this.isLoading())&&"
             }
         },
         {
@@ -236,7 +254,7 @@ export default definePlugin({
                 {
                     // Notice when loading a new batch also discards messages from the other end.
                     match: /(mergePropsAndUpdate_\((\i)\)\{let (\i)=this\.props\.messages)/,
-                    replace: "$1,betterBackreadingSmoothScrollWindowShifted=$3.length>0&&$2.messages.length>0&&$3.first()?.id!==$2.messages.first()?.id&&$3.last()?.id!==$2.messages.last()?.id"
+                    replace: "$1,betterBackreadingSmoothScrollWindowShifted=$self.isActive(this)&&$3.length>0&&$2.messages.length>0&&$3.first()?.id!==$2.messages.first()?.id&&$3.last()?.id!==$2.messages.last()?.id"
                 },
                 {
                     // Allow fast middle-click scrolling through messages without getting stuck in a placeholder boundary.
@@ -254,22 +272,33 @@ export default definePlugin({
             // Choose how many messages are fetched with each history request.
             find: '"scrollManager.loadMore"',
             replacement: {
-                match: /Math\.min\(\i\.\i,2\*\(0,\i\.\i\)\("scrollManager\.loadMore"\)\)/,
-                replace: "$self.getMessageCount($&)"
+                match: /(?<=channelId:(\i)\.props\.channel\.id,before:\i,after:\i,limit:)Math\.min\(\i\.\i,2\*\(0,\i\.\i\)\("scrollManager\.loadMore"\)\)/,
+                replace: "$self.getMessageCount($&,$1)"
             }
         },
         {
             // Keep visible messages and the preload area when Discord trims its message list.
+            // Also, register a flag indicating this group applied successfully. Without this group,
+            // the earlier message preloading in conjunction with post-request truncation can result
+            // in visible messages being discarded and more being requested in a loop.
             find: "truncateBottom(",
             group: true,
             replacement: [
                 {
-                    match: /(?<=this\.length(?:<=|>))\i\.\i(?=\?)/g,
+                    match: /(?<=this\.length<=)\i\.\i(?=\?)/,
                     replace: "$self.getWindowThreshold($&)"
                 },
                 {
-                    match: /(\i)\.truncate(Top|Bottom)\((\i\.\i)/g,
-                    replace: "$1.truncate$2($self.getWindowTarget($3,$1,\"$2\")"
+                    match: /(?<=this\.length>)\i\.\i(?=\?)/,
+                    replace: "$self.getWindowThreshold($&)"
+                },
+                {
+                    match: /truncateTop\((\i)\)\{/,
+                    replace: "get betterBackreadingTrimGuard(){return true;}$&$1=$self.getWindowTarget($1,this,\"Top\");"
+                },
+                {
+                    match: /truncateBottom\((\i)\)\{/,
+                    replace: "$&$1=$self.getWindowTarget($1,this,\"Bottom\");"
                 }
             ]
         },
