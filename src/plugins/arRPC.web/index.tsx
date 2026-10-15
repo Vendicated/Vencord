@@ -89,7 +89,7 @@ export default definePlugin({
             return;
         }
 
-        showToast("Connected to arRPC", "success");
+        showToast({ text: "Connected to arRPC", variant: "success" });
     },
 
     stop() {
