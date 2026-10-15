@@ -301,6 +301,14 @@ export default definePlugin({
             ]
         },
         {
+            // Request archived forum posts in the sort order selected instead of always by most recently active.
+            find: 'sort_by:"last_message_time"',
+            replacement: {
+                match: /(sortOrder:(\i).{0,100}sort_by:)"last_message_time"/,
+                replace: '$1$2===1?"creation_time":"last_message_time"'
+            }
+        },
+        {
             // Keep visible messages and the preload area when Discord trims its message list.
             // Also, register a flag indicating this group applied successfully. Without this group,
             // the earlier message preloading in conjunction with post-request truncation can result
