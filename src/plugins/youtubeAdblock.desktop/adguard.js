@@ -22,199 +22,90 @@
     if (window.adguardInjected) return;
     window.adguardInjected = true;
 
-    const hiddenCSS = [
-        "#__ffYoutube1",
-        "#__ffYoutube2",
-        "#__ffYoutube3",
-        "#__ffYoutube4",
-        "#feed-pyv-container",
-        "#feedmodule-PRO",
-        "#homepage-chrome-side-promo",
-        "#merch-shelf",
-        "#offer-module",
-        '#pla-shelf > ytd-pla-shelf-renderer[class="style-scope ytd-watch"]',
-        "#pla-shelf",
-        "#premium-yva",
-        "#promo-info",
-        "#promo-list",
-        "#promotion-shelf",
-        "#related > ytd-watch-next-secondary-results-renderer > #items > ytd-compact-promoted-video-renderer.ytd-watch-next-secondary-results-renderer",
-        "#search-pva",
-        "#shelf-pyv-container",
-        "#video-masthead",
-        "#watch-branded-actions",
-        "#watch-buy-urls",
-        "#watch-channel-brand-div",
-        "#watch7-branded-banner",
-        "#YtKevlarVisibilityIdentifier",
-        "#YtSparklesVisibilityIdentifier",
-        ".carousel-offer-url-container",
-        ".companion-ad-container",
-        ".GoogleActiveViewElement",
-        '.list-view[style="margin: 7px 0pt;"]',
-        ".promoted-sparkles-text-search-root-container",
-        ".promoted-videos",
-        ".searchView.list-view",
-        ".sparkles-light-cta",
-        ".watch-extra-info-column",
-        ".watch-extra-info-right",
-        ".ytd-carousel-ad-renderer",
-        ".ytd-compact-promoted-video-renderer",
-        ".ytd-companion-slot-renderer",
-        ".ytd-merch-shelf-renderer",
-        ".ytd-player-legacy-desktop-watch-ads-renderer",
-        ".ytd-promoted-sparkles-text-search-renderer",
-        ".ytd-promoted-video-renderer",
-        ".ytd-search-pyv-renderer",
-        ".ytd-video-masthead-ad-v3-renderer",
-        ".ytp-ad-action-interstitial-background-container",
-        ".ytp-ad-action-interstitial-slot",
-        ".ytp-ad-image-overlay",
-        ".ytp-ad-overlay-container",
-        ".ytp-ad-progress",
-        ".ytp-ad-progress-list",
-        '[class*="ytd-display-ad-"]',
-        '[layout*="display-ad-"]',
-        'a[href^="http://www.youtube.com/cthru?"]',
-        'a[href^="https://www.youtube.com/cthru?"]',
-        "ytd-action-companion-ad-renderer",
-        "ytd-banner-promo-renderer",
-        "ytd-compact-promoted-video-renderer",
-        "ytd-companion-slot-renderer",
-        "ytd-display-ad-renderer",
-        "ytd-promoted-sparkles-text-search-renderer",
-        "ytd-promoted-sparkles-web-renderer",
-        "ytd-search-pyv-renderer",
-        "ytd-single-option-survey-renderer",
-        "ytd-video-masthead-ad-advertiser-info-renderer",
-        "ytd-video-masthead-ad-v3-renderer",
-        "YTM-PROMOTED-VIDEO-RENDERER",
-    ];
-    /**
-     * Adds CSS to the page
-     */
-    const hideElements = () => {
-        const selectors = hiddenCSS;
-        if (!selectors) {
-            return;
-        }
-        const rule = selectors.join(", ") + " { display: none!important; }";
-        const style = document.createElement("style");
-        style.textContent = rule;
-        document.head.appendChild(style);
-    };
-    /**
-     * Calls the "callback" function on every DOM change, but not for the tracked events
-     * @param {Function} callback callback function
-     */
-    const observeDomChanges = callback => {
-        const domMutationObserver = new MutationObserver(mutations => {
-            callback(mutations);
-        });
-        domMutationObserver.observe(document.documentElement, {
-            childList: true,
-            subtree: true,
-        });
-    };
-    /**
-     * This function is supposed to be called on every DOM change
-     */
-    const hideDynamicAds = () => {
-        const elements = document.querySelectorAll("#contents > ytd-rich-item-renderer ytd-display-ad-renderer");
-        if (elements.length === 0) {
-            return;
-        }
-        elements.forEach(el => {
-            if (el.parentNode && el.parentNode.parentNode) {
-                const parent = el.parentNode.parentNode;
-                if (parent.localName === "ytd-rich-item-renderer") {
-                    parent.style.display = "none";
-                }
-            }
-        });
-    };
-    /**
-     * This function checks if the video ads are currently running
-     * and auto-clicks the skip button.
-     */
-    const autoSkipAds = () => {
-        // If there's a video that plays the ad at this moment, scroll this ad
-        if (document.querySelector(".ad-showing")) {
-            const video = document.querySelector("video");
-            if (video && video.duration) {
-                video.currentTime = video.duration;
-                // Skip button should appear after that,
-                // now simply click it automatically
-                setTimeout(() => {
-                    const skipBtn = document.querySelector("button.ytp-ad-skip-button");
-                    if (skipBtn) {
-                        skipBtn.click();
-                    }
-                }, 100);
+    const nativeParse = JSON.parse;
+    const hasAdKeys = text => /"(?:adPlacements|playerAds|adSlots)"\s*:|\\u/.test(text);
+    const pruneAds = (value, seen = new WeakSet()) => {
+        if (!value || typeof value !== "object" || seen.has(value)) return value;
+        seen.add(value);
+
+        for (const key of Object.keys(value)) {
+            if (key === "adSlots") {
+                // The embed player loads its ad module even when adSlots is an empty array.
+                delete value[key];
+            } else if (key === "adPlacements" || key === "playerAds") {
+                value[key] = [];
+            } else {
+                pruneAds(value[key], seen);
             }
         }
+        return value;
     };
-    /**
-     * This function overrides a property on the specified object.
-     *
-     * @param {object} obj object to look for properties in
-     * @param {string} propertyName property to override
-     * @param {*} overrideValue value to set
-     */
-    const overrideObject = (obj, propertyName, overrideValue) => {
-        if (!obj) {
-            return false;
+
+    JSON.parse = new Proxy(nativeParse, {
+        apply(target, receiver, args) {
+            const value = Reflect.apply(target, receiver, args);
+            return typeof args[0] !== "string" || hasAdKeys(args[0]) ? pruneAds(value) : value;
         }
-        let overriden = false;
-        for (const key in obj) {
-            if (obj.hasOwnProperty(key) && key === propertyName) {
-                obj[key] = overrideValue;
-                overriden = true;
-            } else if (obj.hasOwnProperty(key) && typeof obj[key] === "object") {
-                if (overrideObject(obj[key], propertyName, overrideValue)) {
-                    overriden = true;
-                }
-            }
-        }
-        return overriden;
-    };
-    /**
-     * Overrides JSON.parse and Response.json functions.
-     * Examines these functions arguments, looks for properties with the specified name there
-     * and if it exists, changes it's value to what was specified.
-     *
-     * @param {string} propertyName name of the property
-     * @param {*} overrideValue new value for the property
-     */
-    const jsonOverride = (propertyName, overrideValue) => {
-        const nativeJSONParse = JSON.parse;
-        JSON.parse = (...args) => {
-            const obj = nativeJSONParse.apply(this, args);
-            // Override it's props and return back to the caller
-            overrideObject(obj, propertyName, overrideValue);
-            return obj;
-        };
-        // Override Response.prototype.json
-        Response.prototype.json = new Proxy(Response.prototype.json, {
-            async apply(...args) {
-                // Call the target function, get the original Promise
-                const result = await Reflect.apply(...args);
-                // Create a new one and override the JSON inside
-                overrideObject(result, propertyName, overrideValue);
-                return result;
-            },
-        });
-    };
-    // Removes ads metadata from YouTube XHR requests
-    jsonOverride("adPlacements", []);
-    jsonOverride("playerAds", []);
-    // Applies CSS that hides YouTube ad elements
-    hideElements();
-    // Some changes should be re-evaluated on every page change
-    hideDynamicAds();
-    autoSkipAds();
-    observeDomChanges(() => {
-        hideDynamicAds();
-        autoSkipAds();
     });
+    const isPlayerResponse = url => /^https:\/\/(?:www\.)?youtube(?:-nocookie)?\.com\/youtubei\/v\d+\/(?:player|get_watch)(?:\?|$)/.test(url);
+    Response.prototype.json = new Proxy(Response.prototype.json, {
+        async apply(target, receiver, args) {
+            const value = await Reflect.apply(target, receiver, args);
+            return isPlayerResponse(receiver.url) ? pruneAds(value) : value;
+        }
+    });
+
+    const pruneText = text => {
+        if (!hasAdKeys(text)) return text;
+        try {
+            const value = nativeParse(text);
+            return JSON.stringify(pruneAds(value));
+        } catch {
+            return text;
+        }
+    };
+
+    // YouTube can parse response text using a saved reference to JSON.parse.
+    Response.prototype.text = new Proxy(Response.prototype.text, {
+        async apply(target, receiver, args) {
+            const text = await Reflect.apply(target, receiver, args);
+            return isPlayerResponse(receiver.url) ? pruneText(text) : text;
+        }
+    });
+    const responseCache = new WeakMap();
+    for (const property of ["response", "responseText"]) {
+        const descriptor = Object.getOwnPropertyDescriptor(XMLHttpRequest.prototype, property);
+        Object.defineProperty(XMLHttpRequest.prototype, property, {
+            ...descriptor,
+            get() {
+                const value = Reflect.apply(descriptor.get, this, []);
+                if (!isPlayerResponse(this.responseURL)) return value;
+                if (property === "response" && this.responseType === "json") return pruneAds(value);
+                if (typeof value !== "string") return value;
+                const cached = responseCache.get(this);
+                if (cached?.value === value) return cached.text;
+                const text = pruneText(value);
+                responseCache.set(this, { value, text });
+                return text;
+            }
+        });
+    }
+
+    // Inline bootstrap data does not pass through JSON.parse or fetch.
+    const descriptor = Object.getOwnPropertyDescriptor(window, "ytInitialPlayerResponse");
+    if (!descriptor || (descriptor.configurable && "value" in descriptor)) {
+        let response = pruneAds(window.ytInitialPlayerResponse);
+        Object.defineProperty(window, "ytInitialPlayerResponse", {
+            configurable: true,
+            enumerable: descriptor?.enumerable ?? true,
+            get: () => response,
+            set: value => { response = pruneAds(value); }
+        });
+    } else {
+        pruneAds(window.ytInitialPlayerResponse);
+    }
+
+    // shortcut: ads already consumed before injection cannot be removed, reopen the embed after enabling the plugin.
+    const args = window.ytplayer?.config?.args;
+    if (typeof args?.player_response === "string") args.player_response = pruneText(args.player_response);
 })();
