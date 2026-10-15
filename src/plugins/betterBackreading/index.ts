@@ -336,12 +336,13 @@ export default definePlugin({
         },
         {
             // Read each open chat's current viewport when deciding which messages can be discarded.
+            // Keep tracking a chat view when Discord hides it and shows it again.
             find: "getOffsetToTriggerLoading(",
             group: true,
             replacement: [
                 {
-                    match: /(constructor\((\i)\)\{)(?=if\(this\.props=\2,this\.loading=)/,
-                    replace: "$1$self.scrollManagers.add(this);"
+                    match: /mergePropsAndUpdate\(\i\)\{/,
+                    replace: "$&$self.scrollManagers.add(this);"
                 },
                 {
                     match: /cleanup\(\)\{(?=this\.acking=)/,
