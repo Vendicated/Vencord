@@ -9,13 +9,20 @@ import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { ChannelMessages } from "@vencord/discord-types";
 
+interface ScrollAnchor {
+    id: string;
+    offsetTop: number;
+    offsetFromTop: number;
+    offsetHeight: number;
+}
+
 interface ScrollManager {
     props: { messages: ChannelMessages; };
     ref: { current: { getScrollerNode(): HTMLElement | null; } | null; };
-    messageFetchAnchor: { id: string; } | null;
-    automaticAnchor: { id: string; } | null;
-    getScrollerState(): { scrollTop: number; offsetHeight: number; };
-    getAnchorData(id: string, scrollTop: number): { offsetFromTop: number; offsetHeight: number; } | null;
+    messageFetchAnchor: ScrollAnchor | null;
+    automaticAnchor: ScrollAnchor | null;
+    getScrollerState(): { scrollTop: number; scrollHeight: number; offsetHeight: number; };
+    getAnchorData(id: string, scrollTop: number): ScrollAnchor | null;
 }
 
 const scrollManagers = new Set<ScrollManager>();
@@ -96,6 +103,26 @@ export default definePlugin({
         return settings.store.useDiscordMessageCount ? nativeThreshold : Math.max(nativeThreshold, 4 * getCustomMessageCount());
     },
 
+    getAutomaticAnchorScrollTop(manager: ScrollManager, anchor: ScrollAnchor, fallback: number) {
+        const { scrollTop, scrollHeight, offsetHeight } = manager.getScrollerState();
+        const current = manager.getAnchorData(anchor.id, scrollTop);
+
+        if (!current) {
+            return fallback;
+        }
+
+        // Shorter content can force the scrollbar upward without the user scrolling.
+        const maximum = Math.max(0, scrollHeight - offsetHeight);
+        const savedScrollTop = Math.min(maximum, Math.max(0, anchor.offsetTop - anchor.offsetFromTop));
+        const target = current.offsetTop - anchor.offsetFromTop + scrollTop - savedScrollTop;
+
+        // Record the correction before it can trigger another resize callback.
+        anchor.offsetTop = current.offsetTop;
+        anchor.offsetFromTop = current.offsetTop - target;
+
+        return target;
+    },
+
     getWindowTarget(nativeTarget: number, messages: ChannelMessages, edge: "Top" | "Bottom") {
         const minimum = settings.store.useDiscordMessageCount ? nativeTarget : Math.max(nativeTarget, 2 * getCustomMessageCount());
         const target = Math.max(minimum, Math.ceil(messages.length / 2));
@@ -150,12 +177,25 @@ export default definePlugin({
 
     patches: [
         {
-            // Keep the saved anchor offset current while the user scrolls, preventing height correction rubberbanding.
             find: "updateAutomaticAnchor(",
-            replacement: {
-                match: /(this\.updateAutomaticAnchor\(\i\.scrollTop),!0(?=\):this\.setAutomaticAnchor)/,
-                replace: "$1"
-            }
+            group: true,
+            replacement: [
+                {
+                    // Keep the saved anchor offset current while the user scrolls, preventing height correction rubberbanding.
+                    match: /(this\.updateAutomaticAnchor\(\i\.scrollTop),!0(?=\):this\.setAutomaticAnchor)/,
+                    replace: "$1"
+                },
+                {
+                    // Remember where the saved message was before an embed changed height.
+                    match: /(\i)\.offsetFromTop=this\.automaticAnchor\.offsetFromTop(?=\))/,
+                    replace: "$&,$1.offsetTop=this.automaticAnchor.offsetTop"
+                },
+                {
+                    // Keep ongoing scrolling when correcting for embed height changes.
+                    match: /(?<=fixedScrollTop:)\i\.offsetTop-\((\i)\.offsetFromTop\+\i\)/,
+                    replace: "$1===this.automaticAnchor?$self.getAutomaticAnchorScrollTop(this,$1,$&):$&"
+                }
+            ]
         },
         {
             // Reduce image pop-in as embeds approach the visible message area.
