@@ -247,8 +247,8 @@ export default definePlugin({
             find: '["aria-hidden"],"aria-label":',
             replacement: {
                 match: /null==\i\.icon\?.+?src:(\(0,\i\.\i\).+?\))(?=[,}])/,
-                // We have to check that icon is not an unread GDM in the server bar
-                replace: (m, iconUrl) => `${m},onClick:vcEvent=>arguments[0]?.size!=="SIZE_40"&&$self.openAvatar(${iconUrl},vcEvent)`
+                // Only match top large (SIZE_80) and top small header (facepileSizeOverride: SIZE_24) icons
+                replace: (m, iconUrl) => `${m},onClick:vcEvent=>(arguments[0]?.size==="SIZE_80"||arguments[0]?.facepileSizeOverride==="SIZE_24")&&$self.openAvatar(${iconUrl},vcEvent)`
             }
         },
         // User DMs top small icon
