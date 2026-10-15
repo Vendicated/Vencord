@@ -25,17 +25,16 @@ import { CogWheel } from "@components/Icons";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { Guild } from "@vencord/discord-types";
-import { findByCodeLazy, findByPropsLazy, mapMangledModuleLazy } from "@webpack";
-import { Menu, UserStore } from "@webpack/common";
+import { findByCodeLazy, findByPropsLazy, findStoreLazy } from "@webpack";
+import { GuildStore, Menu, UserStore } from "@webpack/common";
 
 const { updateGuildNotificationSettings } = findByPropsLazy("updateGuildNotificationSettings");
-const { toggleShowAllChannels } = mapMangledModuleLazy(".onboardExistingMember(", {
-    toggleShowAllChannels: m => {
-        const s = String(m);
-        return s.length < 100 && !s.includes("onboardExistingMember") && !s.includes("getOptedInChannels");
-    }
-});
+const toggleShowAllChannels: (guildId: string, optInEnabled: boolean) => void = findByCodeLazy("guild_enabled", "guild_disabled");
 const isOptInEnabledForGuild = findByCodeLazy(".COMMUNITY)||", ".isOptInEnabled(");
+const LurkingStore = findStoreLazy("LurkingStore");
+
+const knownGuilds = new Set<string>();
+const appliedGuilds = new Set<string>();
 
 const settings = definePluginSettings({
     guild: {
@@ -97,22 +96,18 @@ const makeContextMenuPatch: (shouldAddIcon: boolean) => NavContextMenuPatchCallb
 
 function applyDefaultSettings(guildId: string | null) {
     if (guildId === "@me" || guildId === "null" || guildId == null) return;
-    updateGuildNotificationSettings(guildId,
-        {
-            muted: settings.store.guild,
-            suppress_everyone: settings.store.everyone,
-            suppress_roles: settings.store.role,
-            mute_scheduled_events: settings.store.events,
-            notify_highlights: settings.store.highlights ? 1 : 0
-        });
-    if (settings.store.messages !== 3) {
-        updateGuildNotificationSettings(guildId,
-            {
-                message_notifications: settings.store.messages,
-            });
-    }
+    knownGuilds.add(guildId);
+    appliedGuilds.add(guildId);
+    updateGuildNotificationSettings(guildId, {
+        muted: settings.store.guild,
+        suppress_everyone: settings.store.everyone,
+        suppress_roles: settings.store.role,
+        mute_scheduled_events: settings.store.events,
+        notify_highlights: settings.store.highlights ? 1 : 0,
+        ...(settings.store.messages !== 3 ? { message_notifications: settings.store.messages } : null)
+    });
     if (settings.store.showAllChannels && isOptInEnabledForGuild(guildId)) {
-        toggleShowAllChannels(guildId);
+        toggleShowAllChannels(guildId, false);
     }
 }
 
@@ -130,7 +125,7 @@ export default definePlugin({
         {
             find: ",acceptInvite(",
             replacement: {
-                match: /INVITE_ACCEPT_SUCCESS.+?,(\i)=null!=.+?;/,
+                match: /INVITE_ACCEPT_SUCCESS.+?,(\i)=\i\?\.guild_id\?\?\i\?\.guild\?\.id.+?;/,
                 replace: (m, guildId) => `${m}$self.applyDefaultSettings(${guildId});`
             }
         },
@@ -144,10 +139,57 @@ export default definePlugin({
     ],
     settings,
     applyDefaultSettings,
+    start() {
+        for (const id of GuildStore.getGuildIds()) {
+            if (!LurkingStore.isLurking(id)) knownGuilds.add(id);
+        }
+    },
     flux: {
+        CONNECTION_OPEN({ guilds, unavailableGuilds }: { guilds: Array<{ id: string; }>; unavailableGuilds?: string[]; }) {
+            for (const guild of guilds) knownGuilds.add(guild.id);
+            if (unavailableGuilds) {
+                for (const id of unavailableGuilds) knownGuilds.add(id);
+            }
+        },
+        CACHE_LOADED({ guilds }: { guilds?: Array<{ id: string; }>; }) {
+            if (!guilds) return;
+            for (const guild of guilds) knownGuilds.add(guild.id);
+        },
+        CACHE_LOADED_LAZY({ guilds }: { guilds?: Array<{ id: string; }>; }) {
+            if (!guilds) return;
+            for (const guild of guilds) knownGuilds.add(guild.id);
+        },
+        OVERLAY_INITIALIZE({ guilds }: { guilds?: Array<{ properties?: { id: string; }; id?: string; }>; }) {
+            if (!guilds) return;
+            for (const guild of guilds) {
+                const id = guild.properties?.id ?? guild.id;
+                if (id) knownGuilds.add(id);
+            }
+        },
+        GUILD_CREATE({ guild }: { guild: { id: string; joined_at?: string | null; }; }) {
+            if (!guild?.id) return;
+            const isJoined = (guild.joined_at != null || GuildStore.getGuild(guild.id)?.joinedAt != null) && !LurkingStore.isLurking(guild.id);
+            if (!isJoined) return;
+
+            if (!knownGuilds.has(guild.id)) {
+                applyDefaultSettings(guild.id);
+            } else if (appliedGuilds.has(guild.id) && settings.store.showAllChannels && isOptInEnabledForGuild(guild.id)) {
+                toggleShowAllChannels(guild.id, false);
+            }
+        },
+        GUILD_DELETE({ guild }: { guild: { id: string; unavailable?: boolean; }; }) {
+            if (!guild?.unavailable) {
+                knownGuilds.delete(guild.id);
+                appliedGuilds.delete(guild.id);
+            }
+        },
         GUILD_JOIN_REQUEST_UPDATE({ guildId, request, status }) {
             if (status === "APPROVED" && request.user_id === UserStore.getCurrentUser().id)
                 applyDefaultSettings(guildId);
+        },
+        GUILD_ONBOARDING_COMPLETE({ guildId }) {
+            if (settings.store.showAllChannels && isOptInEnabledForGuild(guildId))
+                toggleShowAllChannels(guildId, false);
         }
     }
 });
