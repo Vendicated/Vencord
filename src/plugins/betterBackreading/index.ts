@@ -112,10 +112,10 @@ export default definePlugin({
             }
         },
         {
-            // Prevent downward jumps at the top placeholder while older messages load.
+            // Prevent scroll jumps at either placeholder while messages load.
             find: "handleScrollSpeed(",
             replacement: {
-                match: /(1===\i&&)(?=\i\+\i<=0)/,
+                match: /([12]===\i&&)(?=\i\+\i[<>]=)/g,
                 replace: "$1!this.isLoading()&&"
             }
         },
