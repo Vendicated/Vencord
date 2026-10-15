@@ -520,6 +520,15 @@ export default definePlugin({
         },
 
         {
+            // fix +:emoji: reaction shortcut attempting to react to a deleted message
+            find: "anyScopeRegex(/^\\+:(.+?): *$/)",
+            replacement: {
+                match: /(?<=reaction:\{.+?getMessages\(\i\.id\))\.last\(\)/,
+                replace: ".toArray().findLast(m=>!m.deleted)"
+            }
+        },
+
+        {
             // Message domain model
             find: "}addReaction(",
             replacement: [
