@@ -25,7 +25,12 @@ function Download({ downloadURL }: { downloadURL: string }) {
         <Tooltip text={getIntlMessage("DOWNLOAD")}>
             {props =>
                 <Button {...props} size={"iconOnly"} variant="none" onClick={async () => {
-                    const data = await Native.fetchAttachment(downloadURL);
+                    let data;
+                    try {
+                        data = await Native.fetchAttachment(downloadURL);
+                    } catch {
+                        window.open(downloadURL);
+                    }
                     const file = new File([new Blob([data.bytes])], filename, { type: data.type });
                     saveFile(file);
                 }} className={cl("download-button")}>
