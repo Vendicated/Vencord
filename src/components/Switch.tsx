@@ -19,22 +19,24 @@
 import "./Switch.css";
 
 import { classNameFactory } from "@utils/css";
-import { classes } from "@utils/misc";
 import { useState } from "@webpack/common";
-import type { FocusEvent } from "react";
+import type { FocusEvent, Ref } from "react";
 
 const switchCls = classNameFactory("vc-switch-");
 
-const SWITCH_ON = "var(--brand-500)";
-const SWITCH_OFF = "var(--primary-400)";
-
 export interface SwitchProps {
-    disabled?: boolean;
     checked: boolean;
     onChange: (checked: boolean) => void;
+    disabled?: boolean;
+    id?: string;
+    // checkmark/x icon in thumb
+    hasIcon?: boolean;
+    innerRef?: Ref<HTMLInputElement>;
+    "aria-describedby"?: string;
+    "aria-labelledby"?: string;
 }
 
-export function Switch({ checked, onChange, disabled }: SwitchProps) {
+export function Switch({ checked, onChange, disabled, id, hasIcon = false, innerRef, ...ariaProps }: SwitchProps) {
     const [focusVisible, setFocusVisible] = useState(false);
 
     // Due to how we wrap the invisible input, there is no good way to do this with css.
@@ -48,44 +50,58 @@ export function Switch({ checked, onChange, disabled }: SwitchProps) {
     };
 
     return (
-        <div>
-            <div className={classes(switchCls("container", { checked, disabled, focusVisible }))}>
+        <label className={switchCls("container", { checked, disabled, focusVisible })}>
+            <div
+                className={switchCls("indicator")}
+                data-mana-component="switch"
+            >
                 <svg
-                    className={switchCls("slider")}
-                    viewBox="0 0 28 20"
-                    preserveAspectRatio="xMinYMid meet"
+                    className={switchCls("thumb")}
+                    viewBox="0 0 24 24"
+                    preserveAspectRatio="xMidYMin meet"
                     aria-hidden="true"
-                    style={{
-                        transform: checked ? "translateX(12px)" : "translateX(-3px)",
-                    }}
                 >
-                    <rect fill="white" x="4" y="0" height="20" width="20" rx="10" />
-                    <svg viewBox="0 0 20 20" fill="none">
-                        {checked ? (
-                            <>
-                                <path fill={SWITCH_ON} d="M7.89561 14.8538L6.30462 13.2629L14.3099 5.25755L15.9009 6.84854L7.89561 14.8538Z" />
-                                <path fill={SWITCH_ON} d="M4.08643 11.0903L5.67742 9.49929L9.4485 13.2704L7.85751 14.8614L4.08643 11.0903Z" />
-                            </>
-                        ) : (
-                            <>
-                                <path fill={SWITCH_OFF} d="M5.13231 6.72963L6.7233 5.13864L14.855 13.2704L13.264 14.8614L5.13231 6.72963Z" />
-                                <path fill={SWITCH_OFF} d="M13.2704 5.13864L14.8614 6.72963L6.72963 14.8614L5.13864 13.2704L13.2704 5.13864Z" />
-                            </>
-                        )}
-
-                    </svg>
+                    <rect
+                        fill="var(--switch-thumb-background-default)"
+                        x={4}
+                        y={4}
+                        width={16}
+                        height={16}
+                        rx={8}
+                    />
+                    {hasIcon && (
+                        <svg viewBox="0 0 24 24" fill="none">
+                            <g transform="translate(4 4)">
+                                {checked ? (
+                                    <>
+                                        <path fill="var(--switch-thumb-icon-active)" d="M6.31649 11.88304L5.0437 10.61032L11.44792 4.20604L12.72072 5.47883L6.31649 11.88304Z" />
+                                        <path fill="var(--switch-thumb-icon-active)" d="M3.26914 8.87224L4.54194 7.59943L7.5588 10.61632L6.28601 11.88912L3.26914 8.87224Z" />
+                                    </>
+                                ) : (
+                                    <>
+                                        <path fill="var(--switch-thumb-icon-default)" d="M4.10585 5.3837L5.37864 4.11091L11.884 10.61632L10.6112 11.88912L4.10585 5.3837Z" />
+                                        <path fill="var(--switch-thumb-icon-default)" d="M10.61632 4.11091L11.88912 5.3837L5.3837 11.88912L4.11091 10.61632L10.61632 4.11091Z" />
+                                    </>
+                                )}
+                            </g>
+                        </svg>
+                    )}
                 </svg>
-                <input
-                    onFocus={handleFocusChange}
-                    onBlur={handleFocusChange}
-                    disabled={disabled}
-                    type="checkbox"
-                    className={switchCls("input")}
-                    tabIndex={0}
-                    checked={checked}
-                    onChange={e => onChange(e.currentTarget.checked)}
-                />
             </div>
-        </div>
+            <input
+                ref={innerRef}
+                id={id}
+                type="checkbox"
+                role="switch"
+                className={switchCls("input")}
+                tabIndex={0}
+                checked={checked}
+                disabled={disabled}
+                onChange={e => onChange(e.currentTarget.checked)}
+                onFocus={handleFocusChange}
+                onBlur={handleFocusChange}
+                {...ariaProps}
+            />
+        </label>
     );
 }
