@@ -120,7 +120,7 @@ export default definePlugin({
                 },
                 {
                     match: /(scrollToChannel\(\i\){.{1,300})(this\.props\.privateChannelIds)/,
-                    replace: "$1[...$2,...$self.getAllUncollapsedChannels()]"
+                    replace: "$1[...$self.getAllUncollapsedChannels(),...$2]"
                 },
 
             ]
@@ -250,11 +250,10 @@ export default definePlugin({
         if (!isPinned(channelId))
             return (
                 (rowHeight + padding) * 2 // header
-                + rowHeight * this.getAllUncollapsedChannels().length // pins
-                + originalOffset // original pin offset minus pins
+                + originalOffset
             );
 
-        return rowHeight * (this.getAllUncollapsedChannels().indexOf(channelId) + preRenderedChildren) + padding;
+        return originalOffset;
     },
 
     renderCategory: ErrorBoundary.wrap(({ section }: { section: number; }) => {
