@@ -5,7 +5,7 @@
  */
 
 import { ChatBarButton } from "@api/ChatButtons";
-import { UploadIcon } from "@components/Icons";
+import { ClockIcon, UploadIcon } from "@components/Icons";
 import { Devs } from "@utils/constants";
 import { pluralise } from "@utils/misc";
 import definePlugin from "@utils/types";
@@ -39,15 +39,15 @@ async function addAttachments(channelId: string, messageId: string, existingAtta
     if (files.length + existingAttachmentCount > 10) {
         const remaining = 10 - existingAttachmentCount;
         if (remaining <= 0) {
-            showToast("You cannot add more attachments to this message.", "failure");
+            showToast({ text: "You cannot add more attachments to this message.", variant: "critical" });
             return;
         }
 
-        showToast(`You can only add ${pluralise(remaining, "more attachment")} to this message.`, "failure");
+        showToast({ text: `You can only add ${pluralise(remaining, "more attachment")} to this message.`, variant: "critical" });
         return;
     }
 
-    showToast("Uploading, this can take a while...", "clock");
+    showToast({ text: "Uploading, this can take a while...", icon: ClockIcon, iconColor: "var(--text-default)" });
 
     const { body: { attachments } } = await RestAPI.post({
         url: `/channels/${channelId}/attachments`,
@@ -87,7 +87,7 @@ async function addAttachments(channelId: string, messageId: string, existingAtta
         }
     });
 
-    showToast(`${files.length === 1 ? "Attachment" : "Attachments"} added successfully!`, "success");
+    showToast({ text: `${files.length === 1 ? "Attachment" : "Attachments"} added successfully!`, variant: "success" });
 }
 
 function canAddAttachments(msg: Message) {

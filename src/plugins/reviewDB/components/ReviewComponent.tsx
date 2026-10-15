@@ -63,7 +63,7 @@ export default function ReviewComponent({ review, refetch, profileId }: { review
                 cancelText="Nevermind"
                 onConfirm={async () => {
                     if (!(await getToken())) {
-                        return showToast("You must be logged in to delete reviews.");
+                        return showToast({ text: "You must be logged in to delete reviews.", variant: "critical" });
                     }
                     const res = await deleteReview(review.id);
                     if (res) refetch();
@@ -82,7 +82,7 @@ export default function ReviewComponent({ review, refetch, profileId }: { review
                 cancelText="Nevermind"
                 onConfirm={async () => {
                     if (!(await getToken())) {
-                        return showToast("You must be logged in to report reviews.");
+                        return showToast({ text: "You must be logged in to report reviews.", variant: "critical" });
                     }
                     await reportReview(review.id);
                 }}
@@ -105,7 +105,7 @@ export default function ReviewComponent({ review, refetch, profileId }: { review
                 cancelText="Nevermind"
                 onConfirm={async () => {
                     if (!(await getToken())) {
-                        return showToast("You must be logged in to block users.");
+                        return showToast({ text: "You must be logged in to block users.", variant: "critical" });
                     }
                     await blockUser(review.sender.discordID);
                 }}
@@ -117,7 +117,7 @@ export default function ReviewComponent({ review, refetch, profileId }: { review
         if (isVoting) return;
 
         if (review.sender.discordID === Auth.user?.discordID) {
-            return showToast("You cannot vote on your own review.");
+            return showToast({ text: "You cannot vote on your own review.", variant: "critical" });
         }
 
         setIsVoting(true);

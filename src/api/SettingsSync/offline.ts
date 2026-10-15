@@ -10,10 +10,10 @@ import { chooseFile, saveFile } from "@utils/web";
 import { moment, showToast } from "@webpack/common";
 
 const toastSuccess = () =>
-    showToast("Settings successfully imported. Restart to apply changes!", "success");
+    showToast({ text: "Settings successfully imported. Restart to apply changes!", variant: "success" });
 
 const toastFailure = (err: any) =>
-    showToast(`Failed to import settings: ${String(err)}`, "failure");
+    showToast({ text: `Failed to import settings: ${String(err)}`, variant: "critical" });
 
 const logger = new Logger("SettingsSync:Offline", "#39b7e0");
 
