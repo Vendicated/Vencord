@@ -582,7 +582,7 @@ export function findExportedComponentLazy<T extends object = any>(...props: Prop
         const res = find(filters.byProps(...props), { isIndirect: true });
         if (!res)
             handleModuleNotFound("findExportedComponent", ...props);
-        return res[props[0]];
+        return res?.[props[0]];
     });
 }
 
