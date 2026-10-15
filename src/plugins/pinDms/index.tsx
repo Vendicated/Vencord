@@ -240,19 +240,34 @@ export default definePlugin({
 
         if (!this.instance || !this.isChannelIndex(categoryIndex, channelIndex)) return false;
 
-        const category = getCategoryByIndex(categoryIndex - 1);
-        if (!category) return false;
+        const { channel, category } = this.getChannel(categoryIndex, channelIndex, this.instance.props.channels);
+        if (!channel || !category) return true;
 
-        return category.collapsed && this.instance.props.selectedChannelId !== this.getCategoryChannels(category)[channelIndex];
+        return Boolean(category.collapsed && this.instance.props.selectedChannelId !== channel.id);
     },
 
     getScrollOffset(channelId: string, rowHeight: number, padding: number, preRenderedChildren: number, originalOffset: number) {
-        if (!isPinned(channelId))
+        if (!isPinned(channelId)) {
+            const row = this.instance?.props?.privateChannelIds?.indexOf(channelId) ?? -1;
+            if (row !== -1 && this.instance?._list?.getScrollPosition) {
+                return this.instance._list.getScrollPosition(this.categoryLen() + 1, row)[0];
+            }
+
             return (
-                (rowHeight + padding) * 2 // header
+                24 * (this.categoryLen() + 1) // headers
                 + rowHeight * this.getAllUncollapsedChannels().length // pins
                 + originalOffset // original pin offset minus pins
             );
+        }
+
+        for (let i = 0; i < this.categoryLen(); i++) {
+            const category = getCategoryByIndex(i);
+            if (!category) continue;
+            const row = this.getCategoryChannels(category).indexOf(channelId);
+            if (row !== -1 && this.instance?._list?.getScrollPosition) {
+                return this.instance._list.getScrollPosition(i + 1, row)[0];
+            }
+        }
 
         return rowHeight * (this.getAllUncollapsedChannels().indexOf(channelId) + preRenderedChildren) + padding;
     },
@@ -358,10 +373,11 @@ export default definePlugin({
     getCategoryChannels(category: Category) {
         if (category.channels.length === 0) return [];
 
+        const sortedChannels = PrivateChannelSortStore.getPrivateChannelIds();
         if (settings.store.pinOrder === PinOrder.LastMessage) {
-            return PrivateChannelSortStore.getPrivateChannelIds().filter(c => category.channels.includes(c));
+            return sortedChannels.filter(c => category.channels.includes(c));
         }
 
-        return category?.channels ?? [];
+        return category?.channels.filter(c => sortedChannels.includes(c)) ?? [];
     }
 });

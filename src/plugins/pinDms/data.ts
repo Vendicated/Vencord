@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { PinOrder, PrivateChannelSortStore, settings } from "@plugins/pinDms";
+import { instance, PinOrder, PrivateChannelSortStore, settings } from "@plugins/pinDms";
 import { useForceUpdater } from "@utils/react";
 import { UserStore } from "@webpack/common";
 
@@ -84,12 +84,13 @@ export function categoryLen() {
 }
 
 export function getAllUncollapsedChannels() {
+    const sortedChannels = PrivateChannelSortStore.getPrivateChannelIds();
+    const selectedChannelId = instance?.props?.selectedChannelId;
     if (settings.store.pinOrder === PinOrder.LastMessage) {
-        const sortedChannels = PrivateChannelSortStore.getPrivateChannelIds();
-        return currentUserCategories.filter(c => !c.collapsed).flatMap(c => sortedChannels.filter(channel => c.channels.includes(channel)));
+        return currentUserCategories.flatMap(c => sortedChannels.filter(channel => c.channels.includes(channel) && (!c.collapsed || channel === selectedChannelId)));
     }
 
-    return currentUserCategories.filter(c => !c.collapsed).flatMap(c => c.channels);
+    return currentUserCategories.flatMap(c => c.channels.filter(channel => sortedChannels.includes(channel) && (!c.collapsed || channel === selectedChannelId)));
 }
 
 export function getSections() {
