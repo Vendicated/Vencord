@@ -7,22 +7,35 @@
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
+import { ChannelMessages } from "@vencord/discord-types";
+
+interface ScrollManager {
+    props: { messages: ChannelMessages; };
+    ref: { current: { getScrollerNode(): HTMLElement | null; } | null; };
+    messageFetchAnchor: { id: string; } | null;
+    automaticAnchor: { id: string; } | null;
+    getScrollerState(): { scrollTop: number; offsetHeight: number; };
+    getAnchorData(id: string, scrollTop: number): { offsetFromTop: number; offsetHeight: number; } | null;
+}
+
+const scrollManagers = new Set<ScrollManager>();
 
 const settings = definePluginSettings({
     imageScrollMargin: {
         type: OptionType.STRING,
         displayName: "Image Preload Distance",
-        description: "How far ahead to load images, in pixels (300-5000).",
+        description: "How far ahead to load images, in pixels (300-3000).",
         default: "1500",
-        isValid: value => validateInteger(value, 300, 5000),
+        isValid: value => validateInteger(value, 300, 3000),
         restartNeeded: true
     },
     messageLoadBuffer: {
         type: OptionType.STRING,
         displayName: "Message Load Buffer",
-        description: "How far ahead to fetch more messages, in pixels (500-5000).",
+        description: "How far ahead to fetch more messages, in pixels (500-3000).",
         default: "1500",
-        isValid: value => validateInteger(value, 500, 5000)
+        isValid: value => validateInteger(value, 500, 3000),
+        restartNeeded: true
     },
     useDiscordMessageCount: {
         type: OptionType.BOOLEAN,
@@ -65,13 +78,14 @@ export default definePlugin({
     authors: [Devs.Etorix],
     tags: ["Chat", "Utility"],
     settings,
+    scrollManagers,
 
     getImageScrollMargin() {
-        return `${boundedInteger(settings.store.imageScrollMargin, 300, 5000, 1500)}px`;
+        return `${Math.min(boundedInteger(settings.store.imageScrollMargin, 300, 3000, 1500), this.getLoadMoreBuffer())}px`;
     },
 
     getLoadMoreBuffer() {
-        return boundedInteger(settings.store.messageLoadBuffer, 500, 5000, 1500);
+        return boundedInteger(settings.store.messageLoadBuffer, 500, 3000, 1500);
     },
 
     getMessageCount(nativeCount: number) {
@@ -82,8 +96,56 @@ export default definePlugin({
         return settings.store.useDiscordMessageCount ? nativeThreshold : Math.max(nativeThreshold, 4 * getCustomMessageCount());
     },
 
-    getWindowTarget(nativeTarget: number) {
-        return settings.store.useDiscordMessageCount ? nativeTarget : Math.max(nativeTarget, 2 * getCustomMessageCount());
+    getWindowTarget(nativeTarget: number, messages: ChannelMessages, edge: "Top" | "Bottom") {
+        const minimum = settings.store.useDiscordMessageCount ? nativeTarget : Math.max(nativeTarget, 2 * getCustomMessageCount());
+        const target = Math.max(minimum, Math.ceil(messages.length / 2));
+
+        // Keep the whole list when it is already small enough.
+        if (target >= messages.length) {
+            return target;
+        }
+
+        const truncateTop = edge === "Top";
+        const cut = truncateTop ? messages.length - target : target - 1;
+        const margin = this.getLoadMoreBuffer() + 100;
+
+        // Check each open view of this channel before discarding loaded messages.
+        for (const manager of scrollManagers) {
+            if (manager.props.messages.channelId !== messages.channelId) {
+                continue;
+            }
+
+            const node = manager.ref.current?.getScrollerNode();
+            const { scrollTop, offsetHeight } = manager.getScrollerState();
+
+            // Skip chat views that are closed, collapsed, or not laid out yet.
+            if (!node?.getClientRects().length || offsetHeight <= 0) {
+                continue;
+            }
+
+            const boundary = manager.getAnchorData(messages._array[cut].id, scrollTop);
+
+            // Keep every message if the cut cannot be measured or would remove visible or preloaded content.
+            if (!boundary || (truncateTop ? boundary.offsetFromTop > -margin : boundary.offsetFromTop + boundary.offsetHeight < offsetHeight + margin)) {
+                return messages.length;
+            }
+
+            // Check whether trimming would remove a message Discord uses to maintain scroll position.
+            for (const anchor of [manager.messageFetchAnchor, manager.automaticAnchor]) {
+                if (!anchor) {
+                    continue;
+                }
+
+                const index = messages._array.findIndex(message => message.id === anchor.id);
+
+                // Keep every message if the cut would remove one Discord needs to restore user position.
+                if (index >= 0 && (truncateTop ? index < cut : index > cut)) {
+                    return messages.length;
+                }
+            }
+        }
+
+        return target;
     },
 
     patches: [
@@ -104,15 +166,23 @@ export default definePlugin({
             }
         },
         {
-            // Request messages earlier as scrolling approaches a loading boundary.
             find: "getOffsetToTriggerLoading(",
-            replacement: {
-                match: /500(?=;return \i\.hasMoreAfter)|(?<=\i\.hasMoreAfter\?\i-\i-\i-)500/g,
-                replace: "$self.getLoadMoreBuffer()"
-            }
+            group: true,
+            replacement: [
+                {
+                    // Request messages earlier as scrolling approaches a loading boundary.
+                    match: /500(?=;return \i\.hasMoreAfter)|(?<=\i\.hasMoreAfter\?\i-\i-\i-)500/g,
+                    replace: "$self.getLoadMoreBuffer()"
+                },
+                {
+                    // Include unread history without changing where Discord restores the unread view.
+                    match: /(\i<=this\.getOffsetToTriggerLoading\("top",\i\))(?=&&\i>\i\?1:)/,
+                    replace: "$1+(this.props.hasUnreads?$self.getLoadMoreBuffer():0)"
+                }
+            ]
         },
         {
-            // Prevent scroll jumps at either placeholder while messages load.
+            // Prevent scroll jumps at either placeholder boundary while messages load.
             find: "handleScrollSpeed(",
             replacement: {
                 match: /([12]===\i&&)(?=\i\+\i[<>]=)/g,
@@ -120,17 +190,23 @@ export default definePlugin({
             }
         },
         {
-            // Allow fast middle-click scrolling through messages without getting stuck in a placeholder display.
             find: "mergePropsAndUpdate_(",
             group: true,
             replacement: [
                 {
+                    // Notice when loading a new batch also discards messages from the other end.
                     match: /(mergePropsAndUpdate_\((\i)\)\{let (\i)=this\.props\.messages)/,
                     replace: "$1,betterBackreadingSmoothScrollWindowShifted=$3.length>0&&$2.messages.length>0&&$3.first()?.id!==$2.messages.first()?.id&&$3.last()?.id!==$2.messages.last()?.id"
                 },
                 {
+                    // Allow fast middle-click scrolling through messages without getting stuck in a placeholder boundary.
                     match: /(this\.loadMorePausedUntilUserScroll\|\|\i<100)/,
                     replace: "$1&&!betterBackreadingSmoothScrollWindowShifted"
+                },
+                {
+                    // Restore the reading position even when added and discarded messages have equal height.
+                    match: /(?<=this\.isHeightChange\(\i,\i\))(?=;if\(this\.offsetHeightCache=)/,
+                    replace: "||betterBackreadingSmoothScrollWindowShifted"
                 }
             ]
         },
@@ -143,7 +219,7 @@ export default definePlugin({
             }
         },
         {
-            // Keep more existing messages when loading larger batches.
+            // Keep visible messages and the preload area when Discord trims its message list.
             find: "truncateBottom(",
             group: true,
             replacement: [
@@ -152,8 +228,23 @@ export default definePlugin({
                     replace: "$self.getWindowThreshold($&)"
                 },
                 {
-                    match: /(?<=\.truncate(?:Top|Bottom)\()\i\.\i/g,
-                    replace: "$self.getWindowTarget($&)"
+                    match: /(\i)\.truncate(Top|Bottom)\((\i\.\i)/g,
+                    replace: "$1.truncate$2($self.getWindowTarget($3,$1,\"$2\")"
+                }
+            ]
+        },
+        {
+            // Read each open chat's current viewport when deciding which messages can be discarded.
+            find: "getOffsetToTriggerLoading(",
+            group: true,
+            replacement: [
+                {
+                    match: /(constructor\((\i)\)\{)(?=if\(this\.props=\2,this\.loading=)/,
+                    replace: "$1$self.scrollManagers.add(this);"
+                },
+                {
+                    match: /cleanup\(\)\{(?=this\.acking=)/,
+                    replace: "$&$self.scrollManagers.delete(this);"
                 }
             ]
         }
