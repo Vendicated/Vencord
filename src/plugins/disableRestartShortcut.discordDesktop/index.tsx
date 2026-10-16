@@ -62,7 +62,7 @@ function RestartShortcutControls() {
         };
     }, [capturing]);
     return (
-        <SettingsSection id="restartShortcut" name="Restart Shortcut" description="" inlineSetting>
+        <SettingsSection id="restartShortcut" name="Config Short Cut" description="" inlineSetting>
             <Button onClick={() => setCapturing(value => !value)}>
                 {capturing ? "Press shortcut..." : `Config: ${restartShortcut}`}
             </Button>
