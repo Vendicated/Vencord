@@ -71,7 +71,7 @@ function RestartShortcutControls() {
 }
 export default definePlugin({
     name: "DisableRestartShortcut",
-    description: "Disables Ctrl+R or configures a custom shortcut to reload Discord.",
+    description: "Disables Ctrl+R or config with a custom shortcut.",
     authors: [Devs.Mashiro],
     tags: ["Shortcuts"],
     settings
