@@ -38,7 +38,7 @@ function Download({ downloadURL }: { downloadURL: string }) {
                 <Button {...props} size={"iconOnly"} variant="none" onClick={async () => {
                     try {
                         const data = await Native.fetchAttachment(downloadURL, settings.store.max_file_size);
-                        const file = new File([new Blob([data.bytes])], filename, { type: data.type });
+                        const file = new File([data.bytes], filename, { type: data.type });
                         saveFile(file);
                     } catch {
                         return window.open(downloadURL);
