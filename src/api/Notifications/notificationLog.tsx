@@ -22,7 +22,7 @@ import { openNotificationSettingsModal } from "@components/settings/tabs/vencord
 import { classNameFactory } from "@utils/css";
 import { useAwaiter } from "@utils/react";
 import { RenderModalProps } from "@vencord/discord-types";
-import { ConfirmModal, Forms, ListScrollerThin, Modal,openModal, React, Timestamp, useEffect, useReducer, useState } from "@webpack/common";
+import { ConfirmModal, Forms, ListScrollerThin, Modal, openModal, React, Timestamp, useEffect, useReducer, useState } from "@webpack/common";
 import { nanoid } from "nanoid";
 import type { DispatchWithoutAction } from "react";
 
@@ -74,14 +74,21 @@ export async function persistNotification(notification: NotificationData) {
     signals.forEach(x => x());
 }
 
-export async function deleteNotification(timestamp: number) {
-    const log = await getLog();
-    const index = log.findIndex(x => x.timestamp === timestamp);
-    if (index === -1) return;
+export async function deleteNotification(id: string) {
+    let found = false;
 
-    log.splice(index, 1);
-    await DataStore.set(KEY, log);
-    signals.forEach(x => x());
+    await DataStore.update(KEY, (old: PersistentNotificationData[] | undefined) => {
+        const log = old ?? [];
+        const index = log.findIndex(x => x.id === id);
+        if (index === -1) return log;
+
+        log.splice(index, 1);
+        found = true;
+        return log;
+    });
+
+    if (found)
+        signals.forEach(x => x());
 }
 
 export function useLogs() {
@@ -113,7 +120,7 @@ function NotificationEntry({ data }: { data: PersistentNotificationData; }) {
                     if (removing) return;
                     setRemoving(true);
 
-                    setTimeout(() => deleteNotification(data.timestamp), 200);
+                    setTimeout(() => deleteNotification(data.id), 200);
                 }}
                 richBody={
                     <div className={cl("body-wrapper")}>

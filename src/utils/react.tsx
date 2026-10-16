@@ -113,7 +113,7 @@ export function useAwaiter<T>(factory: () => Promise<T>, providedOpts?: AwaiterO
             })
             .catch(error => {
                 if (!isAlive) return;
-                setState({ value: null, error, pending: false });
+                setState({ value: opts.fallbackValue, error, pending: false });
                 opts.onError?.(error);
             });
 
@@ -140,10 +140,12 @@ interface TimerOpts {
 
 export function useTimer({ interval = 1000, deps = [] }: TimerOpts) {
     const [time, setTime] = useState(0);
-    const start = useMemo(() => Date.now(), deps);
+    // use performance.now() over date.now() as the former is monotonic and not
+    // affetted by changes in the system clock (eg: timezone)
+    const start = useMemo(() => Math.round(performance.now()), deps);
 
     useEffect(() => {
-        const intervalId = setInterval(() => setTime(Date.now() - start), interval);
+        const intervalId = setInterval(() => setTime(Math.round(performance.now()) - start), interval);
 
         return () => {
             setTime(0);
