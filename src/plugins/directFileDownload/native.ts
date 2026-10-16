@@ -4,31 +4,32 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { createWriteStream } from "node:fs";
+import { pipeline } from "node:stream/promises";
+
 import { checkedFetch } from "@main/utils/http";
-import { IpcMainInvokeEvent } from "electron";
+import { dialog, IpcMainInvokeEvent } from "electron";
+import { BrowserWindow } from "electron/main";
 
 const ALLOWED_HOSTS = new Set(["cdn.discordapp.com", "media.discordapp.net"]);
 
-export async function fetchAttachment(_: IpcMainInvokeEvent, url: string, maxFileSizeSetting: number) {
+export async function saveAttachment(_: IpcMainInvokeEvent, url: string) {
     const parsedURL = new URL(url);
     const { hostname, protocol } = parsedURL;
 
     if (!ALLOWED_HOSTS.has(hostname)) throw new Error(`Disallowed host: ${hostname}`);
     if (protocol !== "https:") throw new Error(`Disallowed protocol: ${protocol}`);
 
-    const maxFileSize = maxFileSizeSetting * 1024 * 1024;
     const res = await checkedFetch(url);
-    const contentLength = res.headers.get("content-length");
+    const focusedWindow = BrowserWindow.getFocusedWindow();
 
-    if (contentLength == null) {
-        throw new Error("Missing required header: Content-Length");
-    }
+    if (!focusedWindow || !res.body) return;
 
-    const fileSize = Number(contentLength);
+    const choice = await dialog.showSaveDialog(focusedWindow, {
+        defaultPath: parsedURL.pathname.split("/").pop()
+    });
 
-    if (fileSize > maxFileSize) {
-        throw new Error(`File is too large: ${fileSize} > ${maxFileSize}`);
-    }
+    if (choice.canceled) return;
 
-    return { bytes: await res.bytes(), type: res.headers.get("content-type") ?? "application/octet-stream" };
+    await pipeline(res.body, createWriteStream(choice.filePath));
 }
