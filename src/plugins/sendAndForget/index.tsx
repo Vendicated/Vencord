@@ -18,8 +18,7 @@ export default definePlugin({
 
     patches: [
         {
-            // ,3e3,{leading:!0,trailing:!1})
-            find: ".FORWARD))},3e3",
+            find: "#{intl::MESSAGE_ACTION_FORWARD_TO}",
             replacement: [
                 {
                     match: /(?<=transitionToDestination:)(1===\i\.length)(?=,|\})/,
