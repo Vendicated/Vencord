@@ -13,7 +13,7 @@ import { useForceUpdater } from "@utils/react";
 import { PluginNative } from "@utils/types";
 import { Channel, MessageAttachment } from "@vencord/discord-types";
 import { findByCodeLazy, findByPropsLazy } from "@webpack";
-import { Constants, createRoot, DraftType, FluxDispatcher, Humanize, MessageActions, PendingReplyStore, PermissionStore, ReactDOM, RestAPI, showToast, Toasts, UploadAttachmentStore, UploadHandler, UploadManager, useCallback, useEffect, useRef, UserSettingsActionCreators, UserSettingsProtoStore, useStateFromStores } from "@webpack/common";
+import { Constants, createRoot, DraftType, FluxDispatcher, Humanize, MessageActions, PendingReplyStore, PermissionStore, ReactDOM, RestAPI, showToast, UploadAttachmentStore, UploadHandler, UploadManager, useCallback, useEffect, useRef, UserSettingsActionCreators, UserSettingsProtoStore, useStateFromStores } from "@webpack/common";
 import { deflateSync, inflateSync } from "fflate";
 import { Key, ReactNode } from "react";
 import { JsonValue } from "type-fest";
@@ -151,7 +151,7 @@ async function getThumbnailBase(item: MessageAttachment): Promise<URL | null> {
 
 export async function getFileThumbnailUrl(item: MessageAttachment): Promise<URL | null> {
     const base = await getThumbnailBase(item).then(url => {
-        if (!url) showToast("Failed to generate file thumbnail - thumbnail service might be down", Toasts.Type.FAILURE);
+        if (!url) showToast({ text: "Failed to generate file thumbnail - thumbnail service might be down", variant: "critical" });
         return url ?? new URL(FALLBACK_THUMBNAIL);
     });
 
@@ -198,14 +198,14 @@ export async function sendAttachment(attachment: MessageAttachment, channel: Cha
     const { filename, title, description } = attachment;
     const file = await fetchAttachment(attachment).catch((e: unknown) => {
         logger.error(e);
-        showToast(`Couldn't fetch ${filename}`, Toasts.Type.FAILURE);
+        showToast({ text: `Couldn't fetch ${filename}`, variant: "critical" });
     });
     if (!file) return;
 
     // Using promptToUpload instead of addFiles directly since it has file size checks with error popups
     await UploadHandler.promptToUpload([file], channel, DraftType.ChannelMessage).catch((e: unknown) => {
         logger.error(e);
-        showToast(`Couldn't upload ${filename}`, Toasts.Type.FAILURE);
+        showToast({ text: `Couldn't upload ${filename}`, variant: "critical" });
     });
 
     const uploads = [...UploadAttachmentStore.getUploads(channel.id, DraftType.ChannelMessage)];
