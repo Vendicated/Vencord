@@ -34,6 +34,9 @@ export class RunningGameStore extends FluxStore {
     getCandidateGames(): RunningGame[];
     getCurrentGameForAnalytics(): RunningGame | null;
     getCurrentNonGameForAnalytics(): RunningGame | null;
+    getDebugRunningGame(): RunningGame | null;
+    getDetectionDebug(): { timestamp: number; totalFromNative: number; entries: { game: RunningGame; outcome: { kind: string; }; }[]; } | null;
+    canCollectExecutableFingerprintsForRunningGames(): boolean;
     getGameForName(name: string): RunningGame | null;
     getGameForPID(pid: number): RunningGame | null;
     getGameOrTransformedSubgameForPID(pid: number): RunningGame | null;
@@ -55,6 +58,7 @@ export class RunningGameStore extends FluxStore {
     getVisibleRunningGames(): RunningGame[];
     isDetectionEnabled(game: RunningGame): boolean;
     isGamesSeenLoaded(): boolean;
+    isGameSeen(gameId: string): boolean;
     isObservedAppRunning(app: string): boolean;
     isSystemServiceInitialized(service: string): boolean;
     shouldContinueWithoutElevatedProcessForPID(pid: number): boolean;

@@ -8,13 +8,9 @@ import { addThemeChangeListener, removeThemeChangeListener } from "@api/Themes";
 import { Devs } from "@utils/constants";
 import { sleep } from "@utils/misc";
 import definePlugin from "@utils/types";
-import { FluxStore } from "@vencord/discord-types";
-import { findStoreLazy } from "@webpack";
-import { NotificationSettingsStore, RelationshipStore, ThemeStore } from "@webpack/common";
+import { GuildReadStateStore, NotificationSettingsStore, RelationshipStore, ThemeStore } from "@webpack/common";
 
 import managedStyle from "./styles.css?managed";
-
-const GuildReadStateStore: FluxStore & { getTotalMentionCount: () => number; hasAnyUnread: () => boolean; } = findStoreLazy("GuildReadStateStore");
 
 let _keybinds: Record<string, { onTrigger: () => any; }>;
 
@@ -174,8 +170,8 @@ export default definePlugin({
         {
             find: "#{intl::KEYBIND_IN_BROSWER_NOTICE}",
             replacement: {
-                match: /,{type:"info",children:(?=.{0,50}?#{intl::KEYBIND_IN_BROSWER_NOTICE})/,
-                replace: ',{type:"info",children:$self.renderKeybindsButton(),_children:',
+                match: /,{type:"info",message:(?=.{0,50}?#{intl::KEYBIND_IN_BROSWER_NOTICE})/,
+                replace: ',{type:"info",children:$self.renderKeybindsButton(),_message:',
                 predicate: () => !IS_USERSCRIPT
             }
         }
