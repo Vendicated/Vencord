@@ -60,6 +60,11 @@ const settings = definePluginSettings({
         type: OptionType.STRING,
         default: "image"
     },
+    excludedExtensions: {
+        description: "Comma-separated list of extensions to ignore",
+        type: OptionType.STRING,
+        default: ""
+    },
 }, {
     randomisedLength: {
         disabled() { return this.store.method !== Methods.Random; },
@@ -71,7 +76,7 @@ const settings = definePluginSettings({
 
 export default definePlugin({
     name: "AnonymiseFileNames",
-    authors: [Devs.fawn],
+    authors: [Devs.fawn, Devs.TANK49],
     description: "Anonymise uploaded file names",
     tags: ["Privacy", "Utility"],
     settings,
@@ -125,6 +130,14 @@ export default definePlugin({
         const tarMatch = tarExtMatcher.exec(originalFileName);
         const extIdx = tarMatch?.index ?? originalFileName.lastIndexOf(".");
         const ext = extIdx !== -1 ? originalFileName.slice(extIdx) : "";
+        const excluded = settings.store.excludedExtensions
+            .split(",")
+            .map(e => e.trim().toLowerCase().replace(/^\./, ""))
+            .filter(Boolean);
+        const lowerExt = ext.slice(1).toLowerCase();
+            if (excluded.some(e => lowerExt === e || lowerExt.endsWith("." + e))) {
+                return;
+        }
 
         const newFilename = (() => {
             switch (settings.store.method) {
