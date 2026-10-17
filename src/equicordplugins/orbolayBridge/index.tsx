@@ -7,7 +7,8 @@
 import { definePluginSettings } from "@api/Settings";
 import { EquicordDevs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { ChannelStore, FluxDispatcher, GuildMemberStore, showToast,StreamerModeStore, UserStore, VoiceStateStore } from "@webpack/common";
+import { SoundboardSound } from "@vencord/discord-types";
+import { ChannelStore, FluxDispatcher, GuildMemberStore, showToast, SoundboardStore, StreamerModeStore, UserStore, VoiceStateStore } from "@webpack/common";
 
 interface ChannelState {
     userId: string;
@@ -18,6 +19,16 @@ interface ChannelState {
     selfDeaf: boolean;
     selfMute: boolean;
     selfStream: boolean;
+}
+
+interface SoundboardSoundPayload {
+    sound_id: string;
+    name: string;
+    volume: number;
+    emoji_id: string | null;
+    emoji_name: string | null;
+    guild_id: string | null;
+    available: boolean;
 }
 
 const settings = definePluginSettings({
@@ -40,6 +51,8 @@ const sendConfig = () => {
 
 let ws: WebSocket | null = null;
 let currentChannel: string | null = null;
+let retryTimer: ReturnType<typeof setTimeout> | null = null;
+let stopped = false;
 
 const waitForPopulate = async fn => {
     while (true) {
@@ -49,18 +62,72 @@ const waitForPopulate = async fn => {
     }
 };
 
-const stateToPayload = (guildId: string, state: ChannelState) => ({
-    userId: state.userId,
-    username:
-        GuildMemberStore.getNick(guildId, state.userId) ||
-        UserStore.getUser(state.userId)?.globalName,
-    avatarUrl: UserStore.getUser(state.userId)?.avatar,
-    channelId: state.channelId,
-    deaf: state.deaf || state.selfDeaf,
-    mute: state.mute || state.selfMute,
-    streaming: state.selfStream,
-    speaking: false,
-});
+const waitForUserData = async (guildId: string, userId: string) => {
+    const isKnown = () =>
+        !!GuildMemberStore.getNick(guildId, userId) ||
+        !!UserStore?.getUser(userId)?.globalName;
+
+    const deadline = Date.now() + 3000;
+    while (!isKnown() && Date.now() < deadline) {
+        await new Promise(r => setTimeout(r, 100));
+    }
+};
+
+const stateToPayload = async (guildId: string, state: ChannelState) => {
+    await waitForUserData(guildId, state.userId);
+
+    return {
+        userId: state.userId,
+        username:
+            GuildMemberStore.getNick(guildId, state.userId) ||
+            UserStore?.getUser(state.userId)?.globalName,
+        avatarUrl: UserStore?.getUser(state.userId)?.avatar,
+        channelId: state.channelId,
+        deaf: state.deaf || state.selfDeaf,
+        mute: state.mute || state.selfMute,
+        streaming: state.selfStream,
+        speaking: false,
+    };
+};
+
+const toSoundboardPayload = (sound: SoundboardSound, fallbackGuild?: string): SoundboardSoundPayload | null => {
+    const soundId = sound?.soundId;
+    if (!soundId) return null;
+
+    const guildId = sound?.guildId ?? fallbackGuild;
+
+    return {
+        sound_id: soundId,
+        name: sound.name,
+        volume: sound.volume,
+        emoji_id: sound?.emojiId ?? null,
+        emoji_name: sound?.emojiName ?? null,
+        guild_id: !guildId || guildId === "0" ? null : guildId,
+        available: sound.available,
+    };
+};
+
+const getSoundboardSounds = (): SoundboardSoundPayload[] => {
+    const sounds: SoundboardSoundPayload[] = [];
+
+    for (const [guildKey, guildSounds] of SoundboardStore.getSounds() ?? []) {
+        for (const sound of guildSounds ?? []) {
+            const payload = toSoundboardPayload(sound, guildKey);
+            if (payload) sounds.push(payload);
+        }
+    }
+
+    return sounds;
+};
+
+const sendSoundboardUpdate = () => {
+    if (ws?.readyState !== WebSocket.OPEN) return;
+
+    const sounds = getSoundboardSounds();
+    if (!sounds.length) return;
+
+    ws.send(JSON.stringify({ cmd: "SOUNDBOARD_UPDATE", sounds }));
+};
 
 const incoming = payload => {
     switch (payload.cmd) {
@@ -161,11 +228,16 @@ const handleVoiceStateUpdates = async dispatch => {
                 ws?.send(
                     JSON.stringify({
                         cmd: "CHANNEL_JOINED",
-                        states: Object.values(voiceStates).map(s => stateToPayload(guildId, s as ChannelState)),
+                        states:
+                            await Promise.all(
+                                Object.values(voiceStates).map(s => stateToPayload(guildId, s as ChannelState))
+                            ),
                     })
                 );
 
                 currentChannel = state.channelId;
+
+                sendSoundboardUpdate();
 
                 break;
             } else if (!state.channelId) {
@@ -189,7 +261,7 @@ const handleVoiceStateUpdates = async dispatch => {
             ws?.send(
                 JSON.stringify({
                     cmd: "VOICE_STATE_UPDATE",
-                    state: stateToPayload(guildId, state as ChannelState),
+                    state: await stateToPayload(guildId, state as ChannelState),
                 })
             );
         }
@@ -209,20 +281,15 @@ const createWebsocket = () => {
     console.log("Attempting to connect to Orbolay server");
     if (ws?.close) ws.close();
 
-    setTimeout(() => {
-        if (ws?.readyState !== WebSocket.OPEN) {
-            showToast("Orbolay websocket could not connect. Is it running?", "failure");
-            ws = null;
-            return;
-        }
-    }, 1000);
-
-    // Use the configured port locally to open the websocket, but do not include it in REGISTER_CONFIG
     ws = new WebSocket("ws://127.0.0.1:" + settings.store.port);
-    ws.onerror = e => {
+    ws.onerror = () => {
         ws?.close?.();
         ws = null;
-        throw e;
+
+        if (!stopped) {
+            if (retryTimer) clearTimeout(retryTimer);
+            retryTimer = setTimeout(createWebsocket, 5000);
+        }
     };
     ws.onmessage = e => {
         incoming(JSON.parse(e.data));
@@ -259,11 +326,16 @@ const createWebsocket = () => {
         ws?.send(
             JSON.stringify({
                 cmd: "CHANNEL_JOINED",
-                states: Object.values(channelState).map(s => stateToPayload(guildId, s as ChannelState)),
+                states:
+                    await Promise.all(
+                        Object.values(channelState).map(s => stateToPayload(guildId, s as ChannelState))
+                    ),
             })
         );
 
         currentChannel = userVoiceState.channelId;
+
+        sendSoundboardUpdate();
     };
 };
 
@@ -281,10 +353,14 @@ export default definePlugin({
     },
 
     start() {
+        stopped = false;
+        if (retryTimer) clearTimeout(retryTimer);
         createWebsocket();
     },
 
     stop() {
+        stopped = true;
+        if (retryTimer) clearTimeout(retryTimer);
         ws?.close?.();
         ws = null;
     }
