@@ -29,8 +29,8 @@ export default definePlugin({
         {
             find: "connectChannelDragSource",
             replacement: {
-                match: /canDrag\((\i)\)\{/,
-                replace: "canDrag($1){if(!$self.isCtrlHeld())return false;"
+                match: /canDrag:\(\)=>/,
+                replace: "canDrag:()=>$self.isCtrlHeld()&&"
             }
         }
     ],
