@@ -25,7 +25,7 @@ export async function saveAttachment(_: IpcMainInvokeEvent, url: string) {
 
     if (!focusedWindow || !res.body) return;
 
-    const choice = await dialog.showSaveDialog(focusedWindow, {
+    const choice = await dialog.showSaveDialog({
         defaultPath: parsedURL.pathname.split("/").pop()
     });
 
