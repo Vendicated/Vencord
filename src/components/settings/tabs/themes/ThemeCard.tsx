@@ -243,10 +243,7 @@ export function ThemeCard({ theme, enabled, onChange, onDelete, showDeleteButton
                             href={`https://discord.gg/${theme.invite}`}
                             onClick={async e => {
                                 e.preventDefault();
-                                theme.invite != null &&
-                                    openInviteModal(theme.invite).catch(() =>
-                                        showToast("Invalid or expired invite")
-                                    );
+                                theme.invite != null && openInviteModal(theme.invite).catch(() => showToast({ text: "Invalid or expired invite", variant: "critical" }));
                             }}
                         >
                             Discord Server

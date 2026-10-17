@@ -70,44 +70,7 @@ waitFor("parseTopic", m => Parser = m);
 export let Alerts: t.Alerts;
 waitFor(["show", "close"], m => Alerts = m);
 
-export interface ToastData {
-    message: string,
-    id: string,
-    /**
-     * Toasts.Type
-     */
-    type: string,
-    options?: ToastOptions;
-}
-
-export interface ToastOptions {
-    /**
-     * Toasts.Position
-     */
-    position?: number;
-    component?: React.ReactNode,
-    duration?: number;
-}
-
-export const Toasts: t.Toasts = mapMangledModuleLazy(".currentToastMap.has(", {
-    show: filters.byCode(".currentToastMap.has("),
-    pop: filters.byCode(".delete(")
-});
-
-export const createToast: t.createToast = findByCodeLazy('variant:"default",icon:', ".duration");
-
-/**
- * Show a simple toast. If you need more options, use Toasts.show manually
- */
-export function showToast(message: string, type: t.ToastType = "message", options?: ToastOptions) {
-    // FIXME once Discord makes up their mind and stops changing this API every update
-    try {
-        Toasts.show(createToast(message, type, options));
-    } catch {
-        // @ts-ignore
-        Toasts.show({ text: message, variant: type });
-    }
-}
+export const showToast: t.showToast = findByCodeLazy(".currentToastMap.has(");
 
 export const UserUtils = {
     getUser: findByCodeLazy(".USER(")

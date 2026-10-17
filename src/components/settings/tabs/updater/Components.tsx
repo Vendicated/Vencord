@@ -14,7 +14,6 @@ import { Span } from "@components/Span";
 import { Margins } from "@utils/margins";
 import { relaunch } from "@utils/native";
 import { changes, checkForUpdates, update, updateError } from "@utils/updater";
-import { ToastPosition } from "@vencord/discord-types/enums";
 import { ConfirmModal, openModal, React, showToast, useState } from "@webpack/common";
 
 import { runWithDispatch } from "./runWithDispatch";
@@ -91,9 +90,8 @@ export function Updatable(props: CommonProps) {
                         } else {
                             setUpdates([]);
 
-                            showToast("No updates found!", "message", {
-                                position: ToastPosition.BOTTOM
-                            });
+                            showToast({ text: "No updates found!", position: "bottom" });
+
                         }
                     })}
                 >

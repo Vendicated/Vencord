@@ -155,7 +155,7 @@ export const VoiceChannelIndicator = ErrorBoundary.wrap(({ userId, isProfile, is
 
         if (e.detail > 1) {
             if (!isDM && !PermissionStore.can(PermissionsBits.CONNECT, channel)) {
-                showToast("You cannot join the user's Voice Channel", "failure");
+                showToast({ text: "You cannot join the user's Voice Channel", variant: "critical" });
                 return;
             }
 

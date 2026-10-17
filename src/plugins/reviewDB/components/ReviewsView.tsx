@@ -138,7 +138,7 @@ export function ReviewsInputComponent(
         <>
             <div onClick={() => {
                 if (!token) {
-                    showToast("Opening authorization window...");
+                    showToast({ text: "Opening authorization window..." });
                     authorize();
                 }
             }}>
