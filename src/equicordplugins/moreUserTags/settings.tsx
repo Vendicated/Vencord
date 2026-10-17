@@ -9,7 +9,6 @@ import { Card } from "@components/Card";
 import { Flex } from "@components/Flex";
 import { FormSwitch } from "@components/FormSwitch";
 import { Paragraph } from "@components/Paragraph";
-import { Margins } from "@utils/margins";
 import { OptionType } from "@utils/types";
 import { Forms, TextInput, Tooltip } from "@webpack/common";
 
@@ -31,8 +30,8 @@ function SettingsComponent() {
         <Flex flexDirection="column">
             <div
                 style={{
-                    display: "flex",
-                    flexWrap: "wrap",
+                    display: "grid",
+                    gridTemplateColumns: "auto auto",
                     gap: "16px",
                 }}
             >
@@ -41,7 +40,6 @@ function SettingsComponent() {
                         key={t.name}
                         style={{
                             padding: "1em 1em 0",
-                            width: "calc(33.333% - 11px)",
                             boxSizing: "border-box",
                         }}
                     >
@@ -59,19 +57,24 @@ function SettingsComponent() {
                         </Forms.FormTitle>
 
                         <div style={{ marginBottom: "10px" }}>
-                            <Paragraph style={{ fontSize: "13px" }}>
+                            <Paragraph style={{
+                                fontSize: "13px",
+                                display: "inline",
+                                paddingRight: "8px"
+                            }}>
                                 Example:
                             </Paragraph>
                             <Tag type={localTags[t.name]} />
                         </div>
 
-                        <TextInput
-                            type="text"
-                            value={tagSettings[t.name]?.text ?? t.displayName}
-                            placeholder={`Text on tag (default: ${t.displayName})`}
-                            onChange={v => tagSettings[t.name].text = v}
-                            className={Margins.bottom16}
-                        />
+                        <div style={{ marginBottom: "16px" }}>
+                            <TextInput
+                                type="text"
+                                value={tagSettings[t.name]?.text ?? t.displayName}
+                                placeholder={`Text on tag (default: ${t.displayName})`}
+                                onChange={v => tagSettings[t.name].text = v}
+                            />
+                        </div>
 
                         <FormSwitch
                             title="Show in messages"
@@ -110,15 +113,15 @@ export const settings = definePluginSettings({
         type: OptionType.BOOLEAN,
         default: false
     },
-    tagSettings: {
-        type: OptionType.COMPONENT,
-        component: SettingsComponent,
-        description: "fill me"
-    },
     noAppsAllowed: {
         description: "Replaces app for bot",
         type: OptionType.BOOLEAN,
         default: false,
         restartNeeded: true
+    },
+    tagSettings: {
+        type: OptionType.COMPONENT,
+        component: SettingsComponent,
+        description: "fill me"
     }
 });

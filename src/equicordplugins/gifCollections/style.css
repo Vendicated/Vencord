@@ -13,7 +13,7 @@
 }
 
 .vc-gif-collections-sort-divider {
-    margin: 10px 0;
+    margin: 8px 0;
     border-top: 1px solid var(--border-subtle);
 }
 
@@ -30,28 +30,26 @@
 }
 
 .vc-gif-collections-sort-option {
-    display: flex;
-    align-items: center;
     margin-bottom: 8px;
 }
 
 .vc-gif-collections-sort-label {
-    font-size: 14px;
-    font-weight: 400;
-    color: var(--text-default);
     cursor: pointer;
-    display: flex;
-    align-items: center;
-}
-
-.vc-gif-collections-sort-input {
-    margin-right: 10px;
-    cursor: pointer;
-    accent-color: var(--brand-experiment);
 }
 
 .vc-gif-collections-sort-label:hover {
     color: var(--text-strong);
+}
+
+.vc-gif-collections-sort-input {
+    margin: 0;
+    margin-right: 8px;
+    cursor: pointer;
+    accent-color: var(--brand-experiment);
+}
+
+.vc-gif-collections-sort-text {
+    display: inline;
 }
 
 .vc-gif-collections-modal {
