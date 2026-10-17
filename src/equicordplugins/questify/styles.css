@@ -66,13 +66,12 @@
 }
 
 /* Quest name color. */
-.questify-quest-item-restyle > div > div[class*="rewardDescriptionContainer"] > div[class*="textContainer"] > [class*="eyebrow"] {
+.questify-quest-item-restyle > div > div[class*="rewardDescriptionContainer"] > div[class*="textContainer"] > [class*="questName_"] {
     color: var(--questify-quest-name) !important;
 }
 
 /* Reward title + Orbs reward title text color. */
-.questify-quest-item-restyle > div > div[class*="rewardDescriptionContainer"] > div[class*="textContainer"] > div[class*="text-md"],
-.questify-quest-item-restyle > div > div[class*="rewardDescriptionContainer"] > div[class*="textContainer"] > div[class*="text-md"] > span {
+.questify-quest-item-restyle > div > div[class*="rewardDescriptionContainer"] > div[class*="textContainer"] [class*="header_"] {
     color: var(--questify-reward-title) !important;
 }
 
