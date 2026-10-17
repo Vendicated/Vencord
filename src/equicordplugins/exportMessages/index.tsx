@@ -15,7 +15,6 @@ import { showItemInFolder } from "@utils/native";
 import definePlugin, { OptionType } from "@utils/types";
 import { saveFile } from "@utils/web";
 import { Message } from "@vencord/discord-types";
-import { ToastPosition } from "@vencord/discord-types/enums";
 import { Menu, showToast } from "@webpack/common";
 
 import { ContactsList } from "./types";
@@ -176,18 +175,22 @@ export default definePlugin({
     copyContactToClipboard() {
         if (this.contactList) {
             copyToClipboard(JSON.stringify(this.contactList));
-            showToast("Contacts copied to clipboard successfully.", "success", {
-                    duration: 3000,
-                    position: ToastPosition.BOTTOM
-                });
+            showToast({
+                text: "Contacts copied to clipboard successfully.",
+                variant: "success",
+                duration: 3000,
+                position: "bottom"
+            });
             return;
         }
         // reason why you need to click the all tab is because the data is extracted during
         // the request itself when you fetch all your friends. this is done to avoid sending a
         // manual request to discord, which may raise suspicion and might even get you terminated.
-        showToast("Contact list is undefined. Click on the \"All\" tab before exporting.", "failure", {
-                duration: 3000,
-                position: ToastPosition.BOTTOM
-            });
+        showToast({
+            text: "Contact list is undefined. Click on the \"All\" tab before exporting.",
+            variant: "critical",
+            duration: 3000,
+            position: "bottom"
+        });
     }
 });

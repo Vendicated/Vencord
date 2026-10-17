@@ -61,7 +61,7 @@ function ScheduleTimeModalInner({ channelId, content, attachments, rootProps, cl
         if (result.success) {
             ComponentDispatch.dispatchToLastSubscribed("CLEAR_TEXT");
             UploadManager.clearAll(channelId, DraftType.ChannelMessage);
-            showToast("Message scheduled!", "success");
+            showToast({ text: "Message scheduled!", variant: "success" });
             close();
         } else {
             setError(result.error ?? "Failed to schedule message");

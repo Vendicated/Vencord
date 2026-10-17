@@ -39,24 +39,24 @@ function ImportButton({ overwrite, pending, setPending, onImport }: ImportButton
             json = JSON.parse(await readClipboard());
         } catch {
             setPending(false);
-            return showToast("No JSON in clipboard!", "failure");
+            return showToast({ text: "No JSON in clipboard!", variant: "critical" });
         }
 
         const { error, data } = UserDataSchema.max(apiConstants.songLimit).safeParse(json);
         if (error) {
             setPending(false);
-            return showToast("Invalid Song Spotlight data in clipboard!", "failure");
+            return showToast({ text: "Invalid Song Spotlight data in clipboard!", variant: "critical" });
         }
 
         const validated = await Promise.allSettled(data.map(song => Native.validateSong(song)));
         if (!validated.every(x => x.status === "fulfilled" && x.value)) {
             setPending(false);
-            return showToast("One or more imported songs were invalid.", "failure");
+            return showToast({ text: "One or more imported songs were invalid.", variant: "critical" });
         }
 
         onImport(data);
         setPending(false);
-        showToast("Imported songs from clipboard!", "success");
+        showToast({ text: "Imported songs from clipboard!", variant: "success" });
     }, [pending]);
 
     return (
@@ -153,7 +153,7 @@ export default function Settings({ templateData }: SettingsProps) {
                                     setPending(true);
                                     try {
                                         await saveData(localData);
-                                        showToast("Successfully saved songs!", "success");
+                                        showToast({ text: "Successfully saved songs!", variant: "success" });
                                     } finally {
                                         setPending(false);
                                     }
@@ -173,7 +173,7 @@ export default function Settings({ templateData }: SettingsProps) {
                         variant="dangerPrimary"
                         onClick={() => {
                             deleteTokens();
-                            showToast("Successfully signed out!", "success");
+                            showToast({ text: "Successfully signed out!", variant: "success" });
                         }}
                         disabled={pending}
                     >
@@ -191,7 +191,7 @@ export default function Settings({ templateData }: SettingsProps) {
                                         await deleteData();
                                         deleteTokens();
 
-                                        showToast("Successfully deleted songs!", "success");
+                                        showToast({ text: "Successfully deleted songs!", variant: "success" });
                                     } finally {
                                         setPending(false);
                                     }

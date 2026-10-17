@@ -136,7 +136,7 @@ export function ThemeCard({ theme, enabled, onChange, onDelete, showDeleteButton
                         icon={DiscordIcon}
                         action={() => {
                             openInviteModal(theme.invite!).catch(() =>
-                                showToast("Invalid or expired invite")
+                                showToast({ text: "Invalid or expired invite" })
                             );
                         }}
                     />

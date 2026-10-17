@@ -39,7 +39,7 @@ function validateColor(value: string, key: string, fallback: string) {
         }
     } catch { /* invalid hex */ }
 
-    showToast(`Invalid color format for ${key}, use "R, G, B" or "#RRGGBB"`, "failure");
+    showToast({ text: `Invalid color format for ${key}, use "R, G, B" or "#RRGGBB"`, variant: "critical" });
     settings.store[key] = fallback;
 }
 

@@ -11,7 +11,6 @@ import { definePluginSettings } from "@api/Settings";
 import { EquicordDevs, IS_MAC } from "@utils/constants";
 import { classNameFactory } from "@utils/css";
 import definePlugin, { makeRange, OptionType } from "@utils/types";
-import { ToastPosition } from "@vencord/discord-types/enums";
 import { Button, ChannelRouter, ChannelStore, closeModal, IconUtils, openModal, React, RelationshipStore, SelectedChannelStore, showToast,UserStore } from "@webpack/common";
 
 const STORAGE_KEY = "RDMSwitch_history";
@@ -77,7 +76,7 @@ const settings = definePluginSettings({
                     cycleSnapshot = [];
                     cycleIndex = -1;
                     await DataStore.set(STORAGE_KEY, []);
-                    showToast("Cleared RDMS history", "success");
+                    showToast({ text: "Cleared RDMS history", variant: "success" });
                 }}>
                 "Clear RDMS History
             </Button>
@@ -318,7 +317,7 @@ function showCycleToast() {
     const id = cycleSnapshot[cycleIndex];
     if (!id) return;
     const { name } = getDisplayForChannel(id);
-    showToast(`Switching to: ${name}`, "message", { position: ToastPosition.BOTTOM, duration: settings.store.toastDurationMs });
+    showToast({ text: `Switching to: ${name}`, position: "bottom", duration: settings.store.toastDurationMs });
 }
 
 export default definePlugin({

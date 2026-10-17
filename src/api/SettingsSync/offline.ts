@@ -111,7 +111,7 @@ export async function exportSettings({ syncDataStore = true, type = "all", minif
 
             if (type === "all") {
                 logger.warn("Skipping DataStore in backup due to size. Export DataStore separately if needed.");
-                showToast("DataStore too large - exported without it. Use 'Export DataStore' separately if needed.", "message");
+                showToast({ text: "DataStore too large - exported without it. Use 'Export DataStore' separately if needed." });
                 dataStore = undefined;
             } else if (type === "datastore") {
                 throw new Error("DataStore is too large to export. Please clear some plugin data and try again.");
@@ -149,7 +149,7 @@ export async function downloadSettingsBackup(type: BackupType = "all", { minify 
         }
     } catch (err) {
         logger.error("Failed to export settings:", err);
-        showToast("Failed to export settings, check console", "failure");
+        showToast({ text: "Failed to export settings, check console", variant: "critical" });
         throw err;
     }
 }

@@ -189,7 +189,7 @@ export default definePlugin({
             style: { marginLeft: "20px" },
             onClick: () => {
                 settings.store.StatusPresets[status.text] = status;
-                showToast("Successfully Saved Status", "success");
+                showToast({ text: "Successfully Saved Status", variant: "success" });
             }
         };
     },

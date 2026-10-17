@@ -120,7 +120,7 @@ const listener: MessageSendListener = async (channelId, message) => {
 
     const channel = ChannelStore.getChannel(channelId);
     if (!canSplitInChannel(channel)) {
-        showToast("Cannot split this message because of the channel's slowmode.", "failure");
+        showToast({ text: "Cannot split this message because of the channel's slowmode.", variant: "critical" });
         return { cancel: true };
     }
 
@@ -130,7 +130,7 @@ const listener: MessageSendListener = async (channelId, message) => {
     const sent = await sendChunks(channelId, chunks, getSendDelay(channel));
     if (sent !== chunks.length) {
         restoreUnsentContent(channelId, chunks, sent);
-        showToast(`Only ${sent}/${chunks.length} message parts were sent.`, "failure");
+        showToast({ text: `Only ${sent}/${chunks.length} message parts were sent.`, variant: "critical" });
     }
 
     return { cancel: true };

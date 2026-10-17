@@ -248,7 +248,7 @@ const settings = definePluginSettings({
                 });
                 dataUriCache.clear();
                 setResetTrigger(prev => prev + 1);
-                showToast("All overrides reset successfully!");
+                showToast({ text: "All overrides reset successfully!" });
             };
 
             const triggerFileUpload = () => {
@@ -280,10 +280,10 @@ const settings = definePluginSettings({
                             }
 
                             setResetTrigger(prev => prev + 1);
-                            showToast("Settings imported successfully!");
+                            showToast({ text: "Settings imported successfully!" });
                         } catch (error) {
                             console.error("Error importing settings:", error);
-                            showToast("Error importing settings. Check console for details.");
+                            showToast({ text: "Error importing settings. Check console for details." });
                         }
                     };
 
@@ -317,7 +317,7 @@ const settings = definePluginSettings({
                 a.click();
                 URL.revokeObjectURL(url);
 
-                showToast(`Exported ${overrides.length} settings (audio files not included)`);
+                showToast({ text: `Exported ${overrides.length} settings (audio files not included)` });
             };
 
             const filteredSoundTypes = allSoundTypes.filter(type =>
@@ -368,7 +368,7 @@ const settings = definePluginSettings({
                                                 await ensureDataURICached(currentOverride.selectedFileId);
                                             } catch (error) {
                                                 console.error(`[CustomSounds] Failed to cache data URI for ${type.id}:`, error);
-                                                showToast("Error loading custom sound file");
+                                                showToast({ text: "Error loading custom sound file" });
                                             }
                                         }
 

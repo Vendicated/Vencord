@@ -69,19 +69,19 @@ export function SoundOverrideComponent({ type, override, onChange }: {
                 const dataUri = await ensureDataURICached(override.selectedFileId);
 
                 if (!dataUri || !dataUri.startsWith("data:audio/")) {
-                    showToast("No custom sound file available for preview");
+                    showToast({ text: "No custom sound file available for preview" });
                     return;
                 }
 
                 sound.current = playAudio(dataUri, {
                     volume: override.volume, onError: e => {
                         console.error("[CustomSounds] Error playing custom audio:", e);
-                        showToast("Error playing custom sound. File may be corrupted.");
+                        showToast({ text: "Error playing custom sound. File may be corrupted." });
                     }
                 });
             } catch (error) {
                 console.error("[CustomSounds] Error in previewSound:", error);
-                showToast("Error playing sound.");
+                showToast({ text: "Error playing sound." });
             }
         } else if (selectedSound === "default") {
             sound.current = playAudio(type.id);
@@ -96,13 +96,13 @@ export function SoundOverrideComponent({ type, override, onChange }: {
 
         const fileExtension = file.name.split(".").pop()?.toLowerCase();
         if (!fileExtension || !AUDIO_EXTENSIONS.includes(fileExtension)) {
-            showToast("Invalid file type. Please upload an audio file.");
+            showToast({ text: "Invalid file type. Please upload an audio file." });
             event.target.value = "";
             return;
         }
 
         try {
-            showToast("Uploading file...");
+            showToast({ text: "Uploading file..." });
             const id = await saveAudio(file);
 
             const savedFiles = await getAllAudio();
@@ -114,10 +114,10 @@ export function SoundOverrideComponent({ type, override, onChange }: {
             await ensureDataURICached(id);
             await saveAndNotify();
 
-            showToast(`File uploaded successfully: ${file.name}`);
+            showToast({ text: `File uploaded successfully: ${file.name}` });
         } catch (error) {
             console.error("[CustomSounds] Error uploading file:", error);
-            showToast(`Error uploading file: ${error}`);
+            showToast({ text: `Error uploading file: ${error}` });
         }
 
         event.target.value = "";
@@ -136,10 +136,10 @@ export function SoundOverrideComponent({ type, override, onChange }: {
             } else {
                 update();
             }
-            showToast("File deleted successfully");
+            showToast({ text: "File deleted successfully" });
         } catch (error) {
             console.error("[CustomSounds] Error deleting file:", error);
-            showToast("Error deleting file.");
+            showToast({ text: "Error deleting file." });
         }
     };
 
@@ -165,7 +165,7 @@ export function SoundOverrideComponent({ type, override, onChange }: {
                             await ensureDataURICached(override.selectedFileId);
                         } catch (error) {
                             console.error(`[CustomSounds] Failed to cache data URI for ${type.id}:`, error);
-                            showToast("Error loading custom sound file");
+                            showToast({ text: "Error loading custom sound file" });
                         }
                     }
 
@@ -224,7 +224,7 @@ export function SoundOverrideComponent({ type, override, onChange }: {
                                         await ensureDataURICached(override.selectedFileId);
                                     } catch (error) {
                                         console.error(`[CustomSounds] Failed to cache data URI for ${type.id}:`, error);
-                                        showToast("Error loading custom sound file");
+                                        showToast({ text: "Error loading custom sound file" });
                                     }
                                 }
 

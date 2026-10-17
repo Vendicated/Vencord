@@ -33,10 +33,10 @@ export function ClearLogsButton({ label = "Clear Logs", onCleared }: ClearLogsBu
                     try {
                         await clearMessagesIDB();
                         onCleared?.();
-                        showToast("Cleared Logs", "success");
+                        showToast({ text: "Cleared Logs", variant: "success" });
                     } catch (err) {
                         Flogger.error("Failed to clear logs", err);
-                        showToast("Failed to clear logs", "failure");
+                        showToast({ text: "Failed to clear logs", variant: "critical" });
                     } finally {
                         setLoading(false);
                     }

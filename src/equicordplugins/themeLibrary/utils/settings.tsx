@@ -12,7 +12,6 @@ import { Paragraph } from "@components/Paragraph";
 import { copyToClipboard } from "@utils/clipboard";
 import { classNameFactory } from "@utils/css";
 import { OptionType } from "@utils/types";
-import { ToastPosition } from "@vencord/discord-types/enums";
 import { Button, showToast } from "@webpack/common";
 
 import { authorizeUser, deauthorizeUser } from "./auth";
@@ -33,17 +32,21 @@ export const settings = definePluginSettings({
             const handleClick = async () => {
                 const token = await DataStore.get("ThemeLibrary_uniqueToken");
 
-                if (!token) return showToast("No token to copy, try authorizing first!", "failure", {
-                        duration: 2.5e3,
-                        position: ToastPosition.BOTTOM
-                    });
+                if (!token) return showToast({
+                    text: "No token to copy, try authorizing first!",
+                    variant: "critical",
+                    duration: 2.5e3,
+                    position: "bottom"
+                });
 
                 copyToClipboard(token);
 
-                showToast("Copied to Clipboard!", "success", {
-                        duration: 2.5e3,
-                        position: ToastPosition.BOTTOM
-                    });
+                showToast({
+                    text: "Copied to Clipboard!",
+                    variant: "success",
+                    duration: 2.5e3,
+                    position: "bottom"
+                });
             };
 
             return (

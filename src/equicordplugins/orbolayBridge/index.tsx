@@ -298,7 +298,7 @@ const createWebsocket = () => {
         ws = null;
     };
     ws.onopen = async () => {
-        showToast("Connected to Orbolay server", "success");
+        showToast({ text: "Connected to Orbolay server", variant: "success" });
 
         const userId = await waitForPopulate(() => UserStore.getCurrentUser().id);
         if (!userId) return;

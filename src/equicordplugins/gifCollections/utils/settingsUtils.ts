@@ -70,6 +70,6 @@ export async function uploadGifCollections(showToast = true): Promise<void> {
     }
 }
 
-const toastSuccess = () => showToast("Collections imported successfully.", "success");
+const toastSuccess = () => showToast({ text: "Collections imported successfully.", variant: "success" });
 
-const toastFailure = (err: unknown) => showToast(`Failed to import collections: ${String(err)}`, "failure");
+const toastFailure = (err: unknown) => showToast({ text: `Failed to import collections: ${String(err)}`, variant: "critical" });

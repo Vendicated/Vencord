@@ -236,7 +236,7 @@ function UserPluginsTab() {
                                     setEnabled={t => {
                                         Vencord.Settings.plugins[pl.name].enabled = t;
                                         if (pluginRequiresRestart(pl)) {
-                                            showToast("Restart to apply changes!", "message");
+                                            showToast({ text: "Restart to apply changes!" });
                                         } else {
                                             (t ? startPlugin : stopPlugin)(pl);
                                         }

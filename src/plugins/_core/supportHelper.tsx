@@ -480,10 +480,10 @@ export default definePlugin({
                             } else if (pluginList && typeof pluginList === "object" && pluginList.uploadFile) {
                                 try {
                                     await uploadPluginListFile(props.channel.id, pluginList.fileContent, pluginList.filename);
-                                    showToast("Plugin list uploaded successfully!", "success");
+                                    showToast({ text: "Plugin list uploaded successfully!", variant: "success" });
                                 } catch (e) {
                                     new Logger("SupportHelper").error("Failed to upload plugin list:", e);
-                                    showToast("Failed to upload plugin list", "failure");
+                                    showToast({ text: "Failed to upload plugin list", variant: "critical" });
                                 }
                             }
                         }}

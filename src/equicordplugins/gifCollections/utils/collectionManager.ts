@@ -5,7 +5,6 @@
  */
 
 import { DataStore } from "@api/index";
-import { ToastPosition } from "@vencord/discord-types/enums";
 import { showToast } from "@webpack/common";
 
 import { settings } from "../settings";
@@ -33,7 +32,7 @@ export async function createCollection(name: string, gifs: Gif[]): Promise<void>
     const fullName = `${settings.store.collectionPrefix}${name}`;
 
     if (collections.some(c => c.name === fullName)) {
-        showToast("That collection already exists", "failure", { duration: 3000, position: ToastPosition.BOTTOM });
+        showToast({ text: "That collection already exists", variant: "critical", duration: 3000, position: "bottom" });
         return;
     }
 
@@ -57,7 +56,7 @@ export async function addToCollection(name: string, gif: Gif): Promise<void> {
     if (!collection) return void logger.warn("Collection not found");
 
     if (settings.store.preventDuplicates && collection.gifs.some(g => g.url === gif.url)) {
-        showToast("This GIF is already in the collection", "failure", { duration: 3000, position: ToastPosition.BOTTOM });
+        showToast({ text: "This GIF is already in the collection", variant: "critical", duration: 3000, position: "bottom" });
         return;
     }
 

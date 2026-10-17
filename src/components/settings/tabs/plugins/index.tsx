@@ -38,7 +38,6 @@ import { classes } from "@utils/misc";
 import { PluginTarget } from "@utils/pluginTargets";
 import { useAwaiter, useCleanupEffect, useIntersection } from "@utils/react";
 import { PluginTag, PluginTags } from "@utils/types";
-import { ToastPosition } from "@vencord/discord-types/enums";
 import { Alerts, ConfirmModal, lodash, openModal, Parser, React, SearchableSelect, Select, showToast,TextInput, Tooltip, useCallback, useMemo, useRef, useState } from "@webpack/common";
 import { JSX } from "react";
 
@@ -53,9 +52,11 @@ export const cl = classNameFactory("vc-plugins-");
 export const logger = new Logger("PluginSettings", "#a6d189");
 
 function showErrorToast(message: string) {
-    showToast(message, "failure", {
-            position: ToastPosition.BOTTOM
-        });
+    showToast({
+        text: message,
+        variant: "critical",
+        position: "bottom"
+    });
 }
 
 function ReloadRequiredCard({ required, enabledPlugins, openWarningModal, resetCheckAndDo }) {

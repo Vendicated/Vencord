@@ -22,7 +22,7 @@ function getRedirectUri(): string {
 function handleApiError(error: any, defaultMessage: string): void {
     console.error(defaultMessage, error);
     const message = error?.message || defaultMessage;
-    showToast(message, "failure");
+    showToast({ text: message, variant: "critical" });
 }
 
 async function safeJsonParse(response: Response): Promise<any> {
@@ -111,7 +111,7 @@ async function setTimezoneInternal(timezone: string): Promise<boolean> {
             return false;
         }
 
-        showToast("Timezone updated successfully!", "success");
+        showToast({ text: "Timezone updated successfully!", variant: "success" });
         return true;
     } catch (e) {
         handleApiError(e, "Failed to set timezone");
@@ -149,7 +149,7 @@ async function deleteTimezoneInternal(): Promise<boolean> {
             return false;
         }
 
-        showToast("Timezone deleted successfully!", "success");
+        showToast({ text: "Timezone deleted successfully!", variant: "success" });
         return true;
     } catch (e) {
         handleApiError(e, "Failed to delete timezone");
@@ -180,7 +180,7 @@ export function authModal(callback?: () => void) {
                         handleApiError(json, "Authorization failed");
                         return;
                     }
-                    showToast("Authorization successful!", "success");
+                    showToast({ text: "Authorization successful!", variant: "success" });
                     callback?.();
                 } catch (e) {
                     handleApiError(e, "Unexpected error during authorization");

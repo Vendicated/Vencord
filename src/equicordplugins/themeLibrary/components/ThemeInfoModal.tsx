@@ -25,10 +25,10 @@ const UserSummaryItem = findComponentByCodeLazy("defaultRenderUser", "showDefaul
 async function downloadTheme(theme: Theme) {
     try {
         await Native.downloadTheme(theme);
-        showToast(`Downloaded ${theme.name}!`, "success");
+        showToast({ text: `Downloaded ${theme.name}!`, variant: "success" });
     } catch (err: unknown) {
         logger.error(err);
-        showToast(`Failed to download ${theme.name}! (check console)`, "failure");
+        showToast({ text: `Failed to download ${theme.name}! (check console)`, variant: "critical" });
     }
 }
 
@@ -166,7 +166,7 @@ export const ThemeInfoModal: React.FC<ThemeInfoModalProps> = ({ author, theme, .
                                     onClick={async e => {
                                         e.preventDefault();
                                         const useInvite = guild ? guild.invite_link?.split("discord.gg/")[1] : invite;
-                                        useInvite != null && openInviteModal(useInvite).catch(() => showToast("Invalid or expired invite!", "failure"));
+                                        useInvite != null && openInviteModal(useInvite).catch(() => showToast({ text: "Invalid or expired invite!", variant: "critical" }));
                                     }}
                                 >
                                     Join Discord Server
@@ -194,7 +194,7 @@ export const ThemeInfoModal: React.FC<ThemeInfoModalProps> = ({ author, theme, .
                                             variant: "primary",
                                             onClick: () => {
                                                 copyToClipboard(themeContent);
-                                                showToast("Copied to Clipboard", "success");
+                                                showToast({ text: "Copied to Clipboard", variant: "success" });
                                             }
                                         }
                                     ]}

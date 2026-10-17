@@ -263,9 +263,9 @@ function ThemesTab() {
             setOnlineThemes(prev =>
                 prev?.map(t => t.link === link ? updatedTheme : t) ?? null
             );
-            showToast("Theme refreshed!", "success");
+            showToast({ text: "Theme refreshed!", variant: "success" });
         } catch {
-            showToast("Failed to refresh theme", "failure");
+            showToast({ text: "Failed to refresh theme", variant: "critical" });
         }
     }
 
@@ -288,7 +288,7 @@ function ThemesTab() {
                 URL.revokeObjectURL(url);
             }
         } catch {
-            showToast("Failed to download theme", "failure");
+            showToast({ text: "Failed to download theme", variant: "critical" });
         }
     }
 

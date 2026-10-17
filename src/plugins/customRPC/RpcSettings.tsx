@@ -183,7 +183,7 @@ function PresetSettings({ onLoad }: { onLoad(): void; }) {
         await DataStore.set(PRESETS_KEY, nextPresets);
         setChangedPresets(nextPresets);
         setSelectedPreset(name);
-        showToast(`Saved preset ${name}.`, "success");
+        showToast({ text: `Saved preset ${name}.`, variant: "success" });
     }
 
     function loadPreset() {
@@ -193,7 +193,7 @@ function PresetSettings({ onLoad }: { onLoad(): void; }) {
         Object.assign(settings.store, preset.config);
         onLoad();
         updateRPC();
-        showToast(`Loaded preset ${preset.name}.`, "success");
+        showToast({ text: `Loaded preset ${preset.name}.`, variant: "success" });
     }
 
     async function deletePreset() {
@@ -203,7 +203,7 @@ function PresetSettings({ onLoad }: { onLoad(): void; }) {
         await DataStore.set(PRESETS_KEY, nextPresets);
         setChangedPresets(nextPresets);
         setSelectedPreset("");
-        showToast(`Deleted preset ${selectedPreset}.`, "success");
+        showToast({ text: `Deleted preset ${selectedPreset}.`, variant: "success" });
     }
 
     return (

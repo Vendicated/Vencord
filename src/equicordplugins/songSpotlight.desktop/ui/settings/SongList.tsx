@@ -196,7 +196,7 @@ export default function SongList({ localData, setLocalData }: SongListProps) {
         if (localData.length >= apiConstants.songLimit) return "Not enough space";
         if (localData.some(x => sid(x) === sid(song))) return "You've already added this song";
 
-        showToast("Added song!");
+        showToast({ text: "Added song!" });
         setLocalData([
             ...localData,
             song,
@@ -207,7 +207,7 @@ export default function SongList({ localData, setLocalData }: SongListProps) {
         const i = localData.indexOf(song);
         if (i === -1) return;
 
-        showToast("Removed song!");
+        showToast({ text: "Removed song!" });
         setLocalData(localData.toSpliced(i, 1));
     }, [localData]);
 

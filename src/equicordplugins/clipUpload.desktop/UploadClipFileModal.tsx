@@ -52,7 +52,7 @@ function UploadClipFileModal({ modalProps, channelId, clip }: { modalProps: Rend
             result = await pickClipFile(parseMetadata);
             if (!result) return;
         } catch (error) {
-            showToast(getErrorMessage(error), "failure");
+            showToast({ text: getErrorMessage(error), variant: "critical" });
             return;
         }
 

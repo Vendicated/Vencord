@@ -11,7 +11,6 @@ import { loadLazyChunks } from "@debug/loadLazyChunks";
 import { reporterData } from "@debug/reporterData";
 import { getIntlMessageFromHash } from "@utils/discord";
 import { canonicalizeMatch, canonicalizeReplace } from "@utils/patches";
-import { ToastPosition } from "@vencord/discord-types/enums";
 import { filters, findAll, search, wreq } from "@webpack";
 import { React, showToast,useState } from "@webpack/common";
 
@@ -66,9 +65,11 @@ export function initWs(isManual = false) {
 
         try {
             if (settings.store.notifyOnAutoConnect || isManual) {
-                showToast("Connected to WebSocket", "success", {
-                        position: ToastPosition.TOP
-                    });
+                showToast({
+                    text: "Connected to WebSocket",
+                    variant: "success",
+                    position: "top"
+                });
             }
         }
         catch (e) {
@@ -83,9 +84,11 @@ export function initWs(isManual = false) {
 
         logger.error("Dev Companion Error:", e);
 
-        showToast("Dev Companion Error", "failure", {
-                position: ToastPosition.TOP
-            });
+        showToast({
+            text: "Dev Companion Error",
+            variant: "critical",
+            position: "top"
+        });
     });
 
     ws.addEventListener("close", e => {
@@ -93,9 +96,11 @@ export function initWs(isManual = false) {
 
         logger.info("Dev Companion Disconnected:", e.code, e.reason);
 
-        showToast("Dev Companion Disconnected", "failure", {
-                position: ToastPosition.TOP
-            });
+        showToast({
+            text: "Dev Companion Disconnected",
+            variant: "critical",
+            position: "top"
+        });
     });
 
     ws.addEventListener("message", e => {

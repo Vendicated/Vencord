@@ -71,9 +71,9 @@ async function downloadAll(attachments: MessageAttachment[]) {
     const succeeded = attachments.length - failed;
 
     if (failed === 0)
-        showToast(`Downloaded ${pluralize(succeeded, "attachment")}.`, "success");
+        showToast({ text: `Downloaded ${pluralize(succeeded, "attachment")}.`, variant: "success" });
     else
-        showToast(`Downloaded ${succeeded} of ${attachments.length} attachments. ${failed} failed.`, "failure");
+        showToast({ text: `Downloaded ${succeeded} of ${attachments.length} attachments. ${failed} failed.`, variant: "critical" });
 }
 
 export default definePlugin({

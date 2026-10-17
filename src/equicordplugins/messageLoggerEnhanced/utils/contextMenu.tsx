@@ -80,7 +80,7 @@ const removeMessageAction = async (props: any) => {
         }
     } catch (e) {
         console.error("Failed to remove message", e);
-        showToast("Failed to remove message. Check console for details.", "failure");
+        showToast({ text: "Failed to remove message. Check console for details.", variant: "critical" });
     }
 };
 

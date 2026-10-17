@@ -134,7 +134,7 @@ export default definePlugin({
                 }
             });
         } catch {
-            showToast("Oops! Something went wrong.", "failure");
+            showToast({ text: "Oops! Something went wrong.", variant: "critical" });
         }
     }
 });

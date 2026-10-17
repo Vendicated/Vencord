@@ -47,7 +47,7 @@ export function SetAvatarModal({ userId, modalProps }: { userId: string; modalPr
         if (!file.type.startsWith("image/")) return;
 
         if (file.type === "image/gif" || file.type === "image/webp") {
-            showToast("GIFs/WebP must be added via URL. Upload your GIF/WebP to a image hosting service and paste the link.", "failure");
+            showToast({ text: "GIFs/WebP must be added via URL. Upload your GIF/WebP to a image hosting service and paste the link.", variant: "critical" });
             return;
         }
 

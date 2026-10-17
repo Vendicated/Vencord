@@ -374,11 +374,11 @@ async function sendScheduledMessage(msg: ScheduledMessage): Promise<boolean> {
         }
 
         if (settings.store.showNotifications) {
-            showToast(`Scheduled message sent to ${getChannelDisplayInfo(msg.channelId).name}`, "success");
+            showToast({ text: `Scheduled message sent to ${getChannelDisplayInfo(msg.channelId).name}`, variant: "success" });
         }
         return true;
     } catch {
-        if (settings.store.showNotifications) showToast("Failed to send scheduled message", "failure");
+        if (settings.store.showNotifications) showToast({ text: "Failed to send scheduled message", variant: "critical" });
         return false;
     }
 }

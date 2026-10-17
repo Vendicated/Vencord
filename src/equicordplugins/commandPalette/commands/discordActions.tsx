@@ -78,7 +78,7 @@ export const discordCommands: PaletteCommand[] = [
                         label: `Set ${status.label}`,
                         run() {
                             StatusSetting?.updateSetting(status.value);
-                            showToast(`Status set to ${status.label}.`, "success");
+                            showToast({ text: `Status set to ${status.label}.`, variant: "success" });
                         }
                     }]
                 }))
@@ -98,7 +98,7 @@ export const discordCommands: PaletteCommand[] = [
                 const currentIdx = THEMES.findIndex(theme => theme.value === ThemeStore.theme);
                 const next = THEMES[(currentIdx + 1) % THEMES.length];
                 updateDiscordTheme({ theme: next.value });
-                showToast(`Theme set to ${next.label}.`, "success");
+                showToast({ text: `Theme set to ${next.label}.`, variant: "success" });
             }
         }]
     }

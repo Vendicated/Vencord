@@ -1304,19 +1304,19 @@ function getFilenameExtension(filename: string): string | undefined {
 async function notifyUploadSuccess(finalUrl: string, forceSend?: boolean): Promise<void> {
     if (settings.store.autoCopy) {
         if (!finalUrl || !finalUrl.trim()) {
-            showToast("Upload successful, but no URL was available to copy", "message");
+            showToast({ text: "Upload successful, but no URL was available to copy" });
             return;
         }
 
         try {
             await copyToClipboard(finalUrl);
-            showToast("Upload successful, URL copied to clipboard", "success");
+            showToast({ text: "Upload successful, URL copied to clipboard", variant: "success" });
         } catch (error) {
             logger.warn("Upload succeeded but clipboard copy failed", error);
-            showToast("Upload successful, but failed to copy URL", "message");
+            showToast({ text: "Upload successful, but failed to copy URL" });
         }
     } else {
-        showToast("Upload successful", "success");
+        showToast({ text: "Upload successful", variant: "success" });
     }
 
     const autoSend = forceSend || Boolean((settings.store as { autoSend?: boolean; }).autoSend);
@@ -1366,7 +1366,7 @@ async function uploadWithFallbacks(fileBlob: Blob, filename: string, primary: Se
         try {
             const uploadedUrl = await uploadToService(service, fileBlob, filename);
             if (attempted.length) {
-                showToast(`Upload succeeded with ${serviceLabels[service]} after fallback`, "success");
+                showToast({ text: `Upload succeeded with ${serviceLabels[service]} after fallback`, variant: "success" });
             }
 
             setUploadState({
@@ -1433,7 +1433,7 @@ async function normalizeUploadBlob(blob: Blob, sourceUrl?: string): Promise<{ bl
             blob = gifBlob;
             ext = "gif";
         } else {
-            showToast("APNG to GIF conversion failed, uploading as APNG", "failure");
+            showToast({ text: "APNG to GIF conversion failed, uploading as APNG", variant: "critical" });
         }
     }
 
@@ -1463,12 +1463,12 @@ async function uploadPreparedBlob(blob: Blob, sourceUrl?: string, forceSend?: bo
 
 export async function uploadFile(url: string): Promise<void> {
     if (isUploading) {
-        showToast("Upload already in progress", "message");
+        showToast({ text: "Upload already in progress" });
         return;
     }
 
     if (!isConfigured()) {
-        showToast("Please configure FileUpload settings first", "failure");
+        showToast({ text: "Please configure FileUpload settings first", variant: "critical" });
         return;
     }
 
@@ -1527,10 +1527,10 @@ export async function uploadFile(url: string): Promise<void> {
     } catch (error) {
         const message = error instanceof Error ? error.message : "Unknown error";
         if (isUploadCancelledError(error)) {
-            showToast("Upload cancelled", "message");
+            showToast({ text: "Upload cancelled" });
             setUploadState({ phase: "cancelled", status: "Upload cancelled.", canCancel: false, percent: 0 });
         } else {
-            showToast(`Upload failed: ${message}`, "failure");
+            showToast({ text: `Upload failed: ${message}`, variant: "critical" });
             logger.error("Upload error", error);
             setUploadState({ phase: "failed", status: `Upload failed: ${message}`, canCancel: false, percent: 0 });
         }
@@ -1547,7 +1547,7 @@ export async function uploadPickedFile(): Promise<void> {
     if (!file) return;
 
     if (!isFileTypeAllowed(file)) {
-        showToast("File type not allowed by current filter", "failure");
+        showToast({ text: "File type not allowed by current filter", variant: "critical" });
         return;
     }
 
@@ -1556,12 +1556,12 @@ export async function uploadPickedFile(): Promise<void> {
 
 export async function uploadProvidedFiles(files: readonly File[], forceSend?: boolean): Promise<void> {
     if (isUploading) {
-        showToast("Upload already in progress", "message");
+        showToast({ text: "Upload already in progress" });
         return;
     }
 
     if (!isConfigured()) {
-        showToast("Please configure FileUpload settings first", "failure");
+        showToast({ text: "Please configure FileUpload settings first", variant: "critical" });
         return;
     }
 
@@ -1596,10 +1596,10 @@ export async function uploadProvidedFiles(files: readonly File[], forceSend?: bo
     } catch (error) {
         const message = error instanceof Error ? error.message : "Unknown error";
         if (isUploadCancelledError(error)) {
-            showToast("Upload cancelled", "message");
+            showToast({ text: "Upload cancelled" });
             setUploadState({ phase: "cancelled", status: "Upload cancelled.", canCancel: false, percent: 0 });
         } else {
-            showToast(`Upload failed: ${message}`, "failure");
+            showToast({ text: `Upload failed: ${message}`, variant: "critical" });
             logger.error("Manual upload error", error);
             setUploadState({ phase: "failed", status: `Upload failed: ${message}`, canCancel: false, percent: 0 });
         }

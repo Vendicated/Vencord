@@ -15,8 +15,7 @@ import { debounce } from "@shared/debounce";
 import { Devs, EquicordDevs, IS_MAC } from "@utils/constants";
 import { classNameFactory } from "@utils/css";
 import definePlugin, { makeRange, OptionType } from "@utils/types";
-import type { Channel, ToastType, VoiceState } from "@vencord/discord-types";
-import { ToastPosition } from "@vencord/discord-types/enums";
+import type { Channel, ToastVariant, VoiceState } from "@vencord/discord-types";
 import { findByCodeLazy } from "@webpack";
 import { ChannelActions, ChannelRouter, ChannelStore, ContextMenuApi, FluxDispatcher, GuildStore, MediaEngineStore, Menu, PermissionsBits, PermissionStore, React, RelationshipStore, SelectedChannelStore, showToast as originalShowToast, useEffect, UserStore, useState, VoiceActions, VoiceStateStore } from "@webpack/common";
 
@@ -373,8 +372,8 @@ const settings = definePluginSettings({
     },
 });
 
-function showToast(message: string, type: ToastType) {
-    originalShowToast(message, type, { position: ToastPosition.BOTTOM });
+function showToast(text: string, variant?: ToastVariant) {
+    originalShowToast({ text, variant, position: "bottom" });
 }
 
 function RandomVoiceIcon({ className }: { className?: string; }) {
@@ -590,13 +589,13 @@ function runAfterVoiceJoin(channelId: string, callbacks: PostJoinAction[]) {
 async function joinRandomVoice() {
     const channelId = pickRandomChannel();
     if (!channelId) {
-        showToast("Failed to find a voice channel.", "message");
+        showToast("Failed to find a voice channel.");
         return;
     }
 
     const channel = ChannelStore.getChannel(channelId);
     if (!channel) {
-        showToast("Voice channel is unavailable.", "failure");
+        showToast("Voice channel is unavailable.", "critical");
         return;
     }
 

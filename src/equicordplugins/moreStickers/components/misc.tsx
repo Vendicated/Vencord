@@ -58,14 +58,18 @@ const StickerPackMetadata = ({ meta, hoveredStickerPackId, setHoveredStickerPack
                 onClick={async () => {
                     try {
                         await deleteStickerPack(meta.id);
-                        showToast("Sticker Pack deleted", "success", {
-                                duration: 1000
-                            });
+                        showToast({
+                            text: "Sticker Pack deleted",
+                            variant: "success",
+                            duration: 1000
+                        });
                         await refreshStickerPackMetas();
                     } catch (e: any) {
-                        showToast(e.message, "failure", {
-                                duration: 1000
-                            });
+                        showToast({
+                            text: e.message,
+                            variant: "critical",
+                            duration: 1000
+                        });
                     }
                 }}
             >
@@ -200,13 +204,17 @@ export const Packs = () => {
                                 refreshStickerPackMetas();
 
                                 if (errorMessage) {
-                                    showToast(errorMessage, "failure", {
-                                            duration: 1000
-                                        });
+                                    showToast({
+                                        text: errorMessage,
+                                        variant: "critical",
+                                        duration: 1000
+                                    });
                                 } else {
-                                    showToast("Sticker Pack added", "success", {
-                                            duration: 1000
-                                        });
+                                    showToast({
+                                        text: "Sticker Pack added",
+                                        variant: "success",
+                                        duration: 1000
+                                    });
                                 }
 
                             }}
@@ -268,13 +276,17 @@ export const Packs = () => {
                                 refreshStickerPackMetas();
 
                                 if (errorMessage) {
-                                    showToast(errorMessage, "failure", {
-                                            duration: 1000
-                                        });
+                                    showToast({
+                                        text: errorMessage,
+                                        variant: "critical",
+                                        duration: 1000
+                                    });
                                 } else {
-                                    showToast("Sticker Pack added", "success", {
-                                            duration: 1000
-                                        });
+                                    showToast({
+                                        text: "Sticker Pack added",
+                                        variant: "success",
+                                        duration: 1000
+                                    });
                                 }
                             }}
                         >Insert from HTML</Button>
@@ -310,14 +322,18 @@ export const Packs = () => {
                                         await saveStickerPack(stickerPack);
                                     }
 
-                                    showToast("Sticker Packs added", "success", {
-                                            duration: 1000
-                                        });
+                                    showToast({
+                                        text: "Sticker Packs added",
+                                        variant: "success",
+                                        duration: 1000
+                                    });
                                 } catch (e: any) {
                                     console.error(e);
-                                    showToast(e.message, "failure", {
-                                            duration: 1000
-                                        });
+                                    showToast({
+                                        text: e.message,
+                                        variant: "critical",
+                                        duration: 1000
+                                    });
                                 }
                             };
                             input.click();
@@ -355,9 +371,11 @@ export const Packs = () => {
                                 a.click();
                                 setTimeout(() => URL.revokeObjectURL(objectUrl), 1000);
 
-                                showToast("Sticker Packs exported", "success", {
-                                        duration: 1000
-                                    });
+                                showToast({
+                                    text: "Sticker Packs exported",
+                                    variant: "success",
+                                    duration: 1000
+                                });
                             }}
                         >Export Sticker Packs</Button>
                         <Button

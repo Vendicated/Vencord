@@ -109,7 +109,7 @@ function commandForm(existing: CustomCommandData | null): PageEntry {
                 : [...store.get(), next]);
             registerCustomCommands();
 
-            showToast(existing ? "Command saved." : "Command created.", "success");
+            showToast({ text: existing ? "Command saved." : "Command created.", variant: "success" });
             ctx.pop();
         }
     };
@@ -138,7 +138,7 @@ function toCommand(data: CustomCommandData): PaletteCommand {
             run() {
                 store.set(store.get().filter(entry => entry.id !== data.id));
                 registerCustomCommands();
-                showToast("Command deleted.", "success");
+                showToast({ text: "Command deleted.", variant: "success" });
             }
         }
     ];

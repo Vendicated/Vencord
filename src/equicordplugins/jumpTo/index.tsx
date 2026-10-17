@@ -38,13 +38,13 @@ async function jumpToUserMessage(channelId: string, guildId: string, userId: str
 
         const messageId = res.body?.messages?.[0]?.[0]?.id;
         if (!messageId) {
-            showToast("No messages found from this user in this channel.", "failure");
+            showToast({ text: "No messages found from this user in this channel.", variant: "critical" });
             return;
         }
 
         NavigationRouter.transitionTo(`/channels/${guildId}/${channelId}/${messageId}`);
     } catch (e) {
-        showToast("Failed to search for messages.", "failure");
+        showToast({ text: "Failed to search for messages.", variant: "critical" });
     }
 }
 

@@ -74,17 +74,21 @@ export async function isV1() {
 export async function migrate() {
     const newPackMetas = await getStickerPackMetas(PACKS_KEY);
     if (newPackMetas.length > 0) {
-        showToast("New sticker packs already exist, migration not needed", "failure", {
-                duration: 1000
-            });
+        showToast({
+            text: "New sticker packs already exist, migration not needed",
+            variant: "critical",
+            duration: 1000
+        });
         return;
     }
 
     let oldPackMetas = await getStickerPackMetas(PACKS_KEY_OLD);
     if (oldPackMetas.length === 0) {
-        showToast("Old sticker packs not found, nothing to migrate", "failure", {
-                duration: 1000
-            });
+        showToast({
+            text: "Old sticker packs not found, nothing to migrate",
+            variant: "critical",
+            duration: 1000
+        });
         return;
     }
 
@@ -102,9 +106,11 @@ export async function migrate() {
             }
         } catch (e) {
             console.error(e);
-            showToast(`Migration failed: ${oldStickerPackMeta.title} (${oldStickerPackMeta.id})`, "failure", {
-                    duration: 1000
-                });
+            showToast({
+                text: `Migration failed: ${oldStickerPackMeta.title} (${oldStickerPackMeta.id})`,
+                variant: "critical",
+                duration: 1000
+            });
         }
     }
 
@@ -121,7 +127,9 @@ export async function migrate() {
     }
 
     console.log("Migration complete");
-    showToast("Sticker Pack Migration Complete", "success", {
-            duration: 1000
-        });
+    showToast({
+        text: "Sticker Pack Migration Complete",
+        variant: "success",
+        duration: 1000
+    });
 }

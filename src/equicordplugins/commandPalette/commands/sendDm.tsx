@@ -82,7 +82,7 @@ export const sendDmCommand: PaletteCommand = {
                 });
 
                 const user = UserStore.getUser(values.recipient);
-                showToast(`Message sent to ${user.globalName || user.username}.`, "success");
+                showToast({ text: `Message sent to ${user.globalName || user.username}.`, variant: "success" });
                 ctx.close();
             }
         }

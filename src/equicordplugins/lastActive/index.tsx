@@ -33,17 +33,17 @@ async function findLastMessageFromUser(guildId: string, channelId: string, userI
         if (messageId) return messageId;
     } catch (error) {
         console.error("Error finding last message:", error);
-        showToast("Failed to find messages. Check console for details.", "failure");
+        showToast({ text: "Failed to find messages. Check console for details.", variant: "critical" });
         return null;
     }
 
-    showToast("Couldn't find any recent messages from this user.", "failure");
+    showToast({ text: "Couldn't find any recent messages from this user.", variant: "critical" });
     return null;
 }
 
 async function jumpToLastActive(channel: Channel, targetUserId?: string) {
     if (!channel) {
-        showToast("Channel information not available.", "failure");
+        showToast({ text: "Channel information not available.", variant: "critical" });
         return;
     }
 
@@ -57,7 +57,7 @@ async function jumpToLastActive(channel: Channel, targetUserId?: string) {
         }
     } catch (error) {
         console.error("Error in jumpToLastActive:", error);
-        showToast("Failed to jump to message. Check console for details.", "failure");
+        showToast({ text: "Failed to jump to message. Check console for details.", variant: "critical" });
     }
 }
 

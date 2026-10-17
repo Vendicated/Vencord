@@ -50,10 +50,10 @@ export const PluginButtons = ErrorBoundary.wrap(function PluginCards({ message }
                 onClick={async () => {
                     try {
                         const success = await toggleEnabled(matchedPlugin);
-                        if (success) showToast(`${label}`, "success");
+                        if (success) showToast({ text: `${label}`, variant: "success" });
                     } catch (e) {
                         new Logger("EquicordHelper").error("Error while toggling:", e);
-                        showToast(`Failed to ${label.toLowerCase()}`, "failure");
+                        showToast({ text: `Failed to ${label.toLowerCase()}`, variant: "critical" });
                     }
                 }}
             >

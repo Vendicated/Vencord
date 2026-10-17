@@ -135,7 +135,7 @@ function getInviteUrl(code: string) {
 export async function createInvite(guildId: string, currentChannel: Channel, settings: InviteSettings): Promise<string | null> {
     const inviteChannel = resolveInviteChannel(guildId, currentChannel);
     if (!inviteChannel) {
-        showToast("No channel available for invites.", "failure");
+        showToast({ text: "No channel available for invites.", variant: "critical" });
         return null;
     }
 
@@ -143,12 +143,12 @@ export async function createInvite(guildId: string, currentChannel: Channel, set
         const reused = await fetchReusableInvite(guildId, inviteChannel.id);
         if (reused.ok) return getInviteUrl(reused.code);
 
-        showToast(
-            reused.reason === "missing"
+        showToast({
+            text: reused.reason === "missing"
                 ? "No reusable invite available."
                 : "Unable to reuse invite.",
-            "failure",
-        );
+            variant: "critical"
+        });
         return null;
     }
 
@@ -174,11 +174,11 @@ export async function createInvite(guildId: string, currentChannel: Channel, set
             maxUses: maxUses === 0 ? null : maxUses,
             uses: 0,
         });
-        showToast("Invite created.", "success");
+        showToast({ text: "Invite created.", variant: "success" });
         return getInviteUrl(code);
     } catch (error) {
         logger.error("Failed to create invite", error);
-        showToast("Unable to create invite.", "failure");
+        showToast({ text: "Unable to create invite.", variant: "critical" });
         return null;
     }
 }

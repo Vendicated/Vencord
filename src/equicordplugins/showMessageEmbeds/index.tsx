@@ -12,7 +12,6 @@ import { Logger } from "@utils/Logger";
 import { parseUrl } from "@utils/misc";
 import definePlugin from "@utils/types";
 import { Message } from "@vencord/discord-types";
-import { ToastPosition } from "@vencord/discord-types/enums";
 import { findByCodeLazy } from "@webpack";
 import { ChannelStore, Constants, Menu, MessageStore, React, RestAPI, showToast } from "@webpack/common";
 
@@ -190,7 +189,7 @@ function removeEmbed(url: string, message: Message) {
 }
 
 function showFailureToast(message: string) {
-    showToast(message, "failure", { position: ToastPosition.BOTTOM });
+    showToast({ text: message, variant: "critical", position: "bottom" });
 }
 
 export default definePlugin({

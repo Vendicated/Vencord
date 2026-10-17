@@ -8,12 +8,12 @@ import "./styles.css";
 
 import { NavContextMenuPatchCallback } from "@api/ContextMenu";
 import * as DataStore from "@api/DataStore";
+import { showNotification } from "@api/Notifications";
 import { definePluginSettings, migratePluginSetting } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs, EquicordDevs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { Message, User } from "@vencord/discord-types";
-import { ToastPosition } from "@vencord/discord-types/enums";
 import { findByPropsLazy, findCssClassesLazy } from "@webpack";
 import { Button, ChannelStore, Menu, openModal, showToast, Tooltip, useEffect, UserStore, useState } from "@webpack/common";
 
@@ -128,7 +128,7 @@ export const settings = definePluginSettings({
                         await deleteTimezone();
                     } catch (error) {
                         console.error("Error resetting database timezone:", error);
-                        showToast("Failed to reset database timezone", "failure");
+                        showToast({ text: "Failed to reset database timezone", variant: "critical" });
                     }
                 }}
             >
@@ -313,14 +313,14 @@ export default definePlugin({
                 const good = await loadDatabaseTimezones();
 
                 if (good) {
-                    showToast("Timezones refreshed successfully!", "success");
+                    showToast({ text: "Timezones refreshed successfully!", variant: "success" });
                 } else {
-                    showToast("Timezones Failed to refresh!", "failure");
+                    showToast({ text: "Timezones Failed to refresh!", variant: "critical" });
                 }
             }
             catch (error) {
                 console.error("Failed to refresh timezone:", error);
-                showToast("Failed to refresh timezones.", "failure");
+                showToast({ text: "Failed to refresh timezones.", variant: "critical" });
             }
         }
     },
@@ -332,24 +332,11 @@ export default definePlugin({
             await loadDatabaseTimezones();
 
             if (!settings.store.askedTimezone) {
-                showToast(
-                    "",
-                    "message",
-                    {
-                        duration: 10000,
-                        component: (
-                            <Button
-                                color={Button.Colors.GREEN}
-                                onClick={() => {
-                                    openModal(modalProps => <SetTimezoneModal userId={UserStore.getCurrentUser().id} modalProps={modalProps} database={true} />);
-                                }}
-                            >
-                                Want to save your timezone to the database? Click here to set it.
-                            </Button>
-                        ),
-                        position: ToastPosition.BOTTOM
-                    }
-                );
+                showNotification({
+                    title: "Timezones",
+                    body: "Want to save your timezone to the database? Click here to set it.",
+                    onClick: () => openModal(modalProps => <SetTimezoneModal userId={UserStore.getCurrentUser().id} modalProps={modalProps} database={true} />)
+                });
                 settings.store.askedTimezone = true;
             }
         }

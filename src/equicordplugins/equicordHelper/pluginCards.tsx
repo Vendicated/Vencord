@@ -59,7 +59,7 @@ export function ChatPluginCard({ url, description }: { url: string, description:
             : card;
     }
 
-    const onRestartNeeded = () => showToast("A restart is required for the change to take effect!");
+    const onRestartNeeded = () => showToast({ text: "A restart is required for the change to take effect!" });
 
     const depMap = useMemo(() => {
         const o = {} as Record<string, string[]>;

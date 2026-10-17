@@ -10,7 +10,6 @@ import { gitHashShort } from "@shared/vencordUserAgent";
 import { copyToClipboard } from "@utils/clipboard";
 import { relaunch, showItemInFolder } from "@utils/native";
 import { checkForUpdates, getRepo } from "@utils/updater";
-import { ToastPosition } from "@vencord/discord-types/enums";
 import { GuildStore, NavigationRouter, SettingsRouter, showToast } from "@webpack/common";
 
 import gitRemote from "~git-remote";
@@ -47,9 +46,11 @@ export const actions: ButtonAction[] = [
                 new URL(newUrl); // Throws if invalid
                 VencordNative.native.openExternal(newUrl);
             } catch {
-                showToast("Invalid URL", "failure", {
-                        position: ToastPosition.BOTTOM
-                    });
+                showToast({
+                    text: "Invalid URL",
+                    variant: "critical",
+                    position: "bottom"
+                });
             }
         }, registrar: "Equicord"
     },
@@ -88,14 +89,18 @@ export const actions: ButtonAction[] = [
                 const text = await res.text();
                 copyToClipboard(text);
 
-                showToast("Copied response to clipboard!", "success", {
-                        position: ToastPosition.BOTTOM
-                    });
+                showToast({
+                    text: "Copied response to clipboard!",
+                    variant: "success",
+                    position: "bottom"
+                });
 
             } catch (e) {
-                showToast("Issue fetching URL", "failure", {
-                        position: ToastPosition.BOTTOM
-                    });
+                showToast({
+                    text: "Issue fetching URL",
+                    variant: "critical",
+                    position: "bottom"
+                });
             }
         }, registrar: "Equicord"
     },
@@ -104,9 +109,11 @@ export const actions: ButtonAction[] = [
         id: "copyGitInfo", label: "Copy Git Info", callback: async () => {
             copyToClipboard(`gitHash: ${gitHashShort}\ngitRemote: ${gitRemote}`);
 
-            showToast("Copied git info to clipboard!", "success", {
-                    position: ToastPosition.BOTTOM
-                });
+            showToast({
+                text: "Copied git info to clipboard!",
+                variant: "success",
+                position: "bottom"
+            });
         }, registrar: "Equicord"
     },
 
@@ -125,9 +132,10 @@ export const actions: ButtonAction[] = [
                     }
                 }), 10_000);
             } else {
-                showToast("No updates available", "message", {
-                        position: ToastPosition.BOTTOM
-                    });
+                showToast({
+                    text: "No updates available",
+                    position: "bottom"
+                });
             }
         }, registrar: "Equicord"
     },
@@ -157,9 +165,11 @@ function togglePlugin(plugin: ButtonAction, enabled: boolean) {
 
     Settings.plugins[plugin.id].enabled = enabled;
 
-    showToast(`Successfully ${enabled ? "enabled" : "disabled"} ${plugin.id}`, "success", {
-            position: ToastPosition.BOTTOM
-        });
+    showToast({
+        text: `Successfully ${enabled ? "enabled" : "disabled"} ${plugin.id}`,
+        variant: "success",
+        position: "bottom"
+    });
 }
 
 export function registerAction(action: ButtonAction) {

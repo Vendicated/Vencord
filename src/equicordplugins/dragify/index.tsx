@@ -293,7 +293,7 @@ export default definePlugin({
         } catch (error) {
             clearDragState();
             logger.error("Failed handling drop", error);
-            showToast("Dragify failed to handle drop.", "failure");
+            showToast({ text: "Dragify failed to handle drop.", variant: "critical" });
         }
     },
 

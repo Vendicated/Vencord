@@ -110,7 +110,7 @@ const logger = new Logger("CommandPalette");
 export async function openSettingsPage(route: string, label?: string) {
     const candidates = resolveRouteCandidates(route);
     if (candidates.length === 0) {
-        showToast("No settings page was provided.", "failure");
+        showToast({ text: "No settings page was provided.", variant: "critical" });
         return false;
     }
 
@@ -124,6 +124,6 @@ export async function openSettingsPage(route: string, label?: string) {
         }
     }
 
-    showToast(`Unable to open ${label ?? "that settings page"}.`, "failure");
+    showToast({ text: `Unable to open ${label ?? "that settings page"}.`, variant: "critical" });
     return false;
 }

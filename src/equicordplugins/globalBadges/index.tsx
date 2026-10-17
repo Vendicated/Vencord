@@ -47,7 +47,7 @@ export default definePlugin({
     toolboxActions: {
         async "Refetch Global Badges"() {
             await loadBadges();
-            showToast("Successfully refetched global badges!", "success");
+            showToast({ text: "Successfully refetched global badges!", variant: "success" });
         }
     },
     get GlobalBadges() {

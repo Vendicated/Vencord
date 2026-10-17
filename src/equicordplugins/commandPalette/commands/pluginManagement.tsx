@@ -20,37 +20,37 @@ function togglePlugin(plugin: Plugin) {
     if (!wasEnabled) {
         const { restartNeeded, failures } = startDependenciesRecursive(plugin);
         if (failures.length) {
-            showToast(`Failed to start dependencies: ${failures.join(", ")}`, "failure");
+            showToast({ text: `Failed to start dependencies: ${failures.join(", ")}`, variant: "critical" });
             return;
         }
         if (restartNeeded) {
             pluginSettings.enabled = true;
-            showToast(`${plugin.name} enabled. Restart to apply.`, "message");
+            showToast({ text: `${plugin.name} enabled. Restart to apply.` });
             return;
         }
     }
 
     if (pluginRequiresRestart(plugin)) {
         pluginSettings.enabled = !wasEnabled;
-        showToast(`${plugin.name} ${wasEnabled ? "disabled" : "enabled"}. Restart to apply.`, "message");
+        showToast({ text: `${plugin.name} ${wasEnabled ? "disabled" : "enabled"}. Restart to apply.` });
         return;
     }
 
     if (wasEnabled && !plugin.started) {
         pluginSettings.enabled = false;
-        showToast(`${plugin.name} disabled.`, "success");
+        showToast({ text: `${plugin.name} disabled.`, variant: "success" });
         return;
     }
 
     const result = wasEnabled ? stopPlugin(plugin) : startPlugin(plugin);
     if (!result) {
         pluginSettings.enabled = false;
-        showToast(`Error while ${wasEnabled ? "stopping" : "starting"} ${plugin.name}.`, "failure");
+        showToast({ text: `Error while ${wasEnabled ? "stopping" : "starting"} ${plugin.name}.`, variant: "critical" });
         return;
     }
 
     pluginSettings.enabled = !wasEnabled;
-    showToast(`${plugin.name} ${wasEnabled ? "disabled" : "enabled"}.`, "success");
+    showToast({ text: `${plugin.name} ${wasEnabled ? "disabled" : "enabled"}.`, variant: "success" });
 }
 
 function pluginItems(): PaletteListItem[] {

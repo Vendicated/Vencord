@@ -253,7 +253,7 @@ function showBrokenAutoCompleteToast(): void {
     }
 
     didShowBrokenAutoCompleteToast = true;
-    showToast("AutoComplete is broken. A fix will be implemented shortly.", "failure");
+    showToast({ text: "AutoComplete is broken. A fix will be implemented shortly.", variant: "critical" });
 }
 
 export function hasEnabledAutoCompleteQuestTypes(): boolean {
@@ -618,7 +618,7 @@ function blockQuestEnrollmentForRetryAfter(retryAfter: number | null): void {
 function showQuestEnrollmentFailureToast(quest: Quest, result: Exclude<QuestEnrollmentResult, { type: "success"; }>): void {
     const rateLimitSuffix = result.type === "rate_limited" ? " due to rate limits" : "";
 
-    showToast(`Enrollment in ${normalizeQuestName(quest)} Quest failed${rateLimitSuffix}.`, "failure");
+    showToast({ text: `Enrollment in ${normalizeQuestName(quest)} Quest failed${rateLimitSuffix}.`, variant: "critical" });
 }
 
 export async function enrollInQuestAPI(quest: Quest): Promise<QuestAPIEnrollResult> {

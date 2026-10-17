@@ -329,7 +329,7 @@ function shouldRetryWithFFmpeg(error: unknown) {
 
 export async function uploadClipFile(file: File, options: ClipUploadOptions) {
     try {
-        showToast("Checking clip file.", "message");
+        showToast({ text: "Checking clip file." });
 
         const uploadFile = await prepareClipFile(file, options.fileName);
 
@@ -338,15 +338,15 @@ export async function uploadClipFile(file: File, options: ClipUploadOptions) {
         } catch (error) {
             if (!shouldRetryWithFFmpeg(error)) throw error;
 
-            showToast("Converting clip file.", "message");
+            showToast({ text: "Converting clip file." });
             await sendClipUpload(await stampVideoFile(await convertClipToMp4(file, options.fileName), options.fileName), options);
         }
 
-        showToast("Clip uploaded.", "success");
+        showToast({ text: "Clip uploaded.", variant: "success" });
         return true;
     } catch (error) {
         logger.error(error);
-        showToast(getErrorMessage(error), "failure");
+        showToast({ text: getErrorMessage(error), variant: "critical" });
         return false;
     }
 }

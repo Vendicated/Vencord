@@ -418,7 +418,7 @@ export async function openStartupTabs(props: BasicChannelTabsProps & { userId: s
             savedTabs = persistedTabs?.[userId];
         } catch (error) {
             logger.error("Failed to load persisted tabs from DataStore", error);
-            showToast("Failed to load saved tabs", "failure");
+            showToast({ text: "Failed to load saved tabs", variant: "critical" });
         }
     }
 
@@ -430,14 +430,14 @@ export async function openStartupTabs(props: BasicChannelTabsProps & { userId: s
 
     if (keepCurrentChannel) {
         hydratedUserId = undefined;
-        showToast("Not restoring tabs as KeepCurrentChannel is enabled", "failure");
+        showToast({ text: "Not restoring tabs as KeepCurrentChannel is enabled", variant: "critical" });
         return;
     }
 
     switch (settings.store.onStartup) {
         case "remember": {
             if (!savedTabs?.openTabs.length) {
-                showToast("Failed to restore tabs", "failure");
+                showToast({ text: "Failed to restore tabs", variant: "critical" });
                 break;
             }
 

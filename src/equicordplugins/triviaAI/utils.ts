@@ -225,7 +225,7 @@ function getSystemPrompt() {
 
 export async function getResponse(payload: ApiMessage[]): Promise<string> {
     if (!settings.store.apiKey || !settings.store.endpoint || !settings.store.model) {
-        showToast("TriviaAI: API settings are incomplete.", "failure");
+        showToast({ text: "TriviaAI: API settings are incomplete.", variant: "critical" });
         return "";
     }
 
@@ -258,7 +258,7 @@ export async function getResponse(payload: ApiMessage[]): Promise<string> {
         if (!req.ok || data.error) {
             const errorMsg = data.error?.message ?? rawBody ?? `Status ${req.status}`;
             logger.error(`API Error: ${errorMsg}`);
-            showToast(errorMsg, "failure");
+            showToast({ text: errorMsg, variant: "critical" });
             return "";
         }
 
@@ -271,7 +271,7 @@ export async function getResponse(payload: ApiMessage[]): Promise<string> {
         return response;
     } catch (e) {
         logger.error("Error getting response from AI model", e);
-        showToast("Error getting response from AI model", "failure");
+        showToast({ text: "Error getting response from AI model", variant: "critical" });
         return "";
     }
 }
