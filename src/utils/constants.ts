@@ -589,6 +589,10 @@ export const Devs = /* #__PURE__*/ Object.freeze({
         name: "RamziAH",
         id: 1279957227612147747n,
     },
+    ThaUnknown: {
+        name: "ThaUnknown_",
+        id: 252390917665718273n
+    },
     SomeAspy: {
         name: "SomeAspy",
         id: 516750892372852754n,
@@ -649,6 +653,38 @@ export const Devs = /* #__PURE__*/ Object.freeze({
     Lunascape: {
         name: "Lunascape",
         id: 383365021415243776n
+    },
+    paige: {
+        name: "paige",
+        id: 1375697625864601650n
+    },
+    jax: {
+        name: "jax",
+        id: 1493703027801194598n
+    },
+    yuna0x0: {
+        name: "yuna0x0",
+        id: 213656926414831616n
+    },
+    scattagain: {
+        name: "Amelia",
+        id: 1098234477626544180n
+    },
+    Davri: {
+        name: "Davri",
+        id: 457579346282938368n
+    },
+    Kaede: {
+        name: "Kaede",
+        id: 1492642701320126504n
+    },
+    c0nnorgg: {
+        name: "c0nnorgg",
+        id: 1088882977985003620n,
+    },
+    f3tch: {
+        name: "f3tch",
+        id: 1016388460929626174n
     }
 } satisfies Record<string, Dev>);
 

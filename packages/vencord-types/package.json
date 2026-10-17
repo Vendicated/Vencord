@@ -1,7 +1,7 @@
 {
     "name": "@vencord/types",
     "private": false,
-    "version": "1.14.15",
+    "version": "1.15.1",
     "description": "",
     "types": "index.d.ts",
     "scripts": {
@@ -19,7 +19,7 @@
     "dependencies": {
         "@types/lodash": "4.17.19",
         "@types/node": "^26.0.1",
-        "@vencord/discord-types": "^1.0.1",
+        "@vencord/discord-types": "^1.0.2",
         "highlight.js": "11.11.1",
         "moment": "^2.22.2",
         "ts-pattern": "^5.6.0",

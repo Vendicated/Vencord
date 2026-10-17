@@ -13,6 +13,18 @@ document.addEventListener(
                 RENDERER_CSS_URL: browser.runtime.getURL("dist/Vencord.css"),
             }
         });
+
+        chrome.runtime.onMessage.addListener(request => {
+            window.postMessage({ type: "vencord:keybinds", meta: request.command });  
+        })
+
+        window.addEventListener('message', function(event) {
+            if (event.source !== window) return;
+
+            if (event.data.type === 'OPEN_SHORTCUTS') {
+            chrome.runtime.sendMessage({ action: "openShortcuts" });
+            }
+        }, false);
     },
     { once: true }
 );

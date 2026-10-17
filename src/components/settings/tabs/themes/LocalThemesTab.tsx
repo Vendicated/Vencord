@@ -43,13 +43,7 @@ function onLocalThemeChange(fileName: string, value: boolean) {
     }
 }
 
-async function onFileUpload(e: SyntheticEvent<HTMLInputElement>) {
-    e.stopPropagation();
-    e.preventDefault();
-
-    if (!e.currentTarget?.files?.length) return;
-    const { files } = e.currentTarget;
-
+async function doUploadThemes(files: ArrayLike<File>) {
     const uploads = Array.from(files, file => {
         const { name } = file;
         if (!name.endsWith(".css")) return;
@@ -68,6 +62,47 @@ async function onFileUpload(e: SyntheticEvent<HTMLInputElement>) {
     await Promise.all(uploads);
 }
 
+async function onFileUpload(e: SyntheticEvent<HTMLInputElement>) {
+    e.stopPropagation();
+    e.preventDefault();
+
+    if (!e.currentTarget?.files?.length) return;
+    await doUploadThemes(e.currentTarget.files);
+}
+
+function useDropFile(refreshThemes: Function) {
+    useEffect(() => {
+        const onDragOver = (e: DragEvent) => {
+            if (!e.dataTransfer?.items.length) return;
+            if (!Array.from(e.dataTransfer.items).some(item => item.kind === "file" && item.getAsFile()?.name.endsWith(".css")))
+                return;
+
+            e.preventDefault();
+            e.dataTransfer.dropEffect = "copy";
+        };
+
+        const onDrop = async (e: DragEvent) => {
+            e.preventDefault();
+
+            if (!e.dataTransfer?.files.length) return;
+
+            await doUploadThemes(
+                Array.from(e.dataTransfer.files).filter(file => file.name.endsWith(".css"))
+            );
+
+            refreshThemes();
+        };
+
+        window.addEventListener("dragover", onDragOver);
+        window.addEventListener("drop", onDrop);
+
+        return () => {
+            window.removeEventListener("dragover", onDragOver);
+            window.removeEventListener("drop", onDrop);
+        };
+    }, []);
+}
+
 export function LocalThemesTab() {
     const settings = useSettings(["enabledThemes"]);
 
@@ -78,6 +113,9 @@ export function LocalThemesTab() {
     useEffect(() => {
         refreshLocalThemes();
     }, []);
+
+    // This condition is compile time so conditional hook is okay
+    if (IS_WEB) useDropFile(refreshLocalThemes);
 
     async function refreshLocalThemes() {
         const themes = await VencordNative.themes.getThemesList();
@@ -109,7 +147,7 @@ export function LocalThemesTab() {
                             (
                                 <QuickAction
                                     text={
-                                        <span style={{ position: "relative" }}>
+                                        <span>
                                             Upload Theme
                                             <FileInput
                                                 ref={fileInputRef}
@@ -123,6 +161,7 @@ export function LocalThemesTab() {
                                         </span>
                                     }
                                     Icon={PlusIcon}
+                                    style={{ position: "relative" }}
                                 />
                             ) : (
                                 <QuickAction
