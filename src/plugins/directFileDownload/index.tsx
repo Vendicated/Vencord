@@ -4,45 +4,22 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import { getIntlMessage } from "@utils/discord";
-import { Logger } from "@utils/Logger";
 import { classes } from "@utils/misc";
-import definePlugin, { IconComponent, PluginNative } from "@utils/types";
+import definePlugin, { PluginNative } from "@utils/types";
 import { findComponentByCodeLazy, findCssClassesLazy } from "@webpack";
 import { Clickable } from "@webpack/common";
 
 const Native = VencordNative.pluginHelpers.DirectFileDownload as PluginNative<typeof import("./native")>;
 
-const DownloadIcon: IconComponent = ({ height = 24, width = 24, className }) => {
-    return <svg aria-hidden="true" role="img" xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2a1 1 0 0 1 1 1v10.59l3.3-3.3a1 1 0 1 1 1.4 1.42l-5 5a1 1 0 0 1-1.4 0l-5-5a1 1 0 1 1 1.4-1.42l3.3 3.3V3a1 1 0 0 1 1-1ZM3 20a1 1 0 1 0 0 2h18a1 1 0 1 0 0-2H3Z"></path></svg>;
-};
-
-const Tooltip = findComponentByCodeLazy("__unsupportedReactNodeAsText", "caretConfig");
-
+const AttachmentButton = findComponentByCodeLazy("__unsupportedReactNodeAsText", "caretConfig");
 const ButtonWrapperClasses = findCssClassesLazy("hoverButton", "hoverButtonGroup");
 
-function Download({ downloadURL }: { downloadURL: string }) {
-    return (
-        <Tooltip text={getIntlMessage("DOWNLOAD")}>
-            <Clickable className={classes(ButtonWrapperClasses.hoverButton)} onClick={async () => {
-                try {
-                    await Native.saveAttachment(downloadURL);
-                } catch (e) {
-                    new Logger("DirectFileDownload").error("Failed to save attachment", e);
-                    return window.open(downloadURL);
-                }
-            }}>
-                <div>
-                    <DownloadIcon aria-hidden />
-                </div>
-            </Clickable>
-        </Tooltip>
-    );
-}
 export default definePlugin({
     name: "DirectFileDownload",
-    description: "Directly download files from Discord without needing to open browser",
+    description: "Directly download files from Discord instead of opening them in the browser",
     authors: [Devs.imnotplayinginreallife],
 
     patches: [
@@ -50,11 +27,21 @@ export default definePlugin({
             find: '},"download"));',
             replacement: {
                 match: /(\i&&!\i&&\i\.push\()\(0(.*?)},"download"\)\);/,
-                replace: "$1$self.Download(arguments[0].downloadURL));"
+                replace: "$1$self.renderDownloadButton(arguments[0]));"
             }
         }
     ],
-    Download(downloadURL: string) {
-        return <Download downloadURL={downloadURL}/>;
-    }
+
+    renderDownloadButton: ErrorBoundary.wrap(({ downloadURL }) => (
+        <AttachmentButton text={getIntlMessage("DOWNLOAD")}>
+            <Clickable
+                className={classes(ButtonWrapperClasses.hoverButton)}
+                onClick={() => Native.saveAttachment(downloadURL).catch(() => VencordNative.native.openExternal(downloadURL))}
+            >
+                <svg aria-hidden role="img" width="20" height="20" fill="none" viewBox="0 0 24 24">
+                    <path fill="currentColor" d="M12 2a1 1 0 0 1 1 1v10.59l3.3-3.3a1 1 0 1 1 1.4 1.42l-5 5a1 1 0 0 1-1.4 0l-5-5a1 1 0 1 1 1.4-1.42l3.3 3.3V3a1 1 0 0 1 1-1ZM3 20a1 1 0 1 0 0 2h18a1 1 0 1 0 0-2H3Z" />
+                </svg>
+            </Clickable>
+        </AttachmentButton>
+    ), { noop: true })
 });
