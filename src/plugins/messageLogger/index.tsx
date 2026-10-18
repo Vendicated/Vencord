@@ -30,8 +30,8 @@ import { Logger } from "@utils/Logger";
 import { classes } from "@utils/misc";
 import definePlugin, { OptionType } from "@utils/types";
 import { ChannelMessages, Message, MessageAttachment } from "@vencord/discord-types";
-import { findCssClassesLazy } from "@webpack";
-import { AuthenticationStore, ChannelStore, FluxDispatcher, Menu, MessageStore, Parser, SelectedChannelStore, Timestamp, useEffect, UserStore, useState, useStateFromStores, WindowStore } from "@webpack/common";
+import { findByCodeLazy, findCssClassesLazy } from "@webpack";
+import { AuthenticationStore, ChannelStore, FluxDispatcher, Menu, MessageStore, Parser, SelectedChannelStore, Timestamp, UserStore, useStateFromStores } from "@webpack/common";
 
 import overlayStyle from "./deleteStyleOverlay.css?managed";
 import textStyle from "./deleteStyleText.css?managed";
@@ -173,29 +173,10 @@ function ClearHistoryIcon({ height = 24, width = 24, className, stroke = "curren
     );
 }
 
-function useShiftHeld() {
-    const [held, setHeld] = useState(false);
-
-    useEffect(() => {
-        const onKey = (e: KeyboardEvent) => setHeld(e.shiftKey);
-        const onFocusChange = () => !WindowStore.isFocused() && setHeld(false);
-
-        document.addEventListener("keydown", onKey);
-        document.addEventListener("keyup", onKey);
-        WindowStore.addChangeListener(onFocusChange);
-
-        return () => {
-            document.removeEventListener("keydown", onKey);
-            document.removeEventListener("keyup", onKey);
-            WindowStore.removeChangeListener(onFocusChange);
-        };
-    }, []);
-
-    return held;
-}
+const useShiftKey: (context?: Window) => boolean = findByCodeLazy("arguments.length>0&&void 0!==arguments[0]?arguments[0]:window");
 
 function ShiftClearHistoryIcon({ height, width, className }: { height?: number | string; width?: number | string; className?: string; }) {
-    const isShiftHeld = useShiftHeld();
+    const isShiftHeld = useShiftKey();
 
     return (
         <ClearHistoryIcon
