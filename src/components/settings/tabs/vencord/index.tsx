@@ -32,7 +32,8 @@ import { IS_WINDOWS } from "@utils/constants";
 import { Margins } from "@utils/margins";
 import { isPluginDev } from "@utils/misc";
 import { relaunch } from "@utils/native";
-import { ConfirmModal, Forms, openModal, React, useMemo, UserStore } from "@webpack/common";
+import { promptToRestart } from "@utils/promptToRestart";
+import { Forms, React, useMemo, UserStore } from "@webpack/common";
 
 import { DonateButtonComponent, isDonor } from "./DonateButton";
 import { MacOSVibrancySettings } from "./MacVibrancySettings";
@@ -112,17 +113,7 @@ function Switches() {
                     settings[key] = v;
 
                     if (restartRequired) {
-                        openModal(props => (
-                            <ConfirmModal
-                                {...props}
-                                title="Restart Required"
-                                subtitle="A restart is required to apply this change"
-                                confirmText="Restart now"
-                                cancelText="Later!"
-                                variant="primary"
-                                onConfirm={relaunch}
-                            />
-                        ));
+                        promptToRestart("relaunch");
                     }
                 }}
             />
