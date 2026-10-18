@@ -299,8 +299,6 @@ export default definePlugin({
             return {
                 label: "Clear history",
                 icon: ClearHistoryIcon,
-                message: current,
-                channel: ChannelStore.getChannel(current.channel_id),
                 onClick: () => {
                     const latest = MessageStore.getMessage(message.channel_id, message.id) as MLMessage | undefined;
                     if (!latest) return;
