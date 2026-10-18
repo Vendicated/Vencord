@@ -7,8 +7,11 @@
 import { VENCORD_USER_AGENT } from "@shared/vencordUserAgent";
 import { Logger } from "@utils/Logger";
 import { TTLMap } from "@utils/TTLMap";
+import { PluginNative } from "@utils/types";
 
 import { ScrobblerBackend, settings, TrackData } from ".";
+
+const Native = VencordNative.pluginHelpers.MusicRichPresence as PluginNative<typeof import("./native")>;
 
 const logger = new Logger("AudioScrobblerRichPresence/ListenBrainz");
 
@@ -143,10 +146,8 @@ export const ListenBrainzScrobbler: ScrobblerBackend = {
 
     async fetchTrackData(): Promise<TrackData | null> {
         try {
-            const res = await fetch(apiUrl(`/1/user/${settings.store.username}/playing-now`));
-            if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
-
-            const data = await res.json().then(json => json.payload?.listens[0]);
+            const data = await Native.fetchJson(apiUrl(`/1/user/${settings.store.username}/playing-now`))
+                .then(json => json.payload?.listens[0]);
             if (!data?.playing_now || !data?.track_metadata)
                 return null;
 
