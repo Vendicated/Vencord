@@ -34,13 +34,58 @@ const settings = definePluginSettings({
 
 export default definePlugin({
     name: "NoTrack",
-    description: "Disable Discord's tracking (analytics/'science'), metrics and Sentry crash reporting",
-    authors: [Devs.Cyn, Devs.Ven, Devs.Nuckyz, Devs.Arrow],
+    description: "Disable Discord's analytics, metrics and crash reporting, randomize tracking IDs, and hide optional client metadata",
+    authors: [Devs.Cyn, Devs.Ven, Devs.Nuckyz, Devs.Arrow, Devs.rot],
     required: true,
 
     settings,
 
     patches: [
+        {
+            find: "X-Super-Properties",
+            all: true,
+            replacement: {
+                match: /("X-Super-Properties"(?:,|\]=|:))(\i)/g,
+                replace: "$1$self.randomizeSuperProperties($2)"
+            }
+        },
+        {
+            find: "this.emit(\"send-message\",",
+            replacement: {
+                match: /JSON\.stringify\((\{op:\i,d:\i\})\)/,
+                replace: "JSON.stringify($self.randomizeGatewayPayload($1))"
+            }
+        },
+        {
+            find: "X-Installation-ID",
+            all: true,
+            replacement: {
+                match: /("X-Installation-ID"(?:,|\]=|:))\i/g,
+                replace: "$1$self.getInstallationId()"
+            }
+        },
+        {
+            find: "getInstallationForTracking(){",
+            replacement: {
+                match: /getInstallationForTracking\(\)\{[^}]*\}/,
+                replace: "getInstallationForTracking(){return $self.getInstallationId()}"
+            }
+        },
+        {
+            find: "X-Discord-Timezone",
+            all: true,
+            replacement: {
+                match: /\i\.set\("X-Discord-Timezone",\i\)/g,
+                replace: "void 0"
+            }
+        },
+        {
+            find: "discord_protos.discord_users.v1.LocalizationSettings",
+            replacement: {
+                match: /\i\.timezone(?:Offset|Name)&&/g,
+                replace: "false&&"
+            }
+        },
         {
             find: "AnalyticsActionHandlers.handle",
             predicate: () => settings.store.disableAnalytics,
@@ -72,6 +117,66 @@ export default definePlugin({
         }
     ],
 
+    randomizeTrackingProperties(properties: Record<string, unknown>) {
+        // Keep client and build fields, drop optional metadata
+        const result: Record<string, unknown> = {};
+        for (const key of ["os", "browser", "release_channel", "client_version", "client_build_number", "native_build_number", "client_event_source", "is_fast_connect"]) {
+            if (Object.hasOwn(properties, key)) result[key] = properties[key];
+        }
+
+        for (const key of ["client_launch_id", "client_heartbeat_session_id", "launch_signature", "client_uuid"]) {
+            if (properties[key] != null) result[key] = crypto.randomUUID();
+        }
+
+        if (properties.installation_id != null) result.installation_id = this.getInstallationId();
+        if (Object.hasOwn(properties, "has_client_mods")) result.has_client_mods = false;
+        return result;
+    },
+
+    randomizeSuperProperties(encoded: string) {
+        try {
+            const bytes = Uint8Array.from(atob(encoded), c => c.charCodeAt(0));
+            const properties = JSON.parse(new TextDecoder().decode(bytes));
+            if (properties == null || typeof properties !== "object" || Array.isArray(properties)) return "e30=";
+
+            const json = JSON.stringify(this.randomizeTrackingProperties(properties));
+            return btoa(String.fromCharCode(...new TextEncoder().encode(json)));
+        } catch {
+            return "e30=";
+        }
+    },
+
+    randomizeGatewayPayload(packet: { op: number; d: unknown; }) {
+        if (packet.d == null || typeof packet.d !== "object" || Array.isArray(packet.d)) return packet;
+        const data = packet.d as Record<string, unknown>;
+
+        switch (packet.op) {
+            case 2: {
+                const { properties } = data;
+                if (properties == null || typeof properties !== "object" || Array.isArray(properties)) return packet;
+                return { ...packet, d: { ...data, properties: this.randomizeTrackingProperties(properties as Record<string, unknown>) } };
+            }
+            case 40: // Replace QoS heartbeats with regular heartbeats.
+                return { op: 1, d: data.seq };
+            case 41: // These telemetry IDs are separate from the Gateway resume session.
+                return {
+                    ...packet,
+                    d: { ...data, initialization_timestamp: 0, session_id: crypto.randomUUID(), client_launch_id: crypto.randomUUID() }
+                };
+            default:
+                return packet;
+        }
+    },
+
+    getInstallationId() {
+        // Match Discord's snowflake.signature format.
+        const bytes = crypto.getRandomValues(new Uint8Array(28));
+        const id = new DataView(bytes.buffer).getBigUint64(0).toString();
+        const signature = btoa(String.fromCharCode(...bytes.subarray(8)))
+            .replaceAll("+", "-").replaceAll("/", "_").replaceAll("=", "");
+        return `${id}.${signature}`;
+    },
+
     // The TRACK event takes an optional `resolve` property that is called when the tracking event was submitted to the server.
     // A few spots in Discord await this callback before continuing (most notably the Voice Debug Logging toggle).
     // Since we NOOP the AnalyticsActionHandlers module, there is no handler for the TRACK event, so we have to handle it ourselves
@@ -83,6 +188,17 @@ export default definePlugin({
 
     startAt: StartAt.Init,
     start() {
+        // Disable fast-connect, its separate bundle bypasses our Gateway patch.
+        const earlySocket = (window as Window & { _ws?: { ws?: WebSocket; } | null; })._ws?.ws;
+        Object.defineProperty(window, "_ws", {
+            configurable: true,
+            get: () => null,
+            set(value: { ws?: WebSocket; } | null) {
+                value?.ws?.close(1000);
+            }
+        });
+        earlySocket?.close(1000);
+
         // Sentry is initialized in its own WebpackInstance.
         // It has everything it needs preloaded, so, it doesn't include any chunk loading functionality.
         // Because of that, its WebpackInstance doesnt export wreq.m or wreq.c
