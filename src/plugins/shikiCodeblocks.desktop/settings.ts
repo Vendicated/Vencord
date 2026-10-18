@@ -73,6 +73,11 @@ export const settings = definePluginSettings({
             },
         ],
     },
+    ignoredLanguages: {
+        type: OptionType.STRING,
+        description: "Comma separated list of languages to leave to Discord's default codeblocks",
+        default: "ansi",
+    },
     useDevIcon: {
         type: OptionType.SELECT,
         description: "How to show language icons on codeblocks",
