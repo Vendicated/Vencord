@@ -52,11 +52,17 @@ export interface ProfileBadge {
     position?: BadgePosition;
     /** The badge name to display, Discord uses this. Required for component badges */
     key?: string;
+    /** Badge title in the directory modal */
     name?: string;
+    /** Text in the directory modal's description card */
     detail?: string;
+    /** Text next to "unlocker" in the directory modal header */
     infoLabel?: string;
+    /** Higher resolution image for the directory modal */
     largeIconSrc?: string;
+    /** ISO date shown as "Unlocked <date>" */
     obtainedAt?: string;
+    /** Rarity label in the directory modal */
     rarity?: BadgeRarity;
 
     /**
