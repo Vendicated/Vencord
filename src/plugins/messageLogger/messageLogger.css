@@ -1,4 +1,4 @@
-.messagelogger-deleted [class*="buttonsInner"] [role="button"]:not([aria-label="Clear history"]),
+.messagelogger-deleted [class*="buttonsInner"] [role="button"]:not(:has(.messagelogger-clear-history)),
 .messagelogger-deleted [class*="buttonsInner"] [class*="separator"] {
     display: none;
 }

@@ -201,7 +201,7 @@ function ShiftClearHistoryIcon({ height, width, className }: { height?: number |
         <ClearHistoryIcon
             height={height}
             width={width}
-            className={className}
+            className={classes(className, "messagelogger-clear-history")}
             stroke={isShiftHeld ? "var(--text-feedback-critical)" : "currentColor"}
         />
     );
