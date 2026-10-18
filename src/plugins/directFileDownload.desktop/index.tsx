@@ -29,8 +29,19 @@ export default definePlugin({
                 match: /(\i&&!\i&&\i\.push\()\(0(.*?)},"download"\)\);/,
                 replace: "$1$self.renderDownloadButton(arguments[0]));"
             }
+        },
+        {
+            find: '"plaintext-preview-overflow-menu"',
+            replacement: {
+                match: /(,action:\(\)=>{)\i\.current\?\.click\(\),\i\(\)}/,
+                replace: "$1$self.saveAttachment(arguments[0].url)}"
+            }
         }
     ],
+
+    saveAttachment(downloadURL: string) {
+        Native.saveAttachment(downloadURL).catch(() => VencordNative.native.openExternal(downloadURL));
+    },
 
     renderDownloadButton: ErrorBoundary.wrap(({ downloadURL }) => (
         <AttachmentButton text={getIntlMessage("DOWNLOAD")}>
