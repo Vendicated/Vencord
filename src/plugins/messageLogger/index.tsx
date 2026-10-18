@@ -18,7 +18,7 @@
 
 import "./messageLogger.css";
 
-import { findGroupChildrenByChildId, NavContextMenuPatchCallback } from "@api/ContextMenu";
+import { NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { updateMessage } from "@api/MessageUpdater";
 import { definePluginSettings } from "@api/Settings";
 import { disableStyle, enableStyle } from "@api/Styles";
@@ -29,9 +29,9 @@ import { getIntlMessage } from "@utils/discord";
 import { Logger } from "@utils/Logger";
 import { classes } from "@utils/misc";
 import definePlugin, { OptionType } from "@utils/types";
-import { Message, MessageAttachment } from "@vencord/discord-types";
+import { ChannelMessages, Message, MessageAttachment } from "@vencord/discord-types";
 import { findCssClassesLazy } from "@webpack";
-import { AuthenticationStore, ChannelStore, FluxDispatcher, Menu, MessageStore, Parser, SelectedChannelStore, Timestamp, UserStore, useStateFromStores } from "@webpack/common";
+import { AuthenticationStore, ChannelStore, FluxDispatcher, Menu, MessageStore, Parser, SelectedChannelStore, Timestamp, useEffect, UserStore, useState, useStateFromStores, WindowStore } from "@webpack/common";
 
 import overlayStyle from "./deleteStyleOverlay.css?managed";
 import textStyle from "./deleteStyleText.css?managed";
@@ -135,7 +135,7 @@ function addDeleteStyle() {
 const REMOVE_HISTORY_ID = "ml-remove-history";
 const TOGGLE_DELETE_STYLE_ID = "ml-toggle-style";
 
-function ClearHistoryIcon({ height = 24, width = 24, className }: { height?: number | string; width?: number | string; className?: string; }) {
+function ClearHistoryIcon({ height = 24, width = 24, className, stroke = "currentColor" }: { height?: number | string; width?: number | string; className?: string; stroke?: string; }) {
     return (
         <svg
             className={className}
@@ -147,26 +147,63 @@ function ClearHistoryIcon({ height = 24, width = 24, className }: { height?: num
         >
             <path
                 d="M5.63606 18.3639C9.15077 21.8786 14.8493 21.8786 18.364 18.3639C21.8787 14.8492 21.8787 9.1507 18.364 5.63598C14.8493 2.12126 9.15077 2.12126 5.63606 5.63598C3.87757 7.39447 2.99889 9.6996 3.00002 12.0044L3 13.9999"
-                stroke="currentColor"
+                stroke={stroke}
                 strokeWidth={2.5}
                 strokeLinecap="round"
                 strokeLinejoin="round"
+                style={{ fill: "none" }}
             />
             <path
                 d="M1 11.9999L3 13.9999L5 11.9999"
-                stroke="currentColor"
+                stroke={stroke}
                 strokeWidth={2.5}
                 strokeLinecap="round"
                 strokeLinejoin="round"
+                style={{ fill: "none" }}
             />
             <path
                 d="M11 7.99994L11 12.9999L16 12.9999"
-                stroke="currentColor"
+                stroke={stroke}
                 strokeWidth={2.5}
                 strokeLinecap="round"
                 strokeLinejoin="round"
+                style={{ fill: "none" }}
             />
         </svg>
+    );
+}
+
+function useShiftHeld() {
+    const [held, setHeld] = useState(false);
+
+    useEffect(() => {
+        const onKey = (e: KeyboardEvent) => setHeld(e.shiftKey);
+        const onFocusChange = () => !WindowStore.isFocused() && setHeld(false);
+
+        document.addEventListener("keydown", onKey);
+        document.addEventListener("keyup", onKey);
+        WindowStore.addChangeListener(onFocusChange);
+
+        return () => {
+            document.removeEventListener("keydown", onKey);
+            document.removeEventListener("keyup", onKey);
+            WindowStore.removeChangeListener(onFocusChange);
+        };
+    }, []);
+
+    return held;
+}
+
+function ShiftClearHistoryIcon({ height, width, className }: { height?: number | string; width?: number | string; className?: string; }) {
+    const isShiftHeld = useShiftHeld();
+
+    return (
+        <ClearHistoryIcon
+            height={height}
+            width={width}
+            className={className}
+            stroke={isShiftHeld ? "var(--text-feedback-critical)" : "currentColor"}
+        />
     );
 }
 
@@ -188,6 +225,10 @@ function clearMessageHistory(msg: MLMessage) {
 
         updateMessage(msg.channel_id, msg.id, { editHistory: [], attachments });
     }
+}
+
+function clearChannelHistory(messages: ChannelMessages) {
+    messages.forEach(msg => clearMessageHistory(msg));
 }
 
 /**
@@ -230,7 +271,6 @@ const patchMessageContextMenu: NavContextMenuPatchCallback = (children, props) =
             key={REMOVE_HISTORY_ID}
             label="Remove Message History"
             leadingAccessory={{ type: "icon", icon: DeleteIcon }}
-            color="danger"
             action={() => {
                 clearMessageHistory(message);
             }}
@@ -242,17 +282,13 @@ const patchChannelContextMenu: NavContextMenuPatchCallback = (children, { channe
     const messages = MessageStore.getMessages(channel?.id);
     if (!messages?.some(msg => doesMessageHaveHistory(msg))) return;
 
-    const group = findGroupChildrenByChildId("mark-channel-read", children) ?? children;
-    group.push(
+    children.push(
         <Menu.MenuItem
             id="vc-ml-clear-channel"
             label="Clear Message Log"
+            leadingAccessory={{ type: "icon", icon: ClearHistoryIcon }}
             color="danger"
-            action={() => {
-                messages.forEach(msg => {
-                    clearMessageHistory(msg);
-                });
-            }}
+            action={() => clearChannelHistory(messages)}
         />
     );
 };
@@ -298,10 +334,15 @@ export default definePlugin({
 
             return {
                 label: "Clear history",
-                icon: ClearHistoryIcon,
+                icon: ShiftClearHistoryIcon,
                 message: current,
                 channel: ChannelStore.getChannel(current.channel_id),
-                onClick: () => {
+                onClick: e => {
+                    if (e.shiftKey) {
+                        clearChannelHistory(MessageStore.getMessages(current.channel_id));
+                        return;
+                    }
+
                     const latest = MessageStore.getMessage(message.channel_id, message.id) as MLMessage | undefined;
                     if (!latest) return;
 
