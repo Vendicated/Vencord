@@ -18,7 +18,7 @@
 
 import "./fixDiscordBadgePadding.css";
 
-import { _getBadges, BadgePosition, BadgeUserArgs, ProfileBadge } from "@api/Badges";
+import { _getBadges, BadgePosition, BadgeRarity, BadgeUserArgs, ProfileBadge } from "@api/Badges";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Flex } from "@components/Flex";
 import { Heart } from "@components/Heart";
@@ -33,18 +33,38 @@ import { shouldShowContributorBadge } from "@utils/misc";
 import definePlugin from "@utils/types";
 import { ContextMenuApi, Forms, Menu, Modal, openModal, showToast, UserStore } from "@webpack/common";
 
-const CONTRIBUTOR_BADGE = "https://cdn.discordapp.com/emojis/1092089799109775453.png?size=64";
+/** Changed size to 512px to avoid blur on badge in directory */
+const CONTRIBUTOR_BADGE = "https://cdn.discordapp.com/emojis/1092089799109775453.png?size=512";
 
 const ContributorBadge: ProfileBadge = {
     id: "vencord_contributor_badge",
     description: "Vencord Contributor",
+    infoLabel: "Vencord Contributor",
+    rarity: 5, // Mythical
     iconSrc: CONTRIBUTOR_BADGE,
     position: BadgePosition.START,
     shouldShow: ({ userId }) => shouldShowContributorBadge(userId),
     onClick: (_, { userId }) => openContributorModal(UserStore.getUser(userId))
 };
 
+/**  Couldn't fully use ProfileBadge since directory uses different keys, move/merge it to Badges.ts maybe? */
+interface DirectoryBadge {
+    badge_id: string;
+    name: string;
+    description: string;
+    info_label: string;
+    rarity: BadgeRarity;
+    simple_icon_url: string;
+    complex_icon_static_url: string;
+    obtained_at?: string;
+    is_earnable: false;
+    owned: true;
+    hidden: false;
+    tiers: [];
+}
+
 let DonorBadges = {} as Record<string, Array<Record<"tooltip" | "badge", string>>>;
+let DirectoryBadges = {} as Record<string, DirectoryBadge>;
 
 async function loadBadges(noCache = false) {
     const init = {} as RequestInit;
@@ -56,6 +76,25 @@ async function loadBadges(noCache = false) {
 }
 
 let intervalId: any;
+
+function toDirectoryBadge(b: ProfileBadge, userId: string): DirectoryBadge {
+    const id = `vc-${userId}-${b.id}`;
+
+    return DirectoryBadges[id] ??= {
+        badge_id: id,
+        name: b.name || b.description || b.infoLabel || "Vencord Badge",
+        description: b.detail ?? b.description ?? b.name ?? "",
+        info_label: b.infoLabel || "Vencord",
+        rarity: b.rarity || 1,
+        simple_icon_url: b.iconSrc!,
+        complex_icon_static_url: b.largeIconSrc || b.iconSrc!,
+        obtained_at: b.obtainedAt,
+        is_earnable: false,
+        owned: true,
+        hidden: false,
+        tiers: []
+    };
+}
 
 function BadgeContextMenu({ badge }: { badge: Omit<ProfileBadge, "id"> & BadgeUserArgs; }) {
     return (
@@ -87,7 +126,7 @@ function BadgeContextMenu({ badge }: { badge: Omit<ProfileBadge, "id"> & BadgeUs
 export default definePlugin({
     name: "BadgeAPI",
     description: "API to add badges to users",
-    authors: [Devs.Megu, Devs.Ven, Devs.TheSun],
+    authors: [Devs.Megu, Devs.Ven, Devs.TheSun, Devs.kaxtusik],
     required: true,
     patches: [
         {
@@ -120,6 +159,20 @@ export default definePlugin({
                 match: /getBadges\(\)\{.{0,100}?return\[/,
                 replace: "$&...$self.getBadges(this),"
             }
+        },
+        {
+            find: '"BadgeDirectoryStore"',
+            replacement: {
+                match: /getBadgeById\((\i),(\i)\)\{/,
+                replace: "$&const vcB=$self.getDirectoryBadge($1);if(vcB)return vcB;"
+            }
+        },
+        {
+            find: "badge_directory_closed",
+            replacement: {
+                match: /(\i\.\i\.getBadges\((\i)\))(?=:\[\],\[\2\]\))/,
+                replace: "$self.injectVencordBadges($1,$2)"
+            }
         }
     ],
 
@@ -146,6 +199,7 @@ export default definePlugin({
 
     async stop() {
         clearInterval(intervalId);
+        DirectoryBadges = {};
     },
 
     getBadges(profile: { userId: string; guildId: string; }) {
@@ -157,6 +211,19 @@ export default definePlugin({
             new Logger("BadgeAPI#getBadges").error(e);
             return [];
         }
+    },
+
+    getDirectoryBadge(id: string) {
+        return DirectoryBadges[id];
+    },
+
+    injectVencordBadges(list: DirectoryBadge[], userId: string) {
+        return [
+            ...list,
+            ...this.getBadges({ userId, guildId: "" })
+                .filter(b => b.iconSrc)
+                .map(b => toDirectoryBadge(b, userId))
+        ];
     },
 
     renderBadgeComponent: ErrorBoundary.wrap((badge: ProfileBadge & BadgeUserArgs) => {
@@ -183,6 +250,9 @@ export default definePlugin({
             id: `vencord_donor_badge_${idx}`,
             iconSrc: badge.badge,
             description: badge.tooltip,
+            name: badge.tooltip || "Vencord Donor",
+            infoLabel: "Vencord Donor",
+            rarity: 5, // Mythical
             position: BadgePosition.START,
             props: {
                 style: {

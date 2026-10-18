@@ -56,7 +56,7 @@ export interface ProfileBadge {
     name?: string;
     /** Text in the directory modal's description card */
     detail?: string;
-    /** Text next to "unlocker" in the directory modal header */
+    /** Text next to "unlocked" in the directory modal header */
     infoLabel?: string;
     /** Higher resolution image for the directory modal */
     largeIconSrc?: string;
