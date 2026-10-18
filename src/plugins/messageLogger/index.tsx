@@ -308,13 +308,14 @@ export default definePlugin({
     messagePopoverButton: {
         icon: ClearHistoryIcon,
         render(message) {
+            const isShiftHeld = useShiftKey();
             const current = MessageStore.getMessage(message.channel_id, message.id) as MLMessage | undefined;
 
             if (!current || !doesMessageHaveHistory(current))
                 return null;
 
             return {
-                label: "Clear history",
+                label: isShiftHeld ? "Clear Message Log" : "Clear history",
                 icon: ShiftClearHistoryIcon,
                 message: current,
                 channel: ChannelStore.getChannel(current.channel_id),
