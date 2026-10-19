@@ -1,9 +1,9 @@
-.vc-favouriteAnything-attachment-container {
+.vc-favoriteAnything-attachment-container {
     padding: 12px;
     display: flex;
     gap: 12px;
 
-    &.vc-favouriteAnything-reduced-padding {
+    &.vc-favoriteAnything-reduced-padding {
         padding-bottom: 0;
     }
 
@@ -34,7 +34,7 @@
     }
 }
 
-.vc-favouriteAnything-container {
+.vc-favoriteAnything-container {
     background: var(--background-base-lower);
     display: flex;
     flex-direction: column;
@@ -43,14 +43,14 @@
     width: 100%;
 }
 
-.vc-favouriteAnything-container-header {
+.vc-favoriteAnything-container-header {
     background: var(--background-surface-high);
     border-bottom: 1px solid var(--border-subtle);
     padding: var(--custom-gif-picker-gutter-size);
     z-index: 1;
 }
 
-.vc-favouriteAnything-container-body {
+.vc-favoriteAnything-container-body {
     display: flex;
     flex-direction: column;
     width: 100%;
@@ -58,14 +58,14 @@
     flex: 1;
     overflow: hidden;
 
-    &.vc-favouriteAnything-container-info {
+    &.vc-favoriteAnything-container-info {
         justify-content: center;
         align-items: center;
         gap: 1.5rem;
     }
 }
 
-.vc-favouriteAnything-image-accessory {
+.vc-favoriteAnything-image-accessory {
     inset-inline-end: unset;
     position: absolute;
     z-index: 3;
@@ -78,7 +78,7 @@
     }
 }
 
-.vc-favouriteAnything-attachment-accessory {
+.vc-favoriteAnything-attachment-accessory {
     cursor: pointer;
 
     &:hover {
@@ -86,16 +86,16 @@
     }
 }
 
-.vc-favouriteAnything-info-text {
+.vc-favoriteAnything-info-text {
     text-align: center;
 }
 
-.vc-favouriteAnything-demo {
+.vc-favoriteAnything-demo {
     width: 70%;
     justify-self: center;
     position: relative;
 
-    .vc-favouriteAnything-demo-favourite-button {
+    .vc-favoriteAnything-demo-favorite-button {
         position: absolute;
         inset-inline-end: 4px;
         top: 4px;

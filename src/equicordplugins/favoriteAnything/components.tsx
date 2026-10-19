@@ -14,8 +14,8 @@ import { ChannelStore, ExpressionPickerStore, ListScrollerThin, lodash, Permissi
 import { ComponentProps, ReactNode } from "react";
 
 import { SignedUrlsStore } from "./stores";
-import { AttachmentContextProviderProps, AttachmentItem, AttachmentsComponentProps, CustomItemFormat, FavoriteButtonProps, FavouriteItemFormat, FilePickerItemProps, FilePickerProps, ManaSearchBarProps, MessageComponentClass, StaticFilePickerItemProps } from "./types";
-import { cl, getFilenameAndExtension, getFileThumbnailUrl, hasPermission, ImageUtils, sendAttachment, transformAttachment, useFavourites, useListScroller, useResizeObserver } from "./utils";
+import { AttachmentContextProviderProps, AttachmentItem, AttachmentsComponentProps, CustomItemFormat, FavoriteButtonProps, FavoriteItemFormat, FilePickerItemProps, FilePickerProps, ManaSearchBarProps, MessageComponentClass, StaticFilePickerItemProps } from "./types";
+import { cl, getFilenameAndExtension, getFileThumbnailUrl, hasPermission, ImageUtils, sendAttachment, transformAttachment, useFavorites, useListScroller, useResizeObserver } from "./utils";
 
 export const EmbedContext = proxyLazyWebpack(() => React.createContext<null | Embed>(null));
 export const EmbedMosaicContext = proxyLazyWebpack(() => React.createContext<null | number>(null));
@@ -31,7 +31,7 @@ const Classes = findCssClassesLazy("gifFavoriteButton", "ctaButtonContainer");
 
 function createPreviewMessage(attachment: MessageAttachment, channelId: string) {
     const previewMessage = {
-        id: `favourite-anything-preview-${attachment.id}`,
+        id: `favorite-anything-preview-${attachment.id}`,
         attachments: [attachment],
         channel_id: channelId,
         content: "",
@@ -82,7 +82,7 @@ export function FilePicker({ onSelectItem }: FilePickerProps) {
 
     const channel = useStateFromStores([ChannelStore], () => ChannelStore.getChannel(channelId), [channelId]);
 
-    const favs = useFavourites(CustomItemFormat.ATTACHMENT, query);
+    const favs = useFavorites(CustomItemFormat.ATTACHMENT, query);
     const count = useMemo(() => (favs ? Object.keys(favs).length : 0), [favs]);
 
     const [rowHeights, handleResize] = useListScroller();
@@ -153,18 +153,18 @@ function Demo() {
             <div className={cl("attachment-container", "demo", "first")}>
                 <AttachmentPreview attachment={demoAttachment} />
                 <FavoriteButton
-                    className={cl("demo-favourite-button")}
+                    className={cl("demo-favorite-button")}
                     url="https://example.org"
                     src="https://example.org"
                     width={100}
                     height={100}
-                    format={FavouriteItemFormat.NONE}
+                    format={FavoriteItemFormat.NONE}
                 />
             </div>
             <BaseText className={cl("info-text")} size="md">
-                Click the star to favourite a file.
+                Click the star to favorite a file.
                 <br />
-                Favourite files will show up here!
+                Favorite files will show up here!
             </BaseText>
         </>
     );
@@ -262,7 +262,7 @@ export function EmbedAccessory() {
 
             // External videos don't have a video.proxyURL property that could be used for the preview - use the static thumbnail instead
             const src = video.proxyURL ?? thumbnail?.proxyURL ?? video.url;
-            const format = isProxiedVideo ? FavouriteItemFormat.VIDEO : FavouriteItemFormat.IMAGE;
+            const format = isProxiedVideo ? FavoriteItemFormat.VIDEO : FavoriteItemFormat.IMAGE;
 
             // External videos' content.url usually doesn't point to a valid resource that could be embedded
             const url = !isProxiedVideo ? embed.url! : video.url;
@@ -279,7 +279,7 @@ export function EmbedAccessory() {
         const isAnimated = ImageUtils.isAnimated({ ...img, original: img.url, src, animated: false });
         if (isAnimated) return null;
 
-        return { ...img, format: FavouriteItemFormat.IMAGE, src };
+        return { ...img, format: FavoriteItemFormat.IMAGE, src };
     }, [embed, mosaicIndex]);
 
     return (
@@ -334,10 +334,10 @@ export function AttachmentContextProvider({ attachment, component, children }: A
     return <AttachmentContext.Provider value={attachmentItem}>{children}</AttachmentContext.Provider>;
 }
 
-const visualMediaFormats: Partial<Record<AttachmentItem["type"], FavouriteItemFormat>> = Object.freeze({
-    IMAGE: FavouriteItemFormat.IMAGE,
-    VIDEO: FavouriteItemFormat.VIDEO,
-    CLIP: FavouriteItemFormat.VIDEO
+const visualMediaFormats: Partial<Record<AttachmentItem["type"], FavoriteItemFormat>> = Object.freeze({
+    IMAGE: FavoriteItemFormat.IMAGE,
+    VIDEO: FavoriteItemFormat.VIDEO,
+    CLIP: FavoriteItemFormat.VIDEO
 });
 
 export function AttachmentAccessory() {
@@ -360,7 +360,7 @@ export function AttachmentAccessory() {
             () => getFileThumbnailUrl(originalItem).then(url => url.toString()),
             { [Symbol.toPrimitive]: () => "" }
         );
-        return { format: FavouriteItemFormat.NONE, src: originalItem.proxy_url, url: downloadUrl, width, height, gifSrc };
+        return { format: FavoriteItemFormat.NONE, src: originalItem.proxy_url, url: downloadUrl, width, height, gifSrc };
     }, [attachment]);
 
     return props && <FavoriteButton {...props} className={cl("attachment-accessory")} />;

@@ -24,7 +24,7 @@ export interface ExpressionPickerTabProps extends PropsWithChildren {
     viewType: ExpressionPickerView;
 }
 
-export interface FavoriteButtonProps extends Omit<FullFavouriteItem, "order"> {
+export interface FavoriteButtonProps extends Omit<FullFavoriteItem, "order"> {
     className?: string;
 }
 
@@ -106,21 +106,21 @@ export interface CV2Attachment {
     flags: number;
 }
 
-export enum FavouriteItemFormat {
+export enum FavoriteItemFormat {
     NONE = 0,
     IMAGE = 1,
     VIDEO = 2
 }
 
-export interface FavouriteItem {
-    format: FavouriteItemFormat;
+export interface FavoriteItem {
+    format: FavoriteItemFormat;
     src: string;
     width: number;
     height: number;
     order: number;
 }
 
-export interface FullFavouriteItem extends FavouriteItem {
+export interface FullFavoriteItem extends FavoriteItem {
     gifSrc?: () => Promise<string>;
     url: string;
 }

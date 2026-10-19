@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { definePluginSettings } from "@api/Settings";
+import { definePluginSettings, migratePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import { getIntlMessage } from "@utils/discord";
 import definePlugin, { OptionType } from "@utils/types";
@@ -13,19 +13,20 @@ import { ComponentType, ReactNode } from "react";
 import { AttachmentAccessory, AttachmentContextProvider, EmbedAccessory, EmbedContext, EmbedMosaicContext, FilePicker } from "./components";
 import { SignedUrlsStore } from "./stores";
 import managedStyle from "./style.css?managed";
-import { AttachmentContextProviderProps, EmbedComponent, ExpressionPickerTabProps, ExpressionPickerView, FavouriteItem, FavouriteItemFormat, FullFavouriteItem } from "./types";
+import { AttachmentContextProviderProps, EmbedComponent, ExpressionPickerTabProps, ExpressionPickerView, FavoriteItem, FavoriteItemFormat, FullFavoriteItem } from "./types";
 
 export const settings = definePluginSettings({
     localThumbnails: {
         type: OptionType.BOOLEAN,
         default: false,
-        description: "Generate file thumbnails locally instead of using an external service (placeholder.nin0.dev). Not compatible with mobile. Toggling this option will not affect existing favourites.",
+        description: "Generate file thumbnails locally instead of using an external service (placeholder.nin0.dev). Not compatible with mobile. Toggling this option will not affect existing favorites.",
     }
 });
 
+migratePluginSettings("FavoriteAnything", "FavouriteAnything");
 export default definePlugin({
-    name: "FavouriteAnything",
-    description: "Favourite any image, video, or file attachment",
+    name: "FavoriteAnything",
+    description: "Favorite any image, video, or file attachment",
     tags: ["Chat", "Media", "Utility"],
     authors: [Devs.Davri, Devs.nin0dev],
     searchTerms: ["favorite"],
@@ -98,7 +99,7 @@ export default definePlugin({
             ]
         },
         {
-            // Hide favourite files from the GIFs/Media tab
+            // Hide favorite files from the GIFs/Media tab
             find: '.sortBy("order").reverse().value()',
             replacement: {
                 match: '.sortBy("order").reverse()',
@@ -158,8 +159,8 @@ export default definePlugin({
     },
     renderAttachmentAccessory: () => <AttachmentAccessory />,
     renderEmbedAccessory: () => <EmbedAccessory />,
-    filterGifs: (item: FavouriteItem) => item.format !== FavouriteItemFormat.NONE,
-    fixFavItem: async (item: FullFavouriteItem | string) => {
+    filterGifs: (item: FavoriteItem) => item.format !== FavoriteItemFormat.NONE,
+    fixFavItem: async (item: FullFavoriteItem | string) => {
         if (typeof item === "string") {
             SignedUrlsStore.addSigned(item);
         } else {

@@ -19,11 +19,11 @@ import { JsonValue } from "type-fest";
 
 import { settings } from ".";
 import { StaticFilePickerItem } from "./components";
-import { AttachmentTransformer, CustomItemDef, CustomItemFormat, FavouriteItem, FavouriteItemFormat, ImageUtils as ImageUtils_, ItemsDef, ResizeObserverHook, UnfurledEmbedsResponse } from "./types";
+import { AttachmentTransformer, CustomItemDef, CustomItemFormat, FavoriteItem, FavoriteItemFormat, ImageUtils as ImageUtils_, ItemsDef, ResizeObserverHook, UnfurledEmbedsResponse } from "./types";
 
-const Native = VencordNative.pluginHelpers.FavouriteAnything as PluginNative<typeof import("./native")>;
+const Native = VencordNative.pluginHelpers.FavoriteAnything as PluginNative<typeof import("./native")>;
 
-export const cl = classNameFactory("vc-favouriteAnything-");
+export const cl = classNameFactory("vc-favoriteAnything-");
 
 export const useResizeObserver: ResizeObserverHook = findByCodeLazy("borderBoxSize", "blockSize", "inlineSize");
 export const ImageUtils: ImageUtils_ = findByPropsLazy("isAnimated", "getFormatQuality");
@@ -68,7 +68,7 @@ function defineItems<T extends Record<CustomItemFormat, CustomItemDef>>(def: Ite
     };
 }
 
-// Encode/Decode definitions for custom favourite items.
+// Encode/Decode definitions for custom favorite items.
 // The encode callback must return a json compatible object, preferably as compact as possible.
 // Decode must recreate the original object based on the encoded value.
 // Stringify returns a simple string representation used for thumbnail text and expression picker search.
@@ -249,18 +249,18 @@ function fuzzySearch(searchQuery: string, searchString: string) {
     return null;
 }
 
-export function useFavourites(itemFormat: CustomItemFormat, searchQuery?: string) {
+export function useFavorites(itemFormat: CustomItemFormat, searchQuery?: string) {
     useEffect(() => void UserSettingsActionCreators.FrecencyUserSettingsActionCreators.loadIfNecessary(), []);
 
     const items = useStateFromStores(
         [UserSettingsProtoStore],
         () => {
-            const gifs: Record<string, FavouriteItem> | undefined =
+            const gifs: Record<string, FavoriteItem> | undefined =
                 UserSettingsProtoStore.frecencyWithoutFetchingLatest.favoriteGifs?.gifs;
             if (!gifs) return null;
 
             return Object.entries(gifs)
-                .filter(([, { format }]) => format === FavouriteItemFormat.NONE)
+                .filter(([, { format }]) => format === FavoriteItemFormat.NONE)
                 .map(([url, { src, ...rest }]) => ({
                     ...rest,
                     ...defs.decode(URL.parse(src)?.hash.replace("#", "") ?? "")!,
