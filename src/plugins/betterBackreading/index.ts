@@ -60,6 +60,12 @@ const settings = definePluginSettings({
         description: "How many messages to fetch per history request when the dynamic count is disabled (30-100).",
         default: "50",
         isValid: value => validateInteger(value, 30, 100)
+    },
+    openUnreadChannelsAtLatest: {
+        type: OptionType.BOOLEAN,
+        displayName: "Open Unread Channels at Latest",
+        description: "Open channels with unread messages at the latest message.",
+        default: true
     }
 }, {
     messageCount: {
@@ -97,6 +103,10 @@ export default definePlugin({
         }
 
         return Array.from(scrollManagers).some(manager => this.isActive(manager));
+    },
+
+    shouldScrollToLatest(manager: ScrollManager) {
+        return this.isActive(manager) && settings.store.openUnreadChannelsAtLatest;
     },
 
     getImageScrollMargin() {
@@ -238,6 +248,14 @@ export default definePlugin({
                     replace: "$1+(this.props.hasUnreads&&$self.isActive(this)?$self.getLoadMoreBuffer(this):0)"
                 }
             ]
+        },
+        {
+            // Open unread channels at the latest message.
+            find: "restoreScroll(){",
+            replacement: {
+                match: /(?<=GUILD_STAGE_VOICE\?)this\.scrollToNewMessages\(\)/,
+                replace: "$self.shouldScrollToLatest(this)?this.setScrollToBottom():$&"
+            }
         },
         {
             // Prevent scroll jumps at either placeholder boundary while messages load.
