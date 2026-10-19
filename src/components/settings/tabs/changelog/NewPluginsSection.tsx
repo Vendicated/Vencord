@@ -156,7 +156,7 @@ export function NewPluginsSection({
                                 The following plugins require a restart:
                                 <div className={Margins.bottom8} />
                                 <ul>
-                                    {changes.map(p => (
+                                    {Array.from(changes, p => (
                                         <li key={p}>{p}</li>
                                     ))}
                                 </ul>
