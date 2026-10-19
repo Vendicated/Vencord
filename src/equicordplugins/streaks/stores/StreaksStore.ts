@@ -6,7 +6,7 @@
 
 import * as DataStore from "@api/DataStore";
 import { proxyLazy } from "@utils/lazy";
-import { UserStore, zustandCreate } from "@webpack/common";
+import { zustandCreate } from "@webpack/common";
 
 import { API_URL } from "../constants";
 import { useAuthorizationStore } from "./AuthorizationStore";
@@ -20,6 +20,16 @@ export interface RemoteStreak {
     user_a_today: boolean;
     user_b_today: boolean;
     today_date: string | null;
+    timezone_a?: string;
+    timezone_b?: string;
+    timezone_a_known?: boolean;
+    timezone_b_known?: boolean;
+    user_a_activity_date?: string | null;
+    user_b_activity_date?: string | null;
+    user_a_today_date?: string | null;
+    user_b_today_date?: string | null;
+    complete_today?: boolean;
+    timezone?: string;
 }
 
 export interface StreaksState {
@@ -71,7 +81,10 @@ export const useStreaksStore = proxyLazy(() => zustandCreate((set: any, get: any
                     Authorization: `Bearer ${token}`,
                     "Content-Type": "application/json"
                 },
-                body: JSON.stringify({ sender_id: senderId })
+                body: JSON.stringify({
+                    sender_id: senderId,
+                    timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC"
+                })
             });
             if (res.status === 401) {
                 useAuthorizationStore.getState().expireToken(token);
