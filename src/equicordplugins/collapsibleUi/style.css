@@ -44,7 +44,7 @@
 }
 
 [data-vc-collapsible-ui-guild-bar],
-[data-vc-collapsible-ui-channel-list],
+[data-vc-collapsible-ui-channel-list-collapsed],
 [data-vc-collapsible-ui-members-list],
 [data-vc-collapsible-ui-title-bar],
 [data-vc-collapsible-ui-header-bar],
@@ -108,7 +108,6 @@
     transition-delay: 0ms;
 }
 
-[data-vc-collapsible-ui-channel-list-expanded],
 [data-vc-collapsible-ui-channel-list-collapsed]:is(:hover, :focus-within) {
     width: var(--custom-guild-sidebar-width, 312px) !important;
     min-width: var(--vc-cui-channel-list-min-width) !important;
