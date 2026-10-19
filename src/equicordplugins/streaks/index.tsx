@@ -95,22 +95,10 @@ export default definePlugin({
             const myFlag = cached && cached.today_date != null && cached.today_date === today && (cached.user_a_id === me ? cached.user_a_today : cached.user_b_today);
             const theirFlag = cached && cached.today_date != null && cached.today_date === today && (cached.user_a_id === me ? cached.user_b_today : cached.user_a_today);
 
-            if (message.author.id === me) {
-                if (!myFlag) {
-                    useStreaksStore.getState().update(recipientId);
-                }
-            } else if (message.author.id === recipientId) {
-                if (!theirFlag) {
-                    setTimeout(async () => {
-                        const before = useStreaksStore.getState().streaks[recipientId]?.count;
-                        await useStreaksStore.getState().refresh(recipientId);
-                        const after = useStreaksStore.getState().streaks[recipientId]?.count;
-
-                        if (before === after) {
-                            useStreaksStore.getState().update(recipientId);
-                        }
-                    }, 1000);
-                }
+            if (message.author.id === me && !myFlag) {
+                useStreaksStore.getState().update(recipientId, message.author.id);
+            } else if (message.author.id === recipientId && !theirFlag) {
+                useStreaksStore.getState().update(recipientId, message.author.id);
             }
         },
     },

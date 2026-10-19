@@ -25,7 +25,7 @@ export interface RemoteStreak {
 export interface StreaksState {
     streaks: Record<string, RemoteStreak>;
     fetch: () => Promise<void>;
-    update: (recipientId: string) => Promise<void>;
+    update: (recipientId: string, senderId: string) => Promise<void>;
     refresh: (recipientId: string) => Promise<void>;
     migrate: () => Promise<void>;
     clear: () => void;
@@ -42,6 +42,10 @@ export const useStreaksStore = proxyLazy(() => zustandCreate((set: any, get: any
             const res = await fetch(`${API_URL}/streaks`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
+            if (res.status === 401) {
+                useAuthorizationStore.getState().expireToken(token);
+                return;
+            }
             if (res.ok) {
                 const data: RemoteStreak[] = await res.json();
                 const myId = UserStore.getCurrentUser()?.id;
@@ -56,15 +60,23 @@ export const useStreaksStore = proxyLazy(() => zustandCreate((set: any, get: any
             console.error("Failed to fetch streaks", e);
         }
     },
-    async update(recipientId: string) {
+    async update(recipientId: string, senderId: string) {
         const { token } = useAuthorizationStore.getState();
         if (!token) return;
 
         try {
             const res = await fetch(`${API_URL}/streaks/${recipientId}`, {
                 method: "POST",
-                headers: { Authorization: `Bearer ${token}` }
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ sender_id: senderId })
             });
+            if (res.status === 401) {
+                useAuthorizationStore.getState().expireToken(token);
+                return;
+            }
             if (res.ok) {
                 const streak: RemoteStreak = await res.json();
                 set({ streaks: { ...get().streaks, [recipientId]: streak } });
@@ -81,6 +93,10 @@ export const useStreaksStore = proxyLazy(() => zustandCreate((set: any, get: any
             const res = await fetch(`${API_URL}/streaks/${recipientId}`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
+            if (res.status === 401) {
+                useAuthorizationStore.getState().expireToken(token);
+                return;
+            }
             if (res.ok) {
                 const streak: RemoteStreak = await res.json();
                 set({ streaks: { ...get().streaks, [recipientId]: streak } });
@@ -106,6 +122,10 @@ export const useStreaksStore = proxyLazy(() => zustandCreate((set: any, get: any
                 body: JSON.stringify(legacyData)
             });
 
+            if (res.status === 401) {
+                useAuthorizationStore.getState().expireToken(token);
+                return;
+            }
             if (res.ok) {
                 await DataStore.del("vc-streaks-data");
                 console.log("Successfully migrated local streaks to API");
