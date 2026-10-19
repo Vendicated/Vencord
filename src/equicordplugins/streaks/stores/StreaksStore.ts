@@ -6,7 +6,7 @@
 
 import * as DataStore from "@api/DataStore";
 import { proxyLazy } from "@utils/lazy";
-import { zustandCreate } from "@webpack/common";
+import { UserStore, zustandCreate } from "@webpack/common";
 
 import { API_URL } from "../constants";
 import { useAuthorizationStore } from "./AuthorizationStore";

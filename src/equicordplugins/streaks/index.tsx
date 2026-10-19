@@ -16,8 +16,7 @@ import { ChannelStore, MessageActions, MessageStore, Tooltip, UserStore } from "
 
 import { settings } from "./settings";
 import { useAuthorizationStore } from "./stores/AuthorizationStore";
-import type { RemoteStreak } from "./stores/StreaksStore";
-import { useStreaksStore } from "./stores/StreaksStore";
+import { type RemoteStreak, useStreaksStore } from "./stores/StreaksStore";
 
 const cl = classNameFactory("vc-streaks-");
 
@@ -47,7 +46,7 @@ async function backfillRecentActivity() {
     const me = UserStore.getCurrentUser()?.id;
     if (!me) return;
 
-    const streaks = Object.values(useStreaksStore.getState().streaks);
+    const streaks = Object.values<RemoteStreak>(useStreaksStore.getState().streaks);
     for (const streak of streaks) {
         const meIsA = streak.user_a_id === me;
         const recipientId = meIsA ? streak.user_b_id : streak.user_a_id;
