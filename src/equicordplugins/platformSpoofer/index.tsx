@@ -13,7 +13,7 @@ import { UserStore } from "@webpack/common";
 const settings = definePluginSettings({
     platform: {
         type: OptionType.SELECT,
-        description: "What platform to show up as on",
+        description: "What platform to pretend you're on.",
         restartNeeded: true,
         options: [
             {
@@ -56,7 +56,7 @@ export default definePlugin({
     authors: [EquicordDevs.Drag, EquicordDevs.neoarz],
     settingsAboutComponent: () => (
         <Notice.Warning>
-            We can't guarantee this plugin won't get you warned or banned.
+            We can't guarantee this plugin won't get you warned or banned. Choosing Xbox/Playstation/VR may make your client an outdated version.
         </Notice.Warning>
     ),
     settings: settings,

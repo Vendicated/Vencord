@@ -234,13 +234,13 @@ export const settings = definePluginSettings({
     whitelistedIds: {
         default: "",
         type: OptionType.STRING,
-        description: "Whitelisted server, channel, or user IDs."
+        description: "Server, channel, or user IDs to always show in message log."
     },
 
     blacklistedIds: {
         default: "",
         type: OptionType.STRING,
-        description: "Blacklisted server, channel, or user IDs."
+        description: "Server, channel, or user IDs to never show in message log."
     },
 
     imageCacheDir: {
