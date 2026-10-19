@@ -26,6 +26,7 @@ import { PluginCards } from "./pluginCards";
 migratePluginToSettings(true, "EquicordHelper", "NoBulletPoints", "noBulletPoints");
 migratePluginToSettings(true, "EquicordHelper", "NoModalAnimation", "noModalAnimation");
 migratePluginToSettings(true, "EquicordHelper", "GuildTagSettings", "disableAdoptTagPrompt");
+migratePluginToSettings(true, "EquicordHelper", "ShowAllBadges", "showAllBadges");
 
 let clicked = false;
 
@@ -169,6 +170,12 @@ const settings = definePluginSettings({
         restartNeeded: true,
         default: false,
     },
+    showAllBadges: {
+        type: OptionType.BOOLEAN,
+        description: "Shows every profile badge instead of collapsing the rest behind +n",
+        restartNeeded: true,
+        default: false,
+    },
     enableAutoCorrect: {
         type: OptionType.BOOLEAN,
         description: "Adds a chat box context menu toggle for native autocorrection and text replacements",
@@ -200,7 +207,8 @@ export default definePlugin({
         Devs.AutumnVN,
         EquicordDevs.auggeeo,
         EquicordDevs.secp192k1,
-        EquicordDevs.tie
+        EquicordDevs.tie,
+        EquicordDevs.itzmeshadow999
     ],
     required: true,
     settings,
@@ -412,6 +420,14 @@ export default definePlugin({
                 replace: ",enabled:!1"
             },
             predicate: () => settings.store.noOnboarding
+        },
+        {
+            find: "UserProfileBadgeListRows",
+            replacement: {
+                match: /let (\i)=\i&&!\i(?=,\i=\1\?Math\.max\()/,
+                replace: "let $1=!1"
+            },
+            predicate: () => settings.store.showAllBadges
         },
         // Add opening profile functionality to some connections
         {
