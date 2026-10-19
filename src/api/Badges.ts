@@ -25,9 +25,12 @@ export const enum BadgePosition {
     END
 }
 
-/** 1 common (label hidden in the badge modal), 2 rare, 3 epic, 5 mythic. 4 was shot dead :( */
-export type BadgeRarity = 1 | 2 | 3 | 5;
-
+export enum BadgeRarity {
+    COMMON = 1, // label hidden
+    RARE = 2,
+    EPIC = 3,
+    MYTHIC = 5
+}
 export interface ProfileBadge {
     /**
      * Badge id, unused by vencord, required by discord

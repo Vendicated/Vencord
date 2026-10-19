@@ -40,7 +40,7 @@ const ContributorBadge: ProfileBadge = {
     id: "vencord_contributor_badge",
     description: "Vencord Contributor",
     infoLabel: "Vencord Contributor",
-    rarity: 5, // Mythical
+    rarity: BadgeRarity.MYTHIC,
     iconSrc: CONTRIBUTOR_BADGE,
     position: BadgePosition.START,
     shouldShow: ({ userId }) => shouldShowContributorBadge(userId),
@@ -252,7 +252,7 @@ export default definePlugin({
             description: badge.tooltip,
             name: badge.tooltip || "Vencord Donor",
             infoLabel: "Vencord Donor",
-            rarity: 5, // Mythical
+            rarity: BadgeRarity.MYTHIC,
             position: BadgePosition.START,
             props: {
                 style: {
