@@ -1,0 +1,13 @@
+.vc-streaks-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+    margin-left: 4px;
+    vertical-align: middle;
+}
+
+.vc-streaks-count {
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 1;
+}
