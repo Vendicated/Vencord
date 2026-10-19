@@ -101,21 +101,21 @@ export default definePlugin({
 
     handleChannelStreamMarkup(channelStreamMarkup: React.ReactElement<MessageProps>[]) {
         try {
-            let index = channelStreamMarkup.findIndex(x => x.props.groupId), pre = -1, future = index + 1;
+            let index = channelStreamMarkup.findIndex(x => x.props.groupId), preIndex = -1, futureIndex = index + 1;
 
             if (index === -1) return channelStreamMarkup;
 
             while (index < channelStreamMarkup.length) {
                 const element = channelStreamMarkup[index];
-                const before: React.ReactElement<MessageProps> | undefined = channelStreamMarkup[pre];
+                const before: React.ReactElement<MessageProps> | undefined = channelStreamMarkup[preIndex];
 
                 let next: React.ReactElement<MessageProps> | undefined;
 
-                while (future < channelStreamMarkup.length) {
-                    const after = channelStreamMarkup[future];
+                while (futureIndex < channelStreamMarkup.length) {
+                    const after = channelStreamMarkup[futureIndex];
 
                     if (!after.props.groupId) {
-                        future++;
+                        futureIndex++;
                         continue;
                     }
 
@@ -134,8 +134,8 @@ export default definePlugin({
 
                 channelStreamMarkup[index].props.grouping = { first, last };
 
-                pre = index;
-                index = future++;
+                preIndex = index;
+                index = futureIndex++;
             }
         }
         catch (err) {
