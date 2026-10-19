@@ -1,3 +1,3 @@
 # EquicordHelper
 
-Used to provide support, fix discord caused crashes, and other misc features.
+Used to provide support and fix discord caused crashes.
