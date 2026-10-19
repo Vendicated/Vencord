@@ -61,11 +61,15 @@ const settings = definePluginSettings({
         default: "50",
         isValid: value => validateInteger(value, 30, 100)
     },
-    openUnreadChannelsAtLatest: {
-        type: OptionType.BOOLEAN,
-        displayName: "Open Unread Channels at Latest",
-        description: "Open channels with unread messages at the latest message.",
-        default: true
+    channelOpenScrollMode: {
+        type: OptionType.SELECT,
+        displayName: "Channel Opening Position",
+        description: "Open unread channels at the saved position (or bottom), always the bottom, or defer to default unread behavior.",
+        options: [
+            { label: "Discord Default", value: "default" },
+            { label: "Always Bottom", value: "bottom" },
+            { label: "Saved Position", value: "saved", default: true }
+        ]
     }
 }, {
     messageCount: {
@@ -105,8 +109,8 @@ export default definePlugin({
         return Array.from(scrollManagers).some(manager => this.isActive(manager));
     },
 
-    shouldScrollToLatest(manager: ScrollManager) {
-        return this.isActive(manager) && settings.store.openUnreadChannelsAtLatest;
+    getChannelOpenScrollMode(manager: ScrollManager) {
+        return this.isActive(manager) ? settings.store.channelOpenScrollMode : "default";
     },
 
     getImageScrollMargin() {
@@ -250,12 +254,19 @@ export default definePlugin({
             ]
         },
         {
-            // Open unread channels at the latest message.
+            // Apply the selected opening position while preserving explicit message jumps.
             find: "restoreScroll(){",
-            replacement: {
-                match: /(?<=GUILD_STAGE_VOICE\?)this\.scrollToNewMessages\(\)/,
-                replace: "$self.shouldScrollToLatest(this)?this.setScrollToBottom():$&"
-            }
+            group: true,
+            replacement: [
+                {
+                    match: /(let\{initialScrollTop:(\i)\}=this;)/,
+                    replace: "$1if($self.getChannelOpenScrollMode(this)===\"bottom\")$2=null;"
+                },
+                {
+                    match: /this\.props\.hasUnreads(?=&&this\.props\.channel\.type)/,
+                    replace: "$self.getChannelOpenScrollMode(this)===\"default\"&&$&"
+                }
+            ]
         },
         {
             // Prevent scroll jumps at either placeholder boundary while messages load.
