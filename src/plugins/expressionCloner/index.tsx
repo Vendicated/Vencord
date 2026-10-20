@@ -21,19 +21,22 @@ import { migratePluginSettings } from "@api/Settings";
 import { BaseText } from "@components/BaseText";
 import { CheckedTextInput } from "@components/CheckedTextInput";
 import { Flex } from "@components/Flex";
-import { DeleteIcon, PlusIcon } from "@components/Icons";
+import { DeleteIcon, PencilIcon, PlusIcon } from "@components/Icons";
 import { Devs } from "@utils/constants";
 import { getGuildAcronym, hasGuildFeature } from "@utils/discord";
 import { Logger } from "@utils/Logger";
 import definePlugin from "@utils/types";
-import { Guild, GuildSticker, Message } from "@vencord/discord-types";
+import { CustomEmoji, Guild, GuildSticker, Message } from "@vencord/discord-types";
 import { StickerFormatType, StickerType } from "@vencord/discord-types/enums";
-import { findByCodeLazy } from "@webpack";
+import { DefaultExtractAndLoadChunksRegex, extractAndLoadChunksLazy, findByCodeLazy, findComponentByCodeLazy } from "@webpack";
 import { ConfirmModal, Constants, EmojiStore, FluxDispatcher, Forms, GuildStore, IconUtils, Menu, Modal, openModal, openModalLazy, PermissionsBits, PermissionStore, React, RestAPI, SelectedGuildStore, showToast, StickersStore, Tooltip, UserStore } from "@webpack/common";
 import { Promisable } from "type-fest";
 
 const uploadEmoji = findByCodeLazy(".GUILD_EMOJIS(", "EMOJI_UPLOAD_START");
 const openEmojiStudioModal = findByCodeLazy("Emoji Studio");
+
+const loadCreateStickerModal = extractAndLoadChunksLazy(["CREATE_STICKER_MODAL", "#{intl::STICKER_PICKER_CREATE_STICKER}"], new RegExp(`\\.CREATE_STICKER_MODAL.{0,100}?${DefaultExtractAndLoadChunksRegex.source}`));
+const CreateStickerModal = findComponentByCodeLazy("#{intl::GUILD_STICKER_INVALID_STICKER}");
 
 interface Sticker extends GuildSticker {
     t: "Sticker";
@@ -439,21 +442,21 @@ const messageContextMenuPatch: NavContextMenuPatchCallback = (children, props: R
     }
 };
 
-function buildDeleteExpressionItem(id: string, type: string) {
+function buildManageExpressionItems(id: string, type: string) {
     let guild: Guild | undefined;
-    let name: string;
+    let expression: GuildSticker | CustomEmoji;
 
     if (type === "emoji") {
         const emoji = EmojiStore.getCustomEmojiById(id);
         if (emoji) {
             guild = GuildStore.getGuild(emoji.guildId);
-            name = emoji.name;
+            expression = emoji;
         }
     } else if (type === "sticker") {
         const sticker = StickersStore.getStickerById(id);
         if (sticker?.type === StickerType.GUILD) {
             guild = GuildStore.getGuild(sticker.guild_id);
-            name = sticker.name;
+            expression = sticker;
         }
     }
 
@@ -462,34 +465,61 @@ function buildDeleteExpressionItem(id: string, type: string) {
     const expressionName = type === "emoji" ? "Emoji" : "Sticker";
 
     return (
-        <Menu.MenuItem
-            key="vc-em-delete"
-            id="vc-em-delete"
-            label={`Delete ${expressionName}`}
-            leadingAccessory={{ type: "icon", icon: DeleteIcon }}
-            color="danger"
-            action={() => {
-                openModal(modalProps =>
-                    <ConfirmModal
-                        {...modalProps}
-                        title={`Delete ${name}`}
-                        subtitle={`Are you sure you want to delete this ${type}?`}
-                        confirmText="Delete"
-                        onConfirm={async () => {
-                            const res = type === "emoji"
-                                ? RestAPI.del(Constants.Endpoints.GUILD_EMOJI(guild.id, id))
-                                : RestAPI.del(Constants.Endpoints.GUILD_STICKER(guild.id, id));
+        <>
+            <Menu.MenuItem
+                key="vc-em-edit"
+                id="vc-em-edit"
+                label={`Edit ${expressionName}`}
+                leadingAccessory={{ type: "icon", icon: PencilIcon }}
+                action={() => {
+                    if (type === "sticker") {
+                        openModalLazy(async () => {
+                            await loadCreateStickerModal();
+                            return modalProps => {
+                                <CreateStickerModal
+                                    {...modalProps}
+                                    sticker={expression}
+                                    guildId={guild.id}
+                                />;
+                            };
+                        });
+                    } else {
+                        openEmojiStudioModal({
+                            analyticsLocation: "guild settings edit emoji",
+                            emoji: expression,
+                            guildId: guild.id
+                        });
+                    }
+                }}
+            />
+            <Menu.MenuItem
+                key="vc-em-delete"
+                id="vc-em-delete"
+                label={`Delete ${expressionName}`}
+                leadingAccessory={{ type: "icon", icon: DeleteIcon }}
+                color="danger"
+                action={() => {
+                    openModal(modalProps =>
+                        <ConfirmModal
+                            {...modalProps}
+                            title={`Delete ${expression.name}`}
+                            subtitle={`Are you sure you want to delete this ${type}?`}
+                            confirmText="Delete"
+                            onConfirm={async () => {
+                                const url = type === "emoji"
+                                    ? Constants.Endpoints.GUILD_EMOJI(guild.id, id)
+                                    : Constants.Endpoints.GUILD_STICKER(guild.id, id);
 
-                            await res.
-                                then(
+                                await RestAPI.del(url).then(
                                     () => showToast({ text: `${expressionName} deleted successfully.`, variant: "success" }),
                                     () => showToast({ text: `Failed to delete ${expressionName}`, variant: "critical" })
                                 );
-                        }}
-                    />
-                );
-            }}
-        />
+                            }}
+                        />
+                    );
+                }}
+            />
+        </>
     );
 }
 
@@ -501,17 +531,19 @@ const expressionPickerPatch: NavContextMenuPatchCallback = (children, props: { t
         const firstChild = props.target.firstChild as HTMLImageElement;
 
         children.push(
-            buildMenuItem("Emoji", () => ({
-                id,
-                name,
-                isAnimated: firstChild && isGifUrl(firstChild.src)
-            })),
-            buildDeleteExpressionItem(id, type)
+            <Menu.MenuGroup key="vc-em-group">
+                {buildMenuItem("Emoji", () => ({
+                    id,
+                    name,
+                    isAnimated: firstChild && isGifUrl(firstChild.src)
+                }))}
+                {buildManageExpressionItems(id, type)}
+            </Menu.MenuGroup>
         );
     } else if (type === "sticker" && !props.target.className?.includes("lottieCanvas")) {
         children.push(
             buildMenuItem("Sticker", () => fetchSticker(id)),
-            buildDeleteExpressionItem(id, type)
+            buildManageExpressionItems(id, type)
         );
     }
 };
