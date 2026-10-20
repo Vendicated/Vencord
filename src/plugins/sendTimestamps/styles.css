@@ -12,16 +12,6 @@
     font-size: 100%;
 }
 
-.vc-st-format-select {
-    margin-bottom: 1em;
-
-    --border-subtle: transparent;
-}
-
-.vc-st-format-label {
-    --border-subtle: transparent;
-}
-
 .vc-st-modal-header {
     place-content: center space-between;
 }
@@ -34,6 +24,17 @@
     padding: 0;
 }
 
-.vc-st-preview-text {
+.vc-st-format-grid {
     margin-bottom: 1em;
+    gap: 0.5em;
+}
+
+.vc-st-format-button {
+    text-wrap: wrap;
+    text-align: center;
+    font-size: 0.9em;
+}
+
+.vc-st-format-button * {
+    background-color: transparent;
 }
