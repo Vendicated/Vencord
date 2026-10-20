@@ -18,12 +18,15 @@
 .vc-kaomoji-body-wrap {
     display: flex;
     flex: 1;
+    min-height: 0;
     overflow: hidden;
 }
 
 .vc-kaomoji-body {
     display: flex;
     flex: 1;
+    min-height: 0;
+    min-width: 0;
     flex-direction: column;
     padding: 0 4px;
 }
