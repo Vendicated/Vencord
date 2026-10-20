@@ -21,18 +21,19 @@ import { migratePluginSettings } from "@api/Settings";
 import { BaseText } from "@components/BaseText";
 import { CheckedTextInput } from "@components/CheckedTextInput";
 import { Flex } from "@components/Flex";
-import { PlusIcon } from "@components/Icons";
+import { DeleteIcon, PlusIcon } from "@components/Icons";
 import { Devs } from "@utils/constants";
 import { getGuildAcronym, hasGuildFeature } from "@utils/discord";
 import { Logger } from "@utils/Logger";
 import definePlugin from "@utils/types";
 import { Guild, GuildSticker, Message } from "@vencord/discord-types";
-import { StickerFormatType } from "@vencord/discord-types/enums";
+import { StickerFormatType, StickerType } from "@vencord/discord-types/enums";
 import { findByCodeLazy } from "@webpack";
-import { Constants, EmojiStore, FluxDispatcher, Forms, GuildStore, IconUtils, Menu, Modal, openModalLazy, PermissionsBits, PermissionStore, React, RestAPI, showToast, StickersStore, Tooltip, UserStore } from "@webpack/common";
+import { ConfirmModal, Constants, EmojiStore, FluxDispatcher, Forms, GuildStore, IconUtils, Menu, Modal, openModal, openModalLazy, PermissionsBits, PermissionStore, React, RestAPI, SelectedGuildStore, showToast, StickersStore, Tooltip, UserStore } from "@webpack/common";
 import { Promisable } from "type-fest";
 
 const uploadEmoji = findByCodeLazy(".GUILD_EMOJIS(", "EMOJI_UPLOAD_START");
+const openEmojiStudioModal = findByCodeLazy("Emoji Studio");
 
 interface Sticker extends GuildSticker {
     t: "Sticker";
@@ -373,10 +374,8 @@ function resolveEmojiName(favoriteableId: string, message: Message) {
         ?? "FakeNitroEmoji";
 }
 
-const messageContextMenuPatch: NavContextMenuPatchCallback = (children, props: Record<"favoriteableId" | "itemHref" | "itemSrc" | "favoriteableType", string> & { message: Message; }) => {
-    const { favoriteableId, itemHref, itemSrc, favoriteableType, message } = props ?? {};
-
-    if (!favoriteableId) return;
+const messageContextMenuPatch: NavContextMenuPatchCallback = (children, props: Record<"favoriteableId" | "itemHref" | "itemSrc" | "favoriteableType", string> & { message: Message; mediaItem?: any; }) => {
+    const { favoriteableId, mediaItem, itemHref, itemSrc, favoriteableType, message } = props ?? {};
 
     const menuItem = (() => {
         switch (favoriteableType) {
@@ -399,7 +398,100 @@ const messageContextMenuPatch: NavContextMenuPatchCallback = (children, props: R
 
     if (menuItem)
         findGroupChildrenByChildId("copy-link", children)?.push(menuItem);
+
+    if (mediaItem?.contentType?.startsWith("image/")) {
+        findGroupChildrenByChildId("copy-link", children)?.push(
+            <Menu.MenuItem
+                key="vc-em-upload-as-emoji"
+                id="vc-em-upload-as-emoji"
+                label="Upload as Emoji"
+                action={async () => {
+                    const blob = await fetch(mediaItem.url).then(res => res.blob());
+
+                    const dataUrl = await new Promise<string>((resolve, reject) => {
+                        const reader = new FileReader();
+                        reader.onloadend = () => resolve(reader.result as string);
+                        reader.onerror = reject;
+                        reader.readAsDataURL(blob);
+                    });
+
+                    const image = new Image();
+                    image.src = dataUrl;
+                    await image.decode();
+
+                    const filename = new URL(mediaItem.url).pathname.split("/").pop() ?? "emoji.png";
+                    const file = new File([blob], filename, { type: "image/png" });
+
+                    await openEmojiStudioModal({
+                        analyticsLocation: {
+                            page: "Guild Settings"
+                        },
+                        guildId: SelectedGuildStore.getGuildId(),
+                        userImage: {
+                            image,
+                            file,
+                            data: dataUrl
+                        }
+                    });
+                }}
+            />
+        );
+    }
 };
+
+function buildDeleteExpressionItem(id: string, type: string) {
+    let guild: Guild | undefined;
+    let name: string;
+
+    if (type === "emoji") {
+        const emoji = EmojiStore.getCustomEmojiById(id);
+        if (emoji) {
+            guild = GuildStore.getGuild(emoji.guildId);
+            name = emoji.name;
+        }
+    } else if (type === "sticker") {
+        const sticker = StickersStore.getStickerById(id);
+        if (sticker?.type === StickerType.GUILD) {
+            guild = GuildStore.getGuild(sticker.guild_id);
+            name = sticker.name;
+        }
+    }
+
+    if (!guild || !PermissionStore.can(PermissionsBits.MANAGE_GUILD_EXPRESSIONS, guild)) return null;
+
+    const expressionName = type === "emoji" ? "Emoji" : "Sticker";
+
+    return (
+        <Menu.MenuItem
+            key="vc-em-delete"
+            id="vc-em-delete"
+            label={`Delete ${expressionName}`}
+            leadingAccessory={{ type: "icon", icon: DeleteIcon }}
+            color="danger"
+            action={() => {
+                openModal(modalProps =>
+                    <ConfirmModal
+                        {...modalProps}
+                        title={`Delete ${name}`}
+                        subtitle={`Are you sure you want to delete this ${type}?`}
+                        confirmText="Delete"
+                        onConfirm={async () => {
+                            const res = type === "emoji"
+                                ? RestAPI.del(Constants.Endpoints.GUILD_EMOJI(guild.id, id))
+                                : RestAPI.del(Constants.Endpoints.GUILD_STICKER(guild.id, id));
+
+                            await res.
+                                then(
+                                    () => showToast({ text: `${expressionName} deleted successfully.`, variant: "success" }),
+                                    () => showToast({ text: `Failed to delete ${expressionName}`, variant: "critical" })
+                                );
+                        }}
+                    />
+                );
+            }}
+        />
+    );
+}
 
 const expressionPickerPatch: NavContextMenuPatchCallback = (children, props: { target: HTMLElement; }) => {
     const { id, name, type } = props?.target?.dataset ?? {};
@@ -408,13 +500,19 @@ const expressionPickerPatch: NavContextMenuPatchCallback = (children, props: { t
     if (type === "emoji" && name) {
         const firstChild = props.target.firstChild as HTMLImageElement;
 
-        children.push(buildMenuItem("Emoji", () => ({
-            id,
-            name,
-            isAnimated: firstChild && isGifUrl(firstChild.src)
-        })));
+        children.push(
+            buildMenuItem("Emoji", () => ({
+                id,
+                name,
+                isAnimated: firstChild && isGifUrl(firstChild.src)
+            })),
+            buildDeleteExpressionItem(id, type)
+        );
     } else if (type === "sticker" && !props.target.className?.includes("lottieCanvas")) {
-        children.push(buildMenuItem("Sticker", () => fetchSticker(id)));
+        children.push(
+            buildMenuItem("Sticker", () => fetchSticker(id)),
+            buildDeleteExpressionItem(id, type)
+        );
     }
 };
 
