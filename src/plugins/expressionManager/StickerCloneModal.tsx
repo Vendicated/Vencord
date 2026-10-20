@@ -7,14 +7,14 @@
 import { CheckedTextInput } from "@components/CheckedTextInput";
 import { Flex } from "@components/Flex";
 import { HeadingTertiary } from "@components/Heading";
-import { Margins } from "@components/index";
+import { BaseText, Margins } from "@components/index";
 import { Span } from "@components/Span";
 import { TooltipContainer } from "@components/TooltipContainer";
 import { classNameFactory } from "@utils/css";
 import { getGuildAcronym } from "@utils/discord";
 import { Logger } from "@utils/Logger";
 import { Guild, Sticker } from "@vencord/discord-types";
-import { Clickable, Constants, FluxDispatcher, GuildStore, IconUtils, PermissionsBits, PermissionStore, React, RestAPI, showToast, StickersStore, useMemo, useReducer, UserStore, useState } from "@webpack/common";
+import { Clickable, Constants, FluxDispatcher, GuildStore, IconUtils, Modal, openModalLazy, PermissionsBits, PermissionStore, React, RestAPI, showToast, StickersStore, useMemo, useReducer, UserStore, useState } from "@webpack/common";
 
 import { formatStickerURL } from ".";
 
@@ -168,4 +168,30 @@ export function CloneModal({ sticker }: { sticker: Sticker; }) {
             </Flex>
         </>
     );
+}
+
+export function openCloneStickerModal(fetchSticker: () => Promise<Sticker>) {
+    openModalLazy(async () => {
+        const sticker = await fetchSticker();
+        return modalProps => (
+            <Modal
+                {...modalProps}
+                title={
+                    <Flex gap="0.5em" alignItems="center">
+                        <img
+                            role="presentation"
+                            aria-hidden
+                            src={formatStickerURL(sticker, 128)}
+                            alt=""
+                            height={24}
+                            width={24}
+                        />
+                        <BaseText tag="h3" size="md" weight="medium">Clone {sticker.name}</BaseText>
+                    </Flex>
+                }
+            >
+                <CloneModal sticker={sticker} />
+            </Modal>
+        );
+    });
 }

@@ -19,29 +19,31 @@
 import "./styles.css";
 
 import { findGroupChildrenByChildId, NavContextMenuPatchCallback } from "@api/ContextMenu";
-import { migratePluginSettings } from "@api/Settings";
-import { BaseText } from "@components/BaseText";
-import { Flex } from "@components/Flex";
-import { DeleteIcon, PencilIcon, PlusIcon } from "@components/Icons";
+import { definePluginSettings, migratePluginSettings } from "@api/Settings";
+import { DeleteIcon, LinkIcon, PencilIcon, PlusIcon, TopRightArrow } from "@components/Icons";
 import { Devs } from "@utils/constants";
-import definePlugin from "@utils/types";
+import { copyWithToast } from "@utils/discord";
+import { removeFromArray } from "@utils/misc";
+import definePlugin, { OptionType } from "@utils/types";
 import { CustomEmoji, Guild, GuildSticker, Message, Sticker } from "@vencord/discord-types";
 import { StickerFormatType, StickerType } from "@vencord/discord-types/enums";
 import { DefaultExtractAndLoadChunksRegex, extractAndLoadChunksLazy, findByCodeLazy, findComponentByCodeLazy } from "@webpack";
-import { ConfirmModal, Constants, EmojiStore, FluxDispatcher, GuildStore, Menu, Modal, openModal, openModalLazy, PermissionsBits, PermissionStore, RestAPI, SelectedGuildStore, showToast, StickersStore } from "@webpack/common";
+import { ConfirmModal, Constants, EmojiStore, FluxDispatcher, GuildStore, Menu, openModal, openModalLazy, PermissionsBits, PermissionStore, RestAPI, SelectedGuildStore, showToast, StickersStore } from "@webpack/common";
 
-import { CloneModal } from "./StickerCloneModal";
+import { openCloneStickerModal } from "./StickerCloneModal";
+
 
 const openEmojiStudioModal = findByCodeLazy("Emoji Studio");
-
 const loadCreateStickerModal = extractAndLoadChunksLazy(["CREATE_STICKER_MODAL", "#{intl::STICKER_PICKER_CREATE_STICKER}"], new RegExp(`\\.CREATE_STICKER_MODAL.{0,100}?${DefaultExtractAndLoadChunksRegex.source}`));
 const CreateStickerModal = findComponentByCodeLazy("#{intl::GUILD_STICKER_INVALID_STICKER}");
 
-export interface Emoji {
+interface Emoji {
     id: string;
     name: string;
     isAnimated: boolean;
 }
+type PartialSticker = Pick<Sticker, "id" | "format_type">;
+
 const StickerExtMap = {
     [StickerFormatType.PNG]: "png",
     [StickerFormatType.APNG]: "png",
@@ -49,8 +51,16 @@ const StickerExtMap = {
     [StickerFormatType.GIF]: "gif"
 } as const;
 
+const settings = definePluginSettings({
+    stickerCopyAndSave: {
+        type: OptionType.BOOLEAN,
+        description: 'Add "Copy Sticker Link" and "Open Sticker Link" options to the sticker context menu',
+        default: true
+    }
+});
+
 const formatEmojiURL = (emoji: Emoji, size: number) => `${location.protocol}//${window.GLOBAL_ENV.CDN_HOST}/emojis/${emoji.id}.webp?size=${size}&lossless=true&animated=true`;
-export const formatStickerURL = (sticker: Sticker, size: number) => `${window.GLOBAL_ENV.MEDIA_PROXY_ENDPOINT}/stickers/${sticker.id}.${StickerExtMap[sticker.format_type]}?size=${size}&lossless=true&animated=true`;
+export const formatStickerURL = (sticker: PartialSticker, size: number) => `${window.GLOBAL_ENV.MEDIA_PROXY_ENDPOINT}/stickers/${sticker.id}.${StickerExtMap[sticker.format_type]}?size=${size}&lossless=true&animated=true`;
 
 async function fetchSticker(id: string) {
     const cached = StickersStore.getStickerById(id);
@@ -81,40 +91,11 @@ function buildCloneItem(type: string, action: () => void) {
 }
 
 function buildCloneEmojiItem(emoji: Emoji) {
-    return buildCloneItem(
-        "Emoji",
-        () => openEmojiUploadModal(formatEmojiURL(emoji, 128))
-    );
+    return buildCloneItem("Emoji", () => openEmojiUploadModal(formatEmojiURL(emoji, 128)));
 }
 
 function buildCloneStickerItem(fetchSticker: () => Promise<Sticker>) {
-    return buildCloneItem(
-        "Sticker",
-        () =>
-            openModalLazy(async () => {
-                const sticker = await fetchSticker();
-                return modalProps => (
-                    <Modal
-                        {...modalProps}
-                        title={
-                            <Flex gap="0.5em" alignItems="center">
-                                <img
-                                    role="presentation"
-                                    aria-hidden
-                                    src={formatStickerURL(sticker, 128)}
-                                    alt=""
-                                    height={24}
-                                    width={24}
-                                />
-                                <BaseText tag="h3" size="md" weight="medium">Clone {sticker.name}</BaseText>
-                            </Flex>
-                        }
-                    >
-                        <CloneModal sticker={sticker} />
-                    </Modal>
-                );
-            })
-    );
+    return buildCloneItem("Sticker", () => openCloneStickerModal(fetchSticker));
 }
 
 async function openEmojiUploadModal(url: string, filename?: string) {
@@ -228,30 +209,28 @@ function buildManageExpressionItems(id: string, type: string) {
     );
 }
 
-const patchExpressionPickerMenu: NavContextMenuPatchCallback = (children, props: { target: HTMLElement; }) => {
-    const { id, name, type } = props?.target?.dataset ?? {};
-    if (!id) return;
+function buildStickerLinkItems(sticker: PartialSticker) {
+    return (
+        <Menu.MenuGroup key="vc-em-sticker-links">
+            <Menu.MenuItem
+                id="vc-copy-sticker-link"
+                key="vc-copy-sticker-link"
+                label="Copy Sticker Link"
+                leadingAccessory={{ type: "icon", icon: LinkIcon }}
+                action={() => copyWithToast(formatStickerURL(sticker, 512), "Link copied!")}
+            />
 
-    if (type === "emoji" && name) {
-        const firstChild = props.target.firstChild as HTMLImageElement;
-
-        children.push(
-            <Menu.MenuGroup key="vc-em-group">
-                {buildCloneEmojiItem({ id, name, isAnimated: firstChild && isGifUrl(firstChild.src) })}
-                {buildManageExpressionItems(id, type)}
-            </Menu.MenuGroup>
-        );
-
-        return;
-    }
-
-    if (type === "sticker" && !props.target.className?.includes("lottieCanvas")) {
-        children.push(
-            buildCloneStickerItem(() => fetchSticker(id)),
-            buildManageExpressionItems(id, type)
-        );
-    }
-};
+            <Menu.MenuItem
+                id="vc-open-sticker-link"
+                key="vc-open-sticker-link"
+                label="Open Sticker Link"
+                leadingAccessory={{ type: "icon", icon: LinkIcon }}
+                trailingIndicator={{ type: "icon", icon: TopRightArrow }}
+                action={() => VencordNative.native.openExternal(formatStickerURL(sticker, 512))}
+            />
+        </Menu.MenuGroup>
+    );
+}
 
 function isGifUrl(url: string) {
     const { pathname, searchParams } = new URL(url);
@@ -273,6 +252,40 @@ function resolveEmojiName(favoriteableId: string, message: Message) {
         ?? "FakeNitroEmoji";
 }
 
+const patchExpressionPickerMenu: NavContextMenuPatchCallback = (children, props: { target: HTMLElement; }) => {
+    const { id, name, type, formatType } = props?.target?.dataset ?? {};
+    if (!id) return;
+
+    if (type === "emoji" && name) {
+        const firstChild = props.target.firstChild as HTMLImageElement;
+
+        children.push(
+            <Menu.MenuGroup key="vc-em-group">
+                {buildCloneEmojiItem({ id, name, isAnimated: firstChild && isGifUrl(firstChild.src) })}
+                {buildManageExpressionItems(id, type)}
+            </Menu.MenuGroup>
+        );
+
+        return;
+    }
+
+    if (type === "sticker" && !props.target.className?.includes("lottieCanvas")) {
+        if (settings.store.stickerCopyAndSave) {
+            const oldCopyLinkParent = findGroupChildrenByChildId("copy-image-link", children);
+            if (oldCopyLinkParent) removeFromArray(oldCopyLinkParent, c => c?.props?.id === "copy-image-link");
+
+            children.push(buildStickerLinkItems({ id, format_type: formatType as any }));
+        }
+
+        children.push(
+            <Menu.MenuGroup key="vc-em-manage">
+                {buildCloneStickerItem(() => fetchSticker(id))}
+                {buildManageExpressionItems(id, type)}
+            </Menu.MenuGroup>
+        );
+    }
+};
+
 const patchMessageContextMenu: NavContextMenuPatchCallback = (children, props: Record<"favoriteableId" | "itemHref" | "itemSrc" | "favoriteableType", string> & { message: Message; mediaItem?: any; }) => {
     const { favoriteableId, mediaItem, itemHref, itemSrc, favoriteableType, message } = props ?? {};
 
@@ -292,11 +305,15 @@ const patchMessageContextMenu: NavContextMenuPatchCallback = (children, props: R
 
         case "sticker":
             const sticker = message.stickerItems.find(s => s.id === favoriteableId);
-            if (sticker?.format_type === StickerFormatType.LOTTIE) return;
+            if (!sticker || sticker.format_type === StickerFormatType.LOTTIE) return;
 
-            findGroupChildrenByChildId("copy-link", children)?.push(
+            findGroupChildrenByChildId("favorite", children)?.unshift(
                 buildCloneStickerItem(() => fetchSticker(favoriteableId))
             );
+
+            if (settings.store.stickerCopyAndSave)
+                children.splice(-1, 0, buildStickerLinkItems(sticker));
+
             break;
     }
 
@@ -316,10 +333,13 @@ const patchMessageContextMenu: NavContextMenuPatchCallback = (children, props: R
 migratePluginSettings("ExpressionManager", "ExpressionCloner", "EmoteCloner");
 export default definePlugin({
     name: "ExpressionManager",
-    description: "Clone Emotes & Stickers or quickly edit or delete them via the context menu",
+    description: "Clone Emotes & Stickers. Adds context menu options to quickly clone, edit, or delete them. Also adds Copy & Save options for stickers",
     tags: ["Emotes", "Servers"],
     searchTerms: ["StickerCloner", "ExpressionCloner", "EmoteCloner", "EmojiCloner"],
     authors: [Devs.Ven, Devs.Nuckyz, Devs.scattagain],
+
+    settings,
+
     contextMenus: {
         "message": patchMessageContextMenu,
         "expression-picker": patchExpressionPickerMenu
