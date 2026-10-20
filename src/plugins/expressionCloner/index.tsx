@@ -301,11 +301,12 @@ const patchMessageContextMenu: NavContextMenuPatchCallback = (children, props: R
     }
 
     if (mediaItem?.contentType?.startsWith("image/")) {
-        findGroupChildrenByChildId("copy-link", children)?.push(
+        findGroupChildrenByChildId("save-image", children)?.push(
             <Menu.MenuItem
                 key="vc-em-upload-as-emoji"
                 id="vc-em-upload-as-emoji"
                 label="Upload as Emoji"
+                leadingAccessory={{ type: "icon", icon: PlusIcon }}
                 action={() => openEmojiUploadModal(mediaItem.url)}
             />
         );
