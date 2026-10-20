@@ -20,6 +20,10 @@ import "./styles.css";
 
 import { ChatBarButton, ChatBarButtonFactory } from "@api/ChatButtons";
 import { definePluginSettings } from "@api/Settings";
+import { Button } from "@components/Button";
+import { Grid } from "@components/Grid";
+import { Heading } from "@components/Heading";
+import { Paragraph } from "@components/Paragraph";
 import { copyToClipboard } from "@utils/clipboard";
 import { Devs } from "@utils/constants";
 import { classNameFactory } from "@utils/css";
@@ -95,21 +99,22 @@ function PickerModal(props: RenderModalProps) {
                 }}
             />
 
-            <Vencord.Components.Heading>Format</Vencord.Components.Heading>
-            <Vencord.Components.Grid columns={3} className={cl("format-grid")}>
+            <Heading>Format</Heading>
+            <Grid columns={3} className={cl("format-grid")}>
                 {Formats.map(m =>
-                    <Vencord.Components.Button
+                    <Button
                         variant={format === m ? "primary" : "secondary"}
                         onClick={() => setFormat(m)}
+                        key={m}
                         className={cl("format-button")}>
                         {Parser.parse(formatTimestamp(time, m))}
-                    </Vencord.Components.Button>
+                    </Button>
                 )}
-            </Vencord.Components.Grid>
+            </Grid>
 
-            <Vencord.Components.Heading>
+            <Heading>
                 Raw Markdown {Parser.parse(`\`${formatted}\``)}
-            </Vencord.Components.Heading>
+            </Heading>
         </Modal>
     );
 }
@@ -177,14 +182,14 @@ export default definePlugin({
 
         return (
             <>
-                <Vencord.Components.Paragraph>
+                <Paragraph>
                     To quickly send time only timestamps, include timestamps formatted as `HH:MM` (including the backticks!) in your message
-                </Vencord.Components.Paragraph>
-                <Vencord.Components.Paragraph>
+                </Paragraph>
+                <Paragraph>
                     See below for examples.
                     If you need anything more specific, use the Date button in the chat bar!
-                </Vencord.Components.Paragraph>
-                <Vencord.Components.Paragraph>
+                </Paragraph>
+                <Paragraph>
                     Examples:
                     <ul>
                         {samples.map(s => (
@@ -193,7 +198,7 @@ export default definePlugin({
                             </li>
                         ))}
                     </ul>
-                </Vencord.Components.Paragraph>
+                </Paragraph>
             </>
         );
     },
