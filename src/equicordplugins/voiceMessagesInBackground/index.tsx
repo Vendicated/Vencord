@@ -30,7 +30,7 @@ export default definePlugin({
     dependencies: ["AudioPlayerAPI", "HeaderBarAPI"],
 
     patches: [{
-        find: "#{intl::PAUSE_VOICE_MESSAGE_A11Y_LABEL}",
+        find: "#{intl::VOICE_MESSAGES_A11Y_LABEL}",
         replacement: {
             match: /(?<=\i>0\),\[(\i),(\i)\].{0,50}useState\(!1\).{0,10})(\[\i,\i\]=)(\i\.useState\(!1\))(?=.{0,100}\("none"\))/,
             replace: "$3$self.useBackgroundPlayback($4,$1,arguments[0]?.src,arguments[0]?.playbackCacheKey,$2)"
