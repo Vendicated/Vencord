@@ -6,11 +6,13 @@
 
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
+import { getIntlMessage } from "@utils/discord";
 import definePlugin from "@utils/types";
 import { findComponentByCodeLazy } from "@webpack";
 import { MessageActions, SelectedChannelStore } from "@webpack/common";
 
 const HeaderBarIcon = findComponentByCodeLazy(".HEADER_BAR_BADGE_BOTTOM,", 'position:"bottom"');
+const UpArrowIcon = findComponentByCodeLazy("L11 6.42V20a1 1 0 1 0 2 0V6.41");
 
 function jumpToTop(channelId: string) {
     MessageActions.jumpToMessage({
@@ -19,13 +21,6 @@ function jumpToTop(channelId: string) {
         flash: false,
         jumpType: "INSTANT"
     });
-}
-
-// arrow-up-to-line (in the code as "UpArrowIcon") from Lucide (https://lucide.dev), ISC license
-function UpArrowIcon() {
-    return (
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 3h14"/><path d="m18 13-6-6-6 6"/><path d="M12 7v14"/></svg>
-    );
 }
 
 export default definePlugin({
@@ -42,16 +37,12 @@ export default definePlugin({
         }
     }],
 
-    jumpButton() {
-        return (
-            <ErrorBoundary key="vc-jump-to-top" noop>
-                <HeaderBarIcon
-                    tooltip="Jump to top"
-                    icon={UpArrowIcon}
-                    onClick={() => jumpToTop(SelectedChannelStore.getChannelId())}
-                />
-            </ErrorBoundary>
-        );
-    }
+    jumpButton: ErrorBoundary.wrap(() => (
+        <HeaderBarIcon
+            tooltip={getIntlMessage("JUMP_TO_TOP")}
+            icon={UpArrowIcon}
+            onClick={() => jumpToTop(SelectedChannelStore.getChannelId())}
+        />
+    ), { noop: true })
 
 });
