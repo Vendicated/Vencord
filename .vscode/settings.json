@@ -4,14 +4,15 @@
         "source.fixAll.eslint": "explicit"
     },
     "[typescript]": {
-        "editor.defaultFormatter": "TypeScriptTeam.native-preview"
+        "editor.defaultFormatter": "vscode.typescript-language-features"
     },
     "[typescriptreact]": {
-        "editor.defaultFormatter": "TypeScriptTeam.native-preview"
+        "editor.defaultFormatter": "vscode.typescript-language-features"
     },
-    "js/ts.format.semicolons": "insert",
-    "js/ts.preferences.quoteStyle": "double",
-    "js/ts.experimental.useTsgo": true,
+    "javascript.format.semicolons": "insert",
+    "typescript.format.semicolons": "insert",
+    "typescript.preferences.quoteStyle": "double",
+    "javascript.preferences.quoteStyle": "double",
     "gitlens.remotes": [
         {
             "domain": "codeberg.org",
