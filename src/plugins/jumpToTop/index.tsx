@@ -5,6 +5,7 @@
  */
 
 import ErrorBoundary from "@components/ErrorBoundary";
+import { UpArrowIcon } from "@components/Icons";
 import { Devs } from "@utils/constants";
 import { getIntlMessage } from "@utils/discord";
 import definePlugin from "@utils/types";
@@ -12,7 +13,6 @@ import { findComponentByCodeLazy } from "@webpack";
 import { MessageActions, SelectedChannelStore } from "@webpack/common";
 
 const HeaderBarIcon = findComponentByCodeLazy(".HEADER_BAR_BADGE_BOTTOM,", 'position:"bottom"');
-const UpArrowIcon = findComponentByCodeLazy("L11 6.42V20a1 1 0 1 0 2 0V6.41");
 
 function jumpToTop(channelId: string) {
     MessageActions.jumpToMessage({
@@ -33,11 +33,11 @@ export default definePlugin({
         find: "Missing channel in Channel.renderHeaderToolbar",
         replacement: {
             match: /(?<=renderHeaderToolbar"\);let (\i)=\[\];)/,
-            replace: "$1.push($self.jumpButton());"
+            replace: "$1.push($self.renderJumpButton());"
         }
     }],
 
-    jumpButton: ErrorBoundary.wrap(() => (
+    renderJumpButton: ErrorBoundary.wrap(() => (
         <HeaderBarIcon
             tooltip={getIntlMessage("JUMP_TO_TOP")}
             icon={UpArrowIcon}
