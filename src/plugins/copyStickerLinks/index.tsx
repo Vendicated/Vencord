@@ -19,7 +19,7 @@
 import { NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { isPluginEnabled } from "@api/PluginManager";
 import { LinkIcon, TopRightArrow } from "@components/Icons";
-import ExpressionClonerPlugin from "@plugins/expressionCloner";
+import ExpressionManagerPlugin from "@plugins/expressionManager";
 import { Devs } from "@utils/constants";
 import { copyWithToast } from "@utils/discord";
 import definePlugin from "@utils/types";
@@ -82,7 +82,7 @@ const expressionPickerPatch: NavContextMenuPatchCallback = (children, props: { t
 
     const sticker = StickersStore.getStickerById(id);
     if (sticker) {
-        children.push(buildMenuItem(sticker, isPluginEnabled(ExpressionClonerPlugin.name)));
+        children.push(buildMenuItem(sticker, isPluginEnabled(ExpressionManagerPlugin.name)));
     }
 };
 
