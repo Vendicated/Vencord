@@ -20,21 +20,25 @@ import { resolveLang } from "@plugins/shikiCodeblocks.desktop/api/languages";
 import { HighlighterProps } from "@plugins/shikiCodeblocks.desktop/components/Highlighter";
 import { HljsSetting } from "@plugins/shikiCodeblocks.desktop/types";
 import { classNameFactory } from "@utils/css";
-import { DefaultExtractAndLoadChunksRegex, extractAndLoadChunksLazy, findByPropsLazy } from "@webpack";
+import { filters, mapMangledModuleLazy } from "@webpack";
 
 export const cl = classNameFactory("vc-shiki-");
 
-export const hljs: typeof import("highlight.js").default = findByPropsLazy("highlight", "registerLanguage");
-export const requireHljs = extractAndLoadChunksLazy(["codeBlock:{react("], new RegExp(`"hljs".+?${DefaultExtractAndLoadChunksRegex.source}`));
+export const arboriumLanguages = mapMangledModuleLazy('jldoctest:"julia"', {
+    resolveLang: filters.byCode(/!\i.test\(/, ".toLowerCase();")
+});
+export const arboriumGrammars = mapMangledModuleLazy(".createSession();try{", {
+    getGrammar: filters.byCode(/return null==\i&&/, /\i\.set\(\i/)
+});
 
-export const shouldUseHljs = ({
+export const shouldUseArborium = ({
     lang,
     tryHljs,
 }: {
     lang: HighlighterProps["lang"],
     tryHljs: HljsSetting,
 }) => {
-    const hljsLang = lang ? hljs?.getLanguage?.(lang) : null;
+    const arboriumLang = lang ? arboriumLanguages.resolveLang(lang) : null;
     const shikiLang = lang ? resolveLang(lang) : null;
     const langName = shikiLang?.name;
 
@@ -42,9 +46,9 @@ export const shouldUseHljs = ({
         case HljsSetting.Always:
             return true;
         case HljsSetting.Primary:
-            return !!hljsLang || lang === "";
+            return !!arboriumLang || lang === "";
         case HljsSetting.Secondary:
-            return !langName && !!hljsLang;
+            return !langName && !!arboriumLang;
         case HljsSetting.Never:
             return false;
         default: return false;
