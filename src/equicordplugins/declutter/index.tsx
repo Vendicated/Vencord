@@ -224,7 +224,7 @@ export default definePlugin({
                     predicate: () => settings.store.removeNameplate,
                 },
                 {
-                    match: /let\{ref:\i,speaking:\i,voiceDb:/,
+                    match: /let\{ref:\i,speaking:\i,playingSoundboard:\i,voiceDb:/,
                     replace: "arguments[0].nameplate=null;$&",
                     predicate: () => settings.store.removeNameplate,
                 },
