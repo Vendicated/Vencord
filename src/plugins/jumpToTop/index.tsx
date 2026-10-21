@@ -34,11 +34,11 @@ export default definePlugin({
         find: "Missing channel in Channel.renderHeaderToolbar",
         replacement: {
             match: /(?<=renderHeaderToolbar"\);let (\i)=\[\];)/,
-            replace: "$1.push($self.JumpButton(this.props));"
+            replace: "$1.push($self.renderJumpButton(this.props));"
         }
     }],
 
-    JumpButton: ErrorBoundary.wrap((props: { channel: Channel }) => {
+    renderJumpButton: ErrorBoundary.wrap((props: { channel: Channel }) => {
         const channelId = props.channel.id;
 
         if (props.channel.isForumPost()) {
