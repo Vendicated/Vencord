@@ -39,7 +39,7 @@ const CONTRIBUTOR_BADGE = "https://cdn.discordapp.com/emojis/1092089799109775453
 const ContributorBadge: ProfileBadge = {
     id: "vencord_contributor_badge",
     description: "Vencord Contributor",
-    infoLabel: "Vencord Contributor",
+    infoLabel: "Vencord",
     rarity: BadgeRarity.MYTHIC,
     iconSrc: CONTRIBUTOR_BADGE,
     position: BadgePosition.START,
@@ -150,6 +150,18 @@ export default definePlugin({
                 {
                     match: /href:(\i)\.link/,
                     replace: "...$self.getBadgeMouseEventHandlers($1),$&"
+                },
+                {
+                    match: /fallbackTitle:(\i)\.description,/,
+                    replace: "$&fallbackBody:$1.infoLabel,"
+                },
+                {
+                    match: /fallbackTitle:(\i),/,
+                    replace: "$&fallbackBody:vcFallbackBody,"
+                },
+                {
+                    match: /(\i)\?\.info_label\?\?/,
+                    replace: "$&vcFallbackBody??"
                 }
             ]
         },

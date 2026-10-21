@@ -31,6 +31,7 @@ export enum BadgeRarity {
     EPIC = 3,
     MYTHIC = 5
 }
+
 export interface ProfileBadge {
     /**
      * Badge id, unused by vencord, required by discord
