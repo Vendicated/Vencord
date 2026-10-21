@@ -20,11 +20,18 @@ import { resolveLang } from "@plugins/shikiCodeblocks.desktop/api/languages";
 import { HighlighterProps } from "@plugins/shikiCodeblocks.desktop/components/Highlighter";
 import { HljsSetting } from "@plugins/shikiCodeblocks.desktop/types";
 import { classNameFactory } from "@utils/css";
-import { DefaultExtractAndLoadChunksRegex, extractAndLoadChunksLazy, findByPropsLazy } from "@webpack";
+import { DefaultExtractAndLoadChunksRegex, extractAndLoadChunksLazy, filters, find } from "@webpack";
 
 export const cl = classNameFactory("vc-shiki-");
 
-export const hljs: typeof import("highlight.js").default = findByPropsLazy("highlight", "registerLanguage");
+let hljsModule: typeof import("highlight.js").default | null | undefined;
+export function getHljs() {
+    if (hljsModule === undefined)
+        hljsModule = find(filters.byProps("highlight", "registerLanguage"), { isIndirect: true }) ?? null;
+
+    return hljsModule;
+}
+
 export const requireHljs = extractAndLoadChunksLazy(["codeBlock:{react("], new RegExp(`"hljs".+?${DefaultExtractAndLoadChunksRegex.source}`));
 
 export const shouldUseHljs = ({
@@ -34,15 +41,16 @@ export const shouldUseHljs = ({
     lang: HighlighterProps["lang"],
     tryHljs: HljsSetting,
 }) => {
-    const hljsLang = lang ? hljs?.getLanguage?.(lang) : null;
+    const hljs = getHljs();
+    const hljsLang = hljs && lang ? hljs.getLanguage?.(lang) : null;
     const shikiLang = lang ? resolveLang(lang) : null;
     const langName = shikiLang?.name;
 
     switch (tryHljs) {
         case HljsSetting.Always:
-            return true;
+            return !!hljs;
         case HljsSetting.Primary:
-            return !!hljsLang || lang === "";
+            return !!hljsLang || (!!hljs && lang === "");
         case HljsSetting.Secondary:
             return !langName && !!hljsLang;
         case HljsSetting.Never:

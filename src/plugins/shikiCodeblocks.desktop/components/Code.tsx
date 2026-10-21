@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { cl, hljs } from "@plugins/shikiCodeblocks.desktop/utils/misc";
+import { cl, getHljs } from "@plugins/shikiCodeblocks.desktop/utils/misc";
 import type { IThemedToken } from "@vap/shiki";
 import { JSX } from "react";
 
@@ -39,7 +39,9 @@ export const Code = ({
 }: CodeProps) => {
     let lines!: JSX.Element[];
 
-    if (useHljs) {
+    const hljs = useHljs ? getHljs() : null;
+
+    if (hljs) {
         try {
             const { value: hljsHtml } = hljs.highlight(content, { language: lang!, ignoreIllegals: true });
             lines = hljsHtml
