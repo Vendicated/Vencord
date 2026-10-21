@@ -251,6 +251,7 @@ const patchChannelContextMenu: NavContextMenuPatchCallback = (children, { channe
             id="vc-ml-clear-channel"
             label="Clear Message Log"
             color="danger"
+            leadingAccessory={{ type: "icon", icon: ClearHistoryIcon }}
             action={() => {
                 messages.forEach(msg => {
                     clearMessageHistory(msg);
@@ -299,7 +300,7 @@ const patchGuildContextMenu: NavContextMenuPatchCallback = (children, { guild }:
                     <ConfirmModal
                         {...props}
                         title="Clear Server Message Log"
-                        subtitle={`Clear ${messages.length} logged messages in this server?`}
+                        subtitle={`Clear ${messages.length} logged message${messages.length === 1 ? "" : "s"} in this server?`}
                         confirmText="Clear"
                         onConfirm={() => messages.forEach(clearMessageHistory)}
                     />
