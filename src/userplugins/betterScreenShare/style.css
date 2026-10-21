@@ -2,7 +2,6 @@
  * BetterScreenShare Styles
  */
 
-/* Crisp scaling for shared application windows, code, and game streams */
 [class*="video_"] video,
 [class*="pictureInPictureVideo_"] video {
     image-rendering: -webkit-optimize-contrast;
