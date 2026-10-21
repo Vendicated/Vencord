@@ -38,10 +38,8 @@ export default definePlugin({
         }
     }],
 
-    renderJumpButton: ErrorBoundary.wrap((props: { channel: Channel }) => {
-        const channelId = props.channel.id;
-
-        if (props.channel.isForumPost()) {
+    renderJumpButton: ErrorBoundary.wrap(({ channel }: { channel: Channel }) => {
+        if (channel.isForumPost()) {
             return null;
         }
 
@@ -49,7 +47,7 @@ export default definePlugin({
             <ChannelToolbarIcon
                 tooltip={getIntlMessage("JUMP_TO_TOP")}
                 icon={UpArrowIcon}
-                onClick={() => jumpToTop(channelId)}
+                onClick={() => jumpToTop(channel.id)}
             />
         );
     }, { noop: true })
