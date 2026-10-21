@@ -33,7 +33,7 @@ import Plugins, { PluginMeta } from "~plugins";
 
 import { EquicordDonorModal, EquicordTranslatorModal, VencordDonorModal } from "./modals";
 
-const CONTRIBUTOR_BADGE = "https://cdn.discordapp.com/emojis/1092089799109775453.png?size=64";
+const CONTRIBUTOR_BADGE = "https://cdn.discordapp.com/emojis/1562267648857997356.webp?size=240";
 const EQUICORD_CONTRIBUTOR_BADGE = "https://equicord.org/assets/favicon.png";
 const USERPLUGIN_CONTRIBUTOR_BADGE = "https://equicord.org/assets/icons/misc/userplugin.png";
 
