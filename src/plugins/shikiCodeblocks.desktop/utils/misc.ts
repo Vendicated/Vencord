@@ -18,7 +18,7 @@
 
 import { resolveLang } from "@plugins/shikiCodeblocks.desktop/api/languages";
 import { HighlighterProps } from "@plugins/shikiCodeblocks.desktop/components/Highlighter";
-import { HljsSetting } from "@plugins/shikiCodeblocks.desktop/types";
+import { HighlighterSetting } from "@plugins/shikiCodeblocks.desktop/types";
 import { classNameFactory } from "@utils/css";
 import { filters, mapMangledModuleLazy } from "@webpack";
 
@@ -33,23 +33,23 @@ export const arboriumGrammars = mapMangledModuleLazy(".createSession();try{", {
 
 export const shouldUseArborium = ({
     lang,
-    tryHljs,
+    tryDiscordHighlighter,
 }: {
     lang: HighlighterProps["lang"],
-    tryHljs: HljsSetting,
+    tryDiscordHighlighter: HighlighterSetting,
 }) => {
     const arboriumLang = lang ? arboriumLanguages.resolveLang(lang) : null;
     const shikiLang = lang ? resolveLang(lang) : null;
     const langName = shikiLang?.name;
 
-    switch (tryHljs) {
-        case HljsSetting.Always:
+    switch (tryDiscordHighlighter) {
+        case HighlighterSetting.Always:
             return true;
-        case HljsSetting.Primary:
+        case HighlighterSetting.Primary:
             return !!arboriumLang || lang === "";
-        case HljsSetting.Secondary:
+        case HighlighterSetting.Secondary:
             return !langName && !!arboriumLang;
-        case HljsSetting.Never:
+        case HighlighterSetting.Never:
             return false;
         default: return false;
     }

@@ -59,15 +59,15 @@ export const Highlighter = ({
     isPreview,
 }: HighlighterProps) => {
     const {
-        tryHljs,
+        tryDiscordHighlighter,
         useDevIcon,
         bgOpacity,
-    } = useShikiSettings(["tryHljs", "useDevIcon", "bgOpacity"]);
+    } = useShikiSettings(["tryDiscordHighlighter", "useDevIcon", "bgOpacity"]);
     const { id: currentThemeId, theme: currentTheme } = useTheme();
 
     const shikiLang = lang ? resolveLang(lang) : null;
     const arboriumLang = lang ? arboriumLanguages.resolveLang(lang) : null;
-    const useArborium = shouldUseArborium({ lang, tryHljs });
+    const useArborium = shouldUseArborium({ lang, tryDiscordHighlighter });
 
     const [rootRef, isIntersecting] = useIntersection(true);
 
