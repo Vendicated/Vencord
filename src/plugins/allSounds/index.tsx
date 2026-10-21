@@ -134,7 +134,7 @@ let defaultSounds: SoundMap | null = null;
 
 export default definePlugin({
     name: "AllSounds",
-    description: "Allowes you to customize every single Discord sound with all the already existing sounds on Discord (Even the hidden once you might never heard)!",
+    description: "Allowes you to customize every single Discord sound with all the already existing sounds on Discord (Even the hidden ones you might never heard)!",
     authors: [Devs.lil_aleks],
     settings,
 
