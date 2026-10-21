@@ -9,8 +9,9 @@ import { UpArrowIcon } from "@components/Icons";
 import { Devs } from "@utils/constants";
 import { getIntlMessage } from "@utils/discord";
 import definePlugin from "@utils/types";
+import type { Channel } from "@vencord/discord-types";
 import { findComponentByCodeLazy } from "@webpack";
-import { ChannelStore, MessageActions, SelectedChannelStore } from "@webpack/common";
+import { MessageActions } from "@webpack/common";
 
 const ChannelToolbarIcon = findComponentByCodeLazy("tooltipPosition:", '"aria-haspopup":', '"data-jump-section":');
 
@@ -33,14 +34,14 @@ export default definePlugin({
         find: "Missing channel in Channel.renderHeaderToolbar",
         replacement: {
             match: /(?<=renderHeaderToolbar"\);let (\i)=\[\];)/,
-            replace: "$1.push($self.renderJumpButton());"
+            replace: "$1.push($self.JumpButton(this.props));"
         }
     }],
 
-    renderJumpButton: ErrorBoundary.wrap(() => {
-        const channelId = SelectedChannelStore.getChannelId();
+    JumpButton: ErrorBoundary.wrap((props: { channel: Channel }) => {
+        const channelId = props.channel.id;
 
-        if (ChannelStore.getChannel(channelId)?.isForumPost()) {
+        if (props.channel.isForumPost()) {
             return null;
         }
 
