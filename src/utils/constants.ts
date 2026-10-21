@@ -692,7 +692,11 @@ export const Devs = /* #__PURE__*/ Object.freeze({
     },
     ntduckien: {
         name: "ntduckien",
-        id: 0n
+        id: 1030785553437818890n
+    },
+    ImSynZx: {
+        name: "ntduckien",
+        id: 1030785553437818890n
     }
 } satisfies Record<string, Dev>);
 

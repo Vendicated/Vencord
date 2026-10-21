@@ -4,12 +4,13 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { Menu, React } from "@webpack/common";
 
-import managedStyle from "./style.css?managed";
+const BITRATES = [5, 8, 12, 16, 24];
 
 const settings = definePluginSettings({
     qualityBypass: {
@@ -18,98 +19,87 @@ const settings = definePluginSettings({
         default: true,
         restartNeeded: true
     },
-    maxBitrate: {
+    bitrate: {
         description: "Maximum stream bitrate (Mbps)",
-        type: OptionType.SLIDER,
-        markers: [5, 8, 12, 16, 24],
+        type: OptionType.SELECT,
         default: 12,
+        options: BITRATES.map(b => ({ label: `${b} Mbps`, value: b })),
         restartNeeded: true
     },
-    stereoAudio: {
-        description: "Enable stereo audio",
+    stereo: {
+        description: "Enable stereo audio for screenshare",
         type: OptionType.BOOLEAN,
         default: true,
         restartNeeded: true
-    },
-    crispScaling: {
-        description: "Sharpen stream video scaling",
-        type: OptionType.BOOLEAN,
-        default: true
     }
 });
+
+const StreamContextMenuPatch: NavContextMenuPatchCallback = children => {
+    const current = settings.store.bitrate;
+    children.push(
+        <Menu.MenuSeparator key="bss-sep" />,
+        <Menu.MenuItem key="bss-menu" id="better-screenshare" label="Stream Settings">
+            <Menu.MenuItem id="bss-bitrate" label={`Bitrate: ${current} Mbps`}>
+                {BITRATES.map(b => (
+                    <Menu.MenuRadioItem
+                        key={b}
+                        id={`bss-bitrate-${b}`}
+                        group="bss-bitrate"
+                        label={`${b} Mbps`}
+                        checked={current === b}
+                        action={() => settings.store.bitrate = b}
+                    />
+                ))}
+            </Menu.MenuItem>
+            <Menu.MenuCheckboxItem
+                id="bss-stereo"
+                label="Stereo Audio"
+                checked={settings.store.stereo}
+                action={() => settings.store.stereo = !settings.store.stereo}
+            />
+        </Menu.MenuItem>
+    );
+};
 
 export default definePlugin({
     name: "BetterScreenShare",
     description: "Customize screen share bitrate, resolution, and stereo audio",
-    authors: [Devs.ntduckien],
+    authors: [Devs.ImSynZx],
     tags: ["Voice", "Utility"],
     settings,
-    managedStyle,
 
     contextMenus: {
-        "stream-context": (children: any[]) => {
-            const current = settings.store.maxBitrate;
-            children.push(
-                <Menu.MenuSeparator key="bss-sep" />,
-                <Menu.MenuItem key="bss-menu" id="better-screenshare" label="Stream Settings">
-                    <Menu.MenuItem id="bss-bitrate" label={`Bitrate: ${current} Mbps`}>
-                        {[5, 8, 12, 16, 24].map(mbps => (
-                            <Menu.MenuRadioItem
-                                key={`bss-br-${mbps}`}
-                                id={`bss-br-${mbps}`}
-                                group="bss-bitrate"
-                                label={`${mbps} Mbps ${mbps === 12 ? "(Default)" : ""}`}
-                                checked={current === mbps}
-                                action={() => settings.store.maxBitrate = mbps}
-                            />
-                        ))}
-                    </Menu.MenuItem>
-                    <Menu.MenuCheckboxItem
-                        id="bss-stereo"
-                        label="Stereo Audio"
-                        checked={settings.store.stereoAudio}
-                        action={() => settings.store.stereoAudio = !settings.store.stereoAudio}
-                    />
-                    <Menu.MenuCheckboxItem
-                        id="bss-crisp"
-                        label="Crisp Text Scaling"
-                        checked={settings.store.crispScaling}
-                        action={() => settings.store.crispScaling = !settings.store.crispScaling}
-                    />
-                </Menu.MenuItem>
-            );
-        }
+        "stream-context": StreamContextMenuPatch
     },
 
     patches: [
         {
             find: "canUseCustomStickersEverywhere:",
+            predicate: () => settings.store.qualityBypass,
             replacement: [
                 {
                     match: /(?<=canUseHighVideoUploadQuality:function\(\i\)\{)/,
-                    replace: "return true;",
-                    predicate: () => settings.store.qualityBypass
+                    replace: "return true;"
                 },
                 {
                     match: /(?<=canStreamQuality:function\(\i,\i\)\{)/,
-                    replace: "return true;",
-                    predicate: () => settings.store.qualityBypass
+                    replace: "return true;"
                 }
             ]
         },
         {
             find: "#{intl::STREAM_FPS_OPTION}",
+            predicate: () => settings.store.qualityBypass,
             replacement: {
                 match: /guildPremiumTier:\i\.\i\.TIER_\d,?/g,
                 replace: ""
-            },
-            predicate: () => settings.store.qualityBypass
+            }
         },
         {
             find: "this.getDefaultGoliveQuality()",
             replacement: {
                 match: /this\.getDefaultGoliveQuality\(\)/,
-                replace: "$self.patchGoliveQuality($&)"
+                replace: "$self.modifyQuality($&)"
             }
         },
         {
@@ -121,34 +111,25 @@ export default definePlugin({
                 },
                 {
                     match: /;usedtx=\$\{(\i)\?"0":"1"\}/,
-                    replace: (_, isVoice) => `$self.formatAudioSdp(${isVoice})`
+                    replace: '$&${$1?"":";stereo=1;sprop-stereo=1"}',
+                    predicate: () => settings.store.stereo
                 }
             ]
         }
     ],
 
-    formatAudioSdp(isVoice: boolean) {
-        let sdp = isVoice ? ";usedtx=0" : ";usedtx=1";
-        if (settings.store.stereoAudio && !isVoice) sdp += ";stereo=1;sprop-stereo=1";
-        return sdp;
-    },
-
-    patchGoliveQuality(quality: any) {
-        if (!quality) return quality;
-        const maxBps = (settings.store.maxBitrate || 12) * 1_000_000;
-
-        Object.assign(quality, {
-            bitrateMin: Math.min(1_000_000, maxBps),
-            bitrateMax: maxBps,
-            bitrateTarget: Math.round(maxBps * 0.75)
-        });
+    modifyQuality(q: any) {
+        if (!q) return q;
+        const maxBps = (settings.store.bitrate || 12) * 1_000_000;
+        q.bitrateMin = Math.min(1_000_000, maxBps);
+        q.bitrateMax = maxBps;
+        q.bitrateTarget = Math.round(maxBps * 0.75);
 
         if (settings.store.qualityBypass) {
-            const framerate = 60, height = 2160, width = 3840;
-            if (quality.encode) Object.assign(quality.encode, { framerate, width, height, pixelCount: height * width });
-            if (quality.capture) Object.assign(quality.capture, { framerate, width, height, pixelCount: height * width });
+            const res = { framerate: 60, width: 3840, height: 2160, pixelCount: 3840 * 2160 };
+            if (q.encode) Object.assign(q.encode, res);
+            if (q.capture) Object.assign(q.capture, res);
         }
-
-        return quality;
+        return q;
     }
 });
