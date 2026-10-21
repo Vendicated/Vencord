@@ -26,7 +26,7 @@ import { Flux, FluxDispatcher } from "@webpack/common";
 const settings = definePluginSettings({
     disableAnalytics: {
         type: OptionType.BOOLEAN,
-        description: "Disable Discord's tracking (analytics/'science')",
+        description: "Disable Discord's tracking (analytics/'science'). Disable this if you want badges to track your progress (eg: hours streamed).",
         default: true,
         restartNeeded: true
     }
