@@ -52,8 +52,6 @@ export default definePlugin({
             return {
                 label: "Quick Mention",
                 icon: Icon,
-                message: msg,
-                channel,
                 onClick: () => insertTextIntoChatInputBox(`<@${msg.author.id}> `)
             };
         }

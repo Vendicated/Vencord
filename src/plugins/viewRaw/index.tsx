@@ -29,7 +29,7 @@ import { copyWithToast, getCurrentGuild, getIntlMessage } from "@utils/discord";
 import { isTruthy } from "@utils/guards";
 import definePlugin, { IconComponent, OptionType } from "@utils/types";
 import { Message } from "@vencord/discord-types";
-import { ChannelStore, GuildRoleStore, Menu, Modal, openModal, UserProfileStore } from "@webpack/common";
+import { GuildRoleStore, Menu, Modal, openModal, UserProfileStore } from "@webpack/common";
 import { MouseEventHandler } from "react";
 
 const CopyRawIcon: IconComponent = ({ height = 20, width = 20, className }) => {
@@ -238,7 +238,7 @@ export default definePlugin({
                 }
             };
 
-            const handleContextMenu: MouseEventHandler<HTMLButtonElement> = e => {
+            const handleContextMenu: MouseEventHandler<HTMLDivElement> = e => {
                 if (settings.store.clickMethod === "Left") {
                     e.preventDefault();
                     e.stopPropagation();
@@ -257,8 +257,6 @@ export default definePlugin({
             return {
                 label,
                 icon: CopyRawIcon,
-                message: msg,
-                channel: ChannelStore.getChannel(msg.channel_id),
                 onClick: handleClick,
                 onContextMenu: handleContextMenu
             };
