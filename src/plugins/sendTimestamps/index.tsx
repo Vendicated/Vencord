@@ -21,6 +21,7 @@ import "./styles.css";
 import { ChatBarButton, ChatBarButtonFactory } from "@api/ChatButtons";
 import { definePluginSettings } from "@api/Settings";
 import { Button } from "@components/Button";
+import { InlineCode } from "@components/CodeBlock";
 import { Grid } from "@components/Grid";
 import { Heading } from "@components/Heading";
 import { Paragraph } from "@components/Paragraph";
@@ -113,7 +114,8 @@ function PickerModal(props: RenderModalProps) {
             </Grid>
 
             <Heading>
-                Raw Markdown {Parser.parse(`\`${formatted}\``)}
+                Raw Markdown:
+                <InlineCode className={cl("raw-code")}>{formatted}</InlineCode>
             </Heading>
         </Modal>
     );
