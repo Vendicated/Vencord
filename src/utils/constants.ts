@@ -689,6 +689,10 @@ export const Devs = /* #__PURE__*/ Object.freeze({
     imnotplayinginreallife: {
         name: "I'm not playing in real life",
         id: 841939724306087986n
+    },
+    ntduckien: {
+        name: "ntduckien",
+        id: 0n
     }
 } satisfies Record<string, Dev>);
 

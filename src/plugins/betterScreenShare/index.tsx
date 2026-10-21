@@ -5,6 +5,7 @@
  */
 
 import { definePluginSettings } from "@api/Settings";
+import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { Menu, React } from "@webpack/common";
 
@@ -12,26 +13,26 @@ import managedStyle from "./style.css?managed";
 
 const settings = definePluginSettings({
     qualityBypass: {
-        description: "Unlock 1080p, 1440p, 4K, and 60 FPS without Nitro",
+        description: "Unlock all resolutions and framerate options without Nitro",
         type: OptionType.BOOLEAN,
         default: true,
         restartNeeded: true
     },
     maxBitrate: {
-        description: "Maximum video bitrate in Mbps",
+        description: "Maximum stream bitrate (Mbps)",
         type: OptionType.SLIDER,
         markers: [5, 8, 12, 16, 24],
         default: 12,
         restartNeeded: true
     },
     stereoAudio: {
-        description: "Stream high-quality stereo audio instead of mono",
+        description: "Enable stereo audio",
         type: OptionType.BOOLEAN,
         default: true,
         restartNeeded: true
     },
     crispScaling: {
-        description: "Sharpen text and code in stream windows",
+        description: "Sharpen stream video scaling",
         type: OptionType.BOOLEAN,
         default: true
     }
@@ -39,8 +40,8 @@ const settings = definePluginSettings({
 
 export default definePlugin({
     name: "BetterScreenShare",
-    description: "Unlocks Nitro stream qualities (1080p, 1440p, 4K, 60fps), boosts bitrate, and enables stereo audio",
-    authors: [{ name: "ntduckien", id: 1030785553437818890n }],
+    description: "Customize screen share bitrate, resolution, and stereo audio",
+    authors: [Devs.ntduckien],
     tags: ["Voice", "Utility"],
     settings,
     managedStyle,
@@ -52,10 +53,29 @@ export default definePlugin({
                 <Menu.MenuSeparator key="bss-sep" />,
                 <Menu.MenuItem key="bss-menu" id="better-screenshare" label="Stream Settings">
                     <Menu.MenuItem id="bss-bitrate" label={`Bitrate: ${current} Mbps`}>
-                        {[5, 8, 12, 16, 24].map(mbps => (<Menu.MenuRadioItem key={`bss-br-${mbps}`} id={`bss-br-${mbps}`} group="bss-bitrate" label={`${mbps} Mbps ${mbps === 12 ? "(Default)" : ""}`} checked={current === mbps} action={() => settings.store.maxBitrate = mbps} />))}
+                        {[5, 8, 12, 16, 24].map(mbps => (
+                            <Menu.MenuRadioItem
+                                key={`bss-br-${mbps}`}
+                                id={`bss-br-${mbps}`}
+                                group="bss-bitrate"
+                                label={`${mbps} Mbps ${mbps === 12 ? "(Default)" : ""}`}
+                                checked={current === mbps}
+                                action={() => settings.store.maxBitrate = mbps}
+                            />
+                        ))}
                     </Menu.MenuItem>
-                    <Menu.MenuCheckboxItem id="bss-stereo" label="Stereo Audio" checked={settings.store.stereoAudio} action={() => settings.store.stereoAudio = !settings.store.stereoAudio} />
-                    <Menu.MenuCheckboxItem id="bss-crisp" label="Crisp Text Scaling" checked={settings.store.crispScaling} action={() => settings.store.crispScaling = !settings.store.crispScaling} />
+                    <Menu.MenuCheckboxItem
+                        id="bss-stereo"
+                        label="Stereo Audio"
+                        checked={settings.store.stereoAudio}
+                        action={() => settings.store.stereoAudio = !settings.store.stereoAudio}
+                    />
+                    <Menu.MenuCheckboxItem
+                        id="bss-crisp"
+                        label="Crisp Text Scaling"
+                        checked={settings.store.crispScaling}
+                        action={() => settings.store.crispScaling = !settings.store.crispScaling}
+                    />
                 </Menu.MenuItem>
             );
         }
@@ -117,7 +137,11 @@ export default definePlugin({
         if (!quality) return quality;
         const maxBps = (settings.store.maxBitrate || 12) * 1_000_000;
 
-        Object.assign(quality, { bitrateMin: Math.min(1_000_000, maxBps), bitrateMax: maxBps, bitrateTarget: Math.round(maxBps * 0.75) });
+        Object.assign(quality, {
+            bitrateMin: Math.min(1_000_000, maxBps),
+            bitrateMax: maxBps,
+            bitrateTarget: Math.round(maxBps * 0.75)
+        });
 
         if (settings.store.qualityBypass) {
             const framerate = 60, height = 2160, width = 3840;

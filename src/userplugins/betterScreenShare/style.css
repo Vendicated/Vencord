@@ -1,8 +1,0 @@
-/*
- * BetterScreenShare Styles
- */
-
-[class*="video_"] video,
-[class*="pictureInPictureVideo_"] video {
-    image-rendering: -webkit-optimize-contrast;
-}
