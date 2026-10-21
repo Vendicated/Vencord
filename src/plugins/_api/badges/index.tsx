@@ -33,7 +33,7 @@ import { shouldShowContributorBadge } from "@utils/misc";
 import definePlugin from "@utils/types";
 import { ContextMenuApi, Forms, Menu, Modal, openModal, showToast, UserStore } from "@webpack/common";
 
-const CONTRIBUTOR_BADGE = "https://cdn.discordapp.com/emojis/1092089799109775453.png?size=64";
+const CONTRIBUTOR_BADGE = "https://cdn.discordapp.com/emojis/1562267648857997356.webp?size=240";
 
 const ContributorBadge: ProfileBadge = {
     id: "vencord_contributor_badge",
@@ -131,7 +131,7 @@ export default definePlugin({
     toolboxActions: {
         async "Refetch Badges"() {
             await loadBadges(true);
-            showToast("Successfully refetched badges!", "success");
+            showToast({ text: "Successfully refetched badges!", variant: "success" });
         }
     },
 

@@ -36,6 +36,7 @@ export * from "./misc";
 export * from "./modal";
 export * from "./onlyOnce";
 export * from "./patches";
+export * from "./promptToRestart";
 export * from "./Queue";
 export * from "./react";
 export * from "./text";

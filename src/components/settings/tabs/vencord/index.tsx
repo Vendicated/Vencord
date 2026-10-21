@@ -26,13 +26,15 @@ import { SpecialCard } from "@components/settings/SpecialCard";
 import { SettingsTab, wrapTab } from "@components/settings/tabs/BaseTab";
 import { openContributorModal } from "@components/settings/tabs/plugins/ContributorModal";
 import { openPluginModal } from "@components/settings/tabs/plugins/PluginModal";
+import NoTrack from "@plugins/_core/noTrack";
 import SettingsPlugin from "@plugins/_core/settings";
 import { gitRemote } from "@shared/vencordUserAgent";
 import { IS_WINDOWS } from "@utils/constants";
 import { Margins } from "@utils/margins";
 import { isPluginDev } from "@utils/misc";
 import { relaunch } from "@utils/native";
-import { ConfirmModal, Forms, openModal, React, useMemo, UserStore } from "@webpack/common";
+import { promptToRestart } from "@utils/promptToRestart";
+import { Forms, React, useMemo, UserStore } from "@webpack/common";
 
 import { DonateButtonComponent, isDonor } from "./DonateButton";
 import { MacOSVibrancySettings } from "./MacVibrancySettings";
@@ -52,12 +54,24 @@ type KeysOfType<Object, Type> = {
 
 function Switches() {
     const settings = useSettings(["useQuickCss", "enableReactDevtools", "frameless", "nativeTitleBar", "transparent", "winCtrlQ", "disableMinSize"]);
+    const { disableAnalytics } = NoTrack.settings.use(["disableAnalytics"]);
 
     const Switches = [
         {
             key: "useQuickCss",
             title: "Enable Custom CSS",
             description: "Apply your configured QuickCSS"
+        },
+        {
+            value: disableAnalytics,
+            updateSetting(newValue) {
+                NoTrack.settings.store.disableAnalytics = newValue;
+            },
+            reactKey: "NoTrack::disableAnalytics",
+            key: null!,
+            title: "Block Discord Analytics",
+            description: NoTrack.settings.def.disableAnalytics.description,
+            restartRequired: NoTrack.settings.def.disableAnalytics.restartNeeded,
         },
         IS_DISCORD_DESKTOP && {
             key: "nativeTitleBar",
@@ -89,9 +103,12 @@ function Switches() {
         },
     ] satisfies Array<false | {
         key: KeysOfType<typeof settings, boolean>;
+        reactKey?: string;
         title: string;
         description?: string;
         restartRequired?: boolean;
+        updateSetting?(newValue: boolean): void;
+        value?: boolean;
     }>;
 
     return Switches.map(setting => {
@@ -99,30 +116,20 @@ function Switches() {
             return null;
         }
 
-        const { key, title, description, restartRequired } = setting;
+        const { reactKey, key, value, title, description, restartRequired, updateSetting = v => (settings[key] = v) } = setting;
 
         return (
             <FormSwitch
-                key={key}
+                key={reactKey ?? key}
                 title={title}
                 description={description}
-                value={settings[key]}
+                value={value ?? settings[key]}
                 hideBorder
                 onChange={v => {
-                    settings[key] = v;
+                    updateSetting(v);
 
                     if (restartRequired) {
-                        openModal(props => (
-                            <ConfirmModal
-                                {...props}
-                                title="Restart Required"
-                                subtitle="A restart is required to apply this change"
-                                confirmText="Restart now"
-                                cancelText="Later!"
-                                variant="primary"
-                                onConfirm={relaunch}
-                            />
-                        ));
+                        promptToRestart("relaunch");
                     }
                 }}
             />

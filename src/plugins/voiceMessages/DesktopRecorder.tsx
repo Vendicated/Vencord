@@ -47,7 +47,7 @@ export const VoiceRecorderDesktop: VoiceRecorder = ({ setAudioBlob, onRecordingC
                     if (success)
                         changeRecording(true);
                     else
-                        showToast("Failed to start recording", "failure");
+                        showToast({ text: "Failed to start recording", variant: "critical" });
                 }
             );
         } else {
@@ -57,7 +57,7 @@ export const VoiceRecorderDesktop: VoiceRecorder = ({ setAudioBlob, onRecordingC
                     if (buf)
                         setAudioBlob(new Blob([buf], { type: "audio/ogg; codecs=opus" }));
                     else
-                        showToast("Failed to finish recording", "failure");
+                        showToast({ text: "Failed to finish recording", variant: "critical" });
                 }
                 changeRecording(false);
             });
