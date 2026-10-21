@@ -10,9 +10,9 @@ import { Devs } from "@utils/constants";
 import { getIntlMessage } from "@utils/discord";
 import definePlugin from "@utils/types";
 import { findComponentByCodeLazy } from "@webpack";
-import { MessageActions, SelectedChannelStore } from "@webpack/common";
+import { ChannelStore, MessageActions, SelectedChannelStore } from "@webpack/common";
 
-const HeaderBarIcon = findComponentByCodeLazy(".HEADER_BAR_BADGE_BOTTOM,", 'position:"bottom"');
+const ChannelToolbarIcon = findComponentByCodeLazy("tooltipPosition:", '"aria-haspopup":', '"data-jump-section":');
 
 function jumpToTop(channelId: string) {
     MessageActions.jumpToMessage({
@@ -37,12 +37,19 @@ export default definePlugin({
         }
     }],
 
-    renderJumpButton: ErrorBoundary.wrap(() => (
-        <HeaderBarIcon
-            tooltip={getIntlMessage("JUMP_TO_TOP")}
-            icon={UpArrowIcon}
-            onClick={() => jumpToTop(SelectedChannelStore.getChannelId())}
-        />
-    ), { noop: true })
+    renderJumpButton: ErrorBoundary.wrap(() => {
+        const channelId = SelectedChannelStore.getChannelId();
 
+        if (ChannelStore.getChannel(channelId)?.isForumPost()) {
+            return null;
+        }
+
+        return (
+            <ChannelToolbarIcon
+                tooltip={getIntlMessage("JUMP_TO_TOP")}
+                icon={UpArrowIcon}
+                onClick={() => jumpToTop(channelId)}
+            />
+        );
+    }, { noop: true })
 });
