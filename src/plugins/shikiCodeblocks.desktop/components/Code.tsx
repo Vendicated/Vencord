@@ -42,7 +42,6 @@ export const Code = ({
     if (useArborium && arboriumHtml) {
         lines = arboriumHtml
             .split("\n")
-            .slice(0, content.split("\n").length)
             .map((line, i) => <span key={i} dangerouslySetInnerHTML={{ __html: line }} />);
     } else {
         const renderTokens =
