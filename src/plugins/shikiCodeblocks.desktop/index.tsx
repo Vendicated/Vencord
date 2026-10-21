@@ -31,7 +31,7 @@ import { settings } from "./settings";
 import { DeviconSetting } from "./types";
 import { clearStyles } from "./utils/createStyle";
 
-migratePluginSetting("ShikiCodeblocks", "tryDiscordHighlighter", "tryHljs");
+migratePluginSetting("ShikiCodeblocks", "tryHljs", "tryDiscordHighlighter");
 export default definePlugin({
     name: "ShikiCodeblocks",
     description: "Brings vscode-style codeblocks into Discord, powered by Shiki",
