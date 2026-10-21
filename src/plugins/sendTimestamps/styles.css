@@ -49,3 +49,14 @@
     position: relative;
     top: 0.1em;
 }
+
+.vc-st-desc-heading {
+    margin-top: 1em;
+}
+
+.vc-st-desc-code code {
+    position: relative;
+    top: 0.2em;
+    padding-top: -0.2em !important;
+    padding-bottom: 0.1em !important;
+}

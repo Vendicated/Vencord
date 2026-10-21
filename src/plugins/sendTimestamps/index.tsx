@@ -185,18 +185,18 @@ export default definePlugin({
         return (
             <>
                 <Paragraph>
-                    To quickly send time only timestamps, include timestamps formatted as `HH:MM` (including the backticks!) in your message
+                    To quickly send time only timestamps, include timestamps formatted as `HH:MM` (including the backticks!) in your message.
                 </Paragraph>
                 <Paragraph>
                     See below for examples.
                     If you need anything more specific, use the Date button in the chat bar!
                 </Paragraph>
                 <Paragraph>
-                    Examples:
+                    <Heading className={cl("desc-heading")}>Examples</Heading>
                     <ul>
                         {samples.map(s => (
                             <li key={s}>
-                                <code>{s}</code> {"->"} {Parser.parse(parseTime(s))}
+                                <InlineCode className={cl("desc-code")}>{s}</InlineCode> → {Parser.parse(parseTime(s))}
                             </li>
                         ))}
                     </ul>
