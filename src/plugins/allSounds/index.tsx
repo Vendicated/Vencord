@@ -136,6 +136,7 @@ export default definePlugin({
     name: "AllSounds",
     description: "Allowes you to customize every single Discord sound with all the already existing sounds on Discord (Even the hidden ones you might never heard)!",
     authors: [Devs.lil_aleks],
+    tags: ["Customisation", "Fun"],
     settings,
 
     patches: [
