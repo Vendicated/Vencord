@@ -833,6 +833,20 @@ export function DownArrow(props: IconProps) {
     );
 }
 
+export function UpArrowIcon(props: IconProps) {
+    return (
+        <Icon
+            {...props}
+            viewBox="0 0 24 24"
+        >
+            <path
+                fill={props.fill || "currentColor"}
+                d="M12.7 3.3a1 1 0 0 0-1.4 0l-8 8a1 1 0 1 0 1.4 1.4L11 6.42V20a1 1 0 1 0 2 0V6.41l6.3 6.3a1 1 0 0 0 1.4-1.42l-8-8Z"
+            />
+        </Icon>
+    );
+}
+
 export function RightArrow(props: IconProps) {
     return (
         <Icon
