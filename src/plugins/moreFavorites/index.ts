@@ -58,7 +58,6 @@ function refresh() {
 }
 
 function clone<T>(value: T): T {
-    // Vencord settings are proxies, which structuredClone cannot copy.
     return JSON.parse(JSON.stringify(value));
 }
 
