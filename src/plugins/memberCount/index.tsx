@@ -86,10 +86,10 @@ export default definePlugin({
             predicate: () => settings.store.toolTip
         },
         {
-            find: "CHANNEL_PRELOAD:function",
+            find: '"GuildSubscriptionsStore"',
             replacement: {
-                match: /(\i)\.(\i)\.getSection\((\i)\)===(\i)\.(\i)\.MEMBERS/,
-                replace: "($1.$2.getSection($3)===$4.$5.MEMBERS||$1.$2.getSection($3)===$4.$5.NONE)"
+                match: /(\i\.\i\.getSection\(\i\))===(\i\.\i)\.MEMBERS/,
+                replace: (m, section, ChannelSectionTypes) => `(${m}||${section}===${ChannelSectionTypes}.NONE)`
             }
         }
     ],
