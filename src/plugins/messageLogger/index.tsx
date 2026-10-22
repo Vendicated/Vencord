@@ -23,7 +23,7 @@ import { updateMessage } from "@api/MessageUpdater";
 import { definePluginSettings } from "@api/Settings";
 import { disableStyle, enableStyle } from "@api/Styles";
 import ErrorBoundary from "@components/ErrorBoundary";
-import { DeleteIcon, EyeIcon } from "@components/Icons";
+import { EyeIcon } from "@components/Icons";
 import { Devs, SUPPORT_CATEGORY_ID, VENBOT_USER_ID } from "@utils/constants";
 import { getIntlMessage } from "@utils/discord";
 import { Logger } from "@utils/Logger";
@@ -151,6 +151,7 @@ function ClearHistoryIcon({ height = 24, width = 24, className }: { height?: num
                 strokeWidth={2.5}
                 strokeLinecap="round"
                 strokeLinejoin="round"
+                style={{ fill: "none" }}
             />
             <path
                 d="M1 11.9999L3 13.9999L5 11.9999"
@@ -158,6 +159,7 @@ function ClearHistoryIcon({ height = 24, width = 24, className }: { height?: num
                 strokeWidth={2.5}
                 strokeLinecap="round"
                 strokeLinejoin="round"
+                style={{ fill: "none" }}
             />
             <path
                 d="M11 7.99994L11 12.9999L16 12.9999"
@@ -165,6 +167,7 @@ function ClearHistoryIcon({ height = 24, width = 24, className }: { height?: num
                 strokeWidth={2.5}
                 strokeLinecap="round"
                 strokeLinejoin="round"
+                style={{ fill: "none" }}
             />
         </svg>
     );
@@ -228,8 +231,8 @@ const patchMessageContextMenu: NavContextMenuPatchCallback = (children, props) =
         <Menu.MenuItem
             id={REMOVE_HISTORY_ID}
             key={REMOVE_HISTORY_ID}
-            label="Remove Message History"
-            leadingAccessory={{ type: "icon", icon: DeleteIcon }}
+            label="Clear Message History"
+            leadingAccessory={{ type: "icon", icon: ClearHistoryIcon }}
             color="danger"
             action={() => {
                 clearMessageHistory(message);
@@ -299,8 +302,6 @@ export default definePlugin({
             return {
                 label: "Clear history",
                 icon: ClearHistoryIcon,
-                message: current,
-                channel: ChannelStore.getChannel(current.channel_id),
                 onClick: () => {
                     const latest = MessageStore.getMessage(message.channel_id, message.id) as MLMessage | undefined;
                     if (!latest) return;
