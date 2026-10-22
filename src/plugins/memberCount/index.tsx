@@ -84,6 +84,13 @@ export default definePlugin({
                 replace: "$&,$self.renderTooltip(arguments[0].guild)"
             },
             predicate: () => settings.store.toolTip
+        },
+        {
+            find: "CHANNEL_PRELOAD:function",
+            replacement: {
+                match: /(\i)\.(\i)\.getSection\((\i)\)===(\i)\.(\i)\.MEMBERS/,
+                replace: "($1.$2.getSection($3)===$4.$5.MEMBERS||$1.$2.getSection($3)===$4.$5.NONE)"
+            }
         }
     ],
     render: ErrorBoundary.wrap(() => <MemberCount />, { noop: true }),
