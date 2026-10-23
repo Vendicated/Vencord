@@ -33,8 +33,7 @@ import { shouldShowContributorBadge } from "@utils/misc";
 import definePlugin from "@utils/types";
 import { ContextMenuApi, Forms, Menu, Modal, openModal, showToast, UserStore } from "@webpack/common";
 
-/** Changed size to 512px to avoid blur on badge in directory */
-const CONTRIBUTOR_BADGE = "https://cdn.discordapp.com/emojis/1092089799109775453.png?size=512";
+const CONTRIBUTOR_BADGE = "https://cdn.discordapp.com/emojis/1562267648857997356.webp?size=512";
 
 const ContributorBadge: ProfileBadge = {
     id: "vencord_contributor_badge",
