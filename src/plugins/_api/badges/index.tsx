@@ -84,7 +84,7 @@ function toDirectoryBadge(b: ProfileBadge, userId: string): DirectoryBadge {
         name: b.name || b.description || b.infoLabel || "Vencord Badge",
         description: b.detail ?? b.description ?? b.name ?? "",
         info_label: b.infoLabel || "Vencord",
-        rarity: b.rarity || 1,
+        rarity: b.rarity || BadgeRarity.COMMON,
         simple_icon_url: b.iconSrc!,
         complex_icon_static_url: b.largeIconSrc || b.iconSrc!,
         obtained_at: b.obtainedAt,
@@ -151,16 +151,8 @@ export default definePlugin({
                     replace: "...$self.getBadgeMouseEventHandlers($1),$&"
                 },
                 {
-                    match: /fallbackTitle:(\i)\.description,/,
-                    replace: "$&fallbackBody:$1.infoLabel,"
-                },
-                {
-                    match: /fallbackTitle:(\i),/,
-                    replace: "$&fallbackBody:vcFallbackBody,"
-                },
-                {
-                    match: /(\i)\?\.info_label\?\?/,
-                    replace: "$&vcFallbackBody??"
+                    match: /legacyBadgeId:(\i),userId:(\i),.{0,100}?=\i,\i=\(0,\i\.\i\)\(\1\)/,
+                    replace: "$&??$self.getDirectoryBadgeId($1,$2)"
                 }
             ]
         },
@@ -182,7 +174,7 @@ export default definePlugin({
             find: "badge_directory_closed",
             replacement: {
                 match: /(\i\.\i\.getBadges\((\i)\))(?=:\[\],\[\2\]\))/,
-                replace: "$self.injectVencordBadges($1,$2)"
+                replace: "[...$1,...$self.getDirectoryBadges($2)]"
             }
         }
     ],
@@ -228,13 +220,19 @@ export default definePlugin({
         return DirectoryBadges[id];
     },
 
-    injectVencordBadges(list: DirectoryBadge[], userId: string) {
-        return [
-            ...list,
-            ...this.getBadges({ userId, guildId: "" })
-                .filter(b => b.iconSrc)
-                .map(b => toDirectoryBadge(b, userId))
-        ];
+    getDirectoryBadges(userId: string) {
+        return this.getBadges({ userId, guildId: "" })
+            .filter(b => b.iconSrc)
+            .map(b => toDirectoryBadge(b, userId));
+    },
+
+    getDirectoryBadgeId(badgeId: string, userId?: string) {
+        if (!userId) return;
+
+        const badge = this.getBadges({ userId, guildId: "" })
+            .find(b => b.id === badgeId && b.iconSrc);
+
+        if (badge) return toDirectoryBadge(badge, userId).badge_id;
     },
 
     renderBadgeComponent: ErrorBoundary.wrap((badge: ProfileBadge & BadgeUserArgs) => {
