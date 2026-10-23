@@ -81,7 +81,7 @@ function toDirectoryBadge(b: ProfileBadge, userId: string): DirectoryBadge {
 
     return DirectoryBadges[id] ??= {
         badge_id: id,
-        name: b.name || b.description || b.infoLabel || "Vencord Badge",
+        name: b.name ?? b.description ?? "",
         description: b.detail ?? b.description ?? b.name ?? "",
         info_label: b.infoLabel || "Vencord",
         rarity: b.rarity || BadgeRarity.COMMON,
@@ -167,7 +167,7 @@ export default definePlugin({
             find: '"BadgeDirectoryStore"',
             replacement: {
                 match: /getBadgeById\((\i),(\i)\)\{/,
-                replace: "$&const vcB=$self.getDirectoryBadge($1);if(vcB)return vcB;"
+                replace: "$&const vencordBadge=$self.getDirectoryBadge($1);if(vencordBadge)return vencordBadge;"
             }
         },
         {
@@ -259,7 +259,7 @@ export default definePlugin({
             id: `vencord_donor_badge_${idx}`,
             iconSrc: badge.badge,
             description: badge.tooltip,
-            name: badge.tooltip || "Vencord Donor",
+            name: badge.tooltip,
             infoLabel: "Vencord Donor",
             rarity: BadgeRarity.MYTHIC,
             position: BadgePosition.START,
