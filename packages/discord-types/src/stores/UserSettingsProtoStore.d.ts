@@ -8,6 +8,7 @@ export interface GuildFolder {
     folderId?: number;
     folderName?: string;
     folderColor?: number;
+    expanded?: boolean;
 }
 
 export interface GuildProto {
