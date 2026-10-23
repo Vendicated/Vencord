@@ -36,10 +36,10 @@ export const enum IpcEvents {
     OPEN_THEMES_FOLDER = "VencordOpenThemesFolder",
     OPEN_SETTINGS_FOLDER = "VencordOpenSettingsFolder",
 
-    GET_UPDATES = "VencordGetUpdates",
-    GET_REPO = "VencordGetRepo",
-    UPDATE = "VencordUpdate",
-    BUILD = "VencordBuild",
+    UPDATER_LIST_UPDATES = "VencordListUpdates",
+    UPDATER_GET_REPO = "VencordGetRepo",
+    UPDATER_FETCH_UPDATE = "VencordFetchUpdate",
+    UPDATER_APPLY_UPDATE = "VencordApplyUpdate",
 
     OPEN_MONACO_EDITOR = "VencordOpenMonacoEditor",
     GET_MONACO_THEME = "VencordGetMonacoTheme",

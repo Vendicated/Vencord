@@ -54,12 +54,12 @@ export async function checkForUpdates() {
 export async function update() {
     if (!isOutdated) return true;
 
-    const res = await Unwrap(VencordNative.updater.update());
+    const res = await Unwrap(VencordNative.updater.fetchUpdate());
 
     if (res) {
         isOutdated = false;
-        if (!await Unwrap(VencordNative.updater.rebuild()))
-            throw new Error("The Build failed. Please try manually building the new update");
+        if (!await Unwrap(VencordNative.updater.applyUpdate()))
+            throw new Error("Failed to apply the update.");
     }
 
     return res;
