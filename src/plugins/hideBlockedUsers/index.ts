@@ -47,6 +47,7 @@ interface ReactionProps {
     message: Message;
     emoji: CustomEmoji;
     type: number;
+    count: number;
 }
 
 type MemberListProps =
@@ -78,13 +79,6 @@ function fetchReactions(msg: Message, emoji: ReactionEmoji, type: number) {
         oldFormErrors: true
     })
         .then(res => {
-            for (const user of res.body) {
-                FluxDispatcher.dispatch({
-                    type: "USER_UPDATE",
-                    user
-                });
-            }
-
             FluxDispatcher.dispatch({
                 type: "MESSAGE_REACTION_ADD_USERS",
                 channelId: msg.channel_id,
@@ -228,13 +222,15 @@ export default definePlugin({
             replacement: {
                 match: /return\(0,\i.jsx\)\(\i.\i,{ta/,
                 predicate: () => settings.store.hideReactions,
-                replace: "if($self.shouldHideReaction({message: arguments[0].message, emoji: arguments[0].emoji, type: arguments[0].type})) return null;$&"
+                replace: "if($self.shouldHideReaction({message: arguments[0].message, emoji: arguments[0].emoji, type: arguments[0].type, count: arguments[0].count})) return null;$&"
             }
         }
     ],
 
-    shouldHideReaction({ message, emoji, type }: ReactionProps) {
+    shouldHideReaction({ message, emoji, type, count }: ReactionProps) {
         try {
+            if (count > 10) return false;
+
             const forceUpdate = useForceUpdater();
 
             useEffect(() => {
@@ -246,8 +242,6 @@ export default definePlugin({
 
                 return () => FluxDispatcher.unsubscribe("MESSAGE_REACTION_ADD_USERS", cb);
             }, [message.id, forceUpdate]);
-
-            if (message.reactions.length > 10) return false;
 
             const reactionMap = getReactionsWithQueue(message, emoji, type);
             const usersIds = reactionMap.keys().map(userId => {
