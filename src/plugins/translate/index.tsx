@@ -20,6 +20,7 @@ import "./styles.css";
 
 import { findGroupChildrenByChildId, NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { Devs } from "@utils/constants";
+import { getCurrentChannel, getCurrentGuild } from "@utils/discord";
 import definePlugin from "@utils/types";
 import { Message } from "@vencord/discord-types";
 import { Menu } from "@webpack/common";
@@ -27,7 +28,7 @@ import { Menu } from "@webpack/common";
 import { settings } from "./settings";
 import { setShouldShowTranslateEnabledTooltip, TranslateChatBarIcon, TranslateIcon } from "./TranslateIcon";
 import { handleTranslate, TranslationAccessory } from "./TranslationAccessory";
-import { translate } from "./utils";
+import { shouldTranslate, translate } from "./utils";
 
 const messageCtxPatch: NavContextMenuPatchCallback = (children, { message }: { message: Message; }) => {
     const content = getMessageContent(message);
@@ -66,7 +67,7 @@ export default definePlugin({
     name: "Translate",
     description: "Translate messages with Google Translate, DeepL or Kagi.",
     tags: ["Chat", "Utility"],
-    authors: [Devs.Ven, Devs.AshtonMemer, Devs.koish1],
+    authors: [Devs.Ven, Devs.AshtonMemer, Devs.koish1, Devs.Av32000],
     settings,
     contextMenus: {
         "message": messageCtxPatch
@@ -99,7 +100,9 @@ export default definePlugin({
     },
 
     async onBeforeMessageSend(_, message) {
-        if (!settings.store.autoTranslate) return;
+        const channelId = getCurrentChannel()?.id;
+        const guildId = getCurrentGuild()?.id;
+        if (!shouldTranslate(channelId, guildId)) return;
         if (!message.content) return;
 
         setShouldShowTranslateEnabledTooltip?.(true);
