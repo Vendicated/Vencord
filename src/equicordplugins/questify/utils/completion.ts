@@ -94,7 +94,7 @@ const sendHeartbeat = findByCodeLazy(".QUESTS_HEARTBEAT(") as (options: {
     terminal?: boolean;
     executableFingerprint?: unknown;
 }) => Promise<void>;
-const getApplicationProxyTicket = findByCodeLazy(".expiresAt>", "await") as (applicationId: string, channelId?: string) => Promise<string>;
+const getApplicationProxyTicket = findByCodeLazy(".expiresAt>", ".ticket;") as (applicationId: string, channelId?: string) => Promise<string>;
 export const enrollInQuestNative = findByCodeLazy('type:"QUESTS_ENROLL_BEGIN",') as (questId: string, options: QuestEnrollmentMetadata) => Promise<QuestEnrollResult>;
 const sortQuestsNative = findByCodeLazy("sortMethod:", "isRenewableEndDateSortEnabled") as (quests: Quest[], options: { sortMethod: string; filters: unknown[]; }) => Quest[];
 const getQuestOrbQuantity = findByCodeLazy("premiumOrbQuantity??", "orbQuantity") as (
