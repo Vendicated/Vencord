@@ -28,7 +28,7 @@ interface ParsedColorInfo {
     text: string;
 }
 
-const requiredFirstCharacters = ["r", "h", "#"].flatMap((v) => [
+const requiredFirstCharacters = ["r", "h", "#"].flatMap(v => [
     v,
     v.toUpperCase(),
 ]);
@@ -90,7 +90,7 @@ export default definePlugin({
     // Needed to load all regex before patching
     startAt: StartAt.Init,
     getColor(order: number) {
-        const source = regex.map((r) => r.reg.source).join("|");
+        const source = regex.map(r => r.reg.source).join("|");
         const matchAllRegExp = new RegExp(`^(${source})`, "i");
         return {
             order,
@@ -200,7 +200,7 @@ export default definePlugin({
                     }
                 },
                 {
-                    fallback: (data) => {
+                    fallback: data => {
                         const child = data.children as ReactElement<any>;
                         return <>{child.props?.text}</>;
                     },
@@ -228,7 +228,7 @@ const isColorDark = (color: string, type: ColorType): boolean => {
             if (color.length === 3) {
                 color = color
                     .split("")
-                    .flatMap((v) => [v, v])
+                    .flatMap(v => [v, v])
                     .join("");
             }
 
