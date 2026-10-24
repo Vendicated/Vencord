@@ -76,6 +76,21 @@ export interface ProfileBadge {
     getBadges?(userInfo: BadgeUserArgs): ProfileBadge[];
 }
 
+export interface DirectoryBadge {
+    badge_id: string;
+    name: string;
+    description: string;
+    info_label: string;
+    rarity: BadgeRarity;
+    simple_icon_url: string;
+    complex_icon_static_url: string;
+    obtained_at?: string;
+    is_earnable: false;
+    owned: true;
+    hidden: false;
+    tiers: [];
+}
+
 const Badges = new Set<ProfileBadge>();
 
 /**

@@ -18,7 +18,7 @@
 
 import "./fixDiscordBadgePadding.css";
 
-import { _getBadges, BadgePosition, BadgeRarity, BadgeUserArgs, ProfileBadge } from "@api/Badges";
+import { _getBadges, BadgePosition, BadgeRarity, BadgeUserArgs, DirectoryBadge, ProfileBadge } from "@api/Badges";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Flex } from "@components/Flex";
 import { Heart } from "@components/Heart";
@@ -33,34 +33,19 @@ import { shouldShowContributorBadge } from "@utils/misc";
 import definePlugin from "@utils/types";
 import { ContextMenuApi, Forms, Menu, Modal, openModal, showToast, UserStore } from "@webpack/common";
 
-const CONTRIBUTOR_BADGE = "https://cdn.discordapp.com/emojis/1562267648857997356.webp?size=512";
-
 const ContributorBadge: ProfileBadge = {
     id: "vencord_contributor_badge",
     description: "Vencord Contributor",
     infoLabel: "Vencord",
     rarity: BadgeRarity.MYTHIC,
-    iconSrc: CONTRIBUTOR_BADGE,
+    iconSrc: "https://cdn.discordapp.com/emojis/1562267648857997356.webp?size=128",
+    largeIconSrc: "https://cdn.discordapp.com/emojis/1562267648857997356.webp?size=512",
     position: BadgePosition.START,
     shouldShow: ({ userId }) => shouldShowContributorBadge(userId),
     onClick: (_, { userId }) => openContributorModal(UserStore.getUser(userId))
 };
 
-/**  Couldn't fully use ProfileBadge since directory uses different keys, move/merge it to Badges.ts maybe? */
-interface DirectoryBadge {
-    badge_id: string;
-    name: string;
-    description: string;
-    info_label: string;
-    rarity: BadgeRarity;
-    simple_icon_url: string;
-    complex_icon_static_url: string;
-    obtained_at?: string;
-    is_earnable: false;
-    owned: true;
-    hidden: false;
-    tiers: [];
-}
+
 
 let DonorBadges = {} as Record<string, Array<Record<"tooltip" | "badge", string>>>;
 let DirectoryBadges = {} as Record<string, DirectoryBadge>;
@@ -81,7 +66,7 @@ function toDirectoryBadge(b: ProfileBadge, userId: string): DirectoryBadge {
 
     return DirectoryBadges[id] ??= {
         badge_id: id,
-        name: b.name ?? "",
+        name: b.name ?? b.description ?? "",
         description: b.detail ?? b.description ?? b.name ?? "",
         info_label: b.infoLabel ?? "Vencord",
         rarity: b.rarity ?? BadgeRarity.COMMON,
