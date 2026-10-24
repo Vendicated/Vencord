@@ -1,0 +1,40 @@
+.vc-cns-manager {
+    margin-top: 8px;
+}
+
+.vc-cns-empty {
+    color: var(--text-muted);
+    padding: 16px;
+}
+
+.vc-cns-rule {
+    align-items: center;
+    display: flex;
+    gap: 8px;
+    padding: 12px;
+}
+
+.vc-cns-rule-copy {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: 3px;
+    min-width: 0;
+}
+
+.vc-cns-rule-copy strong,
+.vc-cns-rule-copy span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.vc-cns-rule-copy span {
+    color: var(--text-muted);
+    font-size: 13px;
+}
+
+.vc-cns-range {
+    accent-color: var(--brand-500);
+    width: 100%;
+}
