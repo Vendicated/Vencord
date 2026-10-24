@@ -51,6 +51,8 @@ export const defaultAcknowledgedNotices: Record<string, true> = {};
 export const defaultMakeMobileVideoQuestsDesktopCompatible = false; // true -> Risky
 export const defaultCompleteVideoQuestsQuicker = false; // true -> Risky
 export const defaultPreventVideoQuestsPausing = false; // true -> Risky
+export const defaultAutoEnrollQuests = false; // true -> Risky
+export const defaultAutoCompleteQuests = false; // true -> Risky
 export const defaultAutoCompleteQuestsSimultaneously = false; // true -> Risky
 export const defaultHideNonAutoCompletableQuests = false;
 export const defaultNotifyOnQuestComplete = true;
@@ -59,38 +61,49 @@ export const defaultNotifyOnNewExcludedQuests = false;
 export const defaultQuestCompletedAlertSound = "bop_message1";
 export const defaultQuestCompletedAlertVolume = 100;
 
-const questTaskTypes = [
-    QuestTaskType.WATCH_VIDEO,
-    QuestTaskType.WATCH_VIDEO_ON_MOBILE,
-    QuestTaskType.ACHIEVEMENT_IN_ACTIVITY,
-    QuestTaskType.ACHIEVEMENT_IN_GAME,
-    QuestTaskType.PLAY_ACTIVITY,
-    QuestTaskType.PLAY_ON_DESKTOP,
-    QuestTaskType.PLAY_ON_DESKTOP_V2,
-    QuestTaskType.STREAM_ON_DESKTOP,
-    QuestTaskType.PLAY_ON_PLAYSTATION,
-    QuestTaskType.PLAY_ON_XBOX,
-] as const satisfies readonly QuestTaskType[];
+interface QuestCapability {
+    desktopOnly: boolean;
+    autoComplete: boolean;
+    requiresNativeCompletion?: boolean;
+}
 
-export const autoCompleteQuestTaskTypes = [
-    QuestTaskType.PLAY_ON_DESKTOP,
-    QuestTaskType.PLAY_ON_XBOX,
-    QuestTaskType.PLAY_ON_PLAYSTATION,
-    QuestTaskType.PLAY_ACTIVITY,
-    QuestTaskType.WATCH_VIDEO,
-    QuestTaskType.WATCH_VIDEO_ON_MOBILE,
-    QuestTaskType.ACHIEVEMENT_IN_ACTIVITY,
-] as const satisfies readonly QuestTaskType[];
+const questCapabilities = {
+    [QuestTaskType.WATCH_VIDEO]: { desktopOnly: false, autoComplete: true },
+    [QuestTaskType.WATCH_VIDEO_ON_MOBILE]: { desktopOnly: false, autoComplete: true },
+    [QuestTaskType.ACHIEVEMENT_IN_ACTIVITY]: { desktopOnly: true, autoComplete: true, requiresNativeCompletion: true },
+    [QuestTaskType.ACHIEVEMENT_IN_GAME]: { desktopOnly: true, autoComplete: false },
+    [QuestTaskType.PLAY_ACTIVITY]: { desktopOnly: true, autoComplete: true },
+    [QuestTaskType.PLAY_ON_DESKTOP]: { desktopOnly: true, autoComplete: true },
+    // [QuestTaskType.PLAY_ON_DESKTOP_V2]: { desktopOnly: true, autoComplete: false },
+    // [QuestTaskType.STREAM_ON_DESKTOP]: { desktopOnly: true, autoComplete: false },
+    [QuestTaskType.PLAY_ON_PLAYSTATION]: { desktopOnly: true, autoComplete: true },
+    [QuestTaskType.PLAY_ON_XBOX]: { desktopOnly: true, autoComplete: true },
+} as const satisfies Partial<Record<QuestTaskType, QuestCapability>>;
 
-const desktopOnlyAutoCompleteQuestTypes = new Set<QuestTaskType>([
-    QuestTaskType.PLAY_ON_DESKTOP,
-    QuestTaskType.PLAY_ON_PLAYSTATION,
-    QuestTaskType.PLAY_ON_XBOX,
-    QuestTaskType.PLAY_ACTIVITY,
-]);
+type AutoCompleteQuestTaskType = {
+    [Type in keyof typeof questCapabilities]: typeof questCapabilities[Type]["autoComplete"] extends true ? Type : never;
+}[keyof typeof questCapabilities];
 
-export function isDesktopCompatible(questType: QuestTaskType): boolean {
-    return IS_DISCORD_DESKTOP || !desktopOnlyAutoCompleteQuestTypes.has(questType);
+const questTaskTypes = Object.keys(questCapabilities) as (keyof typeof questCapabilities)[];
+export const autoCompleteQuestTaskTypes = questTaskTypes.filter((type): type is AutoCompleteQuestTaskType => questCapabilities[type].autoComplete);
+
+function getQuestCapability(questType: QuestTaskType): QuestCapability | undefined {
+    return Object.hasOwn(questCapabilities, questType)
+        ? questCapabilities[questType as keyof typeof questCapabilities]
+        : undefined;
+}
+
+export function isEnrollmentCompatible(questType: QuestTaskType): boolean {
+    const capability = getQuestCapability(questType);
+
+    return capability != null && (!capability.desktopOnly || IS_DISCORD_DESKTOP);
+}
+
+export function isAutoCompleteCompatible(questType: QuestTaskType): boolean {
+    const capability = getQuestCapability(questType);
+
+    return isEnrollmentCompatible(questType) && capability?.autoComplete === true
+        && (!capability.requiresNativeCompletion || typeof VencordNative?.pluginHelpers?.Questify?.complete === "function");
 }
 
 export type AutoCompleteQuestTypes = Partial<Record<QuestTaskType, boolean>>;
@@ -129,4 +142,4 @@ export const defaultLastQuestPageFilters = {} as Record<string, { group: string,
 export const ignoredQuestIDsKey = "questIDs";
 export const defaultIgnoredQuestIDs = { [ignoredQuestIDsKey]: [] } as Record<typeof ignoredQuestIDsKey, string[]>;
 export const defaultResumeQuestIDs = {} as Record<string, // key: UserID
-    { timestamp: number, questIDs: string[]; }>;
+    { timestamp: number, questIDs: string[]; automaticQuestIDs?: string[]; }>;

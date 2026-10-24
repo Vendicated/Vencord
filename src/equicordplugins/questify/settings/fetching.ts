@@ -35,7 +35,10 @@ export function autoFetchCompatible(): boolean {
         buttonCompatible = true;
     }
 
-    const compatible = fetching && (buttonCompatible || notificationsCompatible);
+    const autoEnroll = settings.autoEnrollQuests && settings.autoEnrollQuestsUnpaused !== false;
+    const autoComplete = settings.autoCompleteQuests && settings.autoCompleteQuestsUnpaused !== false;
+    const automationCompatible = settings.usedKonamiCode === true && settings.allowChangingDangerousSettings && (autoEnroll || autoComplete);
+    const compatible = fetching && (buttonCompatible || notificationsCompatible || automationCompatible);
 
     return compatible;
 }
@@ -93,5 +96,6 @@ export function resetQuestsToResume(quest?: Quest, userId?: string): void {
     resumeQuestIDs[key] = {
         timestamp: resumeState.timestamp,
         questIDs: resumeState.questIDs.filter(id => id !== quest.id),
+        automaticQuestIDs: resumeState.automaticQuestIDs?.filter(id => id !== quest.id),
     };
 }

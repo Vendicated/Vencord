@@ -14,7 +14,7 @@ import { QuestNotificationsSetting } from "../components/questNotificationsSetti
 import { QuestTilesSetting } from "../components/questTilesSetting";
 import { ReorderQuestsSetting } from "../components/reorderQuestsSetting";
 import { SettingsSearch } from "../components/settingsSearch";
-import { defaultAcknowledgedNotices, defaultAllowChangingDangerousSettings, defaultAutoCompleteQuestsSimultaneously, defaultAutoCompleteQuestTypes, defaultClaimedSubsort, defaultCompleteVideoQuestsQuicker, defaultDisableAccountPanelPromo, defaultDisableAccountPanelQuestProgress, defaultDisableFriendsListPromo, defaultDisableMembersListPromo, defaultDisableOrbsAndQuestsBadges, defaultDisableQuestsEverything, defaultDisableRelocationNotices, defaultDisableSponsoredBanner, defaultExpiredSubsort, defaultHiddenQuestStatuses, defaultHideNonAutoCompletableQuests, defaultIgnoredQuestIDs, defaultIgnoredSubsort, defaultIsOnQuestsPage, defaultLastQuestPageFilters, defaultLastQuestPageSort, defaultLeftClickAction, defaultMakeMobileVideoQuestsDesktopCompatible, defaultMiddleClickAction, defaultNewExcludedQuestAlertSound, defaultNewExcludedQuestAlertVolume, defaultNewQuestAlertSound, defaultNewQuestAlertVolume, defaultNotifyOnNewExcludedQuests, defaultNotifyOnNewQuests, defaultNotifyOnQuestComplete, defaultPreventVideoQuestsPausing, defaultQuestButtonBadgeColor, defaultQuestButtonBadgeCount, defaultQuestButtonDisplay, defaultQuestButtonIncludedTypes, defaultQuestButtonIndicator, defaultQuestCompletedAlertSound, defaultQuestCompletedAlertVolume, defaultQuestFetchInterval, defaultQuestOrder, defaultQuestTileClaimedColorSetting, defaultQuestTileExpiredColorSetting, defaultQuestTileGradient, defaultQuestTileIgnoredColorSetting, defaultQuestTilePreload, defaultQuestTileUnclaimedColorSetting, defaultRememberQuestPageFilters, defaultRememberQuestPageSort, defaultResumeInterruptedQuests, defaultResumeQuestIDs, defaultRightClickAction, defaultUnclaimedSubsort, type QuestButtonAction, type QuestButtonDisplayMode, type QuestButtonIncludedTypes, type QuestButtonIndicatorMode, type QuestOrderStatus } from "./def";
+import { defaultAcknowledgedNotices, defaultAllowChangingDangerousSettings, defaultAutoCompleteQuests, defaultAutoCompleteQuestsSimultaneously, defaultAutoCompleteQuestTypes, defaultAutoEnrollQuests, defaultClaimedSubsort, defaultCompleteVideoQuestsQuicker, defaultDisableAccountPanelPromo, defaultDisableAccountPanelQuestProgress, defaultDisableFriendsListPromo, defaultDisableMembersListPromo, defaultDisableOrbsAndQuestsBadges, defaultDisableQuestsEverything, defaultDisableRelocationNotices, defaultDisableSponsoredBanner, defaultExpiredSubsort, defaultHiddenQuestStatuses, defaultHideNonAutoCompletableQuests, defaultIgnoredQuestIDs, defaultIgnoredSubsort, defaultIsOnQuestsPage, defaultLastQuestPageFilters, defaultLastQuestPageSort, defaultLeftClickAction, defaultMakeMobileVideoQuestsDesktopCompatible, defaultMiddleClickAction, defaultNewExcludedQuestAlertSound, defaultNewExcludedQuestAlertVolume, defaultNewQuestAlertSound, defaultNewQuestAlertVolume, defaultNotifyOnNewExcludedQuests, defaultNotifyOnNewQuests, defaultNotifyOnQuestComplete, defaultPreventVideoQuestsPausing, defaultQuestButtonBadgeColor, defaultQuestButtonBadgeCount, defaultQuestButtonDisplay, defaultQuestButtonIncludedTypes, defaultQuestButtonIndicator, defaultQuestCompletedAlertSound, defaultQuestCompletedAlertVolume, defaultQuestFetchInterval, defaultQuestOrder, defaultQuestTileClaimedColorSetting, defaultQuestTileExpiredColorSetting, defaultQuestTileGradient, defaultQuestTileIgnoredColorSetting, defaultQuestTilePreload, defaultQuestTileUnclaimedColorSetting, defaultRememberQuestPageFilters, defaultRememberQuestPageSort, defaultResumeInterruptedQuests, defaultResumeQuestIDs, defaultRightClickAction, defaultUnclaimedSubsort, type QuestButtonAction, type QuestButtonDisplayMode, type QuestButtonIncludedTypes, type QuestButtonIndicatorMode, type QuestOrderStatus } from "./def";
 
 const MIGRATION_TARGET = 1;
 const CURRENT_SETTINGS = PlainSettings.plugins.Questify;
@@ -136,6 +136,18 @@ export const settings = definePluginSettings({
         type: OptionType.BOOLEAN,
         description: "Hide incomplete Quests without a supported and enabled auto-complete task.",
         default: defaultHideNonAutoCompletableQuests,
+        hidden: true,
+    },
+    autoEnrollQuests: {
+        type: OptionType.BOOLEAN,
+        description: "Automatically enroll in eligible available Quests on successful fetches while Discord is running.",
+        default: defaultAutoEnrollQuests,
+        hidden: true,
+    },
+    autoCompleteQuests: {
+        type: OptionType.BOOLEAN,
+        description: "Automatically enroll in and complete eligible available Quests with supported and enabled task types on successful fetches while Discord is running.",
+        default: defaultAutoCompleteQuests,
         hidden: true,
     },
     autoCompleteQuestsSimultaneously: {
@@ -409,4 +421,9 @@ export const settings = definePluginSettings({
         default: defaultResumeQuestIDs,
         hidden: true,
     },
-});
+}).withPrivateSettings<{
+    usedKonamiCode?: boolean;
+    autoEnrollQuestsUnpaused?: boolean;
+    autoCompleteQuestsUnpaused?: boolean;
+    enrollmentRateLimitBlockedUntil?: Record<string, number>;
+}>();
