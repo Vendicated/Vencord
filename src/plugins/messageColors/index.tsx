@@ -12,8 +12,14 @@ import definePlugin, { StartAt } from "@utils/types";
 import { React } from "@webpack/common";
 import type { ReactElement } from "react";
 
-import { BlockDisplayType, ColorType, regex, RenderType, replaceRegexp, settings } from "./constants";
-
+import {
+    BlockDisplayType,
+    ColorType,
+    regex,
+    RenderType,
+    replaceRegexp,
+    settings,
+} from "./constants";
 
 interface ParsedColorInfo {
     type: "color";
@@ -22,7 +28,10 @@ interface ParsedColorInfo {
     text: string;
 }
 
-const requiredFirstCharacters = ["r", "h", "#"].flatMap(v => [v, v.toUpperCase()]);
+const requiredFirstCharacters = ["r", "h", "#"].flatMap((v) => [
+    v,
+    v.toUpperCase(),
+]);
 
 export default definePlugin({
     authors: [Devs.hen],
@@ -37,28 +46,28 @@ export default definePlugin({
             group: true,
             replacement: {
                 match: /roleMention:\{order:(\i\.\i\.order)/,
-                replace: "color:$self.getColor($1),$&"
-            }
+                replace: "color:$self.getColor($1),$&",
+            },
         },
         // Changes text md rule regex, so it stops right before hsl( | rgb(
         // Without it discord will try to pass a string without those to color rule
         {
-            find: ".defaultRules.text)",
+            find: ".defaultRules.text,match:",
             group: true,
             replacement: {
                 // $)/)
                 match: /\$\)\//,
                 // hsl(|rgb(|$&
-                replace: requiredFirstCharacters.join("|") + "|$&"
-            }
+                replace: requiredFirstCharacters.join("|") + "|$&",
+            },
         },
         // Fix the issue with [#123](https://example.com) rendered as plain text
         {
             find: "parseInlineCodeChildContent:",
             replacement: {
                 match: /parseInlineCodeChildContent:/,
-                replace: "isInsideOfLink:true,$&"
-            }
+                replace: "isInsideOfLink:true,$&",
+            },
         },
         // Discord just requires it to be here
         // Or it explodes (bad)
@@ -67,21 +76,21 @@ export default definePlugin({
             group: true,
             replacement: {
                 match: /roleMention:{type:/,
-                replace: "color:{type:\"inlineObject\"},$&",
-            }
+                replace: 'color:{type:"inlineObject"},$&',
+            },
         },
     ],
     start() {
         const amount = settings.store.enableShortHexCodes ? "{1,2}" : "{2}";
         regex.push({
             reg: new RegExp("#(?:[0-9a-fA-F]{3})" + amount, "g"),
-            type: ColorType.HEX
+            type: ColorType.HEX,
         });
     },
     // Needed to load all regex before patching
     startAt: StartAt.Init,
     getColor(order: number) {
-        const source = regex.map(r => r.reg.source).join("|");
+        const source = regex.map((r) => r.reg.source).join("|");
         const matchAllRegExp = new RegExp(`^(${source})`, "i");
         return {
             order,
@@ -92,16 +101,20 @@ export default definePlugin({
             match(content: string) {
                 return matchAllRegExp.exec(content);
             },
-            parse(matchedContent: RegExpExecArray, _, parseProps: Record<string, any>):
-                ParsedColorInfo | ({ type: "text", content: string; }) {
+            parse(
+                matchedContent: RegExpExecArray,
+                _,
+                parseProps: Record<string, any>,
+            ): ParsedColorInfo | { type: "text"; content: string } {
                 // This check makes sure that it doesn't try to parse color
                 // When typing/editing message
                 //
                 // Discord doesn't know how to deal with color and crashes
-                if (!parseProps.messageId || parseProps.isInsideOfLink) return {
-                    type: "text",
-                    content: matchedContent[0]
-                };
+                if (!parseProps.messageId || parseProps.isInsideOfLink)
+                    return {
+                        type: "text",
+                        content: matchedContent[0],
+                    };
 
                 const content = matchedContent[0];
                 try {
@@ -111,59 +124,90 @@ export default definePlugin({
                         type: "color",
                         colorType: type,
                         color: parseColor(content, type),
-                        text: content
+                        text: content,
                     };
                 } catch (e) {
                     console.error(e);
                     return {
                         type: "text",
-                        content: matchedContent[0]
+                        content: matchedContent[0],
                     };
                 }
             },
-            react: ErrorBoundary.wrap(({ text, colorType, color }: ParsedColorInfo) => {
-                if (settings.store.renderType === RenderType.FOREGROUND) {
-                    return <span style={{ color: color }}>{text}</span>;
-                }
-                const styles = {
-                    "--color": color
-                } as React.CSSProperties;
+            react: ErrorBoundary.wrap(
+                ({ text, colorType, color }: ParsedColorInfo) => {
+                    if (settings.store.renderType === RenderType.FOREGROUND) {
+                        return <span style={{ color: color }}>{text}</span>;
+                    }
+                    const styles = {
+                        "--color": color,
+                    } as React.CSSProperties;
 
-                if (settings.store.renderType === RenderType.BACKGROUND) {
-                    const isDark = isColorDark(color, colorType);
-                    const className = `vc-color-bg ${!isDark ? "vc-color-bg-invert" : ""}`;
-                    return <span className={className} style={styles}>{text}</span>;
-                }
+                    if (settings.store.renderType === RenderType.BACKGROUND) {
+                        const isDark = isColorDark(color, colorType);
+                        const className = `vc-color-bg ${!isDark ? "vc-color-bg-invert" : ""}`;
+                        return (
+                            <span className={className} style={styles}>
+                                {text}
+                            </span>
+                        );
+                    }
 
-                // Only block display left
-                const margin = "2px";
+                    // Only block display left
+                    const margin = "2px";
 
-                switch (settings.store.blockView) {
-                    case BlockDisplayType.LEFT:
-                        styles.marginRight = margin;
-                        return <><span className="vc-color-block" style={styles} />{text}</>;
+                    switch (settings.store.blockView) {
+                        case BlockDisplayType.LEFT:
+                            styles.marginRight = margin;
+                            return (
+                                <>
+                                    <span
+                                        className="vc-color-block"
+                                        style={styles}
+                                    />
+                                    {text}
+                                </>
+                            );
 
-                    case BlockDisplayType.RIGHT:
-                        styles.marginLeft = margin;
-                        return <>{text}<span className="vc-color-block" style={styles} /></>;
+                        case BlockDisplayType.RIGHT:
+                            styles.marginLeft = margin;
+                            return (
+                                <>
+                                    {text}
+                                    <span
+                                        className="vc-color-block"
+                                        style={styles}
+                                    />
+                                </>
+                            );
 
-                    case BlockDisplayType.BOTH:
-                        styles.marginLeft = margin;
-                        styles.marginRight = margin;
-                        return <>
-                            <span className="vc-color-block" style={styles} />
-                            {text}
-                            <span className="vc-color-block" style={styles} />
-                        </>;
-                }
-            }, {
-                fallback: data => {
-                    const child = data.children as ReactElement<any>;
-                    return <>{child.props?.text}</>;
-                }
-            })
+                        case BlockDisplayType.BOTH:
+                            styles.marginLeft = margin;
+                            styles.marginRight = margin;
+                            return (
+                                <>
+                                    <span
+                                        className="vc-color-block"
+                                        style={styles}
+                                    />
+                                    {text}
+                                    <span
+                                        className="vc-color-block"
+                                        style={styles}
+                                    />
+                                </>
+                            );
+                    }
+                },
+                {
+                    fallback: (data) => {
+                        const child = data.children as ReactElement<any>;
+                        return <>{child.props?.text}</>;
+                    },
+                },
+            ),
         };
-    }
+    },
 });
 
 // https://en.wikipedia.org/wiki/Relative_luminance
@@ -182,7 +226,10 @@ const isColorDark = (color: string, type: ColorType): boolean => {
         case ColorType.HEX: {
             color = color.substring(1);
             if (color.length === 3) {
-                color = color.split("").flatMap(v => [v, v]).join("");
+                color = color
+                    .split("")
+                    .flatMap((v) => [v, v])
+                    .join("");
             }
 
             const rgb = parseInt(color, 16);
@@ -196,7 +243,7 @@ const isColorDark = (color: string, type: ColorType): boolean => {
         case ColorType.HSL: {
             const match = color.match(/\d+/g)!;
             const lightness = +match[2];
-            return lightness < (border / 255 * 100);
+            return lightness < (border / 255) * 100;
         }
     }
 };
@@ -212,13 +259,19 @@ const getColorType = (color: string): ColorType => {
 };
 
 function parseColor(str: string, type: ColorType): string {
-    str = str.toLowerCase().trim().replaceAll(/(\s|,)+/g, " ");
+    str = str
+        .toLowerCase()
+        .trim()
+        .replaceAll(/(\s|,)+/g, " ");
     switch (type) {
         case ColorType.RGB:
             return str;
         case ColorType.RGBA:
             if (!str.includes("/"))
-                return str.replaceAll(replaceRegexp(/\f(?=\s*?\))/.source), "/$&");
+                return str.replaceAll(
+                    replaceRegexp(/\f(?=\s*?\))/.source),
+                    "/$&",
+                );
             return str;
         case ColorType.HEX:
             return str[0] === "#" ? str : `#${str}`;
