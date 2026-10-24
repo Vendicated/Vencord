@@ -21,10 +21,12 @@ import { Devs } from "@utils/constants";
 import { getCurrentChannel } from "@utils/discord";
 import { runtimeHashMessageKey } from "@utils/intlHash";
 import { Logger } from "@utils/Logger";
+import { sleep } from "@utils/misc";
+import { Queue } from "@utils/Queue";
+import { useForceUpdater } from "@utils/react";
 import definePlugin, { OptionType } from "@utils/types";
-import { Channel, Message, User } from "@vencord/discord-types";
-import { findComponentByCodeLazy } from "@webpack";
-import { i18n,ReferencedMessageStore, RelationshipStore } from "@webpack/common";
+import { Channel, CustomEmoji, Message, ReactionEmoji, User } from "@vencord/discord-types";
+import { Constants, FluxDispatcher, i18n, ReferencedMessageStore, RelationshipStore, RestAPI, useEffect } from "@webpack/common";
 
 interface MessageDeleteProps {
     // Internal intl message for BLOCKED_MESSAGE_COUNT
@@ -34,6 +36,17 @@ interface MessageDeleteProps {
             messageReference: Message | null;
         }[];
     };
+}
+
+interface ReactionCacheEntry {
+    fetched: boolean;
+    users: Map<string, User>;
+}
+
+interface ReactionProps {
+    message: Message;
+    emoji: CustomEmoji;
+    type: number;
 }
 
 type MemberListProps =
@@ -51,23 +64,74 @@ type MemberListProps =
         channel: Channel;
     };
 
+const queue = new Queue();
+let reactions: Record<string, ReactionCacheEntry> = {};
+
+function fetchReactions(msg: Message, emoji: ReactionEmoji, type: number) {
+    const key = emoji.name + (emoji.id ? `:${emoji.id}` : "");
+    return RestAPI.get({
+        url: Constants.Endpoints.REACTIONS(msg.channel_id, msg.id, key),
+        query: {
+            limit: 100,
+            type
+        },
+        oldFormErrors: true
+    })
+        .then(res => {
+            for (const user of res.body) {
+                FluxDispatcher.dispatch({
+                    type: "USER_UPDATE",
+                    user
+                });
+            }
+
+            FluxDispatcher.dispatch({
+                type: "MESSAGE_REACTION_ADD_USERS",
+                channelId: msg.channel_id,
+                messageId: msg.id,
+                users: res.body,
+                emoji,
+                reactionType: type
+            });
+        })
+        .catch(console.error)
+        .finally(() => sleep(250));
+}
+
+function getReactionsWithQueue(msg: Message, e: ReactionEmoji, type: number) {
+    const key = `${msg.id}:${e.name}:${e.id ?? ""}:${type}`;
+    const cache = reactions[key] ??= { fetched: false, users: new Map() };
+    if (!cache.fetched) {
+        queue.unshift(() => fetchReactions(msg, e, type));
+        cache.fetched = true;
+    }
+
+    return cache.users;
+}
+
 // Remove this migration once enough time has passed
-migratePluginSetting("NoBlockedMessages", "ignoreBlockedMessages", "ignoreMessages");
+migratePluginSetting("HideBlockedUsers", "ignoreBlockedMessages", "ignoreMessages");
 const settings = definePluginSettings({
-    ignoreMessages: {
-        description: "Completely ignores incoming messages from blocked and ignored (if enabled) users",
+    hideReactions: {
+        description: "Hides reactions by blocked and ignored (if enabled) users",
         type: OptionType.BOOLEAN,
         default: false,
         restartNeeded: true
     },
     hideFromMembersList: {
-        description: "Completely hides blocked and ignored (if enabled) users from members list",
+        description: "Hides blocked and ignored (if enabled) users from the members list",
+        type: OptionType.BOOLEAN,
+        default: true,
+        restartNeeded: true
+    },
+    hideReplies: {
+        description: "Hides replies to messages by blocked and ignored (if enabled) users",
         type: OptionType.BOOLEAN,
         default: false,
         restartNeeded: true
     },
-    hideReplies: {
-        description: "Completely hides incoming messages to blocked and ignored (if enabled) users",
+    ignoreMessages: {
+        description: "Completely ignores incoming messages from blocked and ignored (if enabled) users",
         type: OptionType.BOOLEAN,
         default: false,
         restartNeeded: true
@@ -82,7 +146,7 @@ const settings = definePluginSettings({
 
 export default definePlugin({
     name: "HideBlockedUsers",
-    description: "Hides all blocked/ignored users from Discord completely",
+    description: "Completely hide all blocked/ignored users in Discord",
     authors: [Devs.rushii, Devs.Samu, Devs.jamesbt365, Devs.imnotplayinginreallife],
     tags: ["Accessibility", "Chat"],
     settings,
@@ -118,6 +182,13 @@ export default definePlugin({
             ]
         },
         {
+            find: '"MessageReactionsStore"',
+            replacement: {
+                match: /CONNECTION_OPEN:function\(\){(\i)={}/,
+                replace: "$&;$self.reactions=$1;"
+            }
+        },
+        {
             find: /,disableAnimationTracking\(\)/,
             predicate: () => settings.store.hideFromMembersList,
             replacement: [
@@ -151,12 +222,55 @@ export default definePlugin({
                 match: /({channel:(\i).+?\i.\i\);)(\i)/,
                 replace: "$1if ($self.shouldIgnoreUser($2.ownerId)) {return null};$3"
             }
+        },
+        {
+            find: /\i\i.\i.EMOJI_IN_BURST_REACTION_HOVER:\i\i.\i.EMOJI_IN_BURST_REACTION_HOVER_UPSELL/,
+            replacement: {
+                match: /return\(0,\i.jsx\)\(\i.\i,{ta/,
+                predicate: () => settings.store.hideReactions,
+                replace: "if($self.shouldHideReaction({message: arguments[0].message, emoji: arguments[0].emoji, type: arguments[0].type})) return null;$&"
+            }
         }
     ],
 
+    shouldHideReaction({ message, emoji, type }: ReactionProps) {
+        try {
+            const forceUpdate = useForceUpdater();
+
+            useEffect(() => {
+                const cb = (e: any) => {
+                    if (e?.messageId === message.id)
+                        forceUpdate();
+                };
+                FluxDispatcher.subscribe("MESSAGE_REACTION_ADD_USERS", cb);
+
+                return () => FluxDispatcher.unsubscribe("MESSAGE_REACTION_ADD_USERS", cb);
+            }, [message.id, forceUpdate]);
+
+            if (message.reactions.length > 10) return false;
+
+            const reactionMap = getReactionsWithQueue(message, emoji, type);
+            const usersIds = reactionMap.keys().map(userId => {
+                if (this.shouldIgnoreUser(userId)) {
+                    return null;
+                }
+
+                return userId;
+            }).toArray().filter(userId => userId != null);
+
+            if (usersIds.length === 0) {
+                return true;
+            } else {
+                return false;
+            }
+        } catch (e) {
+            new Logger("HideBlockedUsers").error("Failed to check if reaction should be hidden:", e);
+            return false;
+        }
+    },
+
     shouldIgnoreUser(userId: string, referenceMessageId?: string, referenceMessageChannelId?: string) {
         try {
-            findComponentByCodeLazy("let{threadId:t,goToThread:n,observePostVisibilityAnalytics:i,overrideMedia:r,className:d,containerWidth:o}=e");
             if (referenceMessageId && referenceMessageChannelId) {
                 const referencedMessage = ReferencedMessageStore.getMessage(referenceMessageChannelId, referenceMessageId).message;
                 if (!referencedMessage) return false;
@@ -164,7 +278,7 @@ export default definePlugin({
             }
             return RelationshipStore.isBlocked(userId) || (settings.store.applyToIgnoredUsers && RelationshipStore.isIgnored(userId));
         } catch (e) {
-            new Logger("NoBlockedMessages").error("Failed to check if user is blocked or ignored:", e);
+            new Logger("HideBlockedUsers").error("Failed to check if user is blocked or ignored:", e);
             return false;
         }
     },
@@ -183,7 +297,7 @@ export default definePlugin({
 
             return is("BLOCKED_MESSAGE_COUNT") || (settings.store.applyToIgnoredUsers && is("IGNORED_MESSAGE_COUNT"));
         } catch (e) {
-            new Logger("NoBlockedMessages").error("Failed to check if message should be hidden:", e);
+            new Logger("HideBlockedUsers").error("Failed to check if message should be hidden:", e);
             return false;
         }
     },
@@ -192,27 +306,31 @@ export default definePlugin({
         try {
             const members = args[0].children ?? args[0].channel.recipients;
             if (Array.isArray(members)) {
-                const blockedUsersIds: number[] = members.map(child => {
-                    if (child != null && child.key?.startsWith("member") && this.shouldIgnoreUser(child?.props?.user?.id)) {
-                        return Number(child.props.user.id);
-                    }
-                    if (getCurrentChannel()?.isGroupDM() && this.shouldIgnoreUser(child)) {
-                        return Number(child);
-                    }
-                }).filter(blockedUserId => blockedUserId != null);
-                if (members.length > 0) {
-                    const currentChannel = getCurrentChannel();
-                    if (currentChannel) {
+                const currentChannel = getCurrentChannel();
+                if (currentChannel) {
+                    const blockedUsersIds: string[] = members.map(child => {
+                        if (child != null && child.key?.startsWith("member") && this.shouldIgnoreUser(child?.props?.user?.id)) {
+                            return child.props.user.id;
+                        }
+                        if (currentChannel.isGroupDM() && this.shouldIgnoreUser(child)) {
+                            return child;
+                        }
+                    }).filter(blockedUserId => blockedUserId != null);
+                    if (members.length > 0) {
                         if (currentChannel.isGroupDM() && args[0].channel) {
-                            args[0].channel.recipients = args[0].channel.recipients.filter(userId => !blockedUsersIds.includes(Number(userId)));
+                            args[0].channel.recipients = args[0].channel.recipients.filter(userId => !blockedUsersIds.includes(userId));
                         } else if (args[0].children) {
-                            args[0].children = args[0].children.filter(child => !blockedUsersIds.includes(Number(child?.props?.user?.id)));
+                            args[0].children = args[0].children.filter(child => !blockedUsersIds.includes(child?.props?.user?.id));
                         }
                     }
                 }
             }
         } catch (e) {
-            new Logger("NoBlockedMessages").error(`Failed to hide blocked users from member list: ${e}`);
+            new Logger("HideBlockedUsers").error(`Failed to hide blocked users from member list: ${e}`);
         }
+    },
+
+    set reactions(value: any) {
+        reactions = value;
     }
 });

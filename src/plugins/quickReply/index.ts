@@ -18,7 +18,7 @@
 
 import { isPluginEnabled } from "@api/PluginManager";
 import { definePluginSettings } from "@api/Settings";
-import NoBlockedMessagesPlugin from "@plugins/noBlockedMessages";
+import NoBlockedMessagesPlugin from "@plugins/hideBlockedUsers";
 import NoReplyMentionPlugin from "@plugins/noReplyMention";
 import { Devs, IS_MAC } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";

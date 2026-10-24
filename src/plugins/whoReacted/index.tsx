@@ -19,7 +19,7 @@
 import { isPluginEnabled } from "@api/PluginManager";
 import { definePluginSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
-import NoBlockedMessagesPlugin from "@plugins/noBlockedMessages";
+import NoBlockedMessagesPlugin from "@plugins/hideBlockedUsers";
 import { Devs } from "@utils/constants";
 import { sleep } from "@utils/misc";
 import { Queue } from "@utils/Queue";
