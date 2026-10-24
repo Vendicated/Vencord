@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Button, MediaEngineStore, useState } from "@webpack/common";
+import { Button, MediaEngineStore, useEffect, useRef, useState } from "@webpack/common";
 
 import type { VoiceRecorder } from ".";
 import { settings } from "./settings";
@@ -24,62 +24,108 @@ import { settings } from "./settings";
 export const VoiceRecorderWeb: VoiceRecorder = ({ setAudioBlob, onRecordingChange }) => {
     const [recording, setRecording] = useState(false);
     const [paused, setPaused] = useState(false);
+    const [starting, setStarting] = useState(false);
     const [recorder, setRecorder] = useState<MediaRecorder>();
-    const [chunks, setChunks] = useState<Blob[]>([]);
+    const session = useRef<AbortController | null>(null);
+
+    // cancelling the session also covers microphone permission resolving after close
+    useEffect(() => () => session.current?.abort(), []);
 
     const changeRecording = (recording: boolean) => {
         setRecording(recording);
         onRecordingChange?.(recording);
     };
 
-    function toggleRecording() {
-        const nowRecording = !recording;
+    async function toggleRecording() {
+        function stopTracks(stream: MediaStream) {
+            for (const track of stream.getTracks()) track.stop();
+        }
 
-        if (nowRecording) {
-            navigator.mediaDevices.getUserMedia({
+        if (recording) {
+            if (recorder!.state !== "inactive") recorder!.stop();
+            stopTracks(recorder!.stream);
+            return;
+        }
+
+        // keep one session before React renders the disabled Start button
+        if (session.current) return;
+        const controller = new AbortController();
+        session.current = controller;
+        setStarting(true);
+
+        let stream: MediaStream | undefined;
+        try {
+            stream = await navigator.mediaDevices.getUserMedia({
                 audio: {
                     echoCancellation: settings.store.echoCancellation,
                     noiseSuppression: settings.store.noiseSuppression,
                     deviceId: MediaEngineStore.getInputDeviceId()
                 }
-            }).then(stream => {
-                const chunks = [] as Blob[];
-                setChunks(chunks);
-
-                const recorder = new MediaRecorder(stream);
-                setRecorder(recorder);
-                recorder.addEventListener("dataavailable", e => {
-                    chunks.push(e.data);
-                });
-                recorder.start();
-
-                changeRecording(true);
             });
-        } else {
-            if (recorder) {
-                recorder.addEventListener("stop", () => {
-                    setAudioBlob(new Blob(chunks, { type: "audio/ogg; codecs=opus" }));
 
-                    changeRecording(false);
-                });
-                recorder.stop();
-                recorder.stream.getTracks().forEach(track => track.stop());
+            if (controller.signal.aborted) {
+                stopTracks(stream);
+                return;
             }
+
+            const recorder = new MediaRecorder(stream);
+            const chunks: Blob[] = [];
+            let failed = false;
+            recorder.addEventListener("dataavailable", e => chunks.push(e.data));
+
+            // stop still fires after an error, so reset the session in that handler
+            recorder.addEventListener("error", () => {
+                failed = true;
+                stopTracks(recorder.stream);
+            });
+
+            controller.signal.addEventListener("abort", () => {
+                if (recorder.state !== "inactive") recorder.stop();
+                stopTracks(recorder.stream);
+            }, { once: true });
+
+            recorder.addEventListener("stop", () => {
+                stopTracks(recorder.stream);
+
+                // closing the modal discards its recording without updating unmounted state
+                if (controller.signal.aborted) return;
+                session.current = null;
+                setRecorder(undefined);
+                setPaused(false);
+                changeRecording(false);
+
+                if (!failed) setAudioBlob(new Blob(chunks, { type: "audio/ogg; codecs=opus" }));
+            });
+
+            recorder.start();
+            setRecorder(recorder);
+            changeRecording(true);
+        } catch {
+            // dont leave the mic running if starting the recorder fails
+            if (stream) stopTracks(stream);
+            if (!controller.signal.aborted) session.current = null;
+        } finally {
+            if (!controller.signal.aborted) setStarting(false);
         }
     }
 
     return (
         <>
-            <Button onClick={toggleRecording}>
+            <Button onClick={toggleRecording} disabled={starting}>
                 {recording ? "Stop" : "Start"} recording
             </Button>
 
             <Button
                 disabled={!recording}
                 onClick={() => {
-                    setPaused(!paused);
-                    if (paused) recorder?.resume();
-                    else recorder?.pause();
+                    // stop() makes the recorder inactive before its stop event updates the UI
+                    if (recorder?.state === "paused") {
+                        recorder.resume();
+                        setPaused(false);
+                    } else if (recorder?.state === "recording") {
+                        recorder.pause();
+                        setPaused(true);
+                    }
                 }}
             >
                 {paused ? "Resume" : "Pause"} recording
