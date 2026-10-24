@@ -1,7 +1,7 @@
 {
     "name": "vencord",
     "private": "true",
-    "version": "1.15.12",
+    "version": "1.15.13",
     "description": "The cutest Discord client mod",
     "homepage": "https://github.com/Vendicated/Vencord#readme",
     "bugs": {
@@ -62,7 +62,6 @@
         "eslint-plugin-simple-header": "^1.2.1",
         "eslint-plugin-simple-import-sort": "^13.0.0",
         "eslint-plugin-unused-imports": "^4.4.1",
-        "highlight.js": "11.11.1",
         "html-minifier-terser": "^7.2.0",
         "moment": "^2.22.2",
         "p-limit": "^7.3.0",
