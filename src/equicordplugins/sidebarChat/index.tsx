@@ -336,11 +336,11 @@ export default definePlugin({
             group: true,
             replacement: [
                 {
-                    match: /truncateTop\(\i\)\{(?=.{0,100}?this\._array\.length-\i;return)/,
+                    match: /truncateTop\(\i\)\{/,
                     replace: "$&if($self.hasMultipleChatViews(this.channelId))return this;"
                 },
                 {
-                    match: /truncateBottom\(\i\)\{(?=.{0,100}?return this\._array\.length<=\i\?this:this\.mutate\()/,
+                    match: /truncateBottom\(\i\)\{/,
                     replace: "$&if($self.hasMultipleChatViews(this.channelId))return this;"
                 }
             ]
