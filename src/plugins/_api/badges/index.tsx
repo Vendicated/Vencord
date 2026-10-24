@@ -81,12 +81,12 @@ function toDirectoryBadge(b: ProfileBadge, userId: string): DirectoryBadge {
 
     return DirectoryBadges[id] ??= {
         badge_id: id,
-        name: b.name ?? b.description ?? "",
+        name: b.name ?? "",
         description: b.detail ?? b.description ?? b.name ?? "",
-        info_label: b.infoLabel || "Vencord",
-        rarity: b.rarity || BadgeRarity.COMMON,
+        info_label: b.infoLabel ?? "Vencord",
+        rarity: b.rarity ?? BadgeRarity.COMMON,
         simple_icon_url: b.iconSrc!,
-        complex_icon_static_url: b.largeIconSrc || b.iconSrc!,
+        complex_icon_static_url: b.largeIconSrc ?? b.iconSrc!,
         obtained_at: b.obtainedAt,
         is_earnable: false,
         owned: true,
