@@ -1,0 +1,67 @@
+.vc-external-player-status {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgb(0 0 0 / 45%);
+    color: var(--white);
+    cursor: default;
+}
+
+.vc-external-player-controllable {
+    cursor: pointer;
+}
+
+.vc-external-player-center {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+}
+
+.vc-external-player-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: rgb(0 0 0 / 60%);
+}
+
+.vc-external-player-caption {
+    text-shadow: 0 1px 2px rgb(0 0 0 / 80%);
+}
+
+.vc-external-player-controls {
+    transform: none;
+}
+
+.vc-external-player-close {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    border-radius: 50%;
+    background: rgb(0 0 0 / 60%);
+    color: var(--white);
+}
+
+.vc-external-player-bar {
+    flex: 1;
+    padding: 6px 0;
+    margin: 0 8px;
+}
+
+.vc-external-player-track {
+    height: 6px;
+    border-radius: 3px;
+    background: rgb(255 255 255 / 30%);
+    overflow: hidden;
+}
+
+.vc-external-player-fill {
+    height: 100%;
+    background: var(--brand-500);
+}
