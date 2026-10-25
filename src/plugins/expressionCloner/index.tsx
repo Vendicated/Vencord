@@ -30,7 +30,7 @@ import definePlugin from "@utils/types";
 import { Guild, GuildSticker, Message } from "@vencord/discord-types";
 import { StickerFormatType } from "@vencord/discord-types/enums";
 import { findByCodeLazy } from "@webpack";
-import { Constants, EmojiStore, FluxDispatcher, GuildStore, IconUtils, Menu, Modal, openModalLazy, PermissionsBits, PermissionStore, React, RestAPI, showToast, StickersStore, Tooltip, UserStore } from "@webpack/common";
+import { Constants, EmojiStore, FluxDispatcher, GuildStore, IconUtils, Menu, Modal, openModalLazy, PermissionsBits, PermissionStore, RestAPI, showToast, StickersStore, Tooltip, useMemo, useReducer, UserStore, useState } from "@webpack/common";
 import { Promisable } from "type-fest";
 
 const uploadEmoji = findByCodeLazy(".GUILD_EMOJIS(", "EMOJI_UPLOAD_START");
@@ -218,12 +218,12 @@ const getFontSize = (s: string) => {
 const nameValidator = /^\w+$/i;
 
 function CloneModal({ data }: { data: Sticker | Emoji; }) {
-    const [isCloning, setIsCloning] = React.useState(false);
-    const [name, setName] = React.useState(data.name);
+    const [isCloning, setIsCloning] = useState(false);
+    const [name, setName] = useState(data.name);
 
-    const [x, invalidateMemo] = React.useReducer(x => x + 1, 0);
+    const [x, invalidateMemo] = useReducer(x => x + 1, 0);
 
-    const guilds = React.useMemo(() => getGuildCandidates(data), [data.id, x]);
+    const guilds = useMemo(() => getGuildCandidates(data), [data.id, x]);
 
     return (
         <>
