@@ -9,7 +9,8 @@ permissions:
     id-token: write
 
 jobs:
-    test:
+    npm:
+        if: github.repository == 'Vendicated/Vencord'
         runs-on: ubuntu-latest
 
         steps:

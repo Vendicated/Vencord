@@ -31,15 +31,8 @@ jobs:
         runs-on: ubuntu-latest
 
         steps:
-            - name: Checkout dev branch
-              uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-              if: ${{ github.event_name == 'schedule' }}
-              with:
-                  ref: dev
-
             - name: Checkout user repository
               uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-              if: ${{ github.event_name == 'workflow_dispatch' }}
               with:
                   ref: ${{ inputs.ref || github.ref }}
                   repository: ${{ inputs.repository || github.repository }}
@@ -74,9 +67,6 @@ jobs:
                   pids=""
 
                   branch="${{ inputs.discord_branch }}"
-                  if [[ "${{ github.event_name }}" = "schedule" ]]; then
-                    branch="both"
-                  fi
 
                   if [[ "$branch" = "both" || "$branch" = "stable" ]]; then
                     node dist/report.mjs > "$stable_output_file" &

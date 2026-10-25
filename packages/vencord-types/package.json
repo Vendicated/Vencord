@@ -4,6 +4,11 @@
     "version": "1.15.13",
     "description": "",
     "types": "index.d.ts",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/Vendicated/Vencord.git",
+        "directory": "packages/vencord-types"
+    },
     "scripts": {
         "prepublishOnly": "tsx ./prepare.ts",
         "test": "echo \"Error: no test specified\" && exit 1"
