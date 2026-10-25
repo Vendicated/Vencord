@@ -75,11 +75,3 @@ export function Text<T extends TextTag = "div">(props: TextProps<T>): ReactNode 
         </Tag>
     );
 }
-
-// #region Old compability
-
-/** @deprecated renamed to Text, kept so Vesktop keeps working */
-export const BaseText = Text;
-export type BaseTextProps<Tag extends TextTag = "div"> = TextProps<Tag>;
-
-// #endregion
