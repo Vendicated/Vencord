@@ -29,6 +29,13 @@ import { ApplicationCommandType } from "@vencord/discord-types/enums";
 console.log(ApplicationCommandType.CHAT_INPUT); // 1
 ```
 
+### Package Versioning
+
+Since v1.15.13, this package's version will always mirror Vencord's version. This will make it easier for us to publish updates timely.
+
+Please note that this package does **not** use semantic versioning. Even a patch release can remove or change existing types.
+Discord is a moving target, so trying to follow semver would be impractical.
+
 ### License
 
 This package is licensed under the [LGPL-3.0](./LICENSE) (or later) license.
