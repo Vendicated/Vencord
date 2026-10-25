@@ -27,7 +27,7 @@
 }
 
 .vc-plugins-setting-description {
-    color: var(--text-default);
+    color: var(--text-subtle);
 }
 
 .vc-plugins-setting-error {

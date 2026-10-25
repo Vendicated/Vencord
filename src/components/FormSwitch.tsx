@@ -30,7 +30,7 @@ export function FormSwitch({ onChange, title, value, description, disabled, clas
             <div className={classes("vc-form-switch", className, disabled && "vc-form-switch-disabled")}>
                 <div className={"vc-form-switch-text"}>
                     <Span size="md" weight="medium">{title}</Span>
-                    {description && <Span size="sm" weight="normal">{description}</Span>}
+                    {description && <Span size="sm" weight="normal" className="vc-form-switch-description">{description}</Span>}
                 </div>
 
                 <Switch checked={value} onChange={onChange} disabled={disabled} />

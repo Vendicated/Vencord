@@ -232,6 +232,7 @@ function RoleContextMenu({ guild, roleId, onClose }: { guild: Guild; roleId: str
                 id={cl("copy-role-id")}
                 label={getIntlMessage("COPY_ID_ROLE")}
                 icon={CopyIdIcon}
+                leadingAccessory={{ type: "icon", icon: CopyIdIcon }}
                 action={() => copyToClipboard(roleId)}
             />
 
@@ -242,6 +243,7 @@ function RoleContextMenu({ guild, roleId, onClose }: { guild: Guild; roleId: str
                     id={cl("view-as-role")}
                     label={getIntlMessage("VIEW_AS_ROLE")}
                     icon={ViewAsRoleIcon}
+                    leadingAccessory={{ type: "icon", icon: ViewAsRoleIcon }}
                     action={() => {
                         onClose();
                         FluxDispatcher.dispatch({
@@ -271,6 +273,7 @@ function UserContextMenu({ userId }: { userId: string; }) {
             <Menu.MenuItem
                 id={cl("copy-user-id")}
                 label={getIntlMessage("COPY_ID_USER")}
+                leadingAccessory={{ type: "icon", icon: CopyIdIcon }}
                 action={() => {
                     copyToClipboard(userId);
                 }}

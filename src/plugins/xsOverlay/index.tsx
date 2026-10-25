@@ -306,6 +306,7 @@ export default definePlugin({
 
     stop() {
         socket.close();
+        Native.closeSocket();
     },
 
     settingsAboutComponent: () => (

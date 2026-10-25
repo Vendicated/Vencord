@@ -127,13 +127,6 @@ export default definePlugin({
 
     patches: [
         {
-            find: "https://github.com/highlightjs/highlight.js/issues/2277",
-            replacement: {
-                match: /\(console.log\(`Deprecated.+?`\),/,
-                replace: "("
-            }
-        },
-        {
             find: 'The "interpolate" function is deprecated in v10 (use "to" instead)',
             replacement: {
                 match: /,console.warn\('react-spring: The "interpolate" function is deprecated in v10 \(use "to" instead\)'\)/,
