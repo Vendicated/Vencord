@@ -17,13 +17,13 @@
 */
 
 import { downloadSettingsBackup, uploadSettingsBackup } from "@api/SettingsSync/offline";
-import { BaseText } from "@components/BaseText";
 import { Button } from "@components/Button";
 import { Card } from "@components/Card";
 import { Flex } from "@components/Flex";
 import { Heading } from "@components/Heading";
 import { Paragraph } from "@components/Paragraph";
 import { SettingsTab, wrapTab } from "@components/settings/tabs/BaseTab";
+import { Text } from "@components/Text";
 import { Margins } from "@utils/margins";
 
 function BackupAndRestoreTab() {
@@ -42,13 +42,13 @@ function BackupAndRestoreTab() {
                 </Paragraph>
 
                 <Heading tag="h4">Settings Export contains:</Heading>
-                <BaseText size="md" className={Margins.bottom8}>
+                <Text size="md" className={Margins.bottom8}>
                     <ul>
                         <li>&mdash; Custom QuickCSS</li>
                         <li>&mdash; Theme Links</li>
                         <li>&mdash; Plugin Settings</li>
                     </ul>
-                </BaseText>
+                </Text>
 
                 <Flex>
                     <Button onClick={() => uploadSettingsBackup()}>

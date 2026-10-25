@@ -4,7 +4,6 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-export * from "./BaseText";
 export * from "./Button";
 export * from "./Card";
 export * from "./CheckedTextInput";
@@ -24,3 +23,4 @@ export * from "./Paragraph";
 export * from "./settings";
 export * from "./Span";
 export * from "./Switch";
+export * from "./Text";

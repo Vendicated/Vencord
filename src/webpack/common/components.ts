@@ -16,12 +16,12 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { TextCompat } from "@components/BaseText";
 import { ButtonCompat } from "@components/Button";
 import { Divider } from "@components/Divider";
 import { FormSwitchCompat } from "@components/FormSwitch";
 import { Heading } from "@components/Heading";
 import { Paragraph } from "@components/Paragraph";
+import { TextCompat } from "@components/Text";
 import { TooltipContainer as TooltipContainerComponent } from "@components/TooltipContainer";
 import { TooltipFallback } from "@components/TooltipFallback";
 import { LazyComponent } from "@utils/lazyReact";

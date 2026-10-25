@@ -21,10 +21,10 @@ import "./PluginModal.css";
 import { generateId } from "@api/Commands";
 import { hasAnyVisibleSettings, isSettingHidden } from "@api/PluginManager";
 import { useSettings } from "@api/Settings";
-import { BaseText } from "@components/BaseText";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Heading } from "@components/Heading";
 import { Paragraph } from "@components/Paragraph";
+import { Text } from "@components/Text";
 import { debounce } from "@shared/debounce";
 import { gitRemote } from "@shared/vencordUserAgent";
 import { classNameFactory } from "@utils/css";
@@ -175,7 +175,7 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
             size="lg"
             title={
                 <div className={cl("header")}>
-                    <BaseText tag="h1" weight="semibold" size="lg">{plugin.name}</BaseText>
+                    <Text tag="h1" weight="semibold" size="lg">{plugin.name}</Text>
                     {!pluginMeta.userPlugin && (
                         <div className="vc-settings-modal-links">
                             <FavoriteButton

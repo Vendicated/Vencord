@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import "./BaseText.css";
+import "./Text.css";
 
 import { classNameFactory } from "@utils/css";
 import { classes } from "@utils/misc";
@@ -52,14 +52,14 @@ export type TextSize = keyof typeof Sizes;
 export type TextWeight = keyof typeof Weights;
 export type TextTag = "div" | "span" | "p" | `h${1 | 2 | 3 | 4 | 5 | 6}`;
 
-export type BaseTextProps<Tag extends TextTag = "div"> = ComponentPropsWithoutRef<Tag> & {
+export type TextProps<Tag extends TextTag = "div"> = ComponentPropsWithoutRef<Tag> & {
     size?: TextSize;
     weight?: TextWeight;
     tag?: Tag;
     defaultColor?: boolean;
 };
 
-export function BaseText<T extends TextTag = "div">(props: BaseTextProps<T>): ReactNode {
+export function Text<T extends TextTag = "div">(props: TextProps<T>): ReactNode {
     const {
         size = "md",
         weight = "normal",
@@ -80,7 +80,7 @@ export function BaseText<T extends TextTag = "div">(props: BaseTextProps<T>): Re
 // #region Old compability
 
 export const TextCompat: DiscordText = function TextCompat({ color, variant, ...restProps }) {
-    const newBaseTextProps = restProps as BaseTextProps;
+    const newBaseTextProps = restProps as TextProps;
 
     if (variant) {
         const [left, right] = variant.split("/");
@@ -96,7 +96,7 @@ export const TextCompat: DiscordText = function TextCompat({ color, variant, ...
         newBaseTextProps.style.color = `var(--${color}, var(--text-default))`;
     }
 
-    return <BaseText {...newBaseTextProps} />;
+    return <Text {...newBaseTextProps} />;
 };
 
 // #endregion
