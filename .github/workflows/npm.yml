@@ -1,8 +1,6 @@
 name: Publish NPM packages
 on:
     push:
-        branches:
-            - bump-deps
         tags:
             - v*
     workflow_dispatch:
@@ -37,4 +35,4 @@ jobs:
               run: pnpm generateTypes
 
             - name: Publish NPM Packages
-              run: pnpm stage publish --provenance --filter "packages/{discord-types,vencord-types}"
+              run: pnpm stage publish --provenance --filter "packages/{discord-types,vencord-types}" --no-git-checks
