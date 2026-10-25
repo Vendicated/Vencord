@@ -10,7 +10,7 @@ export * from "./Text";
 // #region Old compability
 
 /** @deprecated renamed to Text, kept so Vesktop keeps working */
-export const BaseText = Text;
+export const BaseText = Text as never;
 export type BaseTextProps<Tag extends TextTag = "div"> = TextProps<Tag>;
 
 // #endregion
