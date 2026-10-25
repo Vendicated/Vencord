@@ -18,7 +18,12 @@ export type CustomRangeProps = {
     suffix: string;
 };
 
-export const CustomRange = ({ onChange, initialValue, minMax, group, id, suffix }: CustomRangeProps) => {
+type RangeSliderProps = Omit<CustomRangeProps, "group" | "id"> & {
+    controlProps: any,
+    sliderRef: any;
+};
+
+const RangeSlider = ({ onChange, initialValue, minMax, suffix, controlProps, sliderRef }: RangeSliderProps) => {
     const [value, setValue] = useState(initialValue);
     const [minValue, maxValue] = minMax;
 
@@ -31,14 +36,22 @@ export const CustomRange = ({ onChange, initialValue, minMax, group, id, suffix 
         changeStreamSettings(roundedValue);
     };
     return (
-        <Menu.MenuControlItem group={`${group}`} id={`${id}-custom`} label={value + suffix} control={(props, ref) => <Menu.MenuSliderControl
-            {...props}
-            ref={ref}
+        <Menu.MenuSliderControl
+            {...controlProps}
+            ref={sliderRef}
             onChange={onChangeHandler}
             renderValue={() => value + suffix}
             value={normalize(value, minValue, maxValue) || 0}
             minValue={0}
             maxValue={100}>
-        </Menu.MenuSliderControl>} />
+        </Menu.MenuSliderControl>
     );
 };
+
+export const CustomRange = ({ group, id, ...props }: CustomRangeProps) => (
+    <Menu.MenuControlItem group={`${group}`} id={`${id}-custom`} label={props.initialValue + props.suffix} control={(controlProps, ref) => <RangeSlider
+        {...props}
+        controlProps={controlProps}
+        sliderRef={ref}
+    />} />
+);
