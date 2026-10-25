@@ -1,6 +1,8 @@
 name: Publish NPM packages
 on:
     push:
+        branches:
+            - bump-deps
         tags:
             - v*
     workflow_dispatch:
