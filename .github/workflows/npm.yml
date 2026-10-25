@@ -34,4 +34,4 @@ jobs:
               run: pnpm generateTypes
 
             - name: Publish NPM Packages
-              run: pnpm stage publish --filter "packages/{discord-types,vencord-types}"
+              run: pnpm stage publish --provenance --filter "packages/{discord-types,vencord-types}"
