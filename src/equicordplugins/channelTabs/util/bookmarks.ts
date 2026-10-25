@@ -4,11 +4,9 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { DataStore } from "@api/index";
-import { useAwaiter } from "@utils/react";
-import { ChannelStore, useCallback, UserStore, useState } from "@webpack/common";
+import { ChannelStore, useCallback, UserStore } from "@webpack/common";
 
-import { bookmarkFolderColors, logger } from "./constants";
+import { bookmarkFolderColors, logger, settings } from "./constants";
 import { Bookmark, BookmarkFolder, Bookmarks, UseBookmark, UseBookmarkMethods } from "./types";
 
 export function isBookmarkFolder(bookmark: Bookmark | BookmarkFolder): bookmark is BookmarkFolder {
@@ -47,27 +45,13 @@ export function bookmarkPlaceholderName(bookmark: Omit<Bookmark | BookmarkFolder
 }
 
 export function useBookmarks(userId: string): UseBookmark {
-    const [bookmarks, _setBookmarks] = useState<{ [k: string]: Bookmarks; }>({});
+    settings.use(["bookmarks"]);
+    const bookmarks: { [k: string]: Bookmarks; } = { ...settings.plain.bookmarks };
+    bookmarks[userId] ??= [];
+
     const setBookmarks = useCallback((bookmarks: { [k: string]: Bookmarks; }) => {
-        _setBookmarks(bookmarks);
-        DataStore.update("ChannelTabs_bookmarks", old => ({
-            ...old,
-            [userId]: bookmarks[userId]
-        }));
-    }, [userId]);
-
-    useAwaiter(() => DataStore.get("ChannelTabs_bookmarks"), {
-        fallbackValue: undefined,
-        onSuccess(bookmarks: { [k: string]: Bookmarks; }) {
-            if (!bookmarks) {
-                bookmarks = { [userId]: [] };
-                DataStore.set("ChannelTabs_bookmarks", { [userId]: [] });
-            }
-            if (!bookmarks[userId]) bookmarks[userId] = [];
-
-            setBookmarks(bookmarks);
-        },
-    });
+        settings.store.bookmarks = bookmarks;
+    }, []);
 
     const methods = {
         addBookmark: (bookmark, folderIndex) => {

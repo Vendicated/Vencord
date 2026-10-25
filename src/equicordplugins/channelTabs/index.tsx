@@ -7,6 +7,7 @@
 import "./style.css";
 
 import { findGroupChildrenByChildId, NavContextMenuPatchCallback } from "@api/ContextMenu";
+import { DataStore } from "@api/index";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { LinkIcon } from "@components/Icons";
 import { Devs, EquicordDevs } from "@utils/constants";
@@ -139,6 +140,10 @@ export default definePlugin({
             settings.store.numberKeySwitchCount = store.hotkeyCount;
             delete store.hotkeyCount;
         }
+        DataStore.get("ChannelTabs_bookmarks").then(bookmarks => {
+            if (bookmarks && !Object.keys(settings.store.bookmarks).length)
+                settings.store.bookmarks = bookmarks;
+        });
     },
 
     containerHeight: 0,
