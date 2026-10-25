@@ -16,8 +16,9 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { Button } from "@components/Button";
 import { PluginNative } from "@utils/types";
-import { Button, MediaEngineStore, showToast, Toasts, useState } from "@webpack/common";
+import { MediaEngineStore, showToast, useState } from "@webpack/common";
 
 import type { VoiceRecorder } from ".";
 import { settings } from "./settings";
@@ -47,7 +48,7 @@ export const VoiceRecorderDesktop: VoiceRecorder = ({ setAudioBlob, onRecordingC
                     if (success)
                         changeRecording(true);
                     else
-                        showToast("Failed to start recording", Toasts.Type.FAILURE);
+                        showToast({ text: "Failed to start recording", variant: "critical" });
                 }
             );
         } else {
@@ -57,7 +58,7 @@ export const VoiceRecorderDesktop: VoiceRecorder = ({ setAudioBlob, onRecordingC
                     if (buf)
                         setAudioBlob(new Blob([buf], { type: "audio/ogg; codecs=opus" }));
                     else
-                        showToast("Failed to finish recording", Toasts.Type.FAILURE);
+                        showToast({ text: "Failed to finish recording", variant: "critical" });
                 }
                 changeRecording(false);
             });

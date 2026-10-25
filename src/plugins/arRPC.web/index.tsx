@@ -17,11 +17,13 @@
 */
 
 import { popNotice, showNotice } from "@api/Notices";
+import { Heading } from "@components/Heading";
 import { Link } from "@components/Link";
+import { Paragraph } from "@components/Paragraph";
 import { Devs } from "@utils/constants";
 import definePlugin, { ReporterTestable } from "@utils/types";
 import { findByCodeLazy } from "@webpack";
-import { ApplicationAssetUtils, FluxDispatcher, Forms, Toasts } from "@webpack/common";
+import { ApplicationAssetUtils, FluxDispatcher, showToast } from "@webpack/common";
 
 const fetchApplicationsRPC = findByCodeLazy('"Invalid Origin"', ".application");
 
@@ -47,10 +49,10 @@ export default definePlugin({
 
     settingsAboutComponent: () => (
         <>
-            <Forms.FormTitle tag="h3">How to use arRPC</Forms.FormTitle>
-            <Forms.FormText>
+            <Heading tag="h3">How to use arRPC</Heading>
+            <Paragraph>
                 <Link href="https://github.com/OpenAsar/arrpc/tree/main#server">Follow the instructions in the GitHub repo</Link> to get the server running, and then enable the plugin.
-            </Forms.FormText>
+            </Paragraph>
         </>
     ),
 
@@ -89,15 +91,7 @@ export default definePlugin({
             return;
         }
 
-        Toasts.show({ // show toast on success
-            message: "Connected to arRPC",
-            type: Toasts.Type.SUCCESS,
-            id: Toasts.genId(),
-            options: {
-                duration: 1000,
-                position: Toasts.Position.BOTTOM
-            }
-        });
+        showToast({ text: "Connected to arRPC", variant: "success" });
     },
 
     stop() {

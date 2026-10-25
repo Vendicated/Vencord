@@ -5,14 +5,14 @@
  */
 
 import { ChatBarButton } from "@api/ChatButtons";
-import { UploadIcon } from "@components/Icons";
+import { ClockIcon, UploadIcon } from "@components/Icons";
 import { Devs } from "@utils/constants";
 import { pluralise } from "@utils/misc";
 import definePlugin from "@utils/types";
 import { Message } from "@vencord/discord-types";
 import { MessageFlags, MessageType } from "@vencord/discord-types/enums";
 import { findByPropsLazy } from "@webpack";
-import { AuthenticationStore, ChannelStore, EditMessageStore, MessageStore, PermissionsBits, PermissionStore, RestAPI, SelectedChannelStore, showToast, Toasts } from "@webpack/common";
+import { AuthenticationStore, ChannelStore, EditMessageStore, MessageStore, PermissionsBits, PermissionStore, RestAPI, SelectedChannelStore, showToast } from "@webpack/common";
 
 const { uniqueId } = findByPropsLazy("uniqueId");
 
@@ -39,15 +39,15 @@ async function addAttachments(channelId: string, messageId: string, existingAtta
     if (files.length + existingAttachmentCount > 10) {
         const remaining = 10 - existingAttachmentCount;
         if (remaining <= 0) {
-            showToast("You cannot add more attachments to this message.", Toasts.Type.FAILURE);
+            showToast({ text: "You cannot add more attachments to this message.", variant: "critical" });
             return;
         }
 
-        showToast(`You can only add ${pluralise(remaining, "more attachment")} to this message.`, Toasts.Type.FAILURE);
+        showToast({ text: `You can only add ${pluralise(remaining, "more attachment")} to this message.`, variant: "critical" });
         return;
     }
 
-    showToast("Uploading, this can take a while...", Toasts.Type.CLOCK);
+    showToast({ text: "Uploading, this can take a while...", icon: ClockIcon, iconColor: "var(--text-default)" });
 
     const { body: { attachments } } = await RestAPI.post({
         url: `/channels/${channelId}/attachments`,
@@ -87,7 +87,7 @@ async function addAttachments(channelId: string, messageId: string, existingAtta
         }
     });
 
-    showToast(`${files.length === 1 ? "Attachment" : "Attachments"} added successfully!`, Toasts.Type.SUCCESS);
+    showToast({ text: `${files.length === 1 ? "Attachment" : "Attachments"} added successfully!`, variant: "success" });
 }
 
 function canAddAttachments(msg: Message) {
@@ -134,8 +134,6 @@ export default definePlugin({
             return {
                 label: "Add Attachments",
                 icon: UploadIcon,
-                message: msg,
-                channel: ChannelStore.getChannel(msg.channel_id),
                 onClick: () => chooseAttachments(msg.channel_id, msg.id, msg.attachments.length)
             };
         },

@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { React, useEffect, useMemo, useReducer, useState } from "@webpack/common";
+import { useEffect, useMemo, useReducer, useRef, useState } from "@webpack/common";
 import type { ActionDispatch, ReactNode } from "react";
 
 import { checkIntersecting } from "./misc";
@@ -42,7 +42,7 @@ export const useIntersection = (intersectOnly = false): [
     refCallback: React.RefCallback<Element>,
     isIntersecting: boolean,
 ] => {
-    const observerRef = React.useRef<IntersectionObserver | null>(null);
+    const observerRef = useRef<IntersectionObserver | null>(null);
     const [isIntersecting, setIntersecting] = useState(false);
 
     const refCallback = (element: Element | null) => {
@@ -140,10 +140,12 @@ interface TimerOpts {
 
 export function useTimer({ interval = 1000, deps = [] }: TimerOpts) {
     const [time, setTime] = useState(0);
-    const start = useMemo(() => Date.now(), deps);
+    // use performance.now() over date.now() as the former is monotonic and not
+    // affetted by changes in the system clock (eg: timezone)
+    const start = useMemo(() => Math.round(performance.now()), deps);
 
     useEffect(() => {
-        const intervalId = setInterval(() => setTime(Date.now() - start), interval);
+        const intervalId = setInterval(() => setTime(Math.round(performance.now()) - start), interval);
 
         return () => {
             setTime(0);

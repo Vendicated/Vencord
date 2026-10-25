@@ -18,10 +18,11 @@
 
 import { findGroupChildrenByChildId, NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { migratePluginSettings } from "@api/Settings";
-import { BaseText } from "@components/BaseText";
 import { CheckedTextInput } from "@components/CheckedTextInput";
 import { Flex } from "@components/Flex";
+import { Heading } from "@components/Heading";
 import { PlusIcon } from "@components/Icons";
+import { Paragraph } from "@components/Paragraph";
 import { Devs } from "@utils/constants";
 import { getGuildAcronym, hasGuildFeature } from "@utils/discord";
 import { Logger } from "@utils/Logger";
@@ -29,7 +30,7 @@ import definePlugin from "@utils/types";
 import { Guild, GuildSticker, Message } from "@vencord/discord-types";
 import { StickerFormatType } from "@vencord/discord-types/enums";
 import { findByCodeLazy } from "@webpack";
-import { Constants, EmojiStore, FluxDispatcher, Forms, GuildStore, IconUtils, Menu, Modal, openModalLazy, PermissionsBits, PermissionStore, React, RestAPI, StickersStore, Toasts, Tooltip, UserStore } from "@webpack/common";
+import { Constants, EmojiStore, FluxDispatcher, GuildStore, IconUtils, Menu, Modal, openModalLazy, PermissionsBits, PermissionStore, RestAPI, showToast, StickersStore, Tooltip, useMemo, useReducer, UserStore, useState } from "@webpack/common";
 import { Promisable } from "type-fest";
 
 const uploadEmoji = findByCodeLazy(".GUILD_EMOJIS(", "EMOJI_UPLOAD_START");
@@ -196,11 +197,7 @@ async function doClone(guildId: string, data: Sticker | Emoji) {
         else
             await cloneEmoji(guildId, data);
 
-        Toasts.show({
-            message: `Successfully cloned ${data.name} to ${GuildStore.getGuild(guildId)?.name ?? "your server"}!`,
-            type: Toasts.Type.SUCCESS,
-            id: Toasts.genId()
-        });
+        showToast({ text: `Successfully cloned ${data.name} to ${GuildStore.getGuild(guildId)?.name ?? "your server"}!`, variant: "success" });
     } catch (e: any) {
         let message = "Something went wrong (check console!)";
         try {
@@ -208,11 +205,7 @@ async function doClone(guildId: string, data: Sticker | Emoji) {
         } catch { }
 
         new Logger("ExpressionCloner").error("Failed to clone", data.name, "to", guildId, e);
-        Toasts.show({
-            message: "Failed to clone: " + message,
-            type: Toasts.Type.FAILURE,
-            id: Toasts.genId()
-        });
+        showToast({ text: "Failed to clone: " + message, variant: "critical" });
     }
 }
 
@@ -225,16 +218,16 @@ const getFontSize = (s: string) => {
 const nameValidator = /^\w+$/i;
 
 function CloneModal({ data }: { data: Sticker | Emoji; }) {
-    const [isCloning, setIsCloning] = React.useState(false);
-    const [name, setName] = React.useState(data.name);
+    const [isCloning, setIsCloning] = useState(false);
+    const [name, setName] = useState(data.name);
 
-    const [x, invalidateMemo] = React.useReducer(x => x + 1, 0);
+    const [x, invalidateMemo] = useReducer(x => x + 1, 0);
 
-    const guilds = React.useMemo(() => getGuildCandidates(data), [data.id, x]);
+    const guilds = useMemo(() => getGuildCandidates(data), [data.id, x]);
 
     return (
         <>
-            <Forms.FormTitle>Custom Name</Forms.FormTitle>
+            <Heading>Custom Name</Heading>
             <CheckedTextInput
                 initialValue={name}
                 onChange={v => {
@@ -300,7 +293,7 @@ function CloneModal({ data }: { data: Sticker | Emoji; }) {
                                         alt={g.name}
                                     />
                                 ) : (
-                                    <Forms.FormText
+                                    <Paragraph
                                         style={{
                                             fontSize: getFontSize(getGuildAcronym(g)),
                                             width: "100%",
@@ -311,7 +304,7 @@ function CloneModal({ data }: { data: Sticker | Emoji; }) {
                                         }}
                                     >
                                         {getGuildAcronym(g)}
-                                    </Forms.FormText>
+                                    </Paragraph>
                                 )}
                             </div>
                         )}
@@ -348,7 +341,7 @@ function buildMenuItem(type: "Emoji" | "Sticker", fetchData: () => Promisable<Om
                                         height={24}
                                         width={24}
                                     />
-                                    <BaseText tag="h3" size="md" weight="medium">Clone {data.name}</BaseText>
+                                    <Paragraph size="md" weight="medium">Clone {data.name}</Paragraph>
                                 </Flex>
                             }
                         >
