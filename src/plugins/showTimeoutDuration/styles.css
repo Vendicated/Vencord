@@ -1,8 +1,17 @@
-.vc-std-wrapper {
+.vc-std-wrapper-default {
     display: flex;
     align-items: center;
 }
 
-.vc-std-wrapper [class*="communicationDisabled"] {
+.vc-std-wrapper-compact {
+    display: inline;
+    margin-right: 4px;
+}
+
+.vc-std-wrapper [class*="communicationDisabled" i] {
     margin-right: 0;
+}
+
+.vc-std-wrapper .vc-text-base {
+    color: var(--status-danger)
 }
