@@ -33,9 +33,6 @@ import Plugins, { PluginMeta } from "~plugins";
 
 import { EquicordDonorModal, EquicordTranslatorModal, VencordDonorModal } from "./modals";
 
-const EQUICORD_CONTRIBUTOR_BADGE = "https://equicord.org/assets/favicon.png";
-const USERPLUGIN_CONTRIBUTOR_BADGE = "https://equicord.org/assets/icons/misc/userplugin.png";
-
 const ContributorBadge: ProfileBadge = {
     id: "vencord_contributor_badge",
     description: "Vencord Contributor",
@@ -51,7 +48,10 @@ const ContributorBadge: ProfileBadge = {
 const EquicordContributorBadge: ProfileBadge = {
     id: "equicord_contributor_badge",
     description: "Equicord Contributor",
-    iconSrc: EQUICORD_CONTRIBUTOR_BADGE,
+    infoLabel: "Equicord",
+    rarity: BadgeRarity.MYTHIC,
+    iconSrc: "https://cdn.discordapp.com/emojis/1563740725726683167.webp?size=128",
+    largeIconSrc: "https://cdn.discordapp.com/emojis/1563740725726683167.webp?size=512",
     position: BadgePosition.START,
     shouldShow: ({ userId }) => shouldShowEquicordContributorBadge(userId),
     onClick: (_, { userId }) => openContributorModal(UserStore.getUser(userId)),
@@ -66,7 +66,10 @@ const EquicordContributorBadge: ProfileBadge = {
 const UserPluginContributorBadge: ProfileBadge = {
     id: "user_plugin_contributor_badge",
     description: "User Plugin Contributor",
-    iconSrc: USERPLUGIN_CONTRIBUTOR_BADGE,
+    infoLabel: "Equicord",
+    rarity: BadgeRarity.MYTHIC,
+    iconSrc: "https://cdn.discordapp.com/emojis/1419345679729295420.webp?size=128",
+    largeIconSrc: "https://cdn.discordapp.com/emojis/1419345679729295420.webp?size=512",
     position: BadgePosition.START,
     shouldShow: ({ userId }) => {
         if (!IS_DEV) return false;
@@ -113,7 +116,7 @@ function toDirectoryBadge(b: ProfileBadge, userId: string): DirectoryBadge {
         badge_id: id,
         name: b.name ?? b.description ?? "",
         description: b.detail ?? b.description ?? b.name ?? "",
-        info_label: b.infoLabel ?? "Vencord",
+        info_label: b.infoLabel ?? "Equicord",
         rarity: b.rarity ?? BadgeRarity.COMMON,
         simple_icon_url: b.iconSrc!,
         complex_icon_static_url: b.largeIconSrc ?? b.iconSrc!,
@@ -315,6 +318,9 @@ export default definePlugin({
             id: `equicord_donor_badge_${idx}`,
             iconSrc: badge.badge,
             description: badge.tooltip,
+            name: badge.tooltip,
+            infoLabel: "Equicord Donor",
+            rarity: BadgeRarity.MYTHIC,
             position: BadgePosition.START,
             props: {
                 style: {
