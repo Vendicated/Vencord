@@ -8,7 +8,6 @@ import "./Text.css";
 
 import { classNameFactory } from "@utils/css";
 import { classes } from "@utils/misc";
-import type { Text as DiscordText } from "@vencord/discord-types";
 import type { ComponentPropsWithoutRef, ReactNode } from "react";
 
 const textCls = classNameFactory("vc-text-");
@@ -79,24 +78,8 @@ export function Text<T extends TextTag = "div">(props: TextProps<T>): ReactNode 
 
 // #region Old compability
 
-export const TextCompat: DiscordText = function TextCompat({ color, variant, ...restProps }) {
-    const newBaseTextProps = restProps as TextProps;
-
-    if (variant) {
-        const [left, right] = variant.split("/");
-        if (left && right) {
-            const size = left.split("-").pop();
-            newBaseTextProps.size = size as TextSize;
-            newBaseTextProps.weight = right as TextWeight;
-        }
-    }
-
-    if (color) {
-        newBaseTextProps.style ??= {};
-        newBaseTextProps.style.color = `var(--${color}, var(--text-default))`;
-    }
-
-    return <Text {...newBaseTextProps} />;
-};
+/** @deprecated renamed to Text, kept so Vesktop keeps working */
+export const BaseText = Text;
+export type BaseTextProps<Tag extends TextTag = "div"> = TextProps<Tag>;
 
 // #endregion
