@@ -19,8 +19,8 @@
 import "./styles.css";
 
 import { definePluginSettings } from "@api/Settings";
-import { BaseText } from "@components/BaseText";
 import ErrorBoundary from "@components/ErrorBoundary";
+import { Paragraph } from "@components/Paragraph";
 import { TooltipContainer } from "@components/TooltipContainer";
 import { Devs } from "@utils/constants";
 import { classNameFactory } from "@utils/css";
@@ -85,7 +85,7 @@ export default definePlugin({
             {children}
             {!isNaN(since.getTime()) && (
                 <TooltipContainer text={DateUtils.dateFormat(since, "LLLL")} tooltipClassName={cl("tooltip")}>
-                    <BaseText size="xs" className={cl("date")}>{formatter.format(since)}</BaseText>
+                    <Paragraph size="xs" className={cl("date")}>{formatter.format(since)}</Paragraph>
                 </TooltipContainer>
             )}
         </div>;

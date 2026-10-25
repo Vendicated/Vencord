@@ -16,23 +16,18 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Button, ButtonVariant } from "@components/Button";
+import { Button, ButtonProps, TextButton } from "@components/Button";
 import { Heart } from "@components/Heart";
 
-export default function DonateButton({
-    variant = "secondary",
-    ...props
-}) {
-    return (
-        <Button
-            {...props}
-            type="button"
-            variant={variant as ButtonVariant}
-            onClick={() => VencordNative.native.openExternal("https://github.com/sponsors/Vendicated")}
-            className="vc-donate-button"
-        >
-            <Heart />
-            Donate
-        </Button>
-    );
+export default function DonateButton({ variant, ...props }: Omit<ButtonProps, "children" | "onClick" | "className">) {
+    const commonProps = {
+        ...props,
+        onClick: () => VencordNative.native.openExternal("https://github.com/sponsors/Vendicated"),
+        className: "vc-donate-button",
+        children: <><Heart />Donate</>
+    };
+
+    return variant
+        ? <Button variant={variant} {...commonProps} />
+        : <TextButton variant="secondary" {...commonProps} />;
 }

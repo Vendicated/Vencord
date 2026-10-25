@@ -49,7 +49,7 @@ export function SpecialCard({ title, subtitle, description, cardImage, backgroun
         <Card className={cl("card", "card-special")} style={cardStyle}>
             <div className={cl("card-flex")}>
                 <div className={cl("card-flex-main")}>
-                    <Heading className={cl("title")} tag="h5">{title}</Heading>
+                    <Heading className={cl("title")}>{title}</Heading>
                     <Paragraph className={cl("subtitle")}>{subtitle}</Paragraph>
                     <Paragraph className={cl("text")}>{description}</Paragraph>
 

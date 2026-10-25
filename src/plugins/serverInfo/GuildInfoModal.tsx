@@ -95,7 +95,7 @@ function GuildInfoModal({ guild, modalProps }: GuildProps & { modalProps: Render
                     }
 
                     <div className={cl("name-and-description")}>
-                        <Heading tag="h5" className={cl("name")}>{guild.name}</Heading>
+                        <Heading className={cl("name")}>{guild.name}</Heading>
                         {guild.description && <Paragraph>{guild.description}</Paragraph>}
                     </div>
                 </div>

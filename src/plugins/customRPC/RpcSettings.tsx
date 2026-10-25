@@ -118,7 +118,7 @@ function SingleSetting<T>({ settingsKey, label, disabled, isValid, transform }: 
 
     return (
         <div className={cl("single", { disabled })}>
-            <Heading tag="h5">{label}</Heading>
+            <Heading>{label}</Heading>
             <TextInput
                 type="text"
                 placeholder={"Enter a value"}
@@ -134,7 +134,7 @@ function SingleSetting<T>({ settingsKey, label, disabled, isValid, transform }: 
 function SelectSetting<T>({ settingsKey, label, options, disabled }: SelectOption<T>) {
     return (
         <div className={cl("single", { disabled })}>
-            <Heading tag="h5">{label}</Heading>
+            <Heading>{label}</Heading>
             <Select
                 placeholder={"Select an option"}
                 options={options}

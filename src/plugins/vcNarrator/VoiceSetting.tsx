@@ -121,7 +121,7 @@ function VoiceSetting() {
 export function VoiceSettingSection() {
     return (
         <section>
-            <Paragraph>Voice</Paragraph>
+            <Heading>Voice</Heading>
             <VoiceSetting />
         </section>
     );

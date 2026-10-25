@@ -58,7 +58,7 @@ export function RenameModal({ props, session, state }: { props: RenderModalProps
             ]}
         >
             <div>
-                <Heading tag="h5">New device name</Heading>
+                <Heading>New device name</Heading>
                 <TextInput
                     style={{ marginBottom: "10px" }}
                     placeholder={getDefaultName(session.client_info)}

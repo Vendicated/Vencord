@@ -4,7 +4,6 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { BaseText } from "@components/BaseText";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Heading } from "@components/Heading";
 import { Link } from "@components/Link";
@@ -93,7 +92,7 @@ function CreateDecorationModal(props: RenderModalProps) {
                 </HelpMessage>
                 <div className={cl("create-decoration-modal-form-preview-container")}>
                     <div className={cl("create-decoration-modal-form")}>
-                        {error !== null && <BaseText size="xs" color="text-danger">{error.message}</BaseText>}
+                        {error !== null && <Paragraph size="xs" style={{ color: "var(--text-danger, var(--text-default))" }}>{error.message}</Paragraph>}
                         <section>
                             <Heading>File</Heading>
                             <FileUpload

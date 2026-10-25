@@ -52,7 +52,7 @@ function NotificationSettings() {
 
     return (
         <>
-            <Heading tag="h5">Notification Style</Heading>
+            <Heading>Notification Style</Heading>
             {settings.useNative !== "never" && Notification?.permission === "denied" && (
                 <ErrorCard style={{ padding: "1em" }} className={Margins.bottom8}>
                     <Heading>Desktop Notification Permission denied</Heading>

@@ -16,7 +16,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { BaseText } from "@components/BaseText";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Flex } from "@components/Flex";
 import { CopyIdIcon, InfoIcon, OwnerCrownIcon } from "@components/Icons";
@@ -83,7 +82,7 @@ function RolesAndUsersPermissionsComponent({ permissions, guild, modalProps, hea
         >
             {!selectedItem && (
                 <div className={cl("modal-no-perms")}>
-                    <BaseText tag="h2" size="lg">No permissions to display!</BaseText>
+                    <Paragraph size="lg">No permissions to display!</Paragraph>
                 </div>
             )}
 
@@ -141,7 +140,7 @@ function RolesAndUsersPermissionsComponent({ permissions, guild, modalProps, hea
                                                 src={user.getAvatarURL(void 0, void 0, false)}
                                             />
                                         )}
-                                        <Paragraph className={cl("modal-list-item-text")}>
+                                        <Paragraph size="md" className={cl("modal-list-item-text")}>
                                             {
                                                 permission.type === PermissionOverwriteType.ROLE
                                                     ? role?.name ?? "Unknown Role"
@@ -187,7 +186,7 @@ function RolesAndUsersPermissionsComponent({ permissions, guild, modalProps, hea
                                         {overrideType === "allowed" && <PermissionAllowedIcon />}
                                         {overrideType === "denied" && <PermissionDeniedIcon />}
                                     </div>
-                                    <BaseText size="md">{guildPermissionSpecMap[String(bit)].title}</BaseText>
+                                    <Paragraph size="md">{guildPermissionSpecMap[String(bit)].title}</Paragraph>
 
                                     <Tooltip text={
                                         (() => {

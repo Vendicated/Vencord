@@ -4,10 +4,9 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { BaseText } from "@components/BaseText";
 import { Button } from "@components/Button";
 import { Flex } from "@components/Flex";
-import { Heading, HeadingPrimary } from "@components/Heading";
+import { Heading } from "@components/Heading";
 import { Paragraph } from "@components/Paragraph";
 import { Decoration, getPresets, Preset } from "@plugins/decor/lib/api";
 import { GUILD_ID, INVITE_KEY } from "@plugins/decor/lib/constants";
@@ -245,15 +244,18 @@ function ChangeDecorationModal(props: RenderModalProps) {
                     avatarDecoration={avatarDecoration}
                     user={UserStore.getCurrentUser()}
                 />
-                {isActiveDecorationPreset && <HeadingPrimary>Part of the {activeDecorationPreset.name} Preset</HeadingPrimary>}
+                {isActiveDecorationPreset &&
+                    <Paragraph size="md" weight="medium" className={Margins.bottom8} style={{ color: "var(--text-strong, var(--text-default))" }}>
+                        Part of the {activeDecorationPreset.name} Preset
+                    </Paragraph>
+                }
                 {typeof activeSelectedDecoration === "object" &&
-                    <BaseText
-                        size="sm"
+                    <Paragraph
                         weight="semibold"
-                        style={{ color: "text-strong" }}
+                        style={{ color: "var(--text-strong, var(--text-default))" }}
                     >
                         {activeSelectedDecoration?.alt}
-                    </BaseText>
+                    </Paragraph>
                 }
                 {activeDecorationHasAuthor && (
                     <Paragraph key={`createdBy-${activeSelectedDecoration.authorId}`}>

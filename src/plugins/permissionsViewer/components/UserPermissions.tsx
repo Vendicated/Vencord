@@ -16,9 +16,9 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { BaseText } from "@components/BaseText";
 import ErrorBoundary from "@components/ErrorBoundary";
-import { HeadingTertiary } from "@components/Heading";
+import { Heading } from "@components/Heading";
+import { Paragraph } from "@components/Paragraph";
 import { cl, getGuildPermissionSpecMap, getSortedRolesForMember, sortUserRoles } from "@plugins/permissionsViewer/utils";
 import { getIntlMessage } from "@utils/discord";
 import { classes } from "@utils/misc";
@@ -57,13 +57,12 @@ function FakeRole({ text, color, ...props }: FakeRoleProps) {
                 />
             </div>
             <div className={RoleClasses.roleName}>
-                <BaseText
-                    size="xs"
-                    weight="medium"
+                <Paragraph
                     className={RoleClasses.roleNameOverflow}
+                    size="xs" weight="medium"
                 >
                     {text}
-                </BaseText>
+                </Paragraph>
             </div>
         </div>
     );
@@ -77,7 +76,7 @@ interface GrantedByTooltipProps {
 function GrantedByTooltip({ roleName, roleColor }: GrantedByTooltipProps) {
     return (
         <>
-            <BaseText size="sm" weight="medium">Granted By</BaseText>
+            <Paragraph weight="medium">Granted By</Paragraph>
             <FakeRole text={roleName} color={roleColor} />
         </>
     );
@@ -137,7 +136,7 @@ function UserPermissionsComponent({ guild, guildMember, closePopout }: { guild: 
 
     return <div>
         <div className={cl("user-header-container")}>
-            <HeadingTertiary>Permissions</HeadingTertiary>
+            <Heading tag="h4">Permissions</Heading>
             <div className={cl("user-header-btns")}>
                 <Tooltip text={`Sorting by ${permissionsSortOrder === PermissionsSortOrder.HighestRole ? "Highest Role" : "Lowest Role"}`}>
                     {tooltipProps => (

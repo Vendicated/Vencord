@@ -6,7 +6,7 @@
 
 import { Button } from "@components/Button";
 import { ErrorCard } from "@components/ErrorCard";
-import { HeadingPrimary, HeadingSecondary } from "@components/Heading";
+import { Heading } from "@components/Heading";
 import { Paragraph } from "@components/Paragraph";
 import { relativeLuminance } from "@plugins/clientTheme/utils/colorUtils";
 import { createOrUpdateThemeColorVars } from "@plugins/clientTheme/utils/styleUtils";
@@ -70,7 +70,7 @@ export function ThemeSettingsComponent() {
         <div className={cl("settings")}>
             <div className={cl("container")}>
                 <div className={cl("settings-labels")}>
-                    <HeadingSecondary>Theme Color</HeadingSecondary>
+                    <Heading tag="h3">Theme Color</Heading>
                     <Paragraph>Add a color to your Discord client theme</Paragraph>
                 </div>
                 <ColorPicker
@@ -82,14 +82,14 @@ export function ThemeSettingsComponent() {
             </div>
             {(contrastWarning || nitroThemeEnabled) && (<>
                 <ErrorCard className={Margins.top8}>
-                    <HeadingPrimary>Your theme won't look good!</HeadingPrimary>
+                    <Heading tag="h3">Your theme won't look good!</Heading>
 
                     {contrastWarning && <Paragraph>{">"} Selected color won't contrast well with text</Paragraph>}
                     {nitroThemeEnabled && <Paragraph>{">"} Nitro themes aren't supported</Paragraph>}
 
                     <div className={cl("buttons-container")}>
-                        {(contrastWarning && fixableContrast) && <Button onClick={() => setDiscordTheme(oppositeTheme)} color="dangerPrimary">Switch to {oppositeTheme} mode</Button>}
-                        {(nitroThemeEnabled) && <Button onClick={() => setDiscordTheme(currentTheme)} color="dangerPrimary">Disable Nitro Theme</Button>}
+                        {(contrastWarning && fixableContrast) && <Button onClick={() => setDiscordTheme(oppositeTheme)} variant="dangerPrimary">Switch to {oppositeTheme} mode</Button>}
+                        {(nitroThemeEnabled) && <Button onClick={() => setDiscordTheme(currentTheme)} variant="dangerPrimary">Disable Nitro Theme</Button>}
                     </div>
                 </ErrorCard>
             </>)}

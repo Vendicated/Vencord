@@ -53,8 +53,7 @@ export function ReplacementInput({ replacement, setReplacement, replacementError
 
     return (
         <>
-            {/* FormTitle adds a class if className is not set, so we set it to an empty string to prevent that */}
-            <Heading className="">Replacement</Heading>
+            <Heading>Replacement</Heading>
             <TextInput
                 value={replacement?.toString()}
                 onChange={onChange}
@@ -76,7 +75,7 @@ export function ReplacementInput({ replacement, setReplacement, replacementError
                 className={Margins.top16}
                 value={isFunc}
                 onChange={setIsFunc}
-                title={"Treat Replacement as function"}
+                title={'Treat "Replacement" as a function'}
                 description='"Replacement" will be evaluated as a function if this is enabled'
                 hideBorder
             />

@@ -19,22 +19,19 @@
 import { definePluginSettings } from "@api/Settings";
 import { getUserSettingLazy } from "@api/UserSettings";
 import { Button } from "@components/Button";
+import { Card } from "@components/Card";
 import { Divider } from "@components/Divider";
-import { ErrorCard } from "@components/ErrorCard";
 import { Flex } from "@components/Flex";
-import { Heading } from "@components/Heading";
 import { Link } from "@components/Link";
 import { Paragraph } from "@components/Paragraph";
 import { Devs } from "@utils/constants";
 import { isTruthy } from "@utils/guards";
-import { Margins } from "@utils/margins";
-import { classes } from "@utils/misc";
 import { useAwaiter } from "@utils/react";
 import definePlugin, { OptionType } from "@utils/types";
 import { Activity } from "@vencord/discord-types";
 import { ActivityType } from "@vencord/discord-types/enums";
 import { findByCodeLazy, findComponentByCodeLazy } from "@webpack";
-import { ApplicationAssetUtils, FluxDispatcher, React, UserStore } from "@webpack/common";
+import { ApplicationAssetUtils, FluxDispatcher, Menu, React, UserStore } from "@webpack/common";
 
 import { RPCSettings } from "./RpcSettings";
 
@@ -55,6 +52,12 @@ export const enum TimestampMode {
 }
 
 export const settings = definePluginSettings({
+    enablePresence: {
+        type: OptionType.BOOLEAN,
+        description: "Whether to show the presence",
+        default: true,
+        onChange: v => setRpc(!v)
+    },
     config: {
         type: OptionType.COMPONENT,
         component: RPCSettings
@@ -204,11 +207,12 @@ async function createActivity(): Promise<Activity | undefined> {
 }
 
 export async function setRpc(disable?: boolean) {
+    const shouldDisable = disable ?? !settings.store.enablePresence;
     const activity: Activity | undefined = await createActivity();
 
     FluxDispatcher.dispatch({
         type: "LOCAL_ACTIVITY_UPDATE",
-        activity: !disable ? activity : null,
+        activity: !shouldDisable ? activity : null,
         socketId: "CustomRPC",
     });
 }
@@ -217,11 +221,27 @@ export default definePlugin({
     name: "CustomRPC",
     description: "Add a fully customisable Rich Presence (Game status) to your Discord profile",
     tags: ["Activity", "Customisation"],
-    authors: [Devs.captain, Devs.AutumnVN, Devs.nin0dev],
+    authors: [Devs.captain, Devs.AutumnVN, Devs.nin0dev, Devs.c0nnorgg],
     dependencies: ["UserSettingsAPI"],
     // This plugin's patch is not important for functionality, so don't require a restart
     requiresRestart: false,
     settings,
+
+    toolboxActions() {
+        const { enablePresence } = settings.use(["enablePresence"]);
+
+        return (
+            <Menu.MenuCheckboxItem
+                id="custom-rpc-toggle-toolbox"
+                label="Show Custom RPC"
+                checked={enablePresence}
+                action={() => {
+                    settings.store.enablePresence = !enablePresence;
+                    setRpc();
+                }}
+            />
+        );
+    },
 
     start: setRpc,
     stop: () => setRpc(true),
@@ -238,31 +258,38 @@ export default definePlugin({
     ],
 
     settingsAboutComponent: () => {
+        const { enablePresence } = settings.use(["enablePresence"]);
         const [activity] = useAwaiter(createActivity, { fallbackValue: undefined, deps: Object.values(settings.store) });
         const gameActivityEnabled = ShowCurrentGame.useSetting();
         const { profileThemeStyle } = useProfileThemeStyle({});
 
         return (
-            <>
+            <Flex flexDirection="column" gap=".5em">
+                {!enablePresence && (
+                    <Card variant="warning">
+                        <Flex flexDirection="column" gap=".5em" alignItems="flex-start">
+                            <Paragraph size="md" weight="bold">Custom RPC disabled</Paragraph>
+                            <Paragraph>The "Enable Presence" setting is disabled, so your presence won't show. If this was unintentional, enable it below.</Paragraph>
+                        </Flex>
+                    </Card>
+                )}
                 {!gameActivityEnabled && (
-                    <ErrorCard
-                        className={classes(Margins.top16, Margins.bottom16)}
-                        style={{ padding: "1em" }}
-                    >
-                        <Heading>Notice</Heading>
-                        <Paragraph>Activity Sharing isn't enabled, people won't be able to see your custom rich presence!</Paragraph>
+                    <Card variant="danger">
+                        <Flex flexDirection="column" gap=".5em" alignItems="flex-start">
+                            <Paragraph size="md" weight="bold">Activity Sharing disabled</Paragraph>
+                            <Paragraph>Activity Sharing isn't enabled, so people won't be able to see your custom rich presence!</Paragraph>
 
-                        <Button
-                            variant="secondary"
-                            className={Margins.top8}
-                            onClick={() => ShowCurrentGame.updateSetting(true)}
-                        >
-                            Enable
-                        </Button>
-                    </ErrorCard>
+                            <Button
+                                variant="overlayPrimary"
+                                onClick={() => ShowCurrentGame.updateSetting(true)}
+                            >
+                                Enable Activity Sharing
+                            </Button>
+                        </Flex>
+                    </Card>
                 )}
 
-                <Flex flexDirection="column" gap=".5em" className={Margins.top16}>
+                <Flex flexDirection="column" gap=".5em">
                     <Paragraph>
                         Go to the <Link href="https://discord.com/developers/applications">Discord Developer Portal</Link> to create an application and
                         get the application ID.
@@ -281,16 +308,16 @@ export default definePlugin({
                     </Paragraph>
                 </Flex>
 
-                <Divider className={Margins.top8} />
+                <Divider />
 
-                <div style={{ width: "284px", ...profileThemeStyle, marginTop: 8, borderRadius: 8, background: "var(--background-mod-muted)" }}>
+                <div style={{ width: "284px", ...profileThemeStyle, borderRadius: 8, background: "var(--background-mod-muted)" }}>
                     {activity && <ActivityView
                         activity={activity}
                         user={UserStore.getCurrentUser()}
                         currentUser={UserStore.getCurrentUser()}
                     />}
                 </div>
-            </>
+            </Flex>
         );
     }
 });

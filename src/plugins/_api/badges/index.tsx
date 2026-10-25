@@ -18,11 +18,12 @@
 
 import "./fixDiscordBadgePadding.css";
 
-import { _getBadges, BadgePosition, BadgeUserArgs, ProfileBadge } from "@api/Badges";
+import { _getBadges, BadgePosition, BadgeRarity, BadgeUserArgs, DirectoryBadge, ProfileBadge } from "@api/Badges";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Flex } from "@components/Flex";
 import { Heading } from "@components/Heading";
 import { Heart } from "@components/Heart";
+import { CopyIcon, LinkIcon } from "@components/Icons";
 import { Paragraph } from "@components/Paragraph";
 import DonateButton from "@components/settings/DonateButton";
 import { openContributorModal } from "@components/settings/tabs";
@@ -32,20 +33,24 @@ import { Logger } from "@utils/Logger";
 import { Margins } from "@utils/margins";
 import { shouldShowContributorBadge } from "@utils/misc";
 import definePlugin from "@utils/types";
-import { ContextMenuApi, Menu, Modal, openModal, Toasts, UserStore } from "@webpack/common";
-
-const CONTRIBUTOR_BADGE = "https://cdn.discordapp.com/emojis/1092089799109775453.png?size=64";
+import { ContextMenuApi, Menu, Modal, openModal, showToast, UserStore } from "@webpack/common";
 
 const ContributorBadge: ProfileBadge = {
     id: "vencord_contributor_badge",
     description: "Vencord Contributor",
-    iconSrc: CONTRIBUTOR_BADGE,
+    infoLabel: "Vencord",
+    rarity: BadgeRarity.MYTHIC,
+    iconSrc: "https://cdn.discordapp.com/emojis/1562267648857997356.webp?size=128",
+    largeIconSrc: "https://cdn.discordapp.com/emojis/1562267648857997356.webp?size=512",
     position: BadgePosition.START,
     shouldShow: ({ userId }) => shouldShowContributorBadge(userId),
     onClick: (_, { userId }) => openContributorModal(UserStore.getUser(userId))
 };
 
+
+
 let DonorBadges = {} as Record<string, Array<Record<"tooltip" | "badge", string>>>;
+let DirectoryBadges = {} as Record<string, DirectoryBadge>;
 
 async function loadBadges(noCache = false) {
     const init = {} as RequestInit;
@@ -57,6 +62,25 @@ async function loadBadges(noCache = false) {
 }
 
 let intervalId: any;
+
+function toDirectoryBadge(b: ProfileBadge, userId: string): DirectoryBadge {
+    const id = `vc-${userId}-${b.id}`;
+
+    return DirectoryBadges[id] ??= {
+        badge_id: id,
+        name: b.name ?? b.description ?? "",
+        description: b.detail ?? b.description ?? b.name ?? "",
+        info_label: b.infoLabel ?? "Vencord",
+        rarity: b.rarity ?? BadgeRarity.COMMON,
+        simple_icon_url: b.iconSrc!,
+        complex_icon_static_url: b.largeIconSrc ?? b.iconSrc!,
+        obtained_at: b.obtainedAt,
+        is_earnable: false,
+        owned: true,
+        hidden: false,
+        tiers: []
+    };
+}
 
 function BadgeContextMenu({ badge }: { badge: Omit<ProfileBadge, "id"> & BadgeUserArgs; }) {
     return (
@@ -70,6 +94,7 @@ function BadgeContextMenu({ badge }: { badge: Omit<ProfileBadge, "id"> & BadgeUs
                     id="vc-badge-copy-name"
                     label="Copy Badge Name"
                     action={() => copyWithToast(badge.description!)}
+                    leadingAccessory={{ type: "icon", icon: CopyIcon }}
                 />
             )}
             {badge.iconSrc && (
@@ -77,6 +102,7 @@ function BadgeContextMenu({ badge }: { badge: Omit<ProfileBadge, "id"> & BadgeUs
                     id="vc-badge-copy-link"
                     label="Copy Badge Image Link"
                     action={() => copyWithToast(badge.iconSrc!)}
+                    leadingAccessory={{ type: "icon", icon: LinkIcon }}
                 />
             )}
         </Menu.Menu>
@@ -86,7 +112,7 @@ function BadgeContextMenu({ badge }: { badge: Omit<ProfileBadge, "id"> & BadgeUs
 export default definePlugin({
     name: "BadgeAPI",
     description: "API to add badges to users",
-    authors: [Devs.Megu, Devs.Ven, Devs.TheSun],
+    authors: [Devs.Megu, Devs.Ven, Devs.TheSun, Devs.kaxtusik],
     required: true,
     patches: [
         {
@@ -110,6 +136,10 @@ export default definePlugin({
                 {
                     match: /href:(\i)\.link/,
                     replace: "...$self.getBadgeMouseEventHandlers($1),$&"
+                },
+                {
+                    match: /legacyBadgeId:(\i),userId:(\i),.{0,100}?=\i,\i=\(0,\i\.\i\)\(\1\)/,
+                    replace: "$&??$self.getDirectoryBadgeId($1,$2)"
                 }
             ]
         },
@@ -118,6 +148,20 @@ export default definePlugin({
             replacement: {
                 match: /getBadges\(\)\{.{0,100}?return\[/,
                 replace: "$&...$self.getBadges(this),"
+            }
+        },
+        {
+            find: '"BadgeDirectoryStore"',
+            replacement: {
+                match: /getBadgeById\((\i),(\i)\)\{/,
+                replace: "$&const vencordBadge=$self.getDirectoryBadge($1);if(vencordBadge)return vencordBadge;"
+            }
+        },
+        {
+            find: "badge_directory_closed",
+            replacement: {
+                match: /(\i\.\i\.getBadges\((\i)\))(?=:\[\],\[\2\]\))/,
+                replace: "[...$1,...$self.getDirectoryBadges($2)]"
             }
         }
     ],
@@ -130,11 +174,7 @@ export default definePlugin({
     toolboxActions: {
         async "Refetch Badges"() {
             await loadBadges(true);
-            Toasts.show({
-                id: Toasts.genId(),
-                message: "Successfully refetched badges!",
-                type: Toasts.Type.SUCCESS
-            });
+            showToast({ text: "Successfully refetched badges!", variant: "success" });
         }
     },
 
@@ -149,6 +189,7 @@ export default definePlugin({
 
     async stop() {
         clearInterval(intervalId);
+        DirectoryBadges = {};
     },
 
     getBadges(profile: { userId: string; guildId: string; }) {
@@ -160,6 +201,25 @@ export default definePlugin({
             new Logger("BadgeAPI#getBadges").error(e);
             return [];
         }
+    },
+
+    getDirectoryBadge(id: string) {
+        return DirectoryBadges[id];
+    },
+
+    getDirectoryBadges(userId: string) {
+        return this.getBadges({ userId, guildId: "" })
+            .filter(b => b.iconSrc)
+            .map(b => toDirectoryBadge(b, userId));
+    },
+
+    getDirectoryBadgeId(badgeId: string, userId?: string) {
+        if (!userId) return;
+
+        const badge = this.getBadges({ userId, guildId: "" })
+            .find(b => b.id === badgeId && b.iconSrc);
+
+        if (badge) return toDirectoryBadge(badge, userId).badge_id;
     },
 
     renderBadgeComponent: ErrorBoundary.wrap((badge: ProfileBadge & BadgeUserArgs) => {
@@ -186,6 +246,9 @@ export default definePlugin({
             id: `vencord_donor_badge_${idx}`,
             iconSrc: badge.badge,
             description: badge.tooltip,
+            name: badge.tooltip,
+            infoLabel: "Vencord Donor",
+            rarity: BadgeRarity.MYTHIC,
             position: BadgePosition.START,
             props: {
                 style: {
@@ -206,7 +269,7 @@ export default definePlugin({
                             {...props}
                             title={
                                 <Heading
-                                    tag="h2"
+                                    tag="h1"
                                     style={{
                                         width: "100%",
                                         textAlign: "center",
@@ -237,16 +300,16 @@ export default definePlugin({
                                 </Flex>
                                 <div style={{ padding: "1em" }}>
                                     <Paragraph>
-                                        This Badge is a special perk for Vencord Donors
+                                        This badge is a special perk for Vencord Donors
                                     </Paragraph>
-                                    <Paragraph className={Margins.top20}>
+                                    <Paragraph className={Margins.top16}>
                                         Please consider supporting the development of Vencord by becoming a donor. It would mean a lot!!
                                     </Paragraph>
                                 </div>
                             </div>
                             <div>
                                 <Flex justifyContent="center" style={{ width: "100%" }}>
-                                    <DonateButton />
+                                    <DonateButton variant="overlayPrimary" />
                                 </Flex>
                             </div>
                         </Modal>

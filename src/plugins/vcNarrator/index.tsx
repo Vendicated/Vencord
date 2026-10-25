@@ -18,7 +18,7 @@
 
 import { Button } from "@components/Button";
 import { ErrorCard } from "@components/ErrorCard";
-import { HeadingSecondary } from "@components/Heading";
+import { Heading } from "@components/Heading";
 import { Paragraph } from "@components/Paragraph";
 import { Devs, IS_LINUX } from "@utils/constants";
 import { Logger } from "@utils/Logger";
@@ -259,7 +259,7 @@ export default definePlugin({
                 </Paragraph>
                 {hasEnglishVoices && (
                     <>
-                        <HeadingSecondary className={Margins.top20}>Play Example Sounds</HeadingSecondary>
+                        <Heading tag="h3" className={Margins.top20}>Play Example Sounds</Heading>
                         <div
                             style={{
                                 display: "grid",

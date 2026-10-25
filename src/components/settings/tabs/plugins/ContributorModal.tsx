@@ -7,9 +7,9 @@
 import "./ContributorModal.css";
 
 import { useSettings } from "@api/Settings";
-import { BaseText } from "@components/BaseText";
-import { HeadingPrimary } from "@components/Heading";
+import { Heading } from "@components/Heading";
 import { Link } from "@components/Link";
+import { Paragraph } from "@components/Paragraph";
 import { DevsById } from "@utils/constants";
 import { classNameFactory } from "@utils/css";
 import { fetchUserProfile } from "@utils/discord";
@@ -19,8 +19,8 @@ import { Modal, openModal, showToast, useEffect, useMemo, UserProfileStore, useS
 
 import Plugins from "~plugins";
 
-import { GithubButton, WebsiteButton } from "./LinkIconButton";
 import { PluginCard } from "./PluginCard";
+import { GithubButton, WebsiteButton } from "./PluginModalButtons";
 
 const cl = classNameFactory("vc-author-modal-");
 
@@ -64,7 +64,7 @@ function ContributorModal({ user, modalProps }: { user: User; modalProps: Render
                         src={user.getAvatarURL(void 0, 512, true)}
                         alt=""
                     />
-                    <HeadingPrimary className={cl("name")}>{user.username}</HeadingPrimary>
+                    <Heading tag="h2" className={cl("name")}>{user.username}</Heading>
 
                     <div className={classes("vc-settings-modal-links", cl("links"))}>
                         {website && (
@@ -85,31 +85,29 @@ function ContributorModal({ user, modalProps }: { user: User; modalProps: Render
             subtitle={
                 plugins.length
                     ? (
-                        <BaseText>
+                        <Paragraph>
                             This person has {ContributedHyperLink} to {pluralise(plugins.length, "plugin")}!
-                        </BaseText>
+                        </Paragraph>
                     )
                     : (
-                        <BaseText>
+                        <Paragraph>
                             This person has not made any plugins. They likely {ContributedHyperLink} to Vencord in other ways!
-                        </BaseText>
+                        </Paragraph>
                     )
             }
         >
-            {
-                !!plugins.length && (
-                    <div className={cl("plugins")}>
-                        {plugins.map(p =>
-                            <PluginCard
-                                key={p.name}
-                                plugin={p}
-                                disabled={p.required ?? false}
-                                onRestartNeeded={() => showToast("Restart to apply changes!")}
-                            />
-                        )}
-                    </div>
-                )
-            }
-        </Modal >
+            {!!plugins.length && (
+                <div className={cl("plugins")}>
+                    {plugins.map(p =>
+                        <PluginCard
+                            key={p.name}
+                            plugin={p}
+                            disabled={p.required ?? false}
+                            onRestartNeeded={() => showToast({ text: "Restart to apply changes!" })}
+                        />
+                    )}
+                </div>
+            )}
+        </Modal>
     );
 }

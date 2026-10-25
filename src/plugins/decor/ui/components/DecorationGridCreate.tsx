@@ -4,8 +4,8 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { BaseText } from "@components/BaseText";
 import { PlusIcon } from "@components/Icons";
+import { Paragraph } from "@components/Paragraph";
 import { getIntlMessage } from "@utils/discord";
 import { HTMLProps } from "react";
 
@@ -21,11 +21,11 @@ export default function DecorationGridCreate(props: DecorationGridCreateProps) {
         isSelected={false}
     >
         <PlusIcon />
-        <BaseText
+        <Paragraph
             size="xs"
-            color="text-strong"
+            style={{ color: "var(--text-strong, var(--text-default))" }}
         >
             {getIntlMessage("CREATE")}
-        </BaseText>
+        </Paragraph>
     </DecorationGridItem >;
 }

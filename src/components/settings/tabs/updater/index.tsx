@@ -22,7 +22,7 @@ import { Card } from "@components/Card";
 import { Divider } from "@components/Divider";
 import { Flex } from "@components/Flex";
 import { FormSwitch } from "@components/FormSwitch";
-import { Heading, HeadingSecondary } from "@components/Heading";
+import { Heading } from "@components/Heading";
 import { Link } from "@components/Link";
 import { Paragraph } from "@components/Paragraph";
 import { SettingsTab, wrapTab } from "@components/settings/tabs/BaseTab";
@@ -44,7 +44,7 @@ function VesktopSection() {
     return (
         <Flex className={Margins.bottom20} flexDirection="column" gap="1em">
             <Card variant="info">
-                <HeadingSecondary>Vesktop & Vencord</HeadingSecondary>
+                <Heading tag="h3">Vesktop & Vencord</Heading>
                 <Paragraph>Vesktop and Vencord are two separate things. This updater is for Vencord.</Paragraph>
                 <Paragraph className={Margins.top8}>
                     You receive separate popups for Vesktop updates. You can also manually update by installing the <Link href="https://vesktop.dev/install">latest version</Link>.
@@ -53,7 +53,7 @@ function VesktopSection() {
 
             {isVesktopOutdated && (
                 <Card variant="warning">
-                    <HeadingSecondary>Vesktop Outdated</HeadingSecondary>
+                    <Heading tag="h3">Vesktop Outdated</Heading>
                     <Flex flexDirection="column" gap="0.5em">
                         <Paragraph>Your version of Vesktop is outdated!</Paragraph>
                         <Button variant="link" onClick={() => VesktopNative.app.openUpdater()}>Open Vesktop Updater</Button>
@@ -99,7 +99,7 @@ function Updater() {
                 />
             </div>
 
-            <Heading>Repo</Heading>
+            <Heading className={Margins.top20}>Repo</Heading>
 
             <Paragraph>
                 {repoPending

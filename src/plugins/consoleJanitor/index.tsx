@@ -6,8 +6,8 @@
 
 import { definePluginSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
+import { Paragraph } from "@components/Paragraph";
 import { SettingsSection } from "@components/settings/tabs/plugins/components/Common";
-import { Span } from "@components/Span";
 import { Devs } from "@utils/constants";
 import definePlugin, { defineDefault, OptionType, StartAt } from "@utils/types";
 import { Checkbox } from "@webpack/common";
@@ -51,7 +51,7 @@ function AllowLevelSetting({ settingKey }: AllowLevelSettingProps) {
             onChange={(_, newValue) => settings.store.allowLevel[settingKey] = newValue}
             size={20}
         >
-            <Span>{settingKey[0].toUpperCase() + settingKey.slice(1)}</Span>
+            <Paragraph>{settingKey[0].toUpperCase() + settingKey.slice(1)}</Paragraph>
         </Checkbox>
     );
 }

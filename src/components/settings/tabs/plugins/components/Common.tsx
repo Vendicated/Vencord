@@ -4,8 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { BaseText } from "@components/BaseText";
-import { Span } from "@components/Span";
+import { Paragraph } from "@components/Paragraph";
 import { classNameFactory } from "@utils/css";
 import { classes } from "@utils/misc";
 import { wordsFromCamel, wordsToTitle } from "@utils/text";
@@ -49,12 +48,12 @@ export function SettingsSection({ tag: Tag = "div", name, id, description, error
         <Tag className={cl("section")}>
             <div className={classes(cl("content"), inlineSetting && cl("inline"))}>
                 <div className={cl("label")}>
-                    <BaseText className={cl("title")} size="md" weight="medium">{name ?? wordsToTitle(wordsFromCamel(id))}</BaseText>
-                    {description && <BaseText className={cl("description")} size="sm">{description}</BaseText>}
+                    <Paragraph size="md" weight="medium" className={cl("title")}>{name ?? wordsToTitle(wordsFromCamel(id))}</Paragraph>
+                    {description && <Paragraph className={cl("description")}>{description}</Paragraph>}
                 </div>
                 {children}
             </div>
-            {error && <Span className={cl("error")}>{error}</Span>}
+            {error && <Paragraph className={cl("error")}>{error}</Paragraph>}
         </Tag>
     );
 }

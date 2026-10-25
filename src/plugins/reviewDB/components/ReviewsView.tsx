@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Heading } from "@components/Heading";
+import { Paragraph } from "@components/Paragraph";
 import { Auth, authorize } from "@plugins/reviewDB/auth";
 import { Review, ReviewType } from "@plugins/reviewDB/entities";
 import { addReview, getReviews, REVIEWS_PER_PAGE, UserReviewsData } from "@plugins/reviewDB/reviewDbApi";
@@ -116,9 +116,9 @@ function ReviewList({ refetch, reviews, hideOwnReview, profileId, type }: { refe
             )}
 
             {reviews?.length === 0 && (
-                <Heading className={cl("placeholder")}>
+                <Paragraph className={cl("placeholder")}>
                     Looks like nobody reviewed this {type === ReviewType.User ? "user" : "server"} yet. You could be the first!
-                </Heading>
+                </Paragraph>
             )}
         </div>
     );

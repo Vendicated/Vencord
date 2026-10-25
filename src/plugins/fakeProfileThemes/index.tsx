@@ -20,12 +20,11 @@
 import "./styles.css";
 
 import { definePluginSettings } from "@api/Settings";
-import { BaseText } from "@components/BaseText";
 import { Button } from "@components/Button";
 import { Divider } from "@components/Divider";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Flex } from "@components/Flex";
-import { HeadingSecondary } from "@components/Heading";
+import { Heading } from "@components/Heading";
 import { Paragraph } from "@components/Paragraph";
 import { Devs } from "@utils/constants";
 import { copyWithToast, fetchUserProfile } from "@utils/discord";
@@ -116,7 +115,7 @@ function SettingsAboutComponent() {
 
     return (
         <section>
-            <HeadingSecondary>Usage</HeadingSecondary>
+            <Heading tag="h3">Usage</Heading>
             <Paragraph>
                 After enabling this plugin, you will see custom colors in
                 the profiles of other people using compatible plugins.{" "}
@@ -131,17 +130,17 @@ function SettingsAboutComponent() {
                 <Divider
                     className={classes(Margins.top8, Margins.bottom8)}
                 />
-                <HeadingSecondary>Color pickers</HeadingSecondary>
+                <Heading tag="h3">Color pickers</Heading>
                 <Flex gap="1em">
                     <ColorPicker
                         color={color1}
                         label={
-                            <BaseText
+                            <Paragraph
                                 size="xs"
                                 style={{ marginTop: "4px" }}
                             >
                                 Primary
-                            </BaseText>
+                            </Paragraph>
                         }
                         onChange={(color: number) => {
                             setColor1(color);
@@ -150,12 +149,12 @@ function SettingsAboutComponent() {
                     <ColorPicker
                         color={color2}
                         label={
-                            <BaseText
+                            <Paragraph
                                 size="xs"
                                 style={{ marginTop: "4px" }}
                             >
                                 Accent
-                            </BaseText>
+                            </Paragraph>
                         }
                         onChange={(color: number) => {
                             setColor2(color);
@@ -167,7 +166,6 @@ function SettingsAboutComponent() {
                             copyWithToast(colorString);
                         }}
                         variant="secondary"
-                        size="medium"
                         style={{ marginBottom: "auto" }}
                     >
                         Copy 3y3
@@ -176,7 +174,7 @@ function SettingsAboutComponent() {
                 <Divider
                     className={classes(Margins.top8, Margins.bottom8)}
                 />
-                <HeadingSecondary>Preview</HeadingSecondary>
+                <Heading tag="h3">Preview</Heading>
                 <div className="vc-fpt-preview">
                     <ProfileModal
                         user={UserStore.getCurrentUser()}
@@ -239,10 +237,8 @@ export default definePlugin({
                 copyWithToast(colorString);
             }}
             variant="secondary"
-            size="medium"
             className={Margins.left16}
-        >
-            Copy 3y3
+        >Copy 3y3
         </Button >;
     }, { noop: true }),
 });

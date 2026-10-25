@@ -18,7 +18,7 @@
 
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Flex } from "@components/Flex";
-import { HeadingPrimary, HeadingSecondary } from "@components/Heading";
+import { Heading } from "@components/Heading";
 import { findByPropsLazy } from "@webpack";
 import { React } from "@webpack/common";
 
@@ -90,7 +90,7 @@ function TimingSection({ title, logs, traceEnd }: TimingSectionProps) {
 
     return (
         <section>
-            <HeadingPrimary>{title}</HeadingPrimary>
+            <Heading tag="h2">{title}</Heading>
             <code>
                 {traceEnd && (
                     <div style={{ color: "var(--text-strong)", marginBottom: 5, userSelect: "text" }}>
@@ -120,7 +120,7 @@ function ServerTrace({ trace }: ServerTraceProps) {
 
     return (
         <section>
-            <HeadingSecondary>Server Trace</HeadingSecondary>
+            <Heading tag="h3">Server Trace</Heading>
             <code>
                 <Flex flexDirection="column" gap="5px" style={{ color: "var(--text-strong)", userSelect: "text" }}>
                     {lines.map((line, idx) => (

@@ -22,7 +22,7 @@ import { NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { Button } from "@components/Button";
 import { Card } from "@components/Card";
 import { Heading } from "@components/Heading";
-import { Microphone } from "@components/Icons";
+import { ClockIcon, Microphone } from "@components/Icons";
 import { Link } from "@components/Link";
 import { Paragraph } from "@components/Paragraph";
 import { Devs } from "@utils/constants";
@@ -34,7 +34,7 @@ import { chooseFile } from "@utils/web";
 import { CloudUpload as TCloudUpload, RenderModalProps } from "@vencord/discord-types";
 import { CloudUploadPlatform } from "@vencord/discord-types/enums";
 import { findLazy } from "@webpack";
-import { Constants, FluxDispatcher, lodash, Menu, MessageActions, Modal, openModal, PendingReplyStore, PermissionsBits, PermissionStore, RestAPI, SelectedChannelStore, showToast, SnowflakeUtils, Toasts, useEffect, useState } from "@webpack/common";
+import { Constants, FluxDispatcher, lodash, Menu, MessageActions, Modal, openModal, PendingReplyStore, PermissionsBits, PermissionStore, RestAPI, SelectedChannelStore, showToast, SnowflakeUtils, useEffect, useState } from "@webpack/common";
 import { ComponentType } from "react";
 
 import { VoiceRecorderDesktop } from "./DesktopRecorder";
@@ -84,7 +84,7 @@ export default definePlugin({
 
     patches: [
         {
-            find: "#{intl::PAUSE_VOICE_MESSAGE_A11Y_LABEL}",
+            find: "#{intl::VOICE_MESSAGES_A11Y_LABEL}",
             replacement: {
                 match: /(?<=\i=)(?=\i\.memo\(.{0,50}?=1,onVolumeChange:[^}]+?waveform:[^}]+?playbackCacheKey:)/,
                 replace: "$self.VoiceMessage=",
@@ -142,7 +142,7 @@ function sendAudio(blob: Blob, meta: AudioMetadata) {
             }
         });
     });
-    upload.on("error", () => showToast("Failed to upload voice message", Toasts.Type.FAILURE));
+    upload.on("error", () => showToast({ text: "Failed to upload voice message", variant: "critical" }));
 
     upload.upload();
 }
@@ -218,7 +218,7 @@ function VoiceMessageModal({ modalProps }: { modalProps: RenderModalProps; }) {
                 onClick: () => {
                     sendAudio(blob!, meta ?? EMPTY_META);
                     modalProps.onClose();
-                    showToast("Now sending voice message... Please be patient", Toasts.Type.MESSAGE);
+                    showToast({ text: "Now sending voice message... Please be patient", icon: ClockIcon, iconColor: "var(--text-default)" });
                 },
                 disabled: !blob
             }]}

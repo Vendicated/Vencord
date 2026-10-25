@@ -23,6 +23,7 @@ import { hasAnyVisibleSettings, isSettingHidden } from "@api/PluginManager";
 import { useSettings } from "@api/Settings";
 import { BaseText } from "@components/BaseText";
 import ErrorBoundary from "@components/ErrorBoundary";
+import { Heading } from "@components/Heading";
 import { Paragraph } from "@components/Paragraph";
 import { debounce } from "@shared/debounce";
 import { gitRemote } from "@shared/vencordUserAgent";
@@ -40,7 +41,7 @@ import { PluginMeta } from "~plugins";
 
 import { OptionComponentMap } from "./components";
 import { openContributorModal } from "./ContributorModal";
-import { GithubButton, WebsiteButton } from "./LinkIconButton";
+import { FavoriteButton, GithubButton, WebsiteButton } from "./PluginModalButtons";
 
 const cl = classNameFactory("vc-plugin-modal-");
 
@@ -177,6 +178,10 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
                     <BaseText tag="h1" weight="semibold" size="lg">{plugin.name}</BaseText>
                     {!pluginMeta.userPlugin && (
                         <div className="vc-settings-modal-links">
+                            <FavoriteButton
+                                isFavorite={pluginSettings.isFavorite ?? false}
+                                onClick={() => pluginSettings.isFavorite = !pluginSettings.isFavorite}
+                            />
                             <WebsiteButton
                                 text="View more info"
                                 href={`https://vencord.dev/plugins/${plugin.name}`}
@@ -200,7 +205,7 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
         >
             <div className={"vc-settings-modal-content"}>
                 <section>
-                    <BaseText tag="h2" size="lg" weight="semibold" className={classes(Margins.top8, Margins.bottom8)}>Authors</BaseText>
+                    <Heading tag="h1" className={classes(Margins.top8, Margins.bottom8)}>Authors</Heading>
                     <div style={{ width: "fit-content" }}>
                         <ErrorBoundary noop>
                             <UserSummaryItem
@@ -239,7 +244,7 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
                 )}
 
                 <section>
-                    <BaseText size="lg" weight="semibold" className={classes(Margins.top16, Margins.bottom8)}>Settings</BaseText>
+                    <Heading tag="h1" className={classes(Margins.top16, Margins.bottom8)}>Settings</Heading>
                     {renderSettings()}
                 </section>
             </div>

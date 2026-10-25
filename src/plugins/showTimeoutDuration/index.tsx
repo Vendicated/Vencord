@@ -93,7 +93,7 @@ export default definePlugin({
         return (
             <div className="vc-std-wrapper">
                 <TooltipContainer text={text}>{children}</TooltipContainer>
-                <Paragraph color="status-danger">
+                <Paragraph size="md" style={{ color: "var(--status-danger, var(--text-default))" }}>
                     {renderTimeout(message, true)} timeout remaining
                 </Paragraph>
             </div>

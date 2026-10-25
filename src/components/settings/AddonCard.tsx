@@ -19,8 +19,8 @@
 import "./AddonCard.css";
 
 import { BaseText } from "@components/BaseText";
+import { Paragraph } from "@components/Paragraph";
 import { AddonBadge } from "@components/settings/PluginBadge";
-import { Span } from "@components/Span";
 import { Switch } from "@components/Switch";
 import { classNameFactory } from "@utils/css";
 import { useRef } from "@webpack/common";
@@ -75,9 +75,9 @@ export function AddonCard({ disabled, isNew, name, infoButton, footer, author, e
                     </BaseText>
 
                     {!!author && (
-                        <BaseText className={cl("author")}>
+                        <Paragraph size="md" className={cl("author")}>
                             {author}
-                        </BaseText>
+                        </Paragraph>
                     )}
                 </div>
 
@@ -90,9 +90,9 @@ export function AddonCard({ disabled, isNew, name, infoButton, footer, author, e
                 />
             </div>
 
-            <Span className={cl("note")}>{description}</Span>
+            <Paragraph className={cl("note")}>{description}</Paragraph>
 
             {footer}
-        </div>
+        </div >
     );
 }
