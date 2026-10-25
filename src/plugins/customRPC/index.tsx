@@ -18,7 +18,6 @@
 
 import { definePluginSettings } from "@api/Settings";
 import { getUserSettingLazy } from "@api/UserSettings";
-import { BaseText } from "@components/BaseText";
 import { Button } from "@components/Button";
 import { Card } from "@components/Card";
 import { Divider } from "@components/Divider";
@@ -269,7 +268,7 @@ export default definePlugin({
                 {!enablePresence && (
                     <Card variant="warning">
                         <Flex flexDirection="column" gap=".5em" alignItems="flex-start">
-                            <BaseText size="md" weight="bold">Custom RPC disabled</BaseText>
+                            <Paragraph size="md" weight="bold">Custom RPC disabled</Paragraph>
                             <Paragraph>The "Enable Presence" setting is disabled, so your presence won't show. If this was unintentional, enable it below.</Paragraph>
                         </Flex>
                     </Card>
@@ -277,7 +276,7 @@ export default definePlugin({
                 {!gameActivityEnabled && (
                     <Card variant="danger">
                         <Flex flexDirection="column" gap=".5em" alignItems="flex-start">
-                            <BaseText size="md" weight="bold">Activity Sharing disabled</BaseText>
+                            <Paragraph size="md" weight="bold">Activity Sharing disabled</Paragraph>
                             <Paragraph>Activity Sharing isn't enabled, so people won't be able to see your custom rich presence!</Paragraph>
 
                             <Button
