@@ -42,7 +42,10 @@
                 },
             });
 
-            require(["vs/editor/editor.main"], () => {
+            require([
+                "vs/editor/editor.api",
+                "vs/language/css/monaco.contribution",
+            ], () => {
                 getCurrentCss().then((css) => {
                     var editor = monaco.editor.create(
                         document.getElementById("container"),
