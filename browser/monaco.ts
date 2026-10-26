@@ -6,7 +6,7 @@
 
 import "./patch-worker";
 
-import * as monaco from "monaco-editor/esm/vs/editor/editor.main.js";
+import * as monaco from "monaco-editor/editor/editor.main";
 
 declare global {
     const baseUrl: string;
