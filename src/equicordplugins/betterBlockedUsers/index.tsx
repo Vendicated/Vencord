@@ -11,15 +11,41 @@ import { getIntlMessage, openUserProfile } from "@utils/discord";
 import definePlugin from "@utils/types";
 import { Button, React, RelationshipStore, TextInput, UserStore } from "@webpack/common";
 
+interface ChannelStreamItem {
+    type: string;
+    content?: unknown;
+    hasUnread?: boolean;
+    hasJumpTarget?: boolean;
+}
+
+function isHiddenGroup(item: ChannelStreamItem | undefined): item is ChannelStreamItem & { content: unknown[]; } {
+    return item?.type === "MESSAGE_GROUP_BLOCKED" || item?.type === "MESSAGE_GROUP_IGNORED";
+}
+
 let lastSearch = "";
 let updateFunc = (v: any) => { };
 
 export default definePlugin({
     name: "BetterBlockedUsers",
-    description: "Allows you to search in blocked users list and makes names selectable in settings.",
+    description: "Allows you to search in blocked users list, make names selectable in settings, skips blocked profile prompt, and groups blocked / ignored messages.",
     tags: ["Appearance", "Shortcuts"],
     authors: [EquicordDevs.TheArmagan],
     patches: [
+        {
+            find: "`forum-post-action-bar-",
+            replacement: {
+                match: /(?<=\i=)(\i)(?=\.map\(\(\i,\i\)=>\{if\(\i\.type===\i\.\i\.DIVIDER\))/,
+                replace: "($1=$self.mergeHiddenMessages($1))"
+            }
+        },
+        {
+            // skips the profile prompt allowing the user to view blocked profiles without hitting yes everytime
+            find: "useSetting(),{isBlocked:",
+            replacement: {
+                match: /(?<=isBlocked:)\i\.\i\.isBlocked\(\i\)/,
+                replace: "false"
+            }
+        },
         {
             find: '"],{numberOfBlockedUsers:',
             group: true,
@@ -43,6 +69,29 @@ export default definePlugin({
             ]
         }
     ],
+    mergeHiddenMessages(stream: ChannelStreamItem[]) {
+        const merged: ChannelStreamItem[] = [];
+        let groups: Record<string, ChannelStreamItem & { content: unknown[]; }> = {};
+
+        for (const item of stream) {
+            if (!isHiddenGroup(item)) {
+                groups = {};
+                merged.push(item);
+                continue;
+            }
+
+            const previous = groups[item.type];
+            if (previous) {
+                previous.content.push(...item.content);
+                previous.hasUnread ||= item.hasUnread;
+                previous.hasJumpTarget ||= item.hasJumpTarget;
+            } else {
+                merged.push(groups[item.type] = { ...item, content: [...item.content] });
+            }
+        }
+
+        return merged;
+    },
     renderSearchInput() {
         const [value, setValue] = React.useState(lastSearch);
 
