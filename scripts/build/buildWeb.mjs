@@ -20,8 +20,8 @@
 // @ts-check
 
 import { readFileSync } from "fs";
-import { appendFile, mkdir, readdir, readFile, rm, writeFile } from "fs/promises";
-import { join } from "path";
+import { appendFile, cp, mkdir, readdir, readFile, rm, writeFile } from "fs/promises";
+import { join, resolve } from "path";
 import Zip from "zip-local";
 
 import { BUILD_TIMESTAMP, commonOpts, globPlugins, IS_DEV, IS_REPORTER, IS_ANTI_CRASH_TEST, IS_STANDALONE, VERSION, commonRendererPlugins, buildOrWatchAll, stringifyValues } from "./common.mjs";
@@ -64,24 +64,6 @@ const MonacoWorkerEntryPoints = [
 /** @type {import("esbuild").BuildOptions[]} */
 const buildConfigs = [
     {
-        entryPoints: MonacoWorkerEntryPoints.map(entry => `node_modules/monaco-editor/esm/${entry}`),
-        bundle: true,
-        minify: true,
-        format: "iife",
-        outbase: "node_modules/monaco-editor/esm/",
-        outdir: "dist/vendor/monaco"
-    },
-    {
-        entryPoints: ["browser/monaco.ts"],
-        bundle: true,
-        minify: true,
-        format: "iife",
-        outfile: "dist/vendor/monaco/index.js",
-        loader: {
-            ".ttf": "file"
-        }
-    },
-    {
         ...commonOptions,
         outfile: "dist/browser.js",
         footer: { js: "//# sourceURL=file:///VencordWeb" }
@@ -114,7 +96,14 @@ const buildConfigs = [
     }
 ];
 
-await buildOrWatchAll(buildConfigs);
+async function copyMonacoEditor() {
+    const src = resolve(import.meta.dirname, "../../node_modules/@sadan4/vencord-monaco-editor/dist");
+    await rm("dist/vendor/monaco", { recursive: true }).catch(() => { });
+    await mkdir("dist/vendor/monaco", { recursive: true });
+    await cp(src, "dist/vendor/monaco", { recursive: true });
+}
+
+await Promise.all([buildOrWatchAll(buildConfigs), copyMonacoEditor()]);
 
 /**
  * @type {(dir: string) => Promise<string[]>}

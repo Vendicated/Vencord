@@ -40,8 +40,8 @@
         "@vap/shiki": "catalog:",
         "fflate": "catalog:",
         "gifenc": "catalog:",
-        "monaco-editor": "catalog:",
-        "virtual-merge": "catalog:"
+        "virtual-merge": "catalog:",
+        "@sadan4/vencord-monaco-editor": "catalog:"
     },
     "devDependencies": {
         "@stylistic/eslint-plugin": "catalog:",
