@@ -8,13 +8,15 @@ import { definePluginSettings } from "@api/Settings";
 import { getUserSettingLazy } from "@api/UserSettings";
 import {
     Divider,
+    Heading,
+    Paragraph,
     Span,
 } from "@components/index";
 import { Devs } from "@utils/constants";
 import { classNameFactory } from "@utils/css";
 import { Logger } from "@utils/Logger";
 import definePlugin, { OptionType } from "@utils/types";
-import { Checkbox, closeModal, Modal, openModal, Text, } from "@webpack/common";
+import { Checkbox, closeModal, Modal, openModal, } from "@webpack/common";
 
 import managedStyle from "./styles.css?managed";
 
@@ -144,8 +146,8 @@ function ModalComponent({ modalProps, submit, close, options }: {
                 size="lg"
                 actionBarInput={
                     <div className={cl("summary")}>
-                        <Text variant="text-md/semibold" color="text-strong" className={cl("source-or-preset-name")}>{liveSettings.contentHint === "motion" ? "Gaming" : liveSettings.contentHint === "detail" ? "Screenshare" : "Custom"}</Text>
-                        <Text variant="text-xs/medium" color="text-muted" className={cl("summary-detail")}>
+                        <Paragraph size="md" weight="semibold" style={{ color: "var(--text-strong, var(--text-default))" }} className={cl("source-or-preset-name")}>{liveSettings.contentHint === "motion" ? "Gaming" : liveSettings.contentHint === "detail" ? "Screenshare" : "Custom"}</Paragraph>
+                        <Paragraph size="xs" weight="medium" style={{ color: "var(--text-muted, var(--text-default))" }} className={cl("summary-detail")}>
                             <span>{liveSettings.contentHint === "motion" ? "Smoother video" : liveSettings.contentHint === "detail" ? "Cleaner text" : "User preset"}</span>
                             <span className={cl("ellipsis")}>•</span>
                             <span>{liveSettings.resolution}p</span>
@@ -153,7 +155,7 @@ function ModalComponent({ modalProps, submit, close, options }: {
                             <span>{liveSettings.frameRate}fps</span>
                             {liveSettings.systemAudio ? <span className={cl("ellipsis")}>•</span> : ""}
                             {liveSettings.systemAudio ? <span>Stream Muted</span> : ""}
-                        </Text>
+                        </Paragraph>
                     </div>
                 }
                 actions={[
@@ -168,7 +170,7 @@ function ModalComponent({ modalProps, submit, close, options }: {
                 <div>
                     <div className={cl("flex", "padding")}>
                         <section className={cl("quality-section")}>
-                            <Text tag="h2" variant="heading-md/semibold" color="text-strong">Resolution</Text>
+                            <Heading tag="h2">Resolution</Heading>
                             <OptionRadio
                                 options={StreamResolution}
                                 settings={liveSettings}
@@ -178,7 +180,7 @@ function ModalComponent({ modalProps, submit, close, options }: {
                         </section>
 
                         <section className={cl("quality-section")}>
-                            <Text tag="h2" variant="heading-md/semibold" color="text-strong">Frame Rate</Text>
+                            <Heading tag="h2">Frame Rate</Heading>
                             <OptionRadio
                                 options={StreamFps}
                                 settings={liveSettings}
@@ -188,7 +190,7 @@ function ModalComponent({ modalProps, submit, close, options }: {
                         </section>
                     </div>
                     <div>
-                        <Text tag="h2" variant="heading-md/semibold" color="text-strong">Stream Mode</Text>
+                        <Heading tag="h2">Stream Mode</Heading>
                         <div>
                             <OptionRadio
                                 options={StreamContentHint}
@@ -207,8 +209,8 @@ function ModalComponent({ modalProps, submit, close, options }: {
                             shape="box"
                             reverse={true}>
                             <div className={cl("control-content")}>
-                                <Text tag="h2" variant="heading-md/semibold" color="text-strong">Mute Stream Audio</Text>
-                                <Text variant="text-sm/normal" color="text-subtle">Prevents system audio from being included in your stream.</Text>
+                                <Heading tag="h2">Mute Stream Audio</Heading>
+                                <Paragraph style={{ color: "var(--text-subtle, var(--text-default))" }}>Prevents system audio from being included in your stream.</Paragraph>
                             </div>
                         </Checkbox>
                     </div>
@@ -219,8 +221,8 @@ function ModalComponent({ modalProps, submit, close, options }: {
                             shape="box"
                             reverse={true}>
                             <div className={cl("control-content")}>
-                                <Text tag="h2" variant="heading-md/semibold" color="text-strong">Show Stream Previews</Text>
-                                <Text variant="text-sm/normal" color="text-subtle">Allows others to see a preview of your stream before they join.</Text>
+                                <Heading tag="h2">Show Stream Previews</Heading>
+                                <Paragraph style={{ color: "var(--text-subtle, var(--text-default))" }}>Allows others to see a preview of your stream before they join.</Paragraph>
                             </div>
                         </Checkbox>
                     </div>

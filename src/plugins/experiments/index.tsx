@@ -16,7 +16,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { BaseText } from "@components/BaseText";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { ErrorCard } from "@components/ErrorCard";
 import { Flex } from "@components/Flex";
@@ -134,7 +133,7 @@ export default definePlugin({
     WarningCard: ErrorBoundary.wrap(() => (
         <ErrorCard id="vc-experiments-warning-card" className={Margins.bottom16}>
             <Flex flexDirection="column" gap={8}>
-                <BaseText tag="h2" weight="bold" size="lg">Hold on!!</BaseText>
+                <Paragraph size="lg" weight="semibold">Hold on!!</Paragraph>
 
                 <Paragraph>
                     Experiments are unreleased Discord features. They might not work, or even break your client or get your account disabled.

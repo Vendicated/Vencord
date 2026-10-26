@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { React } from "@webpack/common";
+import { useEffect, useState } from "@webpack/common";
 
 type Shiki = typeof import("../api/shiki").shiki;
 interface ThemeState {
@@ -32,9 +32,9 @@ const currentTheme: ThemeState = {
 const themeSetters = new Set<React.Dispatch<React.SetStateAction<ThemeState>>>();
 
 export const useTheme = (): ThemeState => {
-    const [, setTheme] = React.useState<ThemeState>(currentTheme);
+    const [, setTheme] = useState<ThemeState>(currentTheme);
 
-    React.useEffect(() => {
+    useEffect(() => {
         themeSetters.add(setTheme);
         return () => void themeSetters.delete(setTheme);
     }, []);

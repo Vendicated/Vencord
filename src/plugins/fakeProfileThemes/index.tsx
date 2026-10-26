@@ -20,9 +20,12 @@
 import "./styles.css";
 
 import { definePluginSettings } from "@api/Settings";
+import { Button } from "@components/Button";
 import { Divider } from "@components/Divider";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Flex } from "@components/Flex";
+import { Heading } from "@components/Heading";
+import { Paragraph } from "@components/Paragraph";
 import { Devs } from "@utils/constants";
 import { copyWithToast, fetchUserProfile } from "@utils/discord";
 import { Margins } from "@utils/margins";
@@ -31,7 +34,7 @@ import { useAwaiter } from "@utils/react";
 import definePlugin, { OptionType } from "@utils/types";
 import { User, UserProfile } from "@vencord/discord-types";
 import { findComponentByCodeLazy } from "@webpack";
-import { Button, ColorPicker, Forms, React, Text, UserProfileStore, UserStore, useState } from "@webpack/common";
+import { ColorPicker, React, UserProfileStore, UserStore, useState } from "@webpack/common";
 import virtualMerge from "virtual-merge";
 
 interface Colors {
@@ -112,12 +115,12 @@ function SettingsAboutComponent() {
 
     return (
         <section>
-            <Forms.FormTitle tag="h3">Usage</Forms.FormTitle>
-            <Forms.FormText>
+            <Heading tag="h3">Usage</Heading>
+            <Paragraph>
                 After enabling this plugin, you will see custom colors in
                 the profiles of other people using compatible plugins.{" "}
-            </Forms.FormText>
-            <Forms.FormText className={Margins.top8}>
+            </Paragraph>
+            <Paragraph className={Margins.top8}>
                 <strong>To set your own profile theme colors:</strong>
                 <ul>
                     <li>&mdash; use the color pickers below to choose your colors</li>
@@ -127,17 +130,17 @@ function SettingsAboutComponent() {
                 <Divider
                     className={classes(Margins.top8, Margins.bottom8)}
                 />
-                <Forms.FormTitle tag="h3">Color pickers</Forms.FormTitle>
+                <Heading tag="h3">Color pickers</Heading>
                 <Flex gap="1em">
                     <ColorPicker
                         color={color1}
                         label={
-                            <Text
-                                variant={"text-xs/normal"}
+                            <Paragraph
+                                size="xs"
                                 style={{ marginTop: "4px" }}
                             >
                                 Primary
-                            </Text>
+                            </Paragraph>
                         }
                         onChange={(color: number) => {
                             setColor1(color);
@@ -146,12 +149,12 @@ function SettingsAboutComponent() {
                     <ColorPicker
                         color={color2}
                         label={
-                            <Text
-                                variant={"text-xs/normal"}
+                            <Paragraph
+                                size="xs"
                                 style={{ marginTop: "4px" }}
                             >
                                 Accent
-                            </Text>
+                            </Paragraph>
                         }
                         onChange={(color: number) => {
                             setColor2(color);
@@ -162,8 +165,7 @@ function SettingsAboutComponent() {
                             const colorString = encode(color1, color2);
                             copyWithToast(colorString);
                         }}
-                        color={Button.Colors.PRIMARY}
-                        size={Button.Sizes.XLARGE}
+                        variant="secondary"
                         style={{ marginBottom: "auto" }}
                     >
                         Copy 3y3
@@ -172,7 +174,7 @@ function SettingsAboutComponent() {
                 <Divider
                     className={classes(Margins.top8, Margins.bottom8)}
                 />
-                <Forms.FormTitle tag="h3">Preview</Forms.FormTitle>
+                <Heading tag="h3">Preview</Heading>
                 <div className="vc-fpt-preview">
                     <ProfileModal
                         user={UserStore.getCurrentUser()}
@@ -185,7 +187,7 @@ function SettingsAboutComponent() {
                         isTryItOut={true}
                     />
                 </div>
-            </Forms.FormText>
+            </Paragraph>
         </section>);
 }
 
@@ -234,8 +236,7 @@ export default definePlugin({
                 const colorString = encode(primary, accent);
                 copyWithToast(colorString);
             }}
-            color={Button.Colors.PRIMARY}
-            size={Button.Sizes.XLARGE}
+            variant="secondary"
             className={Margins.left16}
         >Copy 3y3
         </Button >;

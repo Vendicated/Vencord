@@ -19,7 +19,6 @@
 import { useSettings } from "@api/Settings";
 import { authorizeCloud, deauthorizeCloud } from "@api/SettingsSync/cloudSetup";
 import { deleteCloudSettings, eraseAllCloudData, getCloudSettings, getCloudSyncDirection, putCloudSettings, setCloudSyncDirection } from "@api/SettingsSync/cloudSync";
-import { BaseText } from "@components/BaseText";
 import { Button, ButtonProps } from "@components/Button";
 import { CheckedTextInput } from "@components/CheckedTextInput";
 import { Divider } from "@components/Divider";
@@ -34,7 +33,7 @@ import { SettingsTab, wrapTab } from "@components/settings/tabs/BaseTab";
 import { Margins } from "@utils/margins";
 import { classes } from "@utils/misc";
 import { IconComponent } from "@utils/types";
-import { ConfirmModal,openModal, Select, Tooltip, useState } from "@webpack/common";
+import { ConfirmModal, openModal, Select, Tooltip, useState } from "@webpack/common";
 
 function validateUrl(url: string) {
     try {
@@ -46,14 +45,9 @@ function validateUrl(url: string) {
 }
 
 const SectionHeading = ({ text }: { text: string; }) => (
-    <BaseText
-        tag="h5"
-        size="lg"
-        weight="semibold"
-        className={Margins.bottom16}
-    >
+    <Heading tag="h1" className={Margins.bottom16}>
         {text}
-    </BaseText>
+    </Heading>
 );
 
 function ButtonWithIcon({ children, Icon, className, ...buttonProps }: ButtonProps & { Icon: IconComponent; }) {
@@ -90,7 +84,7 @@ function CloudSetupSection() {
                         cloud.authenticated = v;
                 }}
             />
-            <Heading tag="h5" className={Margins.top16}>Backend URL</Heading>
+            <Heading className={Margins.top16}>Backend URL</Heading>
             <Paragraph className={Margins.bottom8}>
                 Which backend to use when using cloud integrations.
             </Paragraph>
@@ -143,7 +137,7 @@ function SettingsSyncSection() {
                 />
 
                 <div>
-                    <Heading tag="h5">
+                    <Heading>
                         Sync Rules for This Device
                     </Heading>
                     <Paragraph className={Margins.bottom8}>
