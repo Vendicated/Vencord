@@ -24,3 +24,11 @@
 .vc-textReplace-search-input {
     margin-top: 8px;
 }
+
+.vc-textReplace-import-export-buttons {
+    margin-top: 8px;
+}
+
+.vc-textReplace-import-export-buttons > button {
+    flex: 1;
+}
