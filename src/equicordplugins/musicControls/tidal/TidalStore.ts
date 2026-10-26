@@ -64,6 +64,7 @@ class TidalSocket {
 
     public socket: WebSocket | undefined;
     private reconnectTimeout: ReturnType<typeof setTimeout> | undefined;
+    private reconnectDelay = 5_000;
 
     constructor(onChange: typeof this.onChange) {
         this.reconnect();
@@ -110,6 +111,7 @@ class TidalSocket {
 
         this.socket.addEventListener("open", () => {
             this.ready = true;
+            this.reconnectDelay = 5_000;
             this.socket?.send(JSON.stringify({ action: "subscribe", all: true, fields: ["currentTime"] }));
         });
 
@@ -120,7 +122,10 @@ class TidalSocket {
 
         this.socket.addEventListener("close", e => {
             this.ready = false;
-            if (!this.destroyed) this.reconnectTimeout = setTimeout(() => this.reconnect(), 10_000);
+            if (!this.destroyed) {
+                this.reconnectTimeout = setTimeout(() => this.reconnect(), this.reconnectDelay);
+                this.reconnectDelay = Math.min(this.reconnectDelay * 2, 300_000);
+            }
             this.onChange({ type: "update", all: true, fields: { playing: false, track: null, currentTime: 0, repeatMode: 0, shuffle: false, volume: 100 } });
         });
 
