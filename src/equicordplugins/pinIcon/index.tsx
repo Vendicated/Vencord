@@ -17,11 +17,10 @@
 */
 
 import ErrorBoundary from "@components/ErrorBoundary";
+import { PinIcon } from "@components/Icons";
 import { EquicordDevs } from "@utils/constants";
 import definePlugin from "@utils/types";
-import { findComponentByCodeLazy } from "@webpack";
 
-const PinIcon = findComponentByCodeLazy("1-.06-.63L6.16");
 export default definePlugin({
     name: "PinIcon",
     description: "Adds a pin icon to pinned messages",
@@ -37,6 +36,6 @@ export default definePlugin({
         }
     ],
     renderPinIcon: ErrorBoundary.wrap(message => {
-        return message?.pinned ? (<PinIcon size="xs" style={{ position: "absolute", right: "0", top: "0" }} />) : null;
+        return message?.pinned ? (<PinIcon width={16} height={16} style={{ position: "absolute", right: "0", top: "0" }} />) : null;
     }, { noop: true })
 });

@@ -36,3 +36,32 @@
 .vc-pindms-collapsed .vc-pindms-collapse-icon {
     transform: rotate(0deg);
 }
+
+.vc-pindms-sidebar-channel {
+    padding-block: 1px;
+    container-type: inline-size;
+}
+
+.vc-pindms-sidebar-channel [class*="layout__"] {
+    height: var(--custom-friend-row-height);
+}
+
+.vc-pindms-sidebar-channel [class*="channel__"] {
+    margin-inline-start: 0;
+    max-width: 100%;
+}
+
+.vc-pindms-sidebar-channel [class*="link__"] {
+    padding-block: calc(var(--space-xs) - 1px);
+    padding-inline: var(--space-xs);
+}
+
+.vc-pindms-sidebar-channel [class*="closeButton_"] {
+    display: none !important;
+}
+
+@container (width < 100px) {
+    .vc-pindms-sidebar-channel [class*="link__"] {
+        padding-inline: calc((100cqw - 32px) / 2) 0;
+    }
+}

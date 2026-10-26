@@ -7,7 +7,7 @@
 import { findGroupChildrenByChildId, NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { PinOrder, settings } from "@plugins/pinDms";
 import { addChannelToCategory, canMoveChannelInDirection, currentUserCategories, isPinned, moveChannel, removeChannelFromCategory } from "@plugins/pinDms/data";
-import { Menu } from "@webpack/common";
+import { ChannelStore, Menu } from "@webpack/common";
 
 import { openCategoryModal } from "./CreateCategoryModal";
 
@@ -90,6 +90,14 @@ const UserContext: NavContextMenuPatchCallback = (children, props) => {
     if (container) {
         const idx = container.findIndex(c => c?.props?.id === "close-dm");
         container.splice(idx, 0, createPinMenuItem(props.channel.id));
+        return;
+    }
+
+    const channelId = ChannelStore.getDMFromUserId(props.user.id);
+    const group = findGroupChildrenByChildId("message-user", children);
+    if (channelId && group) {
+        const idx = group.findIndex(c => c?.props?.id === "message-user");
+        group.splice(idx + 1, 0, createPinMenuItem(channelId));
     }
 };
 

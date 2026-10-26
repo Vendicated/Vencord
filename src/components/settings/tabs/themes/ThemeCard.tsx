@@ -6,7 +6,7 @@
 
 import type { ThemeActivationMode } from "@api/Settings";
 import { Flex } from "@components/Flex";
-import { CogWheel, DeleteIcon, FolderIcon } from "@components/Icons";
+import { CogWheel, DeleteIcon, FolderIcon, PinIcon } from "@components/Icons";
 import { Link } from "@components/Link";
 import { OnlineThemeCard } from "@components/settings/OnlineThemeCard";
 import { UserThemeHeader } from "@main/themes";
@@ -16,7 +16,6 @@ import { findComponentByCodeLazy } from "@webpack";
 import { Menu, React, showToast, Tooltip, useState } from "@webpack/common";
 import { ContextMenuApi } from "@webpack/common/menu";
 
-const PinIcon = findComponentByCodeLazy("1-.06-.63L6.16");
 const HomeIcon = findComponentByCodeLazy("m2.4 8.4 8.38-6.46a2");
 const RefreshIcon = findComponentByCodeLazy("M21 2a1 1 0 0 1 1 1v6");
 const LinkIcon = findComponentByCodeLazy("M16.32 14.72a1 1 0 0 1 0-1.41l2.51-2.51");
@@ -229,7 +228,7 @@ export function ThemeCard({ theme, enabled, onChange, onDelete, showDeleteButton
                                     onMouseLeave={onMouseLeave}
                                     className={cl("footer-pin-icon")}
                                 >
-                                    <PinIcon size="xs" />
+                                    <PinIcon width={16} height={16} />
                                 </div>
                             )}
                         </Tooltip>
