@@ -1,0 +1,50 @@
+.mc-panel {
+    color: var(--text-default, var(--text-normal));
+    font: inherit;
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
+.mc-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.mc-title {
+    margin: 0;
+}
+
+.mc-panel p {
+    margin-block: 8px;
+}
+
+.mc-panel .vc-form-switch-text {
+    min-width: 0;
+}
+
+.mc-status,
+.mc-scope {
+    color: var(--text-muted);
+}
+
+.mc-status {
+    white-space: nowrap;
+}
+
+.mc-error {
+    color: var(--text-danger);
+}
+
+.mc-panel button:focus-visible {
+    outline: 2px solid var(--brand-500);
+    outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .mc-panel .vc-switch-container,
+    .mc-panel .vc-switch-slider {
+        transition: none;
+    }
+}
