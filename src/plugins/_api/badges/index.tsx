@@ -21,8 +21,10 @@ import "./fixDiscordBadgePadding.css";
 import { _getBadges, BadgePosition, BadgeRarity, BadgeUserArgs, DirectoryBadge, ProfileBadge } from "@api/Badges";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Flex } from "@components/Flex";
+import { Heading } from "@components/Heading";
 import { Heart } from "@components/Heart";
 import { CopyIcon, LinkIcon } from "@components/Icons";
+import { Paragraph } from "@components/Paragraph";
 import DonateButton from "@components/settings/DonateButton";
 import { openContributorModal } from "@components/settings/tabs";
 import { Devs } from "@utils/constants";
@@ -31,7 +33,7 @@ import { Logger } from "@utils/Logger";
 import { Margins } from "@utils/margins";
 import { shouldShowContributorBadge } from "@utils/misc";
 import definePlugin from "@utils/types";
-import { ContextMenuApi, Forms, Menu, Modal, openModal, showToast, UserStore } from "@webpack/common";
+import { ContextMenuApi, Menu, Modal, openModal, showToast, UserStore } from "@webpack/common";
 
 const ContributorBadge: ProfileBadge = {
     id: "vencord_contributor_badge",
@@ -266,8 +268,8 @@ export default definePlugin({
                         <Modal
                             {...props}
                             title={
-                                <Forms.FormTitle
-                                    tag="h2"
+                                <Heading
+                                    tag="h1"
                                     style={{
                                         width: "100%",
                                         textAlign: "center",
@@ -278,7 +280,7 @@ export default definePlugin({
                                         <Heart />
                                         Vencord Donor
                                     </Flex>
-                                </Forms.FormTitle>
+                                </Heading>
                             }
                         >
                             <div>
@@ -297,17 +299,17 @@ export default definePlugin({
                                     />
                                 </Flex>
                                 <div style={{ padding: "1em" }}>
-                                    <Forms.FormText>
-                                        This Badge is a special perk for Vencord Donors
-                                    </Forms.FormText>
-                                    <Forms.FormText className={Margins.top20}>
+                                    <Paragraph>
+                                        This badge is a special perk for Vencord Donors
+                                    </Paragraph>
+                                    <Paragraph className={Margins.top16}>
                                         Please consider supporting the development of Vencord by becoming a donor. It would mean a lot!!
-                                    </Forms.FormText>
+                                    </Paragraph>
                                 </div>
                             </div>
                             <div>
                                 <Flex justifyContent="center" style={{ width: "100%" }}>
-                                    <DonateButton />
+                                    <DonateButton variant="overlayPrimary" />
                                 </Flex>
                             </div>
                         </Modal>

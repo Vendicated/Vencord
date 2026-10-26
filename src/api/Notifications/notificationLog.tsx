@@ -18,12 +18,12 @@
 
 import * as DataStore from "@api/DataStore";
 import { Settings } from "@api/Settings";
+import { Paragraph } from "@components/Paragraph";
 import { openNotificationSettingsModal } from "@components/settings/tabs/vencord/NotificationSettings";
 import { classNameFactory } from "@utils/css";
 import { useAwaiter } from "@utils/react";
 import { RenderModalProps } from "@vencord/discord-types";
-import { ConfirmModal, Forms, ListScrollerThin, Modal, openModal, React, Timestamp, useEffect, useReducer, useState } from "@webpack/common";
-import { nanoid } from "nanoid";
+import { ConfirmModal, ListScrollerThin, Modal, openModal, React, Timestamp, useEffect, useReducer, useState } from "@webpack/common";
 import type { DispatchWithoutAction } from "react";
 
 import NotificationComponent from "./NotificationComponent";
@@ -62,7 +62,7 @@ export async function persistNotification(notification: NotificationData) {
         log.unshift({
             ...pureNotification,
             timestamp: Date.now(),
-            id: nanoid()
+            id: crypto.randomUUID()
         });
 
         if (log.length > limit && limit !== 200)
@@ -138,9 +138,9 @@ export function NotificationLog({ log, pending }: { log: PersistentNotificationD
         return (
             <div>
                 <div className={cl("empty")} />
-                <Forms.FormText style={{ textAlign: "center" }}>
+                <Paragraph style={{ textAlign: "center" }}>
                     No notifications yet
-                </Forms.FormText>
+                </Paragraph>
             </div>
         );
 
