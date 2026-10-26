@@ -5,8 +5,10 @@
  */
 
 import { FormSwitch } from "@components/FormSwitch";
+import { Heading } from "@components/Heading";
+import { Paragraph } from "@components/Paragraph";
 import { Margins } from "@utils/margins";
-import { Forms, Parser, TextInput, useEffect, useState } from "@webpack/common";
+import { Parser, TextInput, useEffect, useState } from "@webpack/common";
 
 const RegexGuide = {
     "\\i": "Special regex escape sequence that matches identifiers (varnames, classnames, etc.)",
@@ -51,8 +53,7 @@ export function ReplacementInput({ replacement, setReplacement, replacementError
 
     return (
         <>
-            {/* FormTitle adds a class if className is not set, so we set it to an empty string to prevent that */}
-            <Forms.FormTitle className="">Replacement</Forms.FormTitle>
+            <Heading>Replacement</Heading>
             <TextInput
                 value={replacement?.toString()}
                 onChange={onChange}
@@ -60,12 +61,12 @@ export function ReplacementInput({ replacement, setReplacement, replacementError
             />
             {!isFunc && (
                 <div>
-                    <Forms.FormTitle className={Margins.top8}>Cheat Sheet</Forms.FormTitle>
+                    <Heading className={Margins.top8}>Cheat Sheet</Heading>
 
                     {Object.entries(RegexGuide).map(([placeholder, desc]) => (
-                        <Forms.FormText key={placeholder}>
+                        <Paragraph key={placeholder}>
                             {Parser.parse("`" + placeholder + "`")}: {desc}
-                        </Forms.FormText>
+                        </Paragraph>
                     ))}
                 </div>
             )}
@@ -74,7 +75,7 @@ export function ReplacementInput({ replacement, setReplacement, replacementError
                 className={Margins.top16}
                 value={isFunc}
                 onChange={setIsFunc}
-                title={"Treat Replacement as function"}
+                title={'Treat "Replacement" as a function'}
                 description='"Replacement" will be evaluated as a function if this is enabled'
                 hideBorder
             />

@@ -25,7 +25,7 @@ import { Paragraph } from "@components/Paragraph";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { findComponentByCodeLazy, findCssClassesLazy, findStoreLazy } from "@webpack";
-import { Constants, React, RestAPI, SettingsRouter, Tooltip } from "@webpack/common";
+import { Constants, React, RestAPI, SettingsRouter, Tooltip, useState } from "@webpack/common";
 
 import { NewButton, RenameButton } from "./components/RenameButton";
 import { Session, SessionInfo } from "./types";
@@ -84,8 +84,8 @@ export default definePlugin({
     renderName: ErrorBoundary.wrap(({ session }: SessionInfo) => {
         const savedSession = savedSessionsCache.get(session.id_hash);
 
-        const state = React.useState(savedSession?.name ? `${savedSession.name}*` : getDefaultName(session.client_info));
-        const [title, setTitle] = state;
+        const state = useState(savedSession?.name ? `${savedSession.name}*` : getDefaultName(session.client_info));
+        const [title] = state;
         // Show a "NEW" badge if the session is seen for the first time
         return (
             <>
