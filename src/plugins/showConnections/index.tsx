@@ -154,7 +154,7 @@ function CompactConnectionComponent({ connection, theme }: { connection: Connect
 
 export default definePlugin({
     name: "ShowConnections",
-    description: "Show connected accounts in user popouts",
+    description: "Show connected accounts in user popouts and DM sidebars",
     tags: ["Friends", "Appearance"],
     authors: [Devs.TheKodeToad],
     settings,
@@ -166,6 +166,14 @@ export default definePlugin({
             replacement: {
                 match: /userId:\i\.id,guild:\i\}\)(?=])/,
                 replace: "$&,$self.profilePopoutComponent(arguments[0])"
+            }
+        },
+        {
+            // From FakeNitro
+            find: '.getByName("fork_and_knife")',
+            replacement: {
+                match: /]}\)](?<=targetUserId.{1,20})/,
+                replace: "$&.concat($self.profilePopoutComponent(arguments[0]))"
             }
         }
     ],
