@@ -98,16 +98,19 @@ const buildConfigs = [
 
 async function copyMonacoEditor() {
     const src = resolve(import.meta.dirname, "../../node_modules/@sadan4/vencord-monaco-editor/dist");
-    await rm("dist/vendor/monaco", { recursive: true }).catch((e) => {
-        if (e.code !== "ENOENT") {
-            console.error(e);
-        }
-    });
+    for (const path of ["dist/vendor/monaco", "dist/chromium-unpacked/vendor/monaco", "dist/firefox-unpacked/vendor/monaco"]) {
+        await rm(path, { recursive: true }).catch((e) => {
+            if (e.code !== "ENOENT") {
+                console.error(e);
+            }
+        });
+    }
     await mkdir("dist/vendor/monaco", { recursive: true });
     await cp(src, "dist/vendor/monaco", { recursive: true });
 }
 
-await Promise.all([buildOrWatchAll(buildConfigs), copyMonacoEditor()]);
+await copyMonacoEditor();
+await buildOrWatchAll(buildConfigs);
 
 /**
  * @type {(dir: string) => Promise<string[]>}
