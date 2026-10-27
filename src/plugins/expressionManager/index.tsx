@@ -22,18 +22,20 @@ import { findGroupChildrenByChildId, NavContextMenuPatchCallback } from "@api/Co
 import { definePluginSettings, migratePluginSettings } from "@api/Settings";
 import { CopyIcon, DeleteIcon, HistoryIcon, PencilIcon, PlusIcon } from "@components/Icons";
 import { Devs } from "@utils/constants";
+import { getIntlMessage } from "@utils/discord";
 import { Logger } from "@utils/Logger";
 import { removeFromArray } from "@utils/misc";
 import definePlugin, { OptionType } from "@utils/types";
 import { CustomEmoji, FluxStore, Guild, GuildSticker, Message, Sticker, StickerItem } from "@vencord/discord-types";
 import { StickerFormatType, StickerType } from "@vencord/discord-types/enums";
-import { findStoreLazy } from "@webpack";
-import { ConfirmModal, Constants, EmojiStore, GuildStore, Menu, openModal, PermissionsBits, PermissionStore, React, RestAPI, SelectedGuildStore, showToast, StickersStore, UserSettingsActionCreators } from "@webpack/common";
+import { findCssClassesLazy, findStoreLazy } from "@webpack";
+import { ConfirmModal, Constants, EmojiStore, GuildStore, Menu, openModal, PermissionsBits, PermissionStore, React, RestAPI, SelectedGuildStore, showToast, StickersStore, useMemo, UserSettingsActionCreators } from "@webpack/common";
 
 import { buildCloneEmojiItem, editEmoji, EmojiURLRegex, openEmojiUploadModal, resolveEmojiName } from "./emojis";
 import { buildCloneStickerItem, buildStickerLinkItems, editSticker } from "./stickers";
 
 const StickersPersistedStore = findStoreLazy("StickersPersistedStore") as FluxStore & { stickerFrecencyWithoutFetchingLatest: { frequently: Sticker[]; }; };
+const EmojiPickerLabelClasses = findCssClassesLazy("label", "labelChecked", "icon");
 
 export const logger = new Logger("ExpressionManager");
 
@@ -136,7 +138,7 @@ function buildManageExpressionItems(id: string, type: string) {
     );
 }
 
-function buildRemoveFrecentItem({ type, id, name }: Record<"type" | "id" | "name", string | undefined>) {
+function buildRemoveFrecentItem({ type, id, name }: Record<"type" | "id" | "name", string | undefined>, isReaction: boolean) {
     if (!settings.store.recents)
         return;
 
@@ -144,7 +146,10 @@ function buildRemoveFrecentItem({ type, id, name }: Record<"type" | "id" | "name
 
     switch (type) {
         case "emoji": {
-            const frecents = EmojiStore.getDisambiguatedEmojiContext(SelectedGuildStore.getGuildId()).getFrequentlyUsedEmojisWithoutFetchingLatest();
+            const ctx = EmojiStore.getDisambiguatedEmojiContext(SelectedGuildStore.getGuildId());
+            const frecents = isReaction
+                ? ctx.getFrequentlyUsedReactionEmojisWithoutFetchingLatest()
+                : ctx.getFrequentlyUsedEmojisWithoutFetchingLatest();
 
             if (frecents.some(e => id ? e.id === id : e.name === name))
                 expressionKey = id ?? name!;
@@ -164,7 +169,11 @@ function buildRemoveFrecentItem({ type, id, name }: Record<"type" | "id" | "name
     if (!expressionKey)
         return;
 
-    const collectionKey = `${type}Frecency`;
+    const collectionKey = type === "emoji"
+        ? isReaction
+            ? "emojiReactionFrecency"
+            : "emojiFrecency"
+        : "stickerFrecency";
     const itemsKey = `${type}s`;
 
     return (
@@ -182,7 +191,10 @@ function buildRemoveFrecentItem({ type, id, name }: Record<"type" | "id" | "name
                     );
                 };
 
-                if (e.shiftKey) {
+                // The confirm modal closes the reaction popup, so skip confirmation
+                const skipConfirm = e.shiftKey || isReaction;
+
+                if (skipConfirm) {
                     onConfirm();
                 } else {
                     openModal(modalProps =>
@@ -203,7 +215,16 @@ function buildRemoveFrecentItem({ type, id, name }: Record<"type" | "id" | "name
 const patchExpressionPickerMenu: NavContextMenuPatchCallback = (children, props: { target: HTMLElement; }) => {
     const { id, name, type, formatType } = props?.target?.dataset ?? {};
 
-    const removeFrecentItem = buildRemoveFrecentItem({ type, id, name });
+    // Horrible. But other alternatives aren't any better
+    const isReaction = useMemo(() => {
+        if (type !== "emoji") return false;
+
+        const superReactionMessages = [getIntlMessage("SUPER_REACTION_TOGGLE_DISABLED"), getIntlMessage("SUPER_REACTION_TOGGLE_ENABLED")];
+        const emojiPickerNode = document.getElementById("emoji-picker-tab-panel");
+        return !!emojiPickerNode && [...emojiPickerNode.getElementsByClassName(EmojiPickerLabelClasses.label)].some(el => superReactionMessages.includes(el.ariaLabel));
+    }, [type]);
+
+    const removeFrecentItem = buildRemoveFrecentItem({ type, id, name }, isReaction);
 
     if (removeFrecentItem) {
         const group = findGroupChildrenByChildId("favorite", children) ?? findGroupChildrenByChildId("unfavorite", children);
