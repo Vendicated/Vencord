@@ -32,7 +32,6 @@ import { ConfirmModal, Constants, EmojiStore, FluxDispatcher, GuildStore, Menu, 
 
 import { openCloneStickerModal } from "./StickerCloneModal";
 
-
 const openEmojiStudioModal = findByCodeLazy("Emoji Studio");
 const loadCreateStickerModal = extractAndLoadChunksLazy(["CREATE_STICKER_MODAL", "#{intl::STICKER_PICKER_CREATE_STICKER}"], new RegExp(`\\.CREATE_STICKER_MODAL.{0,100}?${DefaultExtractAndLoadChunksRegex.source}`));
 const CreateStickerModal = findComponentByCodeLazy("#{intl::GUILD_STICKER_INVALID_STICKER}");
@@ -60,7 +59,7 @@ const settings = definePluginSettings({
 });
 
 const formatEmojiURL = (emoji: Emoji, size: number) => `${location.protocol}//${window.GLOBAL_ENV.CDN_HOST}/emojis/${emoji.id}.webp?size=${size}&lossless=true&animated=true`;
-export const formatStickerURL = (sticker: PartialSticker, size: number) => `${window.GLOBAL_ENV.MEDIA_PROXY_ENDPOINT}/stickers/${sticker.id}.${StickerExtMap[sticker.format_type]}?size=${size}&lossless=true&animated=true`;
+export const formatStickerURL = (sticker: PartialSticker, size: number) => `${location.protocol}//${window.GLOBAL_ENV.MEDIA_PROXY_ENDPOINT}/stickers/${sticker.id}.${StickerExtMap[sticker.format_type]}?size=${size}&lossless=true&animated=true`;
 
 async function fetchSticker(id: string) {
     const cached = StickersStore.getStickerById(id);
@@ -112,7 +111,7 @@ async function openEmojiUploadModal(url: string, filename?: string) {
     image.src = dataUrl;
     await image.decode();
 
-    const file = new File([blob], filename, { type: "image/png" });
+    const file = new File([blob], filename, { type: blob.type });
 
     await openEmojiStudioModal({
         analyticsLocation: {

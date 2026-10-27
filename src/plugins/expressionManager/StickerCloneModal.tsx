@@ -36,7 +36,7 @@ const PremiumTierStickerLimitMap = {
 
 const MAX_STICKER_SIZE_BYTES = 512 * 1024;
 
-function getGuildMaxStickerSlots(guild: Guild) {
+function getGuildMaxStickerSlots(guild: Guild): number {
     if (guild.features.has("MORE_STICKERS") && guild.premiumTier === 3)
         return 120;
 
@@ -57,7 +57,7 @@ async function fetchBlob(sticker: Sticker) {
             return blob;
     }
 
-    throw new Error(`Failed to fetch sticker within size limit of ${MAX_SIZE / 1000}kB`);
+    throw new Error(`Failed to fetch sticker within size limit of ${MAX_SIZE / 1024}KiB`);
 }
 
 async function doClone(guildId: string, sticker: Sticker) {
@@ -89,13 +89,13 @@ async function doClone(guildId: string, sticker: Sticker) {
             message = JSON.parse(e.text).message;
         } catch { }
 
-        new Logger("ExpressionCloner").error(`Failed to clone ${sticker.name} to guild ${guildId}`, e);
+        new Logger("ExpressionManager").error(`Failed to clone ${sticker.name} to guild ${guildId}`, e);
         showToast({ text: `Failed to clone: ${message}`, variant: "critical" });
     }
 }
 
 function getGuildCandidates() {
-    const meId = UserStore.getCurrentUser().id;
+    const meId = AuthenticationStore.getId();
 
     return Object.values(GuildStore.getGuilds()).filter(g => {
         const canCreate = g.ownerId === meId ||
@@ -125,7 +125,7 @@ export function CloneModal({ sticker }: { sticker: Sticker; }) {
                     sticker.name = v;
                     setName(v);
                 }}
-                validate={v => (v.length > 2 && v.length < 30) || "Name must be between 2 and 30 characters and only contain alphanumeric characters"}
+                validate={v => (v.length >= 2 && v.length <= 30) || "Name must be between 2 and 30 characters and only contain alphanumeric characters"}
             />
 
             <Flex flexWrap="wrap" justifyContent="center" alignItems="center" className={Margins.top16}>
