@@ -85,9 +85,9 @@ async function doClone(guildId: string, sticker: PartialSticker) {
     try {
         const data = new FormData();
         data.append("name", sticker.name);
-        if (sticker.tags) data.append("tags", sticker.tags);
-        if (sticker.description) data.append("description", sticker.description);
         data.append("file", await fetchBlob(sticker));
+        data.append("tags", sticker.tags ?? "👻"); // cannot be empty
+        data.append("description", sticker.description ?? "");
 
         const { body } = await RestAPI.post({
             url: Constants.Endpoints.GUILD_STICKER_PACKS(guildId),
