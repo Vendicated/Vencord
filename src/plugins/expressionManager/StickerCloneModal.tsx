@@ -27,7 +27,7 @@ const getFontSize = (s: string) => {
     return sizes[s.length] ?? 4;
 };
 
-type StickerData = StickerItem & Partial<Sticker>;
+type PartialSticker = StickerItem & Partial<Sticker>;
 
 const PremiumTierStickerLimitMap = {
     0: 5,
@@ -59,7 +59,7 @@ async function fetchSticker(id: string) {
     return body as GuildSticker;
 }
 
-async function fetchBlob(sticker: StickerData) {
+async function fetchBlob(sticker: PartialSticker) {
     for (let size = 4096; size >= 16; size /= 2) {
         const url = formatStickerURL(sticker, size);
         const res = await fetch(url);
@@ -81,7 +81,7 @@ async function fetchBlob(sticker: StickerData) {
     throw new Error(`Failed to fetch sticker within size limit of ${MAX_STICKER_SIZE_BYTES / 1024}KiB`);
 }
 
-async function doClone(guildId: string, sticker: StickerData) {
+async function doClone(guildId: string, sticker: PartialSticker) {
     try {
         const data = new FormData();
         data.append("name", sticker.name);
@@ -130,7 +130,7 @@ function getGuildCandidates() {
     }).sort((a, b) => a.name.localeCompare(b.name));
 }
 
-export function CloneModal({ sticker }: { sticker: StickerData; }) {
+export function CloneModal({ sticker }: { sticker: PartialSticker; }) {
     const [isCloning, setIsCloning] = useState(false);
     const [name, setName] = useState(sticker.name);
 
@@ -194,7 +194,7 @@ export function CloneModal({ sticker }: { sticker: StickerData; }) {
     );
 }
 
-export function openCloneStickerModal(stickerData: StickerData) {
+export function openCloneStickerModal(stickerData: PartialSticker) {
     openModalLazy(async () => {
         const sticker = await fetchSticker(stickerData.id)
             .catch(e => stickerData)
