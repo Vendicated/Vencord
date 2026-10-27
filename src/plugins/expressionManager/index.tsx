@@ -28,31 +28,17 @@ import { removeFromArray } from "@utils/misc";
 import definePlugin, { OptionType } from "@utils/types";
 import { BasicMessage, CustomEmoji, FluxStore, Guild, GuildSticker, Message, Sticker, StickerItem } from "@vencord/discord-types";
 import { StickerFormatType, StickerType } from "@vencord/discord-types/enums";
-import { DefaultExtractAndLoadChunksRegex, extractAndLoadChunksLazy, findByCodeLazy, findComponentByCodeLazy, findStoreLazy } from "@webpack";
-import { ConfirmModal, Constants, EmojiStore, GuildStore, Menu, openModal, openModalLazy, PermissionsBits, PermissionStore, React, RestAPI, SelectedGuildStore, showToast, StickersStore, UserSettingsActionCreators } from "@webpack/common";
+import { findStoreLazy } from "@webpack";
+import { ConfirmModal, Constants, EmojiStore, GuildStore, Menu, openModal, PermissionsBits, PermissionStore, React, RestAPI, SelectedGuildStore, showToast, StickersStore, UserSettingsActionCreators } from "@webpack/common";
 
-import { openCloneStickerModal } from "./StickerCloneModal";
+import { buildCloneEmojiItem, editEmoji, openEmojiUploadModal } from "./emojis";
+import { buildCloneStickerItem, editSticker, formatStickerURL } from "./stickers";
 
 const StickersPersistedStore = findStoreLazy("StickersPersistedStore") as FluxStore & { stickerFrecencyWithoutFetchingLatest: { frequently: Sticker[]; }; };
-const openEmojiStudioModal = findByCodeLazy("Emoji Studio");
-const loadCreateStickerModal = extractAndLoadChunksLazy(["CREATE_STICKER_MODAL", "#{intl::STICKER_PICKER_CREATE_STICKER}"], new RegExp(`\\.CREATE_STICKER_MODAL.{0,100}?${DefaultExtractAndLoadChunksRegex.source}`));
-const CreateStickerModal = findComponentByCodeLazy("#{intl::GUILD_STICKER_INVALID_STICKER}");
 
 const EmojiURLRegex = /^https:\/\/cdn\.discordapp\.com\/emojis\/(\d+)\.\w+/;
 
-interface Emoji {
-    id: string;
-    name: string;
-}
-
 export const logger = new Logger("ExpressionManager");
-
-const StickerExtMap = {
-    [StickerFormatType.PNG]: "png",
-    [StickerFormatType.APNG]: "png",
-    [StickerFormatType.LOTTIE]: "json",
-    [StickerFormatType.GIF]: "gif"
-} as const;
 
 const settings = definePluginSettings({
     editAndDelete: {
@@ -67,10 +53,7 @@ const settings = definePluginSettings({
     }
 });
 
-const formatEmojiURL = (emoji: Emoji, size: number) => `${location.protocol}//${window.GLOBAL_ENV.CDN_HOST}/emojis/${emoji.id}.webp?size=${size}&lossless=true&animated=true`;
-export const formatStickerURL = (sticker: StickerItem, size: number) => `${location.protocol}${window.GLOBAL_ENV.MEDIA_PROXY_ENDPOINT}/stickers/${sticker.id}.${StickerExtMap[sticker.format_type]}?size=${size}&lossless=true&animated=true`;
-
-function buildCloneItem(type: string, action: () => void) {
+export function buildCloneItem(type: string, action: () => void) {
     return (
         <Menu.MenuItem
             id="vc-em-clone"
@@ -80,50 +63,6 @@ function buildCloneItem(type: string, action: () => void) {
             action={action}
         />
     );
-}
-
-function buildCloneEmojiItem(emoji: Emoji) {
-    return buildCloneItem("Emoji", () => openEmojiUploadModal(formatEmojiURL(emoji, 128), emoji.name));
-}
-
-function buildCloneStickerItem(sticker: StickerItem) {
-    return buildCloneItem("Sticker", () => openCloneStickerModal(sticker));
-}
-
-async function openEmojiUploadModal(url: string, filename?: string) {
-    try {
-        filename ||= new URL(url).pathname.split("/").pop() ?? "emoji.png";
-
-        const blob = await fetch(url).then(res => res.blob());
-
-        const dataUrl = await new Promise<string>((resolve, reject) => {
-            const reader = new FileReader();
-            reader.onloadend = () => resolve(reader.result as string);
-            reader.onerror = () => reject("Failed to read blob as data URL");
-            reader.readAsDataURL(blob);
-        });
-
-        const image = new Image();
-        image.src = dataUrl;
-        await image.decode();
-
-        const file = new File([blob], filename, { type: blob.type });
-
-        await openEmojiStudioModal({
-            analyticsLocation: {
-                page: "Guild Settings"
-            },
-            guildId: SelectedGuildStore.getGuildId(),
-            userImage: {
-                image,
-                file,
-                data: dataUrl
-            }
-        });
-    } catch (e) {
-        logger.error("Failed to open Emoji Modal", e);
-        showToast({ text: `Failed to open Emoji Modal: ${e}`, variant: "critical" });
-    }
 }
 
 function buildManageExpressionItems(id: string, type: string) {
@@ -158,21 +97,9 @@ function buildManageExpressionItems(id: string, type: string) {
                 leadingAccessory={{ type: "icon", icon: PencilIcon }}
                 action={() => {
                     if (type === "sticker") {
-                        openModalLazy(async () => {
-                            await loadCreateStickerModal();
-                            return modalProps =>
-                                <CreateStickerModal
-                                    {...modalProps}
-                                    sticker={expression}
-                                    guildId={guild.id}
-                                />;
-                        });
+                        editSticker(expression as GuildSticker, guild.id);
                     } else {
-                        openEmojiStudioModal({
-                            analyticsLocation: "guild settings edit emoji",
-                            emoji: expression,
-                            guildId: guild.id
-                        });
+                        editEmoji(expression, guild.id);
                     }
                 }}
             />
@@ -416,7 +343,7 @@ const patchMessageContextMenu: NavContextMenuPatchCallback = (children, props: R
                 id="vc-em-upload-as-emoji"
                 label="Upload as Emoji"
                 leadingAccessory={{ type: "icon", icon: PlusIcon }}
-                action={() => openEmojiUploadModal(mediaItem.url, mediaItem.name)}
+                action={() => openEmojiUploadModal(mediaItem.url)}
             />
         );
     }

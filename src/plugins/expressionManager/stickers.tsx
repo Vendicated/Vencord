@@ -14,20 +14,28 @@ import { classNameFactory } from "@utils/css";
 import { getGuildAcronym } from "@utils/discord";
 import { useForceUpdater } from "@utils/react";
 import { Guild, GuildSticker, Sticker, StickerItem } from "@vencord/discord-types";
+import { StickerFormatType } from "@vencord/discord-types/enums";
+import { DefaultExtractAndLoadChunksRegex, extractAndLoadChunksLazy, findComponentByCodeLazy } from "@webpack";
 import { AuthenticationStore, Clickable, Constants, FluxDispatcher, GuildStore, IconUtils, Modal, openModalLazy, PermissionsBits, PermissionStore, React, RestAPI, showToast, StickersStore, Tooltip, useMemo, UserStore, useState } from "@webpack/common";
 
-import { formatStickerURL, logger } from ".";
+import { buildCloneItem, logger } from ".";
 
 const cl = classNameFactory("vc-expressionManager-");
 
-const getFontSize = (s: string) => {
-    // Font size array from Discord. We currently use XLarge, commented out is
-    // [18, 18, 16, 16, 14, 12, 10]
-    const sizes = [20, 20, 18, 18, 16, 14, 12];
-    return sizes[s.length] ?? 4;
-};
+const loadCreateStickerModal = extractAndLoadChunksLazy(
+    ["CREATE_STICKER_MODAL", "#{intl::STICKER_PICKER_CREATE_STICKER}"],
+    new RegExp(`\\.CREATE_STICKER_MODAL.{0,100}?${DefaultExtractAndLoadChunksRegex.source}`)
+);
+const CreateStickerModal = findComponentByCodeLazy("#{intl::GUILD_STICKER_INVALID_STICKER}");
 
 type PartialSticker = StickerItem & Partial<Sticker>;
+
+const StickerExtMap = {
+    [StickerFormatType.PNG]: "png",
+    [StickerFormatType.APNG]: "png",
+    [StickerFormatType.LOTTIE]: "json",
+    [StickerFormatType.GIF]: "gif"
+} as const;
 
 const PremiumTierStickerLimitMap = {
     0: 5,
@@ -37,6 +45,9 @@ const PremiumTierStickerLimitMap = {
 } as const;
 
 const MAX_STICKER_SIZE_BYTES = 512 * 1024;
+
+export const formatStickerURL = (sticker: StickerItem, size: number) =>
+    `${location.protocol}${window.GLOBAL_ENV.MEDIA_PROXY_ENDPOINT}/stickers/${sticker.id}.${StickerExtMap[sticker.format_type]}?size=${size}&lossless=true&animated=true`;
 
 function getGuildMaxStickerSlots(guild: Guild): number {
     if (guild.features.has("MORE_STICKERS") && guild.premiumTier === 3)
@@ -115,6 +126,13 @@ async function doClone(guildId: string, sticker: PartialSticker) {
     }
 }
 
+function getAcronymFontSize(s: string) {
+    // Font size array from Discord. We currently use XLarge, commented out is Large
+    // [18, 18, 16, 16, 14, 12, 10]
+    const sizes = [20, 20, 18, 18, 16, 14, 12];
+    return sizes[s.length] ?? 4;
+}
+
 function getGuildCandidates() {
     const meId = AuthenticationStore.getId();
 
@@ -181,7 +199,7 @@ export function CloneModal({ sticker }: { sticker: PartialSticker; }) {
                                         alt={g.name}
                                     />
                                 ) : (
-                                    <Span className={cl("guild-acronym")} style={{ fontSize: getFontSize(getGuildAcronym(g)) }}>
+                                    <Span className={cl("guild-acronym")} style={{ fontSize: getAcronymFontSize(getGuildAcronym(g)) }}>
                                         {getGuildAcronym(g)}
                                     </Span>
                                 )}
@@ -194,7 +212,7 @@ export function CloneModal({ sticker }: { sticker: PartialSticker; }) {
     );
 }
 
-export function openCloneStickerModal(stickerData: PartialSticker) {
+function openCloneStickerModal(stickerData: PartialSticker) {
     openModalLazy(async () => {
         const sticker = await fetchSticker(stickerData.id)
             .catch(e => stickerData)
@@ -222,3 +240,17 @@ export function openCloneStickerModal(stickerData: PartialSticker) {
         );
     });
 }
+
+export const buildCloneStickerItem = (sticker: StickerItem) =>
+    buildCloneItem("Sticker", () => openCloneStickerModal(sticker));
+
+export const editSticker = (sticker: StickerItem, guildId: string) =>
+    openModalLazy(async () => {
+        await loadCreateStickerModal();
+        return modalProps =>
+            <CreateStickerModal
+                {...modalProps}
+                sticker={sticker}
+                guildId={guildId}
+            />;
+    });
