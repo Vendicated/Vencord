@@ -57,6 +57,11 @@ const StickerExtMap = {
 } as const;
 
 const settings = definePluginSettings({
+    editAndDelete: {
+        type: OptionType.BOOLEAN,
+        description: 'Add "Edit" and "Delete" options to the context menu',
+        default: true
+    },
     stickerCopyAndOpen: {
         type: OptionType.BOOLEAN,
         description: 'Add "Copy Sticker Link" and "Open Sticker Link" options to the sticker context menu',
@@ -133,6 +138,8 @@ async function openEmojiUploadModal(url: string, filename?: string) {
 }
 
 function buildManageExpressionItems(id: string, type: string) {
+    if (!settings.store.editAndDelete) return null;
+
     let guild: Guild | undefined;
     let expression: GuildSticker | CustomEmoji;
 
@@ -212,6 +219,8 @@ function buildManageExpressionItems(id: string, type: string) {
 }
 
 function buildStickerLinkItems(sticker: StickerItem, ParentComponent = Menu.MenuGroup) {
+    if (!settings.store.stickerCopyAndOpen) return null;
+
     return (
         <ParentComponent key="vc-em-sticker-links">
             <Menu.MenuItem
@@ -313,10 +322,12 @@ const patchMessageContextMenu: NavContextMenuPatchCallback = (children, props: R
 
             if (favoriteContainer) {
                 favoriteContainer.unshift(cloneItem);
-                favoriteContainer.push(
-                    <Menu.MenuSeparator key="vc-em-sticker-links-separator" />,
-                    buildStickerLinkItems(sticker, React.Fragment),
-                );
+
+                if (settings.store.stickerCopyAndOpen)
+                    favoriteContainer.push(
+                        <Menu.MenuSeparator key="vc-em-sticker-links-separator" />,
+                        buildStickerLinkItems(sticker, React.Fragment),
+                    );
             } else {
                 children.splice(-1, 0,
                     <Menu.MenuGroup key="vc-em-clone-sticker-group">{cloneItem}</Menu.MenuGroup>,
