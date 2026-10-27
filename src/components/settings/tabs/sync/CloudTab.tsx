@@ -30,10 +30,11 @@ import { CloudDownloadIcon, CloudUploadIcon, DeleteIcon, RestartIcon } from "@co
 import { Link } from "@components/Link";
 import { Paragraph } from "@components/Paragraph";
 import { SettingsTab, wrapTab } from "@components/settings/tabs/BaseTab";
+import { confirmAction } from "@utils/discord";
 import { Margins } from "@utils/margins";
 import { classes } from "@utils/misc";
 import { IconComponent } from "@utils/types";
-import { ConfirmModal, openModal, Select, Tooltip, useState } from "@webpack/common";
+import { Select, Tooltip, useState } from "@webpack/common";
 
 function validateUrl(url: string) {
     try {
@@ -222,16 +223,15 @@ function ResetSection() {
                 <ButtonWithIcon
                     variant="dangerPrimary"
                     disabled={!authenticated}
-                    onClick={() => openModal(props => (
-                        <ConfirmModal
-                            {...props}
-                            title="Are you sure?"
-                            subtitle="Once your data is erased, we cannot recover it. There's no going back!"
-                            onConfirm={eraseAllCloudData}
-                            confirmText="Erase it!"
-                            cancelText="Nevermind"
-                        />
-                    ))}
+                    onClick={() =>
+                        confirmAction({
+                            title: "Are you sure?",
+                            subtitle: "Once your data is erased, we cannot recover it. There's no going back!",
+                            confirmText: "Erase it!",
+                            cancelText: "Nevermind",
+                            onConfirm: eraseAllCloudData,
+                        })
+                    }
                     Icon={DeleteIcon}
                 >
                     Delete your Cloud Account

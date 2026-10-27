@@ -22,13 +22,14 @@ import { findGroupChildrenByChildId, NavContextMenuPatchCallback } from "@api/Co
 import { definePluginSettings, migratePluginSettings } from "@api/Settings";
 import { CopyIcon, DeleteIcon, HistoryIcon, PencilIcon, PlusIcon } from "@components/Icons";
 import { Devs } from "@utils/constants";
+import { confirmAction } from "@utils/discord";
 import { Logger } from "@utils/Logger";
 import { removeFromArray } from "@utils/misc";
 import definePlugin, { OptionType } from "@utils/types";
 import { CustomEmoji, FluxStore, Guild, GuildSticker, Message, Sticker, StickerItem } from "@vencord/discord-types";
 import { EmojiIntention, StickerFormatType, StickerType } from "@vencord/discord-types/enums";
 import { findStoreLazy } from "@webpack";
-import { ConfirmModal, Constants, EmojiStore, GuildStore, Menu, openModal, PermissionsBits, PermissionStore, React, RestAPI, SelectedGuildStore, showToast, StickersStore, UserSettingsActionCreators } from "@webpack/common";
+import { Constants, EmojiStore, GuildStore, Menu, PermissionsBits, PermissionStore, React, RestAPI, SelectedGuildStore, showToast, StickersStore, UserSettingsActionCreators } from "@webpack/common";
 
 import { buildCloneEmojiItem, editEmoji, EmojiURLRegex, openEmojiUploadModal, resolveEmojiName } from "./emojis";
 import { buildCloneStickerItem, buildStickerLinkItems, editSticker } from "./stickers";
@@ -114,24 +115,21 @@ function buildManageExpressionItems(id: string, type: string) {
                 leadingAccessory={{ type: "icon", icon: DeleteIcon }}
                 color="danger"
                 action={() => {
-                    openModal(modalProps =>
-                        <ConfirmModal
-                            {...modalProps}
-                            title={`Delete ${expression.name}`}
-                            subtitle={`Are you sure you want to delete this ${type}?`}
-                            confirmText="Delete"
-                            onConfirm={async () => {
-                                const url = type === "emoji"
-                                    ? Constants.Endpoints.GUILD_EMOJI(guild.id, id)
-                                    : Constants.Endpoints.GUILD_STICKER(guild.id, id);
+                    confirmAction({
+                        title: `Delete ${expression.name}`,
+                        subtitle: `Are you sure you want to delete this ${type}?`,
+                        confirmText: "Delete",
+                        async onConfirm() {
+                            const url = type === "emoji"
+                                ? Constants.Endpoints.GUILD_EMOJI(guild.id, id)
+                                : Constants.Endpoints.GUILD_STICKER(guild.id, id);
 
-                                await RestAPI.del(url).then(
-                                    () => showToast({ text: `${expressionName} deleted successfully.`, variant: "success" }),
-                                    () => showToast({ text: `Failed to delete ${expressionName}`, variant: "critical" })
-                                );
-                            }}
-                        />
-                    );
+                            await RestAPI.del(url).then(
+                                () => showToast({ text: `${expressionName} deleted successfully.`, variant: "success" }),
+                                () => showToast({ text: `Failed to delete ${expressionName}`, variant: "critical" })
+                            );
+                        }
+                    });
                 }}
             />
         </>
@@ -185,7 +183,7 @@ function buildRemoveFrecentItem({ type, id, name }: Record<"type" | "id" | "name
             key="vc-em-remove-frecent"
             label="Remove From Recents"
             leadingAccessory={{ type: "icon", icon: HistoryIcon }}
-            action={e => {
+            action={async e => {
                 const onConfirm = () => {
                     UserSettingsActionCreators.FrecencyUserSettingsActionCreators.updateAsync(
                         collectionKey,
@@ -195,21 +193,14 @@ function buildRemoveFrecentItem({ type, id, name }: Record<"type" | "id" | "name
                 };
 
                 // The confirm modal closes the reaction popup, so skip confirmation
-                const skipConfirm = e.shiftKey || isReaction;
+                const confirmed = e.shiftKey || isReaction ||
+                    await confirmAction({
+                        title: "Remove From Recents",
+                        subtitle: `This will reset all usage history for this ${type} and cannot be undone. Are you sure?`,
+                        confirmText: "Do it"
+                    });
 
-                if (skipConfirm) {
-                    onConfirm();
-                } else {
-                    openModal(modalProps =>
-                        <ConfirmModal
-                            {...modalProps}
-                            title="Remove From Recents"
-                            subtitle={`This will reset all usage history for this ${type} and cannot be undone. Are you sure?`}
-                            confirmText="Do it"
-                            onConfirm={onConfirm}
-                        />
-                    );
-                }
+                if (confirmed) onConfirm();
             }}
         />
     );
