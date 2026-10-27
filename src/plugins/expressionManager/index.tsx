@@ -27,14 +27,13 @@ import { removeFromArray } from "@utils/misc";
 import definePlugin, { OptionType } from "@utils/types";
 import { CustomEmoji, FluxStore, Guild, GuildSticker, Message, Sticker, StickerItem } from "@vencord/discord-types";
 import { EmojiIntention, StickerFormatType, StickerType } from "@vencord/discord-types/enums";
-import { findCssClassesLazy, findStoreLazy } from "@webpack";
+import { findStoreLazy } from "@webpack";
 import { ConfirmModal, Constants, EmojiStore, GuildStore, Menu, openModal, PermissionsBits, PermissionStore, React, RestAPI, SelectedGuildStore, showToast, StickersStore, UserSettingsActionCreators } from "@webpack/common";
 
 import { buildCloneEmojiItem, editEmoji, EmojiURLRegex, openEmojiUploadModal, resolveEmojiName } from "./emojis";
 import { buildCloneStickerItem, buildStickerLinkItems, editSticker } from "./stickers";
 
 const StickersPersistedStore = findStoreLazy("StickersPersistedStore") as FluxStore & { stickerFrecencyWithoutFetchingLatest: { frequently: Sticker[]; }; };
-const EmojiPickerLabelClasses = findCssClassesLazy("label", "labelChecked", "icon");
 
 let emojiIntention: EmojiIntention;
 
