@@ -25,7 +25,7 @@ import { ImageInvisible, ImageVisible } from "@components/Icons";
 import { Devs } from "@utils/constants";
 import { classes } from "@utils/misc";
 import definePlugin from "@utils/types";
-import { Message } from "@vencord/discord-types";
+import { BasicMessage } from "@vencord/discord-types";
 
 const KEY = "HideAttachments_HiddenIds";
 
@@ -40,7 +40,7 @@ const saveHiddenMessages = (ids: Set<string>) => set(KEY, ids);
 
 migratePluginSettings("HideMedia", "HideAttachments");
 
-const hasMedia = (msg: Message) => msg.attachments.length > 0 || msg.embeds.length > 0 || msg.stickerItems.length > 0 || msg.components.length > 0;
+const hasMedia = (msg: BasicMessage) => msg.attachments.length > 0 || msg.embeds.length > 0 || msg.stickerItems.length > 0 || msg.components.length > 0;
 
 async function toggleHide(channelId: string, messageId: string) {
     const ids = await getHiddenMessages();

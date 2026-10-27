@@ -107,7 +107,7 @@ interface RestRequestData {
     retries?: number;
 }
 
-export type RestAPI = Record<"del" | "get" | "patch" | "post" | "put", (data: RestRequestData) => Promise<any>>;
+export type RestAPI = Record<"del" | "get" | "patch" | "post" | "put", (data: RestRequestData | string) => Promise<any>>;
 
 export type Permissions = "CREATE_INSTANT_INVITE"
     | "KICK_MEMBERS"
@@ -163,10 +163,6 @@ export type Permissions = "CREATE_INSTANT_INVITE"
     | "CREATE_EVENTS";
 
 export type PermissionsBits = Record<Permissions, bigint>;
-
-export interface MessageSnapshot {
-    message: Message;
-}
 
 export interface Locale {
     name: string;
@@ -244,7 +240,10 @@ export interface IconUtils {
 }
 
 export interface Constants {
-    Endpoints: Record<string, any>;
+    // hack: static endpoints with no arguments are strings, ones with arguments are functions returning strings
+    // We just type them as both at once, it's up to the caller to use them correctly.
+    // Otherwise callers have to cast the endpoint to the correct type manually or we have to individually type each endpoint
+    Endpoints: Record<string, string & ((...args: string[]) => string)>;
     UserFlags: Record<string, number>;
     FriendsSections: Record<string, string>;
 }
