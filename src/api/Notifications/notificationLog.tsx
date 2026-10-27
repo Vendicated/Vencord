@@ -21,9 +21,10 @@ import { Settings } from "@api/Settings";
 import { Paragraph } from "@components/Paragraph";
 import { openNotificationSettingsModal } from "@components/settings/tabs/vencord/NotificationSettings";
 import { classNameFactory } from "@utils/css";
+import { confirmAction } from "@utils/discord";
 import { useAwaiter } from "@utils/react";
 import { RenderModalProps } from "@vencord/discord-types";
-import { ConfirmModal, ListScrollerThin, Modal, openModal, React, Timestamp, useEffect, useReducer, useState } from "@webpack/common";
+import { ListScrollerThin, Modal, openModal, React, Timestamp, useEffect, useReducer, useState } from "@webpack/common";
 import type { DispatchWithoutAction } from "react";
 
 import NotificationComponent from "./NotificationComponent";
@@ -175,18 +176,15 @@ function LogModal(props: RenderModalProps) {
                     variant: "critical-primary",
                     disabled: !log.length,
                     onClick() {
-                        openModal(props =>
-                            <ConfirmModal
-                                {...props}
-                                title="Are you sure?"
-                                subtitle={`This will permanently remove ${log.length} notification${log.length === 1 ? "" : "s"}. This action cannot be undone.`}
-                                confirmText="Do it!"
-                                onConfirm={async () => {
-                                    await DataStore.set(KEY, []);
-                                    signals.forEach(x => x());
-                                }}
-                            />
-                        );
+                        confirmAction({
+                            title: "Are you sure?",
+                            subtitle: `This will permanently remove ${log.length} notification${log.length === 1 ? "" : "s"}. This action cannot be undone.`,
+                            confirmText: "Do it!",
+                            async onConfirm() {
+                                await DataStore.set(KEY, []);
+                                signals.forEach(x => x());
+                            },
+                        });
                     }
                 }
             ]}
