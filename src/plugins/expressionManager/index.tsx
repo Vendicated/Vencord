@@ -20,27 +20,24 @@ import "./styles.css";
 
 import { findGroupChildrenByChildId, NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { definePluginSettings, migratePluginSettings } from "@api/Settings";
-import { CopyIcon, DeleteIcon, HistoryIcon, LinkIcon, PencilIcon, PlusIcon, TopRightArrow } from "@components/Icons";
+import { CopyIcon, DeleteIcon, HistoryIcon, PencilIcon, PlusIcon } from "@components/Icons";
 import { Devs } from "@utils/constants";
-import { copyWithToast } from "@utils/discord";
 import { Logger } from "@utils/Logger";
 import { removeFromArray } from "@utils/misc";
 import definePlugin, { OptionType } from "@utils/types";
-import { BasicMessage, CustomEmoji, FluxStore, Guild, GuildSticker, Message, Sticker, StickerItem } from "@vencord/discord-types";
+import { CustomEmoji, FluxStore, Guild, GuildSticker, Message, Sticker, StickerItem } from "@vencord/discord-types";
 import { StickerFormatType, StickerType } from "@vencord/discord-types/enums";
 import { findStoreLazy } from "@webpack";
 import { ConfirmModal, Constants, EmojiStore, GuildStore, Menu, openModal, PermissionsBits, PermissionStore, React, RestAPI, SelectedGuildStore, showToast, StickersStore, UserSettingsActionCreators } from "@webpack/common";
 
-import { buildCloneEmojiItem, editEmoji, openEmojiUploadModal } from "./emojis";
-import { buildCloneStickerItem, editSticker, formatStickerURL } from "./stickers";
+import { buildCloneEmojiItem, editEmoji, EmojiURLRegex, openEmojiUploadModal, resolveEmojiName } from "./emojis";
+import { buildCloneStickerItem, buildStickerLinkItems, editSticker } from "./stickers";
 
 const StickersPersistedStore = findStoreLazy("StickersPersistedStore") as FluxStore & { stickerFrecencyWithoutFetchingLatest: { frequently: Sticker[]; }; };
 
-const EmojiURLRegex = /^https:\/\/cdn\.discordapp\.com\/emojis\/(\d+)\.\w+/;
-
 export const logger = new Logger("ExpressionManager");
 
-const settings = definePluginSettings({
+export const settings = definePluginSettings({
     editAndDelete: {
         type: OptionType.BOOLEAN,
         description: 'Add "Edit" and "Delete" options to the context menu',
@@ -132,46 +129,6 @@ function buildManageExpressionItems(id: string, type: string) {
             />
         </>
     );
-}
-
-function buildStickerLinkItems(sticker: StickerItem, ParentComponent = Menu.MenuGroup) {
-    if (!settings.store.stickerCopyAndOpen) return null;
-
-    return (
-        <ParentComponent key="vc-em-sticker-links">
-            <Menu.MenuItem
-                id="vc-copy-sticker-link"
-                key="vc-copy-sticker-link"
-                label="Copy Sticker Link"
-                leadingAccessory={{ type: "icon", icon: LinkIcon }}
-                action={() => copyWithToast(formatStickerURL(sticker, 512), "Link copied!")}
-            />
-
-            <Menu.MenuItem
-                id="vc-open-sticker-link"
-                key="vc-open-sticker-link"
-                label="Open Sticker Link"
-                leadingAccessory={{ type: "icon", icon: LinkIcon }}
-                trailingIndicator={{ type: "icon", icon: TopRightArrow }}
-                action={() => VencordNative.native.openExternal(formatStickerURL(sticker, 512))}
-            />
-        </ParentComponent>
-    );
-}
-
-function resolveEmojiName(id: string, message: BasicMessage | Message) {
-    const emoji = EmojiStore.getCustomEmojiById(id);
-    if (emoji) return emoji.name;
-
-    const reaction = "reactions" in message && message.reactions.find(reaction => reaction.emoji.id === id);
-    if (reaction) return reaction.emoji.name;
-
-    const match = message.content.match(RegExp(`<a?:(\\w+)(?:~\\d+)?:${id}>|https://cdn\\.discordapp\\.com/emojis/${id}\\.[\\w?&=%]*`));
-    if (!match) return null;
-
-    return match[1]
-        ?? URL.parse(match[0])?.searchParams.get("name")
-        ?? "FakeNitroEmoji";
 }
 
 function buildRemoveFrecentItem({ type, id, name }: Record<"type" | "id" | "name", string | undefined>) {

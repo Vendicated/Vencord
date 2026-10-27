@@ -4,8 +4,9 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { BasicMessage, Message } from "@vencord/discord-types";
 import { findByCodeLazy } from "@webpack";
-import { SelectedGuildStore, showToast } from "@webpack/common";
+import { EmojiStore, SelectedGuildStore, showToast } from "@webpack/common";
 
 import { buildCloneItem, logger } from ".";
 
@@ -15,6 +16,8 @@ interface Emoji {
 }
 
 const openEmojiStudioModal = findByCodeLazy("Emoji Studio");
+
+export const EmojiURLRegex = /^https:\/\/cdn\.discordapp\.com\/emojis\/(\d+)\.\w+/;
 
 export const formatEmojiURL = (emoji: Emoji, size: number) => `${location.protocol}//${window.GLOBAL_ENV.CDN_HOST}/emojis/${emoji.id}.webp?size=${size}&lossless=true&animated=true`;
 
@@ -62,4 +65,19 @@ export async function openEmojiUploadModal(url: string, filename?: string) {
         logger.error("Failed to open Emoji Modal", e);
         showToast({ text: `Failed to open Emoji Modal: ${e}`, variant: "critical" });
     }
+}
+
+export function resolveEmojiName(id: string, message: BasicMessage | Message) {
+    const emoji = EmojiStore.getCustomEmojiById(id);
+    if (emoji) return emoji.name;
+
+    const reaction = "reactions" in message && message.reactions.find(reaction => reaction.emoji.id === id);
+    if (reaction) return reaction.emoji.name;
+
+    const match = message.content.match(RegExp(`<a?:(\\w+)(?:~\\d+)?:${id}>|https://cdn\\.discordapp\\.com/emojis/${id}\\.[\\w?&=%]*`));
+    if (!match) return null;
+
+    return match[1]
+        ?? URL.parse(match[0])?.searchParams.get("name")
+        ?? "FakeNitroEmoji";
 }

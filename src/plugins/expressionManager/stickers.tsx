@@ -7,18 +7,19 @@
 import { CheckedTextInput } from "@components/CheckedTextInput";
 import { Flex } from "@components/Flex";
 import { HeadingTertiary } from "@components/Heading";
+import { LinkIcon, TopRightArrow } from "@components/Icons";
 import { Margins } from "@components/margins";
 import { Span } from "@components/Span";
 import { Text } from "@components/Text";
 import { classNameFactory } from "@utils/css";
-import { getGuildAcronym } from "@utils/discord";
+import { copyWithToast, getGuildAcronym } from "@utils/discord";
 import { useForceUpdater } from "@utils/react";
 import { Guild, GuildSticker, Sticker, StickerItem } from "@vencord/discord-types";
 import { StickerFormatType } from "@vencord/discord-types/enums";
 import { DefaultExtractAndLoadChunksRegex, extractAndLoadChunksLazy, findComponentByCodeLazy } from "@webpack";
-import { AuthenticationStore, Clickable, Constants, FluxDispatcher, GuildStore, IconUtils, Modal, openModalLazy, PermissionsBits, PermissionStore, React, RestAPI, showToast, StickersStore, Tooltip, useMemo, UserStore, useState } from "@webpack/common";
+import { AuthenticationStore, Clickable, Constants, FluxDispatcher, GuildStore, IconUtils, Menu, Modal, openModalLazy, PermissionsBits, PermissionStore, React, RestAPI, showToast, StickersStore, Tooltip, useMemo, UserStore, useState } from "@webpack/common";
 
-import { buildCloneItem, logger } from ".";
+import { buildCloneItem, logger, settings } from ".";
 
 const cl = classNameFactory("vc-expressionManager-");
 
@@ -254,3 +255,28 @@ export const editSticker = (sticker: StickerItem, guildId: string) =>
                 guildId={guildId}
             />;
     });
+
+export function buildStickerLinkItems(sticker: StickerItem, ParentComponent = Menu.MenuGroup) {
+    if (!settings.store.stickerCopyAndOpen) return null;
+
+    return (
+        <ParentComponent key="vc-em-sticker-links">
+            <Menu.MenuItem
+                id="vc-copy-sticker-link"
+                key="vc-copy-sticker-link"
+                label="Copy Sticker Link"
+                leadingAccessory={{ type: "icon", icon: LinkIcon }}
+                action={() => copyWithToast(formatStickerURL(sticker, 512), "Link copied!")}
+            />
+
+            <Menu.MenuItem
+                id="vc-open-sticker-link"
+                key="vc-open-sticker-link"
+                label="Open Sticker Link"
+                leadingAccessory={{ type: "icon", icon: LinkIcon }}
+                trailingIndicator={{ type: "icon", icon: TopRightArrow }}
+                action={() => VencordNative.native.openExternal(formatStickerURL(sticker, 512))}
+            />
+        </ParentComponent>
+    );
+}
