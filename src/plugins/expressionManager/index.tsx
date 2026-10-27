@@ -23,6 +23,7 @@ import { definePluginSettings, migratePluginSettings } from "@api/Settings";
 import { DeleteIcon, LinkIcon, PencilIcon, PlusIcon, TopRightArrow } from "@components/Icons";
 import { Devs } from "@utils/constants";
 import { copyWithToast } from "@utils/discord";
+import { Logger } from "@utils/Logger";
 import { removeFromArray } from "@utils/misc";
 import definePlugin, { OptionType } from "@utils/types";
 import { CustomEmoji, Guild, GuildSticker, Message, MessageSnapshot, Sticker } from "@vencord/discord-types";
@@ -36,12 +37,21 @@ import { openCloneStickerModal } from "./StickerCloneModal";
 const openEmojiStudioModal = findByCodeLazy("Emoji Studio");
 const loadCreateStickerModal = extractAndLoadChunksLazy(["CREATE_STICKER_MODAL", "#{intl::STICKER_PICKER_CREATE_STICKER}"], new RegExp(`\\.CREATE_STICKER_MODAL.{0,100}?${DefaultExtractAndLoadChunksRegex.source}`));
 const CreateStickerModal = findComponentByCodeLazy("#{intl::GUILD_STICKER_INVALID_STICKER}");
+let emojiUrlRegex: RegExp;
 
 interface Emoji {
     id: string;
     name: string;
     isAnimated: boolean;
 }
+
+interface ForumTagContextMenuProps {
+    tag: {
+        emojiId: null | string;
+    };
+}
+
+
 type PartialSticker = Pick<Sticker, "id" | "format_type">;
 
 const StickerExtMap = {
@@ -231,7 +241,7 @@ function buildStickerLinkItems(sticker: PartialSticker, ParentComponent = Menu.M
     );
 }
 
-function isGifUrl(url: string) {
+function isAnimatedEmojiUrl(url: string) {
     const { pathname, searchParams } = new URL(url);
     return pathname.endsWith(".gif") || searchParams.get("animated") === "true";
 }
@@ -260,7 +270,7 @@ const patchExpressionPickerMenu: NavContextMenuPatchCallback = (children, props:
 
         children.push(
             <Menu.MenuGroup key="vc-em-group">
-                {buildCloneEmojiItem({ id, name, isAnimated: firstChild && isGifUrl(firstChild.src) })}
+                {buildCloneEmojiItem({ id, name, isAnimated: firstChild && isAnimatedEmojiUrl(firstChild.src) })}
                 {buildManageExpressionItems(id, type)}
             </Menu.MenuGroup>
         );
@@ -301,7 +311,7 @@ const patchMessageContextMenu: NavContextMenuPatchCallback = (children, props: R
                 buildCloneEmojiItem({
                     id: favoriteableId,
                     name,
-                    isAnimated: isGifUrl(itemHref ?? itemSrc)
+                    isAnimated: isAnimatedEmojiUrl(itemHref ?? itemSrc)
                 }),
                 !favContainer ? <Menu.MenuSeparator key="vc-em-emoji-separator" /> : null,
             );
@@ -344,6 +354,40 @@ const patchMessageContextMenu: NavContextMenuPatchCallback = (children, props: R
         );
     }
 };
+/**
+ * discord uses iamge-context for nitro emoijs in user status
+ */
+const patchImageContextMenu: NavContextMenuPatchCallback = (children, { target, src, ...props }: {
+    target?: HTMLImageElement;
+    src?: string;
+}) => {
+    console.log({ target, src, ...props });
+    const [, id] = src?.match(emojiUrlRegex) ?? [];
+
+    if (!id) return;
+
+    const name = target?.alt || "EmojiName";
+    children.push(buildCloneEmojiItem({
+        id,
+        name,
+        isAnimated: isAnimatedEmojiUrl(src!)
+    }));
+    return;
+};
+
+const patchForumTagContextMenu: NavContextMenuPatchCallback = (children, { tag }: ForumTagContextMenuProps) => {
+    if (!tag?.emojiId) return;
+    // same function discord calls on the emoji id
+    const emoji = EmojiStore.getUsableCustomEmojiById(tag.emojiId);
+
+    if (!emoji) return;
+
+    children.push(buildCloneEmojiItem({
+        id: emoji.id,
+        name: emoji.name,
+        isAnimated: emoji.animated,
+    }));
+};
 
 migratePluginSettings("ExpressionManager", "ExpressionCloner", "EmoteCloner");
 export default definePlugin({
@@ -351,12 +395,22 @@ export default definePlugin({
     description: "Clone Emotes & Stickers. Adds context menu options to quickly clone, edit, or delete them. Also adds Copy & Save options for stickers",
     tags: ["Emotes", "Servers"],
     searchTerms: ["StickerCloner", "ExpressionCloner", "EmoteCloner", "EmojiCloner"],
-    authors: [Devs.Ven, Devs.Nuckyz, Devs.scattagain],
+    authors: [Devs.Ven, Devs.Nuckyz, Devs.scattagain, Devs.sadan],
+
+    start() {
+        const { CDN_HOST } = window.GLOBAL_ENV;
+        if (!CDN_HOST) {
+            new Logger("ExpressionManager").warn("GLOBAL_ENV.CDN_HOST missing");
+        }
+        emojiUrlRegex ??= new RegExp(`^${location.protocol}//${CDN_HOST}/emojis/(\\d+)\\.\\w+.+$`);
+    },
 
     settings,
 
     contextMenus: {
         "message": patchMessageContextMenu,
-        "expression-picker": patchExpressionPickerMenu
+        "expression-picker": patchExpressionPickerMenu,
+        "image-context": patchImageContextMenu,
+        "forum-tag": patchForumTagContextMenu,
     }
 });
