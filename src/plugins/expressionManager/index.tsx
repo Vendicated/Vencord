@@ -40,12 +40,17 @@ export const logger = new Logger("ExpressionManager");
 export const settings = definePluginSettings({
     editAndDelete: {
         type: OptionType.BOOLEAN,
-        description: 'Add "Edit" and "Delete" options to the context menu',
+        description: 'Add "Edit" and "Delete" options to the expression picker context menu',
         default: true
     },
     stickerCopyAndOpen: {
         type: OptionType.BOOLEAN,
         description: 'Add "Copy Sticker Link" and "Open Sticker Link" options to the sticker context menu',
+        default: true
+    },
+    recents: {
+        type: OptionType.BOOLEAN,
+        description: 'Add "Remove from Recents" option to the context menu of frequently used expressions',
         default: true
     }
 });
@@ -132,6 +137,9 @@ function buildManageExpressionItems(id: string, type: string) {
 }
 
 function buildRemoveFrecentItem({ type, id, name }: Record<"type" | "id" | "name", string | undefined>) {
+    if (!settings.store.recents)
+        return;
+
     let expressionKey: string | undefined;
 
     switch (type) {
