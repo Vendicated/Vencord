@@ -115,7 +115,7 @@ export default definePlugin({
                 // Fix ScrollTo
                 {
                     // Override scrollToChannel to properly account for pinned channels
-                    match: /(?<=scrollTo\(\{to:\i\}\):\(\i\+=)(\d+)\*\(.+?(?=,)/,
+                    match: /(?<=scrollTo\(\{to:\i\}\):\(+\i\+=)(\d+)\*\(.+?(?=\)+,)/,
                     replace: "$self.getScrollOffset(arguments[0],$1,this?.props?.padding,this?.state?.preRenderedChildren,$&)"
                 },
                 {
