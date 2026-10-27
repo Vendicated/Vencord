@@ -168,8 +168,8 @@ catalogs:
       specifier: ^0.1.2
       version: 0.1.2
     '@sadan4/vencord-monaco-editor':
-      specifier: ^2.0.2
-      version: 2.0.2
+      specifier: ^2.0.3
+      version: 2.0.3
     '@stylistic/eslint-plugin':
       specifier: ^5.10.0
       version: 5.10.0
@@ -300,7 +300,7 @@ importers:
         version: 0.1.2
       '@sadan4/vencord-monaco-editor':
         specifier: 'catalog:'
-        version: 2.0.2
+        version: 2.0.3
       '@vap/core':
         specifier: 'catalog:'
         version: 0.0.12
@@ -793,8 +793,8 @@ packages:
   '@rtsao/scc@1.1.0':
     resolution: {integrity: sha512-zt6OdqaDoOnJ1ZYsCYGt9YmWzDXl4vQdKTyJev62gFhRGKdx7mcT54V9KIjg+d2wi9EXsPvAPKe7i7WjfVWB8g==}
 
-  '@sadan4/vencord-monaco-editor@2.0.2':
-    resolution: {integrity: sha512-RTO6aGuDRB9oXw2sGG7MqobPeCI6yXWHkJYmRz/Ul8B6B4WAqS0xwNKnU0Q1A64ImDRoAerrfzdRJdb73Uwbcg==}
+  '@sadan4/vencord-monaco-editor@2.0.3':
+    resolution: {integrity: sha512-Tz+8ewv3whjUvVqnQLRaUze42GtI470D0tvgpUYKWDdlQb2WIonDIoHCSg1OPqgi6HTEllt5Jxwv8tmm5/54zA==}
 
   '@sindresorhus/merge-streams@4.0.0':
     resolution: {integrity: sha512-tlqY9xq5ukxTUZBmoOp+m61cqwQD5pHJtFY3Mn8CA8ps6yghLH/Hw8UPdqg4OLmFW3IFlcXnQNmo/dh8HzXYIQ==}
@@ -3050,7 +3050,7 @@ snapshots:
 
   '@rtsao/scc@1.1.0': {}
 
-  '@sadan4/vencord-monaco-editor@2.0.2': {}
+  '@sadan4/vencord-monaco-editor@2.0.3': {}
 
   '@sindresorhus/merge-streams@4.0.0': {}
 
