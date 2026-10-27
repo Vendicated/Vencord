@@ -15,13 +15,14 @@ import { classNameFactory } from "@utils/css";
 import { getGuildAcronym } from "@utils/discord";
 import { Logger } from "@utils/Logger";
 import { Guild, Sticker } from "@vencord/discord-types";
-import { Clickable, Constants, FluxDispatcher, GuildStore, IconUtils, Modal, openModalLazy, PermissionsBits, PermissionStore, React, RestAPI, showToast, StickersStore, useMemo, useReducer, UserStore, useState } from "@webpack/common";
+import { AuthenticationStore, Clickable, Constants, FluxDispatcher, GuildStore, IconUtils, Modal, openModalLazy, PermissionsBits, PermissionStore, React, RestAPI, showToast, StickersStore, useMemo, useReducer, UserStore, useState } from "@webpack/common";
 
 import { formatStickerURL } from ".";
 
 const cl = classNameFactory("vc-expressionManager-");
 
 const getFontSize = (s: string) => {
+    // Font size array from Discord. We currently use XLarge, commented out is
     // [18, 18, 16, 16, 14, 12, 10]
     const sizes = [20, 20, 18, 18, 16, 14, 12];
     return sizes[s.length] ?? 4;
@@ -36,7 +37,7 @@ const PremiumTierStickerLimitMap = {
 
 const MAX_STICKER_SIZE_BYTES = 512 * 1024;
 
-function getGuildMaxStickerSlots(guild: Guild) {
+function getGuildMaxStickerSlots(guild: Guild): number {
     if (guild.features.has("MORE_STICKERS") && guild.premiumTier === 3)
         return 120;
 
@@ -44,20 +45,25 @@ function getGuildMaxStickerSlots(guild: Guild) {
 }
 
 async function fetchBlob(sticker: Sticker) {
-    const MAX_SIZE = MAX_STICKER_SIZE_BYTES;
-
     for (let size = 4096; size >= 16; size /= 2) {
         const url = formatStickerURL(sticker, size);
         const res = await fetch(url);
+
         if (!res.ok)
-            throw new Error(`Failed to fetch ${url} - ${res.status}`);
+            throw new Error(`Failed to fetch ${url}: ${res.status}`);
+
+        const contentLength = res.headers.get("Content-Length");
+        if (Number(contentLength) > MAX_STICKER_SIZE_BYTES) {
+            await res.body?.cancel();
+            continue;
+        }
 
         const blob = await res.blob();
-        if (blob.size <= MAX_SIZE)
+        if (blob.size <= MAX_STICKER_SIZE_BYTES)
             return blob;
     }
 
-    throw new Error(`Failed to fetch sticker within size limit of ${MAX_SIZE / 1000}kB`);
+    throw new Error(`Failed to fetch sticker within size limit of ${MAX_STICKER_SIZE_BYTES / 1024}KiB`);
 }
 
 async function doClone(guildId: string, sticker: Sticker) {
@@ -89,15 +95,15 @@ async function doClone(guildId: string, sticker: Sticker) {
             message = JSON.parse(e.text).message;
         } catch { }
 
-        new Logger("ExpressionCloner").error(`Failed to clone ${sticker.name} to guild ${guildId}`, e);
+        new Logger("ExpressionManager").error(`Failed to clone ${sticker.name} to guild ${guildId}`, e);
         showToast({ text: `Failed to clone: ${message}`, variant: "critical" });
     }
 }
 
 function getGuildCandidates() {
-    const meId = UserStore.getCurrentUser().id;
+    const meId = AuthenticationStore.getId();
 
-    return Object.values(GuildStore.getGuilds()).filter(g => {
+    return GuildStore.getGuildsArray().filter(g => {
         const canCreate = g.ownerId === meId ||
             (PermissionStore.getGuildPermissions({ id: g.id }) & PermissionsBits.CREATE_GUILD_EXPRESSIONS) === PermissionsBits.CREATE_GUILD_EXPRESSIONS;
         if (!canCreate) return false;
@@ -125,7 +131,7 @@ export function CloneModal({ sticker }: { sticker: Sticker; }) {
                     sticker.name = v;
                     setName(v);
                 }}
-                validate={v => (v.length > 2 && v.length < 30) || "Name must be between 2 and 30 characters and only contain alphanumeric characters"}
+                validate={v => (v.length >= 2 && v.length <= 30) || "Name must be between 2 and 30 characters and only contain alphanumeric characters"}
             />
 
             <Flex flexWrap="wrap" justifyContent="center" alignItems="center" className={Margins.top16}>

@@ -26,13 +26,12 @@ import { copyWithToast } from "@utils/discord";
 import { Logger } from "@utils/Logger";
 import { removeFromArray } from "@utils/misc";
 import definePlugin, { OptionType } from "@utils/types";
-import { CustomEmoji, Guild, GuildSticker, Message, MessageSnapshot, Sticker } from "@vencord/discord-types";
+import { BasicMessage, CustomEmoji, Guild, GuildSticker, Message, Sticker, StickerItem } from "@vencord/discord-types";
 import { StickerFormatType, StickerType } from "@vencord/discord-types/enums";
 import { DefaultExtractAndLoadChunksRegex, extractAndLoadChunksLazy, findByCodeLazy, findComponentByCodeLazy } from "@webpack";
 import { ConfirmModal, Constants, EmojiStore, FluxDispatcher, GuildStore, Menu, openModal, openModalLazy, PermissionsBits, PermissionStore, React, RestAPI, SelectedGuildStore, showToast, StickersStore } from "@webpack/common";
 
 import { openCloneStickerModal } from "./StickerCloneModal";
-
 
 const openEmojiStudioModal = findByCodeLazy("Emoji Studio");
 const loadCreateStickerModal = extractAndLoadChunksLazy(["CREATE_STICKER_MODAL", "#{intl::STICKER_PICKER_CREATE_STICKER}"], new RegExp(`\\.CREATE_STICKER_MODAL.{0,100}?${DefaultExtractAndLoadChunksRegex.source}`));
@@ -42,7 +41,6 @@ let emojiUrlRegex: RegExp;
 interface Emoji {
     id: string;
     name: string;
-    isAnimated: boolean;
 }
 
 interface ForumTagContextMenuProps {
@@ -50,9 +48,6 @@ interface ForumTagContextMenuProps {
         emojiId: null | string;
     };
 }
-
-
-type PartialSticker = Pick<Sticker, "id" | "format_type">;
 
 const StickerExtMap = {
     [StickerFormatType.PNG]: "png",
@@ -70,15 +65,13 @@ const settings = definePluginSettings({
 });
 
 const formatEmojiURL = (emoji: Emoji, size: number) => `${location.protocol}//${window.GLOBAL_ENV.CDN_HOST}/emojis/${emoji.id}.webp?size=${size}&lossless=true&animated=true`;
-export const formatStickerURL = (sticker: PartialSticker, size: number) => `${window.GLOBAL_ENV.MEDIA_PROXY_ENDPOINT}/stickers/${sticker.id}.${StickerExtMap[sticker.format_type]}?size=${size}&lossless=true&animated=true`;
+export const formatStickerURL = (sticker: StickerItem, size: number) => `${location.protocol}//${window.GLOBAL_ENV.MEDIA_PROXY_ENDPOINT}/stickers/${sticker.id}.${StickerExtMap[sticker.format_type]}?size=${size}&lossless=true&animated=true`;
 
 async function fetchSticker(id: string) {
     const cached = StickersStore.getStickerById(id);
     if (cached) return cached;
 
-    const { body } = await RestAPI.get({
-        url: Constants.Endpoints.STICKER(id)
-    });
+    const { body } = await RestAPI.get(Constants.Endpoints.STICKER(id));
 
     FluxDispatcher.dispatch({
         type: "STICKER_FETCH_SUCCESS",
@@ -101,7 +94,7 @@ function buildCloneItem(type: string, action: () => void) {
 }
 
 function buildCloneEmojiItem(emoji: Emoji) {
-    return buildCloneItem("Emoji", () => openEmojiUploadModal(formatEmojiURL(emoji, 128)));
+    return buildCloneItem("Emoji", () => openEmojiUploadModal(formatEmojiURL(emoji, 128), emoji.name));
 }
 
 function buildCloneStickerItem(fetchSticker: () => Promise<Sticker>) {
@@ -116,7 +109,7 @@ async function openEmojiUploadModal(url: string, filename?: string) {
     const dataUrl = await new Promise<string>((resolve, reject) => {
         const reader = new FileReader();
         reader.onloadend = () => resolve(reader.result as string);
-        reader.onerror = reject;
+        reader.onerror = () => reject("Failed to read blob as data URL");
         reader.readAsDataURL(blob);
     });
 
@@ -124,7 +117,7 @@ async function openEmojiUploadModal(url: string, filename?: string) {
     image.src = dataUrl;
     await image.decode();
 
-    const file = new File([blob], filename, { type: "image/png" });
+    const file = new File([blob], filename, { type: blob.type });
 
     await openEmojiStudioModal({
         analyticsLocation: {
@@ -218,7 +211,7 @@ function buildManageExpressionItems(id: string, type: string) {
     );
 }
 
-function buildStickerLinkItems(sticker: PartialSticker, ParentComponent = Menu.MenuGroup) {
+function buildStickerLinkItems(sticker: StickerItem, ParentComponent = Menu.MenuGroup) {
     return (
         <ParentComponent key="vc-em-sticker-links">
             <Menu.MenuItem
@@ -241,12 +234,7 @@ function buildStickerLinkItems(sticker: PartialSticker, ParentComponent = Menu.M
     );
 }
 
-function isAnimatedEmojiUrl(url: string) {
-    const { pathname, searchParams } = new URL(url);
-    return pathname.endsWith(".gif") || searchParams.get("animated") === "true";
-}
-
-function resolveEmojiName(favoriteableId: string, message: MessageSnapshot | Message) {
+function resolveEmojiName(favoriteableId: string, message: BasicMessage | Message) {
     const emoji = EmojiStore.getCustomEmojiById(favoriteableId);
     if (emoji) return emoji.name;
 
@@ -266,11 +254,9 @@ const patchExpressionPickerMenu: NavContextMenuPatchCallback = (children, props:
     if (!id) return;
 
     if (type === "emoji" && name) {
-        const firstChild = props.target.firstChild as HTMLImageElement;
-
         children.push(
             <Menu.MenuGroup key="vc-em-group">
-                {buildCloneEmojiItem({ id, name, isAnimated: firstChild && isAnimatedEmojiUrl(firstChild.src) })}
+                {buildCloneEmojiItem({ id, name })}
                 {buildManageExpressionItems(id, type)}
             </Menu.MenuGroup>
         );
@@ -283,7 +269,11 @@ const patchExpressionPickerMenu: NavContextMenuPatchCallback = (children, props:
             const oldCopyLinkParent = findGroupChildrenByChildId("copy-image-link", children);
             if (oldCopyLinkParent) removeFromArray(oldCopyLinkParent, c => c?.props?.id === "copy-image-link");
 
-            children.push(buildStickerLinkItems({ id, format_type: formatType as any }));
+            children.push(buildStickerLinkItems({
+                id,
+                format_type: Number(formatType),
+                name: name!
+            }));
         }
 
         children.push(
@@ -296,7 +286,7 @@ const patchExpressionPickerMenu: NavContextMenuPatchCallback = (children, props:
 };
 
 const patchMessageContextMenu: NavContextMenuPatchCallback = (children, props: Record<"favoriteableId" | "itemHref" | "itemSrc" | "favoriteableType", string> & { message: Message; mediaItem?: any; }) => {
-    const { favoriteableId, mediaItem, itemHref, itemSrc, favoriteableType } = props ?? {};
+    const { favoriteableId, mediaItem, favoriteableType } = props ?? {};
     const { message } = props.message.messageSnapshots?.[0] ?? props;
 
     switch (favoriteableType) {
@@ -308,11 +298,7 @@ const patchMessageContextMenu: NavContextMenuPatchCallback = (children, props: R
             const container = favContainer ?? findGroupChildrenByChildId("copy-native-link", children);
 
             container?.unshift(
-                buildCloneEmojiItem({
-                    id: favoriteableId,
-                    name,
-                    isAnimated: isAnimatedEmojiUrl(itemHref ?? itemSrc)
-                }),
+                buildCloneEmojiItem({ id: favoriteableId, name }),
                 !favContainer ? <Menu.MenuSeparator key="vc-em-emoji-separator" /> : null,
             );
             break;
@@ -349,7 +335,7 @@ const patchMessageContextMenu: NavContextMenuPatchCallback = (children, props: R
                 id="vc-em-upload-as-emoji"
                 label="Upload as Emoji"
                 leadingAccessory={{ type: "icon", icon: PlusIcon }}
-                action={() => openEmojiUploadModal(mediaItem.url)}
+                action={() => openEmojiUploadModal(mediaItem.url, mediaItem.name)}
             />
         );
     }

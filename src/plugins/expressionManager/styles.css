@@ -25,4 +25,5 @@
     text-align: center;
     overflow: hidden;
     white-space: nowrap;
+    user-select: none;
 }
