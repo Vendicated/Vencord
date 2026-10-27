@@ -20,7 +20,7 @@ import "./styles.css";
 
 import { findGroupChildrenByChildId, NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { definePluginSettings, migratePluginSettings } from "@api/Settings";
-import { DeleteIcon, HistoryIcon, LinkIcon, PencilIcon, PlusIcon, TopRightArrow } from "@components/Icons";
+import { CopyIcon, DeleteIcon, HistoryIcon, LinkIcon, PencilIcon, PlusIcon, TopRightArrow } from "@components/Icons";
 import { Devs } from "@utils/constants";
 import { copyWithToast } from "@utils/discord";
 import { removeFromArray } from "@utils/misc";
@@ -287,7 +287,6 @@ function buildRemoveFrecentItem({ type, id, name }: Record<"type" | "id" | "name
             key="vc-em-remove-frecent"
             label="Remove From Recents"
             leadingAccessory={{ type: "icon", icon: HistoryIcon }}
-            color="danger"
             action={e => {
                 const onConfirm = () => {
                     UserSettingsActionCreators.FrecencyUserSettingsActionCreators.updateAsync(
@@ -324,7 +323,17 @@ const patchExpressionPickerMenu: NavContextMenuPatchCallback = (children, props:
         group?.splice(1, 0, removeFrecentItem);
     }
 
-    if (!id) return;
+    if (!id) {
+        // Discord adds "Copy Emoji" to default emojis. But they're stupid and forgot to add an icon for it which looks jarring
+        const group = findGroupChildrenByChildId("copy", children);
+        if (!group) return;
+
+        const idx = group.findIndex(item => item?.props?.id === "copy");
+        if (idx !== -1)
+            group.splice(idx, 1, React.cloneElement(group[idx]!, { leadingAccessory: { type: "icon", icon: CopyIcon } }));
+
+        return;
+    }
 
     if (type === "emoji" && name) {
         children.push(
