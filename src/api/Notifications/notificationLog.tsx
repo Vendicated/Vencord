@@ -177,9 +177,9 @@ function LogModal(props: RenderModalProps) {
                     disabled: !log.length,
                     onClick() {
                         confirmAction({
-                            confirmText: "Do it!",
                             title: "Are you sure?",
                             subtitle: `This will permanently remove ${log.length} notification${log.length === 1 ? "" : "s"}. This action cannot be undone.`,
+                            confirmText: "Do it!",
                             async onConfirm() {
                                 await DataStore.set(KEY, []);
                                 signals.forEach(x => x());

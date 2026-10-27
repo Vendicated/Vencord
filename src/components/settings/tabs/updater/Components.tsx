@@ -10,10 +10,9 @@ import { ErrorCard } from "@components/ErrorCard";
 import { Flex } from "@components/Flex";
 import { Link } from "@components/Link";
 import { Paragraph } from "@components/Paragraph";
-import { confirmAction } from "@utils/discord";
 import { Margins } from "@utils/margins";
 import { classes } from "@utils/misc";
-import { relaunch } from "@utils/native";
+import { promptToRestart } from "@utils/promptToRestart";
 import { changes, checkForUpdates, update, updateError } from "@utils/updater";
 import { React, showToast, useState } from "@webpack/common";
 
@@ -102,13 +101,11 @@ export function Updatable(props: CommonProps) {
                             if (await update()) {
                                 setUpdates([]);
 
-                                await confirmAction({
+                                promptToRestart("relaunch", {
                                     title: "Update Success!",
                                     subtitle: "Successfully updated. Restart now to apply the changes?",
                                     confirmText: "Restart",
-                                    cancelText: "Not now!",
-                                    variant: "primary",
-                                    onConfirm: relaunch
+                                    cancelText: "Not now!"
                                 });
                             }
                         })}

@@ -40,9 +40,7 @@ export default function DecorationContextMenu({ decoration }: { decoration: Deco
                         subtitle: `Are you sure you want to delete ${decoration.alt}?`,
                         confirmText: "Delete",
                         cancelText: "Cancel",
-                        onConfirm() {
-                            deleteDecoration(decoration);
-                        },
+                        onConfirm: () => deleteDecoration(decoration)
                     });
                 }}
             />
