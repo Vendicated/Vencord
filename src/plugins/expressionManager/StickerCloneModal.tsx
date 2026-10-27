@@ -45,20 +45,25 @@ function getGuildMaxStickerSlots(guild: Guild): number {
 }
 
 async function fetchBlob(sticker: Sticker) {
-    const MAX_SIZE = MAX_STICKER_SIZE_BYTES;
-
     for (let size = 4096; size >= 16; size /= 2) {
         const url = formatStickerURL(sticker, size);
         const res = await fetch(url);
+
         if (!res.ok)
-            throw new Error(`Failed to fetch ${url} - ${res.status}`);
+            throw new Error(`Failed to fetch ${url}: ${res.status}`);
+
+        const contentLength = res.headers.get("Content-Length");
+        if (Number(contentLength) > MAX_STICKER_SIZE_BYTES) {
+            await res.body?.cancel();
+            continue;
+        }
 
         const blob = await res.blob();
-        if (blob.size <= MAX_SIZE)
+        if (blob.size <= MAX_STICKER_SIZE_BYTES)
             return blob;
     }
 
-    throw new Error(`Failed to fetch sticker within size limit of ${MAX_SIZE / 1024}KiB`);
+    throw new Error(`Failed to fetch sticker within size limit of ${MAX_STICKER_SIZE_BYTES / 1024}KiB`);
 }
 
 async function doClone(guildId: string, sticker: Sticker) {
