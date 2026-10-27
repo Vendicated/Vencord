@@ -5,10 +5,9 @@
  */
 
 import { plugins } from "@api/PluginManager";
-import { ErrorBoundary } from "@components/index";
-import { findComponentByCodeLazy } from "@webpack";
+import { ServerListItem, type ServerListItemBadgeProps } from "@api/ServerList";
 import { ContextMenuApi, Menu, NavigationRouter, useState } from "@webpack/common";
-import type { CSSProperties, JSX, MouseEvent } from "react";
+import type { JSX, MouseEvent } from "react";
 
 import { useQuestifySettings } from "../settings/access";
 import type { QuestButtonAction, QuestButtonDisplayMode, QuestButtonIndicatorMode } from "../settings/def";
@@ -18,24 +17,13 @@ import { initialQuestDataFetched } from "../state";
 import { getActiveAutoCompletes, getQueueableAutoCompleteQuests, isProcessingQuests, isQuestEnrollmentRateLimited, processQuests, stopAllAutoCompletes } from "../utils/completion";
 import { fetchAndAlertQuests } from "../utils/fetching";
 import { QL } from "../utils/logging";
-import { decimalToRGB, formatLowerBadge, isDarkish, leftClick, middleClick, q, QUEST_PAGE, rightClick } from "../utils/ui";
+import { decimalToRGB, isDarkish, leftClick, middleClick, q, QUEST_PAGE, rightClick } from "../utils/ui";
 import { openQuestifySettingsModal } from "./settingsModal";
-
-const GuildlessServerListItemComponent = findComponentByCodeLazy("tooltip:", "lowerBadgeSize:");
-const ServerListItemPillComponent = findComponentByCodeLazy("=!1,hovered:", "=!1,unread:", "=!1,disabled:");
-const ServerListItemLowerBadgeComponent = findComponentByCodeLazy("BADGE_NOTIFICATION_BACKGROUND", "let{count:");
-
-interface QuestButtonLowerBadgeProps {
-    count: number;
-    color?: string;
-    style?: CSSProperties;
-    maxDigits?: number;
-}
 
 interface QuestButtonViewProps {
     id: string;
     className: string;
-    badgeProps: QuestButtonLowerBadgeProps;
+    badgeProps: ServerListItemBadgeProps;
     hasUnread: boolean;
     selected: boolean;
     visible: boolean;
@@ -56,84 +44,33 @@ export function QuestIcon(height: number, width: number, className?: string): JS
     );
 }
 
-function splitClassNames(className: string): string[] {
-    const classNames = className.split(/\s+/).filter(Boolean);
-
-    return classNames.length ? classNames : [q("quest-button")];
-}
-
-function suffixClassNames(classNames: string[], suffix: string): string {
-    return classNames.map(className => `${className}-${suffix}`).join(" ");
-}
-
-function QuestButtonLowerBadge(props: QuestButtonLowerBadgeProps & { className: string; }): JSX.Element {
-    return <ServerListItemLowerBadgeComponent {...props} />;
-}
-
-function QuestButtonView({
-    id,
-    className,
-    badgeProps,
-    hasUnread,
-    selected,
-    visible,
-    onPress,
-}: QuestButtonViewProps): JSX.Element {
-    const [hovered, setHovered] = useState(false);
-    const baseClasses = splitClassNames(className);
-    const mainContainerClass = suffixClassNames(baseClasses, "container");
-    const iconContainerClass = suffixClassNames(baseClasses, "icon-container");
-    const buttonContainerClass = suffixClassNames(baseClasses, "server-list-button-container");
-    const pillContainerClass = suffixClassNames(baseClasses, "pill-container");
-    const buttonClass = suffixClassNames(baseClasses, "button");
-    const pillClass = suffixClassNames(baseClasses, "pill");
-    const lowerBadgeClass = suffixClassNames(baseClasses, "lower-badge");
-    const lowerBadgeSize = { width: formatLowerBadge(badgeProps.count, badgeProps.maxDigits)[1] };
-    const lowerBadge = badgeProps.count === 0
-        ? null
-        : (
-            <QuestButtonLowerBadge
-                {...badgeProps}
-                className={lowerBadgeClass}
-                style={{ ...(badgeProps.style ?? {}), ...lowerBadgeSize }}
-            />
-        );
-    const icon = (
-        <div className={iconContainerClass}>
+function QuestButtonIcon(): JSX.Element {
+    return (
+        <div style={{ pointerEvents: "none", display: "flex", alignItems: "center", justifyContent: "center", width: "100%", height: "100%" }}>
             {QuestIcon(26, 26)}
         </div>
     );
+}
+
+function QuestButtonView({ id, className, badgeProps, hasUnread, selected, visible, onPress }: QuestButtonViewProps): JSX.Element | null {
+    if (!visible) {
+        return null;
+    }
 
     return (
-        <ErrorBoundary>
-            {visible && (
-                <div id={id} className={mainContainerClass}>
-                    <div className={pillContainerClass}>
-                        <ServerListItemPillComponent
-                            unread={hasUnread}
-                            selected={selected}
-                            hovered={hovered}
-                            className={`${pillClass}${selected ? " selected" : hovered ? " hovered" : ""}`}
-                        />
-                    </div>
-                    <div className={buttonContainerClass}>
-                        <GuildlessServerListItemComponent
-                            icon={() => icon}
-                            tooltip="Quests"
-                            showPill={false}
-                            selected={selected}
-                            className={buttonClass}
-                            onClick={onPress}
-                            onMouseDown={onPress}
-                            onContextMenu={onPress}
-                            onMouseEnter={() => setHovered(true)}
-                            onMouseLeave={() => setHovered(false)}
-                            {...(lowerBadge ? { lowerBadge, lowerBadgeSize } : {})}
-                        />
-                    </div>
-                </div>
-            )}
-        </ErrorBoundary>
+        <ServerListItem
+            id={id}
+            className={className}
+            icon={QuestButtonIcon}
+            nudgeOnClick
+            tooltip="Quests"
+            selected={selected}
+            unread={hasUnread}
+            badge={badgeProps}
+            onClick={onPress}
+            onMouseDown={onPress}
+            onContextMenu={onPress}
+        />
     );
 }
 
@@ -172,21 +109,20 @@ function resolveQuestButtonAction(
     return null;
 }
 
-function getQuestButtonLowerBadgeProps(
+function getQuestButtonBadgeProps(
     badgeCount: number,
     indicatorMode: QuestButtonIndicatorMode,
     badgeColor: number | null,
-): QuestButtonLowerBadgeProps {
+): ServerListItemBadgeProps {
     const resolvedColor = badgeColor === null ? null : decimalToRGB(badgeColor);
 
     return {
         count: indicatorMode === "badge" || indicatorMode === "both" ? badgeCount : 0,
-        maxDigits: 2,
         ...(resolvedColor
             ? { color: `rgb(${resolvedColor.r}, ${resolvedColor.g}, ${resolvedColor.b})` }
             : {}),
         ...(resolvedColor
-            ? { style: { color: isDarkish(resolvedColor) ? "white" : "black" } }
+            ? { textColor: isDarkish(resolvedColor) ? "white" : "black" }
             : {}),
     };
 }
@@ -334,7 +270,7 @@ export function QuestButton(): JSX.Element {
     const rightClickAction = questButtonRightClickAction as QuestButtonAction;
     const indicatorMode = questButtonIndicator as QuestButtonIndicatorMode;
 
-    const lowerBadgeProps = getQuestButtonLowerBadgeProps(badgeCount, indicatorMode, badgeColor);
+    const lowerBadgeProps = getQuestButtonBadgeProps(badgeCount, indicatorMode, badgeColor);
     const hasUnread = indicatorMode === "pill" || indicatorMode === "both";
     const isVisible = showQuestButton(displayMode, badgeCount, onQuestsPage);
 
@@ -374,7 +310,7 @@ export function QuestButton(): JSX.Element {
     return (
         <QuestButtonView
             id={q("quest-button")}
-            className={q("quest-button")}
+            className={q("quest-button-container")}
             selected={onQuestsPage}
             visible={isVisible}
             hasUnread={badgeCount > 0 && hasUnread}
@@ -405,7 +341,7 @@ export function DummyQuestButton({
 }: DummyQuestButtonProps): JSX.Element {
     const badgeCount = showBadge ? 3 : 0;
     const indicatorMode = showBadge ? (showPill ? "both" : "badge") : (showPill ? "pill" : "none");
-    const lowerBadgeProps = getQuestButtonLowerBadgeProps(badgeCount, indicatorMode, badgeColor);
+    const lowerBadgeProps = getQuestButtonBadgeProps(badgeCount, indicatorMode, badgeColor);
     const [dummySelected, setDummySelected] = useState(false);
 
     function handlePress(event: MouseEvent<Element>): void {
@@ -438,7 +374,7 @@ export function DummyQuestButton({
     return (
         <QuestButtonView
             id={q("dummy-quest-button")}
-            className={q("dummy-quest-button", "quest-button")}
+            className={q("dummy-quest-button-container", "quest-button-container")}
             selected={dummySelected}
             visible={visible}
             hasUnread={showPill}

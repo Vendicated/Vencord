@@ -8,8 +8,9 @@ import type { PluginNative } from "@utils/types";
 import type { Quest, User } from "@vencord/discord-types";
 import { QuestTargetedContent, QuestTaskJoinOperator, QuestTaskType } from "@vencord/discord-types/enums";
 import { findByCodeLazy, findLazy } from "@webpack";
-import { AuthorizedAppsStore, FluxDispatcher, QuestStore, RestAPI, showToast, UserStore } from "@webpack/common";
+import { FluxDispatcher, QuestStore, RestAPI, showToast, SnowflakeUtils, UserStore } from "@webpack/common";
 
+import { createQuestEnrollmentGuard } from "../index";
 import { getCurrentUserId, getQuestifySettings } from "../settings/access";
 import { autoCompleteQuestTaskTypes, isAutoCompleteCompatible, isEnrollmentCompatible } from "../settings/def";
 import { resetQuestsToResume } from "../settings/fetching";
@@ -103,20 +104,28 @@ const getQuestOrbQuantity = findByCodeLazy("premiumOrbQuantity??", "orbQuantity"
 ) => number | null;
 const QuestCTA = findLazy(m => !!m?.START_QUEST && !!m?.ACCEPT_QUEST) as QuestCTAConstants;
 
-async function getActivityReferrer(appId: string): Promise<string | undefined> {
+async function getActivityProxyTicket(appId: string): Promise<string | undefined> {
     try {
-        const proxyTicket = await getApplicationProxyTicket(appId);
-        const referrer = new URL(`https://${appId}.discordsays.com/`);
-
-        referrer.searchParams.set("instance_id", "example-cl-instance");
-        referrer.searchParams.set("platform", "desktop");
-        referrer.searchParams.set("discord_proxy_ticket", proxyTicket);
-
-        return referrer.toString();
-    } catch (error) {
-        QL.error("AUTO_COMPLETE_ACHIEVEMENT_PROXY_TICKET_FAILED", { appId, error });
+        return await getApplicationProxyTicket(appId);
+    } catch {
+        QL.error("AUTO_COMPLETE_ACHIEVEMENT_PROXY_TICKET_FAILED", { appId });
     }
 }
+
+async function getApplicationGrantId(appId: string): Promise<string | null> {
+    const response = await RestAPI.get({ url: "/oauth2/tokens" });
+    const grants: unknown = response.body;
+
+    if (!Array.isArray(grants) || grants.some(grant =>
+        !grant || typeof grant.id !== "string" || !grant.id || typeof grant.application?.id !== "string"
+    )) {
+        throw new Error("Invalid application authorization response.");
+    }
+
+    return grants.find(grant => grant.application.id === appId)?.id ?? null;
+}
+
+const activeAchievementApplications = new Set<string>();
 
 function resolveQuestCTA(quest: Quest): string {
     const tasks = quest.config.taskConfigV2?.tasks;
@@ -1149,9 +1158,18 @@ async function runPlayQuest(quest: Quest, entry: AutoCompleteEntry, target: Auto
 }
 
 async function runAchievementQuest(quest: Quest, entry: AutoCompleteEntry, target: AutoCompleteQuestTarget): Promise<boolean> {
+    const userId = getCurrentUserId();
+    const isCurrentSession = createQuestEnrollmentGuard();
+    const appId = entry.task.applications?.[0]?.id;
+
+    if (!userId || !appId || !SnowflakeUtils.isProbablyAValidSnowflake(appId)) {
+        QL.warn("AUTO_COMPLETE_ACHIEVEMENT_INVALID_IDS", { questId: quest.id });
+        return false;
+    }
+
     quest = await waitUntilEnrolled(quest, entry, 60000, 500) ?? quest;
 
-    if (!isEntryActive(entry) || !quest.userStatus?.enrolledAt) {
+    if (!isCurrentSession() || !isEntryActive(entry) || !quest.userStatus?.enrolledAt) {
         return false;
     }
 
@@ -1160,62 +1178,91 @@ async function runAchievementQuest(quest: Quest, entry: AutoCompleteEntry, targe
         return false;
     }
 
-    const appId = entry.task.applications?.[0]?.id;
+    const applicationKey = `${userId}:${appId}`;
 
-    if (!appId) {
-        QL.warn("AUTO_COMPLETE_ACHIEVEMENT_APP_MISSING", { questId: quest.id, questName: entry.questName });
+    while (activeAchievementApplications.has(applicationKey) && isCurrentSession() && isEntryActive(entry)) {
+        await sleep(250, entry.abortController.signal);
+    }
+
+    if (!isCurrentSession() || !isEntryActive(entry)) {
         return false;
     }
 
+    quest = refreshQuest(quest);
+
+    if (quest.userStatus?.completedAt) {
+        return true;
+    }
+
+    activeAchievementApplications.add(applicationKey);
     setQuestAutoCompleteProgress(quest, 0);
 
-    let authCode: string | null = null;
+    let hadAuthorization = true;
+    let authorizationSucceeded = false;
 
     try {
-        const response = await RestAPI.post({
-            url: `/oauth2/authorize?client_id=${appId}&response_type=code&scope=identify%20applications.entitlements&state=`,
-            body: { authorize: true },
-        });
-        const location = response?.body?.location;
+        hadAuthorization = await getApplicationGrantId(appId) !== null;
 
-        authCode = location ? new URL(location).searchParams.get("code") : null;
-    } catch (error) {
-        QL.error("AUTO_COMPLETE_ACHIEVEMENT_AUTH_FAILED", { questId: quest.id, questName: entry.questName, error });
-        return false;
-    }
-
-    if (!authCode) {
-        QL.warn("AUTO_COMPLETE_ACHIEVEMENT_AUTH_CODE_MISSING", { questId: quest.id, questName: entry.questName });
-        return false;
-    }
-
-    const activityReferrer = isEntryActive(entry) ? await getActivityReferrer(appId) : undefined;
-    const result = isEntryActive(entry)
-        ? await QuestifyNative.complete(appId, authCode, target.adjusted, quest.id, activityReferrer)
-        : { success: false, error: null };
-    await RestAPI.get({ url: "/oauth2/tokens" });
-    const success = result.success === true;
-
-    setQuestAutoCompleteProgress(quest, success ? target.adjusted : 0);
-
-    try {
-        const deauthToken = AuthorizedAppsStore.getNewestTokenForApplication(appId)?.id;
-
-        if (deauthToken) {
-            await RestAPI.del({ url: `/oauth2/tokens/${deauthToken}` });
-            QL.info("AUTO_COMPLETE_ACHIEVEMENT_DEAUTH_SUCCESS", { questId: quest.id, questName: entry.questName, appId });
-        } else {
-            QL.error("AUTO_COMPLETE_ACHIEVEMENT_DEAUTH_FAILED", { questId: quest.id, questName: entry.questName, error: "DEAUTH Token Not Found." });
+        if (!isCurrentSession() || !isEntryActive(entry)) {
+            return false;
         }
-    } catch (error) {
-        QL.error("AUTO_COMPLETE_ACHIEVEMENT_DEAUTH_FAILED", { questId: quest.id, questName: entry.questName, error });
-    }
 
-    if (!success && isEntryActive(entry)) {
-        QL.error("AUTO_COMPLETE_ACHIEVEMENT_FAILED", { questId: quest.id, questName: entry.questName, error: result.error });
-    }
+        const query = new URLSearchParams({ client_id: appId, response_type: "code", scope: "identify applications.entitlements", state: "" });
+        const response = await RestAPI.post({ url: `/oauth2/authorize?${query}`, body: { authorize: true } });
 
-    return success;
+        const location = response?.body?.location;
+        const authCode = location ? new URL(location).searchParams.get("code") : null;
+        authorizationSucceeded = !!authCode;
+
+        if (!isCurrentSession() || !isEntryActive(entry)) {
+            return false;
+        }
+
+        if (!authCode) {
+            QL.warn("AUTO_COMPLETE_ACHIEVEMENT_AUTH_CODE_MISSING", { questId: quest.id, questName: entry.questName });
+            return false;
+        }
+
+        const proxyTicket = await getActivityProxyTicket(appId);
+
+        if (!isCurrentSession() || !isEntryActive(entry)) {
+            return false;
+        }
+
+        const result = await QuestifyNative.complete(appId, authCode, target.adjusted, quest.id, proxyTicket);
+
+        if (!isCurrentSession() || !isEntryActive(entry)) {
+            return false;
+        }
+
+        const success = result.success === true;
+        setQuestAutoCompleteProgress(quest, success ? target.adjusted : 0);
+
+        if (!success) {
+            QL.error("AUTO_COMPLETE_ACHIEVEMENT_FAILED", { questId: quest.id, questName: entry.questName, error: result.error });
+        }
+
+        return success;
+    } catch {
+        QL.error("AUTO_COMPLETE_ACHIEVEMENT_FAILED", { questId: quest.id, questName: entry.questName });
+        return false;
+    } finally {
+        try {
+            // Cleanup remains valid after cancellation, but only in the initiating account session.
+            if (authorizationSucceeded && !hadAuthorization && isCurrentSession()) {
+                const grantId = await getApplicationGrantId(appId);
+
+                if (grantId && isCurrentSession()) {
+                    await RestAPI.del({ url: `/oauth2/tokens/${encodeURIComponent(grantId)}` });
+                    QL.info("AUTO_COMPLETE_ACHIEVEMENT_DEAUTH_SUCCESS", { questId: quest.id, questName: entry.questName, appId });
+                }
+            }
+        } catch {
+            QL.error("AUTO_COMPLETE_ACHIEVEMENT_DEAUTH_FAILED", { questId: quest.id, questName: entry.questName, appId });
+        } finally {
+            activeAchievementApplications.delete(applicationKey);
+        }
+    }
 }
 
 async function runAutoCompleteQuest(quest: Quest, entry: AutoCompleteEntry): Promise<boolean> {

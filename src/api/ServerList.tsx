@@ -19,6 +19,8 @@
 import ErrorBoundary from "@components/ErrorBoundary";
 import { ComponentType } from "react";
 
+export { ServerListItem, type ServerListItemBadgeProps, type ServerListItemIconProps, type ServerListItemProps } from "@components/ServerListItem";
+
 export const enum ServerListRenderPosition {
     Above,
     In,

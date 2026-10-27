@@ -16,14 +16,24 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Devs } from "@utils/constants";
+import { Devs, EquicordDevs } from "@utils/constants";
 import definePlugin from "@utils/types";
 
 export default definePlugin({
     name: "ServerListAPI",
-    authors: [Devs.kemo],
-    description: "Api required for plugins that modify the server list",
+    authors: [Devs.kemo, EquicordDevs.Etorix],
+    description: "API required for plugins that modify the server list.",
+    isModified: true,
+
     patches: [
+        {
+            // Exports Discord's guildless item for the shared server-list component.
+            find: '="DOWNLOAD_APPS";function',
+            replacement: {
+                match: /(?<=\i\.\i\(\i,\{)(?=\i:\(\)=>\i.{0,30000}?let (\i)=function\(\i\)\{let\{ref:)/,
+                replace: "GuildlessServerListItemComponent:()=>$1,"
+            }
+        },
         {
             find: "#{intl::DISCODO_DISABLED}",
             replacement: {

@@ -6,6 +6,9 @@
 
 import { BrowserWindow, type IpcMainInvokeEvent } from "electron";
 
+const allowedOrigins = new Set(["https://discord.com", "https://canary.discord.com", "https://ptb.discord.com"]);
+const requestTimeoutMs = 30_000;
+
 export function canOpenDevTools(event: IpcMainInvokeEvent): boolean {
     return !event.sender.isDestroyed();
 }
@@ -28,20 +31,78 @@ export function openDevTools(event: IpcMainInvokeEvent): boolean {
     return true;
 }
 
-export async function complete(_: IpcMainInvokeEvent, appId: string, authCode: string, questTarget: number, questId: string, activityReferrer?: string): Promise<{ success: boolean; error: string | null; }> {
-    const authorization = await authorize(appId, authCode, questId, activityReferrer);
-
-    if (authorization.error || !authorization.token) {
-        return { success: false, error: "AUTH: " + JSON.stringify(authorization.error) };
+export async function complete(event: IpcMainInvokeEvent, appId: string, authCode: string, questTarget: number, questId: string, proxyTicket?: string): Promise<{ success: boolean; error: string | null; }> {
+    if (!isTrustedSender(event)) {
+        return { success: false, error: "Untrusted request sender." };
     }
 
-    const progressResult = await progress(appId, authorization.token, questTarget, questId, activityReferrer);
+    if (!isSnowflake(appId) || !isSnowflake(questId) || !isAuthCode(authCode) || !isQuestTarget(questTarget) || !isProxyTicket(proxyTicket)) {
+        return { success: false, error: "Invalid completion arguments." };
+    }
 
-    if (progressResult.error || !progressResult.success) {
-        return { success: false, error: "PROGRESS: " + JSON.stringify(progressResult.error) };
+    const origin = new URL(`https://${appId}.discordsays.com/`);
+    const activityReferrer = getActivityReferrer(origin, proxyTicket);
+    const signal = AbortSignal.timeout(requestTimeoutMs);
+    const authorization = await authorize(origin, authCode, questId, activityReferrer, signal);
+
+    if (!authorization.token) {
+        return { success: false, error: "AUTH: " + authorization.error };
+    }
+
+    if (!isTrustedSender(event)) {
+        return { success: false, error: "Request sender is no longer available." };
+    }
+
+    const progressResult = await progress(origin, authorization.token, questTarget, questId, activityReferrer, signal);
+
+    if (!progressResult.success) {
+        return { success: false, error: "PROGRESS: " + progressResult.error };
     }
 
     return { success: true, error: null };
+}
+
+function isTrustedSender(event: IpcMainInvokeEvent): boolean {
+    if (event.sender.isDestroyed()) {
+        return false;
+    }
+
+    const frame = event.senderFrame;
+
+    return frame != null && frame === event.sender.mainFrame && allowedOrigins.has(frame.origin);
+}
+
+function isSnowflake(value: unknown): value is string {
+    return typeof value === "string" && /^[1-9]\d{0,19}$/.test(value) && BigInt(value) <= 0xffffffffffffffffn;
+}
+
+function isAuthCode(value: unknown): value is string {
+    return typeof value === "string" && /^[A-Za-z0-9]+$/.test(value);
+}
+
+function isAuthToken(value: unknown): value is string {
+    return typeof value === "string" && /^[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+$/.test(value);
+}
+
+function isQuestTarget(value: unknown): value is number {
+    return typeof value === "number" && Number.isFinite(value) && value >= 0 && value <= Number.MAX_SAFE_INTEGER;
+}
+
+function isProxyTicket(value: unknown): value is string | undefined {
+    return value === undefined || (typeof value === "string" && /^[A-Za-z0-9+/]+={0,2}\.[A-Za-z0-9+/]+={0,2}$/.test(value));
+}
+
+function getActivityReferrer(origin: URL, proxyTicket?: string): string | undefined {
+    if (!proxyTicket) {
+        return undefined;
+    }
+
+    const referrer = new URL(origin);
+    referrer.searchParams.set("instance_id", "example-cl-instance");
+    referrer.searchParams.set("platform", "desktop");
+    referrer.searchParams.set("discord_proxy_ticket", proxyTicket);
+
+    return referrer.toString();
 }
 
 function getActivityHeaders(questId: string, authToken: string = "", activityReferrer?: string): Record<string, string> {
@@ -58,66 +119,53 @@ function getActivityHeaders(questId: string, authToken: string = "", activityRef
     return headers;
 }
 
-async function readJson(res: Response): Promise<unknown> {
+async function authorize(origin: URL, authCode: string, questId: string, activityReferrer: string | undefined, signal: AbortSignal): Promise<{ token: string | null; error: string | null; }> {
     try {
-        return await res.json();
+        const options: RequestInit = {
+            headers: getActivityHeaders(questId, "", activityReferrer),
+            body: JSON.stringify({ code: authCode }),
+            method: "POST",
+            redirect: "error",
+            signal,
+        };
+
+        const response = await fetch(new URL("/.proxy/acf/authorize", origin), options);
+
+        if (!response.ok) {
+            await response.body?.cancel();
+            return { token: null, error: `HTTP ${response.status}.` };
+        }
+
+        const data: unknown = await response.json();
+
+        if (data == null || typeof data !== "object" || !("token" in data) || !isAuthToken(data.token)) {
+            return { token: null, error: "Invalid authorization response." };
+        }
+
+        return { token: data.token, error: null };
     } catch {
-        return null;
+        return { token: null, error: "Request failed or timed out." };
     }
 }
 
-function getResponseToken(data: unknown): string | false {
-    if (data != null && typeof data === "object" && "token" in data && typeof data.token === "string") {
-        return data.token;
+async function progress(origin: URL, authToken: string, questTarget: number, questId: string, activityReferrer: string | undefined, signal: AbortSignal): Promise<{ success: boolean; error: string | null; }> {
+    try {
+        const options: RequestInit = {
+            headers: getActivityHeaders(questId, authToken, activityReferrer),
+            body: JSON.stringify({ progress: questTarget }),
+            method: "POST",
+            redirect: "error",
+            signal,
+        };
+
+        const response = await fetch(new URL("/.proxy/acf/quest/progress", origin), options);
+
+        await response.body?.cancel();
+
+        return response.ok
+            ? { success: true, error: null }
+            : { success: false, error: `HTTP ${response.status}.` };
+    } catch {
+        return { success: false, error: "Request failed or timed out." };
     }
-
-    return false;
-}
-
-async function authorize(appId: string, authCode: string, questId: string, activityReferrer?: string): Promise<{ token: string | false; error: unknown; }> {
-    let error: unknown = null;
-
-    const token = await fetch(`https://${appId}.discordsays.com/.proxy/acf/authorize`, {
-        headers: getActivityHeaders(questId, "", activityReferrer),
-        body: JSON.stringify({ code: authCode }),
-        method: "POST",
-        mode: "cors",
-        credentials: "include",
-    })
-        .then(async res => {
-            const data = await readJson(res);
-            const token = getResponseToken(data);
-
-            if (!res.ok || !token) {
-                error = { status: res.status, body: data };
-                return false as const;
-            }
-
-            return token;
-        })
-        .catch(e => {
-            error = e;
-            return false as const;
-        });
-
-    return { token, error };
-}
-
-async function progress(appId: string, token: string, questTarget: number, questId: string, activityReferrer?: string): Promise<{ success: boolean; error: unknown; }> {
-    let error: unknown = null;
-
-    const success = await fetch(`https://${appId}.discordsays.com/.proxy/acf/quest/progress`, {
-        headers: getActivityHeaders(questId, token, activityReferrer),
-        body: JSON.stringify({ progress: questTarget }),
-        method: "POST",
-        mode: "cors",
-        credentials: "include",
-    })
-        .then(res => res.ok)
-        .catch(e => {
-            error = e;
-            return false;
-        });
-
-    return { success, error };
 }
