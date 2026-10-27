@@ -330,7 +330,7 @@ const patchExpressionPickerMenu: NavContextMenuPatchCallback = (children, props:
 
         const idx = group.findIndex(item => item?.props?.id === "copy");
         if (idx !== -1)
-            group.splice(idx, 1, React.cloneElement(group[idx]!, { leadingAccessory: { type: "icon", icon: CopyIcon } }));
+            group[idx] = React.cloneElement(group[idx]!, { leadingAccessory: { type: "icon", icon: CopyIcon } });
 
         return;
     }
