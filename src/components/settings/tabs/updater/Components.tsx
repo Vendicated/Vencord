@@ -102,16 +102,14 @@ export function Updatable(props: CommonProps) {
                             if (await update()) {
                                 setUpdates([]);
 
-                                const choice = await confirmAction({
+                                await confirmAction({
                                     title: "Update Success!",
                                     subtitle: "Successfully updated. Restart now to apply the changes?",
                                     confirmText: "Restart",
                                     cancelText: "Not now!",
                                     variant: "primary",
+                                    onConfirm: relaunch
                                 });
-                                if (choice) {
-                                    relaunch();
-                                }
                             }
                         })}
                     >

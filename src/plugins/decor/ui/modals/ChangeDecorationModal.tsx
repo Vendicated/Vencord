@@ -179,17 +179,17 @@ function ChangeDecorationModal(props: RenderModalProps) {
                     </Button>}
                 </Tooltip>
                 <Button
-                    onClick={async () => {
-                        const choice = await confirmAction({
+                    onClick={() => {
+                        confirmAction({
                             title: "Log Out",
                             subtitle: "Are you sure you want to log out of Decor?",
                             confirmText: "Log Out",
                             cancelText: "Cancel",
+                            onConfirm() {
+                                useAuthorizationStore.getState().remove(UserStore.getCurrentUser().id);
+                                props.onClose();
+                            },
                         });
-                        if (choice) {
-                            useAuthorizationStore.getState().remove(UserStore.getCurrentUser().id);
-                            props.onClose();
-                        }
                     }}
                     variant="dangerSecondary"
                 >

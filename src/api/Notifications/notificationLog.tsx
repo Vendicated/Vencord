@@ -175,16 +175,16 @@ function LogModal(props: RenderModalProps) {
                     text: "Clear Notification Log",
                     variant: "critical-primary",
                     disabled: !log.length,
-                    async onClick() {
-                        const choice = await confirmAction({
+                    onClick() {
+                        confirmAction({
                             confirmText: "Do it!",
                             title: "Are you sure?",
                             subtitle: `This will permanently remove ${log.length} notification${log.length === 1 ? "" : "s"}. This action cannot be undone.`,
+                            async onConfirm() {
+                                await DataStore.set(KEY, []);
+                                signals.forEach(x => x());
+                            },
                         });
-                        if (choice) {
-                            await DataStore.set(KEY, []);
-                            signals.forEach(x => x());
-                        }
                     }
                 }
             ]}

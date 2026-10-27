@@ -223,16 +223,14 @@ function ResetSection() {
                 <ButtonWithIcon
                     variant="dangerPrimary"
                     disabled={!authenticated}
-                    onClick={async () => {
-                        const choice = await confirmAction({
+                    onClick={() => {
+                        confirmAction({
                             title: "Are you sure?",
                             subtitle: "Once your data is erased, we cannot recover it. There's no going back!",
                             confirmText: "Erase it!",
                             cancelText: "Nevermind",
+                            onConfirm: eraseAllCloudData,
                         });
-                        if (choice) {
-                            eraseAllCloudData();
-                        }
                     }}
                     Icon={DeleteIcon}
                 >

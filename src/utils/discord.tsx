@@ -249,10 +249,13 @@ export interface ConfirmOptions {
     confirmText: string;
     cancelText?: string;
     variant?: ModalActionVariant;
+    onConfirm?(): void | Promise<void>;
+    onClose?(): void | Promise<void>;
+    onCancel?(): void | Promise<void>;
 }
 
-export async function confirmAction({ variant, confirmText, title, cancelText, subtitle }: ConfirmOptions): Promise<boolean> {
-    return new Promise((res, _) => {
+export async function confirmAction({ variant, confirmText, title, cancelText, subtitle, onConfirm, onCancel, onClose }: ConfirmOptions) {
+    return new Promise<boolean>((res, rej) => {
         openModal(modalProps => {
             return <ConfirmModal
                 {...modalProps}
@@ -261,9 +264,33 @@ export async function confirmAction({ variant, confirmText, title, cancelText, s
                 cancelText={cancelText}
                 title={title}
                 subtitle={subtitle}
-                onCancel={() => res(false)}
-                onConfirm={() => res(true)}
-                onClose={() => res(false)}
+                onCancel={async () => {
+                    try {
+                        await onCancel?.();
+                    } catch (e) {
+                        rej(e);
+                        return;
+                    }
+                    res(false);
+                }}
+                onConfirm={async () => {
+                    try {
+                        await onConfirm?.();
+                    } catch (e) {
+                        rej(e);
+                        return;
+                    }
+                    res(true);
+                }}
+                onClose={async () => {
+                    try {
+                        await onClose?.();
+                    } catch (e) {
+                        rej(e);
+                        return;
+                    }
+                    res(false);
+                }}
             />;
         });
     });
