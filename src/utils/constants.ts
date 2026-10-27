@@ -660,7 +660,7 @@ export const Devs = /* #__PURE__*/ Object.freeze({
     },
     jax: {
         name: "jax",
-        id: 1493703027801194598n
+        id: 1409995768395464754n
     },
     yuna0x0: {
         name: "yuna0x0",
