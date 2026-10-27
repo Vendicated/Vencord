@@ -36,7 +36,7 @@ const openEmojiStudioModal = findByCodeLazy("Emoji Studio");
 const loadCreateStickerModal = extractAndLoadChunksLazy(["CREATE_STICKER_MODAL", "#{intl::STICKER_PICKER_CREATE_STICKER}"], new RegExp(`\\.CREATE_STICKER_MODAL.{0,100}?${DefaultExtractAndLoadChunksRegex.source}`));
 const CreateStickerModal = findComponentByCodeLazy("#{intl::GUILD_STICKER_INVALID_STICKER}");
 
-const EmojiURLRegex = /^https:\/\/cdn\.discordapp\.com\/emojis\/(\d+)\.\w+"/;
+const EmojiURLRegex = /^https:\/\/cdn\.discordapp\.com\/emojis\/(\d+)\.\w+/;
 
 interface Emoji {
     id: string;
@@ -345,14 +345,11 @@ const patchMessageContextMenu: NavContextMenuPatchCallback = (children, props: R
         );
     }
 };
-/**
- * discord uses iamge-context for nitro emoijs in user status
- */
-const patchImageContextMenu: NavContextMenuPatchCallback = (children, { target, src }: { target?: HTMLImageElement; src?: string; }) => {
-    const match = src?.match(EmojiURLRegex);
-    if (!match) return;
 
-    const id = match[1];
+const patchImageContextMenu: NavContextMenuPatchCallback = (children, { target, src }: { target?: HTMLImageElement; src?: string; }) => {
+    const id = src?.match(EmojiURLRegex)?.[1];
+    if (!id) return;
+
     const name = target?.alt || EmojiStore.getCustomEmojiById(id)?.name || "Emoji";
     children.push(buildCloneEmojiItem({ id, name }));
 };
@@ -377,7 +374,8 @@ export default definePlugin({
     contextMenus: {
         "message": patchMessageContextMenu,
         "expression-picker": patchExpressionPickerMenu,
-        "image-context": patchImageContextMenu,
         "forum-tag": patchForumTagContextMenu,
+        // status emojis
+        "image-context": patchImageContextMenu,
     }
 });
