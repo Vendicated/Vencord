@@ -61,6 +61,31 @@ const MonacoWorkerEntryPoints = [
     "vs/editor/editor.worker.js"
 ];
 
+/**
+ * @returns {import("esbuild").Plugin}
+ */
+function monacoSizeWarning() {
+    return {
+        name: "monaco-size-warning",
+        setup(build) {
+            build.onEnd((r) => {
+                const totalBytes = Object.values(r.metafile?.outputs ?? {}).map((x) => x.bytes).reduce((acc, cur) => acc + cur);
+                const MiB = 1024 * 1024;
+                // this build does not have the workers (~1.2MiB) and is currently ~4.8MiB
+                // vite currently bundles this to ~14MiB, correctly bundling the workers
+                // if esbuild ever adds support for the worker syntax, this should help us notice so we fix this
+                if (totalBytes > (6 * MiB)) {
+                    return {
+                        warnings: [{
+                            text: "https://github.com/Vendicated/Vencord/pull/4748#issuecomment-6427702795"
+                        }]
+                    }
+                }
+            })
+        }
+    }
+}
+
 /** @type {import("esbuild").BuildOptions[]} */
 const buildConfigs = [
     {
@@ -79,7 +104,9 @@ const buildConfigs = [
         outfile: "dist/vendor/monaco/index.js",
         loader: {
             ".ttf": "file"
-        }
+        },
+        metafile: true,
+        plugins: [monacoSizeWarning()]
     },
     {
         ...commonOptions,
