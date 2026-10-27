@@ -49,11 +49,10 @@
         <div id="container"></div>
 
         <script>
-            let d = document,
-                s = d.createElement("script");
+            let s = document.createElement("script");
             s.src = new URL("/vendor/monaco/index.js", baseUrl);
             s.type = "module";
-            d.body.append(s);
+            document.body.append(s);
         </script>
     </body>
 </html>
