@@ -39,7 +39,6 @@ const CreateStickerModal = findComponentByCodeLazy("#{intl::GUILD_STICKER_INVALI
 interface Emoji {
     id: string;
     name: string;
-    isAnimated: boolean;
 }
 type PartialSticker = Pick<Sticker, "id" | "format_type">;
 
@@ -103,7 +102,7 @@ async function openEmojiUploadModal(url: string, filename?: string) {
     const dataUrl = await new Promise<string>((resolve, reject) => {
         const reader = new FileReader();
         reader.onloadend = () => resolve(reader.result as string);
-        reader.onerror = reject;
+        reader.onerror = () => reject("Failed to read blob as data URL");
         reader.readAsDataURL(blob);
     });
 
@@ -228,11 +227,6 @@ function buildStickerLinkItems(sticker: PartialSticker, ParentComponent = Menu.M
     );
 }
 
-function isGifUrl(url: string) {
-    const { pathname, searchParams } = new URL(url);
-    return pathname.endsWith(".gif") || searchParams.get("animated") === "true";
-}
-
 function resolveEmojiName(favoriteableId: string, message: BasicMessage | Message) {
     const emoji = EmojiStore.getCustomEmojiById(favoriteableId);
     if (emoji) return emoji.name;
@@ -253,11 +247,9 @@ const patchExpressionPickerMenu: NavContextMenuPatchCallback = (children, props:
     if (!id) return;
 
     if (type === "emoji" && name) {
-        const firstChild = props.target.firstChild as HTMLImageElement;
-
         children.push(
             <Menu.MenuGroup key="vc-em-group">
-                {buildCloneEmojiItem({ id, name, isAnimated: firstChild && isGifUrl(firstChild.src) })}
+                {buildCloneEmojiItem({ id, name })}
                 {buildManageExpressionItems(id, type)}
             </Menu.MenuGroup>
         );
@@ -283,7 +275,7 @@ const patchExpressionPickerMenu: NavContextMenuPatchCallback = (children, props:
 };
 
 const patchMessageContextMenu: NavContextMenuPatchCallback = (children, props: Record<"favoriteableId" | "itemHref" | "itemSrc" | "favoriteableType", string> & { message: Message; mediaItem?: any; }) => {
-    const { favoriteableId, mediaItem, itemHref, itemSrc, favoriteableType } = props ?? {};
+    const { favoriteableId, mediaItem, favoriteableType } = props ?? {};
     const { message } = props.message.messageSnapshots?.[0] ?? props;
 
     switch (favoriteableType) {
@@ -295,11 +287,7 @@ const patchMessageContextMenu: NavContextMenuPatchCallback = (children, props: R
             const container = favContainer ?? findGroupChildrenByChildId("copy-native-link", children);
 
             container?.unshift(
-                buildCloneEmojiItem({
-                    id: favoriteableId,
-                    name,
-                    isAnimated: isGifUrl(itemHref ?? itemSrc)
-                }),
+                buildCloneEmojiItem({ id: favoriteableId, name }),
                 !favContainer ? <Menu.MenuSeparator key="vc-em-emoji-separator" /> : null,
             );
             break;

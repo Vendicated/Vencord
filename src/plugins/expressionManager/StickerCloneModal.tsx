@@ -15,13 +15,14 @@ import { classNameFactory } from "@utils/css";
 import { getGuildAcronym } from "@utils/discord";
 import { Logger } from "@utils/Logger";
 import { Guild, Sticker } from "@vencord/discord-types";
-import { Clickable, Constants, FluxDispatcher, GuildStore, IconUtils, Modal, openModalLazy, PermissionsBits, PermissionStore, React, RestAPI, showToast, StickersStore, useMemo, useReducer, UserStore, useState } from "@webpack/common";
+import { AuthenticationStore, Clickable, Constants, FluxDispatcher, GuildStore, IconUtils, Modal, openModalLazy, PermissionsBits, PermissionStore, React, RestAPI, showToast, StickersStore, useMemo, useReducer, UserStore, useState } from "@webpack/common";
 
 import { formatStickerURL } from ".";
 
 const cl = classNameFactory("vc-expressionManager-");
 
 const getFontSize = (s: string) => {
+    // Font size array from Discord. We currently use XLarge, commented out is
     // [18, 18, 16, 16, 14, 12, 10]
     const sizes = [20, 20, 18, 18, 16, 14, 12];
     return sizes[s.length] ?? 4;
@@ -97,7 +98,7 @@ async function doClone(guildId: string, sticker: Sticker) {
 function getGuildCandidates() {
     const meId = AuthenticationStore.getId();
 
-    return Object.values(GuildStore.getGuilds()).filter(g => {
+    return GuildStore.getGuildsArray().filter(g => {
         const canCreate = g.ownerId === meId ||
             (PermissionStore.getGuildPermissions({ id: g.id }) & PermissionsBits.CREATE_GUILD_EXPRESSIONS) === PermissionsBits.CREATE_GUILD_EXPRESSIONS;
         if (!canCreate) return false;
