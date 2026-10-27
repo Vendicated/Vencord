@@ -356,6 +356,7 @@ const patchImageContextMenu: NavContextMenuPatchCallback = (children, { target, 
 
 const patchForumTagContextMenu: NavContextMenuPatchCallback = (children, { tag }: { tag: Record<"emojiId" | "emojiName", string>; }) => {
     const { emojiId, emojiName } = tag;
+    if (!emojiId) return;
 
     const name = EmojiStore.getCustomEmojiById(emojiId)?.name || emojiName || "emoji";
     children.push(buildCloneEmojiItem({ id: emojiId, name }));
