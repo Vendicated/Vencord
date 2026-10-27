@@ -164,10 +164,6 @@ export type Permissions = "CREATE_INSTANT_INVITE"
 
 export type PermissionsBits = Record<Permissions, bigint>;
 
-export interface MessageSnapshot {
-    message: Message;
-}
-
 export interface Locale {
     name: string;
     value: string;
