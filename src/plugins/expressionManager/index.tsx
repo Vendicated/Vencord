@@ -23,7 +23,6 @@ import { definePluginSettings, migratePluginSettings } from "@api/Settings";
 import { DeleteIcon, LinkIcon, PencilIcon, PlusIcon, TopRightArrow } from "@components/Icons";
 import { Devs } from "@utils/constants";
 import { copyWithToast } from "@utils/discord";
-import { Logger } from "@utils/Logger";
 import { removeFromArray } from "@utils/misc";
 import definePlugin, { OptionType } from "@utils/types";
 import { BasicMessage, CustomEmoji, Guild, GuildSticker, Message, Sticker, StickerItem } from "@vencord/discord-types";
@@ -36,7 +35,8 @@ import { openCloneStickerModal } from "./StickerCloneModal";
 const openEmojiStudioModal = findByCodeLazy("Emoji Studio");
 const loadCreateStickerModal = extractAndLoadChunksLazy(["CREATE_STICKER_MODAL", "#{intl::STICKER_PICKER_CREATE_STICKER}"], new RegExp(`\\.CREATE_STICKER_MODAL.{0,100}?${DefaultExtractAndLoadChunksRegex.source}`));
 const CreateStickerModal = findComponentByCodeLazy("#{intl::GUILD_STICKER_INVALID_STICKER}");
-let emojiUrlRegex: RegExp;
+
+const EmojiURLRegex = /^https:\/\/cdn\.discordapp\.com\/emojis\/(\d+)\.\w+"/;
 
 interface Emoji {
     id: string;
@@ -243,14 +243,14 @@ function buildStickerLinkItems(sticker: StickerItem, ParentComponent = Menu.Menu
     );
 }
 
-function resolveEmojiName(favoriteableId: string, message: BasicMessage | Message) {
-    const emoji = EmojiStore.getCustomEmojiById(favoriteableId);
+function resolveEmojiName(id: string, message: BasicMessage | Message) {
+    const emoji = EmojiStore.getCustomEmojiById(id);
     if (emoji) return emoji.name;
 
-    const reaction = "reactions" in message && message.reactions.find(reaction => reaction.emoji.id === favoriteableId);
+    const reaction = "reactions" in message && message.reactions.find(reaction => reaction.emoji.id === id);
     if (reaction) return reaction.emoji.name;
 
-    const match = message.content.match(RegExp(`<a?:(\\w+)(?:~\\d+)?:${favoriteableId}>|https://cdn\\.discordapp\\.com/emojis/${favoriteableId}\\.[\\w?&=%]*`));
+    const match = message.content.match(RegExp(`<a?:(\\w+)(?:~\\d+)?:${id}>|https://cdn\\.discordapp\\.com/emojis/${id}\\.[\\w?&=%]*`));
     if (!match) return null;
 
     return match[1]
@@ -358,20 +358,18 @@ const patchImageContextMenu: NavContextMenuPatchCallback = (children, { target, 
     target?: HTMLImageElement;
     src?: string;
 }) => {
-    const [, id] = src?.match(emojiUrlRegex) ?? [];
+    const match = src?.match(EmojiURLRegex);
+    if (!match) return;
 
-    if (!id) return;
-
-    const name = target?.alt || "EmojiName";
+    const id = match[1];
+    const name = target?.alt || EmojiStore.getCustomEmojiById(id)?.name || "Emoji";
     children.push(buildCloneEmojiItem({ id, name }));
-    return;
 };
 
 const patchForumTagContextMenu: NavContextMenuPatchCallback = (children, { tag }: ForumTagContextMenuProps) => {
     if (!tag?.emojiId) return;
-    // same function discord calls on the emoji id
-    const emoji = EmojiStore.getUsableCustomEmojiById(tag.emojiId);
 
+    const emoji = EmojiStore.getCustomEmojiById(tag.emojiId);
     if (!emoji) return;
 
     children.push(buildCloneEmojiItem(emoji));
@@ -384,14 +382,6 @@ export default definePlugin({
     tags: ["Emotes", "Servers"],
     searchTerms: ["StickerCloner", "ExpressionCloner", "EmoteCloner", "EmojiCloner"],
     authors: [Devs.Ven, Devs.Nuckyz, Devs.scattagain, Devs.sadan],
-
-    start() {
-        const { CDN_HOST } = window.GLOBAL_ENV;
-        if (!CDN_HOST) {
-            new Logger("ExpressionManager").warn("GLOBAL_ENV.CDN_HOST missing");
-        }
-        emojiUrlRegex ??= new RegExp(`^${location.protocol}//${CDN_HOST}/emojis/(\\d+)\\.\\w+.+$`);
-    },
 
     settings,
 
