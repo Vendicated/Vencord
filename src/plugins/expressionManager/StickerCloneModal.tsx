@@ -200,32 +200,25 @@ export function openCloneStickerModal(stickerData: PartialSticker) {
             .catch(e => stickerData)
             .then(sticker => ({ ...sticker })); // Clone so we can safely mutate it
 
-        return modalProps => {
-            if (!sticker) {
-                modalProps.onClose();
-                return null;
-            }
-
-            return (
-                <Modal
-                    {...modalProps}
-                    title={
-                        <Flex gap="0.5em" alignItems="center">
-                            <img
-                                role="presentation"
-                                aria-hidden
-                                src={formatStickerURL(sticker, 128)}
-                                alt=""
-                                height={24}
-                                width={24}
-                            />
-                            <Text tag="h3" size="md" weight="medium">Clone {sticker.name}</Text>
-                        </Flex>
-                    }
-                >
-                    <CloneModal sticker={sticker} />
-                </Modal>
-            );
-        };
+        return modalProps => (
+            <Modal
+                {...modalProps}
+                title={
+                    <Flex gap="0.5em" alignItems="center">
+                        <img
+                            role="presentation"
+                            aria-hidden
+                            src={formatStickerURL(sticker, 128)}
+                            alt=""
+                            height={24}
+                            width={24}
+                        />
+                        <Text tag="h3" size="md" weight="medium">Clone {sticker.name}</Text>
+                    </Flex>
+                }
+            >
+                <CloneModal sticker={sticker} />
+            </Modal>
+        );
     });
 }
