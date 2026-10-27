@@ -179,7 +179,9 @@ export function CloneModal({ sticker }: { sticker: Sticker; }) {
 
 export function openCloneStickerModal(fetchSticker: () => Promise<Sticker>) {
     openModalLazy(async () => {
-        const sticker = await fetchSticker();
+        // spread to create a copy we can mutate
+        const sticker = { ...await fetchSticker() };
+
         return modalProps => (
             <Modal
                 {...modalProps}
