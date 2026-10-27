@@ -20,18 +20,19 @@ import "./styles.css";
 
 import { findGroupChildrenByChildId, NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { definePluginSettings, migratePluginSettings } from "@api/Settings";
-import { DeleteIcon, LinkIcon, PencilIcon, PlusIcon, TopRightArrow } from "@components/Icons";
+import { DeleteIcon, HistoryIcon, LinkIcon, PencilIcon, PlusIcon, TopRightArrow } from "@components/Icons";
 import { Devs } from "@utils/constants";
 import { copyWithToast } from "@utils/discord";
 import { removeFromArray } from "@utils/misc";
 import definePlugin, { OptionType } from "@utils/types";
-import { BasicMessage, CustomEmoji, Guild, GuildSticker, Message, Sticker, StickerItem } from "@vencord/discord-types";
+import { BasicMessage, CustomEmoji, FluxStore, Guild, GuildSticker, Message, Sticker, StickerItem } from "@vencord/discord-types";
 import { StickerFormatType, StickerType } from "@vencord/discord-types/enums";
-import { DefaultExtractAndLoadChunksRegex, extractAndLoadChunksLazy, findByCodeLazy, findComponentByCodeLazy } from "@webpack";
-import { ConfirmModal, Constants, EmojiStore, FluxDispatcher, GuildStore, Menu, openModal, openModalLazy, PermissionsBits, PermissionStore, React, RestAPI, SelectedGuildStore, showToast, StickersStore } from "@webpack/common";
+import { DefaultExtractAndLoadChunksRegex, extractAndLoadChunksLazy, findByCodeLazy, findComponentByCodeLazy, findStoreLazy } from "@webpack";
+import { ConfirmModal, Constants, EmojiStore, FluxDispatcher, GuildStore, Menu, openModal, openModalLazy, PermissionsBits, PermissionStore, React, RestAPI, SelectedGuildStore, showToast, StickersStore, UserSettingsActionCreators } from "@webpack/common";
 
 import { openCloneStickerModal } from "./StickerCloneModal";
 
+const StickersPersistedStore = findStoreLazy("StickersPersistedStore") as FluxStore & { stickerFrecencyWithoutFetchingLatest: { frequently: Sticker[]; }; };
 const openEmojiStudioModal = findByCodeLazy("Emoji Studio");
 const loadCreateStickerModal = extractAndLoadChunksLazy(["CREATE_STICKER_MODAL", "#{intl::STICKER_PICKER_CREATE_STICKER}"], new RegExp(`\\.CREATE_STICKER_MODAL.{0,100}?${DefaultExtractAndLoadChunksRegex.source}`));
 const CreateStickerModal = findComponentByCodeLazy("#{intl::GUILD_STICKER_INVALID_STICKER}");
@@ -252,8 +253,77 @@ function resolveEmojiName(id: string, message: BasicMessage | Message) {
         ?? "FakeNitroEmoji";
 }
 
+function buildRemoveFrecentItem({ type, id, name }: Record<"type" | "id" | "name", string | undefined>) {
+    let expressionKey: string | undefined;
+
+    switch (type) {
+        case "emoji": {
+            const frecents = EmojiStore.getDisambiguatedEmojiContext(SelectedGuildStore.getGuildId()).getFrequentlyUsedEmojisWithoutFetchingLatest();
+
+            if (frecents.some(e => id ? e.id === id : e.name === name))
+                expressionKey = id ?? name!;
+
+            break;
+        }
+        case "sticker": {
+            const frecents = StickersPersistedStore.stickerFrecencyWithoutFetchingLatest.frequently;
+
+            if (id && frecents.some(e => e.id === id))
+                expressionKey = id;
+
+            break;
+        }
+    }
+
+    if (!expressionKey)
+        return;
+
+    const collectionKey = `${type}Frecency`;
+    const itemsKey = `${type}s`;
+
+    return (
+        <Menu.MenuItem
+            id="vc-em-remove-frecent"
+            key="vc-em-remove-frecent"
+            label="Remove From Recents"
+            leadingAccessory={{ type: "icon", icon: HistoryIcon }}
+            color="danger"
+            action={e => {
+                const onConfirm = () => {
+                    UserSettingsActionCreators.FrecencyUserSettingsActionCreators.updateAsync(
+                        collectionKey,
+                        e => delete e[itemsKey][expressionKey],
+                        0 // INFREQUENT_USER_ACTION
+                    );
+                };
+
+                if (e.shiftKey) {
+                    onConfirm();
+                } else {
+                    openModal(modalProps =>
+                        <ConfirmModal
+                            {...modalProps}
+                            title="Remove From Recents"
+                            subtitle={`This will reset all usage history for this ${type} and cannot be undone. Are you sure?`}
+                            confirmText="Do it"
+                            onConfirm={onConfirm}
+                        />
+                    );
+                }
+            }}
+        />
+    );
+}
 const patchExpressionPickerMenu: NavContextMenuPatchCallback = (children, props: { target: HTMLElement; }) => {
     const { id, name, type, formatType } = props?.target?.dataset ?? {};
+
+    const removeFrecentItem = buildRemoveFrecentItem({ type, id, name });
+
+    if (removeFrecentItem) {
+        const group = findGroupChildrenByChildId("favorite", children) ?? findGroupChildrenByChildId("unfavorite", children);
+        group?.splice(1, 0, removeFrecentItem);
+    }
+
     if (!id) return;
 
     if (type === "emoji" && name) {
