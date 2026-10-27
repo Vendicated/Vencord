@@ -177,7 +177,7 @@ export class Message extends DiscordRecord {
         message_id: string;
     } | undefined;
     messageSnapshots: {
-        message: Message;
+        message: MessageSnapshot;
     }[];
     nick: string | null;
     nonce: string | undefined;
@@ -237,6 +237,8 @@ export class Message extends DiscordRecord {
     /** Vencord added */
     deleted?: boolean;
 }
+
+export type MessageSnapshot = Pick<Message, "type" | "content" | "embeds" | "attachments" | "timestamp" | "editedTimestamp" | "flags" | "stickers" | "stickerItems" | "components"> & Partial<Pick<Message, "mentions" | "mentionRoles">>;
 
 /** A smaller Message object found in FluxDispatcher and elsewhere. */
 export interface MessageJSON {

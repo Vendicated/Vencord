@@ -25,10 +25,10 @@ import { Devs } from "@utils/constants";
 import { copyWithToast } from "@utils/discord";
 import { removeFromArray } from "@utils/misc";
 import definePlugin, { OptionType } from "@utils/types";
-import { CustomEmoji, Guild, GuildSticker, Message, Sticker } from "@vencord/discord-types";
+import { CustomEmoji, Guild, GuildSticker, Message, MessageSnapshot, Sticker } from "@vencord/discord-types";
 import { StickerFormatType, StickerType } from "@vencord/discord-types/enums";
 import { DefaultExtractAndLoadChunksRegex, extractAndLoadChunksLazy, findByCodeLazy, findComponentByCodeLazy } from "@webpack";
-import { ConfirmModal, Constants, EmojiStore, FluxDispatcher, GuildStore, Menu, openModal, openModalLazy, PermissionsBits, PermissionStore, RestAPI, SelectedGuildStore, showToast, StickersStore } from "@webpack/common";
+import { ConfirmModal, Constants, EmojiStore, FluxDispatcher, GuildStore, Menu, openModal, openModalLazy, PermissionsBits, PermissionStore, React, RestAPI, SelectedGuildStore, showToast, StickersStore } from "@webpack/common";
 
 import { openCloneStickerModal } from "./StickerCloneModal";
 
@@ -52,7 +52,7 @@ const StickerExtMap = {
 } as const;
 
 const settings = definePluginSettings({
-    stickerCopyAndSave: {
+    stickerCopyAndOpen: {
         type: OptionType.BOOLEAN,
         description: 'Add "Copy Sticker Link" and "Open Sticker Link" options to the sticker context menu',
         default: true
@@ -209,9 +209,9 @@ function buildManageExpressionItems(id: string, type: string) {
     );
 }
 
-function buildStickerLinkItems(sticker: PartialSticker) {
+function buildStickerLinkItems(sticker: PartialSticker, ParentComponent = Menu.MenuGroup) {
     return (
-        <Menu.MenuGroup key="vc-em-sticker-links">
+        <ParentComponent key="vc-em-sticker-links">
             <Menu.MenuItem
                 id="vc-copy-sticker-link"
                 key="vc-copy-sticker-link"
@@ -228,7 +228,7 @@ function buildStickerLinkItems(sticker: PartialSticker) {
                 trailingIndicator={{ type: "icon", icon: TopRightArrow }}
                 action={() => VencordNative.native.openExternal(formatStickerURL(sticker, 512))}
             />
-        </Menu.MenuGroup>
+        </ParentComponent>
     );
 }
 
@@ -237,11 +237,11 @@ function isGifUrl(url: string) {
     return pathname.endsWith(".gif") || searchParams.get("animated") === "true";
 }
 
-function resolveEmojiName(favoriteableId: string, message: Message) {
+function resolveEmojiName(favoriteableId: string, message: MessageSnapshot | Message) {
     const emoji = EmojiStore.getCustomEmojiById(favoriteableId);
     if (emoji) return emoji.name;
 
-    const reaction = message.reactions.find(reaction => reaction.emoji.id === favoriteableId);
+    const reaction = "reactions" in message && message.reactions.find(reaction => reaction.emoji.id === favoriteableId);
     if (reaction) return reaction.emoji.name;
 
     const match = message.content.match(RegExp(`<a?:(\\w+)(?:~\\d+)?:${favoriteableId}>|https://cdn\\.discordapp\\.com/emojis/${favoriteableId}\\.[\\w?&=%]*`));
@@ -270,7 +270,7 @@ const patchExpressionPickerMenu: NavContextMenuPatchCallback = (children, props:
     }
 
     if (type === "sticker" && !props.target.className?.includes("lottieCanvas")) {
-        if (settings.store.stickerCopyAndSave) {
+        if (settings.store.stickerCopyAndOpen) {
             const oldCopyLinkParent = findGroupChildrenByChildId("copy-image-link", children);
             if (oldCopyLinkParent) removeFromArray(oldCopyLinkParent, c => c?.props?.id === "copy-image-link");
 
@@ -287,34 +287,50 @@ const patchExpressionPickerMenu: NavContextMenuPatchCallback = (children, props:
 };
 
 const patchMessageContextMenu: NavContextMenuPatchCallback = (children, props: Record<"favoriteableId" | "itemHref" | "itemSrc" | "favoriteableType", string> & { message: Message; mediaItem?: any; }) => {
-    const { favoriteableId, mediaItem, itemHref, itemSrc, favoriteableType, message } = props ?? {};
+    const { favoriteableId, mediaItem, itemHref, itemSrc, favoriteableType } = props ?? {};
+    const { message } = props.message.messageSnapshots?.[0] ?? props;
 
     switch (favoriteableType) {
-        case "emoji":
+        case "emoji": {
             const name = resolveEmojiName(favoriteableId, message);
             if (!name) return;
 
-            findGroupChildrenByChildId("copy-link", children)?.push(
+            const favContainer = findGroupChildrenByChildId("favorite", children);
+            const container = favContainer ?? findGroupChildrenByChildId("copy-native-link", children);
+
+            container?.unshift(
                 buildCloneEmojiItem({
                     id: favoriteableId,
                     name,
                     isAnimated: isGifUrl(itemHref ?? itemSrc)
-                })
+                }),
+                !favContainer ? <Menu.MenuSeparator key="vc-em-emoji-separator" /> : null,
             );
             break;
-
-        case "sticker":
+        }
+        case "sticker": {
             const sticker = message.stickerItems.find(s => s.id === favoriteableId);
             if (!sticker || sticker.format_type === StickerFormatType.LOTTIE) return;
 
-            findGroupChildrenByChildId("favorite", children)?.unshift(
-                buildCloneStickerItem(() => fetchSticker(favoriteableId))
-            );
+            const favoriteContainer = findGroupChildrenByChildId("favorite", children);
 
-            if (settings.store.stickerCopyAndSave)
-                children.splice(-1, 0, buildStickerLinkItems(sticker));
+            const cloneItem = buildCloneStickerItem(() => fetchSticker(favoriteableId));
+
+            if (favoriteContainer) {
+                favoriteContainer.unshift(cloneItem);
+                favoriteContainer.push(
+                    <Menu.MenuSeparator key="vc-em-sticker-links-separator" />,
+                    buildStickerLinkItems(sticker, React.Fragment),
+                );
+            } else {
+                children.splice(-1, 0,
+                    <Menu.MenuGroup key="vc-em-clone-sticker-group">{cloneItem}</Menu.MenuGroup>,
+                    buildStickerLinkItems(sticker)
+                );
+            }
 
             break;
+        }
     }
 
     if (mediaItem?.contentType?.startsWith("image/")) {
