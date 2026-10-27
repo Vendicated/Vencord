@@ -19,7 +19,7 @@ const openEmojiStudioModal = findByCodeLazy("Emoji Studio");
 export const formatEmojiURL = (emoji: Emoji, size: number) => `${location.protocol}//${window.GLOBAL_ENV.CDN_HOST}/emojis/${emoji.id}.webp?size=${size}&lossless=true&animated=true`;
 
 export const buildCloneEmojiItem = (emoji: Emoji) =>
-    buildCloneItem("Emoji", () => openEmojiUploadModal(emoji, emoji.name));
+    buildCloneItem("Emoji", () => openEmojiUploadModal(formatEmojiURL(emoji, 128), emoji.name));
 
 export const editEmoji = (emoji: Emoji, guildId: string) =>
     openEmojiStudioModal({
@@ -28,9 +28,7 @@ export const editEmoji = (emoji: Emoji, guildId: string) =>
         guildId
     });
 
-export async function openEmojiUploadModal(emoji: Emoji, filename?: string) {
-    const url = formatEmojiURL(emoji, 128);
-
+export async function openEmojiUploadModal(url: string, filename?: string) {
     try {
         filename ||= new URL(url).pathname.split("/").pop() ?? "emoji.png";
 
