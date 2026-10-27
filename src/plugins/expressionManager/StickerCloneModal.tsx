@@ -12,12 +12,11 @@ import { Span } from "@components/Span";
 import { Text } from "@components/Text";
 import { classNameFactory } from "@utils/css";
 import { getGuildAcronym } from "@utils/discord";
-import { Logger } from "@utils/Logger";
 import { useForceUpdater } from "@utils/react";
-import { Guild, GuildSticker, Sticker } from "@vencord/discord-types";
+import { Guild, GuildSticker, Sticker, StickerItem } from "@vencord/discord-types";
 import { AuthenticationStore, Clickable, Constants, FluxDispatcher, GuildStore, IconUtils, Modal, openModalLazy, PermissionsBits, PermissionStore, React, RestAPI, showToast, StickersStore, Tooltip, useMemo, UserStore, useState } from "@webpack/common";
 
-import { formatStickerURL } from ".";
+import { formatStickerURL, logger } from ".";
 
 const cl = classNameFactory("vc-expressionManager-");
 
@@ -27,6 +26,8 @@ const getFontSize = (s: string) => {
     const sizes = [20, 20, 18, 18, 16, 14, 12];
     return sizes[s.length] ?? 4;
 };
+
+type StickerData = StickerItem & Partial<Sticker>;
 
 const PremiumTierStickerLimitMap = {
     0: 5,
@@ -58,7 +59,7 @@ async function fetchSticker(id: string) {
     return body as GuildSticker;
 }
 
-async function fetchBlob(sticker: Sticker) {
+async function fetchBlob(sticker: StickerData) {
     for (let size = 4096; size >= 16; size /= 2) {
         const url = formatStickerURL(sticker, size);
         const res = await fetch(url);
@@ -80,12 +81,12 @@ async function fetchBlob(sticker: Sticker) {
     throw new Error(`Failed to fetch sticker within size limit of ${MAX_STICKER_SIZE_BYTES / 1024}KiB`);
 }
 
-async function doClone(guildId: string, sticker: Sticker) {
+async function doClone(guildId: string, sticker: StickerData) {
     try {
         const data = new FormData();
         data.append("name", sticker.name);
-        data.append("tags", sticker.tags);
-        data.append("description", sticker.description);
+        if (sticker.tags) data.append("tags", sticker.tags);
+        if (sticker.description) data.append("description", sticker.description);
         data.append("file", await fetchBlob(sticker));
 
         const { body } = await RestAPI.post({
@@ -109,7 +110,7 @@ async function doClone(guildId: string, sticker: Sticker) {
             message = JSON.parse(e.text).message;
         } catch { }
 
-        new Logger("ExpressionManager").error(`Failed to clone ${sticker.name} to guild ${guildId}`, e);
+        logger.error(`Failed to clone ${sticker.name} to guild ${guildId}`, e);
         showToast({ text: `Failed to clone: ${message}`, variant: "critical" });
     }
 }
@@ -129,7 +130,7 @@ function getGuildCandidates() {
     }).sort((a, b) => a.name.localeCompare(b.name));
 }
 
-export function CloneModal({ sticker }: { sticker: Sticker; }) {
+export function CloneModal({ sticker }: { sticker: StickerData; }) {
     const [isCloning, setIsCloning] = useState(false);
     const [name, setName] = useState(sticker.name);
 
@@ -193,11 +194,11 @@ export function CloneModal({ sticker }: { sticker: Sticker; }) {
     );
 }
 
-export function openCloneStickerModal(stickerId: string) {
+export function openCloneStickerModal(stickerData: StickerData) {
     openModalLazy(async () => {
-        const sticker = await fetchSticker(stickerId)
-            .then(sticker => ({ ...sticker })) // Clone so we can safely mutate it
-            .catch(e => showToast({ text: "Failed to fetch sticker", variant: "critical" }));
+        const sticker = await fetchSticker(stickerData.id)
+            .catch(e => stickerData)
+            .then(sticker => ({ ...sticker })); // Clone so we can safely mutate it
 
         return modalProps => {
             if (!sticker) {

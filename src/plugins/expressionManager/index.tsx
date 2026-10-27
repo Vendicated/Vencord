@@ -23,6 +23,7 @@ import { definePluginSettings, migratePluginSettings } from "@api/Settings";
 import { CopyIcon, DeleteIcon, HistoryIcon, LinkIcon, PencilIcon, PlusIcon, TopRightArrow } from "@components/Icons";
 import { Devs } from "@utils/constants";
 import { copyWithToast } from "@utils/discord";
+import { Logger } from "@utils/Logger";
 import { removeFromArray } from "@utils/misc";
 import definePlugin, { OptionType } from "@utils/types";
 import { BasicMessage, CustomEmoji, FluxStore, Guild, GuildSticker, Message, Sticker, StickerItem } from "@vencord/discord-types";
@@ -43,6 +44,8 @@ interface Emoji {
     id: string;
     name: string;
 }
+
+export const logger = new Logger("ExpressionManager");
 
 const StickerExtMap = {
     [StickerFormatType.PNG]: "png",
@@ -83,39 +86,44 @@ function buildCloneEmojiItem(emoji: Emoji) {
     return buildCloneItem("Emoji", () => openEmojiUploadModal(formatEmojiURL(emoji, 128), emoji.name));
 }
 
-function buildCloneStickerItem(stickerId: string) {
-    return buildCloneItem("Sticker", () => openCloneStickerModal(stickerId));
+function buildCloneStickerItem(sticker: StickerItem) {
+    return buildCloneItem("Sticker", () => openCloneStickerModal(sticker));
 }
 
 async function openEmojiUploadModal(url: string, filename?: string) {
-    filename ||= new URL(url).pathname.split("/").pop() ?? "emoji.png";
+    try {
+        filename ||= new URL(url).pathname.split("/").pop() ?? "emoji.png";
 
-    const blob = await fetch(url).then(res => res.blob());
+        const blob = await fetch(url).then(res => res.blob());
 
-    const dataUrl = await new Promise<string>((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onloadend = () => resolve(reader.result as string);
-        reader.onerror = () => reject("Failed to read blob as data URL");
-        reader.readAsDataURL(blob);
-    });
+        const dataUrl = await new Promise<string>((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onloadend = () => resolve(reader.result as string);
+            reader.onerror = () => reject("Failed to read blob as data URL");
+            reader.readAsDataURL(blob);
+        });
 
-    const image = new Image();
-    image.src = dataUrl;
-    await image.decode();
+        const image = new Image();
+        image.src = dataUrl;
+        await image.decode();
 
-    const file = new File([blob], filename, { type: blob.type });
+        const file = new File([blob], filename, { type: blob.type });
 
-    await openEmojiStudioModal({
-        analyticsLocation: {
-            page: "Guild Settings"
-        },
-        guildId: SelectedGuildStore.getGuildId(),
-        userImage: {
-            image,
-            file,
-            data: dataUrl
-        }
-    });
+        await openEmojiStudioModal({
+            analyticsLocation: {
+                page: "Guild Settings"
+            },
+            guildId: SelectedGuildStore.getGuildId(),
+            userImage: {
+                image,
+                file,
+                data: dataUrl
+            }
+        });
+    } catch (e) {
+        logger.error("Failed to open Emoji Modal", e);
+        showToast({ text: `Failed to open Emoji Modal: ${e}`, variant: "critical" });
+    }
 }
 
 function buildManageExpressionItems(id: string, type: string) {
@@ -334,20 +342,22 @@ const patchExpressionPickerMenu: NavContextMenuPatchCallback = (children, props:
     }
 
     if (type === "sticker" && !props.target.className?.includes("lottieCanvas")) {
+        const sticker: StickerItem = {
+            id,
+            format_type: Number(formatType),
+            name: name!
+        };
+
         if (settings.store.stickerCopyAndOpen) {
             const oldCopyLinkParent = findGroupChildrenByChildId("copy-image-link", children);
             if (oldCopyLinkParent) removeFromArray(oldCopyLinkParent, c => c?.props?.id === "copy-image-link");
 
-            children.push(buildStickerLinkItems({
-                id,
-                format_type: Number(formatType),
-                name: name!
-            }));
+            children.push(buildStickerLinkItems(sticker));
         }
 
         children.push(
             <Menu.MenuGroup key="vc-em-manage">
-                {buildCloneStickerItem(id)}
+                {buildCloneStickerItem(sticker)}
                 {buildManageExpressionItems(id, type)}
             </Menu.MenuGroup>
         );
@@ -378,7 +388,7 @@ const patchMessageContextMenu: NavContextMenuPatchCallback = (children, props: R
 
             const favoriteContainer = findGroupChildrenByChildId("favorite", children);
 
-            const cloneItem = buildCloneStickerItem(favoriteableId);
+            const cloneItem = buildCloneStickerItem(sticker);
 
             if (favoriteContainer) {
                 favoriteContainer.unshift(cloneItem);
