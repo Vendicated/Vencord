@@ -10,12 +10,16 @@ import { SettingsSection } from "@components/settings/tabs/plugins/components/Co
 import { Switch } from "@components/Switch";
 import { classNameFactory } from "@utils/css";
 import { useForceUpdater } from "@utils/react";
-import { OptionType } from "@utils/types";
+import { OptionType, PluginNative } from "@utils/types";
 import { React, Select, showToast, TextArea, TextInput } from "@webpack/common";
 
 import { CORS_PROXY } from "./constants";
 import { fallbackServiceOrder, serviceLabels, ServiceType } from "./types";
 import { parseShareXConfig } from "./utils/sharex";
+
+const Native = IS_DISCORD_DESKTOP
+    ? VencordNative.pluginHelpers.FileUpload as PluginNative<typeof import("./native")>
+    : null;
 
 const defaultFallbackOrder = fallbackServiceOrder.join(",");
 const cl = classNameFactory("vc-file-upload-settings-");
@@ -1046,6 +1050,20 @@ export function SettingsComponent() {
                         placeholder="Select timeout"
                     />
                 </SettingsSection>
+
+                {Native && (
+                    <SettingsSection id="approved-servers" name="Approved Servers" description="S3 and WebDAV servers you allowed FileUpload to upload to. Resetting will ask again on the next upload.">
+                        <Button
+                            size="small"
+                            onClick={async () => {
+                                await Native.clearApprovedOrigins();
+                                showToast({ text: "Approved servers reset" });
+                            }}
+                        >
+                            Reset Approved Servers
+                        </Button>
+                    </SettingsSection>
+                )}
             </SettingGroup>
 
             <FallbackOrderSettings />

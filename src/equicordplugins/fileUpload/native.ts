@@ -4,9 +4,41 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { IpcMainInvokeEvent } from "electron";
+import { NativeSettings } from "@main/settings";
+import { dialog, IpcMainInvokeEvent } from "electron";
 
 import { NativeUploadResult, NestUploadResponse } from "./types";
+
+function getApprovedOrigins(): string[] {
+    return NativeSettings.store.plugins.FileUpload?.approvedOrigins ?? [];
+}
+
+async function isOriginApproved(url: string): Promise<boolean> {
+    if (getApprovedOrigins().includes(new URL(url).origin)) return true;
+
+    const { response } = await dialog.showMessageBox({
+        type: "warning",
+        title: "Equicord FileUpload",
+        message: `FileUpload wants to upload files to ${origin}`,
+        detail: `Unless you recognise and fully trust ${origin}, you should cancel this request!\n\nTrust remembers this server, Allow only permits this request.`,
+        buttons: ["Trust", "Allow", "Cancel"],
+        defaultId: 2,
+        cancelId: 2
+    });
+
+    if (response === 2) return false;
+    if (response === 1) return true;
+
+    NativeSettings.store.plugins.FileUpload ??= {};
+    NativeSettings.store.plugins.FileUpload.approvedOrigins = [...getApprovedOrigins(), origin];
+    return true;
+}
+
+export function clearApprovedOrigins() {
+    if (NativeSettings.store.plugins.FileUpload) {
+        NativeSettings.store.plugins.FileUpload.approvedOrigins = [];
+    }
+}
 
 export async function uploadToNest(
     _: IpcMainInvokeEvent,
@@ -119,6 +151,10 @@ export async function uploadToS3(
     headers: Record<string, string>
 ): Promise<NativeUploadResult> {
     try {
+        if (!await isOriginApproved(uploadUrl)) {
+            return { success: false, error: "Upload server was not approved" };
+        }
+
         const response = await fetch(uploadUrl, {
             method: "PUT",
             headers,
@@ -478,6 +514,10 @@ export async function uploadToWebdav(
     }
 
     try {
+        if (!await isOriginApproved(uploadUrl)) {
+            return { success: false, error: "Upload server was not approved" };
+        }
+
         const response = await fetch(uploadUrl, {
             method: "PUT",
             headers,
@@ -506,6 +546,10 @@ export async function createWebdavShare(
     }
 
     try {
+        if (!await isOriginApproved(ocsUrl)) {
+            return { success: false, error: "Share server was not approved" };
+        }
+
         const response = await fetch(ocsUrl, {
             method: "POST",
             headers,
@@ -536,34 +580,32 @@ export async function createWebdavShare(
     }
 }
 
+const allowedHosts = new Set([
+    "cdn.discordapp.com",
+    "images-ext-1.discordapp.net",
+    "images-ext-2.discordapp.net",
+    "media.discordapp.net"
+]);
+
 export async function fetchFile(
-
     _: IpcMainInvokeEvent,
-
     url: string
-
 ): Promise<{ success: boolean; data?: ArrayBuffer; contentType?: string; error?: string; }> {
-
     try {
+        if (!allowedHosts.has(new URL(url).hostname)) {
+            return { success: false, error: "Unknown URL" };
+        }
 
         const response = await fetch(url);
-
         if (!response.ok) {
-
             return { success: false, error: `Fetch failed: ${response.status} ${response.statusText}` };
-
         }
 
         const data = await response.arrayBuffer();
-
         const contentType = response.headers.get("content-type") || "";
 
         return { success: true, data, contentType };
-
     } catch (e) {
-
         return { success: false, error: e instanceof Error ? e.message : "Unknown error" };
-
     }
-
 }
