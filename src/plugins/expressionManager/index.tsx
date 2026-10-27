@@ -28,7 +28,7 @@ import definePlugin, { OptionType } from "@utils/types";
 import { BasicMessage, CustomEmoji, FluxStore, Guild, GuildSticker, Message, Sticker, StickerItem } from "@vencord/discord-types";
 import { StickerFormatType, StickerType } from "@vencord/discord-types/enums";
 import { DefaultExtractAndLoadChunksRegex, extractAndLoadChunksLazy, findByCodeLazy, findComponentByCodeLazy, findStoreLazy } from "@webpack";
-import { ConfirmModal, Constants, EmojiStore, FluxDispatcher, GuildStore, Menu, openModal, openModalLazy, PermissionsBits, PermissionStore, React, RestAPI, SelectedGuildStore, showToast, StickersStore, UserSettingsActionCreators } from "@webpack/common";
+import { ConfirmModal, Constants, EmojiStore, GuildStore, Menu, openModal, openModalLazy, PermissionsBits, PermissionStore, React, RestAPI, SelectedGuildStore, showToast, StickersStore, UserSettingsActionCreators } from "@webpack/common";
 
 import { openCloneStickerModal } from "./StickerCloneModal";
 
@@ -65,21 +65,7 @@ const settings = definePluginSettings({
 });
 
 const formatEmojiURL = (emoji: Emoji, size: number) => `${location.protocol}//${window.GLOBAL_ENV.CDN_HOST}/emojis/${emoji.id}.webp?size=${size}&lossless=true&animated=true`;
-export const formatStickerURL = (sticker: StickerItem, size: number) => `${location.protocol}//${window.GLOBAL_ENV.MEDIA_PROXY_ENDPOINT}/stickers/${sticker.id}.${StickerExtMap[sticker.format_type]}?size=${size}&lossless=true&animated=true`;
-
-async function fetchSticker(id: string) {
-    const cached = StickersStore.getStickerById(id);
-    if (cached) return cached;
-
-    const { body } = await RestAPI.get(Constants.Endpoints.STICKER(id));
-
-    FluxDispatcher.dispatch({
-        type: "STICKER_FETCH_SUCCESS",
-        sticker: body
-    });
-
-    return body as GuildSticker;
-}
+export const formatStickerURL = (sticker: StickerItem, size: number) => `${location.protocol}${window.GLOBAL_ENV.MEDIA_PROXY_ENDPOINT}/stickers/${sticker.id}.${StickerExtMap[sticker.format_type]}?size=${size}&lossless=true&animated=true`;
 
 function buildCloneItem(type: string, action: () => void) {
     return (
@@ -97,8 +83,8 @@ function buildCloneEmojiItem(emoji: Emoji) {
     return buildCloneItem("Emoji", () => openEmojiUploadModal(formatEmojiURL(emoji, 128), emoji.name));
 }
 
-function buildCloneStickerItem(fetchSticker: () => Promise<Sticker>) {
-    return buildCloneItem("Sticker", () => openCloneStickerModal(fetchSticker));
+function buildCloneStickerItem(stickerId: string) {
+    return buildCloneItem("Sticker", () => openCloneStickerModal(stickerId));
 }
 
 async function openEmojiUploadModal(url: string, filename?: string) {
@@ -313,6 +299,7 @@ function buildRemoveFrecentItem({ type, id, name }: Record<"type" | "id" | "name
         />
     );
 }
+
 const patchExpressionPickerMenu: NavContextMenuPatchCallback = (children, props: { target: HTMLElement; }) => {
     const { id, name, type, formatType } = props?.target?.dataset ?? {};
 
@@ -360,7 +347,7 @@ const patchExpressionPickerMenu: NavContextMenuPatchCallback = (children, props:
 
         children.push(
             <Menu.MenuGroup key="vc-em-manage">
-                {buildCloneStickerItem(() => fetchSticker(id))}
+                {buildCloneStickerItem(id)}
                 {buildManageExpressionItems(id, type)}
             </Menu.MenuGroup>
         );
@@ -391,7 +378,7 @@ const patchMessageContextMenu: NavContextMenuPatchCallback = (children, props: R
 
             const favoriteContainer = findGroupChildrenByChildId("favorite", children);
 
-            const cloneItem = buildCloneStickerItem(() => fetchSticker(favoriteableId));
+            const cloneItem = buildCloneStickerItem(favoriteableId);
 
             if (favoriteContainer) {
                 favoriteContainer.unshift(cloneItem);

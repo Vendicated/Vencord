@@ -10,12 +10,12 @@ import { HeadingTertiary } from "@components/Heading";
 import { Margins } from "@components/margins";
 import { Span } from "@components/Span";
 import { Text } from "@components/Text";
-import { TooltipContainer } from "@components/TooltipContainer";
 import { classNameFactory } from "@utils/css";
 import { getGuildAcronym } from "@utils/discord";
 import { Logger } from "@utils/Logger";
-import { Guild, Sticker } from "@vencord/discord-types";
-import { AuthenticationStore, Clickable, Constants, FluxDispatcher, GuildStore, IconUtils, Modal, openModalLazy, PermissionsBits, PermissionStore, React, RestAPI, showToast, StickersStore, useMemo, useReducer, UserStore, useState } from "@webpack/common";
+import { useForceUpdater } from "@utils/react";
+import { Guild, GuildSticker, Sticker } from "@vencord/discord-types";
+import { AuthenticationStore, Clickable, Constants, FluxDispatcher, GuildStore, IconUtils, Modal, openModalLazy, PermissionsBits, PermissionStore, React, RestAPI, showToast, StickersStore, Tooltip, useMemo, UserStore, useState } from "@webpack/common";
 
 import { formatStickerURL } from ".";
 
@@ -42,6 +42,20 @@ function getGuildMaxStickerSlots(guild: Guild): number {
         return 120;
 
     return PremiumTierStickerLimitMap[guild.premiumTier] ?? PremiumTierStickerLimitMap[0];
+}
+
+async function fetchSticker(id: string) {
+    const cached = StickersStore.getStickerById(id);
+    if (cached) return cached;
+
+    const { body } = await RestAPI.get(Constants.Endpoints.STICKER(id));
+
+    FluxDispatcher.dispatch({
+        type: "STICKER_FETCH_SUCCESS",
+        sticker: body
+    });
+
+    return body as GuildSticker;
 }
 
 async function fetchBlob(sticker: Sticker) {
@@ -119,7 +133,7 @@ export function CloneModal({ sticker }: { sticker: Sticker; }) {
     const [isCloning, setIsCloning] = useState(false);
     const [name, setName] = useState(sticker.name);
 
-    const [guildCandidatesDep, refreshGuildCandidates] = useReducer(x => x + 1, 0);
+    const [guildCandidatesDep, refreshGuildCandidates] = useForceUpdater(true);
     const guilds = useMemo(() => getGuildCandidates(), [guildCandidatesDep]);
 
     return (
@@ -136,71 +150,81 @@ export function CloneModal({ sticker }: { sticker: Sticker; }) {
 
             <Flex flexWrap="wrap" justifyContent="center" alignItems="center" className={Margins.top16}>
                 {guilds.map(g => (
-                    <TooltipContainer key={g.id} text={g.name}>
-                        <Clickable
-                            role="button"
-                            aria-disabled={isCloning}
-                            className={cl("guild")}
-                            data-is-cloning={isCloning}
-                            onClick={() => {
-                                if (isCloning) return;
+                    <Tooltip key={g.id} text={g.name}>
+                        {tooltipProps =>
+                            <Clickable
+                                {...tooltipProps}
+                                aria-disabled={isCloning}
+                                className={cl("guild")}
+                                data-is-cloning={isCloning}
+                                onClick={() => {
+                                    if (isCloning) return;
 
-                                setIsCloning(true);
-                                doClone(g.id, sticker).finally(() => {
-                                    refreshGuildCandidates();
-                                    setIsCloning(false);
-                                });
-                            }}
-                        >
-                            {g.icon ? (
-                                <img
-                                    aria-hidden
-                                    className={cl("guild-icon")}
-                                    src={IconUtils.getGuildIconURL({
-                                        id: g.id,
-                                        icon: g.icon,
-                                        canAnimate: true,
-                                        size: 512
-                                    })}
-                                    alt={g.name}
-                                />
-                            ) : (
-                                <Span className={cl("guild-acronym")} style={{ fontSize: getFontSize(getGuildAcronym(g)) }}>
-                                    {getGuildAcronym(g)}
-                                </Span>
-                            )}
-                        </Clickable>
-                    </TooltipContainer>
+                                    setIsCloning(true);
+                                    doClone(g.id, sticker).finally(() => {
+                                        refreshGuildCandidates();
+                                        setIsCloning(false);
+                                    });
+                                }}
+                            >
+                                {g.icon ? (
+                                    <img
+                                        aria-hidden
+                                        className={cl("guild-icon")}
+                                        src={IconUtils.getGuildIconURL({
+                                            id: g.id,
+                                            icon: g.icon,
+                                            canAnimate: true,
+                                            size: 512
+                                        })}
+                                        alt={g.name}
+                                    />
+                                ) : (
+                                    <Span className={cl("guild-acronym")} style={{ fontSize: getFontSize(getGuildAcronym(g)) }}>
+                                        {getGuildAcronym(g)}
+                                    </Span>
+                                )}
+                            </Clickable>
+                        }
+                    </Tooltip>
                 ))}
             </Flex>
         </>
     );
 }
 
-export function openCloneStickerModal(fetchSticker: () => Promise<Sticker>) {
+export function openCloneStickerModal(stickerId: string) {
     openModalLazy(async () => {
-        // spread to create a copy we can mutate
-        const sticker = { ...await fetchSticker() };
+        const sticker = await fetchSticker(stickerId)
+            .then(sticker => ({ ...sticker })) // Clone so we can safely mutate it
+            .catch(e => showToast({ text: "Failed to fetch sticker", variant: "critical" }));
 
-        return modalProps => (
-            <Modal
-                {...modalProps}
-                title={
-                    <Flex gap="0.5em" alignItems="center">
-                        <img
-                            role="presentation"
-                            aria-hidden
-                            src={formatStickerURL(sticker, 128)}
-                            alt=""
-                            height={24}
-                            width={24}
-                        />
-                        <Text tag="h3" size="md" weight="medium">Clone {sticker.name}</Text>
-                    </Flex>
-                }
-            >
-                <CloneModal sticker={sticker} />
-            </Modal>
-        );
+        return modalProps => {
+            if (!sticker) {
+                modalProps.onClose();
+                return null;
+            }
+
+            return (
+                <Modal
+                    {...modalProps}
+                    title={
+                        <Flex gap="0.5em" alignItems="center">
+                            <img
+                                role="presentation"
+                                aria-hidden
+                                src={formatStickerURL(sticker, 128)}
+                                alt=""
+                                height={24}
+                                width={24}
+                            />
+                            <Text tag="h3" size="md" weight="medium">Clone {sticker.name}</Text>
+                        </Flex>
+                    }
+                >
+                    <CloneModal sticker={sticker} />
+                </Modal>
+            );
+        };
     });
 }
