@@ -8,7 +8,7 @@ import { IpcMainInvokeEvent } from "electron";
 
 // we love CORS
 export async function fetchAudio(_: IpcMainInvokeEvent, url: string): Promise<Uint8Array> {
-    if (!url.startsWith("https://cdn.discordapp.com")) throw new Error("Unknown URL");
+    if (new URL(url).hostname !== "cdn.discordapp.com") throw new Error("Unknown URL");
     const res = await fetch(url);
     if (!res.ok) throw new Error(`Failed to fetch ${url}: ${res.statusText}`);
     if (!res.headers.get("Content-Type")?.startsWith("audio/")) throw new Error(`${url} is not an audio file`);
