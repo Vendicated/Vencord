@@ -183,7 +183,7 @@ function buildRemoveFrecentItem({ type, id, name }: Record<"type" | "id" | "name
             key="vc-em-remove-frecent"
             label="Remove From Recents"
             leadingAccessory={{ type: "icon", icon: HistoryIcon }}
-            action={e => {
+            action={async e => {
                 const onConfirm = () => {
                     UserSettingsActionCreators.FrecencyUserSettingsActionCreators.updateAsync(
                         collectionKey,
@@ -193,18 +193,14 @@ function buildRemoveFrecentItem({ type, id, name }: Record<"type" | "id" | "name
                 };
 
                 // The confirm modal closes the reaction popup, so skip confirmation
-                const skipConfirm = e.shiftKey || isReaction;
-
-                if (skipConfirm) {
-                    onConfirm();
-                } else {
-                    confirmAction({
+                const confirmed = e.shiftKey || isReaction ||
+                    await confirmAction({
                         title: "Remove From Recents",
                         subtitle: `This will reset all usage history for this ${type} and cannot be undone. Are you sure?`,
-                        confirmText: "Do it",
-                        onConfirm
+                        confirmText: "Do it"
                     });
-                }
+
+                if (confirmed) onConfirm();
             }}
         />
     );
