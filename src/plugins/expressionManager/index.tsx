@@ -161,13 +161,12 @@ function buildManageExpressionItems(id: string, type: string) {
                     if (type === "sticker") {
                         openModalLazy(async () => {
                             await loadCreateStickerModal();
-                            return modalProps => {
+                            return modalProps =>
                                 <CreateStickerModal
                                     {...modalProps}
                                     sticker={expression}
                                     guildId={guild.id}
                                 />;
-                            };
                         });
                     } else {
                         openEmojiStudioModal({
