@@ -43,12 +43,6 @@ interface Emoji {
     name: string;
 }
 
-interface ForumTagContextMenuProps {
-    tag: {
-        emojiId: null | string;
-    };
-}
-
 const StickerExtMap = {
     [StickerFormatType.PNG]: "png",
     [StickerFormatType.APNG]: "png",
@@ -354,10 +348,7 @@ const patchMessageContextMenu: NavContextMenuPatchCallback = (children, props: R
 /**
  * discord uses iamge-context for nitro emoijs in user status
  */
-const patchImageContextMenu: NavContextMenuPatchCallback = (children, { target, src, ...props }: {
-    target?: HTMLImageElement;
-    src?: string;
-}) => {
+const patchImageContextMenu: NavContextMenuPatchCallback = (children, { target, src }: { target?: HTMLImageElement; src?: string; }) => {
     const match = src?.match(EmojiURLRegex);
     if (!match) return;
 
@@ -366,7 +357,7 @@ const patchImageContextMenu: NavContextMenuPatchCallback = (children, { target, 
     children.push(buildCloneEmojiItem({ id, name }));
 };
 
-const patchForumTagContextMenu: NavContextMenuPatchCallback = (children, { tag }: ForumTagContextMenuProps) => {
+const patchForumTagContextMenu: NavContextMenuPatchCallback = (children, { tag }: { tag: { emojiId?: string; }; }) => {
     if (!tag?.emojiId) return;
 
     const emoji = EmojiStore.getCustomEmojiById(tag.emojiId);
