@@ -25,7 +25,7 @@ import { Devs } from "@utils/constants";
 import { copyWithToast } from "@utils/discord";
 import { removeFromArray } from "@utils/misc";
 import definePlugin, { OptionType } from "@utils/types";
-import { BasicMessage, CustomEmoji, Guild, GuildSticker, Message, Sticker } from "@vencord/discord-types";
+import { BasicMessage, CustomEmoji, Guild, GuildSticker, Message, Sticker, StickerItem } from "@vencord/discord-types";
 import { StickerFormatType, StickerType } from "@vencord/discord-types/enums";
 import { DefaultExtractAndLoadChunksRegex, extractAndLoadChunksLazy, findByCodeLazy, findComponentByCodeLazy } from "@webpack";
 import { ConfirmModal, Constants, EmojiStore, FluxDispatcher, GuildStore, Menu, openModal, openModalLazy, PermissionsBits, PermissionStore, React, RestAPI, SelectedGuildStore, showToast, StickersStore } from "@webpack/common";
@@ -40,8 +40,6 @@ interface Emoji {
     id: string;
     name: string;
 }
-type PartialSticker = Pick<Sticker, "id" | "format_type">;
-
 const StickerExtMap = {
     [StickerFormatType.PNG]: "png",
     [StickerFormatType.APNG]: "png",
@@ -58,7 +56,7 @@ const settings = definePluginSettings({
 });
 
 const formatEmojiURL = (emoji: Emoji, size: number) => `${location.protocol}//${window.GLOBAL_ENV.CDN_HOST}/emojis/${emoji.id}.webp?size=${size}&lossless=true&animated=true`;
-export const formatStickerURL = (sticker: PartialSticker, size: number) => `${location.protocol}//${window.GLOBAL_ENV.MEDIA_PROXY_ENDPOINT}/stickers/${sticker.id}.${StickerExtMap[sticker.format_type]}?size=${size}&lossless=true&animated=true`;
+export const formatStickerURL = (sticker: StickerItem, size: number) => `${location.protocol}//${window.GLOBAL_ENV.MEDIA_PROXY_ENDPOINT}/stickers/${sticker.id}.${StickerExtMap[sticker.format_type]}?size=${size}&lossless=true&animated=true`;
 
 async function fetchSticker(id: string) {
     const cached = StickersStore.getStickerById(id);
@@ -87,7 +85,7 @@ function buildCloneItem(type: string, action: () => void) {
 }
 
 function buildCloneEmojiItem(emoji: Emoji) {
-    return buildCloneItem("Emoji", () => openEmojiUploadModal(formatEmojiURL(emoji, 128)));
+    return buildCloneItem("Emoji", () => openEmojiUploadModal(formatEmojiURL(emoji, 128), emoji.name));
 }
 
 function buildCloneStickerItem(fetchSticker: () => Promise<Sticker>) {
@@ -204,7 +202,7 @@ function buildManageExpressionItems(id: string, type: string) {
     );
 }
 
-function buildStickerLinkItems(sticker: PartialSticker, ParentComponent = Menu.MenuGroup) {
+function buildStickerLinkItems(sticker: StickerItem, ParentComponent = Menu.MenuGroup) {
     return (
         <ParentComponent key="vc-em-sticker-links">
             <Menu.MenuItem
@@ -262,7 +260,11 @@ const patchExpressionPickerMenu: NavContextMenuPatchCallback = (children, props:
             const oldCopyLinkParent = findGroupChildrenByChildId("copy-image-link", children);
             if (oldCopyLinkParent) removeFromArray(oldCopyLinkParent, c => c?.props?.id === "copy-image-link");
 
-            children.push(buildStickerLinkItems({ id, format_type: formatType as any }));
+            children.push(buildStickerLinkItems({
+                id,
+                format_type: Number(formatType),
+                name: name!
+            }));
         }
 
         children.push(
@@ -324,7 +326,7 @@ const patchMessageContextMenu: NavContextMenuPatchCallback = (children, props: R
                 id="vc-em-upload-as-emoji"
                 label="Upload as Emoji"
                 leadingAccessory={{ type: "icon", icon: PlusIcon }}
-                action={() => openEmojiUploadModal(mediaItem.url)}
+                action={() => openEmojiUploadModal(mediaItem.url, mediaItem.name)}
             />
         );
     }
