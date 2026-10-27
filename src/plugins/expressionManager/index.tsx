@@ -357,13 +357,11 @@ const patchImageContextMenu: NavContextMenuPatchCallback = (children, { target, 
     children.push(buildCloneEmojiItem({ id, name }));
 };
 
-const patchForumTagContextMenu: NavContextMenuPatchCallback = (children, { tag }: { tag: { emojiId?: string; }; }) => {
-    if (!tag?.emojiId) return;
+const patchForumTagContextMenu: NavContextMenuPatchCallback = (children, { tag }: { tag: Record<"emojiId" | "emojiName", string>; }) => {
+    const { emojiId, emojiName } = tag;
 
-    const emoji = EmojiStore.getCustomEmojiById(tag.emojiId);
-    if (!emoji) return;
-
-    children.push(buildCloneEmojiItem(emoji));
+    const name = EmojiStore.getCustomEmojiById(emojiId)?.name || emojiName || "emoji";
+    children.push(buildCloneEmojiItem({ id: emojiId, name }));
 };
 
 migratePluginSettings("ExpressionManager", "ExpressionCloner", "EmoteCloner");
