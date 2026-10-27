@@ -347,17 +347,12 @@ const patchImageContextMenu: NavContextMenuPatchCallback = (children, { target, 
     target?: HTMLImageElement;
     src?: string;
 }) => {
-    console.log({ target, src, ...props });
     const [, id] = src?.match(emojiUrlRegex) ?? [];
 
     if (!id) return;
 
     const name = target?.alt || "EmojiName";
-    children.push(buildCloneEmojiItem({
-        id,
-        name,
-        isAnimated: isAnimatedEmojiUrl(src!)
-    }));
+    children.push(buildCloneEmojiItem({ id, name }));
     return;
 };
 
@@ -368,11 +363,7 @@ const patchForumTagContextMenu: NavContextMenuPatchCallback = (children, { tag }
 
     if (!emoji) return;
 
-    children.push(buildCloneEmojiItem({
-        id: emoji.id,
-        name: emoji.name,
-        isAnimated: emoji.animated,
-    }));
+    children.push(buildCloneEmojiItem(emoji));
 };
 
 migratePluginSettings("ExpressionManager", "ExpressionCloner", "EmoteCloner");
