@@ -22,20 +22,21 @@ import { findGroupChildrenByChildId, NavContextMenuPatchCallback } from "@api/Co
 import { definePluginSettings, migratePluginSettings } from "@api/Settings";
 import { CopyIcon, DeleteIcon, HistoryIcon, PencilIcon, PlusIcon } from "@components/Icons";
 import { Devs } from "@utils/constants";
-import { getIntlMessage } from "@utils/discord";
 import { Logger } from "@utils/Logger";
 import { removeFromArray } from "@utils/misc";
 import definePlugin, { OptionType } from "@utils/types";
 import { CustomEmoji, FluxStore, Guild, GuildSticker, Message, Sticker, StickerItem } from "@vencord/discord-types";
-import { StickerFormatType, StickerType } from "@vencord/discord-types/enums";
+import { EmojiIntention, StickerFormatType, StickerType } from "@vencord/discord-types/enums";
 import { findCssClassesLazy, findStoreLazy } from "@webpack";
-import { ConfirmModal, Constants, EmojiStore, GuildStore, Menu, openModal, PermissionsBits, PermissionStore, React, RestAPI, SelectedGuildStore, showToast, StickersStore, useMemo, UserSettingsActionCreators } from "@webpack/common";
+import { ConfirmModal, Constants, EmojiStore, GuildStore, Menu, openModal, PermissionsBits, PermissionStore, React, RestAPI, SelectedGuildStore, showToast, StickersStore, UserSettingsActionCreators } from "@webpack/common";
 
 import { buildCloneEmojiItem, editEmoji, EmojiURLRegex, openEmojiUploadModal, resolveEmojiName } from "./emojis";
 import { buildCloneStickerItem, buildStickerLinkItems, editSticker } from "./stickers";
 
 const StickersPersistedStore = findStoreLazy("StickersPersistedStore") as FluxStore & { stickerFrecencyWithoutFetchingLatest: { frequently: Sticker[]; }; };
 const EmojiPickerLabelClasses = findCssClassesLazy("label", "labelChecked", "icon");
+
+let emojiIntention: EmojiIntention;
 
 export const logger = new Logger("ExpressionManager");
 
@@ -138,14 +139,17 @@ function buildManageExpressionItems(id: string, type: string) {
     );
 }
 
-function buildRemoveFrecentItem({ type, id, name }: Record<"type" | "id" | "name", string | undefined>, isReaction: boolean) {
+function buildRemoveFrecentItem({ type, id, name }: Record<"type" | "id" | "name", string | undefined>) {
     if (!settings.store.recents)
         return;
 
+    const isReaction = emojiIntention === EmojiIntention.REACTION;
     let expressionKey: string | undefined;
 
     switch (type) {
         case "emoji": {
+            if (emojiIntention == null) return;
+
             const ctx = EmojiStore.getDisambiguatedEmojiContext(SelectedGuildStore.getGuildId());
             const frecents = isReaction
                 ? ctx.getFrequentlyUsedReactionEmojisWithoutFetchingLatest()
@@ -215,16 +219,7 @@ function buildRemoveFrecentItem({ type, id, name }: Record<"type" | "id" | "name
 const patchExpressionPickerMenu: NavContextMenuPatchCallback = (children, props: { target: HTMLElement; }) => {
     const { id, name, type, formatType } = props?.target?.dataset ?? {};
 
-    // Horrible. But other alternatives aren't any better
-    const isReaction = useMemo(() => {
-        if (type !== "emoji") return false;
-
-        const superReactionMessages = [getIntlMessage("SUPER_REACTION_TOGGLE_DISABLED"), getIntlMessage("SUPER_REACTION_TOGGLE_ENABLED")];
-        const emojiPickerNode = document.getElementById("emoji-picker-tab-panel");
-        return !!emojiPickerNode && [...emojiPickerNode.getElementsByClassName(EmojiPickerLabelClasses.label)].some(el => superReactionMessages.includes(el.ariaLabel));
-    }, [type]);
-
-    const removeFrecentItem = buildRemoveFrecentItem({ type, id, name }, isReaction);
+    const removeFrecentItem = buildRemoveFrecentItem({ type, id, name });
 
     if (removeFrecentItem) {
         const group = findGroupChildrenByChildId("favorite", children) ?? findGroupChildrenByChildId("unfavorite", children);
@@ -360,6 +355,21 @@ export default definePlugin({
     authors: [Devs.Ven, Devs.Nuckyz, Devs.scattagain, Devs.sadan],
 
     settings,
+
+    patches: [
+        {
+            find: '"emoji-picker-categories"',
+            replacement: {
+                match: /return.{0,30}?value:\i,children:\i(?<=intention:(\i),.{0,400}?)/,
+                replace: "$self.intention=$1;$&"
+            }
+        }
+    ],
+
+    set intention(value: EmojiIntention) {
+        emojiIntention = value;
+    },
+
 
     contextMenus: {
         "message": patchMessageContextMenu,
