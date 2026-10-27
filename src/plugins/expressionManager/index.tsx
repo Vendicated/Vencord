@@ -25,7 +25,7 @@ import { Devs } from "@utils/constants";
 import { copyWithToast } from "@utils/discord";
 import { removeFromArray } from "@utils/misc";
 import definePlugin, { OptionType } from "@utils/types";
-import { CustomEmoji, Guild, GuildSticker, Message, MessageSnapshot, Sticker } from "@vencord/discord-types";
+import { BasicMessage, CustomEmoji, Guild, GuildSticker, Message, Sticker } from "@vencord/discord-types";
 import { StickerFormatType, StickerType } from "@vencord/discord-types/enums";
 import { DefaultExtractAndLoadChunksRegex, extractAndLoadChunksLazy, findByCodeLazy, findComponentByCodeLazy } from "@webpack";
 import { ConfirmModal, Constants, EmojiStore, FluxDispatcher, GuildStore, Menu, openModal, openModalLazy, PermissionsBits, PermissionStore, React, RestAPI, SelectedGuildStore, showToast, StickersStore } from "@webpack/common";
@@ -236,7 +236,7 @@ function isGifUrl(url: string) {
     return pathname.endsWith(".gif") || searchParams.get("animated") === "true";
 }
 
-function resolveEmojiName(favoriteableId: string, message: MessageSnapshot | Message) {
+function resolveEmojiName(favoriteableId: string, message: BasicMessage | Message) {
     const emoji = EmojiStore.getCustomEmojiById(favoriteableId);
     if (emoji) return emoji.name;
 
