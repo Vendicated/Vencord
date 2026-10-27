@@ -7,8 +7,9 @@
 import { CheckedTextInput } from "@components/CheckedTextInput";
 import { Flex } from "@components/Flex";
 import { HeadingTertiary } from "@components/Heading";
-import { BaseText, Margins } from "@components/index";
+import { Margins } from "@components/margins";
 import { Span } from "@components/Span";
+import { Text } from "@components/Text";
 import { TooltipContainer } from "@components/TooltipContainer";
 import { classNameFactory } from "@utils/css";
 import { getGuildAcronym } from "@utils/discord";
@@ -186,7 +187,7 @@ export function openCloneStickerModal(fetchSticker: () => Promise<Sticker>) {
                             height={24}
                             width={24}
                         />
-                        <BaseText tag="h3" size="md" weight="medium">Clone {sticker.name}</BaseText>
+                        <Text tag="h3" size="md" weight="medium">Clone {sticker.name}</Text>
                     </Flex>
                 }
             >
