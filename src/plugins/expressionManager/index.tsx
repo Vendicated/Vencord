@@ -66,9 +66,7 @@ async function fetchSticker(id: string) {
     const cached = StickersStore.getStickerById(id);
     if (cached) return cached;
 
-    const { body } = await RestAPI.get({
-        url: Constants.Endpoints.STICKER(id)
-    });
+    const { body } = await RestAPI.get(Constants.Endpoints.STICKER(id));
 
     FluxDispatcher.dispatch({
         type: "STICKER_FETCH_SUCCESS",
