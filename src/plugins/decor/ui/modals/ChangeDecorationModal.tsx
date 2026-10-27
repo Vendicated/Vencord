@@ -20,11 +20,11 @@ import DecorationGridCreate from "@plugins/decor/ui/components/DecorationGridCre
 import DecorationGridNone from "@plugins/decor/ui/components/DecorationGridNone";
 import DecorDecorationGridDecoration from "@plugins/decor/ui/components/DecorDecorationGridDecoration";
 import SectionedGridList from "@plugins/decor/ui/components/SectionedGridList";
-import { copyWithToast, openInviteModal } from "@utils/discord";
+import { confirmAction, copyWithToast, openInviteModal } from "@utils/discord";
 import { Margins } from "@utils/margins";
 import { Queue } from "@utils/Queue";
 import { RenderModalProps, User } from "@vencord/discord-types";
-import { closeAllModals, ConfirmModal, FluxDispatcher, GuildStore, Modal, NavigationRouter, openModal, Parser, Tooltip, useEffect, UserStore, UserSummaryItem, UserUtils, useState } from "@webpack/common";
+import { closeAllModals, FluxDispatcher, GuildStore, Modal, NavigationRouter, openModal, Parser, Tooltip, useEffect, UserStore, UserSummaryItem, UserUtils, useState } from "@webpack/common";
 
 import { openCreateDecorationModal } from "./CreateDecorationModal";
 import { openGuidelinesModal } from "./GuidelinesModal";
@@ -179,19 +179,18 @@ function ChangeDecorationModal(props: RenderModalProps) {
                     </Button>}
                 </Tooltip>
                 <Button
-                    onClick={() => openModal(modalProps => (
-                        <ConfirmModal
-                            {...modalProps}
-                            title="Log Out"
-                            subtitle="Are you sure you want to log out of Decor?"
-                            confirmText="Log Out"
-                            cancelText="Cancel"
-                            onConfirm={() => {
-                                useAuthorizationStore.getState().remove(UserStore.getCurrentUser().id);
-                                props.onClose();
-                            }}
-                        />
-                    ))}
+                    onClick={async () => {
+                        const choice = await confirmAction({
+                            title: "Log Out",
+                            subtitle: "Are you sure you want to log out of Decor?",
+                            confirmText: "Log Out",
+                            cancelText: "Cancel",
+                        });
+                        if (choice) {
+                            useAuthorizationStore.getState().remove(UserStore.getCurrentUser().id);
+                            props.onClose();
+                        }
+                    }}
                     variant="dangerSecondary"
                 >
                     Log Out

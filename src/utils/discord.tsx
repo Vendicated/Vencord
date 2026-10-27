@@ -17,8 +17,8 @@
 */
 
 import type { MessageObject } from "@api/MessageEvents";
-import type { Channel, CloudUpload, Guild, GuildFeatures, MediaModalItem, MediaModalProps, Message, User } from "@vencord/discord-types";
-import { ChannelActionCreators, ChannelStore, ComponentDispatch, Constants, FluxDispatcher, GuildStore, i18n, InviteActions, MessageActions, openMediaModal, openUserProfileModal, RestAPI, SelectedChannelStore, SelectedGuildStore, showToast, UserProfileStore, UserSettingsActionCreators, UserUtils } from "@webpack/common";
+import type { Channel, CloudUpload, Guild, GuildFeatures, MediaModalItem, MediaModalProps, Message, ModalActionVariant, User } from "@vencord/discord-types";
+import { ChannelActionCreators, ChannelStore, ComponentDispatch, ConfirmModal, Constants, FluxDispatcher, GuildStore, i18n, InviteActions, MessageActions, openMediaModal, openModal, openUserProfileModal, RestAPI, SelectedChannelStore, SelectedGuildStore, showToast, UserProfileStore, UserSettingsActionCreators, UserUtils } from "@webpack/common";
 import { Except } from "type-fest";
 
 import { copyToClipboard } from "./clipboard";
@@ -241,4 +241,30 @@ export function getGuildAcronym(guild: Guild): string {
 
 export function hasGuildFeature(guild: Guild, feature: GuildFeatures): boolean {
     return guild.features?.has(feature) ?? false;
+}
+
+export interface ConfirmOptions {
+    title: string;
+    subtitle?: string;
+    confirmText: string;
+    cancelText?: string;
+    variant?: ModalActionVariant;
+}
+
+export async function confirmAction({ variant, confirmText, title, cancelText, subtitle }: ConfirmOptions): Promise<boolean> {
+    return new Promise((res, _) => {
+        openModal(modalProps => {
+            return <ConfirmModal
+                {...modalProps}
+                variant={variant}
+                confirmText={confirmText}
+                cancelText={cancelText}
+                title={title}
+                subtitle={subtitle}
+                onCancel={() => res(false)}
+                onConfirm={() => res(true)}
+                onClose={() => res(false)}
+            />;
+        });
+    });
 }

@@ -10,11 +10,12 @@ import { ErrorCard } from "@components/ErrorCard";
 import { Flex } from "@components/Flex";
 import { Link } from "@components/Link";
 import { Paragraph } from "@components/Paragraph";
+import { confirmAction } from "@utils/discord";
 import { Margins } from "@utils/margins";
 import { classes } from "@utils/misc";
 import { relaunch } from "@utils/native";
 import { changes, checkForUpdates, update, updateError } from "@utils/updater";
-import { ConfirmModal, openModal, React, showToast, useState } from "@webpack/common";
+import { React, showToast, useState } from "@webpack/common";
 
 import { runWithDispatch } from "./runWithDispatch";
 
@@ -101,23 +102,16 @@ export function Updatable(props: CommonProps) {
                             if (await update()) {
                                 setUpdates([]);
 
-                                await new Promise<void>(r => {
-                                    openModal(props => (
-                                        <ConfirmModal
-                                            {...props}
-                                            title="Update Success!"
-                                            subtitle="Successfully updated. Restart now to apply the changes?"
-                                            confirmText="Restart"
-                                            cancelText="Not now!"
-                                            variant="primary"
-                                            onConfirm={() => {
-                                                relaunch();
-                                                r();
-                                            }}
-                                            onCancel={r}
-                                        />
-                                    ));
+                                const choice = await confirmAction({
+                                    title: "Update Success!",
+                                    subtitle: "Successfully updated. Restart now to apply the changes?",
+                                    confirmText: "Restart",
+                                    cancelText: "Not now!",
+                                    variant: "primary",
                                 });
+                                if (choice) {
+                                    relaunch();
+                                }
                             }
                         })}
                     >

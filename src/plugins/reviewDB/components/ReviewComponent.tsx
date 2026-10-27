@@ -21,10 +21,10 @@ import { Review, ReviewType } from "@plugins/reviewDB/entities";
 import { blockUser, deleteReview, deleteReviewVote, reportReview, unblockUser, voteReview } from "@plugins/reviewDB/reviewDbApi";
 import { settings } from "@plugins/reviewDB/settings";
 import { canBlockReviewAuthor, canDeleteReview, canReportReview, cl, showToast } from "@plugins/reviewDB/utils";
-import { openUserProfile } from "@utils/discord";
+import { confirmAction, openUserProfile } from "@utils/discord";
 import { classes } from "@utils/misc";
 import { findCssClassesLazy } from "@webpack";
-import { ConfirmModal, IconUtils, openModal as openVencordModal, Parser, Timestamp, useEffect, useState } from "@webpack/common";
+import { IconUtils, Parser, Timestamp, useEffect, useState } from "@webpack/common";
 
 import { openBlockModal } from "./BlockedUserModal";
 import { BlockButton, DeleteButton, ReportButton } from "./MessageButton";
@@ -53,64 +53,55 @@ export default function ReviewComponent({ review, refetch, profileId }: { review
         openUserProfile(review.sender.discordID);
     }
 
-    function delReview() {
-        openVencordModal(props => (
-            <ConfirmModal
-                {...props}
-                title="Are you sure?"
-                subtitle="Do you really want to delete this review?"
-                confirmText="Delete"
-                cancelText="Nevermind"
-                onConfirm={async () => {
-                    if (!(await getToken())) {
-                        return showToast({ text: "You must be logged in to delete reviews.", variant: "critical" });
-                    }
-                    const res = await deleteReview(review.id);
-                    if (res) refetch();
-                }}
-            />
-        ));
+    async function delReview() {
+        const choice = await confirmAction({
+            title: "Are you sure?",
+            subtitle: "Do you really want to delete this review?",
+            confirmText: "Delete",
+            cancelText: "Nevermind",
+        });
+        if (choice) {
+            if (!(await getToken())) {
+                return showToast({ text: "You must be logged in to delete reviews.", variant: "critical" });
+            }
+            const res = await deleteReview(review.id);
+            if (res) refetch();
+        }
     }
 
-    function reportRev() {
-        openVencordModal(props => (
-            <ConfirmModal
-                {...props}
-                title="Are you sure?"
-                subtitle="Do you really want to report this review?"
-                confirmText="Report"
-                cancelText="Nevermind"
-                onConfirm={async () => {
-                    if (!(await getToken())) {
-                        return showToast({ text: "You must be logged in to report reviews.", variant: "critical" });
-                    }
-                    await reportReview(review.id);
-                }}
-            />
-        ));
+    async function reportRev() {
+        const choice = await confirmAction({
+            title: "Are you sure?",
+            subtitle: "Do you really want to report this review?",
+            confirmText: "Report",
+            cancelText: "Nevermind",
+        });
+        if (choice) {
+            if (!(await getToken())) {
+                return showToast({ text: "You must be logged in to report reviews.", variant: "critical" });
+            }
+            await reportReview(review.id);
+        }
     }
 
     const isAuthorBlocked = Auth?.user?.blockedUsers?.includes(review.sender.discordID) ?? false;
 
-    function blockReviewSender() {
+    async function blockReviewSender() {
         if (isAuthorBlocked)
             return unblockUser(review.sender.discordID);
 
-        openVencordModal(props => (
-            <ConfirmModal
-                {...props}
-                title="Are you sure?"
-                subtitle="Do you really want to block this user? They will be unable to leave further reviews on your profile. You can unblock users in the plugin settings."
-                confirmText="Block"
-                cancelText="Nevermind"
-                onConfirm={async () => {
-                    if (!(await getToken())) {
-                        return showToast({ text: "You must be logged in to block users.", variant: "critical" });
-                    }
-                    await blockUser(review.sender.discordID);
-                }}
-            />
-        ));
+        const choice = await confirmAction({
+            title: "Are you sure?",
+            subtitle: "Do you really want to block this user? They will be unable to leave further reviews on your profile. You can unblock users in the plugin settings.",
+            confirmText: "Block",
+            cancelText: "Nevermind",
+        });
+        if (choice) {
+            if (!(await getToken())) {
+                return showToast({ text: "You must be logged in to block users.", variant: "critical" });
+            }
+            await blockUser(review.sender.discordID);
+        }
     }
 
     async function submitVote(isUpvote: boolean) {
