@@ -65,6 +65,6 @@ allowBuilds:
     esbuild: true
 minimumReleaseAgeExclude:
     - "@vencord/*"
-    - "@sadan4/vencord-monaco-editor@1.0.0 || 2.0.0 || 2.0.1 || 2.0.2 || 2.0.3"
+    - "@sadan4/vencord-monaco-editor@2.0.3"
 
 pmOnFail: warn
