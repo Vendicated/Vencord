@@ -151,7 +151,9 @@ export default definePlugin({
     }, { noop: true }),
 
     async checkNewSessions() {
-        const data = await RestAPI.get(Constants.Endpoints.AUTH_SESSIONS);
+        const data = await RestAPI.get({
+            url: Constants.Endpoints.AUTH_SESSIONS
+        });
 
         for (const session of data.body.user_sessions) {
             if (savedSessionsCache.has(session.id_hash)) continue;
