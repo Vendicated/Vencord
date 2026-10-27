@@ -98,7 +98,7 @@ const buildConfigs = [
 
 async function copyMonacoEditor() {
     const src = resolve(import.meta.dirname, "../../node_modules/@sadan4/vencord-monaco-editor/dist");
-    await rm("dist/vendor/monaco", { recursive: true }).catch(() => { });
+    await rm("dist/vendor/monaco", { recursive: true }).catch((e) => { console.error(e); });
     await mkdir("dist/vendor/monaco", { recursive: true });
     await cp(src, "dist/vendor/monaco", { recursive: true });
 }
