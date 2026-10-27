@@ -3,6 +3,7 @@ import { User, UserJSON } from '../User';
 import { Embed, EmbedJSON } from './Embed';
 import { DiscordRecord } from "../Record";
 import { ApplicationCommandOptionType, ApplicationCommandType, ApplicationIntegrationType, ButtonStyle, ComponentType, InteractionType, MessageActivityType, MessageFlags, MessageReferenceType, MessageType, PollLayoutType, StickerFormatType } from "../../../enums";
+import { StickerItem } from "./Sticker";
 
 export type MessageState = "SENT" | "SENDING" | "SEND_FAILED";
 
@@ -72,16 +73,32 @@ export interface MessageComponent {
     components?: MessageComponent[];
 }
 
+/* The most basic message structure. Does not necessarily have an ID, e.g. in case of forwarded messages */
+export class BasicMessage extends DiscordRecord {
+    constructor(message: object);
+    type: MessageType;
+    content: string;
+    timestamp: Date;
+    editedTimestamp: Date | null;
+    flags: MessageFlags;
+    attachments: MessageAttachment[];
+    components: MessageComponent[];
+    embeds: Embed[];
+    stickerItems: StickerItem[];
+    mentions?: string[];
+    mentionRoles?: string[];
+
+    hasFlag(flag: MessageFlags): boolean;
+}
+
 /*
  * TODO: looks like discord has moved over to Date instead of Moment;
  */
-export class Message extends DiscordRecord {
-    constructor(message: object);
+export class Message extends BasicMessage {
     activity: MessageActivity | null;
     activityInstance: { applicationId: string; instanceId: string; } | null;
     application: { id: string; name: string; icon: string | null; } | null;
     applicationId: string | null;
-    attachments: MessageAttachment[];
     author: User;
     blocked: boolean;
     bot: boolean;
@@ -100,15 +117,10 @@ export class Message extends DiscordRecord {
         type: CodedLinkType;
     }[];
     colorString: string | null;
-    components: MessageComponent[];
-    content: string;
     customRenderedContent: {
         content: React.ReactNode;
         [key: string]: unknown;
     } | null;
-    editedTimestamp: Date | null;
-    embeds: Embed[];
-    flags: MessageFlags;
     giftCodes: string[];
     giftInfo: { sku_id: string; slug: string; } | null;
     giftingPrompt: { recipientUserId: string; } | null;
@@ -177,7 +189,7 @@ export class Message extends DiscordRecord {
         message_id: string;
     } | undefined;
     messageSnapshots: {
-        message: Message;
+        message: BasicMessage;
     }[];
     nick: string | null;
     nonce: string | undefined;
@@ -192,15 +204,7 @@ export class Message extends DiscordRecord {
     sharedClientTheme: { primary_color: number; secondary_color: number; } | null;
     soundboardSounds: { sound_id: string; volume: number; emoji_id?: string; emoji_name?: string; }[];
     state: MessageState;
-    stickerItems: {
-        format_type: StickerFormatType;
-        id: string;
-        name: string;
-    }[];
-    stickers: { id: string; name: string; format_type: StickerFormatType; }[];
-    timestamp: Date;
     tts: boolean;
-    type: MessageType;
     webhookId: string | undefined;
 
     /**
@@ -222,7 +226,6 @@ export class Message extends DiscordRecord {
 
     getChannelId(): string;
     getContentMessage(): Message;
-    hasFlag(flag: MessageFlags): boolean;
     hasPotions(): boolean;
     isCommandType(): boolean;
     isEdited(): boolean;
