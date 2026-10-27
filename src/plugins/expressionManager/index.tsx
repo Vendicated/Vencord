@@ -36,10 +36,13 @@ const openEmojiStudioModal = findByCodeLazy("Emoji Studio");
 const loadCreateStickerModal = extractAndLoadChunksLazy(["CREATE_STICKER_MODAL", "#{intl::STICKER_PICKER_CREATE_STICKER}"], new RegExp(`\\.CREATE_STICKER_MODAL.{0,100}?${DefaultExtractAndLoadChunksRegex.source}`));
 const CreateStickerModal = findComponentByCodeLazy("#{intl::GUILD_STICKER_INVALID_STICKER}");
 
+const EmojiURLRegex = /^https:\/\/cdn\.discordapp\.com\/emojis\/(\d+)\.\w+/;
+
 interface Emoji {
     id: string;
     name: string;
 }
+
 const StickerExtMap = {
     [StickerFormatType.PNG]: "png",
     [StickerFormatType.APNG]: "png",
@@ -234,14 +237,14 @@ function buildStickerLinkItems(sticker: StickerItem, ParentComponent = Menu.Menu
     );
 }
 
-function resolveEmojiName(favoriteableId: string, message: BasicMessage | Message) {
-    const emoji = EmojiStore.getCustomEmojiById(favoriteableId);
+function resolveEmojiName(id: string, message: BasicMessage | Message) {
+    const emoji = EmojiStore.getCustomEmojiById(id);
     if (emoji) return emoji.name;
 
-    const reaction = "reactions" in message && message.reactions.find(reaction => reaction.emoji.id === favoriteableId);
+    const reaction = "reactions" in message && message.reactions.find(reaction => reaction.emoji.id === id);
     if (reaction) return reaction.emoji.name;
 
-    const match = message.content.match(RegExp(`<a?:(\\w+)(?:~\\d+)?:${favoriteableId}>|https://cdn\\.discordapp\\.com/emojis/${favoriteableId}\\.[\\w?&=%]*`));
+    const match = message.content.match(RegExp(`<a?:(\\w+)(?:~\\d+)?:${id}>|https://cdn\\.discordapp\\.com/emojis/${id}\\.[\\w?&=%]*`));
     if (!match) return null;
 
     return match[1]
@@ -343,18 +346,37 @@ const patchMessageContextMenu: NavContextMenuPatchCallback = (children, props: R
     }
 };
 
+const patchImageContextMenu: NavContextMenuPatchCallback = (children, { target, src }: { target?: HTMLImageElement; src?: string; }) => {
+    const id = src?.match(EmojiURLRegex)?.[1];
+    if (!id) return;
+
+    const name = target?.alt || EmojiStore.getCustomEmojiById(id)?.name || "Emoji";
+    children.push(buildCloneEmojiItem({ id, name }));
+};
+
+const patchForumTagContextMenu: NavContextMenuPatchCallback = (children, { tag }: { tag: Record<"emojiId" | "emojiName", string>; }) => {
+    const { emojiId, emojiName } = tag;
+    if (!emojiId) return;
+
+    const name = EmojiStore.getCustomEmojiById(emojiId)?.name || emojiName || "emoji";
+    children.push(buildCloneEmojiItem({ id: emojiId, name }));
+};
+
 migratePluginSettings("ExpressionManager", "ExpressionCloner", "EmoteCloner");
 export default definePlugin({
     name: "ExpressionManager",
     description: "Clone Emotes & Stickers. Adds context menu options to quickly clone, edit, or delete them. Also adds Copy & Save options for stickers",
     tags: ["Emotes", "Servers"],
     searchTerms: ["StickerCloner", "ExpressionCloner", "EmoteCloner", "EmojiCloner"],
-    authors: [Devs.Ven, Devs.Nuckyz, Devs.scattagain],
+    authors: [Devs.Ven, Devs.Nuckyz, Devs.scattagain, Devs.sadan],
 
     settings,
 
     contextMenus: {
         "message": patchMessageContextMenu,
-        "expression-picker": patchExpressionPickerMenu
+        "expression-picker": patchExpressionPickerMenu,
+        "forum-tag": patchForumTagContextMenu,
+        // status emojis
+        "image-context": patchImageContextMenu,
     }
 });
