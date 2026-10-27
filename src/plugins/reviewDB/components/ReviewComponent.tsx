@@ -38,6 +38,8 @@ const BotTagClasses = findCssClassesLazy("botTagVerified", "botTagRegular", "bot
 
 const dateFormat = new Intl.DateTimeFormat();
 
+const ensureToken = async () => await getToken() || showToast({ text: "You must be logged in to perform this action!", variant: "critical" });
+
 export default function ReviewComponent({ review, refetch, profileId }: { review: Review; refetch(): void; profileId: string; }) {
     const [showAll, setShowAll] = useState(false);
     const [localVote, setLocalVote] = useState<boolean | null>(review.userVote ?? null);
@@ -54,9 +56,8 @@ export default function ReviewComponent({ review, refetch, profileId }: { review
     }
 
     async function delReview() {
-        if (!(await getToken())) {
-            return showToast({ text: "You must be logged in to delete reviews.", variant: "critical" });
-        }
+        if (!await ensureToken()) return;
+
         await confirmAction({
             title: "Are you sure?",
             subtitle: "Do you really want to delete this review?",
@@ -70,9 +71,8 @@ export default function ReviewComponent({ review, refetch, profileId }: { review
     }
 
     async function reportRev() {
-        if (!(await getToken())) {
-            return showToast({ text: "You must be logged in to report reviews.", variant: "critical" });
-        }
+        if (!await ensureToken()) return;
+
         await confirmAction({
             title: "Are you sure?",
             subtitle: "Do you really want to report this review?",
@@ -87,9 +87,8 @@ export default function ReviewComponent({ review, refetch, profileId }: { review
     const isAuthorBlocked = Auth?.user?.blockedUsers?.includes(review.sender.discordID) ?? false;
 
     async function blockReviewSender() {
-        if (!(await getToken())) {
-            return showToast({ text: "You must be logged in to block users.", variant: "critical" });
-        }
+        if (!await ensureToken()) return;
+
         if (isAuthorBlocked)
             return unblockUser(review.sender.discordID);
 
