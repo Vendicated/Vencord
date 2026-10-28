@@ -81,7 +81,7 @@ export function findTargetLanguage(code: string | undefined) {
         ?? languages.find(([value]) => normalize(value).startsWith(wanted + "-"));
 }
 
-export async function translate(kind: "received" | "sent", text: string): Promise<TranslationValue> {
+export async function translate(kind: "received" | "sent", text: string, targetLanguage = settings.store[`${kind}Output`]): Promise<TranslationValue> {
     const translate = IS_WEB ? googleTranslate : (() => {
         switch (settings.store.service) {
             case "google":
@@ -97,7 +97,7 @@ export async function translate(kind: "received" | "sent", text: string): Promis
         return await translate(
             text,
             settings.store[`${kind}Input`],
-            settings.store[`${kind}Output`]
+            targetLanguage
         );
     } catch (e) {
         const userMessage = typeof e === "string"

@@ -31,6 +31,9 @@ interface TranslationSetter {
 
 const TranslationSetters = new Set<TranslationSetter>();
 
+// replied message id -> language the reply to it gets translated to
+export const ReplyLanguages = new Map<string, string>();
+
 export function handleTranslate(messageId: string, data: TranslationValue) {
     for (const setter of TranslationSetters) {
         if (setter.messageId === messageId) {
@@ -64,19 +67,17 @@ function ReplyInLanguage({ message, languageCode }: { message: Message; language
             {" - "}
             <button
                 onClick={() => {
-                    settings.store.sentOutput = value;
-                    settings.store.autoTranslate = true;
-                    showToast({ text: `Auto-Translate enabled. Your messages will be translated to ${label}`, variant: "success" });
-
                     const channel = ChannelStore.getChannel(message.channel_id);
                     FluxDispatcher.dispatch({
                         type: "CREATE_PENDING_REPLY",
                         channel,
                         message,
                         shouldMention: true,
-                        showMentionToggle: channel.guild_id !== null
+                        showMentionToggle: channel.guild_id !== null,
+                        _vcTranslateTo: value
                     });
                     ComponentDispatch.dispatchToLastSubscribed("TEXTAREA_FOCUS");
+                    showToast({ text: `Your reply will be translated to ${label}`, variant: "success" });
                 }}
                 className={cl("reply-in-language")}
             >
