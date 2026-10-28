@@ -57,11 +57,6 @@ export interface FilePickerProps {
     onSelectItem: (item: { url: string; }) => void;
 }
 
-export interface StaticFilePickerItemProps {
-    name: string;
-    subtitle: string;
-}
-
 export interface FilePickerItemProps {
     file: MessageAttachment;
     url: string;

@@ -14,8 +14,8 @@ import { ChannelStore, ExpressionPickerStore, ListScrollerThin, lodash, Permissi
 import { ComponentProps, ReactNode } from "react";
 
 import { SignedUrlsStore } from "./stores";
-import { AttachmentContextProviderProps, AttachmentItem, AttachmentsComponentProps, CustomItemFormat, FavoriteButtonProps, FavoriteItemFormat, FilePickerItemProps, FilePickerProps, ManaSearchBarProps, MessageComponentClass, StaticFilePickerItemProps } from "./types";
-import { cl, getFilenameAndExtension, getFileThumbnailUrl, hasPermission, ImageUtils, sendAttachment, transformAttachment, useFavorites, useListScroller, useResizeObserver } from "./utils";
+import { AttachmentContextProviderProps, AttachmentItem, AttachmentsComponentProps, CustomItemFormat, FavoriteButtonProps, FavoriteItemFormat, FilePickerItemProps, FilePickerProps, ManaSearchBarProps, MessageComponentClass } from "./types";
+import { cl, getFileThumbnailUrl, hasPermission, ImageUtils, sendAttachment, transformAttachment, useFavorites, useListScroller, useResizeObserver } from "./utils";
 
 export const EmbedContext = proxyLazyWebpack(() => React.createContext<null | Embed>(null));
 export const EmbedMosaicContext = proxyLazyWebpack(() => React.createContext<null | number>(null));
@@ -174,25 +174,6 @@ function SendIcon({ height = 24, width = 24, ...props }: ComponentProps<"svg">) 
     return (
         <svg xmlns="http://www.w3.org/2000/svg" width={width} height={height} fill="currentColor" viewBox="0 0 24 24" {...props}>
             <path d="M6.6 10.02 14 11.4a.6.6 0 0 1 0 1.18L6.6 14l-2.94 5.87a1.48 1.48 0 0 0 1.99 1.98l17.03-8.52a1.48 1.48 0 0 0 0-2.64L5.65 2.16a1.48 1.48 0 0 0-1.99 1.98l2.94 5.88Z" />
-        </svg>
-    );
-}
-
-export function StaticFilePickerItem({ name, subtitle }: StaticFilePickerItemProps) {
-    const [, ext] = getFilenameAndExtension(name);
-
-    // Keep this compact! Long prop names, styles, numbers, etc could be wasteful
-    return (
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="-2 -2 32 11" style={{ font: "2px sans-serif" }} fill="#242429">
-            <path d="M-2-2h32v11H-2" />
-            <rect width="5" height="7" rx=".5" fill="#ddf" />
-            <g fill="#78e">
-                <path d="M3-1v2.5q0 .5.5.5H6" />
-                {ext && <text x=".85" y="6" fontFamily="monospace">{ext.slice(1, 4)}</text>}
-            </g>
-            <path d="M6 3V-2H1" />
-            <text x="7" y="2.8" fill="#eff">{name}</text>
-            <text x="7" y="5.6" fill="#777">{subtitle}</text>
         </svg>
     );
 }

@@ -18,12 +18,10 @@ import { findComponentByCodeLazy } from "@webpack";
 import {
     Clickable,
     ContextMenuApi,
-    createRoot,
     FluxDispatcher,
     Menu,
     Modal,
     openModal,
-    ReactDOM,
     useCallback,
     useEffect,
     useMemo,
@@ -114,30 +112,23 @@ function ColorContextMenu({ colorKeys }: { colorKeys: string[]; }) {
     );
 }
 
-function convertToHtml(component: React.ReactElement): string {
-    const container = document.createElement("div");
-    const root = createRoot(container);
-    ReactDOM.flushSync(() => root.render(component));
-    const content = container.innerHTML;
-    root.unmount();
-    return content;
-}
-
-function saveIcon(iconName: string, icon: Element | string, color: number, size: number, type: string) {
+function saveIcon(iconName: string, icon: Element, color: number, size: number, type: string) {
     const colorName = cssColors[color]?.name ?? "unknown";
     const ext = FORMAT_EXTENSIONS[type] ?? "png";
     const filename = `${iconName}-${colorName}-${size}px.${ext}`;
 
-    if (typeof icon === "string") {
-        saveFile(new File([icon], filename, { type: "text/plain" }));
-        return;
-    }
-
-    for (const el of icon.children) {
+    const svg = icon.cloneNode(true) as Element;
+    for (const el of svg.children) {
         const fill = el.getAttribute("fill");
         if (fill?.startsWith("var(")) {
             el.setAttribute("fill", getComputedStyle(icon).getPropertyValue(fill.slice(4, -1)));
         }
+    }
+    const data = new XMLSerializer().serializeToString(svg);
+
+    if (type === "image/svg+xml") {
+        saveFile(new File([data], filename, { type }));
+        return;
     }
 
     const canvas = document.createElement("canvas");
@@ -154,19 +145,13 @@ function saveIcon(iconName: string, icon: Element | string, color: number, size:
         link.href = canvas.toDataURL(type);
         link.click();
     };
-    img.src = `data:image/svg+xml;base64,${btoa(icon.outerHTML)}`;
+    img.src = `data:image/svg+xml;base64,${btoa(data)}`;
 }
 
 function OtherContextMenu({ iconName, Icon, color }: { iconName: string; Icon: Icon; color: number; }) {
-    const colorData = cssColors[color];
-
     const handleSave = (type: string) => {
-        const size = iconSizesInPx.lg;
-        const iconEl = type === "image/svg+xml"
-            ? convertToHtml(<Icon className="vc-ic-save-icon" color={colorData?.css} />)
-            : document.querySelector(".vc-ic-icon-preview .vc-ic-icon-large") as Element | null;
-
-        if (iconEl) saveIcon(iconName, iconEl, color, size, type);
+        const iconEl = document.querySelector(".vc-ic-icon-preview .vc-ic-icon-large");
+        if (iconEl) saveIcon(iconName, iconEl, color, iconSizesInPx.lg, type);
     };
 
     return (

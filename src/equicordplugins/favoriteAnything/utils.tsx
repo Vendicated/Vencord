@@ -12,13 +12,12 @@ import { useForceUpdater } from "@utils/react";
 import { PluginNative } from "@utils/types";
 import { Channel, MessageAttachment } from "@vencord/discord-types";
 import { findByCodeLazy, findByPropsLazy } from "@webpack";
-import { Constants, createRoot, DraftType, FluxDispatcher, Humanize, MessageActions, PendingReplyStore, PermissionStore, ReactDOM, RestAPI, showToast,UploadAttachmentStore, UploadHandler, UploadManager, useCallback, useEffect, useRef, UserSettingsActionCreators, UserSettingsProtoStore, useStateFromStores } from "@webpack/common";
+import { Constants, DraftType, FluxDispatcher, Humanize, MessageActions, PendingReplyStore, PermissionStore, RestAPI, showToast,UploadAttachmentStore, UploadHandler, UploadManager, useCallback, useEffect, useRef, UserSettingsActionCreators, UserSettingsProtoStore, useStateFromStores } from "@webpack/common";
 import { deflateSync, inflateSync } from "fflate";
-import { Key, ReactNode } from "react";
+import { Key } from "react";
 import { JsonValue } from "type-fest";
 
 import { settings } from ".";
-import { StaticFilePickerItem } from "./components";
 import { AttachmentTransformer, CustomItemDef, CustomItemFormat, FavoriteItem, FavoriteItemFormat, ImageUtils as ImageUtils_, ItemsDef, ResizeObserverHook, UnfurledEmbedsResponse } from "./types";
 
 const Native = VencordNative.pluginHelpers.FavoriteAnything as PluginNative<typeof import("./native")>;
@@ -104,17 +103,19 @@ export function getFilenameAndExtension(filename: string): [name: string, ext: s
     return ext > 0 ? [filename.substring(0, ext), filename.substring(ext)] : [filename, null];
 }
 
-function renderToHTML(node: ReactNode): Promise<string> {
-    return new Promise(resolve => {
-        const container = document.createElement("div");
-        const root = createRoot(container);
+const escapeXml = (str: string) => str.replace(/[&<>"']/g, c => `&#${c.charCodeAt(0)};`);
 
-        queueMicrotask(() => {
-            ReactDOM.flushSync(() => root.render(node));
-            resolve(container.innerHTML);
-            root.unmount();
-        });
-    });
+function buildThumbnailSvg(name: string, subtitle: string) {
+    const [, ext] = getFilenameAndExtension(name);
+
+    // Keep this compact! Long attribute names, styles, numbers, etc could be wasteful
+    return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="-2 -2 32 11" style="font:2px sans-serif" fill="#242429">'
+        + '<path d="M-2-2h32v11H-2"/><rect width="5" height="7" rx=".5" fill="#ddf"/>'
+        + '<g fill="#78e"><path d="M3-1v2.5q0 .5.5.5H6"/>'
+        + (ext ? `<text x=".85" y="6" font-family="monospace">${escapeXml(ext.slice(1, 4))}</text>` : "")
+        + '</g><path d="M6 3V-2H1"/>'
+        + `<text x="7" y="2.8" fill="#eff">${escapeXml(name)}</text>`
+        + `<text x="7" y="5.6" fill="#777">${escapeXml(subtitle)}</text></svg>`;
 }
 
 export const FALLBACK_THUMBNAIL = new URL("https://images-ext-1.discordapp.net/external/085KIKMVni8n60G3GHE1rGcA0xgH6OgBKIZqUiQYsXc/%3Fname%3DUnknown%2520file%26subtitle%3D0%2520MB/https/placeholder.nin0.dev/image");
@@ -125,9 +126,9 @@ async function getThumbnailBase(item: MessageAttachment): Promise<URL | null> {
     const subtitle = Humanize.filesize(item.size);
 
     if (settings.store.localThumbnails) {
-        const html = await renderToHTML(<StaticFilePickerItem name={ name } subtitle = { subtitle } />);
+        const svg = buildThumbnailSvg(name, subtitle);
         // encodeURIComponent is intentionally avoided since it would bloat the url size by replacing otherwise safe characters
-        return URL.parse("data:image/svg+xml," + html.replaceAll("%", "%25").replaceAll("#", "%23"));
+        return URL.parse("data:image/svg+xml," + svg.replaceAll("%", "%25").replaceAll("#", "%23"));
     } else {
         const url = new URL("https://placeholder.nin0.dev/image");
         url.searchParams.append("name", name || " ");
