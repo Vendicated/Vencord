@@ -7,16 +7,21 @@
 import "./styles.css";
 
 import { Settings, type ThemeActivationMode, useSettings } from "@api/Settings";
+import { Button } from "@components/Button";
 import { Divider } from "@components/Divider";
+import { ErrorCard } from "@components/ErrorCard";
 import { Heading } from "@components/Heading";
 import { Link } from "@components/Link";
 import { Paragraph } from "@components/Paragraph";
 import { SettingsTab, wrapTab } from "@components/settings/tabs/BaseTab";
 import { getThemeInfo, UserThemeHeader } from "@main/themes";
+import { CspBlockedUrls, useCspErrors } from "@utils/cspViolations";
 import { classNameFactory } from "@utils/css";
 import { copyWithToast } from "@utils/discord";
 import { Margins } from "@utils/margins";
 import { classes } from "@utils/misc";
+import { promptToRestart } from "@utils/promptToRestart";
+import { useForceUpdater } from "@utils/react";
 import { getStylusWebStoreUrl } from "@utils/web";
 import { React, Select, showToast, TextInput, useEffect, useMemo, useRef, useState } from "@webpack/common";
 import { SyntheticEvent } from "react";
@@ -76,6 +81,53 @@ interface UnifiedTheme {
     header: UserThemeHeader;
     link?: string;
     activationMode: ThemeActivationMode;
+}
+
+function CspErrorCard() {
+    const errors = useCspErrors();
+    const forceUpdate = useForceUpdater();
+
+    if (IS_WEB || !errors.length) return null;
+
+    const isImgurHtmlDomain = (url: string) => url.startsWith("https://imgur.com/");
+
+    const allowUrl = async (url: string) => {
+        const { origin, host } = new URL(url);
+
+        const result = await VencordNative.csp.requestAddOverride(origin, ["connect-src", "img-src", "style-src", "font-src"], "Equicord Themes");
+        if (result !== "ok") return;
+
+        CspBlockedUrls.forEach(url => {
+            if (new URL(url).host === host) CspBlockedUrls.delete(url);
+        });
+
+        forceUpdate();
+        promptToRestart("relaunch");
+    };
+
+    return (
+        <ErrorCard className={classes(cl("error-card"), Margins.top16)}>
+            <Heading className={Margins.bottom8}>Blocked Resources</Heading>
+            <Paragraph className={Margins.bottom8}>
+                Some resources were blocked from disallowed domains. Move them to GitHub or Imgur, or allow trusted domains below.
+            </Paragraph>
+
+            {errors.map(url => (
+                <div key={url} className="vc-settings-csp-row">
+                    <Link href={url}>{url}</Link>
+                    <Button size="small" variant="secondary" onClick={() => allowUrl(url)} disabled={isImgurHtmlDomain(url)}>
+                        Allow
+                    </Button>
+                </div>
+            ))}
+
+            {errors.some(isImgurHtmlDomain) && (
+                <Paragraph color="text-subtle" className={Margins.top8}>
+                    Imgur links should be direct links like <code>https://i.imgur.com/...</code>
+                </Paragraph>
+            )}
+        </ErrorCard>
+    );
 }
 
 function ThemesTab() {
@@ -369,6 +421,8 @@ function ThemesTab() {
 
     return (
         <SettingsTab>
+            <CspErrorCard />
+
             <Heading className={Margins.top16}>Theme Management</Heading>
             <Paragraph className={Margins.bottom16}>
                 Customize Discord's appearance with themes. Add local .css files or load themes directly from URLs. Themes with a cog wheel icon have customizable settings you can modify.

@@ -9,6 +9,7 @@ import { Button } from "@components/Button";
 import { SettingsSection } from "@components/settings/tabs/plugins/components/Common";
 import { Switch } from "@components/Switch";
 import { classNameFactory } from "@utils/css";
+import { promptToRestart } from "@utils/promptToRestart";
 import { useForceUpdater } from "@utils/react";
 import { OptionType, PluginNative } from "@utils/types";
 import { React, Select, showToast, TextArea, TextInput } from "@webpack/common";
@@ -536,6 +537,17 @@ export function SettingsComponent() {
         }
     };
 
+    const allowServer = async (getUrl: () => string | undefined) => {
+        let res: string;
+        try {
+            res = await VencordNative.csp.requestAddOverride(getUrl() ?? "", ["connect-src"], "FileUpload");
+        } catch {
+            res = "invalid";
+        }
+        if (res === "ok") promptToRestart("relaunch");
+        else if (res !== "cancelled") showToast({ text: res === "conflict" ? "This server is already allowed." : "Could not allow this server.", variant: "critical" });
+    };
+
     const triggerShareXFileUpload = () => {
         sharexFileInputRef.current?.click();
     };
@@ -582,6 +594,11 @@ export function SettingsComponent() {
                         onChange={v => settings.store.serviceUrl = v}
                         placeholder="https://your-zipline-instance.com"
                     />
+                    {!IS_WEB && (
+                        <SettingsSection id="zipline-allow" name="Allow Server" description="Equicord can only connect to servers you allow. A restart is needed afterwards.">
+                            <Button size="small" variant="secondary" onClick={() => allowServer(() => settings.store.serviceUrl)}>Allow Server</Button>
+                        </SettingsSection>
+                    )}
                     <SettingTextInput
                         name="Zipline Token"
                         description="Your Zipline API authorization token"
@@ -824,6 +841,7 @@ export function SettingsComponent() {
                         <div className={cl("actions")}>
                             <Button size="small" onClick={triggerShareXFileUpload}>Import .sxcu/.json</Button>
                             <Button size="small" onClick={validateShareXConfig}>Validate</Button>
+                            {!IS_WEB && <Button size="small" variant="secondary" onClick={() => allowServer(() => parseShareXConfig(settings.store.sharexConfig || "").RequestURL)}>Allow Server</Button>}
                         </div>
                         <input
                             ref={sharexFileInputRef}

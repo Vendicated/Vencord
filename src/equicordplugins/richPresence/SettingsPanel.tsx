@@ -4,11 +4,13 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { Button } from "@components/Button";
 import { SettingsSection } from "@components/settings/tabs/plugins/components/Common";
 import { Switch } from "@components/Switch";
 import { Margins } from "@utils/margins";
 import { classes } from "@utils/misc";
-import { Select, Slider, TabBar, TextInput, useState } from "@webpack/common";
+import { promptToRestart } from "@utils/promptToRestart";
+import { Select, showToast, Slider, TabBar, TextInput, useState } from "@webpack/common";
 
 import { settings, SettingsStore } from "./settings";
 import { NameFormat, ServiceTab } from "./types";
@@ -41,6 +43,23 @@ function TextSetting({ name, description, settingsKey, placeholder }: { name: st
     );
 }
 
+function AllowServerSetting({ settingsKey }: { settingsKey: SettingsKey; }) {
+    if (IS_WEB) return null;
+
+    const allow = async () => {
+        const url = String(settings.store[settingsKey] ?? "");
+        const res = await VencordNative.csp.requestAddOverride(/^https?:\/\//.test(url) ? url : `https://${url}`, ["connect-src"], "RichPresence");
+        if (res === "ok") promptToRestart("relaunch");
+        else if (res !== "cancelled") showToast({ text: res === "conflict" ? "This server is already allowed." : "Could not allow this server.", variant: "critical" });
+    };
+
+    return (
+        <SettingsSection id={`${settingsKey}-allow`} name="Allow Server" description="Equicord can only connect to servers you allow. A restart is needed afterwards.">
+            <Button size="small" variant="secondary" onClick={allow}>Allow Server</Button>
+        </SettingsSection>
+    );
+}
+
 function SelectSetting({ name, description, settingsKey, options }: { name: string; description: string; settingsKey: SettingsKey; options: { label: string; value: string | number; }[]; }) {
     const [value, setValue] = useState(settings.store[settingsKey] ?? options[0]?.value);
     return (
@@ -62,6 +81,7 @@ function AudioBookShelfSettings() {
         <>
             <SettingsSection id="audiobookshelf-settings" name="" description="Display your currently playing audiobooks as Discord Rich Presence. Requires your AudioBookShelf server URL, username, and password." />
             <TextSetting name="Server URL" description="AudioBookShelf server URL." settingsKey="abs_serverUrl" placeholder="https://abs.example.com" />
+            <AllowServerSetting settingsKey="abs_serverUrl" />
             <TextSetting name="Username" description="AudioBookShelf username." settingsKey="abs_username" />
             <TextSetting name="Password" description="AudioBookShelf password." settingsKey="abs_password" />
         </>
@@ -110,6 +130,7 @@ function JellyfinSettings() {
         <>
             <SettingsSection id="jellyfin-settings" name="" description="Show what you're playing on Jellyfin. To get your API key: open your Jellyfin web UI, press F12 to open Developer Tools, go to the Network tab, look for requests to your server, find the Authorization header (Ctrl+F to search), and You need the part from Token='this'. Your user ID can be found in your profile page URL." />
             <TextSetting name="Server URL" description="Jellyfin server URL." settingsKey="jf_serverUrl" placeholder="https://jellyfin.example.com" />
+            <AllowServerSetting settingsKey="jf_serverUrl" />
             <TextSetting name="API Key" description="Jellyfin API key." settingsKey="jf_apiKey" placeholder="Authorization" />
             <TextSetting name="User ID" description="Jellyfin user ID." settingsKey="jf_userId" placeholder="User ID from profile URL" />
             <SelectSetting name="Name Display" description="Name display format." settingsKey="jf_nameDisplay" options={[
@@ -168,6 +189,7 @@ function NavidromeSettings() {
         <>
             <SettingsSection id="navidrome-settings" name="" description="Show what you're currently listening to via Navidrome." />
             <TextSetting name="Server URL" description="Navidrome Server URL (must be a public domain, e.g. https://navidrome.example.com)." settingsKey="nd_serverUrl" placeholder="https://navidrome.example.com" />
+            <AllowServerSetting settingsKey="nd_serverUrl" />
             <TextSetting name="Username" description="Navidrome username." settingsKey="nd_username" />
             <TextSetting name="Password" description="Navidrome password." settingsKey="nd_password" />
             <TextSetting name="Client ID" description="Optional Discord Application Client ID." settingsKey="nd_clientId" placeholder="1470554657506984069" />
