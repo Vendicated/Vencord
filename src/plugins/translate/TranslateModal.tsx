@@ -18,7 +18,7 @@
 
 import { Divider } from "@components/Divider";
 import { FormSwitch } from "@components/FormSwitch";
-import { Heading } from "@components/Heading";
+import { Paragraph } from "@components/Paragraph";
 import { Margins } from "@utils/margins";
 import { RenderModalProps } from "@vencord/discord-types";
 import { Modal, openModal, SearchableSelect, useMemo } from "@webpack/common";
@@ -43,9 +43,9 @@ function LanguageSelect({ settingsKey, includeAuto }: { settingsKey: typeof Lang
 
     return (
         <section className={Margins.bottom16}>
-            <Heading tag="h3">
+            <Paragraph size="md" weight="medium" className={Margins.bottom8}>
                 {settings.def[settingsKey].description}
-            </Heading>
+            </Paragraph>
 
             <SearchableSelect
                 options={options}

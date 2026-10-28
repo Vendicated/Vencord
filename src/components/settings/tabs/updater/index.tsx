@@ -22,7 +22,6 @@ import { Card } from "@components/Card";
 import { Divider } from "@components/Divider";
 import { Flex } from "@components/Flex";
 import { FormSwitch } from "@components/FormSwitch";
-import { Heading } from "@components/Heading";
 import { Link } from "@components/Link";
 import { Paragraph } from "@components/Paragraph";
 import { SettingsTab, wrapTab } from "@components/settings/tabs/BaseTab";
@@ -44,7 +43,7 @@ function VesktopSection() {
     return (
         <Flex className={Margins.bottom20} flexDirection="column" gap="1em">
             <Card variant="info">
-                <Heading tag="h3">Vesktop & Vencord</Heading>
+                <Paragraph size="md" weight="medium" className={Margins.bottom8}>Vesktop & Vencord</Paragraph>
                 <Paragraph>Vesktop and Vencord are two separate things. This updater is for Vencord.</Paragraph>
                 <Paragraph className={Margins.top8}>
                     You receive separate popups for Vesktop updates. You can also manually update by installing the <Link href="https://vesktop.dev/install">latest version</Link>.
@@ -53,7 +52,7 @@ function VesktopSection() {
 
             {isVesktopOutdated && (
                 <Card variant="warning">
-                    <Heading tag="h3">Vesktop Outdated</Heading>
+                    <Paragraph size="md" weight="medium" className={Margins.bottom8}>Vesktop Outdated</Paragraph>
                     <Flex flexDirection="column" gap="0.5em">
                         <Paragraph>Your version of Vesktop is outdated!</Paragraph>
                         <Button variant="link" onClick={() => VesktopNative.app.openUpdater()}>Open Vesktop Updater</Button>
@@ -99,7 +98,7 @@ function Updater() {
                 />
             </div>
 
-            <Heading className={Margins.top20}>Repo</Heading>
+            <Paragraph size="md" weight="medium" className={classes(Margins.top20, Margins.bottom8)}>Repo</Paragraph>
 
             <Paragraph>
                 {repoPending
@@ -118,7 +117,7 @@ function Updater() {
 
             <Divider className={classes(Margins.top16, Margins.bottom16)} />
 
-            <Heading>Updates</Heading>
+            <Paragraph size="md" weight="medium" className={Margins.bottom8}>Updates</Paragraph>
 
             {isNewer
                 ? <Newer {...commonProps} />

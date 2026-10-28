@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { Heading } from "@components/Heading";
+import { Margins } from "@components/margins";
 import { Paragraph } from "@components/Paragraph";
 import { SearchableSelect, useMemo, useState } from "@webpack/common";
 
@@ -85,7 +85,7 @@ function ComplexPicker({ voice, voices }: PickerProps) {
 
     return (
         <>
-            <Heading>Language</Heading>
+            <Paragraph size="md" weight="medium" className={Margins.bottom8}>Language</Paragraph>
             <SearchableSelect
                 placeholder="Select a language"
                 options={languageOptions}
@@ -94,7 +94,7 @@ function ComplexPicker({ voice, voices }: PickerProps) {
                 maxVisibleItems={5}
                 closeOnSelect
             />
-            <Heading>Voice</Heading>
+            <Paragraph size="md" weight="medium" className={Margins.bottom8}>Voice</Paragraph>
             <SimplePicker
                 voice={voice}
                 voices={voicesForLanguage}
@@ -121,7 +121,7 @@ function VoiceSetting() {
 export function VoiceSettingSection() {
     return (
         <section>
-            <Heading>Voice</Heading>
+            <Paragraph size="md" weight="medium" className={Margins.bottom8}>Voice</Paragraph>
             <VoiceSetting />
         </section>
     );

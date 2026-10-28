@@ -20,7 +20,6 @@ import "./styles.css";
 
 import { Card } from "@components/Card";
 import { Flex } from "@components/Flex";
-import { Heading } from "@components/Heading";
 import { Link } from "@components/Link";
 import { Margins } from "@components/margins";
 import { Paragraph } from "@components/Paragraph";
@@ -67,7 +66,7 @@ function ThemesTab() {
                 <CspErrorCard />
 
                 <Card variant="warning">
-                    <Heading tag="h3" className={Margins.bottom8}>Theme Performance</Heading>
+                    <Paragraph size="md" weight="medium" className={Margins.bottom8}>Theme Performance</Paragraph>
                     <Paragraph>
                         Themes and custom CSS have the potential to cause major lag! If you experience performance issues, try
                         disabling your themes and CSS to see if they're the cause. The most common cause of lag is the <code>:has()</code> operator.
@@ -85,7 +84,7 @@ function UserscriptThemesTab() {
     return (
         <SettingsTab>
             <Card variant="danger">
-                <Heading>Themes are not supported on the Userscript!</Heading>
+                <Paragraph size="md" weight="medium" className={Margins.bottom8}>Themes are not supported on the Userscript!</Paragraph>
 
                 <Paragraph>
                     You can instead install themes with the <Link href={getStylusWebStoreUrl()}>Stylus extension</Link>!

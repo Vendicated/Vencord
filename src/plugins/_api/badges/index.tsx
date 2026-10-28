@@ -21,12 +21,12 @@ import "./fixDiscordBadgePadding.css";
 import { _getBadges, BadgePosition, BadgeRarity, BadgeUserArgs, DirectoryBadge, ProfileBadge } from "@api/Badges";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Flex } from "@components/Flex";
-import { Heading } from "@components/Heading";
 import { Heart } from "@components/Heart";
 import { CopyIcon, LinkIcon } from "@components/Icons";
 import { Paragraph } from "@components/Paragraph";
 import DonateButton from "@components/settings/DonateButton";
 import { openContributorModal } from "@components/settings/tabs";
+import { Text } from "@components/Text";
 import { Devs } from "@utils/constants";
 import { copyWithToast } from "@utils/discord";
 import { Logger } from "@utils/Logger";
@@ -268,19 +268,19 @@ export default definePlugin({
                         <Modal
                             {...props}
                             title={
-                                <Heading
-                                    tag="h1"
+                                <Text
+                                    size="lg"
+                                    weight="semibold"
                                     style={{
                                         width: "100%",
-                                        textAlign: "center",
-                                        margin: 0
+                                        textAlign: "center"
                                     }}
                                 >
                                     <Flex justifyContent="center" alignItems="center" gap="0.5em">
                                         <Heart />
                                         Vencord Donor
                                     </Flex>
-                                </Heading>
+                                </Text>
                             }
                         >
                             <div>

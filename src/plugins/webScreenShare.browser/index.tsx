@@ -8,7 +8,6 @@ import { definePluginSettings } from "@api/Settings";
 import { getUserSettingLazy } from "@api/UserSettings";
 import {
     Divider,
-    Heading,
     Paragraph,
     Span,
 } from "@components/index";
@@ -170,7 +169,7 @@ function ModalComponent({ modalProps, submit, close, options }: {
                 <div>
                     <div className={cl("flex", "padding")}>
                         <section className={cl("quality-section")}>
-                            <Heading tag="h2">Resolution</Heading>
+                            <Paragraph size="md" weight="semibold">Resolution</Paragraph>
                             <OptionRadio
                                 options={StreamResolution}
                                 settings={liveSettings}
@@ -180,7 +179,7 @@ function ModalComponent({ modalProps, submit, close, options }: {
                         </section>
 
                         <section className={cl("quality-section")}>
-                            <Heading tag="h2">Frame Rate</Heading>
+                            <Paragraph size="md" weight="semibold">Frame Rate</Paragraph>
                             <OptionRadio
                                 options={StreamFps}
                                 settings={liveSettings}
@@ -190,7 +189,7 @@ function ModalComponent({ modalProps, submit, close, options }: {
                         </section>
                     </div>
                     <div>
-                        <Heading tag="h2">Stream Mode</Heading>
+                        <Paragraph size="md" weight="semibold">Stream Mode</Paragraph>
                         <div>
                             <OptionRadio
                                 options={StreamContentHint}
@@ -209,7 +208,7 @@ function ModalComponent({ modalProps, submit, close, options }: {
                             shape="box"
                             reverse={true}>
                             <div className={cl("control-content")}>
-                                <Heading tag="h2">Mute Stream Audio</Heading>
+                                <Paragraph size="md" weight="semibold">Mute Stream Audio</Paragraph>
                                 <Paragraph style={{ color: "var(--text-subtle, var(--text-default))" }}>Prevents system audio from being included in your stream.</Paragraph>
                             </div>
                         </Checkbox>
@@ -221,7 +220,7 @@ function ModalComponent({ modalProps, submit, close, options }: {
                             shape="box"
                             reverse={true}>
                             <div className={cl("control-content")}>
-                                <Heading tag="h2">Show Stream Previews</Heading>
+                                <Paragraph size="md" weight="semibold">Show Stream Previews</Paragraph>
                                 <Paragraph style={{ color: "var(--text-subtle, var(--text-default))" }}>Allows others to see a preview of your stream before they join.</Paragraph>
                             </div>
                         </Checkbox>

@@ -6,7 +6,6 @@
 
 import { Card } from "@components/Card";
 import ErrorBoundary from "@components/ErrorBoundary";
-import { Heading } from "@components/Heading";
 import { Link } from "@components/Link";
 import { Paragraph } from "@components/Paragraph";
 import { GUILD_ID, INVITE_KEY, RAW_SKU_ID } from "@plugins/decor/lib/constants";
@@ -90,7 +89,7 @@ function CreateDecorationModal(props: RenderModalProps) {
                     <div className={cl("create-decoration-modal-form")}>
                         {error !== null && <Paragraph size="xs" style={{ color: "var(--text-danger, var(--text-default))" }}>{error.message}</Paragraph>}
                         <section>
-                            <Heading>File</Heading>
+                            <Paragraph size="md" weight="medium" className={Margins.bottom8}>File</Paragraph>
                             <FileUpload
                                 filename={file?.name}
                                 placeholder="Choose a file"
@@ -103,7 +102,7 @@ function CreateDecorationModal(props: RenderModalProps) {
                             </Paragraph>
                         </section>
                         <section>
-                            <Heading>Name</Heading>
+                            <Paragraph size="md" weight="medium" className={Margins.bottom8}>Name</Paragraph>
                             <TextInput
                                 placeholder="Companion Cube"
                                 value={name}

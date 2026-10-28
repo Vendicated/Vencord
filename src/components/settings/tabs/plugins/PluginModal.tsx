@@ -22,7 +22,6 @@ import { generateId } from "@api/Commands";
 import { hasAnyVisibleSettings, isSettingHidden } from "@api/PluginManager";
 import { useSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
-import { Heading } from "@components/Heading";
 import { Paragraph } from "@components/Paragraph";
 import { Text } from "@components/Text";
 import { debounce } from "@shared/debounce";
@@ -205,7 +204,7 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
         >
             <div className={"vc-settings-modal-content"}>
                 <section>
-                    <Heading tag="h1" className={classes(Margins.top8, Margins.bottom8)}>Authors</Heading>
+                    <Paragraph size="lg" weight="semibold" className={classes(Margins.top8, Margins.bottom8)}>Authors</Paragraph>
                     <div style={{ width: "fit-content" }}>
                         <ErrorBoundary noop>
                             <UserSummaryItem
@@ -244,7 +243,7 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
                 )}
 
                 <section>
-                    <Heading tag="h1" className={classes(Margins.top16, Margins.bottom8)}>Settings</Heading>
+                    <Paragraph size="lg" weight="semibold" className={classes(Margins.top16, Margins.bottom8)}>Settings</Paragraph>
                     {renderSettings()}
                 </section>
             </div>

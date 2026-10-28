@@ -17,8 +17,8 @@
 */
 
 import { popNotice, showNotice } from "@api/Notices";
-import { Heading } from "@components/Heading";
 import { Link } from "@components/Link";
+import { Margins } from "@components/margins";
 import { Paragraph } from "@components/Paragraph";
 import { Devs } from "@utils/constants";
 import definePlugin, { ReporterTestable } from "@utils/types";
@@ -49,7 +49,7 @@ export default definePlugin({
 
     settingsAboutComponent: () => (
         <>
-            <Heading tag="h3">How to use arRPC</Heading>
+            <Paragraph size="md" weight="medium" className={Margins.bottom8}>How to use arRPC</Paragraph>
             <Paragraph>
                 <Link href="https://github.com/OpenAsar/arrpc/tree/main#server">Follow the instructions in the GitHub repo</Link> to get the server running, and then enable the plugin.
             </Paragraph>

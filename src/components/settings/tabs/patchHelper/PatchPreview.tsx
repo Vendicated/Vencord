@@ -5,7 +5,6 @@
  */
 
 import { Button } from "@components/Button";
-import { Heading } from "@components/Heading";
 import { Paragraph } from "@components/Paragraph";
 import { Margins } from "@utils/margins";
 import { canonicalizeMatch, canonicalizeReplace } from "@utils/patches";
@@ -56,7 +55,7 @@ function Match({ matchResult }: { matchResult: RegExpMatchArray | null; }) {
 
     return (
         <>
-            <Heading>Match</Heading>
+            <Paragraph size="md" weight="medium" className={Margins.bottom8}>Match</Paragraph>
             <div style={{ userSelect: "text" }}>{Parser.parse(fullMatch)}</div>
             <div style={{ userSelect: "text" }}>{Parser.parse(groups)}</div>
         </>
@@ -86,7 +85,7 @@ function Diff({ diff }: { diff: Change[] | null; }) {
 
     return (
         <>
-            <Heading>Diff</Heading>
+            <Paragraph size="md" weight="medium" className={Margins.bottom8}>Diff</Paragraph>
             {diffLines}
         </>
     );
@@ -121,7 +120,7 @@ export function PatchPreview({ module, match, replacement, setReplacementError }
 
     return (
         <>
-            <Heading style={{ userSelect: "text" }}>Module {id}</Heading>
+            <Paragraph size="md" weight="medium" className={Margins.bottom8} style={{ userSelect: "text" }}>Module {id}</Paragraph>
 
             <Match matchResult={matchResult} />
             <Diff diff={diff} />

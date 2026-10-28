@@ -23,8 +23,8 @@ import { definePluginSettings } from "@api/Settings";
 import { Button } from "@components/Button";
 import { Divider } from "@components/Divider";
 import { Flex } from "@components/Flex";
-import { Heading } from "@components/Heading";
 import { Paragraph } from "@components/Paragraph";
+import { Text } from "@components/Text";
 import { Devs } from "@utils/constants";
 import { copyWithToast, fetchUserProfile } from "@utils/discord";
 import { Margins } from "@utils/margins";
@@ -115,12 +115,12 @@ function SettingsAboutComponent() {
 
     return (
         <section>
-            <Heading tag="h3">Usage</Heading>
+            <Paragraph size="md" weight="medium" className={Margins.bottom8}>Usage</Paragraph>
             <Paragraph>
                 After enabling this plugin, you will see custom colors in
                 the profiles of other people using compatible plugins.{" "}
             </Paragraph>
-            <Paragraph className={Margins.top8}>
+            <Text size="sm" className={Margins.top8}>
                 <strong>To set your own profile theme colors:</strong>
                 <ul>
                     <li>&mdash; use the color pickers below to choose your colors</li>
@@ -130,7 +130,7 @@ function SettingsAboutComponent() {
                 <Divider
                     className={classes(Margins.top8, Margins.bottom8)}
                 />
-                <Heading tag="h3">Color pickers</Heading>
+                <Paragraph size="md" weight="medium" className={Margins.bottom8}>Color pickers</Paragraph>
                 <Flex gap="1em">
                     <ColorPicker
                         color={color1}
@@ -174,7 +174,7 @@ function SettingsAboutComponent() {
                 <Divider
                     className={classes(Margins.top8, Margins.bottom8)}
                 />
-                <Heading tag="h3">Preview</Heading>
+                <Paragraph size="md" weight="medium" className={Margins.bottom8}>Preview</Paragraph>
                 <div className="vc-fpt-preview">
                     <ProfileModal
                         user={UserStore.getCurrentUser()}
@@ -187,7 +187,7 @@ function SettingsAboutComponent() {
                         isTryItOut={true}
                     />
                 </div>
-            </Paragraph>
+            </Text>
         </section>);
 }
 

@@ -6,7 +6,6 @@
 
 import { Button } from "@components/Button";
 import { Flex } from "@components/Flex";
-import { Heading } from "@components/Heading";
 import { Paragraph } from "@components/Paragraph";
 import { Decoration, getPresets, Preset } from "@plugins/decor/lib/api";
 import { GUILD_ID, INVITE_KEY } from "@plugins/decor/lib/constants";
@@ -70,7 +69,7 @@ function SectionHeader({ section }: SectionHeaderProps) {
 
     return <div>
         <Flex>
-            <Heading style={{ flexGrow: 1 }}>{section.title}</Heading>
+            <Paragraph size="md" weight="medium" className={Margins.bottom8} style={{ flexGrow: 1 }}>{section.title}</Paragraph>
             {hasAuthorIds && <UserSummaryItem
                 users={authors}
                 guildId={undefined}

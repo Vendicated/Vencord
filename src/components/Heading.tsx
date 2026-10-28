@@ -15,12 +15,7 @@ export type HeadingProps<Tag extends HeadingTag> = ComponentPropsWithoutRef<Tag>
     tag?: Tag;
 };
 
-/**
- * A simple heading component that automatically sizes according to the tag used.
- *
- * If you need more control, use the BaseText component instead.
- */
-export function Heading<T extends HeadingTag>(props: HeadingProps<T>) {
+function HeadingBase<T extends HeadingTag>(props: HeadingProps<T>) {
     const {
         tag: Tag = "h5",
         children,
@@ -35,26 +30,18 @@ export function Heading<T extends HeadingTag>(props: HeadingProps<T>) {
     );
 }
 
-export function HeadingPrimary({ children, ...restProps }: HeadingProps<"h2">) {
-    return (
-        <Heading tag="h2" {...restProps}>
-            {children}
-        </Heading>
-    );
-}
+// #region Old compability
 
-export function HeadingSecondary({ children, ...restProps }: HeadingProps<"h3">) {
-    return (
-        <Heading tag="h3" {...restProps}>
-            {children}
-        </Heading>
-    );
-}
+/** @deprecated Use `Paragraph`, `Span` or `Text` instead */
+export const Heading = HeadingBase as never;
 
-export function HeadingTertiary({ children, ...restProps }: HeadingProps<"h4">) {
-    return (
-        <Heading tag="h4" {...restProps}>
-            {children}
-        </Heading>
-    );
-}
+/** @deprecated Use `Paragraph`, `Span` or `Text` instead */
+export const HeadingPrimary = ((props: HeadingProps<"h2">) => <HeadingBase tag="h2" {...props} />) as never;
+
+/** @deprecated Use `Paragraph`, `Span` or `Text` instead */
+export const HeadingSecondary = ((props: HeadingProps<"h3">) => <HeadingBase tag="h3" {...props} />) as never;
+
+/** @deprecated Use `Paragraph`, `Span` or `Text` instead */
+export const HeadingTertiary = ((props: HeadingProps<"h4">) => <HeadingBase tag="h4" {...props} />) as never;
+
+// #endregion

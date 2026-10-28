@@ -6,9 +6,9 @@
 
 import { CheckedTextInput } from "@components/CheckedTextInput";
 import { Flex } from "@components/Flex";
-import { HeadingTertiary } from "@components/Heading";
 import { LinkIcon, TopRightArrow } from "@components/Icons";
 import { Margins } from "@components/margins";
+import { Paragraph } from "@components/Paragraph";
 import { Span } from "@components/Span";
 import { Text } from "@components/Text";
 import { classNameFactory } from "@utils/css";
@@ -158,7 +158,7 @@ export function CloneModal({ sticker }: { sticker: PartialSticker; }) {
 
     return (
         <>
-            <HeadingTertiary>Custom Name</HeadingTertiary>
+            <Paragraph size="md" weight="semibold" className={Margins.bottom8}>Custom Name</Paragraph>
             <CheckedTextInput
                 initialValue={name}
                 onChange={v => {

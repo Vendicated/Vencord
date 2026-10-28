@@ -4,7 +4,8 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { Heading } from "@components/Heading";
+import { Margins } from "@components/margins";
+import { Paragraph } from "@components/Paragraph";
 import { DEFAULT_COLOR, SWATCHES } from "@plugins/pinDms/constants";
 import { categoryLen, createCategory, getCategory } from "@plugins/pinDms/data";
 import { classNameFactory } from "@utils/css";
@@ -90,14 +91,14 @@ export function NewCategoryModal({ categoryId, modalProps, initialChannelId }: P
                 }}
             >
                 <section>
-                    <Heading>Name</Heading>
+                    <Paragraph size="md" weight="medium" className={Margins.bottom8}>Name</Paragraph>
                     <TextInput
                         value={name}
                         onChange={e => setName(e)}
                     />
                 </section>
                 <section>
-                    <Heading>Color</Heading>
+                    <Paragraph size="md" weight="medium" className={Margins.bottom8}>Color</Paragraph>
                     <ColorPickerWithSwatches
                         className={cl("color-picker")}
                         key={category.id}

@@ -20,7 +20,6 @@ import "./styles.css";
 
 import { ChatBarButton, ChatBarButtonFactory } from "@api/ChatButtons";
 import { definePluginSettings } from "@api/Settings";
-import { Heading } from "@components/Heading";
 import { Paragraph } from "@components/Paragraph";
 import { Devs } from "@utils/constants";
 import { classNameFactory } from "@utils/css";
@@ -90,7 +89,7 @@ function PickerModal(props: RenderModalProps) {
                 }}
             />
 
-            <Heading>Timestamp Format</Heading>
+            <Paragraph size="md" weight="medium" className={Margins.bottom8}>Timestamp Format</Paragraph>
             <div className={cl("format-select")}>
                 <Select
                     options={
@@ -111,7 +110,7 @@ function PickerModal(props: RenderModalProps) {
                 />
             </div>
 
-            <Heading className={Margins.bottom8}>Preview</Heading>
+            <Paragraph size="md" weight="medium" className={Margins.bottom8}>Preview</Paragraph>
             <Paragraph className={cl("preview-text")}>
                 {rendered} ({formatted})
             </Paragraph>

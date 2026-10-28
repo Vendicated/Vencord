@@ -20,7 +20,6 @@ import { openNotificationLogModal } from "@api/Notifications/notificationLog";
 import { useSettings } from "@api/Settings";
 import { Divider } from "@components/Divider";
 import { FormSwitch } from "@components/FormSwitch";
-import { Heading } from "@components/Heading";
 import { FolderIcon, GithubIcon, LogIcon, PaintbrushIcon, RestartIcon } from "@components/Icons";
 import { Paragraph } from "@components/Paragraph";
 import { QuickAction, QuickActionCard } from "@components/settings/QuickAction";
@@ -189,7 +188,7 @@ function VencordSettings() {
             )}
 
             <section>
-                <Heading>Quick Actions</Heading>
+                <Paragraph size="md" weight="medium" className={Margins.bottom8}>Quick Actions</Paragraph>
 
                 <QuickActionCard>
                     <QuickAction
@@ -227,7 +226,7 @@ function VencordSettings() {
             <Divider />
 
             <section className={Margins.top16}>
-                <Heading>Settings</Heading>
+                <Paragraph size="md" weight="medium" className={Margins.bottom8}>Settings</Paragraph>
                 <Paragraph className={Margins.bottom20} style={{ color: "var(--text-muted)" }}>
                     Hint: You can change the position of this settings section in the{" "}
                     <a onClick={() => openPluginModal(SettingsPlugin)}>

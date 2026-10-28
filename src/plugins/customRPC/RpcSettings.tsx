@@ -8,7 +8,6 @@ import "./settings.css";
 
 import { isPluginEnabled } from "@api/PluginManager";
 import { Divider } from "@components/Divider";
-import { Heading } from "@components/Heading";
 import { Paragraph } from "@components/Paragraph";
 import { resolveError } from "@components/settings/tabs/plugins/components/Common";
 import { debounce } from "@shared/debounce";
@@ -118,7 +117,7 @@ function SingleSetting<T>({ settingsKey, label, disabled, isValid, transform }: 
 
     return (
         <div className={cl("single", { disabled })}>
-            <Heading>{label}</Heading>
+            <Paragraph size="md" weight="medium">{label}</Paragraph>
             <TextInput
                 type="text"
                 placeholder={"Enter a value"}
@@ -134,7 +133,7 @@ function SingleSetting<T>({ settingsKey, label, disabled, isValid, transform }: 
 function SelectSetting<T>({ settingsKey, label, options, disabled }: SelectOption<T>) {
     return (
         <div className={cl("single", { disabled })}>
-            <Heading>{label}</Heading>
+            <Paragraph size="md" weight="medium">{label}</Paragraph>
             <Select
                 placeholder={"Select an option"}
                 options={options}

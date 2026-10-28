@@ -6,7 +6,7 @@
 
 import { useSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
-import { Heading } from "@components/Heading";
+import { Paragraph } from "@components/Paragraph";
 import { IS_MAC } from "@utils/constants";
 import { Margins } from "@utils/margins";
 import { identity } from "@utils/misc";
@@ -19,7 +19,7 @@ export function MacOSVibrancySettings() {
 
     return (
         <ErrorBoundary noop>
-            <Heading>MacOS Window vibrancy style (requires restart)</Heading>
+            <Paragraph size="md" weight="medium" className={Margins.bottom8}>MacOS Window vibrancy style (requires restart)</Paragraph>
             <Select
                 className={Margins.bottom20}
                 placeholder="Window vibrancy style"
