@@ -194,9 +194,6 @@ catalogs:
     '@vap/shiki':
       specifier: 0.10.5
       version: 0.10.5
-    '@vencord/monaco-editor':
-      specifier: 0.57.0-beta
-      version: 0.57.0-beta
     diff:
       specifier: ^9.0.0
       version: 9.0.0
@@ -242,6 +239,9 @@ catalogs:
     moment:
       specifier: 2.30.1
       version: 2.30.1
+    monaco-editor:
+      specifier: ^0.57.0
+      version: 0.57.0
     p-limit:
       specifier: ^7.3.3
       version: 7.3.3
@@ -281,9 +281,6 @@ catalogs:
     typescript-transform-paths:
       specifier: ^3.5.6
       version: 3.5.6
-    virtual-merge:
-      specifier: ^1.0.1
-      version: 1.0.2
     zip-local:
       specifier: ^0.3.5
       version: 0.3.5
@@ -304,18 +301,15 @@ importers:
       '@vap/shiki':
         specifier: 'catalog:'
         version: 0.10.5
-      '@vencord/monaco-editor':
-        specifier: 'catalog:'
-        version: 0.57.0-beta
       fflate:
         specifier: 'catalog:'
         version: 0.8.3
       gifenc:
         specifier: 'catalog:'
         version: https://codeload.github.com/mattdesl/gifenc/tar.gz/64842fca317b112a8590f8fef2bf3825da8f6fe3
-      virtual-merge:
+      monaco-editor:
         specifier: 'catalog:'
-        version: 1.0.2
+        version: 0.57.0
     devDependencies:
       '@stylistic/eslint-plugin':
         specifier: 'catalog:'
@@ -841,6 +835,9 @@ packages:
   '@types/react@19.2.3':
     resolution: {integrity: sha512-k5dJVszUiNr1DSe8Cs+knKR6IrqhqdhpUwzqhkS8ecQTSf3THNtbfIp/umqHMpX2bv+9dkx3fwDv/86LcSfvSg==}
 
+  '@types/trusted-types@2.0.7':
+    resolution: {integrity: sha512-ScaPdn1dQczgbl0QFTeTOmVHFULt394XJgOQNoyVhZ6r2vLnMLJfBPd53SB52T/3G36VI1/g2MZaX0cwDuXsfw==}
+
   '@types/yazl@3.3.1':
     resolution: {integrity: sha512-DIWfCKpsTp6hE5BDBHV3+fIL/bLUF9Bv13iDrWnMlmhQpH67buNvI291ZauQ1xcccxK3FqQ9honnXpq4R8NMuQ==}
 
@@ -912,9 +909,6 @@ packages:
 
   '@vap/shiki@0.10.5':
     resolution: {integrity: sha512-5BHVGvQT8qonbLSASon5aQFQ18OZU4FxSl9tLSj6oJ0sap3KdMbYcfGq25M9zFZR1g1dJN7fgjmZXBIS5omIdw==}
-
-  '@vencord/monaco-editor@0.57.0-beta':
-    resolution: {integrity: sha512-rqa7V4H/4deRdQrKYDY9Vqx0c4tssuLz+E3syVsV10E0hY0tTajZkQbCqJsuVHh0R8PLP2uVrM1P5Lls0aAPdw==}
 
   acorn-jsx@5.3.2:
     resolution: {integrity: sha512-rq9s+JNhf0IChjtDXxllJ7g41oZk5SlXtp0LHwyA5cejwn7vKmKp4pPri6YEePv2PU65sAsegbXtIinmDFDXgQ==}
@@ -1278,6 +1272,9 @@ packages:
   domhandler@5.0.3:
     resolution: {integrity: sha512-cgwlv/1iFQiFnU96XXgROh8xTeetsnJiDsTc7TYCLFd9+/WNkIqPTxiM/8pSd8VIrhXGTf1Ny1q1hquVqDJB5w==}
     engines: {node: '>= 4'}
+
+  dompurify@3.4.15:
+    resolution: {integrity: sha512-EUBjM+B+lkDE41iE82DDSCfkoPGfXx8IxFxPMjNzm/Uk4xDet77rTN9wqlxlVg71kK7XGuUMv6wUxJUwwv+Xyw==}
 
   domutils@3.2.2:
     resolution: {integrity: sha512-6kZKyUajlDuqlHKVX1w7gyslj9MPIXzIFiz/rGu35uC1wMi+kMhQwGhl4lt9unC9Vb9INnY9Z3/ZA3+FhASLaw==}
@@ -2048,6 +2045,11 @@ packages:
     resolution: {integrity: sha512-4y7uGv8bd2WdM9vpQsiQNo41Ln1NvhvDRuVt0k2JZQ+ezN2uaQes7lZeZ+QQUHOLQAtDaBJ+7wCbi+ab/KFs+w==}
     engines: {node: '>=0.10.0'}
 
+  marked@14.0.0:
+    resolution: {integrity: sha512-uIj4+faQ+MgHgwUW1l2PsPglZLOLOT1uErt06dAPtx2kjteLAkbsd/0FiYg/MGS+i7ZKLb7w2WClxHkzOOuryQ==}
+    engines: {node: '>= 18'}
+    hasBin: true
+
   math-intrinsics@1.1.0:
     resolution: {integrity: sha512-/IXtbwEk5HTPyEwyKX6hGkYXxM9nbj64B+ilVJnC/R6B0pH5G4V3b0pVbL7DBj4tkhBAppbQUlf6F6Xl9LHu1g==}
     engines: {node: '>= 0.4'}
@@ -2103,6 +2105,9 @@ packages:
 
   moment@2.30.1:
     resolution: {integrity: sha512-uEmtNhbDOrWPFS+hdjFCBfy9f2YoyzRpwcl+DqpC6taX21FzsTLQVbMV/W7PzNSX6x/bhC1zA3c2UQ5NzH6how==}
+
+  monaco-editor@0.57.0:
+    resolution: {integrity: sha512-5BkI9KGoqrNvBGUe15/QlZq3OooZ8WLg1AxTpaqHRCP3HNpzPPZKE2EDz8M7c+VRmCeUw1Brp4cx/PWm3kI/5A==}
 
   ms@2.0.0:
     resolution: {integrity: sha512-Tpp60P6IUJDTuOq/5Z8cdskzJujfwqfOTkrwIwj7IRISpnkJnT6SyJ4PCPnGMoFjC9ddhal5KVIYtAt97ix05A==}
@@ -2729,9 +2734,6 @@ packages:
   util-deprecate@1.0.2:
     resolution: {integrity: sha512-EPD5q1uXyFxJpCrLnCc1nHnq3gOa6DZBocAIiI2TaSCA7VCJ1UJDMagCzIkXNsUYfD1daK//LTEQ8xiIbrHtcw==}
 
-  virtual-merge@1.0.2:
-    resolution: {integrity: sha512-5hxklfyTUWMKYaLuoriOf9Xqmt3oWtfAiZw0M3ITeeNmVdKhcnys7rYyfBHqvy/hlELP0hQ4u7o1r5HBXbm6sg==}
-
   vscode-oniguruma@1.7.0:
     resolution: {integrity: sha512-L9WMGRfrjOhgHSdOYgCt/yRMsXzLDJSL7BPrOZt73gU0iWO4mpqzqQzOz5srxqTvMBaR0XZTSrVWo4j55Rc6cA==}
 
@@ -3101,6 +3103,9 @@ snapshots:
     dependencies:
       csstype: 3.2.3
 
+  '@types/trusted-types@2.0.7':
+    optional: true
+
   '@types/yazl@3.3.1':
     dependencies:
       '@types/node': 26.0.1
@@ -3207,8 +3212,6 @@ snapshots:
       jsonc-parser: 3.3.1
       vscode-oniguruma: 1.7.0
       vscode-textmate: 5.2.0
-
-  '@vencord/monaco-editor@0.57.0-beta': {}
 
   acorn-jsx@5.3.2(acorn@8.16.0):
     dependencies:
@@ -3610,6 +3613,10 @@ snapshots:
   domhandler@5.0.3:
     dependencies:
       domelementtype: 2.3.0
+
+  dompurify@3.4.15:
+    optionalDependencies:
+      '@types/trusted-types': 2.0.7
 
   domutils@3.2.2:
     dependencies:
@@ -4587,6 +4594,8 @@ snapshots:
     dependencies:
       object-visit: 1.0.1
 
+  marked@14.0.0: {}
+
   math-intrinsics@1.1.0: {}
 
   mathml-tag-names@4.0.0: {}
@@ -4632,6 +4641,11 @@ snapshots:
   modern-tar@0.8.6: {}
 
   moment@2.30.1: {}
+
+  monaco-editor@0.57.0:
+    dependencies:
+      dompurify: 3.4.15
+      marked: 14.0.0
 
   ms@2.0.0: {}
 
@@ -5422,8 +5436,6 @@ snapshots:
   use@3.1.1: {}
 
   util-deprecate@1.0.2: {}
-
-  virtual-merge@1.0.2: {}
 
   vscode-oniguruma@1.7.0: {}
 
