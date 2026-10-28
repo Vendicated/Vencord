@@ -271,6 +271,7 @@ function UserContextMenu({ userId }: { userId: string; }) {
             <Menu.MenuItem
                 id={cl("copy-user-id")}
                 label={getIntlMessage("COPY_ID_USER")}
+                leadingAccessory={{ type: "icon", icon: CopyIdIcon }}
                 action={() => {
                     copyToClipboard(userId);
                 }}

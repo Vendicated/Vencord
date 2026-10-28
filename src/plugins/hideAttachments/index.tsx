@@ -26,7 +26,6 @@ import { Devs } from "@utils/constants";
 import { classes } from "@utils/misc";
 import definePlugin from "@utils/types";
 import { Message } from "@vencord/discord-types";
-import { ChannelStore } from "@webpack/common";
 
 const KEY = "HideAttachments_HiddenIds";
 
@@ -77,8 +76,6 @@ export default definePlugin({
             return {
                 label: isHidden ? "Show Media" : "Hide Media",
                 icon: isHidden ? ImageVisible : ImageInvisible,
-                message: msg,
-                channel: ChannelStore.getChannel(msg.channel_id),
                 onClick: () => toggleHide(msg.channel_id, msg.id)
             };
         },

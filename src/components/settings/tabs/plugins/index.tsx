@@ -24,7 +24,7 @@ import { useSettings } from "@api/Settings";
 import { Card } from "@components/Card";
 import { Divider } from "@components/Divider";
 import ErrorBoundary from "@components/ErrorBoundary";
-import { HeadingTertiary } from "@components/Heading";
+import { Heading, HeadingTertiary } from "@components/Heading";
 import { Paragraph } from "@components/Paragraph";
 import { SettingsTab, wrapTab } from "@components/settings/tabs/BaseTab";
 import { ChangeList } from "@utils/ChangeList";
@@ -33,9 +33,11 @@ import { isTruthy } from "@utils/guards";
 import { Logger } from "@utils/Logger";
 import { Margins } from "@utils/margins";
 import { classes } from "@utils/misc";
+import { PluginTarget } from "@utils/pluginTargets";
+import { promptToRestart } from "@utils/promptToRestart";
 import { useAwaiter, useCleanupEffect } from "@utils/react";
 import { PluginTag, PluginTags } from "@utils/types";
-import { Button, ConfirmModal, lodash, openModal, Parser, React, SearchableSelect, Select, TextInput, Tooltip, useMemo, useRef, useState } from "@webpack/common";
+import { Button, lodash, React, SearchableSelect, Select, TextInput, Tooltip, useMemo, useRef, useState } from "@webpack/common";
 import { JSX } from "react";
 
 import Plugins, { ExcludedPlugins, PluginMeta } from "~plugins";
@@ -88,12 +90,13 @@ function ExcludedPluginsList({ search }: { search: string; }) {
             .filter(([name]) => name.toLowerCase().includes(search))
         : [];
 
-    const ExcludedReasons: Record<"web" | "discordDesktop" | "vesktop" | "desktop" | "dev", string> = {
+    const ExcludedReasons: Record<PluginTarget, string> = {
         desktop: "Discord Desktop app or Vesktop",
         discordDesktop: "Discord Desktop app",
         vesktop: "Vesktop app",
         web: "Vesktop app and the Web version of Discord",
-        dev: "Developer version of Vencord"
+        dev: "Developer version of Vencord",
+        browser: "Web Browser version of Vencord"
     };
 
     return (
@@ -122,26 +125,12 @@ function PluginSettings() {
 
     useCleanupEffect(() => {
         if (changes.hasChanges)
-            openModal(props => (
-                <ConfirmModal
-                    {...props}
-                    title="Restart required"
-                    confirmText="Restart now"
-                    cancelText="Later!"
-                    variant="primary"
-                    onConfirm={() => location.reload()}
-                >
-                    <>
-                        <p>The following plugins require a restart:</p>
-                        <div>{changes.map((s, i) => (
-                            <React.Fragment key={s}>
-                                {i > 0 && ", "}
-                                {Parser.parse("`" + s.split(".")[0] + "`")}
-                            </React.Fragment>
-                        ))}</div>
-                    </>
-                </ConfirmModal>
-            ));
+            promptToRestart("reload", {
+                children: <>
+                    <Heading tag="h5">The following plugins require a restart:</Heading>
+                    <Paragraph>{Array.from(changes, k => k.split(".")[0]).join(", ")}</Paragraph>
+                </>
+            });
     }, []);
 
     const depMap = useMemo(() => {
