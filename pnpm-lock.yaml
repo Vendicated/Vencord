@@ -167,9 +167,6 @@ catalogs:
     '@intrnl/xxhash64':
       specifier: ^0.1.2
       version: 0.1.2
-    '@sadan4/vencord-monaco-editor':
-      specifier: 2.0.3
-      version: 2.0.3
     '@stylistic/eslint-plugin':
       specifier: ^5.10.0
       version: 5.10.0
@@ -197,6 +194,9 @@ catalogs:
     '@vap/shiki':
       specifier: 0.10.5
       version: 0.10.5
+    '@vencord/monaco-editor':
+      specifier: 0.57.0-beta
+      version: 0.57.0-beta
     diff:
       specifier: ^9.0.0
       version: 9.0.0
@@ -298,15 +298,15 @@ importers:
       '@intrnl/xxhash64':
         specifier: 'catalog:'
         version: 0.1.2
-      '@sadan4/vencord-monaco-editor':
-        specifier: 'catalog:'
-        version: 2.0.3
       '@vap/core':
         specifier: 'catalog:'
         version: 0.0.12
       '@vap/shiki':
         specifier: 'catalog:'
         version: 0.10.5
+      '@vencord/monaco-editor':
+        specifier: 'catalog:'
+        version: 0.57.0-beta
       fflate:
         specifier: 'catalog:'
         version: 0.8.3
@@ -793,9 +793,6 @@ packages:
   '@rtsao/scc@1.1.0':
     resolution: {integrity: sha512-zt6OdqaDoOnJ1ZYsCYGt9YmWzDXl4vQdKTyJev62gFhRGKdx7mcT54V9KIjg+d2wi9EXsPvAPKe7i7WjfVWB8g==}
 
-  '@sadan4/vencord-monaco-editor@2.0.3':
-    resolution: {integrity: sha512-Tz+8ewv3whjUvVqnQLRaUze42GtI470D0tvgpUYKWDdlQb2WIonDIoHCSg1OPqgi6HTEllt5Jxwv8tmm5/54zA==}
-
   '@sindresorhus/merge-streams@4.0.0':
     resolution: {integrity: sha512-tlqY9xq5ukxTUZBmoOp+m61cqwQD5pHJtFY3Mn8CA8ps6yghLH/Hw8UPdqg4OLmFW3IFlcXnQNmo/dh8HzXYIQ==}
     engines: {node: '>=18'}
@@ -915,6 +912,9 @@ packages:
 
   '@vap/shiki@0.10.5':
     resolution: {integrity: sha512-5BHVGvQT8qonbLSASon5aQFQ18OZU4FxSl9tLSj6oJ0sap3KdMbYcfGq25M9zFZR1g1dJN7fgjmZXBIS5omIdw==}
+
+  '@vencord/monaco-editor@0.57.0-beta':
+    resolution: {integrity: sha512-rqa7V4H/4deRdQrKYDY9Vqx0c4tssuLz+E3syVsV10E0hY0tTajZkQbCqJsuVHh0R8PLP2uVrM1P5Lls0aAPdw==}
 
   acorn-jsx@5.3.2:
     resolution: {integrity: sha512-rq9s+JNhf0IChjtDXxllJ7g41oZk5SlXtp0LHwyA5cejwn7vKmKp4pPri6YEePv2PU65sAsegbXtIinmDFDXgQ==}
@@ -3050,8 +3050,6 @@ snapshots:
 
   '@rtsao/scc@1.1.0': {}
 
-  '@sadan4/vencord-monaco-editor@2.0.3': {}
-
   '@sindresorhus/merge-streams@4.0.0': {}
 
   '@stylistic/eslint-plugin@5.10.0(eslint@10.13.0(supports-color@10.2.2))':
@@ -3209,6 +3207,8 @@ snapshots:
       jsonc-parser: 3.3.1
       vscode-oniguruma: 1.7.0
       vscode-textmate: 5.2.0
+
+  '@vencord/monaco-editor@0.57.0-beta': {}
 
   acorn-jsx@5.3.2(acorn@8.16.0):
     dependencies:
