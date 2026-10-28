@@ -17,7 +17,8 @@
 */
 
 import { Message } from "@vencord/discord-types";
-import { Parser, showToast, useEffect, useState } from "@webpack/common";
+import { MessageFlags } from "@vencord/discord-types/enums";
+import { ChannelStore, ComponentDispatch, FluxDispatcher, MessageTypeSets, Parser, showToast, useEffect, useState } from "@webpack/common";
 
 import { settings } from "./settings";
 import { TranslateIcon } from "./TranslateIcon";
@@ -49,15 +50,14 @@ function Dismiss({ onDismiss }: { onDismiss: () => void; }) {
     );
 }
 
-function ReplyInLanguage({ languageCode }: { languageCode: string; }) {
+function ReplyInLanguage({ message, languageCode }: { message: Message; languageCode: string; }) {
     // service is subscribed so the link re-maps when the language list changes
-    const { autoTranslate, sentOutput } = settings.use(["autoTranslate", "sentOutput", "service"]);
+    settings.use(["service"]);
 
     const target = findTargetLanguage(languageCode);
-    if (!target) return null;
+    if (!target || !MessageTypeSets.REPLYABLE.has(message.type) || message.hasFlag(MessageFlags.EPHEMERAL)) return null;
 
     const [value, label] = target;
-    if (autoTranslate && sentOutput === value) return null;
 
     return (
         <>
@@ -67,6 +67,16 @@ function ReplyInLanguage({ languageCode }: { languageCode: string; }) {
                     settings.store.sentOutput = value;
                     settings.store.autoTranslate = true;
                     showToast({ text: `Auto-Translate enabled. Your messages will be translated to ${label}`, variant: "success" });
+
+                    const channel = ChannelStore.getChannel(message.channel_id);
+                    FluxDispatcher.dispatch({
+                        type: "CREATE_PENDING_REPLY",
+                        channel,
+                        message,
+                        shouldMention: true,
+                        showMentionToggle: channel.guild_id !== null
+                    });
+                    ComponentDispatch.dispatchToLastSubscribed("TEXTAREA_FOCUS");
                 }}
                 className={cl("reply-in-language")}
             >
@@ -100,7 +110,7 @@ export function TranslationAccessory({ message }: { message: Message; }) {
             {Parser.parse(translation.text)}
             <br />
             (translated from {translation.sourceLanguage}
-            <ReplyInLanguage languageCode={translation.sourceLanguageCode} />
+            <ReplyInLanguage message={message} languageCode={translation.sourceLanguageCode} />
             {" - "}
             <Dismiss onDismiss={() => setTranslation(undefined)} />)
         </span>
