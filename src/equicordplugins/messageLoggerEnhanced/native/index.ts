@@ -22,6 +22,7 @@ import { ensureDirectoryExists, getAttachmentIdFromFilename, sleep } from "./uti
 export { getSettings };
 export function messageLoggerEnhancedUniqueIdThingyIdkMan() { }
 
+const allowedHosts = new Set(["cdn.discordapp.com", "media.discordapp.net"]);
 const nativeSavedImages = new Map<string, string>();
 export const getNativeSavedImages = () => nativeSavedImages;
 
@@ -70,7 +71,7 @@ export async function writeImageNative(_event: IpcMainInvokeEvent, filename: str
     const existingImage = nativeSavedImages.get(attachmentId);
     if (existingImage) return;
 
-    const imagePath = path.join(imageDir, filename);
+    const imagePath = path.join(imageDir, path.basename(filename));
     await ensureDirectoryExists(imageDir);
     await writeFile(imagePath, content);
 
@@ -144,8 +145,12 @@ export async function downloadAttachment(_event: IpcMainInvokeEvent, attachment:
         if (!attachment?.url || !attachment.oldUrl || !attachment?.id)
             return { error: "Invalid Attachment", path: null };
 
-        if (attachment.id.match(/[\\/.]/)) {
+        if (attachment.id.match(/[\\/.]/) || attachment.fileExtension?.match(/[\\/]/)) {
             return { error: "Invalid Attachment ID", path: null };
+        }
+
+        if (![attachment.url, attachment.oldUrl].every(url => allowedHosts.has(new URL(url).hostname))) {
+            return { error: "Invalid Attachment URL", path: null };
         }
 
         const settings = await getSettings();

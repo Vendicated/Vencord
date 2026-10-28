@@ -14,7 +14,8 @@ function getApprovedOrigins(): string[] {
 }
 
 async function isOriginApproved(url: string): Promise<boolean> {
-    if (getApprovedOrigins().includes(new URL(url).origin)) return true;
+    const { origin } = new URL(url);
+    if (getApprovedOrigins().includes(origin)) return true;
 
     const { response } = await dialog.showMessageBox({
         type: "warning",

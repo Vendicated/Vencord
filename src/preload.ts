@@ -22,10 +22,9 @@ import { contextBridge, webFrame } from "electron/renderer";
 
 import VencordNative, { invoke, sendSync } from "./VencordNative";
 
-contextBridge.exposeInMainWorld("VencordNative", VencordNative);
-
 // Discord
 if (location.protocol !== "data:") {
+    contextBridge.exposeInMainWorld("VencordNative", VencordNative);
     invoke(IpcEvents.INIT_FILE_WATCHERS);
 
     if (IS_DISCORD_DESKTOP) {

@@ -19,7 +19,8 @@ import setGitPathContent from "./misc/setGitPath.txt";
 // @ts-ignore fuck off
 import updateValidateContent from "./misc/updateValidate.txt"; // see above
 
-const PLUGIN_META_REGEX = /export default definePlugin\((?:\s|\/(?:\/|\*).*)*{\s*(?:\s|\/(?:\/|\*).*)*name:\s*(?:"|'|`)(.*)(?:"|'|`)(?:\s|\/(?:\/|\*).*)*,(?:\s|\/(?:\/|\*).*)*.+(?:\s|\/(?:\/|\*).*)*description:\s*(?:"|'|`)(.*)(?:"|'|`)(?:\s|\/(?:\/|\*).*)*/;
+const COMMENTS = String.raw`(?:\s|\/\/[^\n]*\n|\/\*[^*]*\*+(?:[^/*][^*]*\*+)*\/)*`;
+const PLUGIN_META_REGEX = new RegExp(String.raw`export default definePlugin\(${COMMENTS}{\s*${COMMENTS}name:\s*(?:"|'|\x60)(.*)(?:"|'|\x60)${COMMENTS},${COMMENTS}.+${COMMENTS}description:\s*(?:"|'|\x60)(.*)(?:"|'|\x60)${COMMENTS}`);
 // if edited, also edit in misc/constants.ts!!!
 const CLONE_LINK_REGEX = /https:\/\/(?:((?:git(?:hub|lab)\.com|git\.(?:[a-zA-Z0-9]|\.)+|codeberg\.org))\/(?!user-attachments)((?:[a-zA-Z0-9]|-)+)\/((?:[a-zA-Z0-9]|-|\.)+)(?:\.git)?|(plugins\.(nin0)\.dev)\/((?:[a-zA-Z0-9]|-|\.)+))(?:\/)?/;
 
@@ -57,6 +58,7 @@ export async function rmPlugin(_, name: string): Promise<string> {
 
 export async function isUpdateAvailableForPlugin(_, name: string): Promise<boolean> {
     return new Promise(resolve => {
+        if (!readdirSync(join(vencordPath, "../src/userplugins")).includes(name)) return resolve(false);
         const pluginDir = join(vencordPath, "../src/userplugins", name);
         const otherProc = exec("git fetch", {
             cwd: pluginDir
@@ -85,6 +87,7 @@ export function initPluginInstall(_, link: string, source: string, owner: string
     return new Promise(async (resolve, reject) => {
         const verifiedRegex = link.match(CLONE_LINK_REGEX)!;
         const idpl = source === "plugins.nin0.dev" ? 1 : 0;
+        if (/^\.+$/.test(repo)) return reject("Invalid link");
         if (![4, 7].includes(verifiedRegex.length) || verifiedRegex[0] !== link || verifiedRegex[[1, 4][idpl]] !== source || verifiedRegex[[2, 5][idpl]] !== owner || verifiedRegex[[3, 6][idpl]] !== repo) return reject("Invalid link");
 
         // Ask for clone
@@ -305,6 +308,7 @@ export async function getUserplugins() {
 
 export async function updatePlugin(_, directory: string) {
     return new Promise((resolve, reject) => {
+        if (!readdirSync(join(vencordPath, "../src/userplugins")).includes(directory)) return reject("Invalid plugin");
         const pluginDir = join(vencordPath, "../src/userplugins", directory);
 
         async function doStuff() {
@@ -345,10 +349,10 @@ export async function updatePlugin(_, directory: string) {
                     name: pluginMeta.name,
                     description: pluginMeta.description,
                     remote: pluginMeta.remote,
-                    commit: rawOutput.split("\n").map(line => line.split("////////")).map(([user, shortCommit, longCommit, message]) => `${user} (<a href="${pluginMeta.remote.replace("plugins.nin0.dev", "git.nin0.dev/userplugins")}/commit/${longCommit}" style="font-family: monospace;">${shortCommit}</a>) ~ ${message}`).join("\n")
+                    commit: rawOutput.split("\n").map(line => line.split("////////")).map(([user, shortCommit, longCommit, message]) => `${user.replaceAll("<", "&lt;")} (<a href="${pluginMeta.remote.replace("plugins.nin0.dev", "git.nin0.dev/userplugins")}/commit/${longCommit}" style="font-family: monospace;">${shortCommit}</a>) ~ ${message?.replaceAll("<", "&lt;")}`).join("\n")
                 }));
                 win.on("page-title-updated", async e => {
-                    if (win.webContents.getTitle().startsWith("openLink:")) {
+                    if (win.webContents.getTitle().startsWith("openLink:https://")) {
                         await shell.openExternal(win.webContents.getTitle().replace("openLink:", ""));
                     }
                     switch (win.webContents.getTitle() as "abortInstall" | "install") {

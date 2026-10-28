@@ -13,9 +13,9 @@ app.on("browser-window-created", (_, win) => {
         frame?.once("dom-ready", () => {
             if (!RendererSettings.store.plugins?.YoutubeAdblock?.enabled) return;
 
-            if (frame.url.includes("youtube.com/embed/")) {
+            if (frame.url.startsWith("https://www.youtube.com/embed/")) {
                 frame.executeJavaScript(adguard);
-            } else if (frame.parent?.url.includes("youtube.com/embed/")) {
+            } else if (frame.parent?.url.startsWith("https://www.youtube.com/embed/")) {
                 frame.parent.executeJavaScript(adguard);
             }
         });

@@ -10,12 +10,12 @@ import { request } from "https";
 // These links don't support CORS, so this has to be native
 const validRedirectUrls = /^https:\/\/(spotify\.link|s\.team)\/.+$/;
 
-function getRedirect(url: string) {
+function getRedirect(url: string, hops = 0) {
     return new Promise<string>((resolve, reject) => {
         const req = request(new URL(url), { method: "HEAD" }, res => {
             resolve(
-                res.headers.location
-                    ? getRedirect(res.headers.location)
+                res.headers.location && hops < 5
+                    ? getRedirect(res.headers.location, hops + 1)
                     : url
             );
         });

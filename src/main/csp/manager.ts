@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { NativeSettings } from "@main/settings";
+import { NativeSettings, RendererSettings } from "@main/settings";
 import { IpcEvents } from "@shared/IpcEvents";
 import { dialog, ipcMain, IpcMainInvokeEvent } from "electron";
 
@@ -22,7 +22,7 @@ function validate(url: string, directives: string[]) {
     try {
         const { host } = new URL(url);
 
-        if (/[;'"\\]/.test(host)) return false;
+        if (!/^(\*\.)?[\w-]+(\.[\w-]+)*(:\d+)?$/.test(host)) return false;
     } catch {
         return false;
     }
@@ -33,10 +33,12 @@ function validate(url: string, directives: string[]) {
     return true;
 }
 
-function getMessage(url: string, directives: string[], callerName: string) {
+function getMessage(url: string, directives: string[], isPlugin: boolean, callerName: string) {
     const domain = new URL(url).host;
 
-    const message = `${callerName} wants to allow connections to ${domain}`;
+    const message = isPlugin
+        ? `The ${callerName} plugin wants to allow connections to ${domain}`
+        : `An unknown source wants to allow connections to ${domain}`;
 
     let detail =
         `Unless you recognise and fully trust ${domain}, you should cancel this request!\n\n` +
@@ -79,9 +81,10 @@ async function addCspRule(_: IpcMainInvokeEvent, url: string, directives: string
         return "conflict";
     }
 
+    const isPlugin = !!RendererSettings.store.plugins?.[callerName]?.enabled;
     const { checkboxChecked, response } = await dialog.showMessageBox({
-        ...getMessage(url, directives, callerName),
-        type: callerName ? "info" : "warning",
+        ...getMessage(url, directives, isPlugin, callerName),
+        type: isPlugin ? "info" : "warning",
         title: "Equicord Host Permissions",
         buttons: ["Cancel", "Allow"],
         defaultId: 0,

@@ -175,6 +175,7 @@ ipcMain.handle(IpcEvents.OPEN_MONACO_EDITOR, async () => {
     monacoWin.once("closed", () => { monacoWin = null; });
 
     makeLinksOpenExternally(monacoWin);
+    monacoWin.webContents.on("will-navigate", e => e.preventDefault());
 
     await monacoWin.loadURL(`data:text/html;base64,${monacoHtml}`);
 });
