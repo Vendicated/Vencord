@@ -17,10 +17,11 @@
 */
 
 import { Message } from "@vencord/discord-types";
-import { Parser, useEffect, useState } from "@webpack/common";
+import { Parser, showToast, useEffect, useState } from "@webpack/common";
 
+import { settings } from "./settings";
 import { TranslateIcon } from "./TranslateIcon";
-import { cl, TranslationValue } from "./utils";
+import { cl, findTargetLanguage, TranslationValue } from "./utils";
 
 interface TranslationSetter {
     messageId: string;
@@ -48,6 +49,33 @@ function Dismiss({ onDismiss }: { onDismiss: () => void; }) {
     );
 }
 
+function ReplyInLanguage({ languageCode }: { languageCode: string; }) {
+    // service is subscribed so the link re-maps when the language list changes
+    const { autoTranslate, sentOutput } = settings.use(["autoTranslate", "sentOutput", "service"]);
+
+    const target = findTargetLanguage(languageCode);
+    if (!target) return null;
+
+    const [value, label] = target;
+    if (autoTranslate && sentOutput === value) return null;
+
+    return (
+        <>
+            {" - "}
+            <button
+                onClick={() => {
+                    settings.store.sentOutput = value;
+                    settings.store.autoTranslate = true;
+                    showToast({ text: `Auto-Translate enabled. Your messages will be translated to ${label}`, variant: "success" });
+                }}
+                className={cl("reply-in-language")}
+            >
+                Reply in {label}
+            </button>
+        </>
+    );
+}
+
 export function TranslationAccessory({ message }: { message: Message; }) {
     const [translation, setTranslation] = useState<TranslationValue>();
 
@@ -71,7 +99,10 @@ export function TranslationAccessory({ message }: { message: Message; }) {
             <TranslateIcon width={16} height={16} className={cl("accessory-icon")} />
             {Parser.parse(translation.text)}
             <br />
-            (translated from {translation.sourceLanguage} - <Dismiss onDismiss={() => setTranslation(undefined)} />)
+            (translated from {translation.sourceLanguage}
+            <ReplyInLanguage languageCode={translation.sourceLanguageCode} />
+            {" - "}
+            <Dismiss onDismiss={() => setTranslation(undefined)} />)
         </span>
     );
 }
