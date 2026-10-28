@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { NativeSettings } from "@main/settings";
+import { NativeSettings, RendererSettings } from "@main/settings";
 import { session } from "electron";
 
 type PolicyMap = Record<string, string[]>;
@@ -186,7 +186,27 @@ const patchCsp = (headers: PolicyMap) => {
     }
 };
 
+function migrateThemeLinks() {
+    if (NativeSettings.store.migratedThemeLinkCsp) return;
+
+    const { themeLinks = [], enabledThemeLinks = [] } = RendererSettings.store;
+    for (const link of new Set([...themeLinks, ...enabledThemeLinks])) {
+        const url = URL.parse(link.replace(/^@(light|dark) /, ""));
+        if (url?.protocol !== "https:") continue;
+
+        const { host } = url;
+        const isAllowed = Object.entries({ ...CspPolicies, ...NativeSettings.store.customCspRules })
+            .some(([source, directives]) => (source === host || source.startsWith("*.") && host.endsWith(source.slice(1))) && directives.includes("style-src"));
+
+        if (!isAllowed) NativeSettings.store.customCspRules[host] = ["style-src", "img-src", "font-src"];
+    }
+
+    NativeSettings.store.migratedThemeLinkCsp = true;
+}
+
 export function initCsp() {
+    migrateThemeLinks();
+
     session.defaultSession.webRequest.onHeadersReceived(({ responseHeaders, resourceType }, cb) => {
         if (responseHeaders) {
             if (resourceType === "mainFrame")
