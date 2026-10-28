@@ -12,7 +12,7 @@ export const settings = definePluginSettings({
         type: OptionType.STRING,
         description: "API Key.",
         default: "",
-        placeholder: "Enter API Key here for your AI endpoint.",
+        placeholder: "Enter your OpenRouter API key here.",
         componentProps: {
             type: "password"
         }
@@ -34,12 +34,6 @@ export const settings = definePluginSettings({
         type: OptionType.NUMBER,
         description: "Maximum number of tokens in the response.",
         default: 500
-    },
-    endpoint: {
-        type: OptionType.STRING,
-        description: "OpenAI Compatible AI Endpoint.",
-        default: "https://openrouter.ai/api/v1/chat/completions",
-        placeholder: "Enter your OpenAI compatible AI endpoint here."
     },
     context: {
         type: OptionType.NUMBER,

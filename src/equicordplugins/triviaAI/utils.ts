@@ -224,13 +224,13 @@ function getSystemPrompt() {
 }
 
 export async function getResponse(payload: ApiMessage[]): Promise<string> {
-    if (!settings.store.apiKey || !settings.store.endpoint || !settings.store.model) {
+    if (!settings.store.apiKey || !settings.store.model) {
         showToast({ text: "TriviaAI: API settings are incomplete.", variant: "critical" });
         return "";
     }
 
     try {
-        const req = await fetch(settings.store.endpoint, {
+        const req = await fetch("https://openrouter.ai/api/v1/chat/completions", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",

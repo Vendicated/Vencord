@@ -6,17 +6,13 @@
 
 import { OAuth2AuthorizeModal, openModal, showToast } from "@webpack/common";
 
-import { settings } from ".";
-
 const databaseTimezones: Record<string, { value: string | null; }> = {};
 const CLIENT_ID = "1377021506810417173";
 
-function getDomain(): string {
-    return settings.store.databaseUrl || "https://timezone.creations.works";
-}
+const DOMAIN = "https://timezone.creations.works";
 
 function getRedirectUri(): string {
-    return `${getDomain()}/auth/discord/callback`;
+    return `${DOMAIN}/auth/discord/callback`;
 }
 
 function handleApiError(error: any, defaultMessage: string): void {
@@ -44,7 +40,7 @@ export function getTimezone(userId: string): string | null {
 
 export async function loadDatabaseTimezones(): Promise<boolean> {
     try {
-        const res = await fetch(`${getDomain()}/list`, {
+        const res = await fetch(`${DOMAIN}/list`, {
             headers: { Accept: "application/json" }
         });
         if (res.ok) {
@@ -65,7 +61,7 @@ export async function loadDatabaseTimezones(): Promise<boolean> {
 
 async function checkAuthentication(): Promise<boolean> {
     try {
-        const res = await fetch(`${getDomain()}/me`, {
+        const res = await fetch(`${DOMAIN}/me`, {
             credentials: "include",
             headers: { Accept: "application/json" }
         });
@@ -95,7 +91,7 @@ async function setTimezoneInternal(timezone: string): Promise<boolean> {
     formData.append("timezone", timezone);
 
     try {
-        const res = await fetch(`${getDomain()}/set`, {
+        const res = await fetch(`${DOMAIN}/set`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/x-www-form-urlencoded",
@@ -135,7 +131,7 @@ export async function deleteTimezone(): Promise<boolean> {
 
 async function deleteTimezoneInternal(): Promise<boolean> {
     try {
-        const res = await fetch(`${getDomain()}/delete`, {
+        const res = await fetch(`${DOMAIN}/delete`, {
             method: "DELETE",
             headers: {
                 Accept: "application/json"
