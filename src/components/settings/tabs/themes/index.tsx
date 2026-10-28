@@ -91,14 +91,16 @@ function CspErrorCard() {
 
     const isImgurHtmlDomain = (url: string) => url.startsWith("https://imgur.com/");
 
-    const allowUrl = async (url: string) => {
-        const { origin, host } = new URL(url);
+    const allowableUrls = errors.filter(url => URL.canParse(url) && !isImgurHtmlDomain(url));
+    const allowableHosts = new Set(allowableUrls.map(url => new URL(url).host));
 
-        const result = await VencordNative.csp.requestAddOverride(origin, ["connect-src", "img-src", "style-src", "font-src"], "Equicord Themes");
+    const allowUrls = async (urls: string[]) => {
+        const result = await VencordNative.csp.requestAddOverride(urls.map(url => new URL(url).origin), ["connect-src", "img-src", "style-src", "font-src"], "Equicord Themes");
         if (result !== "ok") return;
 
+        const hosts = new Set(urls.map(url => new URL(url).host));
         CspBlockedUrls.forEach(url => {
-            if (new URL(url).host === host) CspBlockedUrls.delete(url);
+            if (URL.canParse(url) && hosts.has(new URL(url).host)) CspBlockedUrls.delete(url);
         });
 
         forceUpdate();
@@ -112,10 +114,16 @@ function CspErrorCard() {
                 Some resources were blocked from disallowed domains. Move them to GitHub or Imgur, or allow trusted domains below.
             </Paragraph>
 
+            {allowableHosts.size > 1 && (
+                <Button size="small" className={Margins.bottom8} onClick={() => allowUrls(allowableUrls)}>
+                    Allow All ({allowableHosts.size} domains)
+                </Button>
+            )}
+
             {errors.map(url => (
                 <div key={url} className="vc-settings-csp-row">
                     <Link href={url}>{url}</Link>
-                    <Button size="small" variant="secondary" onClick={() => allowUrl(url)} disabled={isImgurHtmlDomain(url)}>
+                    <Button size="small" variant="secondary" onClick={() => allowUrls([url])} disabled={!allowableUrls.includes(url)}>
                         Allow
                     </Button>
                 </div>

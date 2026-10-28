@@ -33,9 +33,7 @@ function validate(url: string, directives: string[]) {
     return true;
 }
 
-function getMessage(url: string, directives: string[], isPlugin: boolean, callerName: string) {
-    const domain = new URL(url).host;
-
+function getMessage(domain: string, directives: string[], isPlugin: boolean, callerName: string) {
     const message = isPlugin
         ? `The ${callerName} plugin wants to allow connections to ${domain}`
         : `An unknown source wants to allow connections to ${domain}`;
@@ -70,20 +68,22 @@ function getMessage(url: string, directives: string[], isPlugin: boolean, caller
     return { message, detail };
 }
 
-async function addCspRule(_: IpcMainInvokeEvent, url: string, directives: string[], callerName: string): Promise<CspRequestResult> {
-    if (!validate(url, directives)) {
+async function addCspRule(_: IpcMainInvokeEvent, url: string | string[], directives: string[], callerName: string): Promise<CspRequestResult> {
+    const urls = [url].flat();
+    if (!urls.length || urls.some(u => !validate(u, directives))) {
         return "invalid";
     }
 
-    const domain = new URL(url).host;
-
-    if (domain in NativeSettings.store.customCspRules) {
+    const domains = [...new Set(urls.map(u => new URL(u).host))].filter(d => !(d in NativeSettings.store.customCspRules));
+    if (!domains.length) {
         return "conflict";
     }
 
+    const domain = domains.join(", ");
+
     const isPlugin = !!RendererSettings.store.plugins?.[callerName]?.enabled;
     const { checkboxChecked, response } = await dialog.showMessageBox({
-        ...getMessage(url, directives, isPlugin, callerName),
+        ...getMessage(domain, directives, isPlugin, callerName),
         type: isPlugin ? "info" : "warning",
         title: "Equicord Host Permissions",
         buttons: ["Cancel", "Allow"],
@@ -101,7 +101,7 @@ async function addCspRule(_: IpcMainInvokeEvent, url: string, directives: string
         return "unchecked";
     }
 
-    NativeSettings.store.customCspRules[domain] = directives;
+    for (const d of domains) NativeSettings.store.customCspRules[d] = directives;
     return "ok";
 }
 
