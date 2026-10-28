@@ -37,7 +37,7 @@ import { findComponentByCodeLazy } from "@webpack";
 import { ColorPicker, React, UserProfileStore, UserStore, useState } from "@webpack/common";
 import virtualMerge from "virtual-merge";
 
-const virtualUsersCache = new WeakMap<UserProfile, { bioKey: string; val: UserProfile; }>();
+const virtualUsersCache = new WeakMap<UserProfile, { cacheKey: string; val: UserProfile; }>();
 
 interface Colors {
     primary: number;
@@ -193,6 +193,10 @@ function SettingsAboutComponent() {
         </section>);
 }
 
+function makeCacheKey(user: UserProfile) {
+    return `${settings.store.nitroFirst}\x01${user.themeColors?.toString() ?? "<undefined>"}\x01${user.bio}`;
+}
+
 export default definePlugin({
     name: "FakeProfileThemes",
     description: "Allows profile theming by hiding the colors in your bio thanks to invisible 3y3 encoding",
@@ -222,16 +226,19 @@ export default definePlugin({
         // the return value of UserProfileStore#getUserProfile needs to have a stable return value
         // discord compares it with referential equality in react deps (somewhere)
         // and we will cause infinite react loops if it's identity is not stable
+        if (!user) {
+            return user;
+        }
         if (virtualUsersCache.has(user)) {
-            const { bioKey, val } = virtualUsersCache.get(user)!;
+            const { cacheKey: bioKey, val } = virtualUsersCache.get(user)!;
             // key on bio so bio updates don't leave stale data
-            if (bioKey !== user?.bio) {
+            if (bioKey !== makeCacheKey(user)) {
                 virtualUsersCache.delete(user);
             } else {
                 return val;
             }
         }
-        if (user?.bio) {
+        if (user.bio) {
             // don't replace colors if already set with nitro
             if (settings.store.nitroFirst && user.themeColors) return user;
             const colors = decode(user.bio);
@@ -240,7 +247,7 @@ export default definePlugin({
                     premiumType: 2,
                     themeColors: colors
                 });
-                virtualUsersCache.set(user, { bioKey: user.bio, val });
+                virtualUsersCache.set(user, { cacheKey: makeCacheKey(user), val });
                 return val;
             }
         }
