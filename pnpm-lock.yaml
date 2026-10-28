@@ -281,9 +281,6 @@ catalogs:
     typescript-transform-paths:
       specifier: ^3.5.6
       version: 3.5.6
-    virtual-merge:
-      specifier: ^1.0.1
-      version: 1.0.2
     zip-local:
       specifier: ^0.3.5
       version: 0.3.5
@@ -313,9 +310,6 @@ importers:
       monaco-editor:
         specifier: 'catalog:'
         version: 0.57.0
-      virtual-merge:
-        specifier: 'catalog:'
-        version: 1.0.2
     devDependencies:
       '@stylistic/eslint-plugin':
         specifier: 'catalog:'
@@ -2739,9 +2733,6 @@ packages:
 
   util-deprecate@1.0.2:
     resolution: {integrity: sha512-EPD5q1uXyFxJpCrLnCc1nHnq3gOa6DZBocAIiI2TaSCA7VCJ1UJDMagCzIkXNsUYfD1daK//LTEQ8xiIbrHtcw==}
-
-  virtual-merge@1.0.2:
-    resolution: {integrity: sha512-5hxklfyTUWMKYaLuoriOf9Xqmt3oWtfAiZw0M3ITeeNmVdKhcnys7rYyfBHqvy/hlELP0hQ4u7o1r5HBXbm6sg==}
 
   vscode-oniguruma@1.7.0:
     resolution: {integrity: sha512-L9WMGRfrjOhgHSdOYgCt/yRMsXzLDJSL7BPrOZt73gU0iWO4mpqzqQzOz5srxqTvMBaR0XZTSrVWo4j55Rc6cA==}
@@ -5445,8 +5436,6 @@ snapshots:
   use@3.1.1: {}
 
   util-deprecate@1.0.2: {}
-
-  virtual-merge@1.0.2: {}
 
   vscode-oniguruma@1.7.0: {}
 
