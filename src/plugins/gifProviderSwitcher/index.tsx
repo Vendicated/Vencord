@@ -162,7 +162,9 @@ export default definePlugin({
         return providers[settings.store.provider!];
     },
 
-    SearchWrapper: ErrorBoundary.wrap(({ Component, placeholder, "aria-label": ariaLabel, ref, ...restProps }) => {
+    SearchWrapper: ErrorBoundary.wrap(({ Component, ...props }) => {
+        let { placeholder, "aria-label": ariaLabel, ref, query, onChange } = props;
+
         const { provider } = settings.use(["provider"]);
 
         // restProps contains `autoFocus: true`, which should in theory focus the input automatically.
@@ -178,12 +180,25 @@ export default definePlugin({
 
         return (
             <div className="vc-tenorGifSearch-wrapper">
-                <Component placeholder={placeholder} aria-label={ariaLabel} ref={ref} {...restProps} />
+                <Component placeholder={placeholder} aria-label={ariaLabel} ref={ref} {...props} />
                 <Select
                     placeholder="Provider"
                     options={settings.def.provider.options}
                     isSelected={v => v === provider}
-                    select={v => settings.store.provider = v}
+                    select={v => {
+                        settings.store.provider = v;
+
+                        if (!query || v === provider) return;
+
+                        // Discord memos it somewhere in a different place.
+                        // It already re-fetches the results internally, but doesn't re-render.
+                        // As a workaround we force a re-render by toggling a space at the start of the query
+                        onChange(
+                            query.startsWith(" ")
+                                ? query.slice(1)
+                                : " " + query
+                        );
+                    }}
                     serialize={identity}
                 />
             </div>

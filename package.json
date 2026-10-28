@@ -40,7 +40,6 @@
         "@vap/shiki": "catalog:",
         "fflate": "catalog:",
         "gifenc": "catalog:",
-        "virtual-merge": "catalog:",
         "@vencord/monaco-editor": "catalog:"
     },
     "devDependencies": {
