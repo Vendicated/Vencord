@@ -65,3 +65,5 @@ allowBuilds:
     esbuild: true
 
 pmOnFail: warn
+minimumReleaseAgeExclude:
+    - "@vencord/monaco-editor@0.57.0-beta"
