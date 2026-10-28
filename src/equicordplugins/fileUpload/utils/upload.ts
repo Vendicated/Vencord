@@ -4,7 +4,6 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { normalizeCorsProxyUrl, toProxiedUrl } from "@equicordplugins/fileUpload/constants";
 import { settings } from "@equicordplugins/fileUpload/settings";
 import { fallbackServiceOrder, serviceLabels, ServiceType, ShareXUploaderConfig, UploadResponse } from "@equicordplugins/fileUpload/types";
 import { copyToClipboard } from "@utils/clipboard";
@@ -25,20 +24,9 @@ const Native = IS_WEB
 
 export const logger = new Logger("FileUpload", "#7cb7ff");
 
-function toProxyUrl(url: string): string {
-    const corsProxyUrl = normalizeCorsProxyUrl((settings.store as { corsProxyUrl?: string; }).corsProxyUrl);
-
-    if (!corsProxyUrl || url.startsWith(`${corsProxyUrl}?url=`)) {
-        return url;
-    }
-
-    return toProxiedUrl(url, corsProxyUrl);
-}
-
 let isUploading = false;
 
 type UploadPhase = "idle" | "preparing" | "uploading" | "retrying" | "success" | "failed" | "cancelled";
-type EmbedProxyService = "cors" | "nfp";
 
 export interface UploadProgressState {
     phase: UploadPhase;
@@ -148,10 +136,8 @@ async function fetchWithTimeout(url: string, options: RequestInit): Promise<Resp
     const controller = new AbortController();
     activeAbortController = controller;
     const timeout = setTimeout(() => controller.abort(), getUploadTimeoutMs());
-    const requestUrl = toProxyUrl(url);
-
     try {
-        return await fetch(requestUrl, {
+        return await fetch(url, {
             ...options,
             signal: controller.signal
         });
@@ -236,14 +222,12 @@ function setXhrUploadProgress(event: ProgressEvent) {
 }
 
 async function uploadRequestWithTimeout(url: string, options: RequestInit): Promise<XhrResponse> {
-    const requestUrl = toProxyUrl(url);
-
     return new Promise((resolve, reject) => {
         const xhr = new XMLHttpRequest();
         activeXhr = xhr;
         const timeout = setTimeout(() => xhr.abort(), getUploadTimeoutMs());
 
-        xhr.open(options.method || "GET", requestUrl);
+        xhr.open(options.method || "GET", url);
 
         for (const [key, value] of getHeaderEntries(options.headers)) {
             xhr.setRequestHeader(key, value);
@@ -1175,12 +1159,6 @@ const EXE_BLOCKED_SERVICES = new Set<ServiceType>([
     ServiceType.ZEROX0
 ]);
 
-function getEmbedProxyService(): EmbedProxyService {
-    const service = settings.store.embedProxyService;
-    return service === "nfp" ? service : "cors";
-
-}
-
 function shouldProxyEmbedUrl(url: string): boolean {
     const ext = getUrlExtension(url)?.toLowerCase();
     if (!ext) {
@@ -1195,19 +1173,11 @@ function applyEmbedProxy(url: string): string {
         return url;
     }
 
-    const service = getEmbedProxyService();
     if (!shouldProxyEmbedUrl(url)) {
         return url;
     }
 
-    switch (service) {
-        case "cors":
-            return toProxyUrl(url);
-        case "nfp":
-            return `https://discord.nfp.is/?v=${encodeURIComponent(url)}`;
-        default:
-            return toProxyUrl(url);
-    }
+    return `https://discord.nfp.is/?v=${encodeURIComponent(url)}`;
 }
 
 function isExeFileName(fileName: string): boolean {

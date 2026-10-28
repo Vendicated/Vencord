@@ -70,16 +70,6 @@ export const settings = definePluginSettings({
             { label: "Show Mod as Suffix", value: "suffix" },
         ]
     },
-    apiUrl: {
-        type: OptionType.STRING,
-        description: "API to use",
-        default: "https://badges.equicord.org/",
-        restartNeeded: false,
-        isValid: (value => {
-            if (!value) return false;
-            return true;
-        })
-    },
     showClientMods: {
         type: OptionType.COMPONENT,
         component: ShowXSettings,

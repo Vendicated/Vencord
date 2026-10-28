@@ -12,7 +12,7 @@ import definePlugin from "@utils/types";
 import { User } from "@vencord/discord-types";
 import { UserStore } from "@webpack/common";
 
-import { CDN_URL, RAW_SKU_ID, setBaseUrl, SKU_ID } from "./lib/constants";
+import { CDN_URL, RAW_SKU_ID, SKU_ID } from "./lib/constants";
 import { useAuthorizationStore } from "./lib/stores/AuthorizationStore";
 import { useCurrentUserDecorationsStore } from "./lib/stores/CurrentUserDecorationsStore";
 import { useUserDecorAvatarDecoration, useUsersDecorationsStore } from "./lib/stores/UsersDecorationsStore";
@@ -172,8 +172,7 @@ export default definePlugin({
         return override === undefined && hasDecorDecoration ? null : src;
     },
 
-    async start() {
-        await setBaseUrl(settings.store.baseUrl);
+    start() {
         useUsersDecorationsStore.getState().fetch(UserStore.getCurrentUser().id, true);
     },
 

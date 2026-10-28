@@ -51,11 +51,6 @@ const litterboxOptions = [
     { label: "72 hours", value: "72h" }
 ];
 
-const embedProxyOptions = [
-    { label: "CORS Proxy", value: "cors", default: true },
-    { label: "discord.nfp.is", value: "nfp" }
-];
-
 const encryptingHostUrlStyleOptions = [
     { label: "Query", value: "query", default: true },
     { label: "Param", value: "param" },
@@ -284,21 +279,8 @@ export const settings = definePluginSettings({
     },
     embedProxyEnabled: {
         type: OptionType.BOOLEAN,
-        description: "Proxy uploaded video links through an embed helper service.",
+        description: "Wrap uploaded video links with discord.nfp.is.",
         default: false,
-        hidden: true
-    },
-    embedProxyService: {
-        type: OptionType.SELECT,
-        description: "Embed helper service to wrap uploaded video links.",
-        options: embedProxyOptions,
-        default: "cors",
-        hidden: true
-    },
-    corsProxyUrl: {
-        type: OptionType.STRING,
-        description: "Optional CORS proxy URL used for browser uploads",
-        default: "",
         hidden: true
     },
     apngToGif: {
@@ -931,28 +913,13 @@ export function SettingsComponent() {
 
                 <SettingSwitch
                     name="Use Embed Proxy"
-                    description="Wrap uploaded video links with an embed proxy service for better Discord previews."
+                    description="Wrap uploaded video links with discord.nfp.is for better Discord previews."
                     checked={settings.store.embedProxyEnabled}
                     onChange={v => {
                         settings.store.embedProxyEnabled = v;
                         update();
                     }}
                 />
-
-                {settings.store.embedProxyEnabled && (
-                    <SettingsSection id="embed-proxy-service" name="Embed Proxy Service" description="Choose which embed proxy service to use for uploaded video links">
-                        <Select
-                            options={embedProxyOptions}
-                            isSelected={v => v === settings.store.embedProxyService}
-                            select={v => {
-                                settings.store.embedProxyService = v;
-                                update();
-                            }}
-                            serialize={v => v}
-                            placeholder="Select an embed proxy service"
-                        />
-                    </SettingsSection>
-                )}
 
                 <SettingSwitch
                     name="Convert APNG to GIF"
@@ -1036,15 +1003,7 @@ export function SettingsComponent() {
                 />
             </SettingGroup>
 
-            <SettingGroup name="Network" description="Configure browser upload proxying and timeouts.">
-                <SettingTextInput
-                    name="CORS Proxy URL"
-                    description="Optional CORS proxy used for web uploads. Leave empty to upload directly."
-                    value={settings.store.corsProxyUrl || ""}
-                    onChange={v => settings.store.corsProxyUrl = v}
-                    placeholder="https://your-cors-proxy.example.com"
-                />
-
+            <SettingGroup name="Network" description="Configure upload timeouts.">
                 <SettingsSection id="upload-timeout" name="Upload Timeout" description="Maximum time to wait per upload attempt before switching to fallback">
                     <Select
                         options={[

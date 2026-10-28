@@ -37,8 +37,7 @@ export const serviceMap: Record<string, string> = {
 const blockedMods = ["vencord", "equicord"];
 
 export async function loadBadges() {
-    const url = settings.store.apiUrl.endsWith("/") ? settings.store.apiUrl + "users" : settings.store.apiUrl + "/users";
-    const globalBadges = await fetch(url, { cache: "no-cache" }).then(r => r.json());
+    const globalBadges = await fetch("https://badges.equicord.org/users", { cache: "no-cache" }).then(r => r.json());
     const filteredUsers: Record<string, typeof globalBadges.users[string]> = {};
 
     for (const key in globalBadges.users) {

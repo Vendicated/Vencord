@@ -6,10 +6,11 @@
 
 import { definePluginSettings } from "@api/Settings";
 import { disableStyle, enableStyle } from "@api/Styles";
-import { ButtonCompat } from "@components/Button";
+import { Button, ButtonCompat } from "@components/Button";
 import { HeadingSecondary } from "@components/Heading";
 import { Paragraph } from "@components/Paragraph";
 import { SettingsSection } from "@components/settings/tabs/plugins/components/Common";
+import { promptToRestart } from "@utils/promptToRestart";
 import { makeRange, OptionType } from "@utils/types";
 import { MaskedLink, Select, showToast, TextInput } from "@webpack/common";
 
@@ -39,6 +40,19 @@ function InstallInstructions() {
 }
 
 function LyricsProviderSettings() {
+    const allowLyricsServer = async () => {
+        const url = settings.store.spotifyLyricsApiUrl.trim();
+        const hostname = URL.parse(url)?.hostname;
+        if (hostname === "localhost" || hostname === "127.0.0.1" || await VencordNative.csp.isDomainAllowed(url, ["connect-src"])) {
+            showToast({ text: "This server is already allowed.", variant: "success" });
+            return;
+        }
+
+        const res = await VencordNative.csp.requestAddOverride(url, ["connect-src"], "MusicControls");
+        if (res === "ok") promptToRestart("relaunch");
+        else if (res !== "cancelled") showToast({ text: res === "conflict" ? "This server is already allowed." : "Could not allow this server.", variant: "critical" });
+    };
+
     return (
         <>
             <SettingsSection id="lyrics-provider" name="Lyrics Provider" description="Where lyrics are fetched from.">
@@ -71,6 +85,12 @@ function LyricsProviderSettings() {
                         placeholder="https://spotify-lyrics-api-pi.vercel.app"
                         maxLength={null}
                     />
+                </SettingsSection>
+            )}
+
+            {!IS_WEB && settings.store.lyricsProvider === Provider.Spotify && (
+                <SettingsSection id="spotify-lyrics-allow" name="Allow Server" description="Equicord can only connect to lyrics servers you allow. A restart is needed afterwards.">
+                    <Button size="small" variant="secondary" onClick={allowLyricsServer}>Allow Server</Button>
                 </SettingsSection>
             )}
         </>
