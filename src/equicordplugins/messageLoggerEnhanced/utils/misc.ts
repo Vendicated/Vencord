@@ -141,7 +141,6 @@ export async function doesBlobUrlExist(url: string) {
 export function getNative(): PluginNative<typeof import("../native")> {
     if (IS_WEB) {
         const Native = {
-            writeLogs: async () => { },
             getDefaultNativeImageDir: async () => DEFAULT_IMAGE_CACHE_DIR,
             getDefaultNativeDataDir: async () => "",
             getDefaultAttachmentFileExtensions: async () => DEFAULT_ATTACHMENT_FILE_EXTENSIONS,
@@ -155,7 +154,6 @@ export function getNative(): PluginNative<typeof import("../native")> {
             getNativeSavedImages: async () => new Map(),
             messageLoggerEnhancedUniqueIdThingyIdkMan: async () => { },
             showItemInFolder: async () => { },
-            writeImageNative: async () => { },
             chooseFile: async () => "",
             downloadAttachment: async () => ({ error: "web", path: null }),
             startNativeLogExport: async () => "" as any,

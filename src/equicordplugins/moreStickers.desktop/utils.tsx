@@ -6,6 +6,7 @@
 
 import type { FFmpeg } from "@ffmpeg/ffmpeg";
 import { classNameFactory } from "@utils/css";
+import { PluginNative } from "@utils/types";
 import { waitFor } from "@webpack";
 import { React } from "@webpack/common";
 
@@ -14,14 +15,11 @@ import { FFmpegState } from "./types";
 export const cl = classNameFactory("vc-more-stickers-");
 export const clPicker = (className: string, ...args: any[]) => cl("picker-" + className, ...args);
 
-const CORS_PROXY = "https://cors.keiran0.workers.dev?url=";
+const Native = VencordNative.pluginHelpers.MoreStickers as PluginNative<typeof import("./native")>;
 
-function corsUrl(url: string | URL) {
-    return CORS_PROXY + encodeURIComponent(url.toString());
-}
-
-export function corsFetch(url: string | URL, init?: RequestInit | undefined) {
-    return fetch(corsUrl(url), init);
+export async function nativeFetch(url: string | URL, init?: RequestInit) {
+    const { status, type, data } = await Native.fetchLine(url.toString(), init);
+    return new Response(data, { status, headers: { "content-type": type } });
 }
 
 export class Mutex {

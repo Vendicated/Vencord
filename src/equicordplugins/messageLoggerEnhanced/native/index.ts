@@ -16,7 +16,7 @@ export * from "./import";
 
 import { blockedExts } from "../list";
 import { LoggedAttachment } from "../types";
-import { DEFAULT_ATTACHMENT_FILE_EXTENSIONS, LOGS_DATA_FILENAME } from "../utils/constants";
+import { DEFAULT_ATTACHMENT_FILE_EXTENSIONS } from "../utils/constants";
 import { ensureDirectoryExists, getAttachmentIdFromFilename, sleep } from "./utils";
 
 export { getSettings };
@@ -30,7 +30,6 @@ let logsDir: string;
 let imageCacheDir: string;
 
 const getImageCacheDir = async () => imageCacheDir ?? await getDefaultNativeImageDir();
-const getLogsDir = async () => logsDir ?? await getDefaultNativeDataDir();
 
 export async function initDirs() {
     const { logsDir: ld, imageCacheDir: icd } = await getSettings();
@@ -63,32 +62,11 @@ export async function getImageNative(_event: IpcMainInvokeEvent, attachmentId: s
     }
 }
 
-export async function writeImageNative(_event: IpcMainInvokeEvent, filename: string, content: Uint8Array) {
-    if (!filename || !content) return;
-    const imageDir = await getImageCacheDir();
-    const attachmentId = getAttachmentIdFromFilename(filename);
-
-    const existingImage = nativeSavedImages.get(attachmentId);
-    if (existingImage) return;
-
-    const imagePath = path.join(imageDir, path.basename(filename));
-    await ensureDirectoryExists(imageDir);
-    await writeFile(imagePath, content);
-
-    nativeSavedImages.set(attachmentId, imagePath);
-}
-
 export async function deleteFileNative(_event: IpcMainInvokeEvent, attachmentId: string) {
     const imagePath = nativeSavedImages.get(attachmentId);
     if (!imagePath) return;
 
     await unlink(imagePath);
-}
-
-export async function writeLogs(_event: IpcMainInvokeEvent, contents: string) {
-    const logsDir = await getLogsDir();
-
-    writeFile(path.join(logsDir, LOGS_DATA_FILENAME), contents);
 }
 
 export async function getDefaultNativeImageDir(): Promise<string> {

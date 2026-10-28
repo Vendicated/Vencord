@@ -13,13 +13,12 @@ import { useForceUpdater } from "@utils/react";
 import { OptionType, PluginNative } from "@utils/types";
 import { React, Select, showToast, TextArea, TextInput } from "@webpack/common";
 
-import { CORS_PROXY } from "./constants";
 import { fallbackServiceOrder, serviceLabels, ServiceType } from "./types";
 import { parseShareXConfig } from "./utils/sharex";
 
-const Native = IS_DISCORD_DESKTOP
-    ? VencordNative.pluginHelpers.FileUpload as PluginNative<typeof import("./native")>
-    : null;
+const Native = IS_WEB
+    ? null
+    : VencordNative.pluginHelpers.FileUpload as PluginNative<typeof import("./native")>;
 
 const defaultFallbackOrder = fallbackServiceOrder.join(",");
 const cl = classNameFactory("vc-file-upload-settings-");
@@ -31,7 +30,7 @@ const serviceOptions = [
     { label: "Encrypting.host", value: ServiceType.ENCRYPTINGHOST },
     { label: "S3-Compatible", value: ServiceType.S3 },
     { label: "Catbox.moe", value: ServiceType.CATBOX },
-    ...(IS_DISCORD_DESKTOP ? [{ label: "0x0.st", value: ServiceType.ZEROX0 }] : []),
+    ...(IS_WEB ? [] : [{ label: "0x0.st", value: ServiceType.ZEROX0 }]),
     { label: "Litterbox", value: ServiceType.LITTERBOX },
     { label: "GoFile", value: ServiceType.GOFILE },
     { label: "tmpfiles.org", value: ServiceType.TMPFILES },
@@ -297,8 +296,8 @@ export const settings = definePluginSettings({
     },
     corsProxyUrl: {
         type: OptionType.STRING,
-        description: "CORS proxy URL used for browser uploads",
-        default: CORS_PROXY,
+        description: "Optional CORS proxy URL used for browser uploads",
+        default: "",
         hidden: true
     },
     apngToGif: {
@@ -1022,15 +1021,11 @@ export function SettingsComponent() {
             <SettingGroup name="Network" description="Configure browser upload proxying and timeouts.">
                 <SettingTextInput
                     name="CORS Proxy URL"
-                    description="CORS proxy used for web uploads. Leave empty to use the default proxy."
+                    description="Optional CORS proxy used for web uploads. Leave empty to upload directly."
                     value={settings.store.corsProxyUrl || ""}
                     onChange={v => settings.store.corsProxyUrl = v}
                     placeholder="https://your-cors-proxy.example.com"
                 />
-
-                <SettingsSection id="default-cors-proxy-source" name="Default CORS Proxy Source" description="Source code for the default CORS proxy">
-                    <a href="https://codeberg.org/key/corsproxy" target="_blank" rel="noreferrer">codeberg.org/key/corsproxy</a>
-                </SettingsSection>
 
                 <SettingsSection id="upload-timeout" name="Upload Timeout" description="Maximum time to wait per upload attempt before switching to fallback">
                     <Select

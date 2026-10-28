@@ -4,15 +4,14 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-export const CORS_PROXY = "https://cors.keiran0.workers.dev";
-
 export function normalizeCorsProxyUrl(url?: string): string {
-    return (url?.trim() || CORS_PROXY).replace(/\/+$/, "");
+    return (url?.trim() ?? "").replace(/\/+$/, "");
 }
 
-export function toProxiedUrl(url: string, corsProxyUrl = CORS_PROXY): string {
-    if (corsProxyUrl === "none") {
+export function toProxiedUrl(url: string, corsProxyUrl?: string): string {
+    const proxy = normalizeCorsProxyUrl(corsProxyUrl);
+    if (!proxy || proxy === "none") {
         return url;
     }
-    return `${normalizeCorsProxyUrl(corsProxyUrl)}?url=${encodeURIComponent(url)}`;
+    return `${proxy}?url=${encodeURIComponent(url)}`;
 }

@@ -8,7 +8,7 @@ import * as DataStore from "@api/DataStore";
 
 import { removeRecentStickerByPackId } from "./components";
 import { DynamicPackSetMeta, DynamicStickerPackMeta, StickerPack, StickerPackMeta } from "./types";
-import { corsFetch, Mutex } from "./utils";
+import { Mutex,nativeFetch } from "./utils";
 
 const mutex = new Mutex();
 
@@ -118,7 +118,7 @@ export async function deleteStickerPack(id: string, packsKey: string = PACKS_KEY
 // ---------------------------- Dynamic Packs ----------------------------
 
 export async function getDynamicStickerPack(dspm: DynamicStickerPackMeta): Promise<StickerPack | null> {
-    const dsp = await corsFetch(dspm.dynamic.refreshUrl, {
+    const dsp = await nativeFetch(dspm.dynamic.refreshUrl, {
         headers: dspm.dynamic.authHeaders,
     });
     if (!dsp.ok) return null;
@@ -134,7 +134,7 @@ function hasDynamicPackSetMeta(dpsm: DynamicPackSetMeta, metas?: DynamicPackSetM
 }
 
 export async function fetchDynamicPackSetMeta(dpsm: DynamicPackSetMeta): Promise<DynamicPackSetMeta | null> {
-    const dpsm_ = await corsFetch(dpsm.refreshUrl, {
+    const dpsm_ = await nativeFetch(dpsm.refreshUrl, {
         headers: dpsm.authHeaders,
     });
     if (!dpsm_.ok) return null;

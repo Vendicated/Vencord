@@ -12,7 +12,7 @@ import { ChannelStore, CloudUploader, Constants, DraftStore, FluxDispatcher, Mes
 
 import { settings } from ".";
 import { FFmpegState, Sticker } from "./types";
-import { corsFetch } from "./utils";
+import { nativeFetch } from "./utils";
 
 type SendStickerOptions = {
     channelId: string;
@@ -75,7 +75,7 @@ async function resizeImage(url: string) {
 
 async function toGIF(url: string, ffmpeg: FFmpeg): Promise<File> {
     const filename = (new URL(url)).pathname.split("/").pop() ?? "image.png";
-    const res = await corsFetch(url);
+    const res = await nativeFetch(url);
     if (!res.ok) throw new Error("Failed to fetch image for GIF conversion");
     const arr = new Uint8Array(await res.arrayBuffer());
     await ffmpeg.writeFile(filename, arr);
@@ -130,7 +130,7 @@ export async function sendSticker({ channelId, sticker, ctrlKey, shiftKey, ffmpe
         if (!ffmpegState?.ffmpeg || !ffmpegState.isLoaded) throw new Error("FFmpeg not ready");
         file = await toGIF(sticker.image, ffmpegState.ffmpeg);
     } else {
-        const res = await corsFetch(sticker.image);
+        const res = await nativeFetch(sticker.image);
         if (!res.ok) throw new Error("Failed to fetch sticker image");
         const blobUrl = URL.createObjectURL(await res.blob());
         let processed: Blob;

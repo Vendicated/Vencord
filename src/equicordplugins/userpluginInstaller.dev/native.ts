@@ -6,7 +6,7 @@
 
 import { NativeSettings } from "@main/settings";
 import { exec, spawn } from "child_process";
-import { BrowserWindow, dialog, shell, WebContentsView } from "electron";
+import { BrowserWindow, dialog, shell } from "electron";
 import { existsSync, readdirSync, readFileSync } from "fs";
 import { mkdir, readdir, readFile, rm } from "fs/promises";
 import { basename, join } from "path";
@@ -85,10 +85,10 @@ export async function isUpdateAvailableForPlugin(_, name: string): Promise<boole
 export function initPluginInstall(_, link: string, source: string, owner: string, repo: string): Promise<string> {
     // eslint-disable-next-line
     return new Promise(async (resolve, reject) => {
-        const verifiedRegex = link.match(CLONE_LINK_REGEX)!;
+        const verifiedRegex = link.match(CLONE_LINK_REGEX);
         const idpl = source === "plugins.nin0.dev" ? 1 : 0;
         if (/^\.+$/.test(repo)) return reject("Invalid link");
-        if (![4, 7].includes(verifiedRegex.length) || verifiedRegex[0] !== link || verifiedRegex[[1, 4][idpl]] !== source || verifiedRegex[[2, 5][idpl]] !== owner || verifiedRegex[[3, 6][idpl]] !== repo) return reject("Invalid link");
+        if (!verifiedRegex || ![4, 7].includes(verifiedRegex.length) || verifiedRegex[0] !== link || verifiedRegex[[1, 4][idpl]] !== source || verifiedRegex[[2, 5][idpl]] !== owner || verifiedRegex[[3, 6][idpl]] !== repo) return reject("Invalid link");
 
         // Ask for clone
         const cloneDialog = await dialog.showMessageBox({
@@ -131,13 +131,6 @@ export function initPluginInstall(_, link: string, source: string, owner: string
             show: false,
             autoHideMenuBar: true
         });
-        const reView /* haha got it */ = new WebContentsView({
-            webPreferences: {
-                devTools: true,
-                nodeIntegration: true
-            }
-        });
-        win.contentView.addChildView(reView);
         win.loadURL(generateReviewPluginContent(meta));
         win.on("page-title-updated", async e => {
             switch (win.webContents.getTitle() as "abortInstall" | "reviewCode" | "install") {
@@ -329,13 +322,6 @@ export async function updatePlugin(_, directory: string) {
                 show: false,
                 autoHideMenuBar: true
             });
-            const reView /* haha got it */ = new WebContentsView({
-                webPreferences: {
-                    devTools: true,
-                    nodeIntegration: true
-                }
-            });
-            win.contentView.addChildView(reView);
 
             const commitProc = exec("git log origin/HEAD...HEAD --oneline --pretty=format:%an////////%h////////%H////////%s", {
                 cwd: pluginDir
@@ -407,13 +393,6 @@ export async function openGitPathModal(_: any) {
         show: false,
         autoHideMenuBar: true
     });
-    const reView = new WebContentsView({
-        webPreferences: {
-            devTools: true,
-            nodeIntegration: true
-        }
-    });
-    win.contentView.addChildView(reView);
     win.loadURL(`data:text/html;base64,${Buffer.from(setGitPathContent).toString("base64")}`);
     win.on("page-title-updated", async _ => {
         const t = win.webContents.getTitle();
