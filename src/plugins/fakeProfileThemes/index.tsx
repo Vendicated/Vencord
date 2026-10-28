@@ -37,7 +37,7 @@ import { findComponentByCodeLazy } from "@webpack";
 import { ColorPicker, React, UserProfileStore, UserStore, useState } from "@webpack/common";
 import virtualMerge from "virtual-merge";
 
-const virtualUsersCache = new WeakMap<object, object>();
+const virtualUsersCache = new WeakMap<UserProfile, { bioKey: string; val: UserProfile; }>();
 
 interface Colors {
     primary: number;
@@ -223,19 +223,25 @@ export default definePlugin({
         // discord compares it with referential equality in react deps (somewhere)
         // and we will cause infinite react loops if it's identity is not stable
         if (virtualUsersCache.has(user)) {
-            return virtualUsersCache.get(user);
+            const { bioKey, val } = virtualUsersCache.get(user)!;
+            // key on bio so bio updates don't leave stale data
+            if (bioKey !== user?.bio) {
+                virtualUsersCache.delete(user);
+            } else {
+                return val;
+            }
         }
         if (user?.bio) {
             // don't replace colors if already set with nitro
             if (settings.store.nitroFirst && user.themeColors) return user;
             const colors = decode(user.bio);
             if (colors) {
-                const ret = virtualMerge(user, {
+                const val: UserProfile = virtualMerge(user, {
                     premiumType: 2,
                     themeColors: colors
                 });
-                virtualUsersCache.set(user, ret);
-                return ret;
+                virtualUsersCache.set(user, { bioKey: user.bio, val });
+                return val;
             }
         }
         return user;
