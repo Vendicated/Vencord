@@ -230,9 +230,9 @@ export default definePlugin({
             return user;
         }
         if (virtualUsersCache.has(user)) {
-            const { cacheKey: bioKey, val } = virtualUsersCache.get(user)!;
+            const { cacheKey, val } = virtualUsersCache.get(user)!;
             // key on bio so bio updates don't leave stale data
-            if (bioKey !== makeCacheKey(user)) {
+            if (cacheKey !== makeCacheKey(user)) {
                 virtualUsersCache.delete(user);
             } else {
                 return val;
