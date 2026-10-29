@@ -32,7 +32,6 @@ import { promisify } from "util";
 
 import { getPluginTarget } from "../utils.mjs";
 import { builtinModules } from "module";
-import { P } from "ts-pattern";
 
 /** @type {import("../../package.json")} */
 const PackageJSON = JSON.parse(readFileSync("package.json", "utf-8"));
