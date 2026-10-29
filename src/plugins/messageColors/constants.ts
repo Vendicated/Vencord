@@ -81,27 +81,29 @@ export const enum ColorType {
 export const replaceRegexp = (reg: string) => {
     const n = new RegExp(
         reg
-            // \c - 'comma'
-            // \v - 'value'
+            // \c - comma or whitespace separator
+            // \v - 'value' (integer)
             // \f - 'float'
             // \p - number, percentage or none (OKLab/OKLCH)
             // \a - optional alpha (OKLab/OKLCH)
+            // \A - required alpha value and its separator (RGBA)
+            .replaceAll("\\A", "(?:\\c|\\s*/\\s*)\\f")
             .replaceAll("\\a", "(?:\\s*/\\s*\\p)?")
             .replaceAll("\\p", "(?:\\f%?|none)")
             .replaceAll("\\f", "[+-]?([0-9]*[.])?[0-9]+")
-            .replaceAll("\\c", "(?:,|\\s)")
-            .replaceAll("\\v", "\\s*?\\d+?\\s*?"),
+            .replaceAll("\\c", "(?:\\s*,\\s*|\\s+)")
+            .replaceAll("\\v", "\\d+"),
         "g",
     );
 
     return n;
 };
 
+/* eslint-disable no-useless-escape -- \a and \A are expanded by replaceRegexp. */
 export const regex = [
-    { reg: /rgb\(\v\c\v\c\v\)/g, type: ColorType.RGB },
-    { reg: /rgba\(\v\c\v\c\v(\c|\/?)\s*\f\)/g, type: ColorType.RGBA },
-    { reg: /hsl\(\v°?\c\s*?\d+%?\s*?\c\s*?\d+%?\s*?\)/g, type: ColorType.HSL },
-    /* eslint-disable no-useless-escape -- \a is expanded by replaceRegexp. */
+    { reg: /rgb\(\s*\v\c\v\c\v\s*\)/g, type: ColorType.RGB },
+    { reg: /rgba\(\s*\v\c\v\c\v\A\s*\)/g, type: ColorType.RGBA },
+    { reg: /hsl\(\s*\v°?\c\v%?\c\v%?\s*\)/g, type: ColorType.HSL },
     { reg: /oklab\(\s*\p\s+\p\s+\p\a\s*\)/g, type: ColorType.OKLAB },
     {
         reg: /oklch\(\s*\p\s+\p\s+(?:\f(?:deg|grad|rad|turn)?|none)\a\s*\)/g,
