@@ -6,9 +6,9 @@
 
 import { definePluginSettings } from "@api/Settings";
 import { getUserSettingLazy } from "@api/UserSettings";
+import { Heading } from "@components/Heading";
 import {
     Divider,
-    Heading,
     Paragraph,
     Span,
 } from "@components/index";
