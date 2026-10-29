@@ -28,7 +28,6 @@ catalog:
     "html-minifier-terser": "^7.2.0"
     "lodash": "^4.18.1"
     "moment": "2.30.1"
-    "monaco-editor": "^0.57.0"
     "p-limit": "^7.3.3"
     "puppeteer-core": "^25.16.0"
     "standalone-electron-types": "^41.2.1"
