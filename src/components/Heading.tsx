@@ -35,11 +35,11 @@ export function Heading<T extends HeadingTag = "h5">(props: HeadingProps<T>) {
 
 // #region Old compability
 
-type HeadingBaseProps<Tag extends HeadingTag> = ComponentPropsWithoutRef<Tag> & {
+type OldHeadingBaseProps<Tag extends HeadingTag> = ComponentPropsWithoutRef<Tag> & {
     tag?: Tag;
 };
 
-function HeadingBase<T extends HeadingTag>(props: HeadingBaseProps<T>) {
+function OldHeadingBase<T extends HeadingTag>(props: OldHeadingBaseProps<T>) {
     const {
         tag: Tag = "h5",
         children,
@@ -55,12 +55,12 @@ function HeadingBase<T extends HeadingTag>(props: HeadingBaseProps<T>) {
 }
 
 /** @deprecated Use `Heading` with `tag="h2"` instead */
-export const HeadingPrimary = ((props: HeadingBaseProps<"h2">) => <HeadingBase tag="h2" {...props} />) as never;
+export const HeadingPrimary = ((props: OldHeadingBaseProps<"h2">) => <OldHeadingBase tag="h2" {...props} />) as never;
 
 /** @deprecated Use `Heading` with `tag="h3"` instead */
-export const HeadingSecondary = ((props: HeadingBaseProps<"h3">) => <HeadingBase tag="h3" {...props} />) as never;
+export const HeadingSecondary = ((props: OldHeadingBaseProps<"h3">) => <OldHeadingBase tag="h3" {...props} />) as never;
 
 /** @deprecated Use `Heading` with `tag="h4"` instead */
-export const HeadingTertiary = ((props: HeadingBaseProps<"h4">) => <HeadingBase tag="h4" {...props} />) as never;
+export const HeadingTertiary = ((props: OldHeadingBaseProps<"h4">) => <OldHeadingBase tag="h4" {...props} />) as never;
 
 // #endregion
