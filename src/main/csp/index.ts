@@ -143,7 +143,8 @@ export function initCsp() {
     session.defaultSession.webRequest.onHeadersReceived(({ responseHeaders, resourceType, url }, cb) => {
         if (responseHeaders) {
             if (url === DESKTOP_MONACO_EDITOR_URL) {
-                responseHeaders["content-type"] = ["text/html"];
+                const header = findHeader(responseHeaders, "content-type") ?? "content-type";
+                responseHeaders[header] = ["text/html"];
             }
             if (resourceType === "mainFrame")
                 patchCsp(responseHeaders);
