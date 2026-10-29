@@ -27,7 +27,7 @@ interface ParsedColorInfo {
     text: string;
 }
 
-const requiredFirstCharacters = ["r", "h", "#"].flatMap(v => [
+const requiredFirstCharacters = ["r", "h", "o", "#"].flatMap(v => [
     v,
     v.toUpperCase(),
 ]);
@@ -214,6 +214,8 @@ const getColorType = (color: string): ColorType => {
     if (color.startsWith("hsl")) return ColorType.HSL;
     if (color.startsWith("rgba")) return ColorType.RGBA;
     if (color.startsWith("rgb")) return ColorType.RGB;
+    if (color.startsWith("oklab")) return ColorType.OKLAB;
+    if (color.startsWith("oklch")) return ColorType.OKLCH;
 
     throw new Error(`Can't resolve color type of ${color}`);
 };
@@ -225,6 +227,8 @@ function parseColor(str: string, type: ColorType): string {
         .replaceAll(/(\s|,)+/g, " ");
     switch (type) {
         case ColorType.RGB:
+        case ColorType.OKLAB:
+        case ColorType.OKLCH:
             return str;
         case ColorType.RGBA:
             if (!str.includes("/"))
