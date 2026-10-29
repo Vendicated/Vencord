@@ -22,19 +22,35 @@ import { findGroupChildrenByChildId, NavContextMenuPatchCallback } from "@api/Co
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 import { Message } from "@vencord/discord-types";
-import { Menu } from "@webpack/common";
+import { Menu, useMemo, useState } from "@webpack/common";
 
 import { settings } from "./settings";
 import { setShouldShowTranslateEnabledTooltip, TranslateChatBarIcon, TranslateIcon } from "./TranslateIcon";
 import { handleTranslate, TranslationAccessory } from "./TranslationAccessory";
-import { translate } from "./utils";
+import { getLanguages, translate } from "./utils";
 
 const messageCtxPatch: NavContextMenuPatchCallback = (children, { message }: { message: Message; }) => {
+    const [search, setSearch] = useState("");
+
+    const filteredLanguages = useMemo(() => {
+        const lowerSearch = search.toLowerCase();
+
+        const languages = Object.entries(getLanguages());
+        return languages.filter(([_id, name]) =>
+            name !== "Detect language" && name.toLowerCase().includes(lowerSearch)
+        );
+    }, [search]);
+
     const content = getMessageContent(message);
     if (!content) return;
 
     const group = findGroupChildrenByChildId("copy-text", children);
     if (!group) return;
+
+    const handleTranslation = async (language?: string) => {
+        const trans = await translate("received", content, language);
+        handleTranslate(message.id, trans);
+    };
 
     group.splice(group.findIndex(c => c?.props?.id === "copy-text") + 1, 0, (
         <Menu.MenuItem
@@ -42,11 +58,26 @@ const messageCtxPatch: NavContextMenuPatchCallback = (children, { message }: { m
             label="Translate"
             icon={TranslateIcon}
             leadingAccessory={{ type: "icon", icon: TranslateIcon }}
-            action={async () => {
-                const trans = await translate("received", content);
-                handleTranslate(message.id, trans);
-            }}
-        />
+            action={() => handleTranslation()}
+        >
+            <Menu.MenuControlItem
+                id="vc-trans-search"
+                control={(props, ref) => (
+                    <Menu.MenuSearchControl {...props} query={search} onChange={setSearch} ref={ref} />
+                )}
+            />
+
+            <Menu.MenuSeparator />
+
+            {filteredLanguages.map(([id, name]) =>
+                <Menu.MenuItem
+                    key={id}
+                    id={`vc-trans-${id}`}
+                    label={name}
+                    action={() => handleTranslation(id)}
+                />
+            )}
+        </Menu.MenuItem>
     ));
 };
 
@@ -90,7 +121,7 @@ export default definePlugin({
             return {
                 label: "Translate",
                 icon: TranslateIcon,
-                onClick: async () => {
+                async onClick() {
                     const trans = await translate("received", content);
                     handleTranslate(message.id, trans);
                 }
