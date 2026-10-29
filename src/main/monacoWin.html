@@ -3,13 +3,6 @@
     <head>
         <meta charset="utf-8" />
         <title>Vencord QuickCSS Editor</title>
-        <link
-            rel="stylesheet"
-            href="https://cdn.jsdelivr.net/npm/monaco-editor@0.57.0/min/vs/editor/editor.main.css"
-            integrity="sha256-kRUFHyIeUNM7fKVxDTwuRzpyFaStwSwt20bFJWj2uII="
-            crossorigin="anonymous"
-            referrerpolicy="no-referrer"
-        />
         <style>
             html,
             body,
@@ -29,38 +22,10 @@
     <body>
         <div id="container"></div>
         <script
-            src="https://cdn.jsdelivr.net/npm/monaco-editor@0.57.0/min/vs/loader.js"
-            integrity="sha256-NbWd+AtBqLc78c6xWbRPBAVnwqtT9Od6PQAtncOdVdE="
+            src="https://cdn.jsdelivr.net/npm/@vencord/monaco-editor@0.57.0-beta.1/dist/index.js"
             crossorigin="anonymous"
             referrerpolicy="no-referrer"
+            type="module"
         ></script>
-
-        <script>
-            require.config({
-                paths: {
-                    vs: "https://cdn.jsdelivr.net/npm/monaco-editor@0.57.0/min/vs",
-                },
-            });
-
-            require(["vs/editor/editor.main"], () => {
-                getCurrentCss().then((css) => {
-                    var editor = monaco.editor.create(
-                        document.getElementById("container"),
-                        {
-                            value: css,
-                            language: "css",
-                            theme: getTheme(),
-                        },
-                    );
-                    editor.onDidChangeModelContent(() =>
-                        setCss(editor.getValue()),
-                    );
-                    window.addEventListener("resize", () => {
-                        // make monaco re-layout
-                        editor.layout();
-                    });
-                });
-            });
-        </script>
     </body>
 </html>

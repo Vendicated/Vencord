@@ -195,8 +195,8 @@ catalogs:
       specifier: 0.10.5
       version: 0.10.5
     '@vencord/monaco-editor':
-      specifier: 0.57.0-beta
-      version: 0.57.0-beta
+      specifier: 0.57.0-beta.2
+      version: 0.57.0-beta.2
     diff:
       specifier: ^9.0.0
       version: 9.0.0
@@ -303,7 +303,7 @@ importers:
         version: 0.10.5
       '@vencord/monaco-editor':
         specifier: 'catalog:'
-        version: 0.57.0-beta
+        version: 0.57.0-beta.2
       fflate:
         specifier: 'catalog:'
         version: 0.8.3
@@ -907,8 +907,8 @@ packages:
   '@vap/shiki@0.10.5':
     resolution: {integrity: sha512-5BHVGvQT8qonbLSASon5aQFQ18OZU4FxSl9tLSj6oJ0sap3KdMbYcfGq25M9zFZR1g1dJN7fgjmZXBIS5omIdw==}
 
-  '@vencord/monaco-editor@0.57.0-beta':
-    resolution: {integrity: sha512-rqa7V4H/4deRdQrKYDY9Vqx0c4tssuLz+E3syVsV10E0hY0tTajZkQbCqJsuVHh0R8PLP2uVrM1P5Lls0aAPdw==}
+  '@vencord/monaco-editor@0.57.0-beta.2':
+    resolution: {integrity: sha512-qsK6LYGJyEt7+TLGL+0AcIN3jkDJrxNMeo89N8kXqL6EURYyi5vBRvrsfm4rjV0tOnJMmji//rugqDfOIfBJ7g==}
 
   acorn-jsx@5.3.2:
     resolution: {integrity: sha512-rq9s+JNhf0IChjtDXxllJ7g41oZk5SlXtp0LHwyA5cejwn7vKmKp4pPri6YEePv2PU65sAsegbXtIinmDFDXgQ==}
@@ -3199,7 +3199,7 @@ snapshots:
       vscode-oniguruma: 1.7.0
       vscode-textmate: 5.2.0
 
-  '@vencord/monaco-editor@0.57.0-beta': {}
+  '@vencord/monaco-editor@0.57.0-beta.2': {}
 
   acorn-jsx@5.3.2(acorn@8.16.0):
     dependencies:

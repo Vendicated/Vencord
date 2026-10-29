@@ -140,8 +140,11 @@ const patchCsp = (headers: PolicyMap) => {
 };
 
 export function initCsp() {
-    session.defaultSession.webRequest.onHeadersReceived(({ responseHeaders, resourceType }, cb) => {
+    session.defaultSession.webRequest.onHeadersReceived(({ responseHeaders, resourceType, url }, cb) => {
         if (responseHeaders) {
+            if (url === DESKTOP_MONACO_EDITOR_URL) {
+                responseHeaders["content-type"] = ["text/html"];
+            }
             if (resourceType === "mainFrame")
                 patchCsp(responseHeaders);
 
