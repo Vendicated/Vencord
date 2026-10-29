@@ -24,7 +24,6 @@ import {
 interface ParsedColorInfo {
     type: "color";
     color: string;
-    colorType: ColorType;
     text: string;
 }
 
@@ -81,6 +80,7 @@ export default definePlugin({
         },
     ],
     start() {
+        // We have to know that setting on startup, so it's omited from consts
         const amount = settings.store.enableShortHexCodes ? "{1,2}" : "{2}";
         regex.push({
             reg: new RegExp("#(?:[0-9a-fA-F]{3})" + amount, "g"),
@@ -122,7 +122,6 @@ export default definePlugin({
 
                     return {
                         type: "color",
-                        colorType: type,
                         color: parseColor(content, type),
                         text: content,
                     };
@@ -135,7 +134,7 @@ export default definePlugin({
                 }
             },
             react: ErrorBoundary.wrap(
-                ({ text, colorType, color }: ParsedColorInfo) => {
+                ({ text, color }: ParsedColorInfo) => {
                     if (settings.store.renderType === RenderType.FOREGROUND) {
                         return <span style={{ color: color }}>{text}</span>;
                     }
@@ -144,11 +143,10 @@ export default definePlugin({
                     } as React.CSSProperties;
 
                     if (settings.store.renderType === RenderType.BACKGROUND) {
-                        const isDark = isColorDark(color, colorType);
-                        const className = `vc-color-bg ${!isDark ? "vc-color-bg-invert" : ""}`;
+                        const className = "vc-color-bg";
                         return (
                             <span className={className} style={styles}>
-                                {text}
+                                <span>{text}</span>
                             </span>
                         );
                     }
@@ -209,44 +207,6 @@ export default definePlugin({
         };
     },
 });
-
-// https://en.wikipedia.org/wiki/Relative_luminance
-const calcRGBLightness = (r: number, g: number, b: number) => {
-    return 0.2126 * r + 0.7152 * g + 0.0722 * b;
-};
-const isColorDark = (color: string, type: ColorType): boolean => {
-    const border = 115;
-    switch (type) {
-        case ColorType.RGBA:
-        case ColorType.RGB: {
-            const match = color.match(/\d+/g)!;
-            const lightness = calcRGBLightness(+match[0], +match[1], +match[2]);
-            return lightness < border;
-        }
-        case ColorType.HEX: {
-            color = color.substring(1);
-            if (color.length === 3) {
-                color = color
-                    .split("")
-                    .flatMap(v => [v, v])
-                    .join("");
-            }
-
-            const rgb = parseInt(color, 16);
-            const r = (rgb >> 16) & 0xff;
-            const g = (rgb >> 8) & 0xff;
-            const b = (rgb >> 0) & 0xff;
-
-            const lightness = calcRGBLightness(r, g, b);
-            return lightness < border;
-        }
-        case ColorType.HSL: {
-            const match = color.match(/\d+/g)!;
-            const lightness = +match[2];
-            return lightness < (border / 255) * 100;
-        }
-    }
-};
 
 const getColorType = (color: string): ColorType => {
     color = color.toLowerCase().trim();
