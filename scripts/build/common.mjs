@@ -59,8 +59,11 @@ export const banner = {
 };
 
 export async function getMonacoEditorCdnUrl() {
-    const catalog = await readFile(resolve(import.meta.dirname, "../../pnpm-workspace.yaml"), "utf8");
-    const [, version] = /"@vencord\/monaco-editor": "([^"]+)"/.exec(catalog) ?? "";
+    const manifest = await readFile(resolve(import.meta.dirname, "../../node_modules/@vencord/monaco-editor/package.json"), "utf8");
+    /**
+     * @type {import("type-fest").PackageJson}
+     */
+    const { version } = JSON.parse(manifest);
 
     if (!version) {
         throw new Error("Failed to extract editor version");
