@@ -20,8 +20,8 @@
 // @ts-check
 
 import { readFileSync } from "fs";
-import { appendFile, cp, mkdir, readdir, readFile, rm, writeFile } from "fs/promises";
-import { join, resolve } from "path";
+import { appendFile, mkdir, readdir, readFile, rm, writeFile } from "fs/promises";
+import { join, relative } from "path";
 import Zip from "zip-local";
 
 import { BUILD_TIMESTAMP, commonOpts, globPlugins, IS_DEV, IS_REPORTER, IS_ANTI_CRASH_TEST, IS_STANDALONE, VERSION, commonRendererPlugins, buildOrWatchAll, stringifyValues } from "./common.mjs";
@@ -55,11 +55,6 @@ const commonOptions = {
         BUILD_TIMESTAMP
     })
 };
-
-const MonacoWorkerEntryPoints = [
-    "vs/language/css/css.worker.js",
-    "vs/editor/editor.worker.js"
-];
 
 /** @type {import("esbuild").BuildOptions[]} */
 const buildConfigs = [
@@ -96,16 +91,6 @@ const buildConfigs = [
     }
 ];
 
-async function copyMonacoEditor() {
-    const root = resolve(import.meta.dirname, "../..");
-    const src = resolve(root, "node_modules/@vencord/monaco-editor/dist");
-    for (const path of ["dist/vendor/monaco", "dist/chromium-unpacked/vendor/monaco", "dist/firefox-unpacked/vendor/monaco"]) {
-        await rm(resolve(root, path), { recursive: true, force: true });
-    }
-    await cp(src, resolve(root, "dist/vendor/monaco"), { recursive: true });
-}
-
-await copyMonacoEditor();
 await buildOrWatchAll(buildConfigs);
 
 /**
@@ -126,11 +111,11 @@ async function globDir(dir) {
 }
 
 /**
- * @type {(dir: string, basePath?: string) => Promise<Record<string, string>>}
+ * @type {(dir: string, outDir: string) => Promise<Record<string, string>>}
  */
-async function loadDir(dir, basePath = "") {
+async function loadDir(dir, outDir) {
     const files = await globDir(dir);
-    return Object.fromEntries(await Promise.all(files.map(async f => [f.slice(basePath.length), await readFile(f)])));
+    return Object.fromEntries(await Promise.all(files.map(async f => [join(outDir, relative(dir, f)), await readFile(f)])));
 }
 
 /**
@@ -140,7 +125,7 @@ async function buildExtension(target, files) {
     const entries = {
         "dist/Vencord.js": await readFile("dist/extension.js"),
         "dist/Vencord.css": await readFile("dist/extension.css"),
-        ...await loadDir("dist/vendor/monaco", "dist/"),
+        ...await loadDir("node_modules/@vencord/monaco-editor/dist", "vendor/monaco"),
         ...Object.fromEntries(await Promise.all(files.map(async f => {
             let content = await readFile(join("browser", f));
             if (f.startsWith("manifest")) {
@@ -156,7 +141,7 @@ async function buildExtension(target, files) {
         })))
     };
 
-    await rm(target, { recursive: true, force: true });
+    await rm(join("dist", target), { recursive: true, force: true });
     await Promise.all(Object.entries(entries).map(async ([file, content]) => {
         const dest = join("dist", target, file);
         const parentDirectory = join(dest, "..");
