@@ -116,7 +116,7 @@ function SettingsAboutComponent() {
 
     return (
         <section>
-            <Heading tag="h3" className={Margins.bottom8}>Usage</Heading>
+            <Heading className={Margins.bottom8}>Usage</Heading>
             <Paragraph>
                 After enabling this plugin, you will see custom colors in
                 the profiles of other people using compatible plugins.{" "}
@@ -131,7 +131,7 @@ function SettingsAboutComponent() {
                 <Divider
                     className={classes(Margins.top8, Margins.bottom8)}
                 />
-                <Heading tag="h3" className={Margins.bottom8}>Color pickers</Heading>
+                <Heading className={Margins.bottom8}>Color pickers</Heading>
                 <Flex gap="1em">
                     <ColorPicker
                         color={color1}
@@ -175,7 +175,7 @@ function SettingsAboutComponent() {
                 <Divider
                     className={classes(Margins.top8, Margins.bottom8)}
                 />
-                <Heading tag="h3" className={Margins.bottom8}>Preview</Heading>
+                <Heading className={Margins.bottom8}>Preview</Heading>
                 <div className="vc-fpt-preview">
                     <ProfileModal
                         user={UserStore.getCurrentUser()}

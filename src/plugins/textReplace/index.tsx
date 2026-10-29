@@ -237,7 +237,7 @@ function TextReplace({ title, description, rulesArray, isRegex = false }: TextRe
     return (
         <>
             <div>
-                <Heading tag="h3" className={Margins.bottom8}>{title}</Heading>
+                <Heading className={Margins.bottom8}>{title}</Heading>
                 <Paragraph>{description}</Paragraph>
                 <div className={cl("search-input")}>
                     <TextInput
@@ -347,7 +347,7 @@ function TextReplaceTesting() {
 
     return (
         <div>
-            <Heading tag="h3" className={Margins.bottom8}>Rule Tester</Heading>
+            <Heading className={Margins.bottom8}>Rule Tester</Heading>
             <Flex flexDirection="column" gap={6}>
                 <TextInput placeholder="Type a message to test rules on" onChange={setValue} />
                 <TextInput placeholder="Message with rules applied" editable={false} value={applyRules(value)} style={{ opacity: 0.7 }} />

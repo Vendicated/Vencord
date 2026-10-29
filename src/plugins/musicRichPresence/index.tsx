@@ -295,7 +295,7 @@ export default definePlugin({
         if (settings.store.scrobblerBackend === "lastfm")
             return (
                 <Card>
-                    <Heading tag="h2" className={Margins.bottom20}>Last.FM</Heading>
+                    <Heading tag="h4" className={Margins.bottom20}>Last.FM</Heading>
                     <Heading className={Margins.bottom8}>How to create an API key</Heading>
                     <Paragraph>Set <strong>Application name</strong> and <strong>Application description</strong> to anything and leave the rest blank.</Paragraph>
                     <LinkButton size="small" href="https://www.last.fm/api/account/create" className={Margins.top8}>Create API Key</LinkButton>

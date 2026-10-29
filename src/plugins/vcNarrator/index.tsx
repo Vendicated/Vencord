@@ -260,7 +260,7 @@ export default definePlugin({
                 </Paragraph>
                 {hasEnglishVoices && (
                     <>
-                        <Heading tag="h3" className={classes(Margins.top20, Margins.bottom8)}>Play Example Sounds</Heading>
+                        <Heading className={classes(Margins.top20, Margins.bottom8)}>Play Example Sounds</Heading>
                         <div
                             style={{
                                 display: "grid",

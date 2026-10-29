@@ -231,7 +231,7 @@ function openCloneStickerModal(stickerData: PartialSticker) {
                             height={24}
                             width={24}
                         />
-                        <Heading tag="h3">Clone {sticker.name}</Heading>
+                        <Heading>Clone {sticker.name}</Heading>
                     </Flex>
                 }
             >

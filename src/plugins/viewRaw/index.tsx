@@ -122,9 +122,9 @@ function openViewRawModal(data: object, type: string, msgContent?: string) {
             >
                 {!!msgContent && (
                     <>
-                        <Heading tag="h3" className={Margins.bottom8}>Message Content</Heading>
+                        <Heading className={Margins.bottom8}>Message Content</Heading>
                         <CodeBlock className="vc-viewRaw-codeBlock" content={msgContent} lang="" />
-                        <Heading tag="h3" className={classes(Margins.top16, Margins.bottom8)}>Message Data</Heading>
+                        <Heading className={classes(Margins.top16, Margins.bottom8)}>Message Data</Heading>
                     </>
                 )}
                 <CodeBlock className="vc-viewRaw-codeBlock" content={json} lang="json" />

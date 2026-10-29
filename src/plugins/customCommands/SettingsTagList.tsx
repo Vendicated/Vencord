@@ -20,7 +20,7 @@ export function SettingsTagList() {
 
     return (
         <section className={Margins.top8}>
-            <Heading tag="h2">Registered Tags</Heading>
+            <Heading tag="h4">Registered Tags</Heading>
             <Flex flexDirection="column" gap="0.5em" className={Margins.top8}>
                 {Object.values(tagsList).map(tag => (
                     <Card key={tag.name} className="vc-customCommands-card">

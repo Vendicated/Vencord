@@ -174,7 +174,7 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
             size="lg"
             title={
                 <div className={cl("header")}>
-                    <Heading tag="h1">{plugin.name}</Heading>
+                    <Heading tag="h3">{plugin.name}</Heading>
                     {!pluginMeta.userPlugin && (
                         <div className="vc-settings-modal-links">
                             <FavoriteButton
@@ -204,7 +204,7 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
         >
             <div className={"vc-settings-modal-content"}>
                 <section>
-                    <Heading tag="h1" className={classes(Margins.top8, Margins.bottom8)}>Authors</Heading>
+                    <Heading tag="h3" className={classes(Margins.top8, Margins.bottom8)}>Authors</Heading>
                     <div style={{ width: "fit-content" }}>
                         <ErrorBoundary noop>
                             <UserSummaryItem
@@ -243,7 +243,7 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
                 )}
 
                 <section>
-                    <Heading tag="h1" className={classes(Margins.top16, Margins.bottom8)}>Settings</Heading>
+                    <Heading tag="h3" className={classes(Margins.top16, Margins.bottom8)}>Settings</Heading>
                     {renderSettings()}
                 </section>
             </div>

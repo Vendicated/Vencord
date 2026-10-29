@@ -10,12 +10,12 @@ export type HeadingTag = `h${1 | 2 | 3 | 4 | 5 | 6}`;
 export type HeadingProps<Tag extends HeadingTag = "h5"> = TextProps<Tag>;
 
 const HeadingDefaults: Record<HeadingTag, { size: TextSize; weight: TextWeight; }> = {
-    h1: { size: "lg", weight: "semibold" },
-    h2: { size: "md", weight: "semibold" },
-    h3: { size: "md", weight: "medium" },
+    h1: { size: "xl", weight: "bold" },
+    h2: { size: "lg", weight: "bold" },
+    h3: { size: "lg", weight: "semibold" },
     h4: { size: "md", weight: "semibold" },
     h5: { size: "md", weight: "medium" },
-    h6: { size: "sm", weight: "semibold" },
+    h6: { size: "sm", weight: "medium" },
 };
 
 export function Heading<T extends HeadingTag = "h5">(props: HeadingProps<T>) {

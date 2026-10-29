@@ -50,7 +50,7 @@ export default definePlugin({
 
     settingsAboutComponent: () => (
         <>
-            <Heading tag="h3" className={Margins.bottom8}>How to use arRPC</Heading>
+            <Heading className={Margins.bottom8}>How to use arRPC</Heading>
             <Paragraph>
                 <Link href="https://github.com/OpenAsar/arrpc/tree/main#server">Follow the instructions in the GitHub repo</Link> to get the server running, and then enable the plugin.
             </Paragraph>

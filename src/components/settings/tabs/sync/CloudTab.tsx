@@ -46,7 +46,7 @@ function validateUrl(url: string) {
 }
 
 const SectionHeading = ({ text }: { text: string; }) => (
-    <Heading tag="h1" className={Margins.bottom16}>
+    <Heading tag="h3" className={Margins.bottom16}>
         {text}
     </Heading>
 );

@@ -269,7 +269,7 @@ export default definePlugin({
                 {!enablePresence && (
                     <Card variant="warning">
                         <Flex flexDirection="column" gap=".5em" alignItems="flex-start">
-                            <Heading tag="h2" weight="bold">Custom RPC disabled</Heading>
+                            <Heading tag="h4" weight="bold">Custom RPC disabled</Heading>
                             <Paragraph>The "Enable Presence" setting is disabled, so your presence won't show. If this was unintentional, enable it below.</Paragraph>
                         </Flex>
                     </Card>
@@ -277,7 +277,7 @@ export default definePlugin({
                 {!gameActivityEnabled && (
                     <Card variant="danger">
                         <Flex flexDirection="column" gap=".5em" alignItems="flex-start">
-                            <Heading tag="h2" weight="bold">Activity Sharing disabled</Heading>
+                            <Heading tag="h4" weight="bold">Activity Sharing disabled</Heading>
                             <Paragraph>Activity Sharing isn't enabled, so people won't be able to see your custom rich presence!</Paragraph>
 
                             <Button

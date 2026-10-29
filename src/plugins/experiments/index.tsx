@@ -134,7 +134,7 @@ export default definePlugin({
     WarningCard: ErrorBoundary.wrap(() => (
         <ErrorCard id="vc-experiments-warning-card" className={Margins.bottom16}>
             <Flex flexDirection="column" gap={8}>
-                <Heading tag="h2" size="lg">Hold on!!</Heading>
+                <Heading tag="h3">Hold on!!</Heading>
 
                 <Paragraph>
                     Experiments are unreleased Discord features. They might not work, or even break your client or get your account disabled.

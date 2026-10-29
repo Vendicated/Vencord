@@ -195,7 +195,7 @@ export default definePlugin({
                     : (
                         <div className={ProfileListClasses.empty}>
                             <div className={ProfileListClasses.textContainer}>
-                                <Heading tag="h3" style={{ color: "var(--text-strong)" }}>You don't have any group chats in common</Heading>
+                                <Heading style={{ color: "var(--text-strong)" }}>You don't have any group chats in common</Heading>
                             </div>
                         </div>
                     )
