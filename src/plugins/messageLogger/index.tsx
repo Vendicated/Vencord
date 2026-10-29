@@ -29,9 +29,9 @@ import { getIntlMessage } from "@utils/discord";
 import { Logger } from "@utils/Logger";
 import { classes } from "@utils/misc";
 import definePlugin, { OptionType } from "@utils/types";
-import { Message, MessageAttachment } from "@vencord/discord-types";
+import { Guild, Message, MessageAttachment } from "@vencord/discord-types";
 import { findCssClassesLazy } from "@webpack";
-import { AuthenticationStore, ChannelStore, FluxDispatcher, Menu, MessageStore, Parser, SelectedChannelStore, Timestamp, UserStore, useStateFromStores } from "@webpack/common";
+import { ActiveJoinedThreadsStore, AuthenticationStore, ChannelStore, ConfirmModal, FluxDispatcher, GuildChannelStore, Menu, MessageStore, openModal, Parser, SelectedChannelStore, Timestamp, UserStore, useStateFromStores } from "@webpack/common";
 
 import overlayStyle from "./deleteStyleOverlay.css?managed";
 import textStyle from "./deleteStyleText.css?managed";
@@ -213,10 +213,60 @@ const patchChannelContextMenu: NavContextMenuPatchCallback = (children, { channe
             id="vc-ml-clear-channel"
             label="Clear Message Log"
             color="danger"
+            leadingAccessory={{ type: "icon", icon: ClearHistoryIcon }}
             action={() => {
                 messages.forEach(msg => {
                     clearMessageHistory(msg);
                 });
+            }}
+        />
+    );
+};
+
+const patchGuildContextMenu: NavContextMenuPatchCallback = (children, { guild }: { guild: Guild; }) => {
+    if (!guild) return;
+
+    const channels = GuildChannelStore.getChannels(guild.id).SELECTABLE
+        .concat(GuildChannelStore.getChannels(guild.id).VOCAL)
+        .concat(
+            Object.values(ActiveJoinedThreadsStore.getActiveJoinedThreadsForGuild(guild.id))
+                .flatMap(threadChannels => Object.values(threadChannels))
+        );
+
+    const channelIds = new Set(channels.map((c: { channel: { id: string; }; }) => c.channel.id));
+    const hasLogs = [...channelIds].some(channelId =>
+        MessageStore.getMessages(channelId)?.some(msg => doesMessageHaveHistory(msg))
+    );
+
+    if (!hasLogs) return;
+
+    const group = findGroupChildrenByChildId("mark-guild-read", children) ?? children;
+    group.push(
+        <Menu.MenuItem
+            id="vc-ml-clear-guild"
+            label="Clear Server Message Log"
+            color="danger"
+            leadingAccessory={{ type: "icon", icon: ClearHistoryIcon }}
+            action={() => {
+                const messages: MLMessage[] = [];
+
+                channelIds.forEach(channelId => {
+                    MessageStore.getMessages(channelId)?.forEach(msg => {
+                        if (doesMessageHaveHistory(msg)) messages.push(msg);
+                    });
+                });
+
+                if (!messages.length) return;
+
+                openModal(props => (
+                    <ConfirmModal
+                        {...props}
+                        title="Clear Server Message Log"
+                        subtitle={`Clear ${messages.length} logged message${messages.length === 1 ? "" : "s"} in this server?`}
+                        confirmText="Clear"
+                        onConfirm={() => messages.forEach(clearMessageHistory)}
+                    />
+                ));
             }}
         />
     );
@@ -238,7 +288,7 @@ export default definePlugin({
     name: "MessageLogger",
     description: "Temporarily logs deleted and edited messages.",
     tags: ["Chat", "Utility"],
-    authors: [Devs.rushii, Devs.Ven, Devs.AutumnVN, Devs.Nickyux, Devs.Kyuuhachi, Devs.sadan, Devs.f3tch],
+    authors: [Devs.rushii, Devs.Ven, Devs.AutumnVN, Devs.Nickyux, Devs.Kyuuhachi, Devs.sadan, Devs.f3tch, Devs.iflex0x],
     dependencies: ["MessageUpdaterAPI"],
     settings,
     contextMenus: {
@@ -246,7 +296,8 @@ export default definePlugin({
         "channel-context": patchChannelContextMenu,
         "thread-context": patchChannelContextMenu,
         "user-context": patchChannelContextMenu,
-        "gdm-context": patchChannelContextMenu
+        "gdm-context": patchChannelContextMenu,
+        "guild-context": patchGuildContextMenu
     },
 
     start() {
