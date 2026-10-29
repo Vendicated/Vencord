@@ -6,6 +6,7 @@
 
 import { useSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
+import { Heading } from "@components/Heading";
 import { Margins } from "@components/margins";
 import { Paragraph } from "@components/Paragraph";
 import { IS_WINDOWS } from "@utils/constants";
@@ -18,7 +19,7 @@ export function WindowsMaterialSettings() {
 
     return (
         <ErrorBoundary noop>
-            <Paragraph size="md" weight="medium" className={Margins.bottom8}>Background Material</Paragraph>
+            <Heading className={Margins.bottom8}>Background Material</Heading>
             <Paragraph className={Margins.bottom8}>
                 Windows transparent background effects. You need a theme that supports transparency or this will do nothing. A restart is required after changing this setting.
             </Paragraph>

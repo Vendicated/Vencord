@@ -6,6 +6,7 @@
 
 import { Button } from "@components/Button";
 import { Flex } from "@components/Flex";
+import { Heading } from "@components/Heading";
 import { Paragraph } from "@components/Paragraph";
 import { Decoration, getPresets, Preset } from "@plugins/decor/lib/api";
 import { GUILD_ID, INVITE_KEY } from "@plugins/decor/lib/constants";
@@ -69,7 +70,7 @@ function SectionHeader({ section }: SectionHeaderProps) {
 
     return <div>
         <Flex>
-            <Paragraph size="md" weight="medium" className={Margins.bottom8} style={{ flexGrow: 1 }}>{section.title}</Paragraph>
+            <Heading className={Margins.bottom8} style={{ flexGrow: 1 }}>{section.title}</Heading>
             {hasAuthorIds && <UserSummaryItem
                 users={authors}
                 guildId={undefined}
@@ -243,9 +244,9 @@ function ChangeDecorationModal(props: RenderModalProps) {
                     user={UserStore.getCurrentUser()}
                 />
                 {isActiveDecorationPreset &&
-                    <Paragraph size="md" weight="medium" className={Margins.bottom8} style={{ color: "var(--text-strong, var(--text-default))" }}>
+                    <Heading className={Margins.bottom8} style={{ color: "var(--text-strong, var(--text-default))" }}>
                         Part of the {activeDecorationPreset.name} Preset
-                    </Paragraph>
+                    </Heading>
                 }
                 {typeof activeSelectedDecoration === "object" &&
                     <Paragraph

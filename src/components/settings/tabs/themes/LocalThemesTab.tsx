@@ -8,6 +8,7 @@ import { isPluginEnabled } from "@api/PluginManager";
 import { Settings, useSettings } from "@api/Settings";
 import { Card } from "@components/Card";
 import { Flex } from "@components/Flex";
+import { Heading } from "@components/Heading";
 import { FolderIcon, PaintbrushIcon, PencilIcon, PlusIcon, RestartIcon } from "@components/Icons";
 import { Link } from "@components/Link";
 import { Margins } from "@components/margins";
@@ -126,7 +127,7 @@ export function LocalThemesTab() {
     return (
         <Flex flexDirection="column" gap="1em">
             <Card>
-                <Paragraph size="md" weight="medium" className={Margins.bottom8}>Find Themes:</Paragraph>
+                <Heading className={Margins.bottom8}>Find Themes:</Heading>
                 <Flex gap="0.4em" flexDirection="column" justifyContent="flex-start" className={Margins.bottom8}>
                     <span>&ndash; <Link href="https://betterdiscord.app/themes">BetterDiscord theme list</Link></span>
                     <span>&ndash; <Link href="https://github.com/search?q=discord+theme">GitHub</Link></span>
@@ -135,13 +136,13 @@ export function LocalThemesTab() {
             </Card>
 
             <Card>
-                <Paragraph size="md" weight="medium" className={Margins.bottom8}>External Resources</Paragraph>
+                <Heading className={Margins.bottom8}>External Resources</Heading>
                 <Paragraph>For security reasons, loading resources (styles, fonts, images, ...) from most sites is blocked.</Paragraph>
                 <Paragraph>Make sure all your assets are hosted on GitHub, GitLab, Codeberg, Imgur, Discord or Google Fonts.</Paragraph>
             </Card>
 
             <section>
-                <Paragraph size="md" weight="medium" className={Margins.bottom8}>Local Themes</Paragraph>
+                <Heading className={Margins.bottom8}>Local Themes</Heading>
                 <QuickActionCard>
                     <>
                         {IS_WEB ?

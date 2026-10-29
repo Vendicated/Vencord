@@ -5,6 +5,7 @@
  */
 
 import { FormSwitch } from "@components/FormSwitch";
+import { Heading } from "@components/Heading";
 import { Paragraph } from "@components/Paragraph";
 import { Margins } from "@utils/margins";
 import { classes } from "@utils/misc";
@@ -53,7 +54,7 @@ export function ReplacementInput({ replacement, setReplacement, replacementError
 
     return (
         <>
-            <Paragraph size="md" weight="medium" className={Margins.bottom8}>Replacement</Paragraph>
+            <Heading className={Margins.bottom8}>Replacement</Heading>
             <TextInput
                 value={replacement?.toString()}
                 onChange={onChange}
@@ -61,7 +62,7 @@ export function ReplacementInput({ replacement, setReplacement, replacementError
             />
             {!isFunc && (
                 <div>
-                    <Paragraph size="md" weight="medium" className={classes(Margins.top8, Margins.bottom8)}>Cheat Sheet</Paragraph>
+                    <Heading className={classes(Margins.top8, Margins.bottom8)}>Cheat Sheet</Heading>
 
                     {Object.entries(RegexGuide).map(([placeholder, desc]) => (
                         <Paragraph key={placeholder}>

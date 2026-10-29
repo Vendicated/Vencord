@@ -20,6 +20,7 @@ import "./SpecialCard.css";
 
 import { Card } from "@components/Card";
 import { Divider } from "@components/Divider";
+import { Heading } from "@components/Heading";
 import { Paragraph } from "@components/Paragraph";
 import { classNameFactory } from "@utils/css";
 import { Clickable } from "@webpack/common";
@@ -48,7 +49,7 @@ export function SpecialCard({ title, subtitle, description, cardImage, backgroun
         <Card className={cl("card", "card-special")} style={cardStyle}>
             <div className={cl("card-flex")}>
                 <div className={cl("card-flex-main")}>
-                    <Paragraph size="md" weight="medium" className={cl("title")}>{title}</Paragraph>
+                    <Heading className={cl("title")}>{title}</Heading>
                     <Paragraph className={cl("subtitle")}>{subtitle}</Paragraph>
                     <Paragraph className={cl("text")}>{description}</Paragraph>
 

@@ -7,6 +7,7 @@
 import { InlineCode } from "@components/CodeBlock";
 import { ExpandableSection } from "@components/ExpandableCard";
 import { Flex } from "@components/Flex";
+import { Heading } from "@components/Heading";
 import { InfoIcon } from "@components/Icons";
 import { Margins } from "@components/margins";
 import { Paragraph } from "@components/Paragraph";
@@ -70,18 +71,18 @@ function CreateTagDialog({ initialValue, modalProps }: { initialValue: Tag; moda
         >
             <Flex flexDirection="column" gap={12}>
                 <section>
-                    <Paragraph size="md" weight="medium" className={Margins.bottom8}>Name</Paragraph>
+                    <Heading tag="h3" className={Margins.bottom8}>Name</Heading>
                     <TextInput value={name} onChange={setName} placeholder="greet" />
                 </section>
 
                 <section>
-                    <Paragraph size="md" weight="medium" className={Margins.bottom8}>Response</Paragraph>
+                    <Heading tag="h3" className={Margins.bottom8}>Response</Heading>
                     <TextArea value={message} onChange={setMessage} placeholder={EXAMPLE_RESPONSE} autosize />
                 </section>
 
                 {detectedArguments.length > 0 && (
                     <section>
-                        <Paragraph size="md" weight="medium" className={Margins.bottom8}>Detected Arguments</Paragraph>
+                        <Heading tag="h3" className={Margins.bottom8}>Detected Arguments</Heading>
                         <Paragraph>
                             <ul>
                                 {detectedArguments.map(arg => (

@@ -10,6 +10,7 @@ import { getUserSettingLazy } from "@api/UserSettings";
 import { Button } from "@components/Button";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Flex } from "@components/Flex";
+import { Heading } from "@components/Heading";
 import { Paragraph } from "@components/Paragraph";
 import CustomRpcPlugin from "@plugins/customRPC";
 import { Devs } from "@utils/constants";
@@ -134,7 +135,7 @@ function IdsListComponent(props: { setValue: (value: string) => void; }) {
 
     return (
         <section>
-            <Paragraph size="md" weight="medium" className={Margins.bottom8}>Filter List</Paragraph>
+            <Heading tag="h3" className={Margins.bottom8}>Filter List</Heading>
             <Paragraph className={Margins.bottom8}>Comma separated list of activity IDs to filter (Useful for filtering specific RPC activities and CustomRPC</Paragraph>
             <TextArea
                 type="text"

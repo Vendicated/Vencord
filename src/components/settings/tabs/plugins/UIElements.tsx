@@ -10,6 +10,7 @@ import { ChatBarButtonMap } from "@api/ChatButtons";
 import { MessagePopoverButtonMap } from "@api/MessagePopover";
 import { SettingsPluginUiElements, useSettings } from "@api/Settings";
 import { Card } from "@components/Card";
+import { Heading } from "@components/Heading";
 import { PlaceholderIcon } from "@components/Icons";
 import { Paragraph } from "@components/Paragraph";
 import { Switch } from "@components/Switch";
@@ -74,7 +75,7 @@ function Section(props: {
 
     return (
         <section>
-            <Paragraph size="lg" weight="semibold" className={Margins.bottom8}>{title}</Paragraph>
+            <Heading tag="h1" className={Margins.bottom8}>{title}</Heading>
             <Paragraph size="sm" className={classes(Margins.top8, Margins.bottom20, cl("description"))}>{description}</Paragraph>
 
             <div className={cl("switches")}>

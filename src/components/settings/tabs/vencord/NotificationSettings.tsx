@@ -9,6 +9,7 @@ import { useSettings } from "@api/Settings";
 import { Button } from "@components/Button";
 import { ErrorCard } from "@components/ErrorCard";
 import { Flex } from "@components/Flex";
+import { Heading } from "@components/Heading";
 import { Paragraph } from "@components/Paragraph";
 import { Margins } from "@utils/margins";
 import { identity } from "@utils/misc";
@@ -17,7 +18,7 @@ import { Modal, openModal, Select, Slider } from "@webpack/common";
 export function NotificationSection() {
     return (
         <section className={Margins.top16}>
-            <Paragraph size="md" weight="medium" className={Margins.bottom8}>Notifications</Paragraph>
+            <Heading className={Margins.bottom8}>Notifications</Heading>
             <Paragraph className={Margins.bottom8}>
                 Settings for Notifications sent by Vencord.
                 This does NOT include Discord notifications (messages, etc)
@@ -51,10 +52,10 @@ function NotificationSettings() {
 
     return (
         <>
-            <Paragraph size="md" weight="medium" className={Margins.bottom8}>Notification Style</Paragraph>
+            <Heading className={Margins.bottom8}>Notification Style</Heading>
             {settings.useNative !== "never" && Notification?.permission === "denied" && (
                 <ErrorCard style={{ padding: "1em" }} className={Margins.bottom8}>
-                    <Paragraph size="md" weight="medium" className={Margins.bottom8}>Desktop Notification Permission denied</Paragraph>
+                    <Heading className={Margins.bottom8}>Desktop Notification Permission denied</Heading>
                     <Paragraph>You have denied Notification Permissions. Thus, Desktop notifications will not work!</Paragraph>
                 </ErrorCard>
             )}
@@ -78,7 +79,7 @@ function NotificationSettings() {
                 serialize={identity}
             />
 
-            <Paragraph size="md" weight="medium" className={Margins.top16 + " " + Margins.bottom8}>Notification Position</Paragraph>
+            <Heading className={Margins.top16 + " " + Margins.bottom8}>Notification Position</Heading>
             <Select
                 isDisabled={settings.useNative === "always"}
                 placeholder="Notification Position"
@@ -91,7 +92,7 @@ function NotificationSettings() {
                 serialize={identity}
             />
 
-            <Paragraph size="md" weight="medium" className={Margins.top16 + " " + Margins.bottom8}>Notification Timeout</Paragraph>
+            <Heading className={Margins.top16 + " " + Margins.bottom8}>Notification Timeout</Heading>
             <Paragraph className={Margins.bottom16}>Set to 0s to never automatically time out</Paragraph>
             <Slider
                 disabled={settings.useNative === "always"}
@@ -105,7 +106,7 @@ function NotificationSettings() {
                 stickToMarkers={false}
             />
 
-            <Paragraph size="md" weight="medium" className={Margins.top16 + " " + Margins.bottom8}>Notification Log Limit</Paragraph>
+            <Heading className={Margins.top16 + " " + Margins.bottom8}>Notification Log Limit</Heading>
             <Paragraph className={Margins.bottom16}>
                 The amount of notifications to save in the log until old ones are removed.
                 Set to <code>0</code> to disable Notification log and <code>∞</code> to never automatically remove old Notifications

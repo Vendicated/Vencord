@@ -25,6 +25,7 @@ import { Divider } from "@components/Divider";
 import { Flex } from "@components/Flex";
 import { FormSwitch } from "@components/FormSwitch";
 import { Grid } from "@components/Grid";
+import { Heading } from "@components/Heading";
 import { CloudDownloadIcon, CloudUploadIcon, DeleteIcon, RestartIcon } from "@components/Icons";
 import { Link } from "@components/Link";
 import { Paragraph } from "@components/Paragraph";
@@ -45,9 +46,9 @@ function validateUrl(url: string) {
 }
 
 const SectionHeading = ({ text }: { text: string; }) => (
-    <Paragraph size="lg" weight="semibold" className={Margins.bottom16}>
+    <Heading tag="h1" className={Margins.bottom16}>
         {text}
-    </Paragraph>
+    </Heading>
 );
 
 function ButtonWithIcon({ children, Icon, className, ...buttonProps }: ButtonProps & { Icon: IconComponent; }) {
@@ -84,7 +85,7 @@ function CloudSetupSection() {
                         cloud.authenticated = v;
                 }}
             />
-            <Paragraph size="md" weight="medium" className={classes(Margins.top16, Margins.bottom8)}>Backend URL</Paragraph>
+            <Heading className={classes(Margins.top16, Margins.bottom8)}>Backend URL</Heading>
             <Paragraph className={Margins.bottom8}>
                 Which backend to use when using cloud integrations.
             </Paragraph>
@@ -137,9 +138,9 @@ function SettingsSyncSection() {
                 />
 
                 <div>
-                    <Paragraph size="md" weight="medium" className={Margins.bottom8}>
+                    <Heading className={Margins.bottom8}>
                         Sync Rules for This Device
-                    </Paragraph>
+                    </Heading>
                     <Paragraph className={Margins.bottom8}>
                         This setting controls how settings move between <strong>this device</strong> and the cloud.
                         You can let changes flow both ways, or choose one place to be the main source of truth.

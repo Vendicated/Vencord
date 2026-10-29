@@ -25,6 +25,7 @@ import { Button } from "@components/Button";
 import { Card } from "@components/Card";
 import { Divider } from "@components/Divider";
 import ErrorBoundary from "@components/ErrorBoundary";
+import { Heading } from "@components/Heading";
 import { Paragraph } from "@components/Paragraph";
 import { SettingsTab, wrapTab } from "@components/settings/tabs/BaseTab";
 import { ChangeList } from "@utils/ChangeList";
@@ -54,7 +55,7 @@ function ReloadRequiredCard({ required }: { required: boolean; }) {
             {required
                 ? (
                     <>
-                        <Paragraph size="md" weight="semibold">Restart required!</Paragraph>
+                        <Heading tag="h4">Restart required!</Heading>
                         <Paragraph className={cl("dep-text")}>
                             Restart now to apply new plugins and their settings
                         </Paragraph>
@@ -65,7 +66,7 @@ function ReloadRequiredCard({ required }: { required: boolean; }) {
                 )
                 : (
                     <>
-                        <Paragraph size="md" weight="semibold">Plugin Management</Paragraph>
+                        <Heading tag="h4">Plugin Management</Heading>
                         <Paragraph>Press the cog wheel or info icon to get more info on a plugin</Paragraph>
                         <Paragraph>Plugins with a cog wheel have settings you can modify!</Paragraph>
                     </>
@@ -127,7 +128,7 @@ function PluginSettings() {
         if (changes.hasChanges)
             promptToRestart("reload", {
                 children: <>
-                    <Paragraph size="md" weight="medium" className={Margins.bottom8}>The following plugins require a restart:</Paragraph>
+                    <Heading className={Margins.bottom8}>The following plugins require a restart:</Heading>
                     <Paragraph>{Array.from(changes, k => k.split(".")[0]).join(", ")}</Paragraph>
                 </>
             });
@@ -263,9 +264,9 @@ function PluginSettings() {
 
             <UIElementsButton />
 
-            <Paragraph size="md" weight="semibold" className={classes(Margins.top20, Margins.bottom8)}>
+            <Heading tag="h4" className={classes(Margins.top20, Margins.bottom8)}>
                 Filters
-            </Paragraph>
+            </Heading>
 
             <ErrorBoundary noop>
                 <TextInput
@@ -306,7 +307,7 @@ function PluginSettings() {
                 </div>
             </ErrorBoundary>
 
-            <Paragraph size="md" weight="semibold" className={Margins.top20}>Plugins</Paragraph>
+            <Heading tag="h4" className={Margins.top20}>Plugins</Heading>
 
             {plugins.length || requiredPlugins.length
                 ? (
@@ -323,9 +324,9 @@ function PluginSettings() {
 
             <Divider className={Margins.top20} />
 
-            <Paragraph size="md" weight="semibold" className={classes(Margins.top20, Margins.bottom8)}>
+            <Heading tag="h4" className={classes(Margins.top20, Margins.bottom8)}>
                 Required Plugins
-            </Paragraph>
+            </Heading>
 
             <div className={cl("grid")}>
                 {requiredPlugins.length

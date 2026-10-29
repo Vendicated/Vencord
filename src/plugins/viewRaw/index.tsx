@@ -22,8 +22,8 @@ import { findGroupChildrenByChildId, NavContextMenuPatchCallback } from "@api/Co
 import { definePluginSettings } from "@api/Settings";
 import { CodeBlock } from "@components/CodeBlock";
 import ErrorBoundary from "@components/ErrorBoundary";
+import { Heading } from "@components/Heading";
 import { Margins } from "@components/margins";
-import { Paragraph } from "@components/Paragraph";
 import { Devs } from "@utils/constants";
 import { copyWithToast, getCurrentGuild, getIntlMessage } from "@utils/discord";
 import { isTruthy } from "@utils/guards";
@@ -122,9 +122,9 @@ function openViewRawModal(data: object, type: string, msgContent?: string) {
             >
                 {!!msgContent && (
                     <>
-                        <Paragraph size="md" weight="medium" className={Margins.bottom8}>Message Content</Paragraph>
+                        <Heading tag="h3" className={Margins.bottom8}>Message Content</Heading>
                         <CodeBlock className="vc-viewRaw-codeBlock" content={msgContent} lang="" />
-                        <Paragraph size="md" weight="medium" className={classes(Margins.top16, Margins.bottom8)}>Message Data</Paragraph>
+                        <Heading tag="h3" className={classes(Margins.top16, Margins.bottom8)}>Message Data</Heading>
                     </>
                 )}
                 <CodeBlock className="vc-viewRaw-codeBlock" content={json} lang="json" />

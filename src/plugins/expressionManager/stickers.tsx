@@ -6,11 +6,10 @@
 
 import { CheckedTextInput } from "@components/CheckedTextInput";
 import { Flex } from "@components/Flex";
+import { Heading } from "@components/Heading";
 import { LinkIcon, TopRightArrow } from "@components/Icons";
 import { Margins } from "@components/margins";
-import { Paragraph } from "@components/Paragraph";
 import { Span } from "@components/Span";
-import { Text } from "@components/Text";
 import { classNameFactory } from "@utils/css";
 import { copyWithToast, getGuildAcronym } from "@utils/discord";
 import { useForceUpdater } from "@utils/react";
@@ -158,7 +157,7 @@ export function CloneModal({ sticker }: { sticker: PartialSticker; }) {
 
     return (
         <>
-            <Paragraph size="md" weight="semibold" className={Margins.bottom8}>Custom Name</Paragraph>
+            <Heading tag="h4" className={Margins.bottom8}>Custom Name</Heading>
             <CheckedTextInput
                 initialValue={name}
                 onChange={v => {
@@ -232,7 +231,7 @@ function openCloneStickerModal(stickerData: PartialSticker) {
                             height={24}
                             width={24}
                         />
-                        <Text tag="h3" size="md" weight="medium">Clone {sticker.name}</Text>
+                        <Heading tag="h3">Clone {sticker.name}</Heading>
                     </Flex>
                 }
             >

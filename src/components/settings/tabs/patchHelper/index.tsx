@@ -20,7 +20,7 @@ import { Button } from "@components/Button";
 import { CodeBlock } from "@components/CodeBlock";
 import { Divider } from "@components/Divider";
 import { Flex } from "@components/Flex";
-import { Paragraph } from "@components/Paragraph";
+import { Heading } from "@components/Heading";
 import { SettingsTab, wrapTab } from "@components/settings/tabs/BaseTab";
 import { debounce } from "@shared/debounce";
 import { copyWithToast } from "@utils/discord";
@@ -107,7 +107,7 @@ function PatchHelper() {
 
     return (
         <SettingsTab>
-            <Paragraph size="md" weight="medium" className={Margins.bottom8}>Full patch</Paragraph>
+            <Heading className={Margins.bottom8}>Full patch</Heading>
             <FullPatchInput
                 setFind={onFindChange}
                 setParsedFind={setParsedFind}
@@ -115,7 +115,7 @@ function PatchHelper() {
                 setReplacement={setReplacement}
             />
 
-            <Paragraph size="md" weight="medium" className={classes(Margins.top8, Margins.bottom8)}>Find</Paragraph>
+            <Heading className={classes(Margins.top8, Margins.bottom8)}>Find</Heading>
             <TextInput
                 type="text"
                 value={find}
@@ -123,7 +123,7 @@ function PatchHelper() {
                 error={findError}
             />
 
-            <Paragraph size="md" weight="medium" className={classes(Margins.top8, Margins.bottom8)}>Match</Paragraph>
+            <Heading className={classes(Margins.top8, Margins.bottom8)}>Match</Heading>
             <TextInput
                 type="text"
                 value={match}
@@ -150,7 +150,7 @@ function PatchHelper() {
 
             {!!(find && match && replacement) && (
                 <>
-                    <Paragraph size="md" weight="medium" className={classes(Margins.top20, Margins.bottom8)}>Code</Paragraph>
+                    <Heading className={classes(Margins.top20, Margins.bottom8)}>Code</Heading>
                     <CodeBlock lang="js" content={code} />
                     <Flex className={Margins.top16}>
                         <Button onClick={() => copyWithToast(code)}>

@@ -18,6 +18,7 @@
 
 import { Button } from "@components/Button";
 import { ErrorCard } from "@components/ErrorCard";
+import { Heading } from "@components/Heading";
 import { Paragraph } from "@components/Paragraph";
 import { Devs, IS_LINUX } from "@utils/constants";
 import { Logger } from "@utils/Logger";
@@ -259,7 +260,7 @@ export default definePlugin({
                 </Paragraph>
                 {hasEnglishVoices && (
                     <>
-                        <Paragraph size="md" weight="medium" className={classes(Margins.top20, Margins.bottom8)}>Play Example Sounds</Paragraph>
+                        <Heading tag="h3" className={classes(Margins.top20, Margins.bottom8)}>Play Example Sounds</Heading>
                         <div
                             style={{
                                 display: "grid",

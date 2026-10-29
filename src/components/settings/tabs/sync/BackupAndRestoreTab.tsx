@@ -20,6 +20,7 @@ import { downloadSettingsBackup, uploadSettingsBackup } from "@api/SettingsSync/
 import { Button } from "@components/Button";
 import { Card } from "@components/Card";
 import { Flex } from "@components/Flex";
+import { Heading } from "@components/Heading";
 import { Paragraph } from "@components/Paragraph";
 import { SettingsTab, wrapTab } from "@components/settings/tabs/BaseTab";
 import { Text } from "@components/Text";
@@ -30,7 +31,7 @@ function BackupAndRestoreTab() {
         <SettingsTab>
             <Flex flexDirection="column" gap="0.5em">
                 <Card variant="warning">
-                    <Paragraph size="md" weight="semibold">Warning</Paragraph>
+                    <Heading tag="h4">Warning</Heading>
                     <Paragraph>Importing a settings file will overwrite your current settings.</Paragraph>
                 </Card>
 
@@ -40,7 +41,7 @@ function BackupAndRestoreTab() {
                     or recover your settings after reinstalling Vencord or Discord.
                 </Paragraph>
 
-                <Paragraph size="md" weight="semibold">Settings Export contains:</Paragraph>
+                <Heading tag="h4">Settings Export contains:</Heading>
                 <Text size="md" className={Margins.bottom8}>
                     <ul>
                         <li>&mdash; Custom QuickCSS</li>
