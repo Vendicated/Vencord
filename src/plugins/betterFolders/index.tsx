@@ -267,10 +267,9 @@ export default definePlugin({
                     replace: `"${GRID_STYLE_NAME} "+$&`
                 },
                 {
-                    // slider uses hardcoded offset which is wrong
-                    // when the better folder sidebar is opened
+                    // Channels resize slider uses hardcoded offset which is wrong when the Better Folders sidebar is opened
                     match: /(?<="aria-valuemax":\d+,className:\i\.\i,onClick:\i,onMouseDown:)(\i)/,
-                    replace: "vcArg=>$1($self.fixResizeSliderOffset(vcArg))"
+                    replace: "vcEvent=>$1($self.fixChannelsResizeSliderOffset(vcEvent))"
                 }
             ]
         },
@@ -404,11 +403,11 @@ export default definePlugin({
         }
     },
 
-    fixResizeSliderOffset(event: MouseEvent) {
+    fixChannelsResizeSliderOffset(event: MouseEvent) {
         const sidebar = document.querySelector<HTMLElement>(".vc-betterFolders-sidebar");
 
         if (sidebar) {
-            // @ts-expect-error readonly, browser doesn't care
+            // @ts-expect-error Readonly, but browser doesn't care
             event.screenX += sidebar.offsetWidth;
         }
 
