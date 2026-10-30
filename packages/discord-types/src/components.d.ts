@@ -230,6 +230,7 @@ export type SearchableSelect = ComponentType<PropsWithChildren<{
 
 export type Slider = ComponentClass<PropsWithChildren<{
     initialValue: number;
+    value?: number;
     defaultValue?: number;
     keyboardStep?: number;
     maxValue?: number;
