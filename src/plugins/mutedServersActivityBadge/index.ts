@@ -15,10 +15,11 @@ export default definePlugin({
 
   patches: [
     {
-      find: "getEmbeddedActivitiesForGuild(e).filter",
+      find: "GuildMediaStateStore",
       replacement: [
         {
-          match: /if\(!i&&n\)return D;/,
+          // Remove the early return for muted, non-selected guilds.
+          match: /if\(!\i&&\i\)return \i;/,
           replace: ""
         },
       ]
