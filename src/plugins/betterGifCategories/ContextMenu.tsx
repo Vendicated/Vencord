@@ -6,8 +6,9 @@
 
 import { findGroupChildrenByChildId, NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { DeleteIcon } from "@components/Icons";
-import { ConfirmModal, ContextMenuApi, Menu, openModal, useState } from "@webpack/common";
-import type { MouseEvent } from "react";
+import { useForceUpdater } from "@utils/react";
+import { ConfirmModal, ContextMenuApi, Menu, openModal } from "@webpack/common";
+import type { MouseEvent, ReactNode } from "react";
 
 import { addGifToCategory, deleteCategory, getCategories, type Gif, type GifCategory, GifFormat, removeGifFromCategory } from "./data";
 import { deleteCategorySubtitle, isGifMedia } from "./helpers";
@@ -36,46 +37,37 @@ function gifFromMessageProps(props: any): Gif | null {
     return { url, src: safeSrc, format, width, height };
 }
 
-// FIXME: checkboxes don't update instantly
-// they only reflect the new state after a rerender, like moving the cursor out of the element
-function buildCategorySubmenu(gif: Gif) {
+function categoryCheckboxItems(gif: Gif, onChanged: () => void): ReactNode[] {
     const categories = getCategories();
 
-    return (
-        <Menu.MenuItem
-            key="vc-bgc-categories"
-            id="vc-bgc-categories"
-            label="Add to Category"
-        >
-            {categories.length === 0 ? (
-                <Menu.MenuItem
-                    key="vc-bgc-empty"
-                    id="vc-bgc-empty"
-                    label="No categories yet"
-                    disabled
-                />
-            ) : categories.map(category => {
-                const checked = category.gifs.some(g => g.url === gif.url);
+    if (categories.length === 0) {
+        return [<Menu.MenuItem key="vc-bgc-empty" id="vc-bgc-empty" label="No categories yet" disabled />];
+    }
 
-                return (
-                    <Menu.MenuCheckboxItem
-                        key={category.id}
-                        id={`vc-bgc-cat-${category.id}`}
-                        label={category.name}
-                        checked={checked}
-                        action={
-                            () => checked
-                                ? removeGifFromCategory(category.id, gif.url)
-                                : addGifToCategory(category.id, gif)
-                        }
-                    />
-                );
-            })}
-        </Menu.MenuItem>
-    );
+    return categories.map(category => {
+        const checked = category.gifs.some(g => g.url === gif.url);
+
+        return (
+            <Menu.MenuCheckboxItem
+                key={category.id}
+                id={`vc-bgc-cat-${category.id}`}
+                label={category.name}
+                checked={checked}
+                action={() => {
+                    const write = checked
+                        ? removeGifFromCategory(category.id, gif.url)
+                        : addGifToCategory(category.id, gif);
+
+                    write.then(onChanged);
+                }}
+            />
+        );
+    });
 }
 
 export const messageContextMenuPatch: NavContextMenuPatchCallback = (children, props) => {
+    const forceUpdate = useForceUpdater();
+
     if (!isGifMedia(props)) {
         return;
     }
@@ -87,53 +79,21 @@ export const messageContextMenuPatch: NavContextMenuPatchCallback = (children, p
     }
 
     const group = findGroupChildrenByChildId("copy-link", children) ?? children;
-    group.push(buildCategorySubmenu(gif));
+
+    group.push(
+        <Menu.MenuItem key="vc-bgc-categories" id="vc-bgc-categories" label="Add to Category">
+            {categoryCheckboxItems(gif, forceUpdate)}
+        </Menu.MenuItem>
+    );
 };
 
 function GifPickerContextMenu({ gif }: { gif: Gif; }) {
-    const categories = getCategories();
-
-    const [checkedIds, setCheckedIds] = useState<ReadonlySet<string>>(
-        () => new Set(categories.filter(c => c.gifs.some(g => g.url === gif.url)).map(c => c.id))
-    );
+    const forceUpdate = useForceUpdater();
 
     return (
         <Menu.Menu navId="vc-bgc-gif-picker" onClose={ContextMenuApi.closeContextMenu}>
-            <Menu.MenuItem id="vc-bgc-categories" label="Add to Category" disabled={categories.length === 0}>
-                {categories.length === 0
-                    ? <Menu.MenuItem id="vc-bgc-empty" label="No categories yet" disabled />
-                    : categories.map(category => {
-                        const checked = checkedIds.has(category.id);
-
-                        return (
-                            <Menu.MenuCheckboxItem
-                                key={category.id}
-                                id={`vc-bgc-cat-${category.id}`}
-                                label={category.name}
-                                checked={checked}
-                                action={() => {
-                                    setCheckedIds(prev => {
-                                        const next = new Set(prev);
-
-                                        if (checked) {
-                                            next.delete(category.id);
-                                        } else {
-                                            next.add(category.id);
-                                        }
-
-                                        return next;
-                                    });
-
-                                    if (checked) {
-                                        removeGifFromCategory(category.id, gif.url);
-                                    } else {
-                                        addGifToCategory(category.id, gif);
-                                    }
-                                }}
-                            />
-                        );
-                    })
-                }
+            <Menu.MenuItem id="vc-bgc-categories" label="Add to Category">
+                {categoryCheckboxItems(gif, forceUpdate)}
             </Menu.MenuItem>
         </Menu.Menu>
     );
