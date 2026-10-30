@@ -7,8 +7,8 @@
 export type ModuleExports = any;
 
 export type Module = {
-    id: PropertyKey;
-    loaded: boolean;
+    id?: PropertyKey;
+    loaded?: boolean;
     exports: ModuleExports;
 };
 
