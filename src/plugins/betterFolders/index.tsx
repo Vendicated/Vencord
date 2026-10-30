@@ -265,6 +265,12 @@ export default definePlugin({
                     // Add grid styles to fix aligment with other visual refresh elements
                     match: /(?<=className:)\i\.\i(?=,"data-fullscreen")/,
                     replace: `"${GRID_STYLE_NAME} "+$&`
+                },
+                {
+                    // slider uses hardcoded offset which is wrong
+                    // when the better folder sidebar is opened
+                    match: /(?<="aria-valuemax":\d+,className:\i\.\i,onClick:\i,onMouseDown:)(\i)/,
+                    replace: "vcArg=>$1($self.fixResizeSliderOffset(vcArg))"
                 }
             ]
         },
@@ -396,6 +402,16 @@ export default definePlugin({
             default:
                 return true;
         }
+    },
+
+    fixResizeSliderOffset(event: MouseEvent) {
+        const sidebar = document.querySelector<HTMLElement>(".vc-betterFolders-sidebar");
+
+        if (!sidebar) return event;
+
+        return Object.assign(event, {
+            screenX: event.screenX + sidebar.offsetWidth
+        });
     },
 
     shouldShowTransition(props: any) {
