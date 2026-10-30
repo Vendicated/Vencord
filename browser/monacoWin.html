@@ -49,13 +49,15 @@
         <div id="container"></div>
 
         <script>
-            let s = document.createElement("script"),
-                l = document.createElement("link");
-            l.href = new URL("/vendor/monaco/style.css", baseUrl);
-            l.rel = "stylesheet";
-            s.src = new URL("/vendor/monaco/index.js", baseUrl);
-            s.type = "module";
-            document.head.append(l, s);
+            const script = document.createElement("script");
+            script.type = "module";
+            script.src = new URL("/vendor/monaco/index.js", baseUrl);
+
+            const link = document.createElement("link");
+            link.rel = "stylesheet";
+            link.href = new URL("/vendor/monaco/style.css", baseUrl);
+
+            document.head.append(link, script);
         </script>
     </body>
 </html>
