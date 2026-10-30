@@ -39,6 +39,8 @@ const setCssDebounced = debounce((css: string) => VencordNative.quickCss.set(css
 
 const themeStore = DataStore.createStore("VencordThemes", "VencordThemeData");
 
+let win: Window;
+
 // probably should make this less cursed at some point
 window.VencordNative = {
     themes: {
@@ -98,7 +100,10 @@ window.VencordNative = {
             }
 
             const features = `popup,width=${Math.min(window.innerWidth, 1000)},height=${Math.min(window.innerHeight, 1000)}`;
-            const win = open("about:blank", "VencordQuickCss", features);
+
+            win?.close();
+
+            win = open("about:blank", "VencordQuickCss", features)!;
             if (!win) {
                 alert("Failed to open QuickCSS popup. Make sure to allow popups!");
                 return;
