@@ -8,6 +8,7 @@ import { FormSwitch } from "@components/FormSwitch";
 import { Heading } from "@components/Heading";
 import { Paragraph } from "@components/Paragraph";
 import { Margins } from "@utils/margins";
+import { classes } from "@utils/misc";
 import { Parser, TextInput, useEffect, useState } from "@webpack/common";
 
 const RegexGuide = {
@@ -53,7 +54,7 @@ export function ReplacementInput({ replacement, setReplacement, replacementError
 
     return (
         <>
-            <Heading>Replacement</Heading>
+            <Heading className={Margins.bottom8}>Replacement</Heading>
             <TextInput
                 value={replacement?.toString()}
                 onChange={onChange}
@@ -61,7 +62,7 @@ export function ReplacementInput({ replacement, setReplacement, replacementError
             />
             {!isFunc && (
                 <div>
-                    <Heading className={Margins.top8}>Cheat Sheet</Heading>
+                    <Heading className={classes(Margins.top8, Margins.bottom8)}>Cheat Sheet</Heading>
 
                     {Object.entries(RegexGuide).map(([placeholder, desc]) => (
                         <Paragraph key={placeholder}>

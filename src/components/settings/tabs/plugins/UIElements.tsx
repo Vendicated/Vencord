@@ -75,7 +75,7 @@ function Section(props: {
 
     return (
         <section>
-            <Heading tag="h1" className={Margins.bottom8}>{title}</Heading>
+            <Heading tag="h3" className={Margins.bottom8}>{title}</Heading>
             <Paragraph size="sm" className={classes(Margins.top8, Margins.bottom20, cl("description"))}>{description}</Paragraph>
 
             <div className={cl("switches")}>

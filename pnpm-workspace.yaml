@@ -28,7 +28,6 @@ catalog:
     "html-minifier-terser": "^7.2.0"
     "lodash": "^4.18.1"
     "moment": "2.30.1"
-    "monaco-editor": "^0.57.0"
     "p-limit": "^7.3.3"
     "puppeteer-core": "^25.16.0"
     "standalone-electron-types": "^41.2.1"
@@ -43,6 +42,7 @@ catalog:
     "typescript-eslint": "^8.72.0"
     "typescript-transform-paths": "^3.5.6"
     "zip-local": "^0.3.5"
+    "@vencord/monaco-editor": "0.57.0-beta.4"
 
 patchedDependencies:
     eslint-plugin-path-alias@2.1.0: patches/eslint-plugin-path-alias@2.1.0.patch
@@ -61,7 +61,7 @@ allowedDeprecatedVersions:
 
 allowBuilds:
     esbuild: true
-minimumReleaseAgeExclude:
-    - "@vencord/*"
 
 pmOnFail: warn
+minimumReleaseAgeExclude:
+    - "@vencord/monaco-editor@0.57.0-beta.4"

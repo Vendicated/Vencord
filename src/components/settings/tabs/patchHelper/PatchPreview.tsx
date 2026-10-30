@@ -56,7 +56,7 @@ function Match({ matchResult }: { matchResult: RegExpMatchArray | null; }) {
 
     return (
         <>
-            <Heading>Match</Heading>
+            <Heading className={Margins.bottom8}>Match</Heading>
             <div style={{ userSelect: "text" }}>{Parser.parse(fullMatch)}</div>
             <div style={{ userSelect: "text" }}>{Parser.parse(groups)}</div>
         </>
@@ -86,7 +86,7 @@ function Diff({ diff }: { diff: Change[] | null; }) {
 
     return (
         <>
-            <Heading>Diff</Heading>
+            <Heading className={Margins.bottom8}>Diff</Heading>
             {diffLines}
         </>
     );
@@ -121,7 +121,7 @@ export function PatchPreview({ module, match, replacement, setReplacementError }
 
     return (
         <>
-            <Heading style={{ userSelect: "text" }}>Module {id}</Heading>
+            <Heading className={Margins.bottom8} style={{ userSelect: "text" }}>Module {id}</Heading>
 
             <Match matchResult={matchResult} />
             <Diff diff={diff} />

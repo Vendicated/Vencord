@@ -43,7 +43,7 @@ function LanguageSelect({ settingsKey, includeAuto }: { settingsKey: typeof Lang
 
     return (
         <section className={Margins.bottom16}>
-            <Heading tag="h3">
+            <Heading className={Margins.bottom8}>
                 {settings.def[settingsKey].description}
             </Heading>
 
