@@ -21,10 +21,12 @@ async function runReporter() {
         function startLoadingChunks() {
             Webpack.factoryListeners.delete(startLoadingChunks);
 
-            // Stylesheets are not needed for testing, so skip loading them for every chunk
-            Webpack.wreq.f.css = () => { };
+            setTimeout(() => {
+                // Stylesheets are not needed for testing, so skip loading them for every chunk
+                Webpack.wreq.f.css = () => { };
 
-            loadLazyChunks().then(loadLazyChunksDoneResolve);
+                loadLazyChunks().then(loadLazyChunksDoneResolve);
+            }, 0);
         }
 
         Webpack.factoryListeners.add(startLoadingChunks);
