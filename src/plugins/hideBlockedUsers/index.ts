@@ -235,6 +235,7 @@ export default definePlugin({
             find: "VoiceDareAvatarRing",
             replacement: {
                 match: /let{children:\i,collapsed:\i=!1,className:\i}/,
+                predicate: () => settings.store.hideFromVoiceChannels,
                 replace: "$self.hideBlockedUsersFromVoicePreview(arguments);$&"
             }
         },
@@ -242,6 +243,7 @@ export default definePlugin({
             find: /\){let{participants:\i,onClick/,
             replacement: {
                 match: /let{participants/,
+                predicate: () => settings.store.hideFromVoiceChannels,
                 replace: "arguments[0].participants = $self.hideVoiceParticipants(arguments[0].participants);$&"
             }
         }
@@ -295,9 +297,9 @@ export default definePlugin({
 
             const previousMessage = messages.at(i - 1);
             if (previousMessage && i !== 0 && !messageObject.content.hasFlag(MessageFlags.HAS_THREAD) && !messageObject.content.interaction) {
-                const previuosSiblingDate = new Date(previousMessage.content.timestamp);
+                const previousSiblingDate = new Date(previousMessage.content.timestamp);
                 const currentMessageDate = new Date(messageObject.content.timestamp);
-                if (previousMessage.content.author.id === messageObject.content.author.id && previousMessage.groupId !== messageObject.groupId && (currentMessageDate.getTime() - previuosSiblingDate.getTime() <= MESSAGE_GROUP_WINDOW_MS)) {
+                if (previousMessage.content.author.id === messageObject.content.author.id && previousMessage.groupId !== messageObject.groupId && (currentMessageDate.getTime() - previousSiblingDate.getTime() <= MESSAGE_GROUP_WINDOW_MS)) {
                     messageObject.groupId = previousMessage.groupId;
                 }
             }
@@ -323,8 +325,6 @@ export default definePlugin({
 
     shouldHideReaction({ message, emoji, type, count }: ReactionProps) {
         try {
-            if (count > 10) return false;
-
             const forceUpdate = useForceUpdater();
 
             useEffect(() => {
@@ -336,6 +336,8 @@ export default definePlugin({
 
                 return () => FluxDispatcher.unsubscribe("MESSAGE_REACTION_ADD_USERS", cb);
             }, [message.id, forceUpdate]);
+
+            if (count > 10) return false;
 
             const reactionMap = getReactionsWithQueue(message, emoji, type);
             const usersIds = reactionMap.keys().map(userId => {
@@ -415,7 +417,7 @@ export default definePlugin({
                             args[0].children = args[0].children.filter(child => !blockedUsersIds.includes(child?.props?.user?.id));
                             args[0].children.forEach((component, i, components) => {
                                 const previousComponent = components.at(i - 1);
-                                if (previousComponent && previousComponent.props.type === "GROUP" && component.props.type === "GROUP") {
+                                if (previousComponent && previousComponent.props && previousComponent.props.type === "GROUP" && component.props.type === "GROUP") {
                                     args[0].children?.splice(i - 1, 1);
                                 }
                             });
