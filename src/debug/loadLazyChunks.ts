@@ -45,18 +45,18 @@ export async function loadLazyChunks() {
     const JSON_CHUNK_REGEX = /^[^{]*\{[^{]*\{[\w$]+\.exports=JSON\.parse\('/;
 
     // wreq.u rebuilds an object containing every chunk on each call, so it is very slow to call repeatedly
-    const chunkFileCache = new Map<PropertyKey, string>();
-    function getChunkFile(id: PropertyKey) {
-        let file = chunkFileCache.get(id);
-        if (file === undefined) chunkFileCache.set(id, file = wreq.u(id));
-        return file;
+    const chunkFileNameCache = new Map<PropertyKey, string>();
+    function getChunkFileName(id: PropertyKey) {
+        let fileName = chunkFileNameCache.get(id);
+        if (fileName == null) chunkFileNameCache.set(id, fileName = wreq.u(id));
+        return fileName;
     }
 
     // The same chunks are loaded by many factories, avoid going through wreq.e more than once for each
     const chunkLoads = new Map<PropertyKey, Promise<unknown>>();
     function loadChunk(id: PropertyKey) {
         let promise = chunkLoads.get(id);
-        if (promise === undefined) chunkLoads.set(id, promise = wreq.e(id));
+        if (promise == null) chunkLoads.set(id, promise = wreq.e(id));
         return promise;
     }
 
@@ -152,9 +152,8 @@ export async function loadLazyChunks() {
                         break;
                     }
 
-                    // No need to check for WebWorker assets here, those are only loaded with new Worker() and never through wreq.e
-                    const chunkFile = getChunkFile(id);
-                    if (chunkFile == null || chunkFile === "undefined.js") continue;
+                    const chunkFileName = getChunkFileName(id);
+                    if (chunkFileName == null || chunkFileName === "undefined.js") continue;
 
                     validChunks.add(id);
                 }
@@ -210,7 +209,7 @@ export async function loadLazyChunks() {
         });
 
         await Promise.all(chunksLeft.map(id => queue(async () => {
-            const chunkCode = await fetch(wreq.p + getChunkFile(id)).then(r => r.text());
+            const chunkCode = await fetch(wreq.p + getChunkFileName(id)).then(r => r.text());
 
             // JSON chunks only contain data, so there is nothing to patch in them. Loading them makes webpack finds testing extremely slow
             if (JSON_CHUNK_REGEX.test(chunkCode) || WORKER_ASSET_REGEX.test(chunkCode)) return;
@@ -219,7 +218,7 @@ export async function loadLazyChunks() {
         })));
 
         // Entry points are only required once every chunk is loaded. Some lazy loads omit chunks which Discord expects to be loaded already in that context,
-        // so requiring them right after their own chunks load can fail and leave the module broken in the require cache
+        // so requiring them right after their own chunks load can fail and error
         for (const deferredRequire of deferredRequires) {
             try {
                 if (wreq.m[deferredRequire]) wreq(deferredRequire);
