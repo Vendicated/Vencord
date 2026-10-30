@@ -21,6 +21,8 @@ async function runReporter() {
         function startLoadingChunks() {
             Webpack.factoryListeners.delete(startLoadingChunks);
 
+            // Factory listeners are first called as soon as WebpackRequire is initialized, while the Webpack runtime is still being set up.
+            // Things like wreq.u, wreq.e and wreq.f are only defined later in the same task, so wait for it to finish
             setTimeout(() => {
                 // Stylesheets are not needed for testing, so skip loading them for every chunk
                 Webpack.wreq.f.css = () => { };
