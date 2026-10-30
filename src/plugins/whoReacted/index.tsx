@@ -26,7 +26,7 @@ import { Queue } from "@utils/Queue";
 import { useForceUpdater } from "@utils/react";
 import definePlugin, { OptionType } from "@utils/types";
 import { CustomEmoji, Message, ReactionEmoji, User } from "@vencord/discord-types";
-import { ChannelStore, Constants, FluxDispatcher, PermissionsBits, PermissionStore, React, RestAPI, SelectedChannelStore, useEffect, useLayoutEffect, UserStore, UserSummaryItem } from "@webpack/common";
+import { ChannelStore, Constants, FluxDispatcher, PermissionsBits, PermissionStore, React, RestAPI, useEffect, useLayoutEffect, UserStore, UserSummaryItem } from "@webpack/common";
 
 interface ReactionCacheEntry {
     fetched: boolean;
@@ -85,10 +85,7 @@ function getReactionsWithQueue(msg: Message, e: ReactionEmoji, type: number) {
     return cache.users;
 }
 
-function currentChannelReadOnly(): boolean {
-    const channelId = SelectedChannelStore.getChannelId();
-    if (!channelId) return false;
-
+function isChannelReadOnly(channelId: string): boolean {
     const channel = ChannelStore.getChannel(channelId);
     if (!channel) return false;
 
@@ -140,17 +137,17 @@ const settings = definePluginSettings({
         restartNeeded: true
     },
     reactionLimit: {
-        description: "Only show for messages with fewer than this many reactions (0 to always show)",
+        description: "Only show for messages with at most this many reactions (0 to always show)",
         type: OptionType.NUMBER,
         default: 8
     },
     reactorLimit: {
-        description: "Only show for messages with fewer than this many unique users who reacted (0 to always show)",
+        description: "Only show for reactions with at most this many users who reacted (0 to always show)",
         type: OptionType.NUMBER,
         default: 12
     },
-    ignoreReadOnly: {
-        description: "Do not show for channels that you cannot send messages in, such as announcement channels",
+    disableReadOnlyChannels: {
+        description: "Disable showing for messages sent in channels that you cannot send messages, such as announcement channels",
         type: OptionType.BOOLEAN,
         default: true
     },
@@ -200,19 +197,16 @@ export default definePlugin({
             return () => FluxDispatcher.unsubscribe("MESSAGE_REACTION_ADD_USERS", cb);
         }, [message.id, forceUpdate]);
 
-        if (currentChannelReadOnly()) return null;
-
-        const { reactionLimit, reactorLimit } = settings.store;
-        if (reactionLimit !== 0 && message.reactions.length >= reactionLimit) return null;
-
+        const { reactionLimit, reactorLimit, disableReadOnlyChannels } = settings.use(["reactionLimit", "reactorLimit", "disableReadOnlyChannels"]);
+        if (disableReadOnlyChannels && isChannelReadOnly(message.channel_id)) return null;
+        if (reactionLimit !== 0 && message.reactions.length > reactionLimit) return null;
         const reactionMap = getReactionsWithQueue(message, emoji, type);
         let users = Array.from(reactionMap, ([id]) => UserStore.getUser(id)).filter(Boolean);
-
-        if (isPluginEnabled(NoBlockedMessagesPlugin.name))
+        if (isPluginEnabled(NoBlockedMessagesPlugin.name)) {
             users = users.filter(user => !NoBlockedMessagesPlugin.shouldIgnoreUser(user.id));
-
+        }
         if (users.length === 0) return null;
-        if (reactorLimit !== 0 && users.length >= reactorLimit) return null;
+        if (reactorLimit !== 0 && users.length > reactorLimit) return null;
         return <ReactionUsers message={message} users={users} />;
     }, { noop: true }),
 
