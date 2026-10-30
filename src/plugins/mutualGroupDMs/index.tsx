@@ -19,6 +19,7 @@
 import "./style.css";
 
 import ErrorBoundary from "@components/ErrorBoundary";
+import { Heading } from "@components/Heading";
 import { Paragraph } from "@components/Paragraph";
 import { Devs } from "@utils/constants";
 import { isNonNullish } from "@utils/guards";
@@ -194,7 +195,7 @@ export default definePlugin({
                     : (
                         <div className={ProfileListClasses.empty}>
                             <div className={ProfileListClasses.textContainer}>
-                                <Paragraph size="md" weight="medium" style={{ color: "var(--text-strong)" }}>You don't have any group chats in common</Paragraph>
+                                <Heading style={{ color: "var(--text-strong)" }}>You don't have any group chats in common</Heading>
                             </div>
                         </div>
                     )

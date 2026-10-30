@@ -44,7 +44,7 @@ function VesktopSection() {
     return (
         <Flex className={Margins.bottom20} flexDirection="column" gap="1em">
             <Card variant="info">
-                <Heading tag="h3">Vesktop & Vencord</Heading>
+                <Heading className={Margins.bottom8}>Vesktop & Vencord</Heading>
                 <Paragraph>Vesktop and Vencord are two separate things. This updater is for Vencord.</Paragraph>
                 <Paragraph className={Margins.top8}>
                     You receive separate popups for Vesktop updates. You can also manually update by installing the <Link href="https://vesktop.dev/install">latest version</Link>.
@@ -53,7 +53,7 @@ function VesktopSection() {
 
             {isVesktopOutdated && (
                 <Card variant="warning">
-                    <Heading tag="h3">Vesktop Outdated</Heading>
+                    <Heading className={Margins.bottom8}>Vesktop Outdated</Heading>
                     <Flex flexDirection="column" gap="0.5em">
                         <Paragraph>Your version of Vesktop is outdated!</Paragraph>
                         <Button variant="link" onClick={() => VesktopNative.app.openUpdater()}>Open Vesktop Updater</Button>
@@ -99,7 +99,7 @@ function Updater() {
                 />
             </div>
 
-            <Heading className={Margins.top20}>Repo</Heading>
+            <Heading className={classes(Margins.top20, Margins.bottom8)}>Repo</Heading>
 
             <Paragraph>
                 {repoPending
@@ -118,7 +118,7 @@ function Updater() {
 
             <Divider className={classes(Margins.top16, Margins.bottom16)} />
 
-            <Heading>Updates</Heading>
+            <Heading className={Margins.bottom8}>Updates</Heading>
 
             {isNewer
                 ? <Newer {...commonProps} />

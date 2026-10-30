@@ -22,6 +22,7 @@ import { Button } from "@components/Button";
 import { Card } from "@components/Card";
 import { Divider } from "@components/Divider";
 import { Flex } from "@components/Flex";
+import { Heading } from "@components/Heading";
 import { Link } from "@components/Link";
 import { Paragraph } from "@components/Paragraph";
 import { Devs } from "@utils/constants";
@@ -268,7 +269,7 @@ export default definePlugin({
                 {!enablePresence && (
                     <Card variant="warning">
                         <Flex flexDirection="column" gap=".5em" alignItems="flex-start">
-                            <Paragraph size="md" weight="bold">Custom RPC disabled</Paragraph>
+                            <Heading tag="h4" weight="bold">Custom RPC disabled</Heading>
                             <Paragraph>The "Enable Presence" setting is disabled, so your presence won't show. If this was unintentional, enable it below.</Paragraph>
                         </Flex>
                     </Card>
@@ -276,7 +277,7 @@ export default definePlugin({
                 {!gameActivityEnabled && (
                     <Card variant="danger">
                         <Flex flexDirection="column" gap=".5em" alignItems="flex-start">
-                            <Paragraph size="md" weight="bold">Activity Sharing disabled</Paragraph>
+                            <Heading tag="h4" weight="bold">Activity Sharing disabled</Heading>
                             <Paragraph>Activity Sharing isn't enabled, so people won't be able to see your custom rich presence!</Paragraph>
 
                             <Button
