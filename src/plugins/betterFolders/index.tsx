@@ -404,9 +404,9 @@ export default definePlugin({
     },
 
     fixChannelsResizeSliderOffset(event: MouseEvent) {
-        const sidebar = document.querySelector<HTMLElement>(".vc-betterFolders-sidebar");
+        const betterFoldersSidebar = document.querySelector<HTMLElement>(".vc-betterFolders-sidebar");
 
-        if (sidebar) {
+        if (betterFoldersSidebar != null) {
             // @ts-expect-error Readonly, but browser doesn't care
             event.screenX += sidebar.offsetWidth;
         }
