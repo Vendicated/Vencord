@@ -265,6 +265,11 @@ export default definePlugin({
                     // Add grid styles to fix aligment with other visual refresh elements
                     match: /(?<=className:)\i\.\i(?=,"data-fullscreen")/,
                     replace: `"${GRID_STYLE_NAME} "+$&`
+                },
+                {
+                    // Channels resize slider uses hardcoded offset which is wrong when the Better Folders sidebar is opened
+                    match: /(?<="aria-valuemax":\d+,className:\i\.\i,onClick:\i,onMouseDown:)(\i)/,
+                    replace: "vcEvent=>$1($self.fixChannelsResizeSliderOffset(vcEvent))"
                 }
             ]
         },
@@ -396,6 +401,17 @@ export default definePlugin({
             default:
                 return true;
         }
+    },
+
+    fixChannelsResizeSliderOffset(event: MouseEvent) {
+        const betterFoldersSidebar = document.querySelector<HTMLElement>(".vc-betterFolders-sidebar");
+
+        if (betterFoldersSidebar != null) {
+            // @ts-expect-error Readonly, but browser doesn't care
+            event.screenX += sidebar.offsetWidth;
+        }
+
+        return event;
     },
 
     shouldShowTransition(props: any) {

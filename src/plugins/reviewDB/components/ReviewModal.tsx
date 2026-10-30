@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Heading } from "@components/Heading";
+import { Span } from "@components/Span";
 import { Auth } from "@plugins/reviewDB/auth";
 import { ReviewType } from "@plugins/reviewDB/entities";
 import { REVIEWS_PER_PAGE, UserReviewsData } from "@plugins/reviewDB/reviewDbApi";
@@ -49,10 +49,10 @@ function ReviewsModal({ modalProps, modalKey, discordId, name, type }: { modalPr
             {...modalProps}
             size="lg"
             title={
-                <Heading tag="h1" className={cl("modal-header")}>
+                <Span size="lg" weight="semibold" className={cl("modal-header")}>
                     {name}'s Reviews
                     {!!reviewCount && <span> ({reviewCount} Reviews)</span>}
-                </Heading>
+                </Span>
             }
             preview={
                 <div className={cl("modal-footer")}>

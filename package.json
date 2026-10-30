@@ -1,7 +1,7 @@
 {
     "name": "vencord",
     "private": "true",
-    "version": "1.15.14",
+    "version": "1.15.15",
     "description": "The cutest Discord client mod",
     "homepage": "https://github.com/Vendicated/Vencord#readme",
     "bugs": {
@@ -38,9 +38,9 @@
         "@intrnl/xxhash64": "catalog:",
         "@vap/core": "catalog:",
         "@vap/shiki": "catalog:",
+        "@vencord/monaco-editor": "catalog:",
         "fflate": "catalog:",
-        "gifenc": "catalog:",
-        "monaco-editor": "catalog:"
+        "gifenc": "catalog:"
     },
     "devDependencies": {
         "@stylistic/eslint-plugin": "catalog:",

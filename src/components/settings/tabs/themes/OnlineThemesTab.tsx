@@ -8,6 +8,7 @@ import { useSettings } from "@api/Settings";
 import { Card } from "@components/Card";
 import { Flex } from "@components/Flex";
 import { Heading } from "@components/Heading";
+import { Margins } from "@components/margins";
 import { Paragraph } from "@components/Paragraph";
 import { TextArea, useState } from "@webpack/common";
 
@@ -36,14 +37,14 @@ export function OnlineThemesTab() {
                 </Paragraph>
             </Card>
             <Card>
-                <Heading>Paste links to css files here</Heading>
+                <Heading className={Margins.bottom8}>Paste links to css files here</Heading>
                 <Paragraph>One link per line</Paragraph>
                 <Paragraph>You can prefix lines with @light or @dark to toggle them based on your Discord theme</Paragraph>
                 <Paragraph>Make sure to use direct links to files (raw or github.io)!</Paragraph>
             </Card>
 
             <section>
-                <Heading>Online Themes</Heading>
+                <Heading className={Margins.bottom8}>Online Themes</Heading>
                 <TextArea
                     value={themeText}
                     onChange={setThemeText}

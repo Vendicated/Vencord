@@ -30,7 +30,7 @@ import { handleTranslate, TranslationAccessory } from "./TranslationAccessory";
 import { translate } from "./utils";
 
 const messageCtxPatch: NavContextMenuPatchCallback = (children, { message }: { message: Message; }) => {
-    const content = getMessageContent(message);
+    const content = document.getSelection()?.toString() || getMessageContent(message);
     if (!content) return;
 
     const group = findGroupChildrenByChildId("copy-text", children);

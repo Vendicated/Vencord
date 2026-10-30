@@ -19,7 +19,7 @@ export function MacOSVibrancySettings() {
 
     return (
         <ErrorBoundary noop>
-            <Heading>MacOS Window vibrancy style (requires restart)</Heading>
+            <Heading className={Margins.bottom8}>MacOS Window vibrancy style (requires restart)</Heading>
             <Select
                 className={Margins.bottom20}
                 placeholder="Window vibrancy style"
