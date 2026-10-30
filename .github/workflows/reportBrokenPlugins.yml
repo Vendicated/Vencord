@@ -67,8 +67,7 @@ jobs:
                   WEBHOOK_SECRET: ${{ secrets.WEBHOOK_SECRET }}
 
     TestCanaryPlugins:
-        needs: TestStablePlugins
-        if: always() && github.repository == 'Vendicated/Vencord' && (inputs.discord_branch == 'both' || inputs.discord_branch == 'canary')
+        if: github.repository == 'Vendicated/Vencord' && (inputs.discord_branch == 'both' || inputs.discord_branch == 'canary')
         runs-on: ubuntu-latest
 
         steps:
