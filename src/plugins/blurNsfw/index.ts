@@ -21,6 +21,7 @@ import { managedStyleRootNode } from "@api/Styles";
 import { Devs } from "@utils/constants";
 import { createAndAppendStyle } from "@utils/css";
 import definePlugin, { OptionType } from "@utils/types";
+import { Channel } from "@vencord/discord-types";
 
 let style: HTMLStyleElement;
 
@@ -30,6 +31,12 @@ const settings = definePluginSettings({
         description: "Blur Amount (in pixels)",
         default: 10,
         onChange: setCss
+    },
+    ignoredChannels: {
+        type: OptionType.STRING,
+        description: "List of channel IDs to not blur attachments in, separated by a space or comma",
+        default: "",
+        multiline: true,
     }
 });
 
@@ -54,13 +61,19 @@ export default definePlugin({
     authors: [Devs.Ven],
     settings,
 
+    shouldBlur(channel?: Channel) {
+        if (!channel?.nsfw) return false;
+        const { ignoredChannels } = settings.store;
+        return !ignoredChannels.includes(channel.id) && !ignoredChannels.includes(channel.parent_id);
+    },
+
     patches: [
         {
             find: "}renderStickersAccessories(",
             replacement: [
                 {
                     match: /(\.renderReactions\(\i\).+?className:)/,
-                    replace: '$&(this?.props?.channel?.nsfw?"vc-nsfw-img ":"")+'
+                    replace: '$&($self.shouldBlur(this?.props?.channel)?"vc-nsfw-img ":"")+'
                 }
             ]
         }
