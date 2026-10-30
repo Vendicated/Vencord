@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { definePluginSettings, migratePluginSetting } from "@api/Settings";
+import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import { getCurrentChannel } from "@utils/discord";
 import { runtimeHashMessageKey } from "@utils/intlHash";
@@ -26,7 +26,8 @@ import { Queue } from "@utils/Queue";
 import { useForceUpdater } from "@utils/react";
 import definePlugin, { OptionType } from "@utils/types";
 import { Channel, CustomEmoji, Message, ReactionEmoji, User } from "@vencord/discord-types";
-import { Constants, FluxDispatcher, i18n, ReferencedMessageStore, RelationshipStore, RestAPI, useEffect } from "@webpack/common";
+import { MessageFlags } from "@vencord/discord-types/enums";
+import { Constants, FluxDispatcher, i18n, ReferencedMessageStore, RelationshipStore, RestAPI, useEffect, UserSettingsProtoStore, VoiceStateStore } from "@webpack/common";
 
 interface MessageDeleteProps {
     // Internal intl message for BLOCKED_MESSAGE_COUNT
@@ -56,6 +57,7 @@ type MemberListProps =
             key: string,
             props: {
                 user: User;
+                type: string;
             };
         }[],
         channel?: never;
@@ -65,6 +67,7 @@ type MemberListProps =
         channel: Channel;
     };
 
+const MESSAGE_GROUP_WINDOW_MS = 420000;
 const queue = new Queue();
 let reactions: Record<string, ReactionCacheEntry> = {};
 
@@ -103,8 +106,6 @@ function getReactionsWithQueue(msg: Message, e: ReactionEmoji, type: number) {
     return cache.users;
 }
 
-// Remove this migration once enough time has passed
-migratePluginSetting("HideBlockedUsers", "ignoreBlockedMessages", "ignoreMessages");
 const settings = definePluginSettings({
     hideReactions: {
         description: "Hides reactions by blocked and ignored (if enabled) users",
@@ -114,6 +115,12 @@ const settings = definePluginSettings({
     },
     hideFromMembersList: {
         description: "Hides blocked and ignored (if enabled) users from the members list",
+        type: OptionType.BOOLEAN,
+        default: true,
+        restartNeeded: true
+    },
+    hideFromVoiceChannels: {
+        description: "Hides blocked and ignored (if enabled) users from the voice channels",
         type: OptionType.BOOLEAN,
         default: true,
         restartNeeded: true
@@ -203,14 +210,6 @@ export default definePlugin({
             ]
         },
         {
-            find: ".THREAD_STARTER_MESSAGE,\"",
-            predicate: () => settings.store.hideReplies,
-            replacement: {
-                match: /return null!=\i\i/,
-                replace: "if($self.shouldIgnoreUser(arguments[0].message.author.id, arguments[0].message.messageReference?.message_id, arguments[0].message.messageReference?.channel_id)) return null; $&"
-            }
-        },
-        {
             find: /let{threadId:\i,goToThread:\i,observePostVisibilityAnalytics:\i,overrideMedia:\i,className:\i,containerWidth:\i/,
             replacement: {
                 match: /({channel:(\i).+?\i.\i\);)(\i)/,
@@ -224,8 +223,103 @@ export default definePlugin({
                 predicate: () => settings.store.hideReactions,
                 replace: "if($self.shouldHideReaction({message: arguments[0].message, emoji: arguments[0].emoji, type: arguments[0].type, count: arguments[0].count})) return null;$&"
             }
+        },
+        {
+            find: ".MESSAGE_GROUP_BLOCKED||",
+            replacement: {
+                match: /let \i,\i,\i,\i,{className:\i,/,
+                replace: "$self.hideBlockedMessages(arguments);$&"
+            }
+        },
+        {
+            find: "VoiceDareAvatarRing",
+            replacement: {
+                match: /let{children:\i,collapsed:\i=!1,className:\i}/,
+                replace: "$self.hideBlockedUsersFromVoicePreview(arguments);$&"
+            }
+        },
+        {
+            find: /\){let{participants:\i,onClick/,
+            replacement: {
+                match: /let{participants/,
+                replace: "arguments[0].participants = $self.hideVoiceParticipants(arguments[0].participants);$&"
+            }
         }
     ],
+
+    flux: {
+        VOICE_CHANNEL_SELECT: ({ channelId }) => {
+            if (!settings.store.hideFromVoiceChannels) return;
+            const voiceStates = VoiceStateStore.getVoiceStatesForChannel(channelId);
+            for (const userId in voiceStates) {
+                if (RelationshipStore.isBlocked(userId) || (settings.store.applyToIgnoredUsers && RelationshipStore.isIgnored(userId))) {
+                    const protoSettings = UserSettingsProtoStore.settings;
+                    const mutedConfig = {
+                        "muted": true,
+                        "volume": 100,
+                        "modifiedAt": new Date().getTime().toString(),
+                        "soundboardMuted": false
+                    };
+                    Object.defineProperty(protoSettings.audioContextSettings.user, userId, { value: mutedConfig, writable: true, configurable: true, enumerable: true });
+                    FluxDispatcher.dispatch({
+                        type: "USER_SETTINGS_PROTO_UPDATE",
+                        settings: {
+                            proto: protoSettings,
+                            type: 1
+                        },
+                        partial: false
+                    });
+                }
+            }
+        }
+    },
+
+    hideBlockedUsersFromVoicePreview(args) {
+        const connectedVoiceUsers: Array<{ props: { user: User; }; }> = args[0].children[0];
+        args[0].children[0] = connectedVoiceUsers.filter(user => !user.props?.user || !this.shouldIgnoreUser(user.props.user.id));
+    },
+
+    hideVoiceParticipants(participants: { user: User; }[]) {
+        return participants.filter(voiceParticipant => !this.shouldIgnoreUser(voiceParticipant.user.id));
+    },
+
+    hideBlockedMessages(args) {
+        if (!args[0]) return;
+        const chatComponents: Array<any> = args[0].channelStream;
+        args[0].channelStream = chatComponents.filter(chatComponent => chatComponent.type !== "MESSAGE_GROUP_BLOCKED");
+        const messages: Array<{ content: Message, groupId: string; }> = chatComponents.filter(component => component.type === "MESSAGE");
+        messages.forEach((messageObject, i) => {
+            if (settings.store.hideReplies && this.shouldIgnoreUser(messageObject.content.author.id, messageObject.content.messageReference?.message_id, messageObject.content.messageReference?.channel_id)) {
+                args[0].channelStream.splice(args[0].channelStream.indexOf(messageObject), 1);
+            }
+
+            const previousMessage = messages.at(i - 1);
+            if (previousMessage && i !== 0 && !messageObject.content.hasFlag(MessageFlags.HAS_THREAD) && !messageObject.content.interaction) {
+                const previuosSiblingDate = new Date(previousMessage.content.timestamp);
+                const currentMessageDate = new Date(messageObject.content.timestamp);
+                if (previousMessage.content.author.id === messageObject.content.author.id && previousMessage.groupId !== messageObject.groupId && (currentMessageDate.getTime() - previuosSiblingDate.getTime() <= MESSAGE_GROUP_WINDOW_MS)) {
+                    messageObject.groupId = previousMessage.groupId;
+                }
+            }
+        });
+
+        const dividers: Array<{ type: string; }> = chatComponents.filter(component => component.type === "DIVIDER");
+        dividers.forEach(dividerObject => {
+            const dividerIndex = args[0].channelStream.indexOf(dividerObject);
+            const previousDivider = args[0].channelStream.at(dividerIndex - 1);
+            if (previousDivider && previousDivider.type === "DIVIDER") {
+                args[0].channelStream.splice(dividerIndex - 1, 1);
+            }
+
+            if (dividerIndex === 0) {
+                args[0].channelStream.splice(dividerIndex, 1);
+            }
+        });
+    },
+
+    shouldHideVoiceParticipant(userId: string) {
+        return this.shouldIgnoreUser(userId);
+    },
 
     shouldHideReaction({ message, emoji, type, count }: ReactionProps) {
         try {
@@ -298,23 +392,33 @@ export default definePlugin({
 
     hideBlockedUsersFromMembersList(args: MemberListProps[]) {
         try {
-            const members = args[0].children ?? args[0].channel.recipients;
-            if (Array.isArray(members)) {
+            const membersListComponents = args[0].children ?? args[0].channel.recipients;
+
+            if (Array.isArray(membersListComponents)) {
                 const currentChannel = getCurrentChannel();
+                const isGroupDM = currentChannel?.isGroupDM();
+
                 if (currentChannel) {
-                    const blockedUsersIds: string[] = members.map(child => {
-                        if (child != null && child.key?.startsWith("member") && this.shouldIgnoreUser(child?.props?.user?.id)) {
-                            return child.props.user.id;
+                    const blockedUsersIds: string[] = membersListComponents.map(component => {
+                        if (component != null && component.key?.startsWith("member") && this.shouldIgnoreUser(component?.props?.user?.id)) {
+                            return component.props.user.id;
                         }
-                        if (currentChannel.isGroupDM() && this.shouldIgnoreUser(child)) {
-                            return child;
+                        if (isGroupDM && this.shouldIgnoreUser(component)) {
+                            return component;
                         }
                     }).filter(blockedUserId => blockedUserId != null);
-                    if (members.length > 0) {
-                        if (currentChannel.isGroupDM() && args[0].channel) {
+
+                    if (membersListComponents.length > 0) {
+                        if (isGroupDM && args[0].channel) {
                             args[0].channel.recipients = args[0].channel.recipients.filter(userId => !blockedUsersIds.includes(userId));
                         } else if (args[0].children) {
                             args[0].children = args[0].children.filter(child => !blockedUsersIds.includes(child?.props?.user?.id));
+                            args[0].children.forEach((component, i, components) => {
+                                const previousComponent = components.at(i - 1);
+                                if (previousComponent && previousComponent.props.type === "GROUP" && component.props.type === "GROUP") {
+                                    args[0].children?.splice(i - 1, 1);
+                                }
+                            });
                         }
                     }
                 }
