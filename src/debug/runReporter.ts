@@ -10,7 +10,6 @@ import * as Webpack from "@webpack";
 import { getBuildNumber, patches, patchTimings } from "@webpack/patcher";
 
 import { loadLazyChunks } from "./loadLazyChunks";
-import { beginTrace, finishTrace } from "./Tracer";
 
 async function runReporter() {
     const ReporterLogger = new Logger("Reporter");
@@ -20,7 +19,6 @@ async function runReporter() {
 
         const { promise: loadLazyChunksDone, resolve: loadLazyChunksDoneResolve } = Promise.withResolvers<void>();
 
-        beginTrace("Reporter::loadLazyChunks");
         // The main patch for starting the reporter chunk loading
         addPatch({
             find: '"Could not find app-mount"',
@@ -37,10 +35,6 @@ async function runReporter() {
         };
 
         await loadLazyChunksDone;
-
-        finishTrace("Reporter::loadLazyChunks");
-
-        beginTrace("Reporter::runReporter");
 
         // Manually require all modules to make sure all lazily required modules are patched
         for (const moduleId of Object.keys(Webpack.wreq.m)) {
@@ -121,7 +115,6 @@ async function runReporter() {
             }
         }
 
-        finishTrace("Reporter::runReporter");
         ReporterLogger.log("Finished test");
     } catch (e) {
         ReporterLogger.log("A fatal error occurred:", e);
