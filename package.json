@@ -40,7 +40,7 @@
         "@vap/shiki": "catalog:",
         "fflate": "catalog:",
         "gifenc": "catalog:",
-        "monaco-editor": "catalog:"
+        "@vencord/monaco-editor": "catalog:"
     },
     "devDependencies": {
         "@stylistic/eslint-plugin": "catalog:",
