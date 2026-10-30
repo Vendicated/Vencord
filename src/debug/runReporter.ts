@@ -23,9 +23,11 @@ async function runReporter() {
         Vencord.Webpack._initWebpack = function (...args) {
             originalInitWebpack.apply(this, args);
 
-            // Stylesheets are not needed for testing, so skip loading them for every chunk
-            Webpack.wreq.f.css = () => { };
-            loadLazyChunks().then(loadLazyChunksDoneResolve);
+            setTimeout(() => {
+                // Stylesheets are not needed for testing, so skip loading them for every chunk
+                Webpack.wreq.f.css = () => { };
+                loadLazyChunks().then(loadLazyChunksDoneResolve);
+            }, 0);
         };
 
         await loadLazyChunksDone;
