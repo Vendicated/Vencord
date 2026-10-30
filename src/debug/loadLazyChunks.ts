@@ -40,26 +40,24 @@ export async function loadLazyChunks() {
     }
 
     const queue = pLimit(50);
-    const workerAssetCache = new Map<string, Promise<boolean>>();
     const WORKER_ASSET_REGEX = /importScripts\(|self\.postMessage/;
+    // Chunks whose first module is a JSON module. Discord bundles JSON modules in their own chunks, so these only contain data
+    const JSON_CHUNK_REGEX = /^[^{]*\{[^{]*\{[\w$]+\.exports=JSON\.parse\('/;
 
-    async function isWorkerAsset(url: string, useQueue: boolean = true): Promise<boolean> {
-        if (workerAssetCache.has(url)) {
-            return workerAssetCache.get(url)!;
-        }
+    // wreq.u rebuilds an object containing every chunk on each call, so it is very slow to call repeatedly
+    const chunkFileCache = new Map<PropertyKey, string>();
+    function getChunkFile(id: PropertyKey) {
+        let file = chunkFileCache.get(id);
+        if (file === undefined) chunkFileCache.set(id, file = wreq.u(id));
+        return file;
+    }
 
-        const doFetch = () => {
-            return fetch(url)
-                .then(r => r.text())
-                .then(t => WORKER_ASSET_REGEX.test(t));
-        };
-
-        const res = useQueue
-            ? queue(doFetch)
-            : doFetch();
-
-        workerAssetCache.set(url, res);
-        return res;
+    // The same chunks are loaded by many factories, avoid going through wreq.e more than once for each
+    const chunkLoads = new Map<PropertyKey, Promise<unknown>>();
+    function loadChunk(id: PropertyKey) {
+        let promise = chunkLoads.get(id);
+        if (promise === undefined) chunkLoads.set(id, promise = wreq.e(id));
+        return promise;
     }
 
     try {
@@ -71,8 +69,8 @@ export async function loadLazyChunks() {
 
         const { promise: chunkSearchingDone, resolve: chunkSearchingDoneResolve } = Promise.withResolvers<void>();
 
-        // True if searching promise for that chunk is resolved, false otherwise
-        let chunkSearchResolvedGetters = [] as Array<() => boolean>;
+        // Amount of factories which are still being searched, or which still have their found chunks loading
+        let pendingSearches = 0;
 
         // This regex loads all language packs which makes webpack finds testing extremely slow, so for now, we prioritize using the one which doesn't include those
         const ChunkLoader = String.raw`[A-Za-z_$][\w$]*\.e\("[^"]+"\)`;
@@ -127,9 +125,7 @@ export async function loadLazyChunks() {
             const lazyChunks = findLazyChunkMatches(factoryCode, hasCssDebuggingLoad);
             const validChunkGroups = new Set<[chunkIds: PropertyKey[], entryPoint: PropertyKey]>();
 
-            const shouldForceDefer = false;
-
-            await Promise.all(lazyChunks.map(async ([, rawChunkIds, entryPoint]) => {
+            for (const [, rawChunkIds, entryPoint] of lazyChunks) {
                 const chunkIds = rawChunkIds
                     ?.matchAll(Webpack.ChunkIdsRegex)
                     .map(m => {
@@ -140,12 +136,12 @@ export async function loadLazyChunks() {
                     ?? [];
 
                 if (chunkIds.length === 0) {
-                    return;
+                    continue;
                 }
 
                 let invalidChunkGroup = false;
 
-                await Promise.all(chunkIds.map(async id => {
+                for (const id of chunkIds) {
                     if (hasCssDebuggingLoad) {
                         if (chunkIds.length > 1) {
                             throw new Error("Found multiple chunks in factory that loads the CSS debugging chunk");
@@ -153,74 +149,43 @@ export async function loadLazyChunks() {
 
                         invalidChunks.add(id);
                         invalidChunkGroup = true;
-                        return;
+                        break;
                     }
 
-                    const chunkFile = wreq.u(id);
-                    if (chunkFile == null || chunkFile === "undefined.js") return;
-
-                    if (await isWorkerAsset(wreq.p + chunkFile)) {
-                        invalidChunks.add(id);
-                        invalidChunkGroup = true;
-                        return;
-                    }
+                    // No need to check for WebWorker assets here, those are only loaded with new Worker() and never through wreq.e
+                    const chunkFile = getChunkFile(id);
+                    if (chunkFile == null || chunkFile === "undefined.js") continue;
 
                     validChunks.add(id);
-                }));
+                }
 
                 if (!invalidChunkGroup) {
                     const numEntryPoint = Number(entryPoint);
                     validChunkGroups.add([chunkIds, Number.isNaN(numEntryPoint) ? entryPoint : String(numEntryPoint)]);
                 }
-            }));
+            }
 
             // Loads all found valid chunk groups
             await Promise.all(
                 Array.from(validChunkGroups)
                     .map(([chunkIds]) =>
-                        Promise.all(chunkIds.map(id => wreq.e(id)))
+                        Promise.all(chunkIds.map(loadChunk))
                     )
             );
 
-            // Requires the entry points for all valid chunk groups
             for (const [, entryPoint] of validChunkGroups) {
-                try {
-                    if (shouldForceDefer) {
-                        deferredRequires.add(entryPoint);
-                        continue;
-                    }
-
-                    if (wreq.m[entryPoint]) wreq(entryPoint);
-                } catch (err) {
-                    if (err instanceof TypeError && err.message.includes("reading 'nativeModules'")) {
-                        continue;
-                    }
-
-                    console.error(err);
-                }
+                deferredRequires.add(entryPoint);
             }
-
-
-            // Filter out resolved chunk search promises. If the array length is 0 that means all the pending searches and loadings are done
-            // and our regex has finished scanning all modules. Once this happens, the artificial "natural" loading of chunks has been completed
-            // and we can continue with the rest of the code.
-            // setImmediate here is needed so the filtering also includes the promises created from searching the modules loaded by the current invokation.
-            // Otherwise, it could resolve before the async code being put at the end of the event loop has a chance to run and add the promise to the array.
-            // The async code mentioned is the invokation of the current function from the factoryListener.
-            setTimeout(() => {
-                chunkSearchResolvedGetters = chunkSearchResolvedGetters.filter(isResolvedGetter => !isResolvedGetter());
-                if (chunkSearchResolvedGetters.length === 0) {
-                    chunkSearchingDoneResolve();
-                }
-            }, 0);
         }
 
         function factoryListener(factory: AnyModuleFactory | ModuleFactory) {
-            let isResolved = false;
+            pendingSearches++;
             searchAndLoadLazyChunks(String(factory))
-                .finally(() => isResolved = true);
-
-            chunkSearchResolvedGetters.push(() => isResolved);
+                .finally(() => {
+                    // Factories from the chunks loaded by this search are added before the chunk loading resolves, so their searches are already pending at this point.
+                    // If no searches are pending, our regex has finished scanning all modules and every chunk it found has been loaded.
+                    if (--pendingSearches === 0) chunkSearchingDoneResolve();
+                });
         }
 
         Webpack.factoryListeners.add(factoryListener);
@@ -231,11 +196,6 @@ export async function loadLazyChunks() {
         await chunkSearchingDone;
         Webpack.factoryListeners.delete(factoryListener);
 
-        // Require deferred entry points
-        for (const deferredRequire of deferredRequires) {
-            wreq(deferredRequire);
-        }
-
         // All chunks Discord has mapped to asset files, even if they are not used anymore
         const chunksMap = getWebpackChunkMap();
         if (!chunksMap) throw new Error("Failed to get chunk map");
@@ -244,19 +204,33 @@ export async function loadLazyChunks() {
         if (allChunks.length === 0) throw new Error("Failed to get all chunks");
 
         // Chunks which our regex could not catch to load
-        // It will always contain WebWorker assets, and also currently contains some language packs which are loaded differently
+        // It will always contain WebWorker assets, and also currently contains language packs and other JSON data which are loaded differently
         const chunksLeft = allChunks.filter(id => {
             return !(validChunks.has(id) || invalidChunks.has(id));
         });
 
         await Promise.all(chunksLeft.map(id => queue(async () => {
-            // We will deadlock if we use the queue inside a queue func
-            const isWorkerFile = await isWorkerAsset(wreq.p + wreq.u(id), false);
+            const chunkCode = await fetch(wreq.p + getChunkFile(id)).then(r => r.text());
 
-            if (!isWorkerFile) {
-                await wreq.e(id);
-            }
+            // JSON chunks only contain data, so there is nothing to patch in them. Loading them makes webpack finds testing extremely slow
+            if (JSON_CHUNK_REGEX.test(chunkCode) || WORKER_ASSET_REGEX.test(chunkCode)) return;
+
+            await loadChunk(id);
         })));
+
+        // Entry points are only required once every chunk is loaded. Some lazy loads omit chunks which Discord expects to be loaded already in that context,
+        // so requiring them right after their own chunks load can fail and leave the module broken in the require cache
+        for (const deferredRequire of deferredRequires) {
+            try {
+                if (wreq.m[deferredRequire]) wreq(deferredRequire);
+            } catch (err) {
+                if (err instanceof TypeError && err.message.includes("reading 'nativeModules'")) {
+                    continue;
+                }
+
+                console.error(err);
+            }
+        }
 
         LazyChunkLoaderLogger.log("Finished loading all chunks!");
         chunksAlreadyLoaded = true;

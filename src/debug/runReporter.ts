@@ -31,6 +31,9 @@ async function runReporter() {
         // initReporter is called in the patched entry point of Discord
         // @ts-expect-error
         Vencord.Webpack._initReporter = function () {
+            // Stylesheets are not needed for testing, so skip loading them for every chunk
+            Webpack.wreq.f.css = () => { };
+
             loadLazyChunks().then(loadLazyChunksDoneResolve);
         };
 
