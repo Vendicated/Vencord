@@ -135,7 +135,7 @@ function IdsListComponent(props: { setValue: (value: string) => void; }) {
 
     return (
         <section>
-            <Heading tag="h3">Filter List</Heading>
+            <Heading className={Margins.bottom8}>Filter List</Heading>
             <Paragraph className={Margins.bottom8}>Comma separated list of activity IDs to filter (Useful for filtering specific RPC activities and CustomRPC</Paragraph>
             <TextArea
                 type="text"

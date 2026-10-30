@@ -70,7 +70,7 @@ function SectionHeader({ section }: SectionHeaderProps) {
 
     return <div>
         <Flex>
-            <Heading style={{ flexGrow: 1 }}>{section.title}</Heading>
+            <Heading className={Margins.bottom8} style={{ flexGrow: 1 }}>{section.title}</Heading>
             {hasAuthorIds && <UserSummaryItem
                 users={authors}
                 guildId={undefined}
@@ -244,9 +244,9 @@ function ChangeDecorationModal(props: RenderModalProps) {
                     user={UserStore.getCurrentUser()}
                 />
                 {isActiveDecorationPreset &&
-                    <Paragraph size="md" weight="medium" className={Margins.bottom8} style={{ color: "var(--text-strong, var(--text-default))" }}>
+                    <Heading className={Margins.bottom8} style={{ color: "var(--text-strong, var(--text-default))" }}>
                         Part of the {activeDecorationPreset.name} Preset
-                    </Paragraph>
+                    </Heading>
                 }
                 {typeof activeSelectedDecoration === "object" &&
                     <Paragraph

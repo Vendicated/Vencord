@@ -19,7 +19,7 @@ export function WindowsMaterialSettings() {
 
     return (
         <ErrorBoundary noop>
-            <Heading>Background Material</Heading>
+            <Heading className={Margins.bottom8}>Background Material</Heading>
             <Paragraph className={Margins.bottom8}>
                 Windows transparent background effects. You need a theme that supports transparency or this will do nothing. A restart is required after changing this setting.
             </Paragraph>
