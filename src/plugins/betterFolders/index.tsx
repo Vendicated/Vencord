@@ -407,11 +407,12 @@ export default definePlugin({
     fixResizeSliderOffset(event: MouseEvent) {
         const sidebar = document.querySelector<HTMLElement>(".vc-betterFolders-sidebar");
 
-        if (!sidebar) return event;
+        if (sidebar) {
+            // @ts-expect-error readonly, browser doesn't care
+            event.screenX += sidebar.offsetWidth;
+        }
 
-        return Object.assign(event, {
-            screenX: event.screenX + sidebar.offsetWidth
-        });
+        return event;
     },
 
     shouldShowTransition(props: any) {
