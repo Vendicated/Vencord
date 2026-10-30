@@ -6,7 +6,7 @@
 
 import { Logger } from "@utils/Logger";
 import * as Webpack from "@webpack";
-import { getBuildNumber, patches, patchTimings } from "@webpack/patcher";
+import { getBuildNumber, patches } from "@webpack/patcher";
 
 import { loadLazyChunks } from "./loadLazyChunks";
 
@@ -54,11 +54,12 @@ async function runReporter() {
             }
         }
 
-        for (const [plugin, moduleId, match, totalTime] of patchTimings) {
-            if (totalTime > 10) {
-                new Logger("WebpackPatcher").warn(`Patch by ${plugin} took ${Math.round(totalTime * 100) / 100}ms (Module id is ${String(moduleId)}): ${match}`);
-            }
-        }
+        // Slow patches reporting is disabled for now since it is too noisy
+        // for (const [plugin, moduleId, match, totalTime] of patchTimings) {
+        //     if (totalTime > 10) {
+        //         new Logger("WebpackPatcher").warn(`Patch by ${plugin} took ${Math.round(totalTime * 100) / 100}ms (Module id is ${String(moduleId)}): ${match}`);
+        //     }
+        // }
 
         for (const [searchType, args] of Webpack.lazyWebpackSearchHistory) {
             let method = searchType;
