@@ -39,7 +39,7 @@ export async function loadLazyChunks() {
         return;
     }
 
-    const queue = pLimit(100);
+    const queue = pLimit(50);
     const WORKER_ASSET_REGEX = /importScripts\(|self\.postMessage/;
     // Chunks whose first module is a JSON module. Discord bundles JSON modules in their own chunks, so these only contain data
     const JSON_CHUNK_REGEX = /^[^{]*\{[^{]*\{[\w$]+\.exports=JSON\.parse\('/;
