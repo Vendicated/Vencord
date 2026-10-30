@@ -5,7 +5,6 @@
  */
 
 import { Logger } from "@utils/Logger";
-import { canonicalizeMatch } from "@utils/patches";
 import { ModuleFactory } from "@vencord/discord-types/webpack";
 import * as Webpack from "@webpack";
 import { wreq } from "@webpack";
@@ -76,8 +75,45 @@ export async function loadLazyChunks() {
         let chunkSearchResolvedGetters = [] as Array<() => boolean>;
 
         // This regex loads all language packs which makes webpack finds testing extremely slow, so for now, we prioritize using the one which doesn't include those
-        const CompleteLazyChunkRegex = canonicalizeMatch(/(?:(?:Promise\.all\(\[)?((?:\i\.e\("?[^)]+?"?\),?)+?)(?:\]\))?)\.then\(\i(?:\.\i)?\.bind\(\i,"?([^)]+?)"?(?:,[^)]+?)?\)\)/g);
-        const PartialLazyChunkRegex = canonicalizeMatch(/(?:(?:Promise\.all\(\[)?((?:\i\.e\("?[^)]+?"?\),?)+?)(?:\]\))?)\.then\(\i\.bind\(\i,"?([^)]+?)"?\)\)/g);
+        const ChunkLoader = String.raw`[A-Za-z_$][\w$]*\.e\("[^"]+"\)`;
+        const Identifier = String.raw`[A-Za-z_$][\w$]*`;
+        const PromiseAllChunkLoad = String.raw`Promise\.all\(\[((?:${ChunkLoader},?)+)\]\)`;
+        const CompleteThen = String.raw`\.then\(${Identifier}(?:\.${Identifier})?\.bind\(${Identifier},"?([^)]+?)"?(?:,[^)]+?)?\)\)`;
+        const PartialThen = String.raw`\.then\(${Identifier}\.bind\(${Identifier},"?([^)]+?)"?\)\)`;
+        const CompletePromiseRegex = new RegExp(`${PromiseAllChunkLoad}${CompleteThen}`, "y");
+        const CompleteSingleRegex = new RegExp(`(${ChunkLoader})${CompleteThen}`, "y");
+        const PartialPromiseRegex = new RegExp(`${PromiseAllChunkLoad}${PartialThen}`, "y");
+        const PartialSingleRegex = new RegExp(`(${ChunkLoader})${PartialThen}`, "y");
+
+        function findLazyChunkMatches(factoryCode: string, complete: boolean) {
+            const promiseRegex = complete ? CompletePromiseRegex : PartialPromiseRegex;
+            const singleRegex = complete ? CompleteSingleRegex : PartialSingleRegex;
+            const matches: RegExpMatchArray[] = [];
+
+            let index = 0;
+            while ((index = factoryCode.indexOf("Promise.all([", index)) !== -1) {
+                promiseRegex.lastIndex = index;
+                const match = promiseRegex.exec(factoryCode);
+                if (match) matches.push(match);
+                index++;
+            }
+
+            index = 0;
+            while ((index = factoryCode.indexOf('.e("', index)) !== -1) {
+                let start = index;
+                while (start > 0 && /[\w$]/.test(factoryCode[start - 1])) start--;
+
+                if (start < index && /[A-Za-z_$]/.test(factoryCode[start])) {
+                    singleRegex.lastIndex = start;
+                    const match = singleRegex.exec(factoryCode);
+                    if (match) matches.push(match);
+                }
+
+                index += 4;
+            }
+
+            return matches.sort((a, b) => a.index! - b.index!);
+        }
 
         let foundCssDebuggingLoad = false;
 
@@ -88,12 +124,12 @@ export async function loadLazyChunks() {
             // Disabled for now since this causes lots of chunks concatenated into the same module to get marked as invalid, and thus not loaded.
             const hasCssDebuggingLoad = foundCssDebuggingLoad = false;
 
-            const lazyChunks = factoryCode.matchAll(hasCssDebuggingLoad ? CompleteLazyChunkRegex : PartialLazyChunkRegex);
+            const lazyChunks = findLazyChunkMatches(factoryCode, hasCssDebuggingLoad);
             const validChunkGroups = new Set<[chunkIds: PropertyKey[], entryPoint: PropertyKey]>();
 
             const shouldForceDefer = false;
 
-            await Promise.all(Array.from(lazyChunks).map(async ([, rawChunkIds, entryPoint]) => {
+            await Promise.all(lazyChunks.map(async ([, rawChunkIds, entryPoint]) => {
                 const chunkIds = rawChunkIds
                     ?.matchAll(Webpack.ChunkIdsRegex)
                     .map(m => {
@@ -213,7 +249,7 @@ export async function loadLazyChunks() {
             return !(validChunks.has(id) || invalidChunks.has(id));
         });
 
-        await Promise.all(chunksLeft.map(async id => queue(async () => {
+        await Promise.all(chunksLeft.map(id => queue(async () => {
             // We will deadlock if we use the queue inside a queue func
             const isWorkerFile = await isWorkerAsset(wreq.p + wreq.u(id), false);
 
