@@ -109,7 +109,7 @@ export async function loadLazyChunks() {
 
                 let invalidChunkGroup = false;
 
-                for (const id of chunkIds) {
+                await Promise.all(chunkIds.map(async id => {
                     if (hasCssDebuggingLoad) {
                         if (chunkIds.length > 1) {
                             throw new Error("Found multiple chunks in factory that loads the CSS debugging chunk");
@@ -117,19 +117,20 @@ export async function loadLazyChunks() {
 
                         invalidChunks.add(id);
                         invalidChunkGroup = true;
-                        break;
+                        return;
                     }
 
-                    if (wreq.u(id) == null || wreq.u(id) === "undefined.js") continue;
+                    const chunkFile = wreq.u(id);
+                    if (chunkFile == null || chunkFile === "undefined.js") return;
 
-                    if (await isWorkerAsset(wreq.p + wreq.u(id))) {
+                    if (await isWorkerAsset(wreq.p + chunkFile)) {
                         invalidChunks.add(id);
                         invalidChunkGroup = true;
-                        continue;
+                        return;
                     }
 
                     validChunks.add(id);
-                }
+                }));
 
                 if (!invalidChunkGroup) {
                     const numEntryPoint = Number(entryPoint);
