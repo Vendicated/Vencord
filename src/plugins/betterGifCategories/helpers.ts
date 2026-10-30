@@ -22,7 +22,7 @@ export function deleteCategorySubtitle({ name, gifs }: GifCategory): string {
         return `Are you sure you want to delete "${name}"?`;
     }
 
-    return `Are you sure you want to delete "${name}"? Its ${gifs.length} gif${gifs.length === 1 ? "" : "s"} stay in your Discord favourites.`;
+    return `Are you sure you want to delete "${name}"? This removes ${gifs.length} gif${gifs.length === 1 ? "" : "s"} from the category. Your Discord favourites won't be affected.`;
 }
 
 
