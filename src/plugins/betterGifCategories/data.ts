@@ -5,6 +5,7 @@
  */
 
 import * as DataStore from "@api/DataStore";
+import { UserStore } from "@webpack/common/stores";
 
 import { getDataKey, makeId } from "./helpers";
 
@@ -31,6 +32,10 @@ export interface GifCategory {
 let cache: GifCategory[] = [];
 
 export async function loadCategories(): Promise<void> {
+    if (UserStore.getCurrentUser()?.id == null) {
+        return;
+    }
+
     cache = (await DataStore.get<GifCategory[]>(getDataKey())) ?? [];
 }
 

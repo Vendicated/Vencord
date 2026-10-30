@@ -38,6 +38,10 @@ export default definePlugin({
         await loadCategories();
     },
 
+    flux: {
+        CONNECTION_OPEN: loadCategories,
+    },
+
     getCategoryTiles,
     getFavorites,
     getHeadingLabel,
