@@ -16,10 +16,11 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { Button } from "@components/Button";
 import { CodeBlock } from "@components/CodeBlock";
 import { Divider } from "@components/Divider";
 import { Flex } from "@components/Flex";
-import { HeadingTertiary } from "@components/Heading";
+import { Heading } from "@components/Heading";
 import { SettingsTab, wrapTab } from "@components/settings/tabs/BaseTab";
 import { debounce } from "@shared/debounce";
 import { copyWithToast } from "@utils/discord";
@@ -27,7 +28,7 @@ import { Margins } from "@utils/margins";
 import { stripIndent } from "@utils/text";
 import { ReplaceFn } from "@utils/types";
 import { search } from "@webpack";
-import { Button, React, TextInput, useMemo, useState } from "@webpack/common";
+import { React, TextInput, useMemo, useState } from "@webpack/common";
 
 import { FullPatchInput } from "./FullPatchInput";
 import { PatchPreview } from "./PatchPreview";
@@ -105,7 +106,7 @@ function PatchHelper() {
 
     return (
         <SettingsTab>
-            <HeadingTertiary>Full patch</HeadingTertiary>
+            <Heading>Full patch</Heading>
             <FullPatchInput
                 setFind={onFindChange}
                 setParsedFind={setParsedFind}
@@ -113,7 +114,7 @@ function PatchHelper() {
                 setReplacement={setReplacement}
             />
 
-            <HeadingTertiary className={Margins.top8}>Find</HeadingTertiary>
+            <Heading className={Margins.top8}>Find</Heading>
             <TextInput
                 type="text"
                 value={find}
@@ -121,7 +122,7 @@ function PatchHelper() {
                 error={findError}
             />
 
-            <HeadingTertiary className={Margins.top8}>Match</HeadingTertiary>
+            <Heading className={Margins.top8}>Match</Heading>
             <TextInput
                 type="text"
                 value={match}
@@ -148,7 +149,7 @@ function PatchHelper() {
 
             {!!(find && match && replacement) && (
                 <>
-                    <HeadingTertiary className={Margins.top20}>Code</HeadingTertiary>
+                    <Heading className={Margins.top20}>Code</Heading>
                     <CodeBlock lang="js" content={code} />
                     <Flex className={Margins.top16}>
                         <Button onClick={() => copyWithToast(code)}>

@@ -103,7 +103,7 @@ export function buildPluginMenuEntries(includeEmpty = false) {
                                         checked={s[key]}
                                         action={() => {
                                             s[key] = !s[key];
-                                            if (option.restartNeeded) showToast("Restart to apply the change");
+                                            if (option.restartNeeded) showToast({ text: "Restart to apply the change" });
                                         }}
                                     />
                                 );
@@ -120,7 +120,7 @@ export function buildPluginMenuEntries(includeEmpty = false) {
                                                 checked={s[key] === opt.value}
                                                 action={() => {
                                                     s[key] = opt.value;
-                                                    if (option.restartNeeded) showToast("Restart to apply the change");
+                                                    if (option.restartNeeded) showToast({ text: "Restart to apply the change" });
                                                 }}
                                             />
                                         ))}

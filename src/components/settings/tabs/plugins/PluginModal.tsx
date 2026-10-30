@@ -21,8 +21,10 @@ import "./PluginModal.css";
 import { generateId } from "@api/Commands";
 import { hasAnyVisibleSettings, isSettingHidden } from "@api/PluginManager";
 import { useSettings } from "@api/Settings";
-import { BaseText } from "@components/BaseText";
 import ErrorBoundary from "@components/ErrorBoundary";
+import { Heading } from "@components/Heading";
+import { Paragraph } from "@components/Paragraph";
+import { Text } from "@components/Text";
 import { debounce } from "@shared/debounce";
 import { gitRemote } from "@shared/vencordUserAgent";
 import { classNameFactory } from "@utils/css";
@@ -32,7 +34,7 @@ import { classes } from "@utils/misc";
 import { OptionType, Plugin, PluginTag } from "@utils/types";
 import { RenderModalProps, User } from "@vencord/discord-types";
 import { findCssClassesLazy } from "@webpack";
-import { Clickable, FluxDispatcher, Forms, Modal, openModal, React, Text, Tooltip, useEffect, useMemo, UserStore, UserSummaryItem, UserUtils, useState } from "@webpack/common";
+import { Clickable, FluxDispatcher, Modal, openModal, React, Tooltip, useEffect, useMemo, UserStore, UserSummaryItem, UserUtils, useState } from "@webpack/common";
 import { Constructor } from "type-fest";
 
 import { PluginMeta } from "~plugins";
@@ -106,7 +108,7 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
     function renderSettings() {
         const { settings } = plugin;
         if (!hasSettings || !settings)
-            return <Forms.FormText>There are no settings for this plugin.</Forms.FormText>;
+            return <Paragraph>There are no settings for this plugin.</Paragraph>;
 
         const options = Object.entries(settings.def).map(([key, setting]) => {
             if (setting.type === OptionType.CUSTOM) return null;
@@ -173,7 +175,7 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
             size="lg"
             title={
                 <div className={cl("header")}>
-                    <BaseText tag="h1" weight="semibold" size="lg">{plugin.name}</BaseText>
+                    <Text tag="h1" weight="semibold" size="lg">{plugin.name}</Text>
                     {!pluginMeta.userPlugin && (
                         <div className="vc-settings-modal-links">
                             <FavoriteButton
@@ -195,7 +197,7 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
             subtitle={
                 <div className={cl("info")}>
                     <div>
-                        <Forms.FormText>{plugin.description}</Forms.FormText>
+                        <Paragraph>{plugin.description}</Paragraph>
                         {!!plugin.tags?.length && <PluginTags tags={plugin.tags} />}
                     </div>
                 </div>
@@ -203,7 +205,7 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
         >
             <div className={"vc-settings-modal-content"}>
                 <section>
-                    <Text variant="heading-lg/semibold" className={classes(Margins.top8, Margins.bottom8)}>Authors</Text>
+                    <Heading tag="h1" className={classes(Margins.top8, Margins.bottom8)}>Authors</Heading>
                     <div style={{ width: "fit-content" }}>
                         <ErrorBoundary noop>
                             <UserSummaryItem
@@ -242,7 +244,7 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
                 )}
 
                 <section>
-                    <Text variant="heading-lg/semibold" className={classes(Margins.top16, Margins.bottom8)}>Settings</Text>
+                    <Heading tag="h1" className={classes(Margins.top16, Margins.bottom8)}>Settings</Heading>
                     {renderSettings()}
                 </section>
             </div>

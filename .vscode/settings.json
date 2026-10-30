@@ -9,10 +9,8 @@
     "[typescriptreact]": {
         "editor.defaultFormatter": "vscode.typescript-language-features"
     },
-    "javascript.format.semicolons": "insert",
-    "typescript.format.semicolons": "insert",
-    "typescript.preferences.quoteStyle": "double",
-    "javascript.preferences.quoteStyle": "double",
+    "js/ts.format.semicolons": "insert",
+    "js/ts.preferences.quoteStyle": "double",
     "gitlens.remotes": [
         {
             "domain": "codeberg.org",
@@ -22,5 +20,8 @@
     "css.format.spaceAroundSelectorSeparator": true,
     "[css]": {
         "editor.defaultFormatter": "vscode.css-language-features"
+    },
+    "[html]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode"
     }
 }

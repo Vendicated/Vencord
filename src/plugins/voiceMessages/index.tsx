@@ -19,8 +19,10 @@
 import "./styles.css";
 
 import { NavContextMenuPatchCallback } from "@api/ContextMenu";
+import { Button } from "@components/Button";
 import { Card } from "@components/Card";
-import { Microphone } from "@components/Icons";
+import { Heading } from "@components/Heading";
+import { ClockIcon, Microphone } from "@components/Icons";
 import { Link } from "@components/Link";
 import { Paragraph } from "@components/Paragraph";
 import { Devs } from "@utils/constants";
@@ -32,7 +34,7 @@ import { chooseFile } from "@utils/web";
 import { CloudUpload as TCloudUpload, RenderModalProps } from "@vencord/discord-types";
 import { CloudUploadPlatform } from "@vencord/discord-types/enums";
 import { findLazy } from "@webpack";
-import { Button, Constants, FluxDispatcher, Forms, lodash, Menu, MessageActions, Modal,openModal, PendingReplyStore, PermissionsBits, PermissionStore, RestAPI, SelectedChannelStore, showToast, SnowflakeUtils, Toasts, useEffect, useState } from "@webpack/common";
+import { Constants, FluxDispatcher, lodash, Menu, MessageActions, Modal, openModal, PendingReplyStore, PermissionsBits, PermissionStore, RestAPI, SelectedChannelStore, showToast, SnowflakeUtils, useEffect, useState } from "@webpack/common";
 import { ComponentType } from "react";
 
 import { VoiceRecorderDesktop } from "./DesktopRecorder";
@@ -41,11 +43,10 @@ import { VoicePreview } from "./VoicePreview";
 import { VoiceRecorderWeb } from "./WebRecorder";
 
 const CloudUpload: typeof TCloudUpload = findLazy(m => m.prototype?.trackUploadFinished);
-
 export const cl = classNameFactory("vc-vmsg-");
 export type VoiceRecorder = ComponentType<{
     setAudioBlob(blob: Blob): void;
-    onRecordingChange?(recording: boolean): void;
+    onRecordingChange(recording: boolean): void;
 }>;
 
 export interface VoiceMessageProps {
@@ -68,7 +69,11 @@ const ctxMenuPatch: NavContextMenuPatchCallback = (children, props) => {
                 icon: Microphone
             }}
             label="Send Voice Message"
-            action={() => openModal(modalProps => <VoiceMessageModal modalProps={modalProps} />)}
+            action={() =>
+                openModal(modalProps => <VoiceMessageModal modalProps={modalProps} />, {
+                    onCloseCallback: () => FluxDispatcher.dispatch({ type: "VENCORD_STOP_RECORDING" })
+                })
+            }
         />
     );
 };
@@ -82,7 +87,7 @@ export default definePlugin({
 
     patches: [
         {
-            find: "#{intl::PAUSE_VOICE_MESSAGE_A11Y_LABEL}",
+            find: "#{intl::VOICE_MESSAGES_A11Y_LABEL}",
             replacement: {
                 match: /(?<=\i=)(?=\i\.memo\(.{0,50}?=1,onVolumeChange:[^}]+?waveform:[^}]+?playbackCacheKey:)/,
                 replace: "$self.VoiceMessage=",
@@ -140,7 +145,7 @@ function sendAudio(blob: Blob, meta: AudioMetadata) {
             }
         });
     });
-    upload.on("error", () => showToast("Failed to upload voice message", Toasts.Type.FAILURE));
+    upload.on("error", () => showToast({ text: "Failed to upload voice message", variant: "critical" }));
 
     upload.upload();
 }
@@ -216,7 +221,7 @@ function VoiceMessageModal({ modalProps }: { modalProps: RenderModalProps; }) {
                 onClick: () => {
                     sendAudio(blob!, meta ?? EMPTY_META);
                     modalProps.onClose();
-                    showToast("Now sending voice message... Please be patient", Toasts.Type.MESSAGE);
+                    showToast({ text: "Now sending voice message... Please be patient", icon: ClockIcon, iconColor: "var(--text-default)" });
                 },
                 disabled: !blob
             }]}
@@ -243,7 +248,7 @@ function VoiceMessageModal({ modalProps }: { modalProps: RenderModalProps; }) {
                 </Button>
             </div>
 
-            <Forms.FormTitle>Preview</Forms.FormTitle>
+            <Heading>Preview</Heading>
             {metaError
                 ? <Paragraph className={cl("error")}>Failed to parse selected audio file: {metaError.message}</Paragraph>
                 : (
@@ -256,11 +261,11 @@ function VoiceMessageModal({ modalProps }: { modalProps: RenderModalProps; }) {
 
             {isUnsupportedFormat && (
                 <Card variant="warning" className={Margins.top16} defaultPadding>
-                    <Forms.FormText>Voice Messages have to be OggOpus to be playable on iOS. This file is <code>{blob.type}</code> so it will not be playable on iOS.</Forms.FormText>
+                    <Paragraph>Voice Messages have to be OggOpus to be playable on iOS. This file is <code>{blob.type}</code> so it will not be playable on iOS.</Paragraph>
 
-                    <Forms.FormText className={Margins.top8}>
+                    <Paragraph className={Margins.top8}>
                         To fix it, first convert it to OggOpus, for example using the <Link href="https://convertio.co/mp3-opus/">convertio web converter</Link>
-                    </Forms.FormText>
+                    </Paragraph>
                 </Card>
             )}
         </Modal>
