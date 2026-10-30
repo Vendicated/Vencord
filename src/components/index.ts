@@ -24,3 +24,4 @@ export * from "./Paragraph";
 export * from "./settings";
 export * from "./Span";
 export * from "./Switch";
+export * from "./Text";

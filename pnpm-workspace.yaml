@@ -1,20 +1,67 @@
 packages:
-  - packages/*
+    - packages/*
+
+# Dependency versions shared across all packages
+catalog:
+    "@intrnl/xxhash64": "^0.1.2"
+    "@stylistic/eslint-plugin": "^5.10.0"
+    "@types/chrome": "^0.3.6"
+    "@types/fs-extra": "^11.0.4"
+    "@types/node": "^26.0.1"
+    "@types/react": "19.2.3"
+    "@types/react-dom": "19.2.3"
+    "@types/yazl": "^3.3.1"
+    "@vap/core": "0.0.12"
+    "@vap/shiki": "0.10.5"
+    "diff": "^9.0.0"
+    "esbuild": "^0.28.2"
+    "eslint": "10.13.0"
+    "eslint-import-resolver-alias": "^1.1.2"
+    "eslint-plugin-path-alias": "2.1.0"
+    "eslint-plugin-react": "^7.37.5"
+    "eslint-plugin-simple-header": "^1.2.1"
+    "eslint-plugin-simple-import-sort": "^14.0.0"
+    "eslint-plugin-unused-imports": "^4.4.1"
+    "fflate": "^0.8.3"
+    "fs-extra": "^11.3.6"
+    "gifenc": "github:mattdesl/gifenc#64842fca317b112a8590f8fef2bf3825da8f6fe3"
+    "html-minifier-terser": "^7.2.0"
+    "lodash": "^4.18.1"
+    "moment": "2.30.1"
+    "monaco-editor": "^0.57.0"
+    "p-limit": "^7.3.3"
+    "puppeteer-core": "^25.16.0"
+    "standalone-electron-types": "^41.2.1"
+    "stylelint": "^17.16.0"
+    "stylelint-config-standard": "^40.0.0"
+    "svgo": "^4.1.0"
+    "ts-patch": "^3.3.0"
+    "ts-pattern": "^5.9.0"
+    "tsx": "^4.23.15"
+    "type-fest": "^5.10.0"
+    "typescript": "^6.0.3"
+    "typescript-eslint": "^8.72.0"
+    "typescript-transform-paths": "^3.5.6"
+    "zip-local": "^0.3.5"
+
 patchedDependencies:
-  eslint-plugin-path-alias@2.1.0: patches/eslint-plugin-path-alias@2.1.0.patch
-peerDependencyRules:
-  ignoreMissing:
-    - eslint-plugin-import
-    - eslint
-allowedDeprecatedVersions:
-  source-map-resolve: '*'
-  resolve-url: '*'
-  source-map-url: '*'
-  urix: '*'
-  q: '*'
+    eslint-plugin-path-alias@2.1.0: patches/eslint-plugin-path-alias@2.1.0.patch
+
 strictPeerDependencies: false
+peerDependencyRules:
+    ignoreMissing:
+        - eslint
+        - eslint-plugin-import
+allowedDeprecatedVersions:
+    q: "*"
+    resolve-url: "*"
+    source-map-resolve: "*"
+    source-map-url: "*"
+    urix: "*"
+
 allowBuilds:
-  esbuild: true
-pmOnFail: warn
+    esbuild: true
 minimumReleaseAgeExclude:
-  - '@vencord/*'
+    - "@vencord/*"
+
+pmOnFail: warn

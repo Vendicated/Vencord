@@ -1,9 +1,14 @@
 {
     "name": "@vencord/types",
     "private": false,
-    "version": "1.15.1",
+    "version": "1.15.14",
     "description": "",
     "types": "index.d.ts",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/Vendicated/Vencord.git",
+        "directory": "packages/vencord-types"
+    },
     "scripts": {
         "prepublishOnly": "tsx ./prepare.ts",
         "test": "echo \"Error: no test specified\" && exit 1"
@@ -12,21 +17,20 @@
     "author": "Vencord",
     "license": "GPL-3.0-or-later",
     "devDependencies": {
-        "@types/fs-extra": "^11.0.4",
-        "fs-extra": "^11.3.6",
-        "tsx": "^4.22.4"
+        "@types/fs-extra": "catalog:",
+        "fs-extra": "catalog:",
+        "tsx": "catalog:"
     },
     "dependencies": {
-        "@types/lodash": "4.17.19",
-        "@types/node": "^26.0.1",
-        "@vencord/discord-types": "^1.0.2",
-        "highlight.js": "11.11.1",
-        "moment": "^2.22.2",
-        "ts-pattern": "^5.6.0",
-        "type-fest": "^5.7.0"
+        "@types/node": "catalog:",
+        "@vencord/discord-types": "workspace:",
+        "lodash": "catalog:",
+        "moment": "catalog:",
+        "ts-pattern": "catalog:",
+        "type-fest": "catalog:"
     },
     "peerDependencies": {
-        "@types/react": "18.3.1",
-        "@types/react-dom": "18.3.1"
+        "@types/react": "catalog:",
+        "@types/react-dom": "catalog:"
     }
 }

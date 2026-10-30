@@ -22,7 +22,7 @@ import { definePluginSettings } from "@api/Settings";
 import { Button } from "@components/Button";
 import { ExpandableSection } from "@components/ExpandableCard";
 import { Flex } from "@components/Flex";
-import { HeadingSecondary } from "@components/Heading";
+import { Heading } from "@components/Heading";
 import { Paragraph } from "@components/Paragraph";
 import { Span } from "@components/Span";
 import { TooltipContainer } from "@components/TooltipContainer";
@@ -236,7 +236,7 @@ function TextReplace({ title, description, rulesArray, isRegex = false }: TextRe
     return (
         <>
             <div>
-                <HeadingSecondary>{title}</HeadingSecondary>
+                <Heading tag="h3">{title}</Heading>
                 <Paragraph>{description}</Paragraph>
                 <div className={cl("search-input")}>
                     <TextInput
@@ -346,7 +346,7 @@ function TextReplaceTesting() {
 
     return (
         <div>
-            <HeadingSecondary>Rule Tester</HeadingSecondary>
+            <Heading tag="h3">Rule Tester</Heading>
             <Flex flexDirection="column" gap={6}>
                 <TextInput placeholder="Type a message to test rules on" onChange={setValue} />
                 <TextInput placeholder="Message with rules applied" editable={false} value={applyRules(value)} style={{ opacity: 0.7 }} />

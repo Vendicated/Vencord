@@ -7,7 +7,7 @@
 import { InlineCode } from "@components/CodeBlock";
 import { ExpandableSection } from "@components/ExpandableCard";
 import { Flex } from "@components/Flex";
-import { HeadingSecondary } from "@components/Heading";
+import { Heading } from "@components/Heading";
 import { InfoIcon } from "@components/Icons";
 import { Paragraph } from "@components/Paragraph";
 import { RenderModalProps } from "@vencord/discord-types";
@@ -70,18 +70,18 @@ function CreateTagDialog({ initialValue, modalProps }: { initialValue: Tag; moda
         >
             <Flex flexDirection="column" gap={12}>
                 <section>
-                    <HeadingSecondary>Name</HeadingSecondary>
+                    <Heading tag="h3">Name</Heading>
                     <TextInput value={name} onChange={setName} placeholder="greet" />
                 </section>
 
                 <section>
-                    <HeadingSecondary>Response</HeadingSecondary>
+                    <Heading tag="h3">Response</Heading>
                     <TextArea value={message} onChange={setMessage} placeholder={EXAMPLE_RESPONSE} autosize />
                 </section>
 
                 {detectedArguments.length > 0 && (
                     <section>
-                        <HeadingSecondary>Detected Arguments</HeadingSecondary>
+                        <Heading tag="h3">Detected Arguments</Heading>
                         <Paragraph>
                             <ul>
                                 {detectedArguments.map(arg => (
