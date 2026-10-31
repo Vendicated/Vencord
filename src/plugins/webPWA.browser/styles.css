@@ -41,7 +41,6 @@
 /* force hide trailing icons when standalone so there's no ugly pixel overflow */
 @media all and (display-mode: standalone) {
     [data-fullscreen] > [class*="bar_"] {
-
         [class*="trailing_"],
         [class*="leading"] {
             display: none;
