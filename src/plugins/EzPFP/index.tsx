@@ -48,6 +48,13 @@ export default definePlugin({
                 replace: "$1$self.testButton($2)",
             },
         },
+        {
+            find: "keyboardStep:.025",
+            replacement: {
+                match: /(?<=minValue:1,maxValue:)2(?=,keyboardStep:\.025)/,
+                replace: "arguments[0].uploadType !== null && arguments[0].uploadType === 'AVATAR' ? 20 : 2",
+            }
+        },
     ],
 
     testButton: (value: ReactNode) => {
