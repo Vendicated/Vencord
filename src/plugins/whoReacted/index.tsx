@@ -137,9 +137,9 @@ const settings = definePluginSettings({
         restartNeeded: true
     },
     reactionLimit: {
-        description: "Only show for messages with at most this many reactions (warning: setting this too high might get you rate-limited)",
+        description: "Only show for messages with at most this many reactions",
         type: OptionType.SLIDER,
-        markers: makeRange(1, 20),
+        markers: makeRange(1, 10),
         default: 8
     },
     reactorLimit: {
