@@ -40,10 +40,10 @@ export default definePlugin({
             },
         },
         {
-            find: /\i\.intl\.string\(\i\.\i#{intl::uvGmCx::raw}\)/,
+            find: /\i\.intl\.format\(\i\.t\["\+CyJu3"\]/,
             replacement: {
-                match: /(#{intl::uvGmCx::raw}.{0,600}?className:\i,children:)(\i)(?=,|}\))/,
-                replace: "$1[$2,$self.renderTimer({})]",
+                match: /(?<=\["\+CyJu3"\],\{recentAvatarsLimit:)6/,
+                replace: "10000",
             },
         },
     ],
