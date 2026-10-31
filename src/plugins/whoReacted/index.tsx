@@ -24,9 +24,9 @@ import { Devs } from "@utils/constants";
 import { sleep } from "@utils/misc";
 import { Queue } from "@utils/Queue";
 import { useForceUpdater } from "@utils/react";
-import definePlugin, { OptionType } from "@utils/types";
+import definePlugin, { makeRange, OptionType } from "@utils/types";
 import { CustomEmoji, Message, ReactionEmoji, User } from "@vencord/discord-types";
-import { ChannelStore, Constants, FluxDispatcher, React, RestAPI, useEffect, useLayoutEffect, UserStore, UserSummaryItem } from "@webpack/common";
+import { ChannelStore, Constants, FluxDispatcher, PermissionsBits, PermissionStore, React, RestAPI, useEffect, useLayoutEffect, UserStore, UserSummaryItem } from "@webpack/common";
 
 interface ReactionCacheEntry {
     fetched: boolean;
@@ -85,6 +85,17 @@ function getReactionsWithQueue(msg: Message, e: ReactionEmoji, type: number) {
     return cache.users;
 }
 
+function isChannelReadOnly(channelId: string): boolean {
+    const channel = ChannelStore.getChannel(channelId);
+    if (!channel) return false;
+
+    const bit = channel.isThread()
+        ? PermissionsBits.SEND_MESSAGES_IN_THREADS
+        : PermissionsBits.SEND_MESSAGES;
+
+    return !PermissionStore.can(bit, channel);
+}
+
 function handleClickAvatar(event: React.UIEvent<HTMLElement, Event>) {
     event.stopPropagation();
 }
@@ -124,14 +135,30 @@ const settings = definePluginSettings({
         type: OptionType.BOOLEAN,
         default: true,
         restartNeeded: true
-    }
+    },
+    reactionLimit: {
+        description: "Only show for messages with at most this many reactions",
+        type: OptionType.SLIDER,
+        markers: makeRange(1, 10),
+        default: 8
+    },
+    reactorLimit: {
+        description: "Only show for reactions with at most this many users who reacted (0 to always show)",
+        type: OptionType.NUMBER,
+        default: 0
+    },
+    disableReadOnlyChannels: {
+        description: "Disable showing for messages sent in channels that you cannot send messages, such as announcement channels",
+        type: OptionType.BOOLEAN,
+        default: false
+    },
 });
 
 export default definePlugin({
     name: "WhoReacted",
     description: "Renders the avatars of users who reacted to a message",
     tags: ["Reactions", "Chat", "Appearance"],
-    authors: [Devs.Ven, Devs.KannaDev, Devs.newwares, Devs.paige],
+    authors: [Devs.Ven, Devs.KannaDev, Devs.newwares, Devs.paige, Devs.BioTomateDE],
     settings,
     patches: [
         {
@@ -171,17 +198,17 @@ export default definePlugin({
             return () => FluxDispatcher.unsubscribe("MESSAGE_REACTION_ADD_USERS", cb);
         }, [message.id, forceUpdate]);
 
-        if (message.reactions.length > 10) return null;
-
+        const { reactionLimit, reactorLimit, disableReadOnlyChannels } = settings.use(["reactionLimit", "reactorLimit", "disableReadOnlyChannels"]);
+        if (disableReadOnlyChannels && isChannelReadOnly(message.channel_id)) return null;
+        if (message.reactions.length > reactionLimit) return null;
         const reactionMap = getReactionsWithQueue(message, emoji, type);
         let users = Array.from(reactionMap, ([id]) => UserStore.getUser(id)).filter(Boolean);
-
-        if (isPluginEnabled(NoBlockedMessagesPlugin.name))
+        if (isPluginEnabled(NoBlockedMessagesPlugin.name)) {
             users = users.filter(user => !NoBlockedMessagesPlugin.shouldIgnoreUser(user.id));
-
-        return users.length === 0
-            ? null
-            : <ReactionUsers message={message} users={users} />;
+        }
+        if (users.length === 0) return null;
+        if (reactorLimit !== 0 && users.length > reactorLimit) return null;
+        return <ReactionUsers message={message} users={users} />;
     }, { noop: true }),
 
     setScrollObj(scroll: any) {
