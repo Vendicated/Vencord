@@ -8,6 +8,8 @@ import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import { Logger } from "@utils/index";
 import definePlugin, { OptionType } from "@utils/types";
+import { useState } from "@webpack/common";
+import { ReactNode } from "react";
 
 const settings = definePluginSettings({
     ezPFP: {
@@ -42,18 +44,29 @@ export default definePlugin({
         {
             find: /\i\.intl\.format\(\i\.t\["\+CyJu3"\]/,
             replacement: {
-                match: /(?<=\["\+CyJu3"\],\{recentAvatarsLimit:)6/,
-                replace: "10000",
+                match: /(,children:)(\i\.intl\.format\(\i\.t\["\+CyJu3"\],\{recentAvatarsLimit:6\}\))/,
+                replace: "$1$self.testButton($2)",
             },
         },
     ],
 
-    renderTimer: () => {
+    testButton: (value: ReactNode) => {
         logger.log("NYAAAAAAAAAAAAAA");
+        const [n, setN] = useState(0);
+
         return (
-            <p style={{ margin: 0, fontFamily: "var(--font-code)" }}>
-                test text bleh
-            </p>
+            <>
+                {value}
+                <p style={{ margin: 0, fontFamily: "var(--font-code)" }}>
+                    {n}
+                </p>
+                <button
+                    style={{ margin: 0, fontFamily: "var(--font-code)" }}
+                    onClick={() => setN(n + 1)}
+                >
+                    +1
+                </button>
+            </>
         );
     },
 
