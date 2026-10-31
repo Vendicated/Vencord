@@ -38,7 +38,7 @@
         "scripts": ["background.js"]
     },
 
-    "web_accessible_resources": ["dist/Vencord.js", "dist/Vencord.css"],
+    "web_accessible_resources": ["dist/Vencord.js", "dist/Vencord.css", "vendor/*"],
 
     "browser_specific_settings": {
         "gecko": {

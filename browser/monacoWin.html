@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
     <head>
         <meta charset="utf-8" />
@@ -31,7 +31,10 @@
                     display: flex;
                     align-items: center;
                     padding-left: 14px;
-                    font-family: Consolas, Courier New, monospace;
+                    font-family:
+                        Consolas,
+                        Courier New,
+                        monospace;
                     line-height: 1;
                     height: env(titlebar-area-height, 0px);
                     app-region: drag;
@@ -47,14 +50,14 @@
 
         <script>
             const script = document.createElement("script");
+            script.type = "module";
             script.src = new URL("/vendor/monaco/index.js", baseUrl);
 
-            const style = document.createElement("link");
-            style.type = "text/css";
-            style.rel = "stylesheet";
-            style.href = new URL("/vendor/monaco/index.css", baseUrl);
+            const link = document.createElement("link");
+            link.rel = "stylesheet";
+            link.href = new URL("/vendor/monaco/style.css", baseUrl);
 
-            document.body.append(style, script);
+            document.head.append(link, script);
         </script>
     </body>
 </html>
