@@ -24,7 +24,7 @@ import { Devs } from "@utils/constants";
 import { sleep } from "@utils/misc";
 import { Queue } from "@utils/Queue";
 import { useForceUpdater } from "@utils/react";
-import definePlugin, { OptionType } from "@utils/types";
+import definePlugin, { makeRange, OptionType } from "@utils/types";
 import { CustomEmoji, Message, ReactionEmoji, User } from "@vencord/discord-types";
 import { ChannelStore, Constants, FluxDispatcher, PermissionsBits, PermissionStore, React, RestAPI, useEffect, useLayoutEffect, UserStore, UserSummaryItem } from "@webpack/common";
 
@@ -137,19 +137,20 @@ const settings = definePluginSettings({
         restartNeeded: true
     },
     reactionLimit: {
-        description: "Only show for messages with at most this many reactions (0 to always show)",
-        type: OptionType.NUMBER,
+        description: "Only show for messages with at most this many reactions (warning: setting this too high might get you rate-limited)",
+        type: OptionType.SLIDER,
+        markers: makeRange(1, 20),
         default: 8
     },
     reactorLimit: {
         description: "Only show for reactions with at most this many users who reacted (0 to always show)",
         type: OptionType.NUMBER,
-        default: 12
+        default: 0
     },
     disableReadOnlyChannels: {
         description: "Disable showing for messages sent in channels that you cannot send messages, such as announcement channels",
         type: OptionType.BOOLEAN,
-        default: true
+        default: false
     },
 });
 
@@ -199,7 +200,7 @@ export default definePlugin({
 
         const { reactionLimit, reactorLimit, disableReadOnlyChannels } = settings.use(["reactionLimit", "reactorLimit", "disableReadOnlyChannels"]);
         if (disableReadOnlyChannels && isChannelReadOnly(message.channel_id)) return null;
-        if (reactionLimit !== 0 && message.reactions.length > reactionLimit) return null;
+        if (message.reactions.length > reactionLimit) return null;
         const reactionMap = getReactionsWithQueue(message, emoji, type);
         let users = Array.from(reactionMap, ([id]) => UserStore.getUser(id)).filter(Boolean);
         if (isPluginEnabled(NoBlockedMessagesPlugin.name)) {
