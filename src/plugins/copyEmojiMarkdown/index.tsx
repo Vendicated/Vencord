@@ -58,7 +58,7 @@ export default definePlugin({
 
     contextMenus: {
         "expression-picker"(children, { target }: { target: Target; }) {
-            if (target.dataset.type !== "emoji") return;
+            if (target.dataset.type !== "emoji" || !target.dataset.id) return;
 
             children.push(
                 <Menu.MenuItem

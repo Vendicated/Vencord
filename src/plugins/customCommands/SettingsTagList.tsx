@@ -4,10 +4,10 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { BaseText } from "@components/BaseText";
 import { Button } from "@components/Button";
 import { Card } from "@components/Card";
 import { Flex } from "@components/Flex";
+import { Heading } from "@components/Heading";
 import { DeleteIcon, PencilIcon } from "@components/Icons";
 import { Margins } from "@components/margins";
 import { Paragraph } from "@components/Paragraph";
@@ -20,7 +20,7 @@ export function SettingsTagList() {
 
     return (
         <section className={Margins.top8}>
-            <BaseText size="md" weight="semibold">Registered Tags</BaseText>
+            <Heading tag="h4">Registered Tags</Heading>
             <Flex flexDirection="column" gap="0.5em" className={Margins.top8}>
                 {Object.values(tagsList).map(tag => (
                     <Card key={tag.name} className="vc-customCommands-card">

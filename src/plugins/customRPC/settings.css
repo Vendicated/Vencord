@@ -2,10 +2,6 @@
     display: flex;
     flex-direction: column;
     gap: 0.5em;
-
-    & h5 {
-        margin: 0;
-    }
 }
 
 .vc-customRPC-settings-pair {
