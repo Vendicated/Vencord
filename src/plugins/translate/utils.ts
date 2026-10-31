@@ -43,12 +43,14 @@ interface DeeplData {
 interface KagiData {
     translation: string;
     detected_language: {
+        iso: string;
         label: string;
     };
 }
 
 export interface TranslationValue {
     sourceLanguage: string;
+    sourceLanguageCode: string;
     text: string;
 }
 
@@ -66,7 +68,20 @@ export const getLanguages = () => {
     }
 };
 
-export async function translate(kind: "received" | "sent", text: string): Promise<TranslationValue> {
+// Detected source codes don't always match the target codes of the current service,
+// e.g. DeepL detects "EN" but only accepts "en-us" / "en-gb", Kagi uses "zh_cn" instead of "zh-CN"
+export function findTargetLanguage(code: string | undefined) {
+    if (!code) return;
+
+    const normalize = (s: string) => s.toLowerCase().replace("_", "-");
+    const wanted = normalize(code);
+    const languages = Object.entries(getLanguages()).filter(([value]) => value && value !== "auto");
+
+    return languages.find(([value]) => normalize(value) === wanted)
+        ?? languages.find(([value]) => normalize(value).startsWith(wanted + "-"));
+}
+
+export async function translate(kind: "received" | "sent", text: string, targetLanguage = settings.store[`${kind}Output`]): Promise<TranslationValue> {
     const translate = IS_WEB ? googleTranslate : (() => {
         switch (settings.store.service) {
             case "google":
@@ -82,7 +97,7 @@ export async function translate(kind: "received" | "sent", text: string): Promis
         return await translate(
             text,
             settings.store[`${kind}Input`],
-            settings.store[`${kind}Output`]
+            targetLanguage
         );
     } catch (e) {
         const userMessage = typeof e === "string"
@@ -118,6 +133,7 @@ async function googleTranslate(text: string, sourceLang: string, targetLang: str
 
     return {
         sourceLanguage: GoogleLanguages[sourceLanguage] ?? sourceLanguage,
+        sourceLanguageCode: sourceLanguage,
         text: translation
     };
 }
@@ -174,6 +190,7 @@ async function deeplTranslate(text: string, sourceLang: string, targetLang: stri
 
     return {
         sourceLanguage: DeeplLanguages[src] ?? src,
+        sourceLanguageCode: src,
         text: translations[0].text
     };
 }
@@ -196,6 +213,7 @@ async function kagiTranslate(text: string, sourceLang: string, targetLang: strin
 
     return {
         sourceLanguage: detected_language.label,
+        sourceLanguageCode: detected_language.iso,
         text: translation
     };
 }
