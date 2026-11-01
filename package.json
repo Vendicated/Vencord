@@ -28,10 +28,10 @@
         "inject": "node scripts/runInstaller.mjs -- --install",
         "uninject": "node scripts/runInstaller.mjs -- --uninstall",
         "lint": "eslint",
-        "format": "oxfmt \"src/**/*.css\" \"**/*.html\" \"**/*.json\"",
-        "format:check": "pnpm format --check",
+        "fmt": "oxfmt \"src/**/*.css\" \"**/*.html\" \"**/*.json\"",
+        "fmt:check": "pnpm fmt --check",
         "lint:fix": "pnpm lint --fix",
-        "test": "pnpm test:ts && pnpm buildStandalone && pnpm buildWebStandalone && pnpm lint && pnpm format:check && pnpm generatePluginJson",
+        "test": "pnpm test:ts && pnpm buildStandalone && pnpm buildWebStandalone && pnpm lint && pnpm fmt:check && pnpm generatePluginJson",
         "test:ts": "tsc --noEmit",
         "bump": "./scripts/bump.sh"
     },
