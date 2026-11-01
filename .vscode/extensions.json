@@ -1,6 +1,5 @@
 {
     "recommendations": [
-        "dbaeumer.vscode-eslint",
         "EditorConfig.EditorConfig",
         "GregorBiswanger.json2ts",
         "oxc.oxc-vscode",
