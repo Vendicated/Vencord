@@ -191,10 +191,16 @@ export default definePlugin({
             const hasUnread = GuildReadStateStore.hasAnyUnread();
             const disableUnreadBadge = NotificationSettingsStore.getDisableUnreadBadge();
 
-            let totalCount = mentionCount + pendingRequests;
-            if (!totalCount && hasUnread && !disableUnreadBadge) totalCount = -1;
+            const totalCount = mentionCount + pendingRequests;
 
-            navigator.setAppBadge(totalCount);
+            if (totalCount > 0) {
+                navigator.setAppBadge(totalCount);
+            } else if (hasUnread && !disableUnreadBadge) {
+                // no argument shows a dot instead of a number
+                navigator.setAppBadge();
+            } else {
+                navigator.clearAppBadge();
+            }
         } catch (e) {
             console.error(e);
         }
