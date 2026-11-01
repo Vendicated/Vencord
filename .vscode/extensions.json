@@ -3,7 +3,7 @@
         "dbaeumer.vscode-eslint",
         "EditorConfig.EditorConfig",
         "GregorBiswanger.json2ts",
-        "stylelint.vscode-stylelint",
+        "oxc.oxc-vscode",
         "Vendicated.vencord-companion"
     ]
 }

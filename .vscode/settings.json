@@ -17,11 +17,10 @@
             "type": "Gitea"
         }
     ],
-    "css.format.spaceAroundSelectorSeparator": true,
     "[css]": {
-        "editor.defaultFormatter": "vscode.css-language-features"
+        "editor.defaultFormatter": "oxc.oxc-vscode"
     },
     "[html]": {
-        "editor.defaultFormatter": "esbenp.prettier-vscode"
+        "editor.defaultFormatter": "oxc.oxc-vscode"
     }
 }
