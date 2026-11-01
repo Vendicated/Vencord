@@ -7,7 +7,6 @@
 import { definePluginSettings } from "@api/Settings";
 import { Button } from "@components/Button";
 import { Devs } from "@utils/constants";
-import { Logger } from "@utils/Logger";
 import definePlugin, { makeRange, OptionType, PluginNative, ReporterTestable } from "@utils/types";
 import type { Channel, Embed, GuildMember, MessageAttachment, User } from "@vencord/discord-types";
 import { findByCodeLazy, findLazy } from "@webpack";
@@ -91,7 +90,6 @@ interface NotificationObject {
 }
 
 const notificationsShouldNotify = findByCodeLazy(".SUPPRESS_NOTIFICATIONS))return!1");
-const logger = new Logger("XSOverlay");
 
 const settings = definePluginSettings({
     webSocketPort: {
