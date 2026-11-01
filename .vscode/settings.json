@@ -3,12 +3,37 @@
     "editor.codeActionsOnSave": {
         "source.fixAll.eslint": "explicit"
     },
-    "[javascript][javascriptreact][typescript][typescriptreact]": {
+
+    // these can also be specified in one line via "[javascript][javascriptreact]..." but that has lower priority
+    // https://github.com/microsoft/vscode/issues/168411
+    "[javascript]": {
         "editor.defaultFormatter": "vscode.typescript-language-features"
     },
-    "[css][html][json][jsonc][yaml]": {
+    "[javascriptreact]": {
+        "editor.defaultFormatter": "vscode.typescript-language-features"
+    },
+    "[typescript]": {
+        "editor.defaultFormatter": "vscode.typescript-language-features"
+    },
+    "[typescriptreact]": {
+        "editor.defaultFormatter": "vscode.typescript-language-features"
+    },
+    "[css]": {
         "editor.defaultFormatter": "oxc.oxc-vscode"
     },
+    "[html]": {
+        "editor.defaultFormatter": "oxc.oxc-vscode"
+    },
+    "[json]": {
+        "editor.defaultFormatter": "oxc.oxc-vscode"
+    },
+    "[jsonc]": {
+        "editor.defaultFormatter": "oxc.oxc-vscode"
+    },
+    "[yaml]": {
+        "editor.defaultFormatter": "oxc.oxc-vscode"
+    },
+
     "js/ts.format.semicolons": "insert",
     "js/ts.preferences.quoteStyle": "double",
     "gitlens.remotes": [
