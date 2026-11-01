@@ -90,7 +90,7 @@ export default definePlugin({
 
     getUserModalProps(props: { user: User; }) {
         return {
-            "data-member-id": props.user.id,
+            "data-user-id": props.user.id,
             "data-is-self": props.user.id === AuthenticationStore.getId()
         };
     },
