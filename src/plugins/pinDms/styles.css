@@ -1,4 +1,4 @@
-.vc-pindms-section-container {
+.cc-pindms-section-container {
     box-sizing: border-box;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -13,7 +13,7 @@
     cursor: pointer;
 }
 
-.vc-pindms-modal-color-picker {
+.cc-pindms-modal-color-picker {
     margin-inline-end: 0;
 
     [class*="defaultContainer"] {
@@ -21,18 +21,18 @@
     }
 }
 
-.vc-pindms-modal-content {
+.cc-pindms-modal-content {
     display: grid;
     gap: 1.5em;
 }
 
-.vc-pindms-collapse-icon {
+.cc-pindms-collapse-icon {
     width: 16px;
     height: 16px;
     color: var(--interactive-icon-default);
     transform: rotate(90deg)
 }
 
-.vc-pindms-collapsed .vc-pindms-collapse-icon {
+.cc-pindms-collapsed .cc-pindms-collapse-icon {
     transform: rotate(0deg);
 }

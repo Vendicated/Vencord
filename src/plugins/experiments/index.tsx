@@ -1,5 +1,5 @@
 /*
- * Vencord, a modification for Discord's desktop app
+ * Claudecord, a modification for Discord's desktop app
  * Copyright (c) 2022 Vendicated and contributors
  *
  * This program is free software: you can redistribute it and/or modify
@@ -132,7 +132,7 @@ export default definePlugin({
     },
 
     WarningCard: ErrorBoundary.wrap(() => (
-        <ErrorCard id="vc-experiments-warning-card" className={Margins.bottom16}>
+        <ErrorCard id="cc-experiments-warning-card" className={Margins.bottom16}>
             <Flex flexDirection="column" gap={8}>
                 <Heading tag="h3">Hold on!!</Heading>
 
@@ -141,7 +141,7 @@ export default definePlugin({
                 </Paragraph>
 
                 <Paragraph>
-                    Only use experiments if you know what you're doing. Vencord is not responsible for any damage caused by enabling experiments.
+                    Only use experiments if you know what you're doing. Claudecord is not responsible for any damage caused by enabling experiments.
 
                     If you don't know what an experiment does, ignore it. Do not ask us what experiments do either, we probably don't know.
                 </Paragraph>

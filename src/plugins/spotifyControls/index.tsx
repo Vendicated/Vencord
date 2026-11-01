@@ -1,5 +1,5 @@
 /*
- * Vencord, a modification for Discord's desktop app
+ * Claudecord, a modification for Discord's desktop app
  * Copyright (c) 2022 Vendicated and contributors
  *
  * This program is free software: you can redistribute it and/or modify
@@ -60,8 +60,8 @@ export default definePlugin({
             replacement: {
                 // react.jsx)(AccountPanel, { ..., showTaglessAccountPanel: blah })
                 match: /(?<=\i\.jsxs?\)\()(\i),{(?=[^}]*?userTag:\i,occluded:)/,
-                // react.jsx(WrapperComponent, { VencordOriginal: AccountPanel, ...
-                replace: "$self.PanelWrapper,{VencordOriginal:$1,"
+                // react.jsx(WrapperComponent, { ClaudecordOriginal: AccountPanel, ...
+                replace: "$self.PanelWrapper,{ClaudecordOriginal:$1,"
             }
         },
         {
@@ -69,7 +69,7 @@ export default definePlugin({
             replacement: [{
                 // Adds POST and a Marker to the SpotifyAPI (so we can easily find it)
                 match: /get:(\i)\.bind\(null,(\i\.\i)\.get\)/,
-                replace: "post:$1.bind(null,$2.post),vcSpotifyMarker:1,$&"
+                replace: "post:$1.bind(null,$2.post),ccSpotifyMarker:1,$&"
             },
             {
                 // Spotify Connect API returns status 202 instead of 204 when skipping tracks.
@@ -96,12 +96,12 @@ export default definePlugin({
 
     start: () => toggleHoverControls(settings.store.hoverControls),
 
-    PanelWrapper({ VencordOriginal, ...props }) {
+    PanelWrapper({ ClaudecordOriginal, ...props }) {
         return (
             <>
                 <ErrorBoundary
                     fallback={() => (
-                        <div className="vc-spotify-fallback">
+                        <div className="cc-spotify-fallback">
                             <p>Failed to render Spotify Modal :(</p>
                             <p >Check the console for errors</p>
                         </div>
@@ -110,7 +110,7 @@ export default definePlugin({
                     <Player />
                 </ErrorBoundary>
 
-                <VencordOriginal {...props} />
+                <ClaudecordOriginal {...props} />
             </>
         );
     }

@@ -1,5 +1,5 @@
 /*
- * Vencord, a modification for Discord's desktop app
+ * Claudecord, a modification for Discord's desktop app
  * Copyright (c) 2022 Vendicated and contributors
  *
  * This program is free software: you can redistribute it and/or modify
@@ -44,8 +44,8 @@ function VesktopSection() {
     return (
         <Flex className={Margins.bottom20} flexDirection="column" gap="1em">
             <Card variant="info">
-                <Heading className={Margins.bottom8}>Vesktop & Vencord</Heading>
-                <Paragraph>Vesktop and Vencord are two separate things. This updater is for Vencord.</Paragraph>
+                <Heading className={Margins.bottom8}>Vesktop & Claudecord</Heading>
+                <Paragraph>Vesktop and Claudecord are two separate things. This updater is for Claudecord.</Paragraph>
                 <Paragraph className={Margins.top8}>
                     You receive separate popups for Vesktop updates. You can also manually update by installing the <Link href="https://vesktop.dev/install">latest version</Link>.
                 </Paragraph>
@@ -81,17 +81,17 @@ function Updater() {
         <SettingsTab>
             <VesktopSection />
 
-            <div className="vc-settings-switches">
+            <div className="cc-settings-switches">
                 <FormSwitch
                     title="Automatically update"
-                    description="Automatically update Vencord without confirmation prompt"
+                    description="Automatically update Claudecord without confirmation prompt"
                     value={settings.autoUpdate}
                     onChange={(v: boolean) => settings.autoUpdate = v}
                     hideBorder
                 />
                 <FormSwitch
                     title="Get notified when an automatic update completes"
-                    description="Show a notification when Vencord automatically updates"
+                    description="Show a notification when Claudecord automatically updates"
                     value={settings.autoUpdateNotification}
                     onChange={(v: boolean) => settings.autoUpdateNotification = v}
                     disabled={!settings.autoUpdate}

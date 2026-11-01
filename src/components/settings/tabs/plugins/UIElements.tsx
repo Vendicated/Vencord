@@ -1,5 +1,5 @@
 /*
- * Vencord, a Discord client mod
+ * Claudecord, a Discord client mod
  * Copyright (c) 2025 Vendicated and contributors
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
@@ -22,7 +22,7 @@ import { RenderModalProps } from "@vencord/discord-types";
 import { Clickable, Modal, openModal } from "@webpack/common";
 
 
-const cl = classNameFactory("vc-plugin-ui-elements-");
+const cl = classNameFactory("cc-plugin-ui-elements-");
 
 export function UIElementsButton() {
     return (

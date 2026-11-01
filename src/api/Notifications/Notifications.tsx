@@ -1,6 +1,6 @@
 /*
- * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2023 Vendicated and contributors
+ * Claudecord, a modification for Discord's desktop app
+ * Copyright (c) 2023 Vendicated, Claude and contributors
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -33,7 +33,7 @@ let id = 42;
 function getRoot() {
     if (!reactRoot) {
         const container = document.createElement("div");
-        container.id = "vc-notification-container";
+        container.id = "cc-notification-container";
         document.body.append(container);
         reactRoot = createRoot(container);
     }

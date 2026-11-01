@@ -1,4 +1,4 @@
-.vc-voice-download {
+.cc-voice-download {
     width: 24px;
     height: 24px;
     color: var(--interactive-icon-default);
@@ -6,6 +6,6 @@
     position: relative;
 }
 
-.vc-voice-download:hover {
+.cc-voice-download:hover {
     color: var(--interactive-icon-active);
 }

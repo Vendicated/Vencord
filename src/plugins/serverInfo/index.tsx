@@ -1,5 +1,5 @@
 /*
- * Vencord, a Discord client mod
+ * Claudecord, a Discord client mod
  * Copyright (c) 2023 Vendicated and contributors
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
@@ -18,7 +18,7 @@ const makePatch: (showIcon: boolean) => NavContextMenuPatchCallback = showIcon =
 
     group?.push(
         <Menu.MenuItem
-            id="vc-server-info"
+            id="cc-server-info"
             label="Server Info"
             leadingAccessory={showIcon ? { type: "icon", icon: InfoIcon } : undefined}
             action={() => openGuildInfoModal(guild)}

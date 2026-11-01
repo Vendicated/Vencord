@@ -1,4 +1,4 @@
-.vc-shc-container {
+.cc-shc-container {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -9,23 +9,23 @@
     min-height: 100%;
 }
 
-.vc-shc-logo {
+.cc-shc-logo {
     width: 12em;
     height: 12em;
 }
 
-.vc-shc-heading-container {
+.cc-shc-heading-container {
     display: flex;
     flex-direction: row;
     align-items: center;
     gap: 0.5em;
 }
 
-.vc-shc-heading-nsfw-icon {
+.cc-shc-heading-nsfw-icon {
     color: var(--text-default);
 }
 
-.vc-shc-topic-container {
+.cc-shc-topic-container {
     color: var(--text-default);
     background: var(--background-base-lower);
     border-radius: 5px;
@@ -33,7 +33,7 @@
     max-width: 70vw;
 }
 
-.vc-shc-default-emoji-container {
+.cc-shc-default-emoji-container {
     display: flex;
     flex-direction: row;
     align-items: center;
@@ -43,7 +43,7 @@
     margin-left: 0.75em;
 }
 
-.vc-shc-tags-container {
+.cc-shc-tags-container {
     display: flex;
     flex-direction: column;
     background: var(--background-base-lower);
@@ -53,7 +53,7 @@
     max-width: 70vw;
 }
 
-.vc-shc-tags {
+.cc-shc-tags {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -61,7 +61,7 @@
     gap: 0.35em;
 }
 
-.vc-shc-allowed-users-and-roles-container {
+.cc-shc-allowed-users-and-roles-container {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -71,14 +71,14 @@
     max-width: 70vw;
 }
 
-.vc-shc-allowed-users-and-roles-container-title {
+.cc-shc-allowed-users-and-roles-container-title {
     display: flex;
     flex-direction: row;
     align-items: center;
     gap: 0.5em;
 }
 
-.vc-shc-allowed-users-and-roles-container-toggle-btn {
+.cc-shc-allowed-users-and-roles-container-toggle-btn {
     all: unset;
     cursor: pointer;
     display: flex;
@@ -86,7 +86,7 @@
     color: var(--text-default);
 }
 
-.vc-shc-allowed-users-and-roles-container-permdetails-btn {
+.cc-shc-allowed-users-and-roles-container-permdetails-btn {
     all: unset;
     cursor: pointer;
     display: flex;
@@ -94,13 +94,13 @@
     color: var(--text-default);
 }
 
-.vc-shc-allowed-users-and-roles-container > [class*="members"] {
+.cc-shc-allowed-users-and-roles-container > [class*="members"] {
     margin-left: 12px;
     flex-wrap: wrap;
     justify-content: center;
 }
 
-.vc-shc-hidden-channel-icon {
+.cc-shc-hidden-channel-icon {
     cursor: not-allowed;
     margin-left: 6px;
     z-index: 0;

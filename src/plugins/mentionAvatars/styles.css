@@ -1,4 +1,4 @@
-.vc-mentionAvatars-icon {
+.cc-mentionAvatars-icon {
     vertical-align: middle;
     width: 1em !important; /* insane discord sets width: 100% in channel topic */
     height: 1em;
@@ -6,11 +6,11 @@
     box-sizing: border-box;
 }
 
-.vc-mentionAvatars-role-icon {
+.cc-mentionAvatars-role-icon {
     margin: 0 2px 0.2rem 4px;
 }
 
 /** don't display inside the ServerInfo modal owner mention */
-.vc-gp-owner .vc-mentionAvatars-icon {
+.cc-gp-owner .cc-mentionAvatars-icon {
     display: none;
 }

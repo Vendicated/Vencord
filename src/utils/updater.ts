@@ -1,6 +1,6 @@
 /*
- * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2022 Vendicated and contributors
+ * Claudecord, a modification for Discord's desktop app
+ * Copyright (c) 2022 Vendicated, Claude and contributors
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -38,7 +38,7 @@ async function Unwrap<T>(p: Promise<IpcRes<T>>) {
 }
 
 export async function checkForUpdates() {
-    changes = await Unwrap(VencordNative.updater.getUpdates());
+    changes = await Unwrap(ClaudecordNative.updater.getUpdates());
 
     // we only want to check this for the git updater, not the http updater
     if (!IS_STANDALONE) {
@@ -54,18 +54,18 @@ export async function checkForUpdates() {
 export async function update() {
     if (!isOutdated) return true;
 
-    const res = await Unwrap(VencordNative.updater.update());
+    const res = await Unwrap(ClaudecordNative.updater.update());
 
     if (res) {
         isOutdated = false;
-        if (!await Unwrap(VencordNative.updater.rebuild()))
+        if (!await Unwrap(ClaudecordNative.updater.rebuild()))
             throw new Error("The Build failed. Please try manually building the new update");
     }
 
     return res;
 }
 
-export const getRepo = () => Unwrap(VencordNative.updater.getRepo());
+export const getRepo = () => Unwrap(ClaudecordNative.updater.getRepo());
 
 export async function maybePromptToUpdate(confirmMessage: string, checkForDev = false) {
     if (IS_WEB || IS_UPDATER_DISABLED) return;

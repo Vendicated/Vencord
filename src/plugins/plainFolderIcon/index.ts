@@ -1,5 +1,5 @@
 /*
- * Vencord, a modification for Discord's desktop app
+ * Claudecord, a modification for Discord's desktop app
  * Copyright (c) 2022 Vendicated and contributors
  *
  * This program is free software: you can redistribute it and/or modify
@@ -34,7 +34,7 @@ export default definePlugin({
                 {
                     // Discord always renders both plain and guild icons folders and uses a css transtion to switch between them
                     match: /\.slice\(0,4\).+?\]:(\i),\[\i\.\i\]:!\1/,
-                    replace: (m, hasFolderButtonContent) => `${m},"vc-plainFolderIcon-plain":!${hasFolderButtonContent}`
+                    replace: (m, hasFolderButtonContent) => `${m},"cc-plainFolderIcon-plain":!${hasFolderButtonContent}`
                 }
 
             ]

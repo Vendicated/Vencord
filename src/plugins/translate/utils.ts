@@ -1,5 +1,5 @@
 /*
- * Vencord, a modification for Discord's desktop app
+ * Claudecord, a modification for Discord's desktop app
  * Copyright (c) 2023 Vendicated and contributors
  *
  * This program is free software: you can redistribute it and/or modify
@@ -24,9 +24,9 @@ import { showToast } from "@webpack/common";
 import { DeeplLanguages, deeplLanguageToGoogleLanguage, GoogleLanguages, KagiLanguages } from "./languages";
 import { resetLanguageDefaults, settings } from "./settings";
 
-export const cl = classNameFactory("vc-trans-");
+export const cl = classNameFactory("cc-trans-");
 
-const Native = VencordNative.pluginHelpers.Translate as PluginNative<typeof import("./native")>;
+const Native = ClaudecordNative.pluginHelpers.Translate as PluginNative<typeof import("./native")>;
 
 interface GoogleData {
     translation: string;

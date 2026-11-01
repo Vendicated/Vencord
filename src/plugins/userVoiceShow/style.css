@@ -1,46 +1,46 @@
-.vc-uvs-speaker {
+.cc-uvs-speaker {
     color: var(--interactive-icon-default);
     display: flex;
     align-items: center;
     justify-content: center;
 }
 
-.vc-uvs-clickable {
+.cc-uvs-clickable {
     cursor: pointer;
 }
 
-.vc-uvs-clickable:hover {
+.cc-uvs-clickable:hover {
     color: var(--interactive-icon-hover);
 }
 
-.vc-uvs-profile-speaker {
+.cc-uvs-profile-speaker {
     height: var(--custom-nickname-icon-size);
     margin-right: 4px;
     transform: translateY(1.3px);
 }
 
-.vc-uvs-tooltip-container {
+.cc-uvs-tooltip-container {
     max-width: 50vw;
 }
 
-.vc-uvs-tooltip-content {
+.cc-uvs-tooltip-content {
     display: flex;
     flex-direction: column;
     gap: 6px;
 }
 
-.vc-uvs-name {
+.cc-uvs-name {
     display: flex;
     align-items: center;
     gap: 8px;
 }
 
-.vc-uvs-guild-icon {
+.cc-uvs-guild-icon {
     border-radius: 100%;
     align-self: center;
 }
 
-.vc-uvs-vc-members {
+.cc-uvs-cc-members {
     display: flex;
     gap: 6px;
 }

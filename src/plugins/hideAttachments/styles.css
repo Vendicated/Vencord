@@ -1,10 +1,10 @@
-.vc-hideAttachments-accessory {
+.cc-hideAttachments-accessory {
     color: var(--text-muted);
     margin-top: 0.5em;
     font-style: italic;
     font-weight: 400;
 }
 
-.vc-hideAttachments-no-content {
+.cc-hideAttachments-no-content {
     margin-top: 0;
 }

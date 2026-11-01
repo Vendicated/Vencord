@@ -1,4 +1,4 @@
-.vc-expressionManager-guild {
+.cc-expressionManager-guild {
     border-radius: 50%;
     background-color: var(--background-base-lower);
     display: inline-flex;
@@ -14,13 +14,13 @@
     }
 }
 
-.vc-expressionManager-guild-icon {
+.cc-expressionManager-guild-icon {
     border-radius: 50%;
     width: 100%;
     height: 100%;
 }
 
-.vc-expressionManager-guild-acronym {
+.cc-expressionManager-guild-acronym {
     width: 100%;
     text-align: center;
     overflow: hidden;

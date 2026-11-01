@@ -3,7 +3,7 @@
 - Run Chromium and use the Chrome Devtools MCP to control it
 - Build the web extension with `pnpm buildWeb --dev` and install it from `dist/chromium-unpacked`. Rebuild and reload as needed
 - Navigate to `https://canary.discord.com/app`
-- Ensure the ConsoleShortcuts plugin is enabled. Run `Vencord.Settings.plugins.ConsoleShortcuts.enabled = true` to enable it
+- Ensure the ConsoleShortcuts plugin is enabled. Run `Claudecord.Settings.plugins.ConsoleShortcuts.enabled = true` to enable it
 It exports many useful helpers as `window.shortcutList`
 - Ensure a user is logged in. `AuthenticationStore.getId()` should return an id once Discord loaded. If not, ask the user to log in. Using an alt account is recommended
 

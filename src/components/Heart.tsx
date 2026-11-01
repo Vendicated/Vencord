@@ -1,5 +1,5 @@
 /*
- * Vencord, a modification for Discord's desktop app
+ * Claudecord, a modification for Discord's desktop app
  * Copyright (c) 2022 Vendicated and contributors
  *
  * This program is free software: you can redistribute it and/or modify
@@ -27,7 +27,7 @@ export function Heart(props: SVGProps<SVGSVGElement>) {
             height="16"
             width="16"
             {...props}
-            className={classes("vc-heart-icon", props.className)}
+            className={classes("cc-heart-icon", props.className)}
         >
             <path
                 fill="#db61a2"

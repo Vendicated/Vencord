@@ -1,4 +1,4 @@
-.vc-charCounter-counter {
+.cc-charCounter-counter {
     font-size: 12px;
     color: var(--text-muted);
     position: absolute;
@@ -10,10 +10,10 @@
     transition: color 0.3s ease;
 }
 
-.vc-charCounter-count {
+.cc-charCounter-count {
     transition: color 0.3s ease;
 }
 
-.vc-charCounter-selected {
+.cc-charCounter-selected {
     color: var(--brand-500);
 }

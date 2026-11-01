@@ -1,5 +1,5 @@
 /*
- * Vencord, a modification for Discord's desktop app
+ * Claudecord, a modification for Discord's desktop app
  * Copyright (c) 2022 Vendicated and contributors
  *
  * This program is free software: you can redistribute it and/or modify
@@ -61,8 +61,8 @@ export const settings = definePluginSettings({
 export function buildCloneItem(type: string, action: () => void) {
     return (
         <Menu.MenuItem
-            id="vc-em-clone"
-            key="vc-em-clone"
+            id="cc-em-clone"
+            key="cc-em-clone"
             label={`Clone ${type}`}
             leadingAccessory={{ type: "icon", icon: PlusIcon }}
             action={action}
@@ -96,8 +96,8 @@ function buildManageExpressionItems(id: string, type: string) {
     return (
         <>
             <Menu.MenuItem
-                key="vc-em-edit"
-                id="vc-em-edit"
+                key="cc-em-edit"
+                id="cc-em-edit"
                 label={`Edit ${expressionName}`}
                 leadingAccessory={{ type: "icon", icon: PencilIcon }}
                 action={() => {
@@ -109,8 +109,8 @@ function buildManageExpressionItems(id: string, type: string) {
                 }}
             />
             <Menu.MenuItem
-                key="vc-em-delete"
-                id="vc-em-delete"
+                key="cc-em-delete"
+                id="cc-em-delete"
                 label={`Delete ${expressionName}`}
                 leadingAccessory={{ type: "icon", icon: DeleteIcon }}
                 color="danger"
@@ -179,8 +179,8 @@ function buildRemoveFrecentItem({ type, id, name }: Record<"type" | "id" | "name
 
     return (
         <Menu.MenuItem
-            id="vc-em-remove-frecent"
-            key="vc-em-remove-frecent"
+            id="cc-em-remove-frecent"
+            key="cc-em-remove-frecent"
             label="Remove From Recents"
             leadingAccessory={{ type: "icon", icon: HistoryIcon }}
             action={async e => {
@@ -230,7 +230,7 @@ const patchExpressionPickerMenu: NavContextMenuPatchCallback = (children, props:
 
     if (type === "emoji" && name) {
         children.push(
-            <Menu.MenuGroup key="vc-em-group">
+            <Menu.MenuGroup key="cc-em-group">
                 {buildCloneEmojiItem({ id, name })}
                 {buildManageExpressionItems(id, type)}
             </Menu.MenuGroup>
@@ -254,7 +254,7 @@ const patchExpressionPickerMenu: NavContextMenuPatchCallback = (children, props:
         }
 
         children.push(
-            <Menu.MenuGroup key="vc-em-manage">
+            <Menu.MenuGroup key="cc-em-manage">
                 {buildCloneStickerItem(sticker)}
                 {buildManageExpressionItems(id, type)}
             </Menu.MenuGroup>
@@ -276,7 +276,7 @@ const patchMessageContextMenu: NavContextMenuPatchCallback = (children, props: R
 
             container?.unshift(
                 buildCloneEmojiItem({ id: favoriteableId, name }),
-                !favContainer ? <Menu.MenuSeparator key="vc-em-emoji-separator" /> : null,
+                !favContainer ? <Menu.MenuSeparator key="cc-em-emoji-separator" /> : null,
             );
             break;
         }
@@ -293,12 +293,12 @@ const patchMessageContextMenu: NavContextMenuPatchCallback = (children, props: R
 
                 if (settings.store.stickerCopyAndOpen)
                     favoriteContainer.push(
-                        <Menu.MenuSeparator key="vc-em-sticker-links-separator" />,
+                        <Menu.MenuSeparator key="cc-em-sticker-links-separator" />,
                         buildStickerLinkItems(sticker, React.Fragment),
                     );
             } else {
                 children.splice(-1, 0,
-                    <Menu.MenuGroup key="vc-em-clone-sticker-group">{cloneItem}</Menu.MenuGroup>,
+                    <Menu.MenuGroup key="cc-em-clone-sticker-group">{cloneItem}</Menu.MenuGroup>,
                     buildStickerLinkItems(sticker)
                 );
             }
@@ -310,8 +310,8 @@ const patchMessageContextMenu: NavContextMenuPatchCallback = (children, props: R
     if (mediaItem?.contentType?.startsWith("image/")) {
         findGroupChildrenByChildId("save-image", children)?.push(
             <Menu.MenuItem
-                key="vc-em-upload-as-emoji"
-                id="vc-em-upload-as-emoji"
+                key="cc-em-upload-as-emoji"
+                id="cc-em-upload-as-emoji"
                 label="Upload as Emoji"
                 leadingAccessory={{ type: "icon", icon: PlusIcon }}
                 action={() => openEmojiUploadModal(mediaItem.url)}

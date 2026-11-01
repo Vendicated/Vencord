@@ -1,4 +1,4 @@
-.vc-ranb-button {
+.cc-ranb-button {
     color: var(--interactive-icon-default);
     padding: 0 0.5em;
     margin-left: 3px;
@@ -8,6 +8,6 @@
     box-sizing: border-box;
 }
 
-.vc-ranb-button:hover {
+.cc-ranb-button:hover {
     color: var(--interactive-icon-active);
 }

@@ -1,6 +1,6 @@
 /*
- * Vencord, a Discord client mod
- * Copyright (c) 2023 Vendicated and contributors
+ * Claudecord, a Discord client mod
+ * Copyright (c) 2023 Vendicated, Claude and contributors
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
@@ -13,7 +13,7 @@ export const metaReady = new Promise<void>(res => resolveMetaReady = res);
 
 if (IS_EXTENSION) {
     const listener = (e: MessageEvent) => {
-        if (e.data?.type === "vencord:meta") {
+        if (e.data?.type === "claudecord:meta") {
             ({ EXTENSION_BASE_URL, EXTENSION_VERSION, RENDERER_CSS_URL } = e.data.meta);
             window.removeEventListener("message", listener);
             resolveMetaReady();

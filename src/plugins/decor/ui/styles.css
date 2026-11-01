@@ -1,16 +1,16 @@
-.vc-decor-danger-btn {
+.cc-decor-danger-btn {
     color: var(--control-critical-primary-text-default);
     background-color: var(--control-critical-primary-background-default);
 }
 
-.vc-decor-change-decoration-modal-content {
+.cc-decor-change-decoration-modal-content {
     position: relative;
     display: flex;
     border-radius: 5px 5px 0 0;
     gap: 4px;
 }
 
-.vc-decor-change-decoration-modal-preview {
+.cc-decor-change-decoration-modal-preview {
     display: flex;
     flex-direction: column;
     margin-top: 24px;
@@ -18,48 +18,48 @@
     max-width: 280px;
 }
 
-.vc-decor-change-decoration-modal-decoration {
+.cc-decor-change-decoration-modal-decoration {
     width: 80px;
     height: 80px;
 }
 
-.vc-decor-change-decoration-modal-footer {
+.cc-decor-change-decoration-modal-footer {
     justify-content: space-between;
 }
 
-.vc-decor-create-decoration-modal-content {
+.cc-decor-create-decoration-modal-content {
     display: flex;
     flex-direction: column;
     gap: 20px;
 }
 
-.vc-decor-create-decoration-modal-form-preview-container {
+.cc-decor-create-decoration-modal-form-preview-container {
     display: flex;
     gap: 16px;
 }
 
-.vc-decor-modal-header {
+.cc-decor-modal-header {
     padding: 16px;
 }
 
-.vc-decor-modal-footer {
+.cc-decor-modal-footer {
     padding: 16px;
 }
 
-.vc-decor-modal-footer-btn-container {
+.cc-decor-modal-footer-btn-container {
     display: flex;
     flex-direction: row;
     gap: 0.5em;
 }
 
-.vc-decor-create-decoration-modal-form {
+.cc-decor-create-decoration-modal-form {
     display: flex;
     flex-direction: column;
     flex-grow: 1;
     gap: 16px;
 }
 
-.vc-decor-sectioned-grid-list-container {
+.cc-decor-sectioned-grid-list-container {
     display: flex;
     flex-direction: column;
     overflow: hidden scroll;
@@ -70,12 +70,12 @@
     width: 352px;
 }
 
-.vc-decor-sectioned-grid-list-grid {
+.cc-decor-sectioned-grid-list-grid {
     display: flex;
     flex-wrap: wrap;
     gap: 8px;
 }
 
-.vc-decor-section-remove-margin {
+.cc-decor-section-remove-margin {
     margin-bottom: 0;
 }

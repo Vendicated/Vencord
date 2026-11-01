@@ -1,5 +1,5 @@
 /*
- * Vencord, a modification for Discord's desktop app
+ * Claudecord, a modification for Discord's desktop app
  * Copyright (c) 2023 Vendicated and contributors
  *
  * This program is free software: you can redistribute it and/or modify
@@ -23,7 +23,7 @@ import { classes } from "@utils/misc";
 import { useState } from "@webpack/common";
 import type { FocusEvent } from "react";
 
-const switchCls = classNameFactory("vc-switch-");
+const switchCls = classNameFactory("cc-switch-");
 
 const SWITCH_ON = "var(--brand-500)";
 const SWITCH_OFF = "var(--primary-400)";

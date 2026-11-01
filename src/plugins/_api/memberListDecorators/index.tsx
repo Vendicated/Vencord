@@ -1,5 +1,5 @@
 /*
- * Vencord, a modification for Discord's desktop app
+ * Claudecord, a modification for Discord's desktop app
  * Copyright (c) 2022 Vendicated and contributors
  *
  * This program is free software: you can redistribute it and/or modify
@@ -34,7 +34,7 @@ export default definePlugin({
             replacement: [
                 {
                     match: /children:\[(?=.{0,300},lostPermissionTooltipText:)/,
-                    replace: "children:[Vencord.Api.MemberListDecorators.__getDecorators(arguments[0],'guild'),"
+                    replace: "children:[Claudecord.Api.MemberListDecorators.__getDecorators(arguments[0],'guild'),"
                 }
             ]
         },
@@ -42,7 +42,7 @@ export default definePlugin({
             find: "PrivateChannel.renderAvatar",
             replacement: {
                 match: /decorators:(\i\.isSystemDM\(\)\?.+?:null)/,
-                replace: "decorators:[Vencord.Api.MemberListDecorators.__getDecorators(arguments[0],'dm'),$1]"
+                replace: "decorators:[Claudecord.Api.MemberListDecorators.__getDecorators(arguments[0],'dm'),$1]"
             }
         }
     ]

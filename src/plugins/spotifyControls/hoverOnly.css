@@ -1,4 +1,4 @@
-.vc-spotify-button-row {
+.cc-spotify-button-row {
     height: 0;
     opacity: 0;
     pointer-events: none;
@@ -6,7 +6,7 @@
     transition-property: height;
 }
 
-#vc-spotify-player:hover .vc-spotify-button-row {
+#cc-spotify-player:hover .cc-spotify-button-row {
     opacity: 1;
     height: 32px;
     pointer-events: auto;

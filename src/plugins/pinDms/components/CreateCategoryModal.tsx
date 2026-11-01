@@ -1,5 +1,5 @@
 /*
- * Vencord, a Discord client mod
+ * Claudecord, a Discord client mod
  * Copyright (c) 2024 Vendicated and contributors
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
@@ -28,7 +28,7 @@ const ColorPickerWithSwatches = findComponentByCodeLazy<ColorPickerWithSwatchesP
 
 export const requireSettingsModal = extractAndLoadChunksLazy(['type:"USER_SETTINGS_MODAL_OPEN"']);
 
-const cl = classNameFactory("vc-pindms-modal-");
+const cl = classNameFactory("cc-pindms-modal-");
 
 interface Props {
     categoryId: string | null;

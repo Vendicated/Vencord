@@ -1,15 +1,15 @@
-#vc-spotify-player {
+#cc-spotify-player {
     padding: 12px;
     margin: 0;
     border-bottom: 1px solid var(--border-subtle);
 
     /* so custom themes can easily change it */
-    --vc-spotify-green: var(--spotify, #1db954);
-    --vc-spotify-green-90: color-mix(in hsl, var(--vc-spotify-green), transparent 90%);
-    --vc-spotify-green-80: color-mix(in hsl, var(--vc-spotify-green), transparent 80%);
+    --cc-spotify-green: var(--spotify, #1db954);
+    --cc-spotify-green-90: color-mix(in hsl, var(--cc-spotify-green), transparent 90%);
+    --cc-spotify-green-80: color-mix(in hsl, var(--cc-spotify-green), transparent 80%);
 }
 
-.vc-spotify-button {
+.cc-spotify-button {
     margin: 0 2px;
     border-radius: var(--radius-sm);
     background: none;
@@ -22,39 +22,39 @@
     align-items: center;
 }
 
-.vc-spotify-button:hover {
+.cc-spotify-button:hover {
     color: var(--interactive-icon-hover);
     background-color: var(--background-mod-strong);
 }
 
-.vc-spotify-button-icon {
+.cc-spotify-button-icon {
     height: 24px;
     width: 24px;
 }
 
-.vc-spotify-shuffle .vc-spotify-button-icon,
-.vc-spotify-repeat .vc-spotify-button-icon {
+.cc-spotify-shuffle .cc-spotify-button-icon,
+.cc-spotify-repeat .cc-spotify-button-icon {
     width: 22px;
     height: 22px;
 }
 
-/* .vc-spotify-button:hover {
+/* .cc-spotify-button:hover {
     filter: brightness(1.3);
 } */
 
-.vc-spotify-repeat-context,
-.vc-spotify-repeat-track,
-.vc-spotify-shuffle-on {
-    background-color: var(--vc-spotify-green-90);
+.cc-spotify-repeat-context,
+.cc-spotify-repeat-track,
+.cc-spotify-shuffle-on {
+    background-color: var(--cc-spotify-green-90);
 }
 
-.vc-spotify-repeat-context:hover,
-.vc-spotify-repeat-track:hover,
-.vc-spotify-shuffle-on:hover {
-    background-color: var(--vc-spotify-green-80);
+.cc-spotify-repeat-context:hover,
+.cc-spotify-repeat-track:hover,
+.cc-spotify-shuffle-on:hover {
+    background-color: var(--cc-spotify-green-80);
 }
 
-.vc-spotify-tooltip-text {
+.cc-spotify-tooltip-text {
     overflow: hidden;
     white-space: nowrap;
     padding-right: 0.2em;
@@ -62,7 +62,7 @@
     margin: unset;
 }
 
-.vc-spotify-repeat-1 {
+.cc-spotify-repeat-1 {
     font-size: 70%;
     position: absolute;
     top: 50%;
@@ -70,20 +70,20 @@
     transform: translate(-50%, -50%);
 }
 
-.vc-spotify-button-row {
+.cc-spotify-button-row {
     justify-content: center;
     margin-top: 14px;
 }
 
-.vc-spotify-secondary-song-info {
+.cc-spotify-secondary-song-info {
     font-size: 12px;
 }
 
-.vc-spotify-song-info-prefix {
+.cc-spotify-song-info-prefix {
     display: none;
 }
 
-#vc-spotify-info-wrapper {
+#cc-spotify-info-wrapper {
     display: flex;
     flex-direction: row;
     align-items: center;
@@ -91,24 +91,24 @@
     gap: 0.5em;
 }
 
-#vc-spotify-album-image {
+#cc-spotify-album-image {
     height: 90%;
     object-fit: contain;
     border-radius: 3px;
     transition: filter 0.2s;
 }
 
-#vc-spotify-album-image:hover {
+#cc-spotify-album-image:hover {
     filter: brightness(1.2);
     cursor: pointer;
 }
 
-#vc-spotify-album-expanded-wrapper #vc-spotify-album-image {
+#cc-spotify-album-expanded-wrapper #cc-spotify-album-image {
     width: 100%;
     object-fit: contain;
 }
 
-#vc-spotify-titles {
+#cc-spotify-titles {
     display: flex;
     flex-direction: column;
     padding: 0.2rem;
@@ -117,38 +117,38 @@
     overflow: hidden;
 }
 
-#vc-spotify-song-title {
+#cc-spotify-song-title {
     color: var(--text-strong);
     font-size: 14px;
     font-weight: 600;
 }
 
-.vc-spotify-ellipoverflow {
+.cc-spotify-ellipoverflow {
     white-space: nowrap;
     overflow: hidden;
     width: 100%;
     text-overflow: ellipsis;
 }
 
-.vc-spotify-artist,
-.vc-spotify-album {
+.cc-spotify-artist,
+.cc-spotify-album {
     font-size: 12px;
     text-decoration: none;
     color: var(--text-strong);
 }
 
-.vc-spotify-comma {
+.cc-spotify-comma {
     color: var(--text-default);
 }
 
-.vc-spotify-artist[role="link"]:hover,
-#vc-spotify-album-title[role="link"]:hover,
-#vc-spotify-song-title[role="link"]:hover {
+.cc-spotify-artist[role="link"]:hover,
+#cc-spotify-album-title[role="link"]:hover,
+#cc-spotify-song-title[role="link"]:hover {
     text-decoration: underline;
     cursor: pointer;
 }
 
-#vc-spotify-progress-bar {
+#cc-spotify-progress-bar {
     position: relative;
     color: var(--text-default);
     width: 100%;
@@ -156,26 +156,26 @@
     margin-bottom: 5px;
 }
 
-#vc-spotify-progress-bar > [class*="slider"] {
+#cc-spotify-progress-bar > [class*="slider"] {
     flex-grow: 1;
     width: 100%;
     padding: 0 !important;
 }
 
-#vc-spotify-progress-bar > [class*="slider"] [class*="bar"] {
+#cc-spotify-progress-bar > [class*="slider"] [class*="bar"] {
     height: 3px !important;
     top: calc(12px - 4px / 2 + var(--bar-offset));
 }
 
-#vc-spotify-progress-bar > [class*="slider"] [class*="barFill"] {
+#cc-spotify-progress-bar > [class*="slider"] [class*="barFill"] {
     background-color: var(--interactive-icon-active);
 }
 
-#vc-spotify-progress-bar > [class*="slider"]:hover [class*="barFill"] {
-    background-color: var(--vc-spotify-green);
+#cc-spotify-progress-bar > [class*="slider"]:hover [class*="barFill"] {
+    background-color: var(--cc-spotify-green);
 }
 
-#vc-spotify-progress-bar > [class*="slider"] [class*="grabber"] {
+#cc-spotify-progress-bar > [class*="slider"] [class*="grabber"] {
     /* these importants are necessary, it applies a width and height through inline styles */
     height: 16px !important;
     width: 16px !important;
@@ -188,15 +188,15 @@
     transition: opacity 0.1s;
 }
 
-#vc-spotify-progress-bar:hover > [class*="slider"] [class*="grabber"] {
+#cc-spotify-progress-bar:hover > [class*="slider"] [class*="grabber"] {
     opacity: 1;
 }
 
-#vc-spotify-progress-text {
+#cc-spotify-progress-text {
     margin: 0;
 }
 
-.vc-spotify-progress-time {
+.cc-spotify-progress-time {
     font-size: 12px;
     top: 10px;
     position: absolute;
@@ -204,15 +204,15 @@
     font-family: var(--font-code);
 }
 
-.vc-spotify-time-left {
+.cc-spotify-time-left {
     left: 0;
 }
 
-.vc-spotify-time-right {
+.cc-spotify-time-right {
     right: 0;
 }
 
-.vc-spotify-fallback {
+.cc-spotify-fallback {
     padding: 0.5em;
     color: var(--text-default);
 }

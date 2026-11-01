@@ -1,5 +1,5 @@
 /*
- * Vencord, a Discord client mod
+ * Claudecord, a Discord client mod
  * Copyright (c) 2024 Vendicated and contributors
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
@@ -20,13 +20,13 @@ import { Checkbox, closeModal, Modal, openModal, } from "@webpack/common";
 
 import managedStyle from "./styles.css?managed";
 
-const cl = classNameFactory("vc-screen-picker-");
+const cl = classNameFactory("cc-screen-picker-");
 
 class NotAllowedError extends Error {
     name = "NotAllowedError";
 }
 
-const logger = new Logger("VencordScreenShare");
+const logger = new Logger("ClaudecordScreenShare");
 
 const getDisplayMedia = navigator.mediaDevices.getDisplayMedia.bind(navigator.mediaDevices);
 

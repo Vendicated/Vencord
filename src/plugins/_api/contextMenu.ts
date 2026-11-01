@@ -1,5 +1,5 @@
 /*
- * Vencord, a modification for Discord's desktop app
+ * Claudecord, a modification for Discord's desktop app
  * Copyright (c) 2022 Vendicated and contributors
  *
  * This program is free software: you can redistribute it and/or modify
@@ -67,7 +67,7 @@ export default definePlugin({
                 // Patch the central context menu handler
                 {
                     match: /(?=let{navId:)(?<=function \i\((\i)\).+?)/,
-                    replace: "$1=Vencord.Api.ContextMenu._usePatchContextMenu($1);"
+                    replace: "$1=Claudecord.Api.ContextMenu._usePatchContextMenu($1);"
                 },
 
                 // Demangle Discord's Menu Item module

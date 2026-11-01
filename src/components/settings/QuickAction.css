@@ -1,4 +1,4 @@
-.vc-settings-quickActions-card {
+.cc-settings-quickActions-card {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: 0.5em;
@@ -7,12 +7,12 @@
 }
 
 @media (width <=1040px) {
-    .vc-settings-quickActions-card {
+    .cc-settings-quickActions-card {
         grid-template-columns: repeat(2, 1fr);
     }
 }
 
-.vc-settings-quickActions-pill {
+.cc-settings-quickActions-pill {
     all: unset;
     cursor: pointer;
     background: var(--control-secondary-background-default);
@@ -26,18 +26,18 @@
     box-sizing: border-box;
 }
 
-.vc-settings-quickActions-pill:hover {
+.cc-settings-quickActions-pill:hover {
     background: var(--control-secondary-background-hover);
     transform: translateY(-1px);
     box-shadow: var(--elevation-high);
 }
 
-.vc-settings-quickActions-pill:focus-visible {
+.cc-settings-quickActions-pill:focus-visible {
     outline: 2px solid var(--border-focus);
     outline-offset: 2px;
 }
 
-.vc-settings-quickActions-img {
+.cc-settings-quickActions-img {
     width: 24px;
     height: 24px;
 }

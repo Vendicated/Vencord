@@ -1,5 +1,5 @@
 /*
- * Vencord, a modification for Discord's desktop app
+ * Claudecord, a modification for Discord's desktop app
  * Copyright (c) 2022 Vendicated and contributors
  *
  * This program is free software: you can redistribute it and/or modify
@@ -52,7 +52,7 @@ const platformMap = {
 };
 
 const badge: ProfileBadge = {
-    id: "vc_platform_indicator_wrapper",
+    id: "cc_platform_indicator_wrapper",
     getBadges,
     position: BadgePosition.START,
 };
@@ -165,10 +165,10 @@ function getBadges({ userId }: BadgeUserArgs): ProfileBadge[] {
     if (!status) return [];
 
     return Object.entries(status).map(([platform, status]) => ({
-        key: `vc-platform-indicator-${platform}`,
-        id: `vc-platform-indicator-${platform}`,
+        key: `cc-platform-indicator-${platform}`,
+        id: `cc-platform-indicator-${platform}`,
         component: () => (
-            <span key={platform} className="vc-platform-indicator">
+            <span key={platform} className="cc-platform-indicator">
                 <PlatformIcon
                     platform={platform as DiscordPlatform}
                     status={status}
@@ -193,7 +193,7 @@ function PlatformIndicators({ statusMap, small }: { statusMap: ClientStatusMap; 
 
     return (
         <span
-            className="vc-platform-indicator"
+            className="cc-platform-indicator"
             style={{ gap: "2px" }}
         >
             {icons}

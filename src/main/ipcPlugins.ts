@@ -1,6 +1,6 @@
 /*
- * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2023 Vendicated and contributors
+ * Claudecord, a modification for Discord's desktop app
+ * Copyright (c) 2023 Vendicated, Claude and contributors
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,7 +31,7 @@ for (const [plugin, methods] of Object.entries(PluginNatives)) {
     const mappings = PluginIpcMappings[plugin] = {};
 
     for (const [methodName, method] of entries) {
-        const key = `VencordPluginNative_${plugin}_${methodName}`;
+        const key = `ClaudecordPluginNative_${plugin}_${methodName}`;
         ipcMain.handle(key, method);
         mappings[methodName] = key;
     }

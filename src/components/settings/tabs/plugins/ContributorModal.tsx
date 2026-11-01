@@ -1,5 +1,5 @@
 /*
- * Vencord, a Discord client mod
+ * Claudecord, a Discord client mod
  * Copyright (c) 2023 Vendicated and contributors
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
@@ -22,7 +22,7 @@ import Plugins from "~plugins";
 import { PluginCard } from "./PluginCard";
 import { GithubButton, WebsiteButton } from "./PluginModalButtons";
 
-const cl = classNameFactory("vc-author-modal-");
+const cl = classNameFactory("cc-author-modal-");
 
 export function openContributorModal(user: User) {
     openModal(modalProps => <ContributorModal user={user} modalProps={modalProps} />);
@@ -52,13 +52,13 @@ function ContributorModal({ user, modalProps }: { user: User; modalProps: Render
             .sort((a, b) => Number(a.required ?? false) - Number(b.required ?? false));
     }, [user.id, user.username]);
 
-    const ContributedHyperLink = <Link href="https://vencord.dev/source">contributed</Link>;
+    const ContributedHyperLink = <Link href="https://claudecord.dev/source">contributed</Link>;
 
     return (
         <Modal
             {...modalProps}
             title={
-                <div className="vc-plugin-modal-header">
+                <div className="cc-plugin-modal-header">
                     <img
                         className={cl("avatar")}
                         src={user.getAvatarURL(void 0, 512, true)}
@@ -66,7 +66,7 @@ function ContributorModal({ user, modalProps }: { user: User; modalProps: Render
                     />
                     <Span size="lg" weight="semibold" className={cl("name")}>{user.username}</Span>
 
-                    <div className={classes("vc-settings-modal-links", cl("links"))}>
+                    <div className={classes("cc-settings-modal-links", cl("links"))}>
                         {website && (
                             <WebsiteButton
                                 text={website}
@@ -91,7 +91,7 @@ function ContributorModal({ user, modalProps }: { user: User; modalProps: Render
                     )
                     : (
                         <Paragraph>
-                            This person has not made any plugins. They likely {ContributedHyperLink} to Vencord in other ways!
+                            This person has not made any plugins. They likely {ContributedHyperLink} to Claudecord in other ways!
                         </Paragraph>
                     )
             }

@@ -1,5 +1,5 @@
 /*
- * Vencord, a modification for Discord's desktop app
+ * Claudecord, a modification for Discord's desktop app
  * Copyright (c) 2023 Vendicated and contributors
  *
  * This program is free software: you can redistribute it and/or modify
@@ -27,7 +27,7 @@ import { PermissionsSortOrder, settings } from ".";
 export const loadGetGuildPermissionSpecMap = extractAndLoadChunksLazy([".PRIMARY,badgeTooltipDelay:"]);
 export const { getGuildPermissionSpecMap } = findByPropsLazy("getGuildPermissionSpecMap");
 
-export const cl = classNameFactory("vc-permviewer-");
+export const cl = classNameFactory("cc-permviewer-");
 
 export function getSortedRolesForMember({ id: guildId }: Guild, member: GuildMember) {
     // The guild id is the @everyone role

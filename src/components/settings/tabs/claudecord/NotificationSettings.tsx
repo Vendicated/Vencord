@@ -1,5 +1,5 @@
 /*
- * Vencord, a Discord client mod
+ * Claudecord, a Discord client mod
  * Copyright (c) 2024 Vendicated and contributors
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
@@ -20,7 +20,7 @@ export function NotificationSection() {
         <section className={Margins.top16}>
             <Heading className={Margins.bottom8}>Notifications</Heading>
             <Paragraph className={Margins.bottom8}>
-                Settings for Notifications sent by Vencord.
+                Settings for Notifications sent by Claudecord.
                 This does NOT include Discord notifications (messages, etc)
             </Paragraph>
             <Flex>
@@ -62,7 +62,7 @@ function NotificationSettings() {
             <Paragraph className={Margins.bottom8}>
                 Some plugins may show you notifications. These come in two styles:
                 <ul>
-                    <li><strong>Vencord Notifications</strong>: These are in-app notifications</li>
+                    <li><strong>Claudecord Notifications</strong>: These are in-app notifications</li>
                     <li><strong>Desktop Notifications</strong>: Native Desktop notifications (like when you get a ping)</li>
                 </ul>
             </Paragraph>
@@ -71,7 +71,7 @@ function NotificationSettings() {
                 options={[
                     { label: "Only use Desktop notifications when Discord is not focused", value: "not-focused", default: true },
                     { label: "Always use Desktop notifications", value: "always" },
-                    { label: "Always use Vencord notifications", value: "never" },
+                    { label: "Always use Claudecord notifications", value: "never" },
                 ] satisfies Array<{ value: typeof settings["useNative"]; } & Record<string, any>>}
                 closeOnSelect={true}
                 select={v => settings.useNative = v}

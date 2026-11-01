@@ -1,6 +1,6 @@
 /*
- * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2022 Vendicated and contributors
+ * Claudecord, a modification for Discord's desktop app
+ * Copyright (c) 2022 Vendicated, Claude and contributors
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,8 +21,8 @@ import { join } from "path";
 
 export const DATA_DIR = process.env.VENCORD_USER_DATA_DIR ?? (
     process.env.DISCORD_USER_DATA_DIR
-        ? join(process.env.DISCORD_USER_DATA_DIR, "..", "VencordData")
-        : join(app.getPath("userData"), "..", "Vencord")
+        ? join(process.env.DISCORD_USER_DATA_DIR, "..", "ClaudecordData")
+        : join(app.getPath("userData"), "..", "Claudecord")
 );
 export const SETTINGS_DIR = join(DATA_DIR, "settings");
 export const THEMES_DIR = join(DATA_DIR, "themes");

@@ -1,6 +1,6 @@
 /*
- * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2022 Vendicated and contributors
+ * Claudecord, a modification for Discord's desktop app
+ * Copyright (c) 2022 Vendicated, Claude and contributors
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -49,20 +49,20 @@ function patchLatest() {
         if (latestVersion === currentVersion) return;
 
         const oldResources = join(discordPath, currentVersion, "resources");
-        const oldVencordAsar = join(oldResources, "app.asar");
+        const oldClaudecordAsar = join(oldResources, "app.asar");
 
         const resources = join(discordPath, latestVersion, "resources");
         const newAppAsar = join(resources, "app.asar");
         const newAppAsarBackup = join(resources, "_app.asar");
 
-        if (!existsSync(oldVencordAsar) || !existsSync(newAppAsar) || existsSync(newAppAsarBackup)) return;
+        if (!existsSync(oldClaudecordAsar) || !existsSync(newAppAsar) || existsSync(newAppAsarBackup)) return;
 
-        console.info(`[Vencord] Detected Host Update (${currentVersion} -> ${latestVersion}). Repatching...`);
+        console.info(`[Claudecord] Detected Host Update (${currentVersion} -> ${latestVersion}). Repatching...`);
 
         renameSync(newAppAsar, newAppAsarBackup);
-        copyFileSync(oldVencordAsar, newAppAsar);
+        copyFileSync(oldClaudecordAsar, newAppAsar);
     } catch (err) {
-        console.error("[Vencord] Failed to repatch latest host update", err);
+        console.error("[Claudecord] Failed to repatch latest host update", err);
     }
 }
 

@@ -12,7 +12,7 @@ permissions:
 
 jobs:
     codeberg:
-        if: github.repository == 'Vendicated/Vencord'
+        if: github.repository == 'Vendicated/Claudecord'
         runs-on: ubuntu-latest
         steps:
             - name: Checkout repository

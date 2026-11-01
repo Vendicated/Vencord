@@ -1,5 +1,5 @@
-/*!
- * Vencord, a modification for Discord's desktop app
+/*
+ * Claudecord, a modification for Discord's desktop app
  * Copyright (c) 2022 Vendicated and contributors
  *
  * This program is free software: you can redistribute it and/or modify
@@ -16,6 +16,9 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import "./VencordNativeStub";
+declare global {
+    export var ClaudecordNative: typeof import("./ClaudecordNative").default;
+    export var Claudecord: typeof import("./Claudecord");
+}
 
-export * from "../src/Vencord";
+export { };

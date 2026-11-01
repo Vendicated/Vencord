@@ -1,5 +1,5 @@
 /*
- * Vencord, a Discord client mod
+ * Claudecord, a Discord client mod
  * Copyright (c) 2024 Vendicated and contributors
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
@@ -10,7 +10,7 @@ import { Card } from "@components/Card";
 import { classNameFactory } from "@utils/css";
 import type { ComponentType, PropsWithChildren, ReactNode } from "react";
 
-const cl = classNameFactory("vc-settings-quickActions-");
+const cl = classNameFactory("cc-settings-quickActions-");
 
 export interface QuickActionProps {
     Icon: ComponentType<{ className?: string; }>;

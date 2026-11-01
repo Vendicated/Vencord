@@ -1,5 +1,5 @@
 /*
- * Vencord, a Discord client mod
+ * Claudecord, a Discord client mod
  * Copyright (c) 2025 Vendicated and contributors
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
@@ -8,8 +8,8 @@ import { managedStyleRootNode } from "@api/Styles";
 import { createAndAppendStyle } from "@utils/css";
 
 import { hexToHSL } from "./colorUtils";
-const VARS_STYLE_ID = "vc-clientTheme-vars";
-const OVERRIDES_STYLE_ID = "vc-clientTheme-overrides";
+const VARS_STYLE_ID = "cc-clientTheme-vars";
+const OVERRIDES_STYLE_ID = "cc-clientTheme-overrides";
 type StyleId = typeof VARS_STYLE_ID | typeof OVERRIDES_STYLE_ID;
 
 const styleCache = {} as Record<StyleId, HTMLStyleElement | null>;

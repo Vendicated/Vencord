@@ -1,5 +1,5 @@
 /*
- * Vencord, a modification for Discord's desktop app
+ * Claudecord, a modification for Discord's desktop app
  * Copyright (c) 2022 Vendicated and contributors
  *
  * This program is free software: you can redistribute it and/or modify
@@ -22,7 +22,7 @@ import { HighlighterSetting } from "@plugins/shikiCodeblocks.desktop/types";
 import { classNameFactory } from "@utils/css";
 import { filters, mapMangledModuleLazy } from "@webpack";
 
-export const cl = classNameFactory("vc-shiki-");
+export const cl = classNameFactory("cc-shiki-");
 
 export const arboriumLanguages = mapMangledModuleLazy('jldoctest:"julia"', {
     resolveLang: filters.byCode(/!\i.test\(/, ".toLowerCase();")

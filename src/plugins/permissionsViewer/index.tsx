@@ -1,5 +1,5 @@
 /*
- * Vencord, a modification for Discord's desktop app
+ * Claudecord, a modification for Discord's desktop app
  * Copyright (c) 2023 Vendicated and contributors
  *
  * This program is free software: you can redistribute it and/or modify
@@ -201,7 +201,7 @@ export default definePlugin({
                             ref={buttonRef}
                             variant="none"
                             size="min"
-                            className={classes(className, "vc-permviewer-role-button")}
+                            className={classes(className, "cc-permviewer-role-button")}
                         >
                             <SafetyIcon height="16" width="16" />
                         </Button>

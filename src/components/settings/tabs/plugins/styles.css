@@ -1,5 +1,5 @@
 /*
- * Vencord, a modification for Discord's desktop app
+ * Claudecord, a modification for Discord's desktop app
  * Copyright (c) 2022 Vendicated and contributors
  *
  * This program is free software: you can redistribute it and/or modify
@@ -16,14 +16,14 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-.vc-plugins-grid {
+.cc-plugins-grid {
     margin-top: 16px;
     display: grid;
     gap: 16px;
     grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
 }
 
-.vc-plugins-info-button {
+.cc-plugins-info-button {
     height: 24px;
     width: 24px;
     padding: 0;
@@ -37,11 +37,11 @@
     }
 }
 
-.vc-plugins-settings-button:hover {
+.cc-plugins-settings-button:hover {
     color: var(--interactive-icon-hover);
 }
 
-.vc-plugins-filter-controls {
+.cc-plugins-filter-controls {
     display: grid;
     height: 40px;
     gap: 10px;
@@ -49,11 +49,11 @@
     align-items: center;
 }
 
-.vc-plugins-filter-control {
+.cc-plugins-filter-control {
     height: 40px;
 }
 
-.vc-addon-badge {
+.cc-addon-badge {
     padding: 0 6px;
     font-family: var(--font-display);
     font-weight: 500;
@@ -65,11 +65,11 @@
     text-align: center;
 }
 
-.vc-plugins-dep-name {
+.cc-plugins-dep-name {
     margin: 0 auto;
 }
 
-.vc-plugins-info-card {
+.cc-plugins-info-card {
     padding: 1em;
     height: 8em;
     display: flex;
@@ -77,16 +77,16 @@
     gap: 0.25em;
 }
 
-.vc-plugins-restart-button {
+.cc-plugins-restart-button {
     margin-top: 0.5em;
     background: var(--icon-status-idle) !important;
 }
 
-.vc-plugins-info-icon:not(:hover, :focus) {
+.cc-plugins-info-icon:not(:hover, :focus) {
     color: var(--text-muted);
 }
 
-.vc-plugins-settings {
+.cc-plugins-settings {
     display: flex;
     flex-direction: column;
     gap: 1.25em;

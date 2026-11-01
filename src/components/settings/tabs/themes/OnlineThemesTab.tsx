@@ -1,5 +1,5 @@
 /*
- * Vencord, a Discord client mod
+ * Claudecord, a Discord client mod
  * Copyright (c) 2025 Vendicated and contributors
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
@@ -48,7 +48,7 @@ export function OnlineThemesTab() {
                 <TextArea
                     value={themeText}
                     onChange={setThemeText}
-                    className={"vc-settings-theme-links"}
+                    className={"cc-settings-theme-links"}
                     placeholder="Enter Theme Links..."
                     spellCheck={false}
                     onBlur={onBlur}

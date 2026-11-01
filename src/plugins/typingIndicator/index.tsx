@@ -1,5 +1,5 @@
 /*
- * Vencord, a modification for Discord's desktop app
+ * Claudecord, a modification for Discord's desktop app
  * Copyright (c) 2022 Vendicated and contributors
  *
  * This program is free software: you can redistribute it and/or modify
@@ -97,7 +97,7 @@ function TypingIndicator({ channelId, guildId }: { channelId: string; guildId: s
         return (
             <Tooltip text={tooltipText!}>
                 {props => (
-                    <div className="vc-typing-indicator" {...props}>
+                    <div className="cc-typing-indicator" {...props}>
                         {((settings.store.indicatorMode & IndicatorMode.Avatars) === IndicatorMode.Avatars) && (
                             <div
                                 onClick={e => {
@@ -114,12 +114,12 @@ function TypingIndicator({ channelId, guildId }: { channelId: string; guildId: s
                                     showDefaultAvatarsForNullUsers
                                     showUserPopout
                                     size={16}
-                                    className="vc-typing-indicator-avatars"
+                                    className="cc-typing-indicator-avatars"
                                 />
                             </div>
                         )}
                         {((settings.store.indicatorMode & IndicatorMode.Dots) === IndicatorMode.Dots) && (
-                            <div className="vc-typing-indicator-dots">
+                            <div className="cc-typing-indicator-dots">
                                 <ThreeDots dotRadius={3} themed={true} />
                             </div>
                         )}

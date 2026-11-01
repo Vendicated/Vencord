@@ -1,5 +1,5 @@
 /*
- * Vencord, a modification for Discord's desktop app
+ * Claudecord, a modification for Discord's desktop app
  * Copyright (c) 2023 Vendicated and contributors
  *
  * This program is free software: you can redistribute it and/or modify
@@ -30,7 +30,7 @@ import { PropsWithChildren } from "react";
 
 import managedStyle from "./style.css?managed";
 
-const cl = classNameFactory("vc-typing-tweaks-");
+const cl = classNameFactory("cc-typing-tweaks-");
 const settings = definePluginSettings({
     showAvatars: {
         type: OptionType.BOOLEAN,

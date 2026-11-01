@@ -1,5 +1,5 @@
 /*
- * Vencord, a modification for Discord's desktop app
+ * Claudecord, a modification for Discord's desktop app
  * Copyright (c) 2022 Vendicated and contributors
  *
  * This program is free software: you can redistribute it and/or modify
@@ -33,7 +33,7 @@ export default definePlugin({
             find: "#{intl::GUILD_COMMUNICATION_DISABLED_ICON_TOOLTIP_BODY}",
             replacement: {
                 match: /#{intl::GUILD_COMMUNICATION_DISABLED_BOTTOM_SHEET_TITLE}.+?renderPopout:.+?(?=\])/,
-                replace: "$&,Vencord.Api.MessageDecorations.__addDecorationsToMessage(arguments[0])"
+                replace: "$&,Claudecord.Api.MessageDecorations.__addDecorationsToMessage(arguments[0])"
             }
         }
     ]

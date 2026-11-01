@@ -1,5 +1,5 @@
 /*
- * Vencord, a modification for Discord's desktop app
+ * Claudecord, a modification for Discord's desktop app
  * Copyright (c) 2023 Vendicated and contributors
  *
  * This program is free software: you can redistribute it and/or modify
@@ -43,7 +43,7 @@ import { VoicePreview } from "./VoicePreview";
 import { VoiceRecorderWeb } from "./WebRecorder";
 
 const CloudUpload: typeof TCloudUpload = findLazy(m => m.prototype?.trackUploadFinished);
-export const cl = classNameFactory("vc-vmsg-");
+export const cl = classNameFactory("cc-vmsg-");
 export type VoiceRecorder = ComponentType<{
     setAudioBlob(blob: Blob): void;
     onRecordingChange(recording: boolean): void;
@@ -62,7 +62,7 @@ const ctxMenuPatch: NavContextMenuPatchCallback = (children, props) => {
 
     children.push(
         <Menu.MenuItem
-            id="vc-send-vmsg"
+            id="cc-send-vmsg"
             iconLeft={Microphone}
             leadingAccessory={{
                 type: "icon",
@@ -71,7 +71,7 @@ const ctxMenuPatch: NavContextMenuPatchCallback = (children, props) => {
             label="Send Voice Message"
             action={() =>
                 openModal(modalProps => <VoiceMessageModal modalProps={modalProps} />, {
-                    onCloseCallback: () => FluxDispatcher.dispatch({ type: "VENCORD_STOP_RECORDING" })
+                    onCloseCallback: () => FluxDispatcher.dispatch({ type: "CLAUDECORD_STOP_RECORDING" })
                 })
             }
         />

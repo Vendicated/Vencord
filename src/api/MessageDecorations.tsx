@@ -1,6 +1,6 @@
 /*
- * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2022 Vendicated and contributors
+ * Claudecord, a modification for Discord's desktop app
+ * Copyright (c) 2022 Vendicated, Claude and contributors
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -69,7 +69,7 @@ export function __addDecorationsToMessage(props: MessageDecorationProps): JSX.El
     );
 
     return (
-        <div className="vc-message-decorations-wrapper">
+        <div className="cc-message-decorations-wrapper">
             {decorations}
         </div>
     );

@@ -46,7 +46,7 @@ jobs:
 
             - name: Clean up obsolete files
               run: |
-                  rm -rf dist/*-unpacked dist/vendor Vencord.user.css vencordDesktopRenderer.css vencordDesktopRenderer.css.map
+                  rm -rf dist/*-unpacked dist/vendor Claudecord.user.css claudecordDesktopRenderer.css claudecordDesktopRenderer.css.map
 
             - name: Get some values needed for the release
               id: release_values
@@ -54,7 +54,7 @@ jobs:
                   echo "release_tag=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
 
             - name: Upload DevBuild as release
-              if: github.repository == 'Vendicated/Vencord'
+              if: github.repository == 'Vendicated/Claudecord'
               run: |
                   gh release upload devbuild --clobber dist/*
                   gh release edit devbuild --title "DevBuild $RELEASE_TAG"
@@ -63,7 +63,7 @@ jobs:
                   RELEASE_TAG: ${{ env.release_tag }}
 
             - name: Upload DevBuild to builds repo
-              if: github.repository == 'Vendicated/Vencord'
+              if: github.repository == 'Vendicated/Claudecord'
               run: |
                   git config --global user.name "$USERNAME"
                   git config --global user.email actions@github.com
@@ -80,5 +80,5 @@ jobs:
                   git push --force https://$USERNAME:$API_TOKEN@github.com/$GH_REPO.git
               env:
                   API_TOKEN: ${{ secrets.BUILDS_TOKEN }}
-                  GH_REPO: Vencord/builds
+                  GH_REPO: Claudecord/builds
                   USERNAME: GitHub-Actions

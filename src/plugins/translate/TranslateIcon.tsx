@@ -1,5 +1,5 @@
 /*
- * Vencord, a modification for Discord's desktop app
+ * Claudecord, a modification for Discord's desktop app
  * Copyright (c) 2023 Vendicated and contributors
  *
  * This program is free software: you can redistribute it and/or modify
@@ -48,7 +48,7 @@ function AutoTranslateConfirmModal(props: RenderModalProps) {
     return (
         <ConfirmModal
             {...props}
-            title="Vencord Auto-Translate Enabled"
+            title="Claudecord Auto-Translate Enabled"
             subtitle="You just enabled Auto Translate! Any message will automatically be translated before being sent."
             confirmText="Disable Auto-Translate"
             onConfirm={() => settings.store.autoTranslate = false}

@@ -1,8 +1,8 @@
-.vc-std-wrapper {
+.cc-std-wrapper {
     display: flex;
     align-items: center;
 }
 
-.vc-std-wrapper [class*="communicationDisabled"] {
+.cc-std-wrapper [class*="communicationDisabled"] {
     margin-right: 0;
 }

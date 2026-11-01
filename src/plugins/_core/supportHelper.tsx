@@ -1,5 +1,5 @@
 /*
- * Vencord, a modification for Discord's desktop app
+ * Claudecord, a modification for Discord's desktop app
  * Copyright (c) 2023 Vendicated and contributors
  *
  * This program is free software: you can redistribute it and/or modify
@@ -26,7 +26,7 @@ import { Flex } from "@components/Flex";
 import { Link } from "@components/Link";
 import { Paragraph } from "@components/Paragraph";
 import { openSettingsTabModal, UpdaterTab } from "@components/settings";
-import { CONTRIB_ROLE_ID, Devs, DONOR_ROLE_ID, KNOWN_ISSUES_CHANNEL_ID, REGULAR_ROLE_ID, SUPPORT_CATEGORY_ID, SUPPORT_CHANNEL_ID, VENBOT_USER_ID, VENCORD_GUILD_ID } from "@utils/constants";
+import { CONTRIB_ROLE_ID, Devs, DONOR_ROLE_ID, KNOWN_ISSUES_CHANNEL_ID, REGULAR_ROLE_ID, SUPPORT_CATEGORY_ID, SUPPORT_CHANNEL_ID, VENBOT_USER_ID, CLAUDECORD_GUILD_ID } from "@utils/constants";
 import { sendMessage } from "@utils/discord";
 import { Logger } from "@utils/Logger";
 import { Margins } from "@utils/margins";
@@ -46,7 +46,7 @@ import plugins, { PluginMeta } from "~plugins";
 import SettingsPlugin from "./settings";
 
 const AdditionalAllowedChannelIds = [
-    "1024286218801926184", // Vencord > #bot-commands
+    "1024286218801926184", // Claudecord > #bot-commands
 ];
 
 const TrustedRolesIds = [
@@ -83,8 +83,8 @@ async function generateDebugInfoMessage() {
     })();
 
     const info = {
-        Vencord:
-            `v${VERSION} • [${gitHash}](<https://github.com/Vendicated/Vencord/commit/${gitHash}>)` +
+        Claudecord:
+            `v${VERSION} • [${gitHash}](<https://github.com/Vendicated/Claudecord/commit/${gitHash}>)` +
             `${SettingsPlugin.additionalInfo} - ${Intl.DateTimeFormat("en-GB", { dateStyle: "medium" }).format(BUILD_TIMESTAMP)}`,
         Client: `${RELEASE_CHANNEL} ~ ${client}`,
         Platform: navigator.platform
@@ -96,7 +96,7 @@ async function generateDebugInfoMessage() {
 
     const commonIssues = {
         "Activity Sharing disabled": tryOrElse(() => !ShowCurrentGame.getSetting(), false),
-        "Vencord DevBuild": !IS_STANDALONE,
+        "Claudecord DevBuild": !IS_STANDALONE,
         "Has UserPlugins": Object.values(PluginMeta).some(m => m.userPlugin),
         "More than two weeks out of date": BUILD_TIMESTAMP < Date.now() - 12096e5,
     };
@@ -149,11 +149,11 @@ function DevBuildConfirmModal(props: RenderModalProps) {
             }}
         >
             <div>
-                <Paragraph>You are using a custom build of Vencord, which we do not provide support for!</Paragraph>
+                <Paragraph>You are using a custom build of Claudecord, which we do not provide support for!</Paragraph>
 
                 <Paragraph className={Margins.top8}>
-                    We only provide support for <Link href="https://vencord.dev/download">official builds</Link>.
-                    Either <Link href="https://vencord.dev/download">switch to an official build</Link> or figure your issue out yourself.
+                    We only provide support for <Link href="https://claudecord.dev/download">official builds</Link>.
+                    Either <Link href="https://claudecord.dev/download">switch to an official build</Link> or figure your issue out yourself.
                 </Paragraph>
 
                 <Paragraph size="md" weight="bold" className={Margins.top8}>You will be banned from receiving support if you ignore this rule.</Paragraph>
@@ -181,14 +181,14 @@ export default definePlugin({
 
     commands: [
         {
-            name: "vencord-debug",
-            description: "Send Vencord debug info",
+            name: "claudecord-debug",
+            description: "Send Claudecord debug info",
             predicate: ctx => isPluginDev(UserStore.getCurrentUser()?.id) || isSupportAllowedChannel(ctx.channel),
             execute: async () => ({ content: await generateDebugInfoMessage() })
         },
         {
-            name: "vencord-plugins",
-            description: "Send Vencord plugin list",
+            name: "claudecord-plugins",
+            description: "Send Claudecord plugin list",
             predicate: ctx => isPluginDev(UserStore.getCurrentUser()?.id) || isSupportAllowedChannel(ctx.channel),
             execute: () => ({ content: generatePluginList() })
         }
@@ -217,7 +217,7 @@ export default definePlugin({
                             onCancel={() => openSettingsTabModal(UpdaterTab!)}
                         >
                             <div>
-                                <Paragraph>You are using an outdated version of Vencord! Chances are, your issue is already fixed.</Paragraph>
+                                <Paragraph>You are using an outdated version of Claudecord! Chances are, your issue is already fixed.</Paragraph>
                                 <Paragraph className={Margins.top8}>
                                     Please first update before asking for support!
                                 </Paragraph>
@@ -231,7 +231,7 @@ export default definePlugin({
                 }
             }
 
-            const roles = GuildMemberStore.getSelfMember(VENCORD_GUILD_ID)?.roles;
+            const roles = GuildMemberStore.getSelfMember(CLAUDECORD_GUILD_ID)?.roles;
             if (!roles || TrustedRolesIds.some(id => roles.includes(id))) return;
 
             if (!IS_WEB && IS_UPDATER_DISABLED) {
@@ -243,9 +243,9 @@ export default definePlugin({
                         variant="primary"
                     >
                         <div>
-                            <Paragraph>You are using an externally updated Vencord version, which we do not provide support for!</Paragraph>
+                            <Paragraph>You are using an externally updated Claudecord version, which we do not provide support for!</Paragraph>
                             <Paragraph className={Margins.top8}>
-                                Please either switch to an <Link href="https://vencord.dev/download">officially supported version of Vencord</Link>, or
+                                Please either switch to an <Link href="https://claudecord.dev/download">officially supported version of Claudecord</Link>, or
                                 contact your package maintainer for support instead.
                             </Paragraph>
                         </div>
@@ -262,7 +262,7 @@ export default definePlugin({
     },
 
     renderMessageAccessory(props) {
-        if (props.message.vencordEmbeddedBy) return null;
+        if (props.message.claudecordEmbeddedBy) return null;
 
         const buttons = [] as JSX.Element[];
 
@@ -277,7 +277,7 @@ export default definePlugin({
         if (shouldAddUpdateButton) {
             buttons.push(
                 <Button
-                    key="vc-update"
+                    key="cc-update"
                     variant="positive"
                     onClick={async () => {
                         try {
@@ -297,21 +297,21 @@ export default definePlugin({
         }
 
         if (props.channel.parent_id === SUPPORT_CATEGORY_ID && PermissionStore.can(PermissionsBits.SEND_MESSAGES, props.channel)) {
-            if (props.message.content.includes("/vencord-debug") || props.message.content.includes("/vencord-plugins")) {
+            if (props.message.content.includes("/claudecord-debug") || props.message.content.includes("/claudecord-plugins")) {
                 buttons.push(
                     <Button
-                        key="vc-dbg"
+                        key="cc-dbg"
                         variant="secondary"
                         onClick={async () => sendMessage(props.channel.id, { content: await generateDebugInfoMessage() })}
                     >
-                        Run /vencord-debug
+                        Run /claudecord-debug
                     </Button>,
                     <Button
-                        key="vc-plg-list"
+                        key="cc-plg-list"
                         variant="secondary"
                         onClick={async () => sendMessage(props.channel.id, { content: generatePluginList() })}
                     >
-                        Run /vencord-plugins
+                        Run /claudecord-plugins
                     </Button>
                 );
             }
@@ -329,9 +329,9 @@ export default definePlugin({
 
         return (
             <Card variant="warning" className={Margins.top8} defaultPadding>
-                Please do not private message Vencord plugin developers for support!
+                Please do not private message Claudecord plugin developers for support!
                 <br />
-                Instead, use the Vencord support channel: {Parser.parse("https://discord.com/channels/1015060230222131221/1026515880080842772")}
+                Instead, use the Claudecord support channel: {Parser.parse("https://discord.com/channels/1015060230222131221/1026515880080842772")}
                 {!ChannelStore.getChannel(SUPPORT_CHANNEL_ID) && " (Click the link to join)"}
             </Card>
         );

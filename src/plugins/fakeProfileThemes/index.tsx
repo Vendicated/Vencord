@@ -1,5 +1,5 @@
 /*
- * Vencord, a modification for Discord's desktop app
+ * Claudecord, a modification for Discord's desktop app
  * Copyright (c) 2023 Vendicated and contributors
  *
  * This program is free software: you can redistribute it and/or modify
@@ -176,7 +176,7 @@ function SettingsAboutComponent() {
                     className={classes(Margins.top8, Margins.bottom8)}
                 />
                 <Heading className={Margins.bottom8}>Preview</Heading>
-                <div className="vc-fpt-preview">
+                <div className="cc-fpt-preview">
                     <ProfileModal
                         user={UserStore.getCurrentUser()}
                         pendingThemeColors={[color1, color2]}

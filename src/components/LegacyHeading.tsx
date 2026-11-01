@@ -1,5 +1,5 @@
 /*
- * Vencord, a Discord client mod
+ * Claudecord, a Discord client mod
  * Copyright (c) 2025 Vendicated and contributors
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
@@ -26,7 +26,7 @@ function LegacyHeading<T extends HeadingTag>(props: HeadingProps<T>) {
     } = props;
 
     return (
-        <Tag className={classes(`vc-${Tag}`, !className && `vc-${Tag}-defaultMargin`, className)} {...restProps}>
+        <Tag className={classes(`cc-${Tag}`, !className && `cc-${Tag}-defaultMargin`, className)} {...restProps}>
             {children}
         </Tag>
     );

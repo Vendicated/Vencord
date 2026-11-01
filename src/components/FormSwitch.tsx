@@ -1,5 +1,5 @@
 /*
- * Vencord, a Discord client mod
+ * Claudecord, a Discord client mod
  * Copyright (c) 2025 Vendicated and contributors
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
@@ -26,16 +26,16 @@ export interface FormSwitchProps {
 
 export function FormSwitch({ onChange, title, value, description, disabled, className, hideBorder }: FormSwitchProps) {
     return (
-        <label className="vc-form-switch-wrapper">
-            <div className={classes("vc-form-switch", className, disabled && "vc-form-switch-disabled")}>
-                <div className={"vc-form-switch-text"}>
+        <label className="cc-form-switch-wrapper">
+            <div className={classes("cc-form-switch", className, disabled && "cc-form-switch-disabled")}>
+                <div className={"cc-form-switch-text"}>
                     <Span size="md" weight="medium">{title}</Span>
-                    {description && <Span size="sm" weight="normal" className="vc-form-switch-description">{description}</Span>}
+                    {description && <Span size="sm" weight="normal" className="cc-form-switch-description">{description}</Span>}
                 </div>
 
                 <Switch checked={value} onChange={onChange} disabled={disabled} />
             </div>
-            {!hideBorder && <Divider className="vc-form-switch-border" />}
+            {!hideBorder && <Divider className="cc-form-switch-border" />}
         </label>
     );
 }

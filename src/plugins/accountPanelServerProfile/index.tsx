@@ -1,5 +1,5 @@
 /*
- * Vencord, a Discord client mod
+ * Claudecord, a Discord client mod
  * Copyright (c) 2024 Vendicated and contributors
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
@@ -29,11 +29,11 @@ const AccountPanelContextMenu = ErrorBoundary.wrap(() => {
 
     return (
         <Menu.Menu
-            navId="vc-ap-server-profile"
+            navId="cc-ap-server-profile"
             onClose={ContextMenuApi.closeContextMenu}
         >
             <Menu.MenuItem
-                id="vc-ap-view-alternate-popout"
+                id="cc-ap-view-alternate-popout"
                 label={prioritizeServerProfile ? "View Account Profile" : "View Server Profile"}
                 disabled={getCurrentChannel()?.getGuildId() == null}
                 action={e => {
@@ -42,7 +42,7 @@ const AccountPanelContextMenu = ErrorBoundary.wrap(() => {
                 }}
             />
             <Menu.MenuCheckboxItem
-                id="vc-ap-prioritize-server-profile"
+                id="cc-ap-prioritize-server-profile"
                 label="Prioritize Server Profile"
                 checked={prioritizeServerProfile}
                 action={() => settings.store.prioritizeServerProfile = !prioritizeServerProfile}
@@ -113,7 +113,7 @@ export default definePlugin({
         }
 
         const currentChannel = getCurrentChannel();
-        if (currentChannel?.getGuildId() == null || !UserProfile.$$vencordGetWrappedComponent()) {
+        if (currentChannel?.getGuildId() == null || !UserProfile.$$claudecordGetWrappedComponent()) {
             return originalRenderPopout();
         }
 

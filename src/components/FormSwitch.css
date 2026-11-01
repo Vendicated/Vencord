@@ -1,9 +1,9 @@
-.vc-form-switch-wrapper {
+.cc-form-switch-wrapper {
     margin-bottom: 20px;
     cursor: pointer;
 }
 
-.vc-form-switch {
+.cc-form-switch {
     display: flex;
     width: 100%;
 
@@ -12,23 +12,23 @@
     }
 }
 
-.vc-form-switch-disabled {
+.cc-form-switch-disabled {
     opacity: 0.5;
     pointer-events: none;
     cursor: not-allowed;
 }
 
-.vc-form-switch-text {
+.cc-form-switch-text {
     display: flex;
     flex-direction: column;
     justify-content: center;
     gap: 8px;
 }
 
-.vc-form-switch-border {
+.cc-form-switch-border {
     margin-top: 20px;
 }
 
-.vc-form-switch-description {
+.cc-form-switch-description {
     color: var(--text-subtle);
 }

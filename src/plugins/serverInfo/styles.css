@@ -1,4 +1,4 @@
-.vc-gp-banner {
+.cc-gp-banner {
     cursor: pointer;
     aspect-ratio: auto 240 / 135;
     height: 334px;
@@ -10,7 +10,7 @@
     overflow-clip-margin: content-box;
 }
 
-.vc-gp-header {
+.cc-gp-header {
     display: flex;
     flex-direction: row;
     align-items: center;
@@ -18,23 +18,23 @@
     margin: 0.5em;
 }
 
-.vc-gp-icon {
+.cc-gp-icon {
     width: 48px;
     height: 48px;
     cursor: pointer;
 }
 
-.vc-gp-name-and-description {
+.cc-gp-name-and-description {
     display: flex;
     flex-direction: column;
     gap: 0.2em;
 }
 
-.vc-gp-name {
+.cc-gp-name {
     margin: 0;
 }
 
-.vc-gp-tab-bar {
+.cc-gp-tab-bar {
     border-bottom: 1px solid var(--border-subtle);
     margin: 20px 12px 0;
     display: flex;
@@ -43,51 +43,51 @@
     flex-direction: row;
 }
 
-.vc-gp-tab {
+.cc-gp-tab {
     border-bottom: 2px solid transparent;
     color: var(--interactive-icon-default);
     cursor: pointer;
     line-height: 14px;
 }
 
-.vc-gp-tab-content {
+.cc-gp-tab-content {
     margin: 1em;
 }
 
-.vc-gp-tab:where(.vc-gp-selected, :hover, :focus) {
+.cc-gp-tab:where(.cc-gp-selected, :hover, :focus) {
     border-bottom-color: var(--interactive-icon-active);
 }
 
-.vc-gp-info {
+.cc-gp-info {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 1em;
 }
 
-.vc-gp-server-info-pair {
+.cc-gp-server-info-pair {
     color: var(--text-default);
 }
 
-.vc-gp-server-info-pair [class*="timestamp"] {
+.cc-gp-server-info-pair [class*="timestamp"] {
     margin-left: 0;
 }
 
-.vc-gp-owner {
+.cc-gp-owner {
     display: flex;
     align-items: center;
     gap: 0.2em;
 }
 
-.vc-gp-owner-avatar {
+.cc-gp-owner-avatar {
     height: 20px;
     border-radius: 50%;
     cursor: pointer;
 }
 
-.vc-gp-scroller {
+.cc-gp-scroller {
     max-height: 500px;
 }
 
-.vc-gp-scroller [class*="row"] {
+.cc-gp-scroller [class*="row"] {
     margin: 1px 0;
 }

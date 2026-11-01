@@ -1,5 +1,5 @@
 /*
- * Vencord, a modification for Discord's desktop app
+ * Claudecord, a modification for Discord's desktop app
  * Copyright (c) 2022 Sofia Lima
  *
  * This program is free software: you can redistribute it and/or modify
@@ -243,7 +243,7 @@ function CustomInstanceAboutComponent() {
 
     const [cspAllowed] = useAwaiter(async () => {
         if (!instanceAPIBaseUrl || !instanceBaseURL) return true;
-        return await VencordNative.csp.isDomainAllowed(instanceAPIBaseUrl, ["connect-src"]) && await VencordNative.csp.isDomainAllowed(instanceBaseURL, ["connect-src"]);
+        return await ClaudecordNative.csp.isDomainAllowed(instanceAPIBaseUrl, ["connect-src"]) && await ClaudecordNative.csp.isDomainAllowed(instanceBaseURL, ["connect-src"]);
     }, { fallbackValue: true, deps: [instanceAPIBaseUrl, instanceBaseURL, signal] });
 
     if (!instanceAPIBaseUrl || !instanceBaseURL)
@@ -257,15 +257,15 @@ function CustomInstanceAboutComponent() {
     if (!cspAllowed)
         return (
             <Card variant="warning">
-                <Heading className={Margins.bottom8}>Allow Vencord to connect to ListenBrainz instance</Heading>
-                <Paragraph>To use your custom ListenBrainz instance, you must first allow Vencord to connect to it.</Paragraph>
+                <Heading className={Margins.bottom8}>Allow Claudecord to connect to ListenBrainz instance</Heading>
+                <Paragraph>To use your custom ListenBrainz instance, you must first allow Claudecord to connect to it.</Paragraph>
                 <Button
                     size="small"
                     className={Margins.top8}
                     variant="secondary"
                     onClick={async () => {
                         for (const host of [instanceAPIBaseUrl, instanceBaseURL]) {
-                            const res = await VencordNative.csp.requestAddOverride(host, ["connect-src"], "MusicRichPresence");
+                            const res = await ClaudecordNative.csp.requestAddOverride(host, ["connect-src"], "MusicRichPresence");
                             if (!res) return;
                         }
                         forceUpdate();

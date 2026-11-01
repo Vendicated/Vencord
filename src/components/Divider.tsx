@@ -1,5 +1,5 @@
 /*
- * Vencord, a Discord client mod
+ * Claudecord, a Discord client mod
  * Copyright (c) 2025 Vendicated and contributors
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
@@ -14,7 +14,7 @@ export type DividerProps = ComponentPropsWithoutRef<"hr">;
 export function Divider({ className, ...restProps }: DividerProps) {
     return (
         <hr
-            className={classes("vc-divider", className)}
+            className={classes("cc-divider", className)}
             {...restProps}
         />
     );

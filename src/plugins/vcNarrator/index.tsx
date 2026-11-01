@@ -1,5 +1,5 @@
 /*
- * Vencord, a modification for Discord's desktop app
+ * Claudecord, a modification for Discord's desktop app
  * Copyright (c) 2023 Vendicated and contributors
  *
  * This program is free software: you can redistribute it and/or modify
@@ -267,7 +267,7 @@ export default definePlugin({
                                 gridTemplateColumns: "repeat(4, 1fr)",
                                 gap: "1rem",
                             }}
-                            className={"vc-narrator-buttons"}
+                            className={"cc-narrator-buttons"}
                         >
                             {types.map(t => (
                                 <Button key={t} onClick={() => playSample(t)}>

@@ -1,6 +1,6 @@
-# Vencord Types
+# Claudecord Types
 
-Typings for Vencord's api, published to npm
+Typings for Claudecord's api, published to npm
 
 ```sh
 npm i @vencord/types

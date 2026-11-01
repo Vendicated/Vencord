@@ -1,5 +1,5 @@
 /*
- * Vencord, a Discord client mod
+ * Claudecord, a Discord client mod
  * Copyright (c) 2024 Vendicated and contributors
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
@@ -82,8 +82,8 @@ export function buildExtraRoleContextMenuItems(role: Role, guild: Guild, popoutR
     const before = [
         PermissionStore.getGuildPermissionProps(guild).canManageRoles && (
             <Menu.MenuItem
-                key="vc-edit-role"
-                id="vc-edit-role"
+                key="cc-edit-role"
+                id="cc-edit-role"
                 label="Edit Role"
                 action={async () => {
                     await GuildSettingsActions.open(guild.id, "ROLES");
@@ -95,8 +95,8 @@ export function buildExtraRoleContextMenuItems(role: Role, guild: Guild, popoutR
         ),
         role.colorString && (
             <Menu.MenuItem
-                key="vc-copy-role-color"
-                id="vc-copy-role-color"
+                key="cc-copy-role-color"
+                id="cc-copy-role-color"
                 label="Copy Role Color"
                 action={() => copyToClipboard(role.colorString!)}
                 icon={AppearanceIcon}
@@ -108,8 +108,8 @@ export function buildExtraRoleContextMenuItems(role: Role, guild: Guild, popoutR
     const after = [
         role.icon && (
             <Menu.MenuItem
-                key="vc-view-role-icon"
-                id="vc-view-role-icon"
+                key="cc-view-role-icon"
+                id="cc-view-role-icon"
                 label="View Role Icon"
                 action={() => {
                     openImageModal({
@@ -124,8 +124,8 @@ export function buildExtraRoleContextMenuItems(role: Role, guild: Guild, popoutR
         ),
         popoutRef && (
             <Menu.MenuItem
-                key="vc-view-role-members"
-                id="vc-view-role-members"
+                key="cc-view-role-members"
+                id="cc-view-role-members"
                 label="View Role Members"
                 render={() => (
                     <Popout
@@ -178,15 +178,15 @@ export function openRoleContextMenu(event: React.MouseEvent<HTMLElement>, { guil
 
         return (
             <Menu.Menu
-                navId="vc-better-role-context-member-list"
+                navId="cc-better-role-context-member-list"
                 onClose={ContextMenuApi.closeContextMenu}
                 aria-label="Role Actions"
             >
                 {before}
                 {after}
                 <Menu.MenuItem
-                    key="vc-better-role-context-copy-role-id"
-                    id="vc-better-role-context-copy-role-id"
+                    key="cc-better-role-context-copy-role-id"
+                    id="cc-better-role-context-copy-role-id"
                     label={getIntlMessage("COPY_ID_ROLE")}
                     icon={CopyIdIcon}
                     leadingAccessory={{ type: "icon", icon: CopyIdIcon }}

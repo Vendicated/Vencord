@@ -1,6 +1,6 @@
 /*
- * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2023 Vendicated and contributors
+ * Claudecord, a modification for Discord's desktop app
+ * Copyright (c) 2023 Vendicated, Claude and contributors
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,8 +30,8 @@ import { installExt } from "./utils/extensions";
 
 if (IS_VESKTOP || !IS_VANILLA) {
     app.whenReady().then(() => {
-        protocol.handle("vencord", ({ url: unsafeUrl }) => {
-            let url = decodeURI(unsafeUrl).slice("vencord://".length).replace(/\?v=\d+$/, "");
+        protocol.handle("claudecord", ({ url: unsafeUrl }) => {
+            let url = decodeURI(unsafeUrl).slice("claudecord://".length).replace(/\?v=\d+$/, "");
 
             if (url.endsWith("/")) url = url.slice(0, -1);
 
@@ -53,11 +53,11 @@ if (IS_VESKTOP || !IS_VANILLA) {
 
             switch (url) {
                 case "renderer.js.map":
-                case "vencordDesktopRenderer.js.map":
+                case "claudecordDesktopRenderer.js.map":
                 case "preload.js.map":
-                case "vencordDesktopPreload.js.map":
+                case "claudecordDesktopPreload.js.map":
                 case "patcher.js.map":
-                case "vencordDesktopMain.js.map":
+                case "claudecordDesktopMain.js.map":
                     return net.fetch(pathToFileURL(join(__dirname, url)).toString());
                 default:
                     return new Response(null, {
@@ -69,8 +69,8 @@ if (IS_VESKTOP || !IS_VANILLA) {
         try {
             if (RendererSettings.store.enableReactDevtools)
                 installExt("fmkadmapgofadopljbjfkapdkoienihi")
-                    .then(() => console.info("[Vencord] Installed React Developer Tools"))
-                    .catch(err => console.error("[Vencord] Failed to install React Developer Tools", err));
+                    .then(() => console.info("[Claudecord] Installed React Developer Tools"))
+                    .catch(err => console.error("[Claudecord] Failed to install React Developer Tools", err));
         } catch { }
 
 

@@ -28,7 +28,7 @@ Replacements should be as concise as possible. Create a method on the plugin obj
 
 ## Discord Modules
 
-Vencord exports many Discord modules from `@webpack/commons`. Use `find*` methods when no common exists. Discord organises all data into stores, `window.Stores` contains all of them.
+Claudecord exports many Discord modules from `@webpack/commons`. Use `find*` methods when no common exists. Discord organises all data into stores, `window.Stores` contains all of them.
 Subscribe to store changes with `useStateFromStores`.
 
 ## Error Safety

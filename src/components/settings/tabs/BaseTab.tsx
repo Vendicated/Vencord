@@ -1,5 +1,5 @@
 /*
- * Vencord, a modification for Discord's desktop app
+ * Claudecord, a modification for Discord's desktop app
  * Copyright (c) 2023 Vendicated and contributors
  *
  * This program is free software: you can redistribute it and/or modify
@@ -24,7 +24,7 @@ import type { ComponentType, PropsWithChildren } from "react";
 
 export function SettingsTab({ children }: PropsWithChildren) {
     return (
-        <section className="vc-settings-tab">{children}</section>
+        <section className="cc-settings-tab">{children}</section>
     );
 }
 

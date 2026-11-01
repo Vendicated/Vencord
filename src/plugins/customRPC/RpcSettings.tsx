@@ -1,5 +1,5 @@
 /*
- * Vencord, a Discord client mod
+ * Claudecord, a Discord client mod
  * Copyright (c) 2025 Vendicated and contributors
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
@@ -18,7 +18,7 @@ import { Select, TextInput, useState } from "@webpack/common";
 
 import CustomRPCPlugin, { setRpc, settings, TimestampMode } from ".";
 
-const cl = classNameFactory("vc-customRPC-settings-");
+const cl = classNameFactory("cc-customRPC-settings-");
 
 type SettingsKey = keyof typeof settings.store;
 

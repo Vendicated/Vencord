@@ -1,5 +1,5 @@
 /*
- * Vencord, a modification for Discord's desktop app
+ * Claudecord, a modification for Discord's desktop app
  * Copyright (c) 2023 Vendicated and contributors
  *
  * This program is free software: you can redistribute it and/or modify
@@ -33,7 +33,7 @@ export function VerifiedIcon() {
             forcedIconColor={forcedIconColor}
             size={16}
             tooltipText={getIntlMessage("CONNECTION_VERIFIED")}
-            className="vc-sc-tooltip-icon"
+            className="cc-sc-tooltip-icon"
         />
     );
 }

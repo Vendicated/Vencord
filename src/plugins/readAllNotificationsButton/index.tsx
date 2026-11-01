@@ -1,5 +1,5 @@
 /*
- * Vencord, a modification for Discord's desktop app
+ * Claudecord, a modification for Discord's desktop app
  * Copyright (c) 2022 Vendicated and contributors
  *
  * This program is free software: you can redistribute it and/or modify
@@ -57,7 +57,7 @@ const ReadAllButton = () => (
     <TextButton
         variant="secondary"
         onClick={onClick}
-        className="vc-ranb-button"
+        className="cc-ranb-button"
     >
         Read All
     </TextButton>

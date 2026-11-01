@@ -423,7 +423,7 @@ importers:
         specifier: 'catalog:'
         version: 5.10.0
 
-  packages/vencord-types:
+  packages/claudecord-types:
     dependencies:
       '@types/node':
         specifier: 'catalog:'

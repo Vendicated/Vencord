@@ -27,7 +27,7 @@ permissions:
 
 jobs:
     TestStablePlugins:
-        if: github.repository == 'Vendicated/Vencord' && (inputs.discord_branch == 'both' || inputs.discord_branch == 'stable')
+        if: github.repository == 'Vendicated/Claudecord' && (inputs.discord_branch == 'both' || inputs.discord_branch == 'stable')
         runs-on: ubuntu-latest
 
         steps:
@@ -50,7 +50,7 @@ jobs:
               run: |
                   pnpm install --frozen-lockfile
 
-            - name: Build Vencord Reporter Version
+            - name: Build Claudecord Reporter Version
               run: pnpm buildReporter
 
             - name: Run Stable Reporter
@@ -67,7 +67,7 @@ jobs:
                   WEBHOOK_SECRET: ${{ secrets.WEBHOOK_SECRET }}
 
     TestCanaryPlugins:
-        if: github.repository == 'Vendicated/Vencord' && (inputs.discord_branch == 'both' || inputs.discord_branch == 'canary')
+        if: github.repository == 'Vendicated/Claudecord' && (inputs.discord_branch == 'both' || inputs.discord_branch == 'canary')
         runs-on: ubuntu-latest
 
         steps:
@@ -89,7 +89,7 @@ jobs:
             - name: Install dependencies
               run: pnpm install --frozen-lockfile
 
-            - name: Build Vencord Reporter Version
+            - name: Build Claudecord Reporter Version
               run: pnpm buildReporter
 
             - name: Run Canary Reporter

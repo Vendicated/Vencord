@@ -1,5 +1,5 @@
 /*
- * Vencord, a modification for Discord's desktop app
+ * Claudecord, a modification for Discord's desktop app
  * Copyright (c) 2023 Vendicated and contributors
  *
  * This program is free software: you can redistribute it and/or modify
@@ -78,7 +78,7 @@ const pluginSettings = definePluginSettings(
 );
 
 
-const Native = VencordNative.pluginHelpers.OpenInApp as PluginNative<typeof import("./native")>;
+const Native = ClaudecordNative.pluginHelpers.OpenInApp as PluginNative<typeof import("./native")>;
 
 export default definePlugin({
     name: "OpenInApp",
@@ -138,7 +138,7 @@ export default definePlugin({
                 showToast({ text: "Opened link in native app", variant: "success" });
 
                 const newUrl = url.replace(rule.match, rule.replace);
-                VencordNative.native.openExternal(newUrl);
+                ClaudecordNative.native.openExternal(newUrl);
 
                 event?.preventDefault();
                 return true;
@@ -157,7 +157,7 @@ export default definePlugin({
     handleAccountView(e: MouseEvent, platformType: string, userId: string) {
         const rule = UrlReplacementRules[platformType];
         if (rule?.accountViewReplace && pluginSettings.store[platformType]) {
-            VencordNative.native.openExternal(rule.accountViewReplace(userId));
+            ClaudecordNative.native.openExternal(rule.accountViewReplace(userId));
             e.preventDefault();
             return true;
         }

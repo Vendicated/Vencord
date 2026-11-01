@@ -1,5 +1,5 @@
 /*
- * Vencord, a modification for Discord's desktop app
+ * Claudecord, a modification for Discord's desktop app
  * Copyright (c) 2022 Vendicated and contributors
  *
  * This program is free software: you can redistribute it and/or modify
@@ -36,9 +36,9 @@ import definePlugin from "@utils/types";
 import { ContextMenuApi, Menu, Modal, openModal, showToast, UserStore } from "@webpack/common";
 
 const ContributorBadge: ProfileBadge = {
-    id: "vencord_contributor_badge",
-    description: "Vencord Contributor",
-    infoLabel: "Vencord",
+    id: "claudecord_contributor_badge",
+    description: "Claudecord Contributor",
+    infoLabel: "Claudecord",
     rarity: BadgeRarity.MYTHIC,
     iconSrc: "https://cdn.discordapp.com/emojis/1562267648857997356.webp?size=128",
     largeIconSrc: "https://cdn.discordapp.com/emojis/1562267648857997356.webp?size=512",
@@ -62,20 +62,20 @@ async function loadBadges(noCache = false) {
     if (noCache)
         init.cache = "no-cache";
 
-    DonorBadges = await fetch("https://badges.vencord.dev/badges.json", init)
+    DonorBadges = await fetch("https://badges.claudecord.dev/badges.json", init)
         .then(r => r.json());
 }
 
 let intervalId: any;
 
 function toDirectoryBadge(b: ProfileBadge, userId: string): DirectoryBadge {
-    const id = `vc-${userId}-${b.id}`;
+    const id = `cc-${userId}-${b.id}`;
 
     return DirectoryBadges[id] ??= {
         badge_id: id,
         name: b.name ?? b.description ?? "",
         description: b.detail ?? b.description ?? b.name ?? "",
-        info_label: b.infoLabel ?? "Vencord",
+        info_label: b.infoLabel ?? "Claudecord",
         rarity: b.rarity ?? BadgeRarity.COMMON,
         simple_icon_url: b.iconSrc!,
         complex_icon_static_url: b.largeIconSrc ?? b.iconSrc!,
@@ -90,13 +90,13 @@ function toDirectoryBadge(b: ProfileBadge, userId: string): DirectoryBadge {
 function BadgeContextMenu({ badge }: { badge: Omit<ProfileBadge, "id"> & BadgeUserArgs; }) {
     return (
         <Menu.Menu
-            navId="vc-badge-context"
+            navId="cc-badge-context"
             onClose={ContextMenuApi.closeContextMenu}
             aria-label="Badge Options"
         >
             {badge.description && (
                 <Menu.MenuItem
-                    id="vc-badge-copy-name"
+                    id="cc-badge-copy-name"
                     label="Copy Badge Name"
                     action={() => copyWithToast(badge.description!)}
                     leadingAccessory={{ type: "icon", icon: CopyIcon }}
@@ -104,7 +104,7 @@ function BadgeContextMenu({ badge }: { badge: Omit<ProfileBadge, "id"> & BadgeUs
             )}
             {badge.iconSrc && (
                 <Menu.MenuItem
-                    id="vc-badge-copy-link"
+                    id="cc-badge-copy-link"
                     label="Copy Badge Image Link"
                     action={() => copyWithToast(badge.iconSrc!)}
                     leadingAccessory={{ type: "icon", icon: LinkIcon }}
@@ -159,7 +159,7 @@ export default definePlugin({
             find: '"BadgeDirectoryStore"',
             replacement: {
                 match: /getBadgeById\((\i),(\i)\)\{/,
-                replace: "$&const vencordBadge=$self.getDirectoryBadge($1);if(vencordBadge)return vencordBadge;"
+                replace: "$&const claudecordBadge=$self.getDirectoryBadge($1);if(claudecordBadge)return claudecordBadge;"
             }
         },
         {
@@ -256,12 +256,12 @@ export default definePlugin({
             }
 
             return {
-                id: `vencord_donor_badge_${idx}`,
+                id: `claudecord_donor_badge_${idx}`,
                 iconSrc: badge.badge,
                 largeIconSrc,
                 description: badge.tooltip,
                 name: badge.tooltip,
-                infoLabel: "Vencord Donor",
+                infoLabel: "Claudecord Donor",
                 rarity: BadgeRarity.MYTHIC,
                 position: BadgePosition.START,
                 props: {
@@ -277,7 +277,7 @@ export default definePlugin({
                     openModal(props => (
                         <ErrorBoundary noop onError={() => {
                             props.onClose();
-                            VencordNative.native.openExternal("https://github.com/sponsors/Vendicated");
+                            ClaudecordNative.native.openExternal("https://github.com/sponsors/Vendicated");
                         }}>
                             <Modal
                                 {...props}
@@ -292,7 +292,7 @@ export default definePlugin({
                                     >
                                         <Flex justifyContent="center" alignItems="center" gap="0.5em">
                                             <Heart />
-                                            Vencord Donor
+                                            Claudecord Donor
                                         </Flex>
                                     </Text>
                                 }
@@ -314,10 +314,10 @@ export default definePlugin({
                                     </Flex>
                                     <div style={{ padding: "1em" }}>
                                         <Paragraph>
-                                            This badge is a special perk for Vencord Donors
+                                            This badge is a special perk for Claudecord Donors
                                         </Paragraph>
                                         <Paragraph className={Margins.top16}>
-                                            Please consider supporting the development of Vencord by becoming a donor. It would mean a lot!!
+                                            Please consider supporting the development of Claudecord by becoming a donor. It would mean a lot!!
                                         </Paragraph>
                                     </div>
                                 </div>

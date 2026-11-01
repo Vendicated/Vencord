@@ -1,5 +1,5 @@
 /*
- * Vencord, a Discord client mod
+ * Claudecord, a Discord client mod
  * Copyright (c) 2024 Vendicated and contributors
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
@@ -11,7 +11,7 @@ import { classNameFactory } from "@utils/css";
 import { getTheme, Theme } from "@utils/discord";
 import { Clickable, MaskedLink, Tooltip } from "@webpack/common";
 
-const cl = classNameFactory("vc-settings-modal-");
+const cl = classNameFactory("cc-settings-modal-");
 
 const getThemeClass = () => getTheme() !== Theme.Light ? "dark" : "light";
 

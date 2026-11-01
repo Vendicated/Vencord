@@ -1,5 +1,5 @@
 /*
- * Vencord, a modification for Discord's desktop app
+ * Claudecord, a modification for Discord's desktop app
  * Copyright (c) 2022 Vendicated and contributors
  *
  * This program is free software: you can redistribute it and/or modify
@@ -96,7 +96,7 @@ export const SpotifyStore = proxyLazyWebpack(() => {
                 ? "spotify:" + path.replaceAll("/", (_, idx) => idx === 0 ? "" : ":")
                 : "https://open.spotify.com" + path;
 
-            VencordNative.native.openExternal(url);
+            ClaudecordNative.native.openExternal(url);
         }
 
         // Need to keep track of this manually
@@ -162,7 +162,7 @@ export const SpotifyStore = proxyLazyWebpack(() => {
                     position_ms: Math.round(ms)
                 }
             }).catch((e: any) => {
-                console.error("[VencordSpotifyControls] Failed to seek", e);
+                console.error("[ClaudecordSpotifyControls] Failed to seek", e);
                 this.isSettingPosition = false;
             });
         }

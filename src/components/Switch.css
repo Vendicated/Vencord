@@ -1,4 +1,4 @@
-.vc-switch-container {
+.cc-switch-container {
     background: var(--primary-400);
     border: 1px solid transparent;
     border-radius: 16px;
@@ -13,22 +13,22 @@
     }
 }
 
-.vc-switch-checked {
+.cc-switch-checked {
     background: var(--brand-500);
     border-color: var(--control-primary-border-default);
 }
 
-.vc-switch-disabled {
+.cc-switch-disabled {
     cursor: not-allowed;
     opacity: 0.3;
 }
 
-.vc-switch-focusVisible {
+.cc-switch-focusVisible {
     /* stylelint-disable-next-line custom-property-pattern */
     box-shadow: 0 0 0 4px var(--__adaptive-focus-ring-color, var(--border-focus, #00b0f4));
 }
 
-.vc-switch-slider {
+.cc-switch-slider {
     display: block;
     height: 20px;
     left: 0;
@@ -39,7 +39,7 @@
     overflow: visible;
 }
 
-.vc-switch-input {
+.cc-switch-input {
     border-radius: 14px;
     cursor: pointer;
     height: 100%;

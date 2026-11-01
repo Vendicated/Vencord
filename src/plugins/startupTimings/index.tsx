@@ -1,5 +1,5 @@
 /*
- * Vencord, a modification for Discord's desktop app
+ * Claudecord, a modification for Discord's desktop app
  * Copyright (c) 2022 Vendicated and contributors
  *
  * This program is free software: you can redistribute it and/or modify
@@ -31,13 +31,13 @@ export default definePlugin({
     authors: [Devs.Megu],
     start() {
         SettingsPlugin.customEntries.push({
-            key: "vencord_startup_timings",
+            key: "claudecord_startup_timings",
             title: "Startup Timings",
             Component: StartupTimingPage,
             Icon: ClockIcon
         });
     },
     stop() {
-        removeFromArray(SettingsPlugin.customEntries, e => e.key === "vencord_startup_timings");
+        removeFromArray(SettingsPlugin.customEntries, e => e.key === "claudecord_startup_timings");
     },
 });

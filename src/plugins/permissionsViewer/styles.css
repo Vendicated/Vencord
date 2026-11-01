@@ -1,18 +1,18 @@
 /* User Permissions Component */
 
-.vc-permviewer-user-header-container {
+.cc-permviewer-user-header-container {
     display: flex;
     justify-content: space-between;
     align-items: center;
     margin-bottom: 8px;
 }
 
-.vc-permviewer-user-header-btns {
+.cc-permviewer-user-header-btns {
     display: flex;
     gap: 8px;
 }
 
-.vc-permviewer-user-header-btn {
+.cc-permviewer-user-header-btn {
     cursor: pointer;
     display: flex;
     align-items: center;
@@ -21,7 +21,7 @@
 
 /*  RolesAndUsersPermissions Component */
 
-.vc-permviewer-modal-no-perms {
+.cc-permviewer-modal-no-perms {
     width: 100%;
     height: 100%;
     display: flex;
@@ -30,7 +30,7 @@
     text-align: center;
 }
 
-.vc-permviewer-modal-container {
+.cc-permviewer-modal-container {
     width: 100%;
     height: min(760px, 80vh);
     min-height: 0;
@@ -39,7 +39,7 @@
     overflow: hidden;
 }
 
-.vc-permviewer-modal-list {
+.cc-permviewer-modal-list {
     display: flex;
     flex-direction: column;
     gap: 2px;
@@ -50,11 +50,11 @@
     padding-right: 8px;
 }
 
-.vc-permviewer-modal-list-item-btn {
+.cc-permviewer-modal-list-item-btn {
     cursor: pointer;
 }
 
-.vc-permviewer-modal-list-item {
+.cc-permviewer-modal-list-item {
     display: flex;
     align-items: center;
     gap: 8px;
@@ -62,45 +62,45 @@
     border-radius: 5px;
 }
 
-.vc-permviewer-modal-list-item:hover {
+.cc-permviewer-modal-list-item:hover {
     background-color: var(--background-mod-subtle);
 }
 
-.vc-permviewer-modal-list-item-active {
+.cc-permviewer-modal-list-item-active {
     background-color: var(--background-mod-strong);
 }
 
-.vc-permviewer-modal-list-item-text {
+.cc-permviewer-modal-list-item-text {
     text-overflow: ellipsis;
     white-space: nowrap;
     overflow: hidden;
 }
 
-.vc-permviewer-modal-role-circle {
+.cc-permviewer-modal-role-circle {
     border-radius: 50%;
     width: 12px;
     height: 12px;
     flex-shrink: 0;
 }
 
-.vc-permviewer-modal-role-image {
+.cc-permviewer-modal-role-image {
     width: 20px;
     height: 20px;
     object-fit: contain;
 }
 
-.vc-permviewer-modal-user-img {
+.cc-permviewer-modal-user-img {
     border-radius: 50%;
     width: 20px;
     height: 20px;
 }
 
-.vc-permviewer-modal-divider {
+.cc-permviewer-modal-divider {
     width: 2px;
     background-color: var(--background-mod-normal);
 }
 
-.vc-permviewer-modal-perms {
+.cc-permviewer-modal-perms {
     display: flex;
     flex-direction: column;
     flex: 1 1 0;
@@ -111,7 +111,7 @@
     padding-right: 8px;
 }
 
-.vc-permviewer-modal-perms-item {
+.cc-permviewer-modal-perms-item {
     display: flex;
     align-items: center;
     gap: 5px;
@@ -119,29 +119,29 @@
     border-bottom: 2px solid var(--background-mod-normal);
 }
 
-.vc-permviewer-modal-perms-item:last-child {
+.cc-permviewer-modal-perms-item:last-child {
     border: 0;
 }
 
-.vc-permviewer-modal-perms-item-icon {
+.cc-permviewer-modal-perms-item-icon {
     border: 1px solid var(--background-mod-strong);
     width: 24px;
     height: 24px;
 }
 
-.vc-permviewer-modal-perms-item .vc-info-icon {
+.cc-permviewer-modal-perms-item .cc-info-icon {
     color: var(--interactive-muted);
     margin-left: auto;
     cursor: pointer;
     transition: color ease-in 0.1s;
 }
 
-.vc-permviewer-modal-perms-item .vc-info-icon:hover {
+.cc-permviewer-modal-perms-item .cc-info-icon:hover {
     color: var(--interactive-icon-active);
 }
 
 /* copy pasted from discord cause impossible to webpack find */
-.vc-permviewer-role-button {
+.cc-permviewer-role-button {
     border-radius: var(--radius-sm);
     color: var(--interactive-icon-default);
     border: 1px solid var(--user-profile-border);
@@ -152,16 +152,16 @@
     padding: 4px
 }
 
-.vc-permviewer-role-button:hover {
+.cc-permviewer-role-button:hover {
     background-color: var(--user-profile-background-hover);
 }
 
-.vc-permviewer-granted-by-container {
+.cc-permviewer-granted-by-container {
     max-width: 300px;
     width: auto;
 }
 
-.vc-permviewer-granted-by-content {
+.cc-permviewer-granted-by-content {
     display: flex;
     align-items: center;
     gap: 4px;

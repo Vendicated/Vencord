@@ -1,5 +1,5 @@
 /*
- * Vencord, a Discord client mod
+ * Claudecord, a Discord client mod
  * Copyright (c) 2026 Vendicated and contributors
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
@@ -20,7 +20,7 @@ import { AuthenticationStore, Clickable, Constants, FluxDispatcher, GuildStore, 
 
 import { buildCloneItem, logger, settings } from ".";
 
-const cl = classNameFactory("vc-expressionManager-");
+const cl = classNameFactory("cc-expressionManager-");
 
 const loadCreateStickerModal = extractAndLoadChunksLazy(
     ["CREATE_STICKER_MODAL", "#{intl::STICKER_PICKER_CREATE_STICKER}"],
@@ -259,22 +259,22 @@ export function buildStickerLinkItems(sticker: StickerItem, ParentComponent = Me
     if (!settings.store.stickerCopyAndOpen) return null;
 
     return (
-        <ParentComponent key="vc-em-sticker-links">
+        <ParentComponent key="cc-em-sticker-links">
             <Menu.MenuItem
-                id="vc-copy-sticker-link"
-                key="vc-copy-sticker-link"
+                id="cc-copy-sticker-link"
+                key="cc-copy-sticker-link"
                 label="Copy Sticker Link"
                 leadingAccessory={{ type: "icon", icon: LinkIcon }}
                 action={() => copyWithToast(formatStickerURL(sticker, 512), "Link copied!")}
             />
 
             <Menu.MenuItem
-                id="vc-open-sticker-link"
-                key="vc-open-sticker-link"
+                id="cc-open-sticker-link"
+                key="cc-open-sticker-link"
                 label="Open Sticker Link"
                 leadingAccessory={{ type: "icon", icon: LinkIcon }}
                 trailingIndicator={{ type: "icon", icon: TopRightArrow }}
-                action={() => VencordNative.native.openExternal(formatStickerURL(sticker, 512))}
+                action={() => ClaudecordNative.native.openExternal(formatStickerURL(sticker, 512))}
             />
         </ParentComponent>
     );

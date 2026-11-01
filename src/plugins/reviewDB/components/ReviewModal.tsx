@@ -1,5 +1,5 @@
 /*
- * Vencord, a modification for Discord's desktop app
+ * Claudecord, a modification for Discord's desktop app
  * Copyright (c) 2023 Vendicated and contributors
  *
  * This program is free software: you can redistribute it and/or modify
@@ -103,7 +103,7 @@ function ReviewsModal({ modalProps, modalKey, discordId, name, type }: { modalPr
 }
 
 export function openReviewsModal(discordId: string, name: string, type: ReviewType) {
-    const modalKey = "vc-rdb-modal-" + Date.now();
+    const modalKey = "cc-rdb-modal-" + Date.now();
 
     openModalLazy(async () => {
         await requirePaginator();

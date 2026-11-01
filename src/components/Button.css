@@ -1,4 +1,4 @@
-.vc-btn-base {
+.cc-btn-base {
     position: relative;
     display: flex;
     justify-content: center;
@@ -30,8 +30,8 @@
     }
 }
 
-.vc-btn-min,
-.vc-btn-xs {
+.cc-btn-min,
+.cc-btn-xs {
     padding: 3px 7px;
     min-height: 22px;
     min-width: unset;
@@ -40,11 +40,11 @@
     line-height: 1.3333;
 }
 
-.vc-btn-xs {
+.cc-btn-xs {
     min-width: 60px;
 }
 
-.vc-btn-small {
+.cc-btn-small {
     padding: 3px 11px;
     min-height: 30px;
     min-width: 60px;
@@ -53,7 +53,7 @@
     line-height: 1.2857;
 }
 
-.vc-btn-medium {
+.cc-btn-medium {
     padding: 7px 15px;
     min-height: 38px;
     min-width: 100px;
@@ -62,7 +62,7 @@
     line-height: 1.25;
 }
 
-.vc-btn-iconOnly {
+.cc-btn-iconOnly {
     width: 32px;
     height: 32px;
     min-width: unset;
@@ -82,7 +82,7 @@
     }
 }
 
-.vc-btn-primary {
+.cc-btn-primary {
     background-color: var(--control-primary-background-default);
     border-color: var(--control-primary-border-default);
     color: var(--control-primary-text-default);
@@ -94,8 +94,8 @@
     }
 }
 
-.vc-btn-secondary,
-.vc-btn-link {
+.cc-btn-secondary,
+.cc-btn-link {
     background-color: var(--control-secondary-background-default);
     border-color: var(--control-secondary-border-default);
     color: var(--control-secondary-text-default);
@@ -107,7 +107,7 @@
     }
 }
 
-.vc-btn-dangerPrimary {
+.cc-btn-dangerPrimary {
     background-color: var(--control-critical-primary-background-default);
     border-color: var(--control-critical-primary-border-default);
     color: var(--control-critical-primary-text-default);
@@ -119,7 +119,7 @@
     }
 }
 
-.vc-btn-dangerSecondary {
+.cc-btn-dangerSecondary {
     background-color: var(--control-critical-secondary-background-default);
     border-color: var(--control-critical-secondary-border-default);
     color: var(--control-critical-secondary-text-default);
@@ -131,7 +131,7 @@
     }
 }
 
-.vc-btn-overlayPrimary {
+.cc-btn-overlayPrimary {
     background-color: var(--control-overlay-primary-background-default);
     border-color: var(--control-overlay-primary-border-default);
     color: var(--control-overlay-primary-text-default);
@@ -143,7 +143,7 @@
     }
 }
 
-.vc-btn-positive {
+.cc-btn-positive {
     background-color: var(--control-connected-background-default, var(--green-430));
     color: var(--white);
 
@@ -152,7 +152,7 @@
     }
 }
 
-.vc-btn-none {
+.cc-btn-none {
     background-color: transparent;
     border-color: transparent;
     color: var(--control-icon-only-icon-default);
@@ -164,14 +164,14 @@
     }
 }
 
-.vc-btn-link-icon {
+.cc-btn-link-icon {
     width: 0.875em;
     height: 0.875em;
     margin-left: 8px;
     flex-shrink: 0;
 }
 
-.vc-text-btn-base {
+.cc-text-btn-base {
     display: inline-flex;
     justify-content: center;
     align-items: center;
@@ -201,18 +201,18 @@
     }
 }
 
-.vc-text-btn-primary {
+.cc-text-btn-primary {
     color: var(--text-brand);
 }
 
-.vc-text-btn-secondary {
+.cc-text-btn-secondary {
     color: var(--text-strong, var(--text-default));
 }
 
-.vc-text-btn-danger {
+.cc-text-btn-danger {
     color: var(--text-feedback-critical);
 }
 
-.vc-text-btn-link {
+.cc-text-btn-link {
     color: var(--text-link);
 }

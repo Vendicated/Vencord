@@ -1,5 +1,5 @@
 /*
- * Vencord, a modification for Discord's desktop app
+ * Claudecord, a modification for Discord's desktop app
  * Copyright (c) 2023 Vendicated and contributors
  *
  * This program is free software: you can redistribute it and/or modify
@@ -26,7 +26,7 @@ import { classNameFactory } from "@utils/css";
 import { useRef } from "@webpack/common";
 import type { MouseEventHandler, ReactNode } from "react";
 
-const cl = classNameFactory("vc-addon-");
+const cl = classNameFactory("cc-addon-");
 
 interface Props {
     name: ReactNode;

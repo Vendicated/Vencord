@@ -1,4 +1,4 @@
-.vc-author-modal-name {
+.cc-author-modal-name {
     text-transform: none;
     flex-grow: 0;
     background: var(--background-base-lowest);
@@ -11,7 +11,7 @@
     text-wrap: nowrap;
 }
 
-.vc-author-modal-name::before {
+.cc-author-modal-name::before {
     content: "";
     display: block;
     position: absolute;
@@ -25,17 +25,17 @@
     border-bottom-left-radius: 9999px;
 }
 
-.vc-author-modal-avatar {
+.cc-author-modal-avatar {
     height: 32px;
     width: 32px;
     border-radius: 50%;
 }
 
-.vc-author-modal-links {
+.cc-author-modal-links {
     margin-left: auto;
 }
 
-.vc-author-modal-plugins {
+.cc-author-modal-plugins {
     display: grid;
     gap: 0.5em;
     margin-top: 0.75em;

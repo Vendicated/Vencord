@@ -3,7 +3,7 @@
 /*!
  * idb-keyval v6.2.0
  * Copyright 2016, Jake Archibald
- * Copyright 2022, Vendicated
+ * Copyright 2022, Vendicated, Claude
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,7 +49,7 @@ let defaultGetStoreFunc: UseStore | undefined;
 
 function defaultGetStore() {
     if (!defaultGetStoreFunc) {
-        defaultGetStoreFunc = createStore(!IS_REPORTER ? "VencordData" : "VencordDataReporter", "VencordStore");
+        defaultGetStoreFunc = createStore(!IS_REPORTER ? "ClaudecordData" : "ClaudecordDataReporter", "ClaudecordStore");
     }
     return defaultGetStoreFunc;
 }

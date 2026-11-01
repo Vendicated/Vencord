@@ -1,5 +1,5 @@
 /*
- * Vencord, a Discord client mod
+ * Claudecord, a Discord client mod
  * Copyright (c) 2025 Vendicated and contributors
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
@@ -29,7 +29,7 @@ export function CspErrorCard() {
     const allowUrl = async (url: string) => {
         const { origin: baseUrl, host } = new URL(url);
 
-        const result = await VencordNative.csp.requestAddOverride(baseUrl, ["connect-src", "img-src", "style-src", "font-src"], "Vencord Themes");
+        const result = await ClaudecordNative.csp.requestAddOverride(baseUrl, ["connect-src", "img-src", "style-src", "font-src"], "Claudecord Themes");
         if (result !== "ok") return;
 
         CspBlockedUrls.forEach(url => {
@@ -54,11 +54,11 @@ export function CspErrorCard() {
             </Paragraph>
 
             <Heading className={classes(Margins.top16, Margins.bottom8)}>Blocked URLs</Heading>
-            <div className="vc-settings-csp-list">
+            <div className="cc-settings-csp-list">
                 {errors.map((url, i) => (
                     <div key={url}>
                         {i !== 0 && <Divider className={Margins.bottom8} />}
-                        <div className="vc-settings-csp-row">
+                        <div className="cc-settings-csp-row">
                             <Link href={url}>{url}</Link>
                             <Button variant="secondary" onClick={() => allowUrl(url)} disabled={isImgurHtmlDomain(url)}>
                                 Allow

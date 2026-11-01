@@ -1,5 +1,5 @@
 /*
- * Vencord, a modification for Discord's desktop app
+ * Claudecord, a modification for Discord's desktop app
  * Copyright (c) 2022 Vendicated and contributors
  *
  * This program is free software: you can redistribute it and/or modify
@@ -48,7 +48,7 @@ const guildPopoutPatch: NavContextMenuPatchCallback = (children, { guild }: { gu
     children.push(
         <Menu.MenuItem
             label="View Reviews"
-            id="vc-rdb-server-reviews"
+            id="cc-rdb-server-reviews"
             icon={OpenExternalIcon}
             leadingAccessory={{ type: "icon", icon: OpenExternalIcon }}
             action={() => openReviewsModal(guild.id, guild.name, ReviewType.Server)}
@@ -61,7 +61,7 @@ const userContextPatch: NavContextMenuPatchCallback = (children, { user }: { use
     children.push(
         <Menu.MenuItem
             label="View Reviews"
-            id="vc-rdb-user-reviews"
+            id="cc-rdb-user-reviews"
             icon={OpenExternalIcon}
             leadingAccessory={{ type: "icon", icon: OpenExternalIcon }}
             action={() => openReviewsModal(user.id, user.username, ReviewType.User)}
@@ -135,7 +135,7 @@ export default definePlugin({
                         cancelText: "Appeal",
                         confirmText: "Ok",
                         onCancel: async () =>
-                            VencordNative.native.openExternal(
+                            ClaudecordNative.native.openExternal(
                                 "https://reviewdb.mantikafasi.dev/api/redirect?"
                                 + new URLSearchParams({
                                     token: Auth.token!,

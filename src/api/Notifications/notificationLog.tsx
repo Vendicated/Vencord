@@ -1,6 +1,6 @@
 /*
- * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2023 Vendicated and contributors
+ * Claudecord, a modification for Discord's desktop app
+ * Copyright (c) 2023 Vendicated, Claude and contributors
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,7 +19,7 @@
 import * as DataStore from "@api/DataStore";
 import { Settings } from "@api/Settings";
 import { Paragraph } from "@components/Paragraph";
-import { openNotificationSettingsModal } from "@components/settings/tabs/vencord/NotificationSettings";
+import { openNotificationSettingsModal } from "@components/settings/tabs/claudecord/NotificationSettings";
 import { classNameFactory } from "@utils/css";
 import { confirmAction } from "@utils/discord";
 import { useAwaiter } from "@utils/react";
@@ -42,7 +42,7 @@ const getLog = async () => {
     return log ?? [];
 };
 
-const cl = classNameFactory("vc-notification-log-");
+const cl = classNameFactory("cc-notification-log-");
 const signals = new Set<DispatchWithoutAction>();
 
 export async function persistNotification(notification: NotificationData) {

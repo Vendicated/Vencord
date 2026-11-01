@@ -1,5 +1,5 @@
 /*
- * Vencord, a modification for Discord's desktop app
+ * Claudecord, a modification for Discord's desktop app
  * Copyright (c) 2023 Vendicated and contributors
  *
  * This program is free software: you can redistribute it and/or modify
@@ -53,8 +53,8 @@ const SectionHeading = ({ text }: { text: string; }) => (
 
 function ButtonWithIcon({ children, Icon, className, ...buttonProps }: ButtonProps & { Icon: IconComponent; }) {
     return (
-        <Button {...buttonProps} className={classes("vc-cloud-icon-with-button", className)}>
-            <Icon className={"vc-cloud-button-icon"} />
+        <Button {...buttonProps} className={classes("cc-cloud-icon-with-button", className)}>
+            <Icon className={"cc-cloud-button-icon"} />
             {children}
         </Button>
     );
@@ -68,9 +68,9 @@ function CloudSetupSection() {
             <SectionHeading text="Cloud Integrations" />
 
             <Paragraph size="md" className={Margins.bottom20}>
-                Vencord comes with a cloud integration that adds goodies like settings sync across devices.
-                It <Link href="https://vencord.dev/cloud/privacy">respects your privacy</Link>, and
-                the <Link href="https://github.com/Vencord/Backend">source code</Link> is AGPL 3.0 licensed so you
+                Claudecord comes with a cloud integration that adds goodies like settings sync across devices.
+                It <Link href="https://claudecord.dev/cloud/privacy">respects your privacy</Link>, and
+                the <Link href="https://github.com/Claudecord/Backend">source code</Link> is AGPL 3.0 licensed so you
                 can host it yourself.
             </Paragraph>
             <FormSwitch
@@ -130,7 +130,7 @@ function SettingsSyncSection() {
                 <FormSwitch
                     key="cloud-sync"
                     title="Enable Settings Sync"
-                    description="Save your Vencord settings to the cloud so you can easily keep them the same on all your devices"
+                    description="Save your Claudecord settings to the cloud so you can easily keep them the same on all your devices"
                     value={cloud.settingsSync}
                     onChange={v => { cloud.settingsSync = v; }}
                     disabled={!cloud.authenticated}

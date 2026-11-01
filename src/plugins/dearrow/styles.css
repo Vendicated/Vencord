@@ -1,8 +1,8 @@
-.vc-dearrow-toggle-off .vc-dearrow-icon {
+.cc-dearrow-toggle-off .cc-dearrow-icon {
     filter: grayscale(1);
 }
 
-.vc-dearrow-toggle-on, .vc-dearrow-toggle-off {
+.cc-dearrow-toggle-on, .cc-dearrow-toggle-off {
     all: unset;
     display: inline;
     cursor: pointer;

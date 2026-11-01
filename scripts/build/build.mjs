@@ -1,6 +1,6 @@
 #!/usr/bin/node
 /*
- * Vencord, a modification for Discord's desktop app
+ * Claudecord, a modification for Discord's desktop app
  * Copyright (c) 2022 Vendicated and contributors
  *
  * This program is free software: you can redistribute it and/or modify
@@ -57,7 +57,7 @@ const nodeCommonOpts = {
     external: ["electron", "original-fs", "~pluginNatives", ...commonOpts.external]
 };
 
-const sourceMapFooter = s => watch ? "" : `//# sourceMappingURL=vencord://${s}.js.map`;
+const sourceMapFooter = s => watch ? "" : `//# sourceMappingURL=claudecord://${s}.js.map`;
 const sourcemap = watch ? "inline" : "external";
 
 /**
@@ -123,7 +123,7 @@ const buildConfigs = ([
         ...nodeCommonOpts,
         entryPoints: ["src/main/index.ts"],
         outfile: "dist/patcher.js",
-        footer: { js: "//# sourceURL=file:///VencordPatcher\n" + sourceMapFooter("patcher") },
+        footer: { js: "//# sourceURL=file:///ClaudecordPatcher\n" + sourceMapFooter("patcher") },
         sourcemap,
         plugins: [
             // @ts-ignore this is never undefined
@@ -138,12 +138,12 @@ const buildConfigs = ([
     },
     {
         ...commonOpts,
-        entryPoints: ["src/Vencord.ts"],
+        entryPoints: ["src/Claudecord.ts"],
         outfile: "dist/renderer.js",
         format: "iife",
         target: ["esnext"],
-        footer: { js: "//# sourceURL=file:///VencordRenderer\n" + sourceMapFooter("renderer") },
-        globalName: "Vencord",
+        footer: { js: "//# sourceURL=file:///ClaudecordRenderer\n" + sourceMapFooter("renderer") },
+        globalName: "Claudecord",
         sourcemap,
         plugins: [
             globPlugins("discordDesktop"),
@@ -159,7 +159,7 @@ const buildConfigs = ([
         ...nodeCommonOpts,
         entryPoints: ["src/preload.ts"],
         outfile: "dist/preload.js",
-        footer: { js: "//# sourceURL=file:///VencordPreload\n" + sourceMapFooter("preload") },
+        footer: { js: "//# sourceURL=file:///ClaudecordPreload\n" + sourceMapFooter("preload") },
         sourcemap,
         define: {
             ...defines,
@@ -168,12 +168,12 @@ const buildConfigs = ([
         }
     },
 
-    // Vencord Desktop main & renderer & preload
+    // Claudecord Desktop main & renderer & preload
     {
         ...nodeCommonOpts,
         entryPoints: ["src/main/index.ts"],
-        outfile: "dist/vencordDesktopMain.js",
-        footer: { js: "//# sourceURL=file:///VencordDesktopMain\n" + sourceMapFooter("vencordDesktopMain") },
+        outfile: "dist/claudecordDesktopMain.js",
+        footer: { js: "//# sourceURL=file:///ClaudecordDesktopMain\n" + sourceMapFooter("claudecordDesktopMain") },
         sourcemap,
         plugins: [
             ...nodeCommonOpts.plugins,
@@ -187,12 +187,12 @@ const buildConfigs = ([
     },
     {
         ...commonOpts,
-        entryPoints: ["src/Vencord.ts"],
-        outfile: "dist/vencordDesktopRenderer.js",
+        entryPoints: ["src/Claudecord.ts"],
+        outfile: "dist/claudecordDesktopRenderer.js",
         format: "iife",
         target: ["esnext"],
-        footer: { js: "//# sourceURL=file:///VencordDesktopRenderer\n" + sourceMapFooter("vencordDesktopRenderer") },
-        globalName: "Vencord",
+        footer: { js: "//# sourceURL=file:///ClaudecordDesktopRenderer\n" + sourceMapFooter("claudecordDesktopRenderer") },
+        globalName: "Claudecord",
         sourcemap,
         plugins: [
             globPlugins("vesktop"),
@@ -207,8 +207,8 @@ const buildConfigs = ([
     {
         ...nodeCommonOpts,
         entryPoints: ["src/preload.ts"],
-        outfile: "dist/vencordDesktopPreload.js",
-        footer: { js: "//# sourceURL=file:///VencordPreload\n" + sourceMapFooter("vencordDesktopPreload") },
+        outfile: "dist/claudecordDesktopPreload.js",
+        footer: { js: "//# sourceURL=file:///ClaudecordPreload\n" + sourceMapFooter("claudecordDesktopPreload") },
         sourcemap,
         define: {
             ...defines,

@@ -1,5 +1,5 @@
 /*
- * Vencord, a modification for Discord's desktop app
+ * Claudecord, a modification for Discord's desktop app
  * Copyright (c) 2022 Vendicated and contributors
  *
  * This program is free software: you can redistribute it and/or modify
@@ -35,8 +35,8 @@ const settings = definePluginSettings({
 
 function setCss() {
     style.textContent = `
-        .vc-nsfw-img [class*=imageContainer],
-        .vc-nsfw-img [class*=wrapperPaused] {
+        .cc-nsfw-img [class*=imageContainer],
+        .cc-nsfw-img [class*=wrapperPaused] {
             filter: blur(${settings.store.blurAmount}px);
             transition: filter 0.2s;
 
@@ -60,7 +60,7 @@ export default definePlugin({
             replacement: [
                 {
                     match: /(\.renderReactions\(\i\).+?className:)/,
-                    replace: '$&(this?.props?.channel?.nsfw?"vc-nsfw-img ":"")+'
+                    replace: '$&(this?.props?.channel?.nsfw?"cc-nsfw-img ":"")+'
                 }
             ]
         }

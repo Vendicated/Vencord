@@ -1,6 +1,6 @@
 /*
- * Vencord, a Discord client mod
- * Copyright (c) 2024 Vendicated and contributors
+ * Claudecord, a Discord client mod
+ * Copyright (c) 2024 Vendicated, Claude and contributors
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
@@ -95,7 +95,7 @@ export type ChatBarButtonData = {
 export const ChatBarButtonMap = new Map<string, ChatBarButtonData>();
 const logger = new Logger("ChatButtons");
 
-function VencordChatBarButtons(props: ChatBarProps) {
+function ClaudecordChatBarButtons(props: ChatBarProps) {
     const { chatBarButtons } = useSettings(["uiElements.chatBarButtons.*"]).uiElements;
 
     const { analyticsName } = props.type;
@@ -115,7 +115,7 @@ function VencordChatBarButtons(props: ChatBarProps) {
 export function _injectButtons(buttons: ReactNode[], props: ChatBarProps) {
     if (props.disabled || buttons.length === 0) return;
 
-    buttons.unshift(<VencordChatBarButtons key="vencord-chat-buttons" {...props} />);
+    buttons.unshift(<ClaudecordChatBarButtons key="claudecord-chat-buttons" {...props} />);
 }
 
 /**
@@ -138,7 +138,7 @@ export const ChatBarButton = ErrorBoundary.wrap((props: ChatBarButtonProps) => {
     return (
         <Tooltip text={props.tooltip}>
             {({ onMouseEnter, onMouseLeave }) => (
-                <div className={`expression-picker-chat-input-button ${ChannelTextAreaClasses?.buttonContainer ?? ""} vc-chatbar-button`}>
+                <div className={`expression-picker-chat-input-button ${ChannelTextAreaClasses?.buttonContainer ?? ""} cc-chatbar-button`}>
                     <Clickable
                         aria-label={props.tooltip}
                         onMouseEnter={onMouseEnter}
@@ -172,12 +172,12 @@ addContextMenuPatch("textarea-context", (children, args) => {
     if (idx === -1) return;
 
     group.splice(idx, 0,
-        <Menu.MenuItem id="vc-chat-buttons" key="vencord-chat-buttons" label="Vencord Buttons">
+        <Menu.MenuItem id="cc-chat-buttons" key="claudecord-chat-buttons" label="Claudecord Buttons">
             {buttons.map(([id]) => (
                 <Menu.MenuCheckboxItem
                     label={id}
                     key={id}
-                    id={`vc-chat-button-${id}`}
+                    id={`cc-chat-button-${id}`}
                     checked={chatBarButtons[id]?.enabled !== false}
                     action={() => {
                         const wasEnabled = chatBarButtons[id]?.enabled !== false;

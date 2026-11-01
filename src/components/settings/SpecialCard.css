@@ -1,63 +1,63 @@
-.vc-donate-button {
+.cc-donate-button {
     overflow: visible !important;
 }
 
-.vc-donate-button .vc-heart-icon {
+.cc-donate-button .cc-heart-icon {
     transition: transform 0.3s;
     margin-right: 0.5em;
 }
 
-.vc-donate-button:hover .vc-heart-icon {
+.cc-donate-button:hover .cc-heart-icon {
     transform: scale(1.1);
     z-index: 10;
     position: relative;
 }
 
-.vc-special-card-special {
+.cc-special-card-special {
     padding: 1em 1.5em;
     margin-bottom: 1em;
     background-size: cover;
     background-position: center;
 }
 
-.vc-special-card-flex {
+.cc-special-card-flex {
     display: flex;
     flex-direction: row;
 }
 
-.vc-special-card-flex-main {
+.cc-special-card-flex-main {
     width: 100%;
 }
 
-.vc-special-title {
+.cc-special-title {
     color: black;
 }
 
-.vc-special-subtitle {
+.cc-special-subtitle {
     color: black;
     font-size: 1.2em;
     font-weight: bold;
     margin-top: 0.5em;
 }
 
-.vc-special-text {
+.cc-special-text {
     color: black;
     font-size: 1em;
     margin-top: .75em;
     white-space: pre-line;
 }
 
-.vc-special-seperator {
+.cc-special-seperator {
     margin-top: .75em;
     border-top: 1px solid white;
     opacity: 0.4;
 }
 
-.vc-special-hyperlink {
+.cc-special-hyperlink {
     margin-top: 1em;
     cursor: pointer;
 
-    .vc-special-hyperlink-text {
+    .cc-special-hyperlink-text {
         color: black;
         font-size: 1em;
         font-weight: bold;
@@ -66,12 +66,12 @@
         cursor: pointer;
     }
 
-    &:hover .vc-special-hyperlink-text {
+    &:hover .cc-special-hyperlink-text {
         text-decoration: underline;
     }
 }
 
-.vc-special-image-container {
+.cc-special-image-container {
     display: flex;
     justify-content: center;
     align-items: center;
@@ -83,6 +83,6 @@
     background-color: white;
 }
 
-.vc-special-image {
+.cc-special-image {
     width: 65%;
 }

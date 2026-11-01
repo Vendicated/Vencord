@@ -1,5 +1,5 @@
 /*
- * Vencord, a modification for Discord's desktop app
+ * Claudecord, a modification for Discord's desktop app
  * Copyright (c) 2023 Vendicated and contributors
  *
  * This program is free software: you can redistribute it and/or modify
@@ -25,7 +25,7 @@ import { Readable } from "stream";
 import { finished } from "stream/promises";
 import { fileURLToPath } from "url";
 
-const BASE_URL = "https://github.com/Vencord/Installer/releases/latest/download/";
+const BASE_URL = "https://github.com/Vencord/Installer/releases/latest/download/"; // todo, rename to the slop name
 
 const BASE_DIR = join(dirname(fileURLToPath(import.meta.url)), "..");
 const FILE_DIR = join(BASE_DIR, "dist", "Installer");
@@ -34,11 +34,11 @@ const ETAG_FILE = join(FILE_DIR, "etag.txt");
 function getFilename() {
     switch (process.platform) {
         case "win32":
-            return "VencordInstallerCli.exe";
+            return "VencordInstallerCli.exe"; // here too
         case "darwin":
-            return "VencordInstallerCli-darwin";
+            return "VencordInstallerCli-darwin"; // here too
         case "linux":
-            return "VencordInstallerCli-linux";
+            return "VencordInstallerCli-linux"; // here too
         default:
             throw new Error("Unsupported platform: " + process.platform);
     }
@@ -58,7 +58,7 @@ async function ensureBinary() {
 
     const res = await fetch(BASE_URL + filename, {
         headers: {
-            "User-Agent": "Vencord (https://github.com/Vendicated/Vencord)",
+            "User-Agent": "Claudecord (https://github.com/Vendicated/Claudecord)",
             "If-None-Match": etag
         }
     });

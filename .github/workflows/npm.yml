@@ -10,7 +10,7 @@ permissions:
 
 jobs:
     npm:
-        if: github.repository == 'Vendicated/Vencord'
+        if: github.repository == 'Vendicated/Claudecord'
         runs-on: ubuntu-latest
 
         steps:
@@ -31,8 +31,8 @@ jobs:
             - name: Run Tests
               run: pnpm test
 
-            - name: Build Vencord Types
+            - name: Build Claudecord Types
               run: pnpm generateTypes
 
             - name: Publish NPM Packages
-              run: pnpm stage publish --provenance --filter "./packages/{discord,vencord}-types"
+              run: pnpm stage publish --provenance --filter "./packages/{discord,claudecord}-types"

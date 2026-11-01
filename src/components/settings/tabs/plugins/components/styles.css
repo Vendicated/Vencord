@@ -1,35 +1,35 @@
-.vc-plugins-setting-section {
+.cc-plugins-setting-section {
     display: flex;
     flex-direction: column;
     gap: 0.5em;
 }
 
-.vc-plugins-setting-content {
+.cc-plugins-setting-content {
     display: flex;
     flex-direction: column;
     gap: 0.5em;
 }
 
-.vc-plugins-setting-inline {
+.cc-plugins-setting-inline {
     flex-direction: row;
     align-items: center;
     justify-content: space-between;
 }
 
-.vc-plugins-setting-label {
+.cc-plugins-setting-label {
     display: flex;
     flex-direction: column;
     gap: 0.25em;
 }
 
-.vc-plugins-setting-title {
+.cc-plugins-setting-title {
     color: var(--text-strong);
 }
 
-.vc-plugins-setting-description {
+.cc-plugins-setting-description {
     color: var(--text-subtle);
 }
 
-.vc-plugins-setting-error {
+.cc-plugins-setting-error {
     color: var(--text-feedback-critical, #FF5C5C);
 }

@@ -1,5 +1,5 @@
 /*
- * Vencord, a modification for Discord's desktop app
+ * Claudecord, a modification for Discord's desktop app
  * Copyright (c) 2022 Vendicated and contributors
  *
  * This program is free software: you can redistribute it and/or modify
@@ -23,7 +23,7 @@ import type { HTMLProps } from "react";
 
 export function ErrorCard(props: React.PropsWithChildren<HTMLProps<HTMLDivElement>>) {
     return (
-        <div {...props} className={classes(props.className, "vc-error-card")}>
+        <div {...props} className={classes(props.className, "cc-error-card")}>
             {props.children}
         </div>
     );

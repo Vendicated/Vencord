@@ -1,5 +1,5 @@
 /*
- * Vencord, a Discord client mod
+ * Claudecord, a Discord client mod
  * Copyright (c) 2023 Vendicated and contributors
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
@@ -20,7 +20,7 @@ import { FluxDispatcher, GuildChannelStore, GuildMemberStore, GuildRoleStore, Ic
 const IconClasses = findCssClassesLazy("icon", "acronym", "childWrapper");
 const FriendRow = findComponentByCodeLazy("discriminatorClass:", ".isMobileOnline", "avatarSrc:");
 
-const cl = classNameFactory("vc-gp-");
+const cl = classNameFactory("cc-gp-");
 
 export function openGuildInfoModal(guild: Guild) {
     openModal(props => <GuildInfoModal guild={guild} modalProps={props} />);

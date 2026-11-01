@@ -1,4 +1,4 @@
-.vc-sortFriendRequests-wrapper {
+.cc-sortFriendRequests-wrapper {
     display: flex;
     flex-direction: row;
     justify-content: space-between;
@@ -7,12 +7,12 @@
     margin-right: 0.5em;
 }
 
-.vc-sortFriendRequests-tooltip {
+.cc-sortFriendRequests-tooltip {
     max-width: none;
     white-space: nowrap;
 }
 
-.vc-sortFriendRequests-date {
+.cc-sortFriendRequests-date {
     color: var(--text-muted);
     font-family: var(--font-code);
 }

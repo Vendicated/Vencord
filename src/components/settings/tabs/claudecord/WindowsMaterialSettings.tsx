@@ -1,5 +1,5 @@
 /*
- * Vencord, a Discord client mod
+ * Claudecord, a Discord client mod
  * Copyright (c) 2026 Vendicated and contributors
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
@@ -15,7 +15,7 @@ import { Select } from "@webpack/common";
 export function WindowsMaterialSettings() {
     const settings = useSettings(["windowsMaterial"]);
 
-    if (!IS_WINDOWS || IS_WEB || !VencordNative.native.supportsWindowsMaterial()) return null;
+    if (!IS_WINDOWS || IS_WEB || !ClaudecordNative.native.supportsWindowsMaterial()) return null;
 
     return (
         <ErrorBoundary noop>

@@ -1,9 +1,9 @@
-.vc-rdb-badge {
+.cc-rdb-badge {
     vertical-align: middle;
     margin-left: 4px;
 }
 
-.vc-rdb-input {
+.cc-rdb-input {
     padding-inline: 12px;
     margin-top: 6px;
     margin-bottom: 12px;
@@ -14,47 +14,47 @@
     box-sizing: border-box;
 }
 
-.vc-rdb-placeholder {
+.cc-rdb-placeholder {
     margin-bottom: 4px;
     font-weight: bold;
     font-style: italic;
     color: var(--text-muted);
 }
 
-.vc-rdb-input * {
+.cc-rdb-input * {
     font-size: 14px;
 }
 
-.vc-rdb-modal-footer {
+.cc-rdb-modal-footer {
     padding: 0;
 }
 
-.vc-rdb-modal-footer .vc-rdb-input {
+.cc-rdb-modal-footer .cc-rdb-input {
     margin-bottom: 0;
     background: var(--input-background-default);
 }
 
-.vc-rdb-modal-footer [class*="pageControlContainer"] {
+.cc-rdb-modal-footer [class*="pageControlContainer"] {
     margin-top: 0;
     white-space: nowrap;
 }
 
-.vc-rdb-review {
+.cc-rdb-review {
     padding-top: 8px !important;
     padding-bottom: 8px !important;
     padding-right: 64px !important;
 }
 
-.vc-rdb-review:hover {
+.cc-rdb-review:hover {
     background: var(--message-background-hover) !important;
     border-radius: 8px;
 }
 
-.vc-rdb-review-comment [class*="avatar"] {
+.cc-rdb-review-comment [class*="avatar"] {
     vertical-align: text-top;
 }
 
-.vc-rdb-review-comment {
+.cc-rdb-review-comment {
     overflow-y: hidden;
     margin-top: 1px;
     line-height: 1.2;
@@ -63,16 +63,16 @@
     font-size: 15px;
 }
 
-.vc-rdb-blocked-badge {
+.cc-rdb-blocked-badge {
     cursor: pointer;
 }
 
-.vc-rdb-block-modal {
+.cc-rdb-block-modal {
     display: grid;
     gap: 0.75em;
 }
 
-.vc-rdb-button-grid {
+.cc-rdb-button-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 10px;
@@ -80,25 +80,25 @@
 
 /* stylelint-disable-next-line media-feature-range-notation */
 @media (max-width: 600px) {
-    .vc-rdb-button-grid {
+    .cc-rdb-button-grid {
         grid-template-columns: 1fr;
     }
 }
 
-.vc-rdb-block-modal-row {
+.cc-rdb-block-modal-row {
     display: flex;
     height: 2em;
     gap: 0.5em;
     align-items: center;
 }
 
-.vc-rdb-block-modal-avatar {
+.cc-rdb-block-modal-avatar {
     border-radius: 50%;
     height: 2em;
     width: 2em;
 }
 
-.vc-rdb-block-modal-avatar::before {
+.cc-rdb-block-modal-avatar::before {
     content: "";
     display: block;
     width: 100%;
@@ -106,21 +106,21 @@
     background-color: var(--border-subtle);
 }
 
-.vc-rdb-block-modal-username {
+.cc-rdb-block-modal-username {
     flex-grow: 1;
 }
 
-.vc-rdb-block-modal-unblock {
+.cc-rdb-block-modal-unblock {
     cursor: pointer;
 }
 
-.vc-rdb-profile-popout-disabled {
+.cc-rdb-profile-popout-disabled {
     opacity: 0.4;
     cursor: not-allowed;
 }
 
 
-.vc-rdb-vote-column {
+.cc-rdb-vote-column {
     position: absolute;
     right: 16px;
     top: 50%;
@@ -132,13 +132,13 @@
     gap: 4px;
 }
 
-.vc-rdb-vote-column-buttons {
+.cc-rdb-vote-column-buttons {
     display: flex;
     flex-direction: column;
     gap: 0;
 }
 
-.vc-rdb-vote-column-button {
+.cc-rdb-vote-column-button {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -152,17 +152,17 @@
     cursor: pointer;
 }
 
-.vc-rdb-vote-column-button:disabled {
+.cc-rdb-vote-column-button:disabled {
     cursor: default;
     opacity: 0.65;
 }
 
-.vc-rdb-vote-column-button:hover:not(:disabled) {
+.cc-rdb-vote-column-button:hover:not(:disabled) {
     background: var(--background-modifier-hover);
     color: var(--interactive-hover);
 }
 
-.vc-rdb-vote-column-score {
+.cc-rdb-vote-column-score {
     min-width: 15px;
     color: var(--text-muted);
     font-size: 1rem;
@@ -171,22 +171,22 @@
     text-align: center;
 }
 
-.vc-rdb-vote-column-score-positive,
-.vc-rdb-vote-column-up-selected {
+.cc-rdb-vote-column-score-positive,
+.cc-rdb-vote-column-up-selected {
     color: var(--status-positive);
 }
 
-.vc-rdb-vote-column-score-negative,
-.vc-rdb-vote-column-down-selected {
+.cc-rdb-vote-column-score-negative,
+.cc-rdb-vote-column-down-selected {
     color: var(--status-danger);
 }
 
-.vc-rdb-vote-column-up-selected:hover:not(:disabled) {
+.cc-rdb-vote-column-up-selected:hover:not(:disabled) {
     background: color-mix(in srgb, var(--status-positive) 14%, transparent);
     color: var(--status-positive);
 }
 
-.vc-rdb-vote-column-down-selected:hover:not(:disabled) {
+.cc-rdb-vote-column-down-selected:hover:not(:disabled) {
     background: color-mix(in srgb, var(--status-danger) 14%, transparent);
     color: var(--status-danger);
 }

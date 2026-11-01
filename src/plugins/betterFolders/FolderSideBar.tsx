@@ -1,5 +1,5 @@
 /*
- * Vencord, a modification for Discord's desktop app
+ * Claudecord, a modification for Discord's desktop app
  * Copyright (c) 2023 Vendicated and contributors
  *
  * This program is free software: you can redistribute it and/or modify
@@ -63,7 +63,7 @@ export default ErrorBoundary.wrap(guildsBarProps => {
 
     if (!guilds || !settings.store.sidebarAnim) {
         return visible
-            ? <div className="vc-betterFolders-sidebar" style={sidebarStyle}>{Sidebar}</div>
+            ? <div className="cc-betterFolders-sidebar" style={sidebarStyle}>{Sidebar}</div>
             : null;
     }
 
@@ -77,7 +77,7 @@ export default ErrorBoundary.wrap(guildsBarProps => {
         >
             {(animationStyle: any, show: any) =>
                 show && (
-                    <Animations.animated.div className="vc-betterFolders-sidebar" style={{ ...animationStyle, ...sidebarStyle }}>
+                    <Animations.animated.div className="cc-betterFolders-sidebar" style={{ ...animationStyle, ...sidebarStyle }}>
                         {Sidebar}
                     </Animations.animated.div>
                 )

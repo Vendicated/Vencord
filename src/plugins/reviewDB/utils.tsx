@@ -1,5 +1,5 @@
 /*
- * Vencord, a modification for Discord's desktop app
+ * Claudecord, a modification for Discord's desktop app
  * Copyright (c) 2022 Vendicated and contributors
  *
  * This program is free software: you can redistribute it and/or modify
@@ -23,7 +23,7 @@ import { showToast as originalShowToast, UserStore } from "@webpack/common";
 import { Auth } from "./auth";
 import { Review, UserType } from "./entities";
 
-export const cl = classNameFactory("vc-rdb-");
+export const cl = classNameFactory("cc-rdb-");
 
 export function canDeleteReview(profileId: string, review: Review) {
     const myId = UserStore.getCurrentUser().id;

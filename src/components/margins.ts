@@ -1,5 +1,5 @@
 /*
- * Vencord, a modification for Discord's desktop app
+ * Claudecord, a modification for Discord's desktop app
  * Copyright (c) 2023 Vendicated and contributors
  *
  * This program is free software: you can redistribute it and/or modify
@@ -18,7 +18,7 @@
 
 import { classNameFactory } from "@utils/css";
 
-const marginCls = classNameFactory("vc-margin-");
+const marginCls = classNameFactory("cc-margin-");
 
 const Directions = ["top", "bottom", "left", "right"] as const;
 const Sizes = [8, 16, 20] as const;

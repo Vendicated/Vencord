@@ -1,4 +1,4 @@
-.vc-trans-accessory {
+.cc-trans-accessory {
     color: var(--text-muted);
     margin-top: 0.5em;
     font-style: italic;
@@ -7,24 +7,24 @@
     white-space: break-spaces;
 }
 
-.vc-trans-accessory-icon {
+.cc-trans-accessory-icon {
     margin-right: 0.25em;
 }
 
-.vc-trans-dismiss {
+.cc-trans-dismiss {
     all: unset;
     cursor: pointer;
     color: var(--text-link);
 }
 
-.vc-trans-dismiss:is(:hover, :focus) {
+.cc-trans-dismiss:is(:hover, :focus) {
     text-decoration: underline;
 }
 
-.vc-trans-auto-translate {
+.cc-trans-auto-translate {
     color: var(--green-360);
 }
 
-.vc-trans-chat-button {
+.cc-trans-chat-button {
     scale: 1.085;
 }

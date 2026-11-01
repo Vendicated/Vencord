@@ -237,7 +237,7 @@ export class Message extends BasicMessage {
     userHasReactedWithEmoji(emoji: ReactionEmoji, burst?: boolean): boolean;
     addReactionBatch(reactions: { emoji: ReactionEmoji; users: string[]; }[], burstReactions: { emoji: ReactionEmoji; users: string[]; }[]): Message;
 
-    /** Vencord added */
+    /** Claudecord added */
     deleted?: boolean;
 }
 

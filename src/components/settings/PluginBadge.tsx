@@ -1,5 +1,5 @@
 /*
- * Vencord, a modification for Discord's desktop app
+ * Claudecord, a modification for Discord's desktop app
  * Copyright (c) 2022 Vendicated and contributors
  *
  * This program is free software: you can redistribute it and/or modify
@@ -18,7 +18,7 @@
 
 export function AddonBadge({ text, color }) {
     return (
-        <div className="vc-addon-badge" style={{
+        <div className="cc-addon-badge" style={{
             backgroundColor: color,
             justifySelf: "flex-end",
             marginLeft: "auto"

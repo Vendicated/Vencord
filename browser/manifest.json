@@ -2,10 +2,10 @@
     "manifest_version": 3,
     "minimum_chrome_version": "111",
 
-    "name": "Vencord Web",
+    "name": "Claudecord Web",
     "description": "The cutest Discord mod now in your browser",
     "author": "Vendicated",
-    "homepage_url": "https://github.com/Vendicated/Vencord",
+    "homepage_url": "https://github.com/Vendicated/Claudecord",
     "icons": {
         "128": "icon.png"
     },
@@ -28,7 +28,7 @@
         {
             "run_at": "document_start",
             "matches": ["*://*.discord.com/*"],
-            "js": ["dist/Vencord.js"],
+            "js": ["dist/Claudecord.js"],
             "all_frames": true,
             "world": "MAIN"
         }

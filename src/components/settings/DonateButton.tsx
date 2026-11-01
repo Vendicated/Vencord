@@ -1,5 +1,5 @@
 /*
- * Vencord, a modification for Discord's desktop app
+ * Claudecord, a modification for Discord's desktop app
  * Copyright (c) 2022 Vendicated and contributors
  *
  * This program is free software: you can redistribute it and/or modify
@@ -22,8 +22,8 @@ import { Heart } from "@components/Heart";
 export default function DonateButton({ variant, ...props }: Omit<ButtonProps, "children" | "onClick" | "className">) {
     const commonProps = {
         ...props,
-        onClick: () => VencordNative.native.openExternal("https://github.com/sponsors/Vendicated"),
-        className: "vc-donate-button",
+        onClick: () => ClaudecordNative.native.openExternal("https://github.com/sponsors/Vendicated"),
+        className: "cc-donate-button",
         children: <><Heart />Donate</>
     };
 

@@ -1,5 +1,5 @@
 /*
- * Vencord, a Discord client mod
+ * Claudecord, a Discord client mod
  * Copyright (c) 2026 Vendicated and contributors
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
@@ -28,14 +28,14 @@ export function ExpandableSection({ children, renderContent: Content, className,
     const Icon = expanded ? DownArrow : RightArrow;
 
     return (
-        <Card data-expanded={expanded} className={classes("vc-expandable-card", className)}>
-            <Clickable className="vc-expandable-card-header" onClick={() => setExpanded(c => !c)} >
+        <Card data-expanded={expanded} className={classes("cc-expandable-card", className)}>
+            <Clickable className="cc-expandable-card-header" onClick={() => setExpanded(c => !c)} >
                 {children}
-                <Icon className="vc-expandable-card-icon" />
+                <Icon className="cc-expandable-card-icon" />
             </Clickable>
 
             {expanded
-                ? <div className="vc-expandable-card-content">
+                ? <div className="cc-expandable-card-content">
                     <Content />
                 </div>
                 : null

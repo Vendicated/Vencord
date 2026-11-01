@@ -1,5 +1,5 @@
 /*
- * Vencord, a Discord client mod
+ * Claudecord, a Discord client mod
  * Copyright (c) 2024 Vendicated and contributors
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
@@ -78,7 +78,7 @@ function makeSearchItem(src: string) {
             <Menu.MenuItem
                 label={`Search with ${name}`}
                 key="search-custom-engine"
-                id="vc-search-custom-engine"
+                id="cc-search-custom-engine"
                 action={() => search(src, Engines[name!])}
             />
         );
@@ -88,11 +88,11 @@ function makeSearchItem(src: string) {
         <Menu.MenuItem
             label="Search Text"
             key="search-text"
-            id="vc-search-text"
+            id="cc-search-text"
             leadingAccessory={{ type: "icon", icon: SearchIcon }}
         >
             {Object.keys(Engines).map(engine => {
-                const key = "vc-search-content-" + engine;
+                const key = "cc-search-content-" + engine;
                 return (
                     <Menu.MenuItem
                         key={key}

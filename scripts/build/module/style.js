@@ -1,5 +1,5 @@
 /*
- * Vencord, a modification for Discord's desktop app
+ * Claudecord, a modification for Discord's desktop app
  * Copyright (c) 2022 Vendicated and contributors
  *
  * This program is free software: you can redistribute it and/or modify
@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-(window.VencordStyles ??= new Map()).set(STYLE_NAME, {
+(window.ClaudecordStyles ??= new Map()).set(STYLE_NAME, {
     name: STYLE_NAME,
     source: STYLE_SOURCE,
     classNames: {},

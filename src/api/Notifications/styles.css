@@ -1,4 +1,4 @@
-.vc-notification-root {
+.cc-notification-root {
     /* clear default button styles */
     all: unset;
     display: flex;
@@ -11,7 +11,7 @@
     width: 100%;
 }
 
-.vc-notification-root:not(.vc-notification-log-wrapper > .vc-notification-root) {
+.cc-notification-root:not(.cc-notification-log-wrapper > .cc-notification-root) {
     position: absolute;
     z-index: 2147483647;
     right: 1rem;
@@ -19,24 +19,24 @@
     min-height: 10vh;
 }
 
-.vc-notification {
+.cc-notification {
     display: flex;
     flex-direction: row;
     padding: 1.25rem;
     gap: 1.25rem;
 }
 
-.vc-notification-content {
+.cc-notification-content {
     width: 100%;
     overflow: hidden;
 }
 
-.vc-notification-header {
+.cc-notification-header {
     display: flex;
     justify-content: space-between;
 }
 
-.vc-notification-title {
+.cc-notification-title {
     color: var(--text-strong);
     font-size: 1rem;
     font-weight: 600;
@@ -44,7 +44,7 @@
     text-transform: uppercase;
 }
 
-.vc-notification-close-btn {
+.cc-notification-close-btn {
     all: unset;
     cursor: pointer;
     color: var(--interactive-icon-default);
@@ -52,44 +52,44 @@
     transition: opacity 0.2s ease-in-out, color 0.2s ease-in-out;
 }
 
-.vc-notification-close-btn:hover {
+.cc-notification-close-btn:hover {
     color: var(--interactive-icon-hover);
     opacity: 1;
 }
 
-.vc-notification-icon {
+.cc-notification-icon {
     height: 4rem;
     width: 4rem;
     border-radius: 6px;
 }
 
-.vc-notification-progressbar {
+.cc-notification-progressbar {
     height: 0.25rem;
     border-radius: 5px;
     margin-top: auto;
 }
 
-.vc-notification-p {
+.cc-notification-p {
     margin: 0.5rem 0 0;
     line-height: 140%;
 }
 
-.vc-notification-img {
+.cc-notification-img {
     width: 100%;
 }
 
-.vc-notification-log-modal {
+.cc-notification-log-modal {
     max-width: 962px;
     width: clamp(var(--modal-width-large, 800px), 962px, 85vw);
 }
 
-.vc-notification-log-empty {
+.cc-notification-log-empty {
     height: 218px;
     background: url("/assets/b36de980b174d7b798c89f35c116e5c6.svg") center no-repeat;
     margin-bottom: 40px;
 }
 
-.vc-notification-log-wrapper {
+.cc-notification-log-wrapper {
     height: 120px;
     width: 100%;
     padding-bottom: 16px;
@@ -98,38 +98,38 @@
     transition-property: height, opacity;
 
     /* stylelint-disable-next-line no-descending-specificity */
-    .vc-notification-root {
+    .cc-notification-root {
         height: 104px;
     }
 }
 
-.vc-notification-log-removing {
+.cc-notification-log-removing {
     height: 0 !important;
     opacity: 0;
     margin-bottom: 1em;
 }
 
-.vc-notification-log-body-wrapper {
+.cc-notification-log-body-wrapper {
     display: flex;
     flex-direction: column;
     width: 100%;
     box-sizing: border-box;
 }
 
-.vc-notification-log-body {
+.cc-notification-log-body {
     white-space: nowrap;
     text-overflow: ellipsis;
     overflow: hidden;
     line-height: 1.2em;
 }
 
-.vc-notification-log-timestamp {
+.cc-notification-log-timestamp {
     margin-left: auto;
     font-size: 0.8em;
     font-weight: lighter;
 }
 
-.vc-notification-log-danger-btn {
+.cc-notification-log-danger-btn {
     color: var(--control-critical-primary-text-default);
     background-color: var(--control-critical-primary-background-default);
 }

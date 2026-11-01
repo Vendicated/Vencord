@@ -1,5 +1,5 @@
 /*
- * Vencord, a modification for Discord's desktop app
+ * Claudecord, a modification for Discord's desktop app
  * Copyright (c) 2022 Vendicated and contributors
  *
  * This program is free software: you can redistribute it and/or modify
@@ -45,18 +45,18 @@ function ThemesTab() {
             <TabBar
                 type="top"
                 look="brand"
-                className="vc-settings-tab-bar"
+                className="cc-settings-tab-bar"
                 selectedItem={currentTab}
                 onItemSelect={setCurrentTab}
             >
                 <TabBar.Item
-                    className="vc-settings-tab-bar-item"
+                    className="cc-settings-tab-bar-item"
                     id={ThemeTab.LOCAL}
                 >
                     Local Themes
                 </TabBar.Item>
                 <TabBar.Item
-                    className="vc-settings-tab-bar-item"
+                    className="cc-settings-tab-bar-item"
                     id={ThemeTab.ONLINE}
                 >
                     Online Themes

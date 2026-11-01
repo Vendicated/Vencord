@@ -1,6 +1,6 @@
 # Agent Development Guide
 
-Vencord is a modification for the Discord web app. It is available for the Electron app and as browser extension.
+Claudecord is a modification for the Discord web app. It is available for the Electron app and as browser extension.
 
 Follow these deeper instructions when applicable:
 - [Live Discord Sessions](.skills/discord-session.md) - Run chrome for live testing & reverse engineering

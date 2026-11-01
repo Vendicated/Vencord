@@ -1,23 +1,23 @@
-.vc-settings-modal-light {
+.cc-settings-modal-light {
     color: black;
 }
 
-.vc-settings-modal-dark {
+.cc-settings-modal-dark {
     color: white;
 }
 
 
-.vc-settings-modal-favorite-button {
+.cc-settings-modal-favorite-button {
     cursor: pointer;
     transition: color 0.2s ease-in-out;
 }
 
-.vc-settings-modal-favorite-button-active,
-.vc-settings-modal-favorite-button:hover {
+.cc-settings-modal-favorite-button-active,
+.cc-settings-modal-favorite-button:hover {
     color: var(--yellow-300);
 }
 
-.vc-settings-modal-link-icon {
+.cc-settings-modal-link-icon {
     height: 32px;
     width: 32px;
     border-radius: 50%;
@@ -25,12 +25,12 @@
     box-sizing: border-box
 }
 
-.vc-settings-modal-favorite-icon {
+.cc-settings-modal-favorite-icon {
     background: var(--background-base-lowest);
     padding: 1px;
 }
 
-.vc-settings-modal-links {
+.cc-settings-modal-links {
     display: flex;
     gap: 0.2em;
     margin-left: auto;

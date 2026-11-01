@@ -1,5 +1,5 @@
 /*
- * Vencord, a Discord client mod
+ * Claudecord, a Discord client mod
  * Copyright (c) 2024 Vendicated and contributors
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
@@ -13,7 +13,7 @@ import { classNameFactory } from "@utils/css";
 import definePlugin, { OptionType } from "@utils/types";
 import { useEffect, UserStore, useState } from "@webpack/common";
 
-const cl = classNameFactory("vc-charCounter-");
+const cl = classNameFactory("cc-charCounter-");
 
 const settings = definePluginSettings({
     colorEffects: {

@@ -1,5 +1,5 @@
 /*
- * Vencord, a modification for Discord's desktop app
+ * Claudecord, a modification for Discord's desktop app
  * Copyright (c) 2022 Vendicated and contributors
  *
  * This program is free software: you can redistribute it and/or modify
@@ -35,7 +35,7 @@ const formatter = new Intl.DateTimeFormat(undefined, {
     year: "numeric",
 });
 
-const cl = classNameFactory("vc-sortFriendRequests-");
+const cl = classNameFactory("cc-sortFriendRequests-");
 
 function getSince(user: User) {
     return new Date(RelationshipStore.getSince(user.id));

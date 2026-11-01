@@ -1,5 +1,5 @@
 /*
- * Vencord, a Discord client mod
+ * Claudecord, a Discord client mod
  * Copyright (c) 2026 Vendicated and contributors
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
@@ -12,13 +12,13 @@ import definePlugin, { PluginNative } from "@utils/types";
 import { findComponentByCodeLazy, findCssClassesLazy } from "@webpack";
 import { Clickable } from "@webpack/common";
 
-const Native = VencordNative.pluginHelpers.DirectFileDownload as PluginNative<typeof import("./native")>;
+const Native = ClaudecordNative.pluginHelpers.DirectFileDownload as PluginNative<typeof import("./native")>;
 
 const AttachmentButton = findComponentByCodeLazy("__unsupportedReactNodeAsText", "caretConfig");
 const ButtonWrapperClasses = findCssClassesLazy("hoverButton", "hoverButtonGroup");
 
 function saveAttachment(downloadURL: string) {
-    Native.saveAttachment(downloadURL).catch(() => VencordNative.native.openExternal(downloadURL));
+    Native.saveAttachment(downloadURL).catch(() => ClaudecordNative.native.openExternal(downloadURL));
 }
 
 export default definePlugin({

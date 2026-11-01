@@ -1,5 +1,5 @@
 /*
- * Vencord, a Discord client mod
+ * Claudecord, a Discord client mod
  * Copyright (c) 2025 Vendicated and contributors
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
@@ -24,7 +24,7 @@ import type { ComponentType, Ref, SyntheticEvent } from "react";
 
 import { ThemeCard } from "./ThemeCard";
 
-const cl = classNameFactory("vc-settings-theme-");
+const cl = classNameFactory("cc-settings-theme-");
 
 type FileInput = ComponentType<{
     ref: Ref<HTMLInputElement>;
@@ -53,7 +53,7 @@ async function doUploadThemes(files: ArrayLike<File>) {
         return new Promise<void>((resolve, reject) => {
             const reader = new FileReader();
             reader.onload = () => {
-                VencordNative.themes.uploadTheme(name, reader.result as string)
+                ClaudecordNative.themes.uploadTheme(name, reader.result as string)
                     .then(resolve)
                     .catch(reject);
             };
@@ -120,7 +120,7 @@ export function LocalThemesTab() {
     if (IS_WEB) useDropFile(refreshLocalThemes);
 
     async function refreshLocalThemes() {
-        const themes = await VencordNative.themes.getThemesList();
+        const themes = await ClaudecordNative.themes.getThemesList();
         setUserThemes(themes);
     }
 
@@ -168,7 +168,7 @@ export function LocalThemesTab() {
                             ) : (
                                 <QuickAction
                                     text="Open Themes Folder"
-                                    action={() => VencordNative.themes.openFolder()}
+                                    action={() => ClaudecordNative.themes.openFolder()}
                                     Icon={FolderIcon}
                                 />
                             )}
@@ -179,7 +179,7 @@ export function LocalThemesTab() {
                         />
                         <QuickAction
                             text="Edit QuickCSS"
-                            action={() => VencordNative.quickCss.openEditor()}
+                            action={() => ClaudecordNative.quickCss.openEditor()}
                             Icon={PaintbrushIcon}
                         />
 
@@ -201,7 +201,7 @@ export function LocalThemesTab() {
                             onChange={enabled => onLocalThemeChange(theme.fileName, enabled)}
                             onDelete={async () => {
                                 onLocalThemeChange(theme.fileName, false);
-                                await VencordNative.themes.deleteTheme(theme.fileName);
+                                await ClaudecordNative.themes.deleteTheme(theme.fileName);
                                 refreshLocalThemes();
                             }}
                             theme={theme}

@@ -1,15 +1,15 @@
 {
-    "name": "vencord",
+    "name": "claudecord",
     "private": "true",
     "version": "1.15.15",
     "description": "The cutest Discord client mod",
-    "homepage": "https://github.com/Vendicated/Vencord#readme",
+    "homepage": "https://github.com/Vendicated/Claudecord#readme",
     "bugs": {
-        "url": "https://github.com/Vendicated/Vencord/issues"
+        "url": "https://github.com/Vendicated/Claudecord/issues"
     },
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/Vendicated/Vencord.git"
+        "url": "git+https://github.com/Vendicated/Claudecord.git"
     },
     "license": "GPL-3.0-or-later",
     "author": "Vendicated",
@@ -24,7 +24,7 @@
         "dev": "pnpm watch",
         "watchWeb": "pnpm buildWeb --watch",
         "generatePluginJson": "tsx scripts/generatePluginList.ts",
-        "generateTypes": "tspc --emitDeclarationOnly --declaration --outDir packages/vencord-types --allowJs false",
+        "generateTypes": "tspc --emitDeclarationOnly --declaration --outDir packages/claudecord-types --allowJs false",
         "inject": "node scripts/runInstaller.mjs -- --install",
         "uninject": "node scripts/runInstaller.mjs -- --uninstall",
         "lint": "eslint",

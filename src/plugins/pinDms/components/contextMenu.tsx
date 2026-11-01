@@ -1,5 +1,5 @@
 /*
- * Vencord, a Discord client mod
+ * Claudecord, a Discord client mod
  * Copyright (c) 2024 Vendicated and contributors
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
@@ -18,14 +18,14 @@ function createPinMenuItem(channelId: string) {
 
     return (
         <Menu.MenuItem
-            id="vc-pin-dm"
+            id="cc-pin-dm"
             label="Pin DMs"
         >
 
             {!pinned && (
                 <>
                     <Menu.MenuItem
-                        id="vc-add-category"
+                        id="cc-add-category"
                         label="Add Category"
                         color="brand"
                         action={() => openCategoryModal(null, channelId)}
@@ -48,7 +48,7 @@ function createPinMenuItem(channelId: string) {
             {pinned && (
                 <>
                     <Menu.MenuItem
-                        id="vc-unpin-dm"
+                        id="cc-unpin-dm"
                         label="Unpin DM"
                         color="danger"
                         action={() => removeChannelFromCategory(channelId)}

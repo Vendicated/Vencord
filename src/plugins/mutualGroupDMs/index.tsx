@@ -1,5 +1,5 @@
 /*
- * Vencord, a modification for Discord's desktop app
+ * Claudecord, a modification for Discord's desktop app
  * Copyright (c) 2023 Vendicated and contributors
  *
  * This program is free software: you can redistribute it and/or modify
@@ -108,7 +108,7 @@ export default definePlugin({
                 // set the gap to zero to ensure ours stays on screen
                 {
                     match: /className:\i\.\i(?=,type:"top")/,
-                    replace: '$& + " vc-mutual-gdms-modal-tab-bar"'
+                    replace: '$& + " cc-mutual-gdms-modal-tab-bar"'
                 }
             ]
         },
@@ -127,7 +127,7 @@ export default definePlugin({
                 // Make the gap between each item smaller so our tab can fit.
                 {
                     match: /type:"top",/,
-                    replace: '$&className:"vc-mutual-gdms-modal-v2-tab-bar",'
+                    replace: '$&className:"cc-mutual-gdms-modal-v2-tab-bar",'
                 },
             ]
         },
@@ -186,7 +186,7 @@ export default definePlugin({
 
         return (
             <ScrollerThin
-                className={classes(TabBarClasses.tabPanelScroller, !isLegacy && "vc-mutual-gdms-scroller")}
+                className={classes(TabBarClasses.tabPanelScroller, !isLegacy && "cc-mutual-gdms-scroller")}
                 fade={true}
                 onClose={onClose}
             >
@@ -212,7 +212,7 @@ export default definePlugin({
             <>
                 {hasDivider && Divider}
                 <ExpandableList
-                    listClassName={classes(listStyle, "vc-mutual-gdms-dm-page-list")}
+                    listClassName={classes(listStyle, "cc-mutual-gdms-dm-page-list")}
                     header={"Mutual Groups"}
                     isLoading={false}
                     items={renderClickableGDMs(mutualGDms)}

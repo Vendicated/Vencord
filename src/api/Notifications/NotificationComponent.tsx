@@ -1,6 +1,6 @@
 /*
- * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2023 Vendicated and contributors
+ * Claudecord, a modification for Discord's desktop app
+ * Copyright (c) 2023 Vendicated, Claude and contributors
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -64,7 +64,7 @@ export default ErrorBoundary.wrap(function NotificationComponent({
 
     return (
         <button
-            className={classes("vc-notification-root", className)}
+            className={classes("cc-notification-root", className)}
             style={position === "bottom-right" ? { bottom: "1rem" } : { top: "3rem" }}
             onClick={() => {
                 onClick?.();
@@ -79,13 +79,13 @@ export default ErrorBoundary.wrap(function NotificationComponent({
             onMouseEnter={() => setIsHover(true)}
             onMouseLeave={() => setIsHover(false)}
         >
-            <div className="vc-notification">
-                {icon && <img className="vc-notification-icon" src={icon} alt="" />}
-                <div className="vc-notification-content">
-                    <div className="vc-notification-header">
-                        <h2 className="vc-notification-title">{title}</h2>
+            <div className="cc-notification">
+                {icon && <img className="cc-notification-icon" src={icon} alt="" />}
+                <div className="cc-notification-content">
+                    <div className="cc-notification-header">
+                        <h2 className="cc-notification-title">{title}</h2>
                         <button
-                            className="vc-notification-close-btn"
+                            className="cc-notification-close-btn"
                             onClick={e => {
                                 e.preventDefault();
                                 e.stopPropagation();
@@ -97,20 +97,20 @@ export default ErrorBoundary.wrap(function NotificationComponent({
                                 height="24"
                                 viewBox="0 0 24 24"
                                 role="img"
-                                aria-labelledby="vc-notification-dismiss-title"
+                                aria-labelledby="cc-notification-dismiss-title"
                             >
-                                <title id="vc-notification-dismiss-title">Dismiss Notification</title>
+                                <title id="cc-notification-dismiss-title">Dismiss Notification</title>
                                 <path fill="currentColor" d="M18.4 4L12 10.4L5.6 4L4 5.6L10.4 12L4 18.4L5.6 20L12 13.6L18.4 20L20 18.4L13.6 12L20 5.6L18.4 4Z" />
                             </svg>
                         </button>
                     </div>
-                    {richBody ?? <p className="vc-notification-p">{body}</p>}
+                    {richBody ?? <p className="cc-notification-p">{body}</p>}
                 </div>
             </div>
-            {image && <img className="vc-notification-img" src={image} alt="" />}
+            {image && <img className="cc-notification-img" src={image} alt="" />}
             {timeout !== 0 && !permanent && (
                 <div
-                    className="vc-notification-progressbar"
+                    className="cc-notification-progressbar"
                     style={{ width: `${(1 - timeoutProgress) * 100}%`, backgroundColor: color || "var(--brand-500)" }}
                 />
             )}

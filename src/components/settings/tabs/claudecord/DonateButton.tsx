@@ -1,17 +1,17 @@
 /*
- * Vencord, a Discord client mod
+ * Claudecord, a Discord client mod
  * Copyright (c) 2025 Vendicated and contributors
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
 import DonateButton from "@components/settings/DonateButton";
 import BadgeAPI from "@plugins/_api/badges";
-import { DONOR_ROLE_ID, VENCORD_GUILD_ID } from "@utils/constants";
+import { DONOR_ROLE_ID, CLAUDECORD_GUILD_ID } from "@utils/constants";
 import { GuildMemberStore } from "@webpack/common";
 
 export const isDonor = (userId: string) => !!(
     (BadgeAPI.getDonorBadges(userId)?.length ?? 0) > 0
-    || GuildMemberStore?.getMember(VENCORD_GUILD_ID, userId)?.roles.includes(DONOR_ROLE_ID)
+    || GuildMemberStore?.getMember(CLAUDECORD_GUILD_ID, userId)?.roles.includes(DONOR_ROLE_ID)
 );
 
 export function DonateButtonComponent() {

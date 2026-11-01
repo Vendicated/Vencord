@@ -1,5 +1,5 @@
 /*
- * Vencord, a modification for Discord's desktop app
+ * Claudecord, a modification for Discord's desktop app
  * Copyright (c) 2023 Vendicated and contributors
  *
  * This program is free software: you can redistribute it and/or modify
@@ -25,7 +25,7 @@ import { SessionInfo } from "./types";
 
 const getDataKey = () => `BetterSessions_savedSessions_${UserStore.getCurrentUser().id}`;
 
-export const cl = classNameFactory("vc-betterSessions-");
+export const cl = classNameFactory("cc-betterSessions-");
 export const savedSessionsCache: Map<string, { name: string, isNew: boolean; }> = new Map();
 
 export function getDefaultName(clientInfo: SessionInfo["session"]["client_info"]) {

@@ -1,4 +1,4 @@
-.vc-text-base {
+.cc-text-base {
     font-family: var(--font-primary);
     line-height: normal;
 
@@ -6,6 +6,6 @@
     margin: 0;
 }
 
-.vc-text-defaultColor {
+.cc-text-defaultColor {
     color: var(--text-default);
 }

@@ -1,5 +1,5 @@
 /*
- * Vencord, a modification for Discord's desktop app
+ * Claudecord, a modification for Discord's desktop app
  * Copyright (c) 2022 Vendicated and contributors
  *
  * This program is free software: you can redistribute it and/or modify
@@ -99,7 +99,7 @@ const ChatBarContextCheckbox: NavContextMenuPatchCallback = children => {
 
     group.splice(idx + 1, 0,
         <Menu.MenuCheckboxItem
-            id="vc-silent-typing"
+            id="cc-silent-typing"
             label="Enable Silent Typing"
             checked={isEnabled}
             action={() => settings.store.isEnabled = !settings.store.isEnabled}

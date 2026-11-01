@@ -1,8 +1,8 @@
-.vc-pip-button {
+.cc-pip-button {
     color: var(--interactive-icon-default);
 }
 
-.vc-pip-button:hover {
+.cc-pip-button:hover {
     background-color: var(--background-mod-subtle);
     color: var(--interactive-icon-hover);
 }

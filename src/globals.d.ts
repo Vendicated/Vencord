@@ -1,6 +1,6 @@
 /*
- * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2022 Vendicated and contributors
+ * Claudecord, a modification for Discord's desktop app
+ * Copyright (c) 2022 Vendicated, Claude and contributors
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -46,9 +46,9 @@ declare global {
     export var BUILD_TIMESTAMP: number;
     export var DESKTOP_MONACO_EDITOR_URL: string;
 
-    export var VencordNative: typeof import("./VencordNative").default;
-    export var Vencord: typeof import("./Vencord");
-    export var VencordStyles: Map<string, Style>;
+    export var ClaudecordNative: typeof import("./ClaudecordNative").default;
+    export var Claudecord: typeof import("./Claudecord");
+    export var ClaudecordStyles: Map<string, Style>;
     export var appSettings: {
         set(setting: string, v: any): void;
     };

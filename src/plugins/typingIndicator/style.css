@@ -1,14 +1,14 @@
-.vc-typing-indicator {
+.cc-typing-indicator {
     display: flex;
     align-items: center;
     height: 20px;
 }
 
-.vc-typing-indicator-avatars {
+.cc-typing-indicator-avatars {
     margin-left: 6px;
 }
 
-.vc-typing-indicator-dots {
+.cc-typing-indicator-dots {
     margin-left: 6px;
     height: 16px;
     display: flex;

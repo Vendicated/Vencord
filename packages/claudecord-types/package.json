@@ -6,15 +6,15 @@
     "types": "index.d.ts",
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/Vendicated/Vencord.git",
-        "directory": "packages/vencord-types"
+        "url": "git+https://github.com/Vendicated/Claudecord.git",
+        "directory": "packages/claudecord-types"
     },
     "scripts": {
         "prepublishOnly": "tsx ./prepare.ts",
         "test": "echo \"Error: no test specified\" && exit 1"
     },
     "keywords": [],
-    "author": "Vencord",
+    "author": "Claudecord",
     "license": "GPL-3.0-or-later",
     "devDependencies": {
         "@types/fs-extra": "catalog:",

@@ -1,5 +1,5 @@
 /*
- * Vencord, a Discord client mod
+ * Claudecord, a Discord client mod
  * Copyright (c) 2024 Vendicated and contributors
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
@@ -15,7 +15,7 @@ import { findByPropsLazy, findCssClassesLazy } from "@webpack";
 import { ChannelRouter, ChannelStore, Parser, PermissionsBits, PermissionStore, React, showToast, Tooltip, useMemo, UserStore, UserSummaryItem, useStateFromStores, VoiceStateStore } from "@webpack/common";
 import { PropsWithChildren } from "react";
 
-const cl = classNameFactory("vc-uvs-");
+const cl = classNameFactory("cc-uvs-");
 
 const { selectVoiceChannel } = findByPropsLazy("selectVoiceChannel", "selectChannel");
 
@@ -101,7 +101,7 @@ function VoiceChannelTooltip({ channel, isLocked }: VoiceChannelTooltipProps) {
         <>
             <Paragraph weight="bold">In Voice Chat</Paragraph>
             <Paragraph weight="bold">{Parser.parse(`<#${channel.id}>`)}</Paragraph>
-            <div className={cl("vc-members")}>
+            <div className={cl("cc-members")}>
                 <Icon size={18} />
                 <UserSummaryItem
                     users={users}

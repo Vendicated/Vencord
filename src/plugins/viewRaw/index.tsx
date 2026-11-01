@@ -1,5 +1,5 @@
 /*
- * Vencord, a modification for Discord's desktop app
+ * Claudecord, a modification for Discord's desktop app
  * Copyright (c) 2022 Vendicated and contributors
  *
  * This program is free software: you can redistribute it and/or modify
@@ -123,11 +123,11 @@ function openViewRawModal(data: object, type: string, msgContent?: string) {
                 {!!msgContent && (
                     <>
                         <Heading className={Margins.bottom8}>Message Content</Heading>
-                        <CodeBlock className="vc-viewRaw-codeBlock" content={msgContent} lang="" />
+                        <CodeBlock className="cc-viewRaw-codeBlock" content={msgContent} lang="" />
                         <Heading className={classes(Margins.top16, Margins.bottom8)}>Message Data</Heading>
                     </>
                 )}
-                <CodeBlock className="vc-viewRaw-codeBlock" content={json} lang="json" />
+                <CodeBlock className="cc-viewRaw-codeBlock" content={json} lang="json" />
             </Modal>
         </ErrorBoundary >
     ));
@@ -170,7 +170,7 @@ function MakeContextCallback(name: "Guild" | "Role" | "User" | "Channel" | "Mess
         if (isMessage && !settings.store.messageContextMenu) return;
 
         // typescript parser goes crazy if this is inline
-        const id = `vc-view-${name.toLowerCase()}-raw`;
+        const id = `cc-view-${name.toLowerCase()}-raw`;
         const action = isMessage
             ? () => openViewRawModalMessage(value)
             : name === "User"
@@ -200,7 +200,7 @@ const devContextCallback: NavContextMenuPatchCallback = (children, { id }: { id:
 
     children.push(
         <Menu.MenuItem
-            id={"vc-view-role-raw"}
+            id={"cc-view-role-raw"}
             label="View Raw"
             action={() => openViewRawModal(role, "Role")}
             icon={CopyRawIcon}

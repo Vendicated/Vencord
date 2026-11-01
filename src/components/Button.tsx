@@ -1,5 +1,5 @@
 /*
- * Vencord, a Discord client mod
+ * Claudecord, a Discord client mod
  * Copyright (c) 2025 Vendicated and contributors
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
@@ -13,8 +13,8 @@ import type { ComponentPropsWithRef } from "react";
 import { OpenExternalIcon } from "./Icons";
 import { Link } from "./Link";
 
-const btnCls = classNameFactory("vc-btn-");
-const textBtnCls = classNameFactory("vc-text-btn-");
+const btnCls = classNameFactory("cc-btn-");
+const textBtnCls = classNameFactory("cc-text-btn-");
 
 export type ButtonVariant =
     "primary" | "secondary" | "dangerPrimary" | "dangerSecondary" | "overlayPrimary" | "positive" | "link" | "none";

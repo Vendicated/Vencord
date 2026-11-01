@@ -1,5 +1,5 @@
 /*
- * Vencord, a modification for Discord's desktop app
+ * Claudecord, a modification for Discord's desktop app
  * Copyright (c) 2023 Vendicated and contributors
  *
  * This program is free software: you can redistribute it and/or modify
@@ -26,7 +26,7 @@ import { classNameFactory } from "@utils/css";
 import { Clickable } from "@webpack/common";
 import type { PropsWithChildren } from "react";
 
-const cl = classNameFactory("vc-special-");
+const cl = classNameFactory("cc-special-");
 
 interface StyledCardProps {
     title: string;

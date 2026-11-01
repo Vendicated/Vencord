@@ -1,5 +1,5 @@
 /*
- * Vencord, a modification for Discord's desktop app
+ * Claudecord, a modification for Discord's desktop app
  * Copyright (c) 2023 Vendicated and contributors
  *
  * This program is free software: you can redistribute it and/or modify
@@ -137,7 +137,7 @@ export const settings = definePluginSettings({
 
 const IS_BETTER_FOLDERS_VAR = "typeof isBetterFolders!=='undefined'?isBetterFolders:arguments[0]?.isBetterFolders";
 const BETTER_FOLDERS_EXPANDED_IDS_VAR = "typeof betterFoldersExpandedIds!=='undefined'?betterFoldersExpandedIds:arguments[0]?.betterFoldersExpandedIds";
-const GRID_STYLE_NAME = "vc-betterFolders-sidebar-grid";
+const GRID_STYLE_NAME = "cc-betterFolders-sidebar-grid";
 
 export default definePlugin({
     name: "BetterFolders",
@@ -269,7 +269,7 @@ export default definePlugin({
                 {
                     // Channels resize slider uses hardcoded offset which is wrong when the Better Folders sidebar is opened
                     match: /(?<="aria-valuemax":\d+,className:\i\.\i,onClick:\i,onMouseDown:)(\i)/,
-                    replace: "vcEvent=>$1($self.fixChannelsResizeSliderOffset(vcEvent))"
+                    replace: "ccEvent=>$1($self.fixChannelsResizeSliderOffset(ccEvent))"
                 }
             ]
         },
@@ -404,7 +404,7 @@ export default definePlugin({
     },
 
     fixChannelsResizeSliderOffset(event: MouseEvent) {
-        const betterFoldersSidebar = document.querySelector<HTMLElement>(".vc-betterFolders-sidebar");
+        const betterFoldersSidebar = document.querySelector<HTMLElement>(".cc-betterFolders-sidebar");
 
         if (betterFoldersSidebar != null) {
             // @ts-expect-error Readonly, but browser doesn't care

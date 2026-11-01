@@ -1,5 +1,5 @@
 /*
- * Vencord, a modification for Discord's desktop app
+ * Claudecord, a modification for Discord's desktop app
  * Copyright (c) 2023 Vendicated and contributors
  *
  * This program is free software: you can redistribute it and/or modify
@@ -38,7 +38,7 @@ const messageCtxPatch: NavContextMenuPatchCallback = (children, { message }: { m
 
     group.splice(group.findIndex(c => c?.props?.id === "copy-text") + 1, 0, (
         <Menu.MenuItem
-            id="vc-trans"
+            id="cc-trans"
             label="Translate"
             icon={TranslateIcon}
             leadingAccessory={{ type: "icon", icon: TranslateIcon }}

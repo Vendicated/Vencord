@@ -1,6 +1,6 @@
 /*
- * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2022 Vendicated and contributors
+ * Claudecord, a modification for Discord's desktop app
+ * Copyright (c) 2022 Vendicated, Claude and contributors
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -33,12 +33,12 @@ export class Logger {
 
     private _log(level: "log" | "error" | "warn" | "info" | "debug", levelColor: string, args: any[], customFmt = "") {
         if (IS_REPORTER && IS_WEB && !IS_VESKTOP) {
-            console[level]("[Vencord]", this.name + ":", ...args);
+            console[level]("[Claudecord]", this.name + ":", ...args);
             return;
         }
 
         console[level](
-            `%c Vencord %c %c ${this.name} ${customFmt}`,
+            `%c Claudecord %c %c ${this.name} ${customFmt}`,
             `background: ${levelColor}; color: black; font-weight: bold; border-radius: 5px;`,
             "",
             `background: ${this.color}; color: black; font-weight: bold; border-radius: 5px;`

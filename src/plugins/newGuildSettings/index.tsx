@@ -1,5 +1,5 @@
 /*
- * Vencord, a modification for Discord's desktop app
+ * Claudecord, a modification for Discord's desktop app
  * Copyright (c) 2022 Vendicated and contributors
  *
  * This program is free software: you can redistribute it and/or modify
@@ -87,7 +87,7 @@ const makeContextMenuPatch: (shouldAddIcon: boolean) => NavContextMenuPatchCallb
     group?.push(
         <Menu.MenuItem
             label="Apply NewGuildSettings"
-            id="vc-newguildsettings-apply"
+            id="cc-newguildsettings-apply"
             icon={shouldAddIcon ? CogWheel : void 0}
             leadingAccessory={shouldAddIcon ? { type: "icon", icon: CogWheel } : void 0}
             action={() => applyDefaultSettings(guild.id)}

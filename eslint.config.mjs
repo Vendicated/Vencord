@@ -1,6 +1,6 @@
 /*
- * Vencord, a Discord client mod
- * Copyright (c) 2023 Vendicated and contributors
+ * Claudecord, a Discord client mod
+ * Copyright (c) 2023 Vendicated, Claude and contributors
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
@@ -13,7 +13,7 @@ import unusedImports from "eslint-plugin-unused-imports";
 import tseslint from "typescript-eslint";
 
 export default tseslint.config(
-    { ignores: ["dist", "browser", "packages/vencord-types"] },
+    { ignores: ["dist", "browser", "packages/claudecord-types"] },
     {
         files: ["src/**/*.{tsx,ts,mts,mjs,js,jsx}", "eslint.config.mjs"],
         settings: {
@@ -60,7 +60,7 @@ export default tseslint.config(
         },
         rules: {
             /*
-             * Since it's only been a month and Vencord has already been stolen
+             * Since it's only been a month and Claudecord has already been stolen
              * by random skids who rebranded it to "AlphaCord" and erased all license
              * information
              */
@@ -68,7 +68,7 @@ export default tseslint.config(
                 "error",
                 {
                     "files": ["scripts/header-new.txt", "scripts/header-old.txt"],
-                    "templates": { "author": [".*", "Vendicated and contributors"] }
+                    "templates": { "author": [".*", "Vendicated, Claude and contributors"] }
                 }
             ],
 

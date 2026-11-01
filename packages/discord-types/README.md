@@ -2,7 +2,7 @@
 
 This package provides TypeScript types for the Webpack modules of Discord's web app.
 
-While it was primarily created for Vencord, other client mods could also benefit from this, so it is published as a standalone package!
+While it was primarily created for Claudecord, other client mods could also benefit from this, so it is published as a standalone package!
 
 ## Installation
 
@@ -31,7 +31,7 @@ console.log(ApplicationCommandType.CHAT_INPUT); // 1
 
 ### Package Versioning
 
-Since v1.15.13, this package's version will always mirror Vencord's version. This will make it easier for us to publish updates timely.
+Since v1.15.13, this package's version will always mirror Claudecord's version. This will make it easier for us to publish updates timely.
 
 Please note that this package does **not** use semantic versioning. Even a patch release can remove or change existing types.
 Discord is a moving target, so trying to follow semver would be impractical.

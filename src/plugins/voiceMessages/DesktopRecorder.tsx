@@ -1,5 +1,5 @@
 /*
- * Vencord, a modification for Discord's desktop app
+ * Claudecord, a modification for Discord's desktop app
  * Copyright (c) 2023 Vendicated and contributors
  *
  * This program is free software: you can redistribute it and/or modify
@@ -24,12 +24,12 @@ import { MediaEngineStore, showToast, useState } from "@webpack/common";
 import type { VoiceRecorder } from ".";
 import { settings } from "./settings";
 
-const Native = VencordNative.pluginHelpers.VoiceMessages as PluginNative<typeof import("./native")>;
+const Native = ClaudecordNative.pluginHelpers.VoiceMessages as PluginNative<typeof import("./native")>;
 
 export const VoiceRecorderDesktop: VoiceRecorder = ({ setAudioBlob, onRecordingChange }) => {
     const [recording, setRecording] = useState(false);
 
-    useFluxSubscription("VENCORD_STOP_RECORDING", stopRecording);
+    useFluxSubscription("CLAUDECORD_STOP_RECORDING", stopRecording);
 
     function changeRecording(recording: boolean) {
         setRecording(recording);

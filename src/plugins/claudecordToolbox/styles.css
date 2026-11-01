@@ -1,16 +1,16 @@
-.vc-toolbox-btn,
-.vc-toolbox-icon {
+.cc-toolbox-btn,
+.cc-toolbox-icon {
     -webkit-app-region: no-drag;
 }
 
-.vc-toolbox-icon {
+.cc-toolbox-icon {
     color: var(--interactive-icon-default);
 }
 
-.vc-toolbox-btn[class*="selected"] .vc-toolbox-icon {
+.cc-toolbox-btn[class*="selected"] .cc-toolbox-icon {
     color: var(--interactive-icon-active);
 }
 
-.vc-toolbox-btn:hover .vc-toolbox-icon {
+.cc-toolbox-btn:hover .cc-toolbox-icon {
     color: var(--interactive-icon-hover);
 }

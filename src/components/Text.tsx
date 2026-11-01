@@ -1,5 +1,5 @@
 /*
- * Vencord, a Discord client mod
+ * Claudecord, a Discord client mod
  * Copyright (c) 2025 Vendicated and contributors
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
@@ -10,7 +10,7 @@ import { classNameFactory } from "@utils/css";
 import { classes } from "@utils/misc";
 import type { ComponentPropsWithoutRef, ReactNode } from "react";
 
-const textCls = classNameFactory("vc-text-");
+const textCls = classNameFactory("cc-text-");
 
 const Sizes = {
     xxs: "0.625rem",

@@ -1,6 +1,6 @@
 /*
- * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2022 Vendicated and contributors
+ * Claudecord, a modification for Discord's desktop app
+ * Copyright (c) 2022 Vendicated, Claude and contributors
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -74,7 +74,7 @@ export function hasAnyVisibleSettings({ settings }: Plugin) {
     return !!settings && Object.values(settings.def).some(s => !isSettingHidden(settings, s));
 }
 
-export function addPatch(newPatch: Omit<Patch, "plugin">, pluginName: string, pluginPath = `Vencord.Plugins.plugins[${JSON.stringify(pluginName)}]`) {
+export function addPatch(newPatch: Omit<Patch, "plugin">, pluginName: string, pluginPath = `Claudecord.Plugins.plugins[${JSON.stringify(pluginName)}]`) {
     // TODO: this causes crashes
     if (pluginName === "Vesktop" && newPatch.find === ".STREAMING_AUTO_STREAMER_MODE,") return;
 

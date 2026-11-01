@@ -1,5 +1,5 @@
 /*
- * Vencord, a Discord client mod
+ * Claudecord, a Discord client mod
  * Copyright (c) 2024 Vendicated and contributors
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
@@ -18,7 +18,7 @@ import { parseEditContent } from ".";
 const CodeContainerClasses = findCssClassesLazy("markup", "codeContainer");
 const MiscClasses = findCssClassesLazy("messageContent", "markupRtl");
 
-const cl = classNameFactory("vc-ml-modal-");
+const cl = classNameFactory("cc-ml-modal-");
 
 export function openHistoryModal(message: any) {
     openModal(props =>
@@ -45,14 +45,14 @@ export function HistoryModal({ modalProps, message }: { modalProps: RenderModalP
             <TabBar
                 type="top"
                 look="brand"
-                className={classes("vc-settings-tab-bar", cl("tab-bar"))}
+                className={classes("cc-settings-tab-bar", cl("tab-bar"))}
                 selectedItem={currentTab}
                 onItemSelect={setCurrentTab}
             >
                 {message.firstEditTimestamp.getTime() !== message.timestamp.getTime() && (
                     <TooltipContainer text="This edit state was not logged so it can't be displayed.">
                         <TabBar.Item
-                            className="vc-settings-tab-bar-item"
+                            className="cc-settings-tab-bar-item"
                             id={-1}
                             disabled
                         >
@@ -69,7 +69,7 @@ export function HistoryModal({ modalProps, message }: { modalProps: RenderModalP
                 {timestamps.map((timestamp, index) => (
                     <TabBar.Item
                         key={index}
-                        className="vc-settings-tab-bar-item"
+                        className="cc-settings-tab-bar-item"
                         id={index}
                     >
                         <Timestamp

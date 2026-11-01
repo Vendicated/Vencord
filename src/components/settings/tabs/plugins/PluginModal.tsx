@@ -1,5 +1,5 @@
 /*
- * Vencord, a modification for Discord's desktop app
+ * Claudecord, a modification for Discord's desktop app
  * Copyright (c) 2022 Vendicated and contributors
  *
  * This program is free software: you can redistribute it and/or modify
@@ -25,7 +25,7 @@ import ErrorBoundary from "@components/ErrorBoundary";
 import { Heading } from "@components/Heading";
 import { Paragraph } from "@components/Paragraph";
 import { debounce } from "@shared/debounce";
-import { gitRemote } from "@shared/vencordUserAgent";
+import { gitRemote } from "@shared/claudecordUserAgent";
 import { classNameFactory } from "@utils/css";
 import { proxyLazy } from "@utils/lazy";
 import { Margins } from "@utils/margins";
@@ -42,7 +42,7 @@ import { OptionComponentMap } from "./components";
 import { openContributorModal } from "./ContributorModal";
 import { FavoriteButton, GithubButton, WebsiteButton } from "./PluginModalButtons";
 
-const cl = classNameFactory("vc-plugin-modal-");
+const cl = classNameFactory("cc-plugin-modal-");
 
 const AvatarStyles = findCssClassesLazy("moreUsers", "avatar", "clickableAvatar");
 const UserRecord: Constructor<Partial<User>> = proxyLazy(() => UserStore.getCurrentUser().constructor) as any;
@@ -139,7 +139,7 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
         });
 
         return (
-            <div className="vc-plugins-settings">
+            <div className="cc-plugins-settings">
                 {options}
             </div>
         );
@@ -176,14 +176,14 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
                 <div className={cl("header")}>
                     <Heading tag="h3">{plugin.name}</Heading>
                     {!pluginMeta.userPlugin && (
-                        <div className="vc-settings-modal-links">
+                        <div className="cc-settings-modal-links">
                             <FavoriteButton
                                 isFavorite={pluginSettings.isFavorite ?? false}
                                 onClick={() => pluginSettings.isFavorite = !pluginSettings.isFavorite}
                             />
                             <WebsiteButton
                                 text="View more info"
-                                href={`https://vencord.dev/plugins/${plugin.name}`}
+                                href={`https://claudecord.dev/plugins/${plugin.name}`}
                             />
                             <GithubButton
                                 text="View source code"
@@ -202,7 +202,7 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
                 </div>
             }
         >
-            <div className={"vc-settings-modal-content"}>
+            <div className={"cc-settings-modal-content"}>
                 <section>
                     <Heading tag="h3" className={classes(Margins.top8, Margins.bottom8)}>Authors</Heading>
                     <div style={{ width: "fit-content" }}>

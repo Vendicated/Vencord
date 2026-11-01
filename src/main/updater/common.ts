@@ -1,6 +1,6 @@
 /*
- * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2022 Vendicated and contributors
+ * Claudecord, a modification for Discord's desktop app
+ * Copyright (c) 2022 Vendicated, Claude and contributors
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,11 +16,11 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-export const VENCORD_FILES = [
-    IS_DISCORD_DESKTOP ? "patcher.js" : "vencordDesktopMain.js",
-    IS_DISCORD_DESKTOP ? "preload.js" : "vencordDesktopPreload.js",
-    IS_DISCORD_DESKTOP ? "renderer.js" : "vencordDesktopRenderer.js",
-    IS_DISCORD_DESKTOP ? "renderer.css" : "vencordDesktopRenderer.css",
+export const CLAUDECORD_FILES = [
+    IS_DISCORD_DESKTOP ? "patcher.js" : "claudecordDesktopMain.js",
+    IS_DISCORD_DESKTOP ? "preload.js" : "claudecordDesktopPreload.js",
+    IS_DISCORD_DESKTOP ? "renderer.js" : "claudecordDesktopRenderer.js",
+    IS_DISCORD_DESKTOP ? "renderer.css" : "claudecordDesktopRenderer.css",
 ];
 
 export function serializeErrors(func: (...args: any[]) => any) {
