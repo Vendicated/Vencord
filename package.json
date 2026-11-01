@@ -1,18 +1,18 @@
 {
     "name": "vencord",
-    "private": "true",
     "version": "1.15.15",
+    "private": "true",
     "description": "The cutest Discord client mod",
     "homepage": "https://github.com/Vendicated/Vencord#readme",
     "bugs": {
         "url": "https://github.com/Vendicated/Vencord/issues"
     },
+    "license": "GPL-3.0-or-later",
+    "author": "Vendicated",
     "repository": {
         "type": "git",
         "url": "git+https://github.com/Vendicated/Vencord.git"
     },
-    "license": "GPL-3.0-or-later",
-    "author": "Vendicated",
     "scripts": {
         "build": "node --require=./scripts/suppressExperimentalWarnings.js scripts/build/build.mjs",
         "buildStandalone": "pnpm build --standalone",
@@ -28,8 +28,8 @@
         "inject": "node scripts/runInstaller.mjs -- --install",
         "uninject": "node scripts/runInstaller.mjs -- --uninstall",
         "lint": "eslint",
-        "format": "oxfmt \"src/**/*.css\" \"**/*.html\"",
-        "format:check": "oxfmt --check \"src/**/*.css\" \"**/*.html\"",
+        "format": "oxfmt \"src/**/*.css\" \"**/*.html\" \"**/*.json\"",
+        "format:check": "pnpm format --check",
         "lint:fix": "pnpm lint --fix",
         "test": "pnpm test:ts && pnpm buildStandalone && pnpm buildWebStandalone && pnpm lint && pnpm format:check && pnpm generatePluginJson",
         "test:ts": "tsc --noEmit",
@@ -77,8 +77,8 @@
         "typescript-transform-paths": "catalog:",
         "zip-local": "catalog:"
     },
-    "packageManager": "pnpm@12.15.0",
     "engines": {
         "node": ">=22"
-    }
+    },
+    "packageManager": "pnpm@12.15.0"
 }
