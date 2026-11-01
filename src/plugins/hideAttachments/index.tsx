@@ -20,69 +20,188 @@ import "./styles.css";
 
 import { get, set } from "@api/DataStore";
 import { updateMessage } from "@api/MessageUpdater";
-import { migratePluginSettings } from "@api/Settings";
+import { definePluginSettings, migratePluginSettings } from "@api/Settings";
 import { ImageInvisible, ImageVisible } from "@components/Icons";
 import { Devs } from "@utils/constants";
 import { classes } from "@utils/misc";
-import definePlugin from "@utils/types";
-import { BasicMessage } from "@vencord/discord-types";
+import definePlugin, { OptionType } from "@utils/types";
+import { BasicMessage, Message } from "@vencord/discord-types";
 
-const KEY = "HideAttachments_HiddenIds";
+const HIDDEN_KEY = "HideAttachments_HiddenIds";
+const REVEALED_KEY = "HideAttachments_RevealedIds";
 
 let hiddenMessages = new Set<string>();
+let revealedMessages = new Set<string>();
 
 async function getHiddenMessages() {
-    hiddenMessages = await get(KEY) ?? new Set();
+    hiddenMessages = await get(HIDDEN_KEY) ?? new Set();
     return hiddenMessages;
 }
 
-const saveHiddenMessages = (ids: Set<string>) => set(KEY, ids);
+async function getRevealedMessages() {
+    revealedMessages = await get(REVEALED_KEY) ?? new Set();
+    return revealedMessages;
+}
+
+const saveHiddenMessages = (ids: Set<string>) => set(HIDDEN_KEY, ids);
+const saveRevealedMessages = (ids: Set<string>) => set(REVEALED_KEY, ids);
 
 migratePluginSettings("HideMedia", "HideAttachments");
 
-const hasMedia = (msg: BasicMessage) => msg.attachments.length > 0 || msg.embeds.length > 0 || msg.stickerItems.length > 0 || msg.components.length > 0;
+const hasMedia = (msg: BasicMessage) =>
+    msg.attachments.length > 0 ||
+    msg.embeds.length > 0 ||
+    msg.stickerItems.length > 0 ||
+    msg.components.length > 0;
 
-async function toggleHide(channelId: string, messageId: string) {
-    const ids = await getHiddenMessages();
-    if (!ids.delete(messageId))
-        ids.add(messageId);
+const settings = definePluginSettings({
+    blacklist: {
+        description: "List of user IDs or media links/domains to automatically hide by default (separated by commas or newlines)",
+        type: OptionType.STRING,
+        default: "",
+        multiline: true
+    }
+});
 
-    await saveHiddenMessages(ids);
-    updateMessage(channelId, messageId);
+function matchesBlacklistEntry(msg: BasicMessage, entry: string): boolean {
+    if (!entry) return false;
+
+    // Check user ID (raw or formatted as mention <@id>)
+    const cleanId = entry.replace(/[<@!>]/g, "");
+    if (/^\d{17,20}$/.test(cleanId) && "author" in msg && (msg as Message).author?.id === cleanId) {
+        return true;
+    }
+
+    if ("author" in msg && (msg as Message).author?.id === entry) {
+        return true;
+    }
+
+    // Check message content
+    if (msg.content?.toLowerCase().includes(entry)) {
+        return true;
+    }
+
+    // Check attachments
+    if (msg.attachments?.some(att =>
+        att.url?.toLowerCase().includes(entry) ||
+        att.proxy_url?.toLowerCase().includes(entry)
+    )) {
+        return true;
+    }
+
+    // Check embeds
+    if (msg.embeds?.some(embed =>
+        embed.url?.toLowerCase().includes(entry) ||
+        embed.image?.url?.toLowerCase().includes(entry) ||
+        embed.image?.proxyURL?.toLowerCase().includes(entry) ||
+        embed.thumbnail?.url?.toLowerCase().includes(entry) ||
+        embed.thumbnail?.proxyURL?.toLowerCase().includes(entry) ||
+        embed.video?.url?.toLowerCase().includes(entry)
+    )) {
+        return true;
+    }
+
+    // Check forwarded messages
+    if ("messageSnapshots" in msg && Array.isArray((msg as Message).messageSnapshots)) {
+        if ((msg as Message).messageSnapshots.some(s => s.message && matchesBlacklistEntry(s.message, entry))) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+function isBlacklisted(msg: BasicMessage | Message): boolean {
+    if (!settings.store.blacklist) return false;
+    if (!hasMedia(msg) && !("messageSnapshots" in msg && (msg as Message).messageSnapshots?.some(s => hasMedia(s.message)))) {
+        return false;
+    }
+
+    const entries = settings.store.blacklist
+        .split(/[,\n]/)
+        .map(e => e.trim().toLowerCase())
+        .filter(Boolean);
+
+    if (entries.length === 0) return false;
+
+    return entries.some(entry => matchesBlacklistEntry(msg, entry));
+}
+
+function getMessageId(msg: BasicMessage | Message | string | undefined | null): string | undefined {
+    if (!msg) return undefined;
+    if (typeof msg === "string") return msg;
+    if ("id" in msg && typeof (msg as Message).id === "string") return (msg as Message).id;
+    return undefined;
+}
+
+function isMediaHidden(msg: BasicMessage | Message | string): boolean {
+    const id = getMessageId(msg);
+    if (id) {
+        if (hiddenMessages.has(id)) return true;
+        if (revealedMessages.has(id)) return false;
+    }
+    if (typeof msg !== "string") {
+        return isBlacklisted(msg);
+    }
+    return false;
+}
+
+async function toggleHide(channelId: string, msg: BasicMessage | Message | string) {
+    const isHidden = isMediaHidden(msg);
+    const id = getMessageId(msg);
+    if (!id) return;
+
+    if (isHidden) {
+        hiddenMessages.delete(id);
+        if (typeof msg !== "string" && isBlacklisted(msg)) {
+            revealedMessages.add(id);
+            await saveRevealedMessages(revealedMessages);
+        }
+        await saveHiddenMessages(hiddenMessages);
+    } else {
+        revealedMessages.delete(id);
+        if (typeof msg !== "string" && !isBlacklisted(msg)) {
+            hiddenMessages.add(id);
+            await saveHiddenMessages(hiddenMessages);
+        }
+        await saveRevealedMessages(revealedMessages);
+    }
+    updateMessage(channelId, id);
 }
 
 export default definePlugin({
     name: "HideMedia",
-    description: "Hide attachments and embeds for individual messages via hover button",
+    description: "Hide attachments and embeds for individual messages via hover button or blacklist",
     tags: ["Chat", "Appearance"],
-    authors: [Devs.Ven],
+    authors: [Devs.Ven, Devs.GhaZy],
     dependencies: ["MessageUpdaterAPI"],
+    settings,
 
     patches: [{
         find: "this.renderAttachments(",
         replacement: {
             match: /(?<=\i=)this\.render(?:Attachments|Embeds|StickersAccessories|ComponentAccessories)\((\i)\)/g,
-            replace: "$self.shouldHide($1?.id)?null:$&"
+            replace: "$self.shouldHide($1)?null:$&"
         }
     }],
 
     messagePopoverButton: {
         icon: ImageInvisible,
         render(msg) {
-            if (!hasMedia(msg) && !msg.messageSnapshots.some(s => hasMedia(s.message))) return null;
+            if (!hasMedia(msg) && !msg.messageSnapshots?.some(s => s.message && hasMedia(s.message))) return null;
 
-            const isHidden = hiddenMessages.has(msg.id);
+            const isHidden = isMediaHidden(msg);
 
             return {
                 label: isHidden ? "Show Media" : "Hide Media",
                 icon: isHidden ? ImageVisible : ImageInvisible,
-                onClick: () => toggleHide(msg.channel_id, msg.id)
+                onClick: () => toggleHide(msg.channel_id, msg)
             };
         },
     },
 
     renderMessageAccessory({ message }) {
-        if (!this.shouldHide(message.id)) return null;
+        if (!this.shouldHide(message)) return null;
 
         return (
             <span className={classes("vc-hideAttachments-accessory", !message.content && "vc-hideAttachments-no-content")}>
@@ -92,14 +211,19 @@ export default definePlugin({
     },
 
     async start() {
-        await getHiddenMessages();
+        await Promise.all([
+            getHiddenMessages(),
+            getRevealedMessages()
+        ]);
     },
 
     stop() {
         hiddenMessages.clear();
+        revealedMessages.clear();
     },
 
-    shouldHide(messageId: string) {
-        return hiddenMessages.has(messageId);
+    shouldHide(msg: BasicMessage | Message | string | undefined | null) {
+        if (!msg) return false;
+        return isMediaHidden(msg);
     },
 });
