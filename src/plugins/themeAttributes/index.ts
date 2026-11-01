@@ -9,7 +9,7 @@ import { Logger } from "@utils/Logger";
 import definePlugin from "@utils/types";
 import { Message, User } from "@vencord/discord-types";
 import { MessageReferenceType } from "@vencord/discord-types/enums";
-import { UserStore } from "@webpack/common";
+import { AuthenticationStore } from "@webpack/common";
 
 interface Grouping {
     first: boolean;
@@ -91,7 +91,7 @@ export default definePlugin({
     getUserModalProps(props: { user: User; }) {
         return {
             "data-member-id": props.user.id,
-            "data-is-self": props.user.id === UserStore.getCurrentUser()?.id
+            "data-is-self": props.user.id === AuthenticationStore.getId()
         };
     },
 
@@ -101,41 +101,30 @@ export default definePlugin({
 
     handleChannelStreamMarkup(channelStreamMarkup: React.ReactElement<MessageProps>[]) {
         try {
-            let index = channelStreamMarkup.findIndex(x => x.props.groupId), preIndex = -1, futureIndex = index + 1;
+            const groups = new Map<
+                string,
+                React.ReactElement<MessageProps>[]
+            >();
 
-            if (index === -1) return channelStreamMarkup;
+            for (let index = 0; index < channelStreamMarkup.length; index++) {
+                const message = channelStreamMarkup[index];
 
-            while (index < channelStreamMarkup.length) {
-                const element = channelStreamMarkup[index];
-                const before: React.ReactElement<MessageProps> | undefined = channelStreamMarkup[preIndex];
+                if (!message.props.groupId) continue;
 
-                let next: React.ReactElement<MessageProps> | undefined;
+                groups.getOrInsert(message.props.groupId, []).push(message);
+            }
 
-                while (futureIndex < channelStreamMarkup.length) {
-                    const after = channelStreamMarkup[futureIndex];
+            for (const entries of groups.values()) {
+                const lastIndex = entries.length - 1;
 
-                    if (!after.props.groupId) {
-                        futureIndex++;
-                        continue;
-                    }
+                for (let index = 0; index < entries.length; index++) {
+                    const message = entries[index];
 
-                    next = after;
-                    break;
+                    message.props.grouping = {
+                        first: index === 0,
+                        last: index === lastIndex
+                    };
                 }
-
-                let first = true;
-                if (typeof before === "object") {
-                    first = before.props.groupId !== element.props.groupId;
-                }
-
-                let last = false;
-                if (!next) last = true;
-                else if (element.props.groupId !== next.props.groupId) last = true;
-
-                channelStreamMarkup[index].props.grouping = { first, last };
-
-                preIndex = index;
-                index = futureIndex++;
             }
         }
         catch (err) {
@@ -166,7 +155,7 @@ export default definePlugin({
                 "data-message-group-end": props.grouping?.last,
                 "data-author-id": authorId,
                 "data-author-username": author?.username,
-                "data-is-self": authorId && authorId === UserStore.getCurrentUser()?.id,
+                "data-is-self": authorId && authorId === AuthenticationStore.getId(),
                 "data-is-webhook": author.discriminator === "0000" && author.bot,
                 "data-author-is-deleted": author.id === "456226577798135808",
                 "data-is-bot": author.bot && author.discriminator !== "0000",
