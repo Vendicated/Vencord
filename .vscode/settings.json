@@ -3,11 +3,11 @@
     "editor.codeActionsOnSave": {
         "source.fixAll.eslint": "explicit"
     },
-    "[typescript]": {
+    "[javascript][javascriptreact][typescript][typescriptreact]": {
         "editor.defaultFormatter": "vscode.typescript-language-features"
     },
-    "[typescriptreact]": {
-        "editor.defaultFormatter": "vscode.typescript-language-features"
+    "[css][html][json][jsonc][yaml]": {
+        "editor.defaultFormatter": "oxc.oxc-vscode"
     },
     "js/ts.format.semicolons": "insert",
     "js/ts.preferences.quoteStyle": "double",
@@ -16,17 +16,5 @@
             "domain": "codeberg.org",
             "type": "Gitea"
         }
-    ],
-    "[css]": {
-        "editor.defaultFormatter": "oxc.oxc-vscode"
-    },
-    "[html]": {
-        "editor.defaultFormatter": "oxc.oxc-vscode"
-    },
-    "[json]": {
-        "editor.defaultFormatter": "oxc.oxc-vscode"
-    },
-    "[jsonc]": {
-        "editor.defaultFormatter": "oxc.oxc-vscode"
-    }
+    ]
 }

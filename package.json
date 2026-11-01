@@ -28,7 +28,7 @@
         "inject": "node scripts/runInstaller.mjs -- --install",
         "uninject": "node scripts/runInstaller.mjs -- --uninstall",
         "lint": "eslint",
-        "fmt": "oxfmt \"src/**/*.css\" \"**/*.html\" \"**/*.json\"",
+        "fmt": "oxfmt \"src/**/*.css\" \"**/*.html\" \"**/*.json\" \"**/*.{yml,yaml}\" \"!pnpm-lock.yaml\"",
         "fmt:check": "pnpm fmt --check",
         "lint:fix": "pnpm lint --fix",
         "test": "pnpm test:ts && pnpm buildStandalone && pnpm buildWebStandalone && pnpm lint && pnpm fmt:check && pnpm generatePluginJson",
