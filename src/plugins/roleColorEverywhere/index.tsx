@@ -138,7 +138,7 @@ export default definePlugin({
         {
             find: "MessageReactions.render:",
             replacement: {
-                match: /tag:"strong",variant:"text-md\/medium"(?<=onContextMenu:.{0,15}\((\i),(\i),\i\).+?)/,
+                match: /tag:"strong",variant:"body-md\/medium"(?<=onContextMenu:.{0,15}\((\i),(\i),\i\).+?)/,
                 replace: "$&,style:$self.getColorStyle($2?.id,$1?.channel?.id)"
             },
             predicate: () => settings.store.reactorsList,
@@ -147,7 +147,7 @@ export default definePlugin({
         {
             find: ",reactionVoteCounts",
             replacement: {
-                match: /\.SIZE_32.+?variant:"text-md\/normal",className:\i\.\i,(?="aria-label":)/,
+                match: /\.SIZE_32.+?variant:"body-md\/normal",className:\i\.\i,(?="aria-label":)/,
                 replace: "$&style:$self.getColorStyle(arguments[0]?.user?.id,arguments[0]?.channel?.id),"
             },
             predicate: () => settings.store.pollResults
