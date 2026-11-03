@@ -5,11 +5,14 @@
  */
 
 import { definePluginSettings } from "@api/Settings";
+import { ErrorBoundary } from "@components/index";
 import { Devs } from "@utils/constants";
 import { Logger } from "@utils/index";
 import definePlugin, { OptionType } from "@utils/types";
 import { useState } from "@webpack/common";
 import { ReactNode } from "react";
+
+import Preview from "./Preview";
 
 const settings = definePluginSettings({
     ezPFP: {
@@ -50,10 +53,16 @@ export default definePlugin({
         },
         {
             find: "keyboardStep:.025",
-            replacement: {
-                match: /(?<=minValue:1,maxValue:)2(?=,keyboardStep:\.025)/,
-                replace: "arguments[0].uploadType !== null && arguments[0].uploadType === 'AVATAR' ? 20 : 2",
-            }
+            replacement: [
+                {
+                    match: /(?<=minValue:1,maxValue:)2(?=,keyboardStep:\.025)/,
+                    replace: "arguments[0].uploadType !== null && arguments[0].uploadType === 'AVATAR' ? 20 : 2",
+                },
+                {
+                    match: /(?<=className:\i\.\i,children:\[)(?=\(0,\i\.jsxs\)\("div",\{role:"group")/,
+                    replace: "$self.renderPreview(arguments[0].imageUri),"
+                }
+            ],
         },
     ],
 
@@ -81,6 +90,12 @@ export default definePlugin({
         logger.log("BLEEEH BLEH:", a);
         return a;
     },
+
+    renderPreview: (src: string) => (
+        <ErrorBoundary noop>
+            <Preview src={src} />
+        </ErrorBoundary>
+    ),
 });
 
 function ReactComponent() {
