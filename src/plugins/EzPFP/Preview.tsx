@@ -5,22 +5,57 @@
  */
 
 import { Logger } from "@utils/index";
-import { UserStore } from "@webpack/common";
+import { useEffect, useRef, UserStore } from "@webpack/common";
 
 const SIZE = 40;
+const logger = new Logger("EzPFP", "#a6d189");
+
+function CropCircle({ src, size }: { src: string; size: number; }) {
+    const box = useRef<HTMLDivElement>(null);
+    const img = useRef<HTMLImageElement>(null);
+
+    useEffect(() => {
+        let raf = 0;
+        const tick = () => {
+            const root = box.current?.closest("[data-ezpfp-root]");
+            const editorImage = [...(root?.parentElement?.querySelectorAll("img") ?? [])]
+                .find(img => !root!.contains(img));
+            const frame = editorImage?.nextElementSibling as HTMLElement | null;
+
+            if (editorImage && frame?.offsetWidth) {
+                const boxStyle = box.current!.style;
+                boxStyle.width = frame.offsetWidth + "px";
+                boxStyle.height = frame.offsetHeight + "px";
+                boxStyle.transform = `scale(${size / frame.offsetWidth})`;
+
+                img.current!.style.cssText = editorImage.style.cssText + ";max-width:none;max-height:none";
+            }
+            raf = requestAnimationFrame(tick);
+        };
+        tick();
+        return () => cancelAnimationFrame(raf);
+    }, [size]);
+
+    return (
+        <div style={{ width: size, height: size, position: "relative", overflow: "hidden", borderRadius: "50%" }}>
+            <div ref={box} style={{ position: "absolute", top: 0, left: 0, transformOrigin: "top left", display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden" }}>
+                <img ref={img} src={src} style={{ opacity: 0 }} />
+            </div>
+        </div>
+    );
+}
 
 export default function Preview({ src }: { src: string; }) {
     const user = UserStore.getCurrentUser();
     const deco = user.avatarDecorationData?.asset as string | undefined;
     const name = user.globalName ?? user.username;
 
-    const logger = new Logger("EzPFP", "#a6d189");
     logger.log("yadda yadda user:", user, " src:", src, " deco:", deco);
 
     return (
         <div data-ezpfp-root style={{ display: "flex", alignItems: "center", gap: 16, padding: 16 }}>
             <div style={{ position: "relative", width: SIZE, height: SIZE }}>
-                <img src={src} style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: "50%" }} />
+                <CropCircle src={src} size={SIZE} />
                 {deco && (
                     <img
                         src={`https://cdn.discordapp.com/avatar-decoration-presets/${deco}.png?size=128`}

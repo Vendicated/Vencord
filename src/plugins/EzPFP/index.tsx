@@ -9,8 +9,6 @@ import { ErrorBoundary } from "@components/index";
 import { Devs } from "@utils/constants";
 import { Logger } from "@utils/index";
 import definePlugin, { OptionType } from "@utils/types";
-import { useState } from "@webpack/common";
-import { ReactNode } from "react";
 
 import Preview from "./Preview";
 
@@ -37,20 +35,20 @@ export default definePlugin({
     authors: [Devs.RandomCat],
     settings,
     patches: [
-        {
-            find: /\i\.intl\.string\(\i\.\i#{intl::Br1ls3::raw}\)/,
-            replacement: {
-                match: /(\i\.intl\.string\(\i\.\i#{intl::Br1ls3::raw}\))/,
-                replace: "$self.doThat($1)",
-            },
-        },
-        {
-            find: /\i\.intl\.format\(\i\.t\["\+CyJu3"\]/,
-            replacement: {
-                match: /(,children:)(\i\.intl\.format\(\i\.t\["\+CyJu3"\],\{recentAvatarsLimit:6\}\))/,
-                replace: "$1$self.testButton($2)",
-            },
-        },
+        // {
+        //     find: /\i\.intl\.string\(\i\.\i#{intl::Br1ls3::raw}\)/,
+        //     replacement: {
+        //         match: /(\i\.intl\.string\(\i\.\i#{intl::Br1ls3::raw}\))/,
+        //         replace: "$self.doThat($1)",
+        //     },
+        // },
+        // {
+        //     find: /\i\.intl\.format\(\i\.t\["\+CyJu3"\]/,
+        //     replacement: {
+        //         match: /(,children:)(\i\.intl\.format\(\i\.t\["\+CyJu3"\],\{recentAvatarsLimit:6\}\))/,
+        //         replace: "$1$self.testButton($2)",
+        //     },
+        // },
         {
             find: "keyboardStep:.025",
             replacement: [
@@ -59,37 +57,37 @@ export default definePlugin({
                     replace: "arguments[0].uploadType !== null && arguments[0].uploadType === 'AVATAR' ? 20 : 2",
                 },
                 {
-                    match: /(?<=className:\i\.\i,children:\[)(?=\(0,\i\.jsxs\)\("div",\{role:"group")/,
-                    replace: "$self.renderPreview(arguments[0].imageUri),"
+                    match: /(showUpsell:!0,position:"inline",className:\i\.\i\}\))(?=\])/,
+                    replace: "$1,$self.renderPreview(arguments[0].imageUri)"
                 }
             ],
         },
     ],
 
-    testButton: (value: ReactNode) => {
-        logger.log("NYAAAAAAAAAAAAAA");
-        const [n, setN] = useState(0);
+    // testButton: (value: ReactNode) => {
+    //     logger.log("NYAAAAAAAAAAAAAA");
+    //     const [n, setN] = useState(0);
 
-        return (
-            <>
-                {value}
-                <p style={{ margin: 0, fontFamily: "var(--font-code)" }}>
-                    {n}
-                </p>
-                <button
-                    style={{ margin: 0, fontFamily: "var(--font-code)" }}
-                    onClick={() => setN(n + 1)}
-                >
-                    +1
-                </button>
-            </>
-        );
-    },
+    //     return (
+    //         <>
+    //             {value}
+    //             <p style={{ margin: 0, fontFamily: "var(--font-code)" }}>
+    //                 {n}
+    //             </p>
+    //             <button
+    //                 style={{ margin: 0, fontFamily: "var(--font-code)" }}
+    //                 onClick={() => setN(n + 1)}
+    //             >
+    //                 +1
+    //             </button>
+    //         </>
+    //     );
+    // },
 
-    doThat(a) {
-        logger.log("BLEEEH BLEH:", a);
-        return a;
-    },
+    // doThat(a) {
+    //     logger.log("BLEEEH BLEH:", a);
+    //     return a;
+    // },
 
     renderPreview: (src: string) => (
         <ErrorBoundary noop>
