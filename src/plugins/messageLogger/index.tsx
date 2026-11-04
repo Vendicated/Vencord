@@ -23,7 +23,7 @@ import { updateMessage } from "@api/MessageUpdater";
 import { definePluginSettings } from "@api/Settings";
 import { disableStyle, enableStyle } from "@api/Styles";
 import ErrorBoundary from "@components/ErrorBoundary";
-import { EyeIcon } from "@components/Icons";
+import { EyeIcon, HistoryIcon } from "@components/Icons";
 import { Devs, SUPPORT_CATEGORY_ID, VENBOT_USER_ID } from "@utils/constants";
 import { getIntlMessage } from "@utils/discord";
 import { Logger } from "@utils/Logger";
@@ -232,7 +232,7 @@ const patchMessageContextMenu: NavContextMenuPatchCallback = (children, props) =
             id={REMOVE_HISTORY_ID}
             key={REMOVE_HISTORY_ID}
             label="Clear Message History"
-            leadingAccessory={{ type: "icon", icon: ClearHistoryIcon }}
+            leadingAccessory={{ type: "icon", icon: HistoryIcon }}
             color="danger"
             action={() => {
                 clearMessageHistory(message);
@@ -343,7 +343,7 @@ export default definePlugin({
     },
 
     messagePopoverButton: {
-        icon: ClearHistoryIcon,
+        icon: HistoryIcon,
         render(message) {
             const current = MessageStore.getMessage(message.channel_id, message.id) as MLMessage | undefined;
 
@@ -352,7 +352,7 @@ export default definePlugin({
 
             return {
                 label: "Clear history",
-                icon: ClearHistoryIcon,
+                icon: HistoryIcon,
                 onClick: () => {
                     const latest = MessageStore.getMessage(message.channel_id, message.id) as MLMessage | undefined;
                     if (!latest) return;
@@ -524,6 +524,22 @@ export default definePlugin({
             "cardinal"
         ]]
     }),
+
+    /**
+     * Get the reaction target for a reaction command like `+:emoji:`
+     *
+     * in the case of something like
+     * >actual message
+     * >deleted message
+     * >chatbox
+     * discord would grab and try to react to the deleted message
+     *
+     * https://github.com/Vendicated/Vencord/issues/4063
+     */
+    getReactionTarget(channelId: string) {
+        const msgs = MessageStore.getMessages(channelId)._array;
+        return msgs.findLast(msg => !msg.deleted);
+    },
 
     patches: [
         {
@@ -709,6 +725,14 @@ export default definePlugin({
             replacement: {
                 match: /receiveMessage\((\i)\)\{/,
                 replace: "$& $self.normalizeNonce($1);"
+            }
+        },
+        {
+            find: "anyScopeRegex(/^\\+:(.+?): *$/)",
+            replacement: {
+                match: /(?<=anyScopeRegex\(\/\^\\\+:\(\.\+\?\): \*\$\/\),action\(\i,\i\)\{.{10,80}?\i=)\i\.\i\.getMessages\((\i\.id)\)\.last\(\)/,
+                replace: "$self.getReactionTarget($1)"
+
             }
         }
     ]

@@ -16,8 +16,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { Button } from "@components/Button";
+import { useFluxSubscription } from "@utils/react";
 import { PluginNative } from "@utils/types";
-import { Button, MediaEngineStore, showToast, useState } from "@webpack/common";
+import { MediaEngineStore, showToast, useRef, useState } from "@webpack/common";
 
 import type { VoiceRecorder } from ".";
 import { settings } from "./settings";
@@ -26,11 +28,35 @@ const Native = VencordNative.pluginHelpers.VoiceMessages as PluginNative<typeof 
 
 export const VoiceRecorderDesktop: VoiceRecorder = ({ setAudioBlob, onRecordingChange }) => {
     const [recording, setRecording] = useState(false);
+    const closed = useRef(false);
 
-    const changeRecording = (recording: boolean) => {
+    useFluxSubscription("VENCORD_STOP_RECORDING", () => {
+        closed.current = true;
+        stopRecording();
+    });
+
+    function changeRecording(recording: boolean) {
         setRecording(recording);
-        onRecordingChange?.(recording);
-    };
+        onRecordingChange(recording);
+    }
+
+    function stopRecording() {
+        if (!recording) return;
+
+        const discordVoice = DiscordNative.nativeModules.requireModule("discord_voice");
+
+        discordVoice.stopLocalAudioRecording(async (filePath: string) => {
+            if (filePath) {
+                const buf = await Native.readRecording(filePath);
+                if (buf)
+                    setAudioBlob(new Blob([buf], { type: "audio/ogg; codecs=opus" }));
+                else
+                    showToast({ text: "Failed to finish recording", variant: "critical" });
+            }
+            changeRecording(false);
+        });
+    }
+
 
     function toggleRecording() {
         const discordVoice = DiscordNative.nativeModules.requireModule("discord_voice");
@@ -44,6 +70,12 @@ export const VoiceRecorderDesktop: VoiceRecorder = ({ setAudioBlob, onRecordingC
                     deviceId: MediaEngineStore.getInputDeviceId(),
                 },
                 (success: boolean) => {
+                    // native recording can finish starting after the modal has closed
+                    if (closed.current) {
+                        if (success) discordVoice.stopLocalAudioRecording(filePath => filePath && Native.readRecording(filePath));
+                        return;
+                    }
+
                     if (success)
                         changeRecording(true);
                     else
@@ -51,16 +83,7 @@ export const VoiceRecorderDesktop: VoiceRecorder = ({ setAudioBlob, onRecordingC
                 }
             );
         } else {
-            discordVoice.stopLocalAudioRecording(async (filePath: string) => {
-                if (filePath) {
-                    const buf = await Native.readRecording(filePath);
-                    if (buf)
-                        setAudioBlob(new Blob([buf], { type: "audio/ogg; codecs=opus" }));
-                    else
-                        showToast({ text: "Failed to finish recording", variant: "critical" });
-                }
-                changeRecording(false);
-            });
+            stopRecording();
         }
     }
 
