@@ -46,7 +46,7 @@ function validateUrl(url: string) {
 }
 
 const SectionHeading = ({ text }: { text: string; }) => (
-    <Heading tag="h1" className={Margins.bottom16}>
+    <Heading tag="h3" className={Margins.bottom16}>
         {text}
     </Heading>
 );
@@ -85,7 +85,7 @@ function CloudSetupSection() {
                         cloud.authenticated = v;
                 }}
             />
-            <Heading className={Margins.top16}>Backend URL</Heading>
+            <Heading className={classes(Margins.top16, Margins.bottom8)}>Backend URL</Heading>
             <Paragraph className={Margins.bottom8}>
                 Which backend to use when using cloud integrations.
             </Paragraph>
@@ -138,7 +138,7 @@ function SettingsSyncSection() {
                 />
 
                 <div>
-                    <Heading>
+                    <Heading className={Margins.bottom8}>
                         Sync Rules for This Device
                     </Heading>
                     <Paragraph className={Margins.bottom8}>

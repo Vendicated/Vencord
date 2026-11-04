@@ -249,7 +249,7 @@ function CustomInstanceAboutComponent() {
     if (!instanceAPIBaseUrl || !instanceBaseURL)
         return (
             <Card variant="danger">
-                <Heading>Invalid ListenBrainz compatible instance</Heading>
+                <Heading className={Margins.bottom8}>Invalid ListenBrainz compatible instance</Heading>
                 <Paragraph>Provide both the <b>API Base URL</b> and the <b>Instance Base URL</b> for your custom ListenBrainz instance or switch back to ListenBrainz/Last.FM</Paragraph>
             </Card>
         );
@@ -257,7 +257,7 @@ function CustomInstanceAboutComponent() {
     if (!cspAllowed)
         return (
             <Card variant="warning">
-                <Heading>Allow Vencord to connect to ListenBrainz instance</Heading>
+                <Heading className={Margins.bottom8}>Allow Vencord to connect to ListenBrainz instance</Heading>
                 <Paragraph>To use your custom ListenBrainz instance, you must first allow Vencord to connect to it.</Paragraph>
                 <Button
                     size="small"
@@ -295,8 +295,8 @@ export default definePlugin({
         if (settings.store.scrobblerBackend === "lastfm")
             return (
                 <Card>
-                    <Heading tag="h2">Last.FM</Heading>
-                    <Heading>How to create an API key</Heading>
+                    <Heading tag="h4" className={Margins.bottom20}>Last.FM</Heading>
+                    <Heading className={Margins.bottom8}>How to create an API key</Heading>
                     <Paragraph>Set <strong>Application name</strong> and <strong>Application description</strong> to anything and leave the rest blank.</Paragraph>
                     <LinkButton size="small" href="https://www.last.fm/api/account/create" className={Margins.top8}>Create API Key</LinkButton>
                 </Card>

@@ -21,12 +21,12 @@ import "./fixDiscordBadgePadding.css";
 import { _getBadges, BadgePosition, BadgeRarity, BadgeUserArgs, DirectoryBadge, ProfileBadge } from "@api/Badges";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Flex } from "@components/Flex";
-import { Heading } from "@components/Heading";
 import { Heart } from "@components/Heart";
 import { CopyIcon, LinkIcon } from "@components/Icons";
 import { Paragraph } from "@components/Paragraph";
 import DonateButton from "@components/settings/DonateButton";
 import { openContributorModal } from "@components/settings/tabs";
+import { Text } from "@components/Text";
 import { Devs } from "@utils/constants";
 import { copyWithToast } from "@utils/discord";
 import { Logger } from "@utils/Logger";
@@ -48,8 +48,13 @@ const ContributorBadge: ProfileBadge = {
 };
 
 
+interface DonorBadge {
+    tooltip?: string;
+    badge: string;
+    "2"?: 1;
+}
 
-let DonorBadges = {} as Record<string, Array<Record<"tooltip" | "badge", string>>>;
+let DonorBadges = {} as Record<string, Array<DonorBadge>>;
 let DirectoryBadges = {} as Record<string, DirectoryBadge>;
 
 async function loadBadges(noCache = false) {
@@ -242,80 +247,90 @@ export default definePlugin({
     },
 
     getDonorBadges(userId: string) {
-        return DonorBadges[userId]?.map((badge, idx) => ({
-            id: `vencord_donor_badge_${idx}`,
-            iconSrc: badge.badge,
-            description: badge.tooltip,
-            name: badge.tooltip,
-            infoLabel: "Vencord Donor",
-            rarity: BadgeRarity.MYTHIC,
-            position: BadgePosition.START,
-            props: {
-                style: {
-                    borderRadius: "50%",
-                    transform: "scale(0.9)" // The image is a bit too big compared to default badges
-                }
-            },
-            onContextMenu(event, badge) {
-                ContextMenuApi.openContextMenu(event, () => <BadgeContextMenu badge={badge} />);
-            },
-            onClick() {
-                openModal(props => (
-                    <ErrorBoundary noop onError={() => {
-                        props.onClose();
-                        VencordNative.native.openExternal("https://github.com/sponsors/Vendicated");
-                    }}>
-                        <Modal
-                            {...props}
-                            title={
-                                <Heading
-                                    tag="h1"
-                                    style={{
-                                        width: "100%",
-                                        textAlign: "center",
-                                        margin: 0
-                                    }}
-                                >
-                                    <Flex justifyContent="center" alignItems="center" gap="0.5em">
-                                        <Heart />
-                                        Vencord Donor
+        return DonorBadges[userId]?.map((badge, idx) => {
+            let largeIconSrc: string | undefined = undefined;
+            if (badge["2"]) {
+                const url = new URL(badge.badge);
+                url.pathname = url.pathname.replace(/(\.[^/.]+)$/, "@2x$1");
+                largeIconSrc = url.toString();
+            }
+
+            return {
+                id: `vencord_donor_badge_${idx}`,
+                iconSrc: badge.badge,
+                largeIconSrc,
+                description: badge.tooltip,
+                name: badge.tooltip,
+                infoLabel: "Vencord Donor",
+                rarity: BadgeRarity.MYTHIC,
+                position: BadgePosition.START,
+                props: {
+                    style: {
+                        borderRadius: "50%",
+                        transform: "scale(0.9)" // The image is a bit too big compared to default badges
+                    }
+                },
+                onContextMenu(event, badge) {
+                    ContextMenuApi.openContextMenu(event, () => <BadgeContextMenu badge={badge} />);
+                },
+                onClick() {
+                    openModal(props => (
+                        <ErrorBoundary noop onError={() => {
+                            props.onClose();
+                            VencordNative.native.openExternal("https://github.com/sponsors/Vendicated");
+                        }}>
+                            <Modal
+                                {...props}
+                                title={
+                                    <Text
+                                        size="lg"
+                                        weight="semibold"
+                                        style={{
+                                            width: "100%",
+                                            textAlign: "center"
+                                        }}
+                                    >
+                                        <Flex justifyContent="center" alignItems="center" gap="0.5em">
+                                            <Heart />
+                                            Vencord Donor
+                                        </Flex>
+                                    </Text>
+                                }
+                            >
+                                <div>
+                                    <Flex>
+                                        <img
+                                            role="presentation"
+                                            src="https://cdn.discordapp.com/emojis/1026533070955872337.png"
+                                            alt=""
+                                            style={{ margin: "auto" }}
+                                        />
+                                        <img
+                                            role="presentation"
+                                            src="https://cdn.discordapp.com/emojis/1026533090627174460.png"
+                                            alt=""
+                                            style={{ margin: "auto" }}
+                                        />
                                     </Flex>
-                                </Heading>
-                            }
-                        >
-                            <div>
-                                <Flex>
-                                    <img
-                                        role="presentation"
-                                        src="https://cdn.discordapp.com/emojis/1026533070955872337.png"
-                                        alt=""
-                                        style={{ margin: "auto" }}
-                                    />
-                                    <img
-                                        role="presentation"
-                                        src="https://cdn.discordapp.com/emojis/1026533090627174460.png"
-                                        alt=""
-                                        style={{ margin: "auto" }}
-                                    />
-                                </Flex>
-                                <div style={{ padding: "1em" }}>
-                                    <Paragraph>
-                                        This badge is a special perk for Vencord Donors
-                                    </Paragraph>
-                                    <Paragraph className={Margins.top16}>
-                                        Please consider supporting the development of Vencord by becoming a donor. It would mean a lot!!
-                                    </Paragraph>
+                                    <div style={{ padding: "1em" }}>
+                                        <Paragraph>
+                                            This badge is a special perk for Vencord Donors
+                                        </Paragraph>
+                                        <Paragraph className={Margins.top16}>
+                                            Please consider supporting the development of Vencord by becoming a donor. It would mean a lot!!
+                                        </Paragraph>
+                                    </div>
                                 </div>
-                            </div>
-                            <div>
-                                <Flex justifyContent="center" style={{ width: "100%" }}>
-                                    <DonateButton variant="overlayPrimary" />
-                                </Flex>
-                            </div>
-                        </Modal>
-                    </ErrorBoundary>
-                ));
-            },
-        } satisfies ProfileBadge));
+                                <div>
+                                    <Flex justifyContent="center" style={{ width: "100%" }}>
+                                        <DonateButton variant="overlayPrimary" />
+                                    </Flex>
+                                </div>
+                            </Modal>
+                        </ErrorBoundary>
+                    ));
+                },
+            } satisfies ProfileBadge;
+        });
     }
 });

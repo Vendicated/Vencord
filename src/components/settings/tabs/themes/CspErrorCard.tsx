@@ -46,7 +46,7 @@ export function CspErrorCard() {
 
     return (
         <ErrorCard>
-            <Heading>Blocked Resources</Heading>
+            <Heading className={Margins.bottom8}>Blocked Resources</Heading>
             <Paragraph>Some images, styles, or fonts were blocked because they come from disallowed domains.</Paragraph>
             <Paragraph>It is highly recommended to move them to GitHub or Imgur. But you may also allow domains if you fully trust them.</Paragraph>
             <Paragraph>

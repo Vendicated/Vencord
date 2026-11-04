@@ -7,9 +7,9 @@
 import "./ContributorModal.css";
 
 import { useSettings } from "@api/Settings";
-import { Heading } from "@components/Heading";
 import { Link } from "@components/Link";
 import { Paragraph } from "@components/Paragraph";
+import { Span } from "@components/Span";
 import { DevsById } from "@utils/constants";
 import { classNameFactory } from "@utils/css";
 import { fetchUserProfile } from "@utils/discord";
@@ -64,7 +64,7 @@ function ContributorModal({ user, modalProps }: { user: User; modalProps: Render
                         src={user.getAvatarURL(void 0, 512, true)}
                         alt=""
                     />
-                    <Heading tag="h2" className={cl("name")}>{user.username}</Heading>
+                    <Span size="lg" weight="semibold" className={cl("name")}>{user.username}</Span>
 
                     <div className={classes("vc-settings-modal-links", cl("links"))}>
                         {website && (

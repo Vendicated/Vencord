@@ -128,7 +128,7 @@ function PluginSettings() {
         if (changes.hasChanges)
             promptToRestart("reload", {
                 children: <>
-                    <Heading>The following plugins require a restart:</Heading>
+                    <Heading className={Margins.bottom8}>The following plugins require a restart:</Heading>
                     <Paragraph>{Array.from(changes, k => k.split(".")[0]).join(", ")}</Paragraph>
                 </>
             });

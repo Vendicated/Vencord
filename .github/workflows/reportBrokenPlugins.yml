@@ -26,8 +26,8 @@ permissions:
     contents: read
 
 jobs:
-    TestPlugins:
-        if: github.repository == 'Vendicated/Vencord'
+    TestStablePlugins:
+        if: github.repository == 'Vendicated/Vencord' && (inputs.discord_branch == 'both' || inputs.discord_branch == 'stable')
         runs-on: ubuntu-latest
 
         steps:
@@ -53,7 +53,7 @@ jobs:
             - name: Build Vencord Reporter Version
               run: pnpm buildReporter
 
-            - name: Run Reporter
+            - name: Run Stable Reporter
               timeout-minutes: 10
               run: |
                   export PATH="$PWD/node_modules/.bin:$PATH"
@@ -61,32 +61,45 @@ jobs:
 
                   esbuild scripts/generateReport.ts > dist/report.mjs
 
-                  stable_output_file=$(mktemp)
-                  canary_output_file=$(mktemp)
+                  node dist/report.mjs >> "$GITHUB_STEP_SUMMARY"
+              env:
+                  WEBHOOK_URL: ${{ inputs.webhook_url || secrets.DISCORD_WEBHOOK }}
+                  WEBHOOK_SECRET: ${{ secrets.WEBHOOK_SECRET }}
 
-                  pids=""
+    TestCanaryPlugins:
+        if: github.repository == 'Vendicated/Vencord' && (inputs.discord_branch == 'both' || inputs.discord_branch == 'canary')
+        runs-on: ubuntu-latest
 
-                  branch="${{ inputs.discord_branch }}"
+        steps:
+            - name: Checkout user repository
+              uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+              with:
+                  ref: ${{ inputs.ref || github.ref }}
+                  repository: ${{ inputs.repository || github.repository }}
 
-                  if [[ "$branch" = "both" || "$branch" = "stable" ]]; then
-                    node dist/report.mjs > "$stable_output_file" &
-                    pids+=" $!"
-                  fi
+            - name: Setup pnpm
+              uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
 
-                  if [[ "$branch" = "both" || "$branch" = "canary" ]]; then
-                    USE_CANARY=true node dist/report.mjs > "$canary_output_file" &
-                    pids+=" $!"
-                  fi
+            - name: Use Node.js
+              uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+              with:
+                  node-version: 24
+                  cache: "pnpm"
 
-                  exit_code=0
-                  for pid in $pids; do
-                      if ! wait "$pid"; then
-                        exit_code=1
-                      fi
-                  done
+            - name: Install dependencies
+              run: pnpm install --frozen-lockfile
 
-                  cat "$stable_output_file" "$canary_output_file" >> $GITHUB_STEP_SUMMARY
-                  exit $exit_code
+            - name: Build Vencord Reporter Version
+              run: pnpm buildReporter
+
+            - name: Run Canary Reporter
+              timeout-minutes: 10
+              run: |
+                  export PATH="$PWD/node_modules/.bin:$PATH"
+                  export CHROMIUM_BIN=/usr/bin/google-chrome
+
+                  esbuild scripts/generateReport.ts > dist/report.mjs
+                  USE_CANARY=true node dist/report.mjs >> "$GITHUB_STEP_SUMMARY"
               env:
                   WEBHOOK_URL: ${{ inputs.webhook_url || secrets.DISCORD_WEBHOOK }}
                   WEBHOOK_SECRET: ${{ secrets.WEBHOOK_SECRET }}

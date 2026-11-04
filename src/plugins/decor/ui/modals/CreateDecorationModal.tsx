@@ -90,7 +90,7 @@ function CreateDecorationModal(props: RenderModalProps) {
                     <div className={cl("create-decoration-modal-form")}>
                         {error !== null && <Paragraph size="xs" style={{ color: "var(--text-danger, var(--text-default))" }}>{error.message}</Paragraph>}
                         <section>
-                            <Heading>File</Heading>
+                            <Heading className={Margins.bottom8}>File</Heading>
                             <FileUpload
                                 filename={file?.name}
                                 placeholder="Choose a file"
@@ -103,7 +103,7 @@ function CreateDecorationModal(props: RenderModalProps) {
                             </Paragraph>
                         </section>
                         <section>
-                            <Heading>Name</Heading>
+                            <Heading className={Margins.bottom8}>Name</Heading>
                             <TextInput
                                 placeholder="Companion Cube"
                                 value={name}

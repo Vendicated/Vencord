@@ -248,7 +248,7 @@ function VoiceMessageModal({ modalProps }: { modalProps: RenderModalProps; }) {
                 </Button>
             </div>
 
-            <Heading>Preview</Heading>
+            <Heading className={Margins.bottom8}>Preview</Heading>
             {metaError
                 ? <Paragraph className={cl("error")}>Failed to parse selected audio file: {metaError.message}</Paragraph>
                 : (

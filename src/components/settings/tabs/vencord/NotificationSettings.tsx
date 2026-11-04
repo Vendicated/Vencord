@@ -18,7 +18,7 @@ import { Modal, openModal, Select, Slider } from "@webpack/common";
 export function NotificationSection() {
     return (
         <section className={Margins.top16}>
-            <Heading>Notifications</Heading>
+            <Heading className={Margins.bottom8}>Notifications</Heading>
             <Paragraph className={Margins.bottom8}>
                 Settings for Notifications sent by Vencord.
                 This does NOT include Discord notifications (messages, etc)
@@ -52,10 +52,10 @@ function NotificationSettings() {
 
     return (
         <>
-            <Heading>Notification Style</Heading>
+            <Heading className={Margins.bottom8}>Notification Style</Heading>
             {settings.useNative !== "never" && Notification?.permission === "denied" && (
                 <ErrorCard style={{ padding: "1em" }} className={Margins.bottom8}>
-                    <Heading>Desktop Notification Permission denied</Heading>
+                    <Heading className={Margins.bottom8}>Desktop Notification Permission denied</Heading>
                     <Paragraph>You have denied Notification Permissions. Thus, Desktop notifications will not work!</Paragraph>
                 </ErrorCard>
             )}
