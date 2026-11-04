@@ -18,7 +18,7 @@
 
 import { definePluginSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
-import IrcColors from "@plugins/ircColors";
+import { getUserColor } from "@plugins/ircColors";
 import { Devs } from "@utils/constants";
 import { classNameFactory } from "@utils/css";
 import { openUserProfile } from "@utils/discord";
@@ -69,14 +69,6 @@ interface TypingUserProps {
     guildId: string;
 }
 
-const getUserColor = (userId: string, guildId: string) => {
-    if (Vencord.Plugins.isPluginEnabled("IrcColors")) {
-        const color = IrcColors.resolveUserColor(userId);
-        if (color) return color;
-    }
-
-    return GuildMemberStore.getMember(guildId, userId)?.colorString;
-};
 const TypingUser = ErrorBoundary.wrap(function TypingUser({ user, guildId }: TypingUserProps) {
     return (
         <strong
@@ -86,7 +78,10 @@ const TypingUser = ErrorBoundary.wrap(function TypingUser({ user, guildId }: Typ
                 openUserProfile(user.id);
             }}
             style={{
-                color: settings.store.showRoleColors ? getUserColor(user.id, guildId) : undefined,
+                color: settings.store.showRoleColors ? getUserColor(user.id, {
+                    colorString: GuildMemberStore.getMember(guildId, user.id)?.colorString,
+                    isPrivate: !guildId
+                }) ?? undefined : undefined,
             }}
         >
             {settings.store.showAvatars && (

@@ -17,7 +17,7 @@
 */
 
 import { definePluginSettings } from "@api/Settings";
-import IrcColors from "@plugins/ircColors";
+import { getUserColor } from "@plugins/ircColors";
 import { Devs } from "@utils/constants";
 import { hasGuildFeature } from "@utils/discord";
 import { Logger } from "@utils/Logger";
@@ -25,7 +25,6 @@ import definePlugin, { makeRange, OptionType } from "@utils/types";
 import { GuildMember, Role } from "@vencord/discord-types";
 import { findByCodeLazy } from "@webpack";
 import { ChannelStore, GuildMemberStore, GuildRoleStore, GuildStore } from "@webpack/common";
-
 
 const useMessageAuthor = findByCodeLazy('"Result cannot be null because the message is not null"');
 
@@ -194,14 +193,16 @@ export default definePlugin({
 
     getMember(userId: string, channelOrGuildId: string) {
         try {
-            const guildId = ChannelStore.getChannel(channelOrGuildId)?.guild_id ?? GuildStore.getGuild(channelOrGuildId)?.id;
+            const channel = ChannelStore.getChannel(channelOrGuildId);
+            const guildId = channel?.guild_id ?? GuildStore.getGuild(channelOrGuildId)?.id;
             const member = guildId == null ? null : GuildMemberStore.getMember(guildId, userId);
 
-            if (Vencord.Plugins.isPluginEnabled("IrcColors")) {
-                const color = IrcColors.resolveUserColor(userId);
-                if (color && color !== member?.colorString)
-                    return { guildId: guildId ?? channelOrGuildId, member: { colorString: color, colorStrings: null } };
-            }
+            const color = getUserColor(userId, {
+                colorString: member?.colorString,
+                isPrivate: channel?.isPrivate() ?? false
+            });
+            if (color && color !== member?.colorString)
+                return { guildId: guildId ?? channelOrGuildId, member: { colorString: color, colorStrings: null } };
 
             return guildId != null && member ? { guildId, member } : null;
         } catch (e) {
@@ -246,8 +247,13 @@ export default definePlugin({
             // Do not apply role color if the send fails, otherwise it becomes indistinguishable
             if (message.state === "SEND_FAILED") return;
 
-            if (author.colorString != null && messageSaturation !== 0) {
-                const value = `color-mix(in oklab, ${author.colorString} ${messageSaturation}%, var({DEFAULT}))`;
+            const colorString = getUserColor(message.author.id, {
+                colorString: author.colorString,
+                isPrivate: ChannelStore.getChannel(message.channel_id)?.isPrivate() ?? false
+            });
+
+            if (colorString != null && messageSaturation !== 0) {
+                const value = `color-mix(in oklab, ${colorString} ${messageSaturation}%, var({DEFAULT}))`;
 
                 return {
                     color: value.replace("{DEFAULT}", "--text-default"),

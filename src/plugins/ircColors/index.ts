@@ -20,23 +20,13 @@ import { definePluginSettings } from "@api/Settings";
 import { hash as h64 } from "@intrnl/xxhash64";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { ChannelStore, GuildMemberStore, SelectedChannelStore } from "@webpack/common";
-
-function calculateHSLforId(id: string) {
-    // No hooks: this also runs outside React components.
-    return {
-        hue: Number(h64(id + settings.store.seed) % 360n),
-        saturation: settings.store.saturation,
-        lightness: settings.store.lightness
-    };
-}
 
 // https://stackoverflow.com/a/44134328
 // Role Color Everywhere expects colorString to be hex, so...
-function hslToHex(hue, saturation, lightness) {
+function hslToHex(hue: number, saturation: number, lightness: number) {
     lightness /= 100;
     const a = saturation * Math.min(lightness, 1 - lightness) / 100;
-    const f = n => {
+    const f = (n: number) => {
         const k = (n + hue / 30) % 12;
         const color = lightness - a * Math.max(Math.min(k - 3, 9 - k, 1), -1);
         // Clip RGB, not HSL, so extended saturation and lightness still affect the color.
@@ -81,6 +71,18 @@ const settings = definePluginSettings({
         default: false
     }
 });
+
+export function getUserColor(userId: string | undefined, { colorString, isPrivate }: { colorString?: string | null; isPrivate: boolean; }) {
+    if (!Vencord.Plugins.isPluginEnabled("IrcColors")) return colorString;
+    if (settings.store.applyColorOnlyInDms && !isPrivate) return colorString;
+    if (settings.store.applyColorOnlyToUsersWithoutColor && colorString) return colorString;
+    if (!userId) return colorString;
+
+    const { lightness, saturation, seed } = settings.store;
+    const hue = Number(h64(userId + seed) % 360n);
+
+    return hslToHex(hue, saturation, lightness);
+}
 
 export default definePlugin({
     name: "IrcColors",
@@ -130,52 +132,26 @@ export default definePlugin({
         }
     },
 
-    calculateHSLforId,
-    resolveUserColor(userId: string) {
-        const channelId = SelectedChannelStore.getChannelId();
-        const channel = ChannelStore.getChannel(channelId);
-        const colorString = channel?.guild_id
-            ? GuildMemberStore.getMember(channel.guild_id, userId)?.colorString
-            : undefined;
-
-        if (settings.store.applyColorOnlyInDms && !channel?.isPrivate()) return colorString;
-        if (settings.store.applyColorOnlyToUsersWithoutColor && colorString) return colorString;
-
-        const { hue, lightness, saturation } = calculateHSLforId(userId);
-
-        return hslToHex(hue, saturation, lightness);
-    },
     calculateNameColorForMessageContext(context: any) {
         const userId: string | undefined = context?.message?.author?.id;
         const colorString = context?.author?.colorString;
-        const color = userId ? this.resolveUserColor(userId) : null;
 
         // Color preview in role settings
         if (context?.message?.channel_id === "1337" && userId === "313337")
             return colorString;
 
-        if (settings.store.applyColorOnlyInDms && !context?.channel?.isPrivate()) {
-            return colorString;
-        }
-
-        return (!settings.store.applyColorOnlyToUsersWithoutColor || !colorString)
-            ? color
-            : colorString;
+        return getUserColor(userId, {
+            colorString,
+            isPrivate: context?.channel?.isPrivate() ?? false
+        });
     },
 
     calculateNameColorForListContext(context: any) {
         try {
-            const id = context?.user?.id;
-            const colorString = context?.colorString;
-            const color = id ? this.resolveUserColor(id) : null;
-
-            if (settings.store.applyColorOnlyInDms && context?.guildId !== undefined) {
-                return colorString;
-            }
-
-            return (!settings.store.applyColorOnlyToUsersWithoutColor || !colorString)
-                ? color
-                : colorString;
+            return getUserColor(context?.user?.id, {
+                colorString: context?.colorString,
+                isPrivate: context?.guildId === undefined
+            });
         } catch (e) {
             console.error("Failed to calculate name color for list context:", e);
         }
