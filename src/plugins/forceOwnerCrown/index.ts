@@ -18,13 +18,14 @@
 
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
+import { Channel, User } from "@vencord/discord-types";
 import { GuildStore } from "@webpack/common";
-import { Channel, User } from "discord-types/general";
 
 export default definePlugin({
     name: "ForceOwnerCrown",
     description: "Force the owner crown next to usernames even if the server is large.",
     authors: [Devs.D3SOX, Devs.Nickyux],
+    tags: ["Roles", "Appearance", "Servers"],
     patches: [
         {
             find: "#{intl::GUILD_OWNER}),children:",

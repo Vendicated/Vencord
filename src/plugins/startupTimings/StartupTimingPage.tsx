@@ -18,8 +18,10 @@
 
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Flex } from "@components/Flex";
+import { Heading } from "@components/Heading";
+import { Margins } from "@components/margins";
 import { findByPropsLazy } from "@webpack";
-import { Forms, React } from "@webpack/common";
+import { React } from "@webpack/common";
 
 interface AppStartPerformance {
     prefix: string;
@@ -88,14 +90,15 @@ function TimingSection({ title, logs, traceEnd }: TimingSectionProps) {
     });
 
     return (
-        <Forms.FormSection title={title} tag="h1">
+        <section>
+            <Heading tag="h4" className={Margins.bottom20}>{title}</Heading>
             <code>
                 {traceEnd && (
-                    <div style={{ color: "var(--header-primary)", marginBottom: 5, userSelect: "text" }}>
+                    <div style={{ color: "var(--text-strong)", marginBottom: 5, userSelect: "text" }}>
                         Trace ended at: {(new Date(traceEnd)).toTimeString()}
                     </div>
                 )}
-                <div style={{ color: "var(--header-primary)", display: "grid", gridTemplateColumns: "repeat(3, auto) 1fr", gap: "2px 10px", userSelect: "text" }}>
+                <div style={{ color: "var(--text-strong)", display: "grid", gridTemplateColumns: "repeat(3, auto) 1fr", gap: "2px 10px", userSelect: "text" }}>
                     <span>Start</span>
                     <span>Interval</span>
                     <span>Delta</span>
@@ -105,7 +108,7 @@ function TimingSection({ title, logs, traceEnd }: TimingSectionProps) {
                     ))}
                 </div>
             </code>
-        </Forms.FormSection>
+        </section>
     );
 }
 
@@ -117,15 +120,16 @@ function ServerTrace({ trace }: ServerTraceProps) {
     const lines = trace.split("\n");
 
     return (
-        <Forms.FormSection title="Server Trace" tag="h2">
+        <section>
+            <Heading className={Margins.bottom8}>Server Trace</Heading>
             <code>
-                <Flex flexDirection="column" style={{ color: "var(--header-primary)", gap: 5, userSelect: "text" }}>
+                <Flex flexDirection="column" gap="5px" style={{ color: "var(--text-strong)", userSelect: "text" }}>
                     {lines.map((line, idx) => (
                         <span key={idx}>{line}</span>
                     ))}
                 </Flex>
             </code>
-        </Forms.FormSection>
+        </section>
     );
 }
 

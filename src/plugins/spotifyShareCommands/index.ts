@@ -16,57 +16,31 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { ApplicationCommandInputType, Command, findOption, OptionalMessageOption, sendBotMessage } from "@api/Commands";
+import { ApplicationCommandInputType, findOption, OptionalMessageOption, sendBotMessage } from "@api/Commands";
 import { Devs } from "@utils/constants";
 import { sendMessage } from "@utils/discord";
 import definePlugin from "@utils/types";
-import { findByPropsLazy } from "@webpack";
-import { FluxDispatcher, MessageActions } from "@webpack/common";
+import { Command, SpotifyTrack } from "@vencord/discord-types";
+import { FluxDispatcher, MessageActions, PendingReplyStore, SpotifyStore } from "@webpack/common";
 
-interface Album {
-    id: string;
-    image: {
-        height: number;
-        width: number;
-        url: string;
-    };
-    name: string;
-}
-
-interface Artist {
-    external_urls: {
-        spotify: string;
-    };
-    href: string;
-    id: string;
-    name: string;
-    type: "artist" | string;
-    uri: string;
-}
-
-interface Track {
-    id: string;
-    album: Album;
-    artists: Artist[];
-    duration: number;
-    isLocal: boolean;
-    name: string;
-}
-
-const Spotify = findByPropsLazy("getPlayerState");
-const PendingReplyStore = findByPropsLazy("getPendingReply");
-
-function makeCommand(name: string, formatUrl: (track: Track) => string): Command {
+function makeCommand(name: string, formatUrl: (track: SpotifyTrack) => string): Command {
     return {
         name,
         description: `Share your current Spotify ${name} in chat`,
         inputType: ApplicationCommandInputType.BUILT_IN,
         options: [OptionalMessageOption],
         execute(options, { channel }) {
-            const track: Track | null = Spotify.getTrack();
+            const track = SpotifyStore.getTrack();
             if (!track) {
                 return sendBotMessage(channel.id, {
                     content: "You're not listening to any music."
+                });
+            }
+
+            // local tracks have an id of null
+            if (track.id == null) {
+                return sendBotMessage(channel.id, {
+                    content: "Failed to find the track on spotify."
                 });
             }
 
@@ -91,6 +65,7 @@ function makeCommand(name: string, formatUrl: (track: Track) => string): Command
 export default definePlugin({
     name: "SpotifyShareCommands",
     description: "Share your current Spotify track, album or artist via slash command (/track, /album, /artist)",
+    tags: ["Media", "Commands"],
     authors: [Devs.katlyn],
     commands: [
         makeCommand("track", track => `https://open.spotify.com/track/${track.id}`),

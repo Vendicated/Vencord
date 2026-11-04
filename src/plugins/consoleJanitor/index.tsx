@@ -5,11 +5,12 @@
  */
 
 import { definePluginSettings } from "@api/Settings";
-import { ErrorBoundary, Flex } from "@components/index";
+import ErrorBoundary from "@components/ErrorBoundary";
+import { Paragraph } from "@components/Paragraph";
+import { SettingsSection } from "@components/settings/tabs/plugins/components/Common";
 import { Devs } from "@utils/constants";
-import { Margins } from "@utils/margins";
 import definePlugin, { defineDefault, OptionType, StartAt } from "@utils/types";
-import { Checkbox, Forms, Text } from "@webpack/common";
+import { Checkbox } from "@webpack/common";
 
 const Noop = () => { };
 const NoopLogger = {
@@ -50,22 +51,20 @@ function AllowLevelSetting({ settingKey }: AllowLevelSettingProps) {
             onChange={(_, newValue) => settings.store.allowLevel[settingKey] = newValue}
             size={20}
         >
-            <Text variant="text-sm/normal">{settingKey[0].toUpperCase() + settingKey.slice(1)}</Text>
+            <Paragraph>{settingKey[0].toUpperCase() + settingKey.slice(1)}</Paragraph>
         </Checkbox>
     );
 }
 
 const AllowLevelSettings = ErrorBoundary.wrap(() => {
     return (
-        <Forms.FormSection>
-            <Forms.FormTitle tag="h3">Filter List</Forms.FormTitle>
-            <Forms.FormText className={Margins.bottom8} type={Forms.FormText.Types.DESCRIPTION}>Always allow loggers of these types</Forms.FormText>
-            <Flex flexDirection="row">
+        <SettingsSection name="Filter List" id="filterList" description="Always allow loggers of these types">
+            <div style={{ display: "flex", flexDirection: "row" }}>
                 {Object.keys(settings.store.allowLevel).map(key => (
                     <AllowLevelSetting key={key} settingKey={key as keyof AllowLevels} />
                 ))}
-            </Flex>
-        </Forms.FormSection>
+            </div>
+        </SettingsSection>
     );
 });
 
@@ -84,8 +83,9 @@ const settings = definePluginSettings({
     },
     whitelistedLoggers: {
         type: OptionType.STRING,
-        description: "Semi colon separated list of loggers to allow even if others are hidden",
+        description: "Semicolon (;) separated list of loggers to allow even if others are hidden",
         default: "GatewaySocket; Routing/Utils",
+        multiline: true,
         onChange(newVal: string) {
             logAllow.clear();
             newVal.split(";").map(x => x.trim()).forEach(logAllow.add.bind(logAllow));
@@ -109,6 +109,7 @@ export default definePlugin({
     name: "ConsoleJanitor",
     description: "Disables annoying console messages/errors",
     authors: [Devs.Nuckyz, Devs.sadan],
+    tags: ["Developers", "Console", "Utility"],
     settings,
 
     startAt: StartAt.Init,
@@ -126,16 +127,9 @@ export default definePlugin({
 
     patches: [
         {
-            find: "https://github.com/highlightjs/highlight.js/issues/2277",
-            replacement: {
-                match: /\(console.log\(`Deprecated.+?`\),/,
-                replace: "("
-            }
-        },
-        {
             find: 'The "interpolate" function is deprecated in v10 (use "to" instead)',
             replacement: {
-                match: /,console.warn\(\i\+'The "interpolate" function is deprecated in v10 \(use "to" instead\)'\)/,
+                match: /,console.warn\('react-spring: The "interpolate" function is deprecated in v10 \(use "to" instead\)'\)/,
                 replace: ""
             }
         },
@@ -148,10 +142,12 @@ export default definePlugin({
         },
         {
             find: "is not a valid locale.",
-            replacement: {
-                match: /\i\.error(?=\(""\.concat\(\i," is not a valid locale."\)\))/,
-                replace: "$self.Noop"
-            }
+            replacement: [
+                {
+                    match: /\i\.error(?=\(`\$\{\i\} is not a valid locale.`)/,
+                    replace: "$self.Noop"
+                }
+            ]
         },
         {
             find: '"AppCrashedFatalReport: getLastCrash not supported."',
@@ -163,7 +159,7 @@ export default definePlugin({
         {
             find: "RPCServer:WSS",
             replacement: {
-                match: /\i\.error\("Error: "\.concat\((\i)\.message/,
+                match: /\i\.error\(`Error: \$\{(\i)\.message\}/,
                 replace: '!$1.message.includes("EADDRINUSE")&&$&'
             }
         },
@@ -183,17 +179,21 @@ export default definePlugin({
         },
         {
             find: "failed to send analytics events",
-            replacement: {
-                match: /console\.error\("\[analytics\] failed to send analytics events query: "\.concat\(\i\)\)/,
-                replace: ""
-            }
+            replacement: [
+                {
+                    match: /console\.error\(`\[analytics\] failed to send analytics events query: \$\{\i\}`\)/,
+                    replace: ""
+                }
+            ]
         },
         {
             find: "Slow dispatch on",
-            replacement: {
-                match: /\i\.totalTime>\i&&\i\.verbose\("Slow dispatch on ".+?\)\);/,
-                replace: ""
-            }
+            replacement: [
+                {
+                    match: /\i\.totalTime>\d+?&&\i\.verbose\([`"]Slow dispatch on.{0,55}\);/,
+                    replace: ""
+                },
+            ]
         },
         // Patches Discord generic logger function
         {

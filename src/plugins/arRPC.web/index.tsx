@@ -17,11 +17,14 @@
 */
 
 import { popNotice, showNotice } from "@api/Notices";
+import { Heading } from "@components/Heading";
 import { Link } from "@components/Link";
+import { Margins } from "@components/margins";
+import { Paragraph } from "@components/Paragraph";
 import { Devs } from "@utils/constants";
 import definePlugin, { ReporterTestable } from "@utils/types";
 import { findByCodeLazy } from "@webpack";
-import { ApplicationAssetUtils, FluxDispatcher, Forms, Toasts } from "@webpack/common";
+import { ApplicationAssetUtils, FluxDispatcher, showToast } from "@webpack/common";
 
 const fetchApplicationsRPC = findByCodeLazy('"Invalid Origin"', ".application");
 
@@ -40,16 +43,17 @@ let ws: WebSocket;
 export default definePlugin({
     name: "WebRichPresence (arRPC)",
     description: "Client plugin for arRPC to enable RPC on Discord Web (experimental)",
+    tags: ["Activity", "Utility"],
     authors: [Devs.Ducko],
     reporterTestable: ReporterTestable.None,
     hidden: IS_VESKTOP || "legcord" in window,
 
     settingsAboutComponent: () => (
         <>
-            <Forms.FormTitle tag="h3">How to use arRPC</Forms.FormTitle>
-            <Forms.FormText>
+            <Heading className={Margins.bottom8}>How to use arRPC</Heading>
+            <Paragraph>
                 <Link href="https://github.com/OpenAsar/arrpc/tree/main#server">Follow the instructions in the GitHub repo</Link> to get the server running, and then enable the plugin.
-            </Forms.FormText>
+            </Paragraph>
         </>
     ),
 
@@ -79,7 +83,7 @@ export default definePlugin({
 
         ws.onmessage = this.handleEvent;
 
-        const connectionSuccessful = await new Promise(res => setTimeout(() => res(ws.readyState === WebSocket.OPEN), 1000)); // check if open after 1s
+        const connectionSuccessful = await new Promise(res => setTimeout(() => res(ws.readyState === WebSocket.OPEN), 5000)); // check if open after 5s
         if (!connectionSuccessful) {
             showNotice("Failed to connect to arRPC, is it running?", "Retry", () => { // show notice about failure to connect, with retry/ignore
                 popNotice();
@@ -88,15 +92,7 @@ export default definePlugin({
             return;
         }
 
-        Toasts.show({ // show toast on success
-            message: "Connected to arRPC",
-            type: Toasts.Type.SUCCESS,
-            id: Toasts.genId(),
-            options: {
-                duration: 1000,
-                position: Toasts.Position.BOTTOM
-            }
-        });
+        showToast({ text: "Connected to arRPC", variant: "success" });
     },
 
     stop() {

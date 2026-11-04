@@ -16,32 +16,32 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Devs } from "@utils/constants";
+import { Devs, IS_MAC } from "@utils/constants";
 import definePlugin from "@utils/types";
-import { findByPropsLazy } from "@webpack";
+import { findCssClassesLazy } from "@webpack";
 
-const SpoilerClasses = findByPropsLazy("spoilerContent");
-const MessagesClasses = findByPropsLazy("messagesWrapper", "navigationDescription");
+const SpoilerClasses = findCssClassesLazy("spoilerContent", "hidden");
+const MessagesClasses = findCssClassesLazy("messagesWrapper", "navigationDescription");
 
 export default definePlugin({
     name: "RevealAllSpoilers",
     description: "Reveal all spoilers in a message by Ctrl-clicking a spoiler, or in the chat with Ctrl+Shift-click",
     authors: [Devs.whqwert],
-
+    tags: ["Accessibility", "Chat", "Shortcuts", "Utility"],
     patches: [
         {
             find: ".removeObscurity,",
             replacement: {
-                match: /(?<="removeObscurity",(\i)=>{)/,
+                match: /(?<=removeObscurity(?:",|=)(\i)=>{)/,
                 replace: (_, event) => `$self.reveal(${event});`
             }
         }
     ],
 
     reveal(event: MouseEvent) {
-        const { ctrlKey, shiftKey, target } = event;
+        const { ctrlKey, metaKey, shiftKey, target } = event;
 
-        if (!ctrlKey) { return; }
+        if (!(IS_MAC ? metaKey : ctrlKey)) { return; }
 
         const { spoilerContent, hidden } = SpoilerClasses;
         const { messagesWrapper } = MessagesClasses;

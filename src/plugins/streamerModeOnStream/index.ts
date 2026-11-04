@@ -37,7 +37,8 @@ function toggleStreamerMode({ streamKey }: StreamEvent, value: boolean) {
 export default definePlugin({
     name: "StreamerModeOnStream",
     description: "Automatically enables streamer mode when you start streaming in Discord",
-    authors: [Devs.Kodarru],
+    tags: ["Privacy", "Utility"],
+    authors: [Devs.IcedMarina],
     flux: {
         STREAM_CREATE: d => toggleStreamerMode(d, true),
         STREAM_DELETE: d => toggleStreamerMode(d, false)
