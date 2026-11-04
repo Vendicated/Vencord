@@ -70,7 +70,7 @@ export function ThemeSettingsComponent() {
         <div className={cl("settings")}>
             <div className={cl("container")}>
                 <div className={cl("settings-labels")}>
-                    <Heading tag="h3">Theme Color</Heading>
+                    <Heading className={Margins.bottom8}>Theme Color</Heading>
                     <Paragraph>Add a color to your Discord client theme</Paragraph>
                 </div>
                 <ColorPicker
@@ -82,7 +82,7 @@ export function ThemeSettingsComponent() {
             </div>
             {(contrastWarning || nitroThemeEnabled) && (<>
                 <ErrorCard className={Margins.top8}>
-                    <Heading tag="h3">Your theme won't look good!</Heading>
+                    <Heading className={Margins.bottom8}>Your theme won't look good!</Heading>
 
                     {contrastWarning && <Paragraph>{">"} Selected color won't contrast well with text</Paragraph>}
                     {nitroThemeEnabled && <Paragraph>{">"} Nitro themes aren't supported</Paragraph>}

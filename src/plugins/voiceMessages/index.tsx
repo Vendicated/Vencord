@@ -43,11 +43,10 @@ import { VoicePreview } from "./VoicePreview";
 import { VoiceRecorderWeb } from "./WebRecorder";
 
 const CloudUpload: typeof TCloudUpload = findLazy(m => m.prototype?.trackUploadFinished);
-
 export const cl = classNameFactory("vc-vmsg-");
 export type VoiceRecorder = ComponentType<{
     setAudioBlob(blob: Blob): void;
-    onRecordingChange?(recording: boolean): void;
+    onRecordingChange(recording: boolean): void;
 }>;
 
 export interface VoiceMessageProps {
@@ -70,7 +69,11 @@ const ctxMenuPatch: NavContextMenuPatchCallback = (children, props) => {
                 icon: Microphone
             }}
             label="Send Voice Message"
-            action={() => openModal(modalProps => <VoiceMessageModal modalProps={modalProps} />)}
+            action={() =>
+                openModal(modalProps => <VoiceMessageModal modalProps={modalProps} />, {
+                    onCloseCallback: () => FluxDispatcher.dispatch({ type: "VENCORD_STOP_RECORDING" })
+                })
+            }
         />
     );
 };
@@ -245,7 +248,7 @@ function VoiceMessageModal({ modalProps }: { modalProps: RenderModalProps; }) {
                 </Button>
             </div>
 
-            <Heading>Preview</Heading>
+            <Heading className={Margins.bottom8}>Preview</Heading>
             {metaError
                 ? <Paragraph className={cl("error")}>Failed to parse selected audio file: {metaError.message}</Paragraph>
                 : (

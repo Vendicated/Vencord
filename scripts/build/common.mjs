@@ -58,6 +58,20 @@ export const banner = {
 `.trim()
 };
 
+export async function getMonacoEditorCdnUrl() {
+    const manifest = await readFile(resolve(import.meta.dirname, "../../node_modules/@vencord/monaco-editor/package.json"), "utf8");
+    /**
+     * @type {import("type-fest").PackageJson}
+     */
+    const { version } = JSON.parse(manifest);
+
+    if (!version) {
+        throw new Error("Failed to extract editor version");
+    }
+
+    return `https://cdn.jsdelivr.net/npm/@vencord/monaco-editor@${version}/dist/index.html`;
+}
+
 /**
  * JSON.stringify all values in an object
  * @type {(obj: Record<string, any>) => Record<string, string>}

@@ -189,7 +189,7 @@ function VencordSettings() {
             )}
 
             <section>
-                <Heading>Quick Actions</Heading>
+                <Heading className={Margins.bottom8}>Quick Actions</Heading>
 
                 <QuickActionCard>
                     <QuickAction
@@ -227,7 +227,7 @@ function VencordSettings() {
             <Divider />
 
             <section className={Margins.top16}>
-                <Heading>Settings</Heading>
+                <Heading className={Margins.bottom8}>Settings</Heading>
                 <Paragraph className={Margins.bottom20} style={{ color: "var(--text-muted)" }}>
                     Hint: You can change the position of this settings section in the{" "}
                     <a onClick={() => openPluginModal(SettingsPlugin)}>

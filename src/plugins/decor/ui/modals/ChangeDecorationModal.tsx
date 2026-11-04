@@ -20,11 +20,11 @@ import DecorationGridCreate from "@plugins/decor/ui/components/DecorationGridCre
 import DecorationGridNone from "@plugins/decor/ui/components/DecorationGridNone";
 import DecorDecorationGridDecoration from "@plugins/decor/ui/components/DecorDecorationGridDecoration";
 import SectionedGridList from "@plugins/decor/ui/components/SectionedGridList";
-import { copyWithToast, openInviteModal } from "@utils/discord";
+import { confirmAction, copyWithToast, openInviteModal } from "@utils/discord";
 import { Margins } from "@utils/margins";
 import { Queue } from "@utils/Queue";
 import { RenderModalProps, User } from "@vencord/discord-types";
-import { closeAllModals, ConfirmModal, FluxDispatcher, GuildStore, Modal, NavigationRouter, openModal, Parser, Tooltip, useEffect, UserStore, UserSummaryItem, UserUtils, useState } from "@webpack/common";
+import { closeAllModals, FluxDispatcher, GuildStore, Modal, NavigationRouter, openModal, Parser, Tooltip, useEffect, UserStore, UserSummaryItem, UserUtils, useState } from "@webpack/common";
 
 import { openCreateDecorationModal } from "./CreateDecorationModal";
 import { openGuidelinesModal } from "./GuidelinesModal";
@@ -70,7 +70,7 @@ function SectionHeader({ section }: SectionHeaderProps) {
 
     return <div>
         <Flex>
-            <Heading style={{ flexGrow: 1 }}>{section.title}</Heading>
+            <Heading className={Margins.bottom8} style={{ flexGrow: 1 }}>{section.title}</Heading>
             {hasAuthorIds && <UserSummaryItem
                 users={authors}
                 guildId={undefined}
@@ -179,19 +179,18 @@ function ChangeDecorationModal(props: RenderModalProps) {
                     </Button>}
                 </Tooltip>
                 <Button
-                    onClick={() => openModal(modalProps => (
-                        <ConfirmModal
-                            {...modalProps}
-                            title="Log Out"
-                            subtitle="Are you sure you want to log out of Decor?"
-                            confirmText="Log Out"
-                            cancelText="Cancel"
-                            onConfirm={() => {
+                    onClick={() => {
+                        confirmAction({
+                            title: "Log Out",
+                            subtitle: "Are you sure you want to log out of Decor?",
+                            confirmText: "Log Out",
+                            cancelText: "Cancel",
+                            onConfirm() {
                                 useAuthorizationStore.getState().remove(UserStore.getCurrentUser().id);
                                 props.onClose();
-                            }}
-                        />
-                    ))}
+                            },
+                        });
+                    }}
                     variant="dangerSecondary"
                 >
                     Log Out
@@ -245,9 +244,9 @@ function ChangeDecorationModal(props: RenderModalProps) {
                     user={UserStore.getCurrentUser()}
                 />
                 {isActiveDecorationPreset &&
-                    <Paragraph size="md" weight="medium" className={Margins.bottom8} style={{ color: "var(--text-strong, var(--text-default))" }}>
+                    <Heading className={Margins.bottom8} style={{ color: "var(--text-strong, var(--text-default))" }}>
                         Part of the {activeDecorationPreset.name} Preset
-                    </Paragraph>
+                    </Heading>
                 }
                 {typeof activeSelectedDecoration === "object" &&
                     <Paragraph

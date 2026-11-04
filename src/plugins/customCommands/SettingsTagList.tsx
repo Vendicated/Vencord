@@ -7,6 +7,7 @@
 import { Button } from "@components/Button";
 import { Card } from "@components/Card";
 import { Flex } from "@components/Flex";
+import { Heading } from "@components/Heading";
 import { DeleteIcon, PencilIcon } from "@components/Icons";
 import { Margins } from "@components/margins";
 import { Paragraph } from "@components/Paragraph";
@@ -19,7 +20,7 @@ export function SettingsTagList() {
 
     return (
         <section className={Margins.top8}>
-            <Paragraph size="md" weight="semibold">Registered Tags</Paragraph>
+            <Heading tag="h4">Registered Tags</Heading>
             <Flex flexDirection="column" gap="0.5em" className={Margins.top8}>
                 {Object.values(tagsList).map(tag => (
                     <Card key={tag.name} className="vc-customCommands-card">

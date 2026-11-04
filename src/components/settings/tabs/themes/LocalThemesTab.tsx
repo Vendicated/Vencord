@@ -127,7 +127,7 @@ export function LocalThemesTab() {
     return (
         <Flex flexDirection="column" gap="1em">
             <Card>
-                <Heading>Find Themes:</Heading>
+                <Heading className={Margins.bottom8}>Find Themes:</Heading>
                 <Flex gap="0.4em" flexDirection="column" justifyContent="flex-start" className={Margins.bottom8}>
                     <span>&ndash; <Link href="https://betterdiscord.app/themes">BetterDiscord theme list</Link></span>
                     <span>&ndash; <Link href="https://github.com/search?q=discord+theme">GitHub</Link></span>
@@ -136,13 +136,13 @@ export function LocalThemesTab() {
             </Card>
 
             <Card>
-                <Heading>External Resources</Heading>
+                <Heading className={Margins.bottom8}>External Resources</Heading>
                 <Paragraph>For security reasons, loading resources (styles, fonts, images, ...) from most sites is blocked.</Paragraph>
                 <Paragraph>Make sure all your assets are hosted on GitHub, GitLab, Codeberg, Imgur, Discord or Google Fonts.</Paragraph>
             </Card>
 
             <section>
-                <Heading>Local Themes</Heading>
+                <Heading className={Margins.bottom8}>Local Themes</Heading>
                 <QuickActionCard>
                     <>
                         {IS_WEB ?

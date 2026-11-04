@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { useEffect, useMemo, useReducer, useRef, useState } from "@webpack/common";
+import { FluxDispatcher, useEffect, useMemo, useReducer, useRef, useState } from "@webpack/common";
 import type { ActionDispatch, ReactNode } from "react";
 
 import { checkIntersecting } from "./misc";
@@ -117,6 +117,7 @@ export function useAwaiter<T>(factory: () => Promise<T>, providedOpts?: AwaiterO
                 opts.onError?.(error);
             });
 
+
         return () => void (isAlive = false);
     }, opts.deps);
 
@@ -161,4 +162,16 @@ export function useCleanupEffect(
     deps?: React.DependencyList
 ): void {
     useEffect(() => effect, deps);
+}
+
+export function useFluxSubscription(event: string, cb: (...args: any[]) => void) {
+    const cbRef = useRef(cb);
+    cbRef.current = cb;
+
+    useEffect(() => {
+        const handler = (...args: any[]) => cbRef.current(...args);
+
+        FluxDispatcher.subscribe(event, handler);
+        return () => FluxDispatcher.unsubscribe(event, handler);
+    }, [event]);
 }

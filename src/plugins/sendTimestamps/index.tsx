@@ -90,7 +90,7 @@ function PickerModal(props: RenderModalProps) {
                 }}
             />
 
-            <Heading>Timestamp Format</Heading>
+            <Heading className={Margins.bottom8}>Timestamp Format</Heading>
             <div className={cl("format-select")}>
                 <Select
                     options={

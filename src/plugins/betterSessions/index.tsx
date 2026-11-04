@@ -89,7 +89,7 @@ export default definePlugin({
         // Show a "NEW" badge if the session is seen for the first time
         return (
             <>
-                <Paragraph size="md" weight="semibold" color="text-strong">{title}</Paragraph>
+                <Paragraph size="md" weight="semibold" style={{ color: "var(--text-strong, var(--text-default))" }}>{title}</Paragraph>
                 <div className={cl("footer-buttons")}>
                     {(savedSession == null || savedSession.isNew) && (
                         <NewButton />
@@ -105,7 +105,7 @@ export default definePlugin({
 
         return (
             <div className={cl("description")}>
-                <Paragraph size="sm" weight="normal" color="text-muted">{label}</Paragraph>
+                <Paragraph size="sm" weight="normal" style={{ color: "var(--text-muted, var(--text-default))" }}>{label}</Paragraph>
                 {timeLabel && (
                     <>
                         {" \xb7 "}
