@@ -26,7 +26,7 @@ import { Menu } from "@webpack/common";
 
 import { settings } from "./settings";
 import { setShouldShowTranslateEnabledTooltip, TranslateChatBarIcon, TranslateIcon } from "./TranslateIcon";
-import { handleTranslate, TranslationAccessory } from "./TranslationAccessory";
+import { handleTranslate, ReplyLanguages, TranslationAccessory } from "./TranslationAccessory";
 import { translate } from "./utils";
 
 const messageCtxPatch: NavContextMenuPatchCallback = (children, { message }: { message: Message; }) => {
@@ -98,9 +98,27 @@ export default definePlugin({
         }
     },
 
-    async onBeforeMessageSend(_, message) {
-        if (!settings.store.autoTranslate) return;
+    flux: {
+        // set by the "Reply in <language>" button, any other reply to that message clears it
+        CREATE_PENDING_REPLY({ message, _vcTranslateTo }: { message: Message; _vcTranslateTo?: string; }) {
+            if (_vcTranslateTo) ReplyLanguages.set(message.id, _vcTranslateTo);
+            else ReplyLanguages.delete(message.id);
+        }
+    },
+
+    async onBeforeMessageSend(_, message, { messageReference }) {
         if (!message.content) return;
+
+        const replyLanguage = messageReference && ReplyLanguages.get(messageReference.message_id);
+        if (replyLanguage) {
+            ReplyLanguages.delete(messageReference.message_id);
+
+            const trans = await translate("sent", message.content, replyLanguage);
+            message.content = trans.text;
+            return;
+        }
+
+        if (!settings.store.autoTranslate) return;
 
         setShouldShowTranslateEnabledTooltip?.(true);
         clearTimeout(tooltipTimeout);

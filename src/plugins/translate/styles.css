@@ -11,13 +11,14 @@
     margin-right: 0.25em;
 }
 
-.vc-trans-dismiss {
+.vc-trans-dismiss,
+.vc-trans-reply-in-language {
     all: unset;
     cursor: pointer;
     color: var(--text-link);
 }
 
-.vc-trans-dismiss:is(:hover, :focus) {
+:is(.vc-trans-dismiss, .vc-trans-reply-in-language):is(:hover, :focus) {
     text-decoration: underline;
 }
 
