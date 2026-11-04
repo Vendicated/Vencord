@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { BaseText } from "@components/BaseText";
+import { Text } from "@components/BaseText";
 import { Button } from "@components/Button";
 import { LazyComponentWrapper } from "@utils/lazyReact";
 import { Embed, ListRow, Message, MessageAttachment, ScrollerBaseRef } from "@vencord/discord-types";
@@ -134,7 +134,7 @@ export function FilePicker({ onSelectItem }: FilePickerProps) {
 }
 
 function EmptyList() {
-    return <BaseText className={cl("info-text")}>No files match your search.</BaseText>;
+    return <Text className={cl("info-text")}>No files match your search.</Text>;
 }
 
 const demoAttachment: MessageAttachment = {
@@ -161,11 +161,11 @@ function Demo() {
                     format={FavouriteItemFormat.NONE}
                 />
             </div>
-            <BaseText className={cl("info-text")} size="md">
+            <Text className={cl("info-text")} size="md">
                 Click the star to favourite a file.
                 <br />
                 Favourite files will show up here!
-            </BaseText>
+            </Text>
         </>
     );
 }
