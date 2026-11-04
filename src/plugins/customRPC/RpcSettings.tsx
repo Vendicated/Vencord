@@ -9,11 +9,12 @@ import "./settings.css";
 import { isPluginEnabled } from "@api/PluginManager";
 import { Divider } from "@components/Divider";
 import { Heading } from "@components/Heading";
+import { Paragraph } from "@components/Paragraph";
 import { resolveError } from "@components/settings/tabs/plugins/components/Common";
 import { debounce } from "@shared/debounce";
 import { classNameFactory } from "@utils/css";
 import { ActivityType } from "@vencord/discord-types/enums";
-import { Select, Text, TextInput, useState } from "@webpack/common";
+import { Select, TextInput, useState } from "@webpack/common";
 
 import CustomRPCPlugin, { setRpc, settings, TimestampMode } from ".";
 
@@ -117,7 +118,7 @@ function SingleSetting<T>({ settingsKey, label, disabled, isValid, transform }: 
 
     return (
         <div className={cl("single", { disabled })}>
-            <Heading tag="h5">{label}</Heading>
+            <Heading>{label}</Heading>
             <TextInput
                 type="text"
                 placeholder={"Enter a value"}
@@ -125,7 +126,7 @@ function SingleSetting<T>({ settingsKey, label, disabled, isValid, transform }: 
                 onChange={handleChange}
                 disabled={disabled}
             />
-            {error && <Text className={cl("error")} variant="text-sm/normal">{error}</Text>}
+            {error && <Paragraph className={cl("error")}>{error}</Paragraph>}
         </div>
     );
 }
@@ -133,7 +134,7 @@ function SingleSetting<T>({ settingsKey, label, disabled, isValid, transform }: 
 function SelectSetting<T>({ settingsKey, label, options, disabled }: SelectOption<T>) {
     return (
         <div className={cl("single", { disabled })}>
-            <Heading tag="h5">{label}</Heading>
+            <Heading>{label}</Heading>
             <Select
                 placeholder={"Select an option"}
                 options={options}

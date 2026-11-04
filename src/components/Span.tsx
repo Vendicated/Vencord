@@ -4,14 +4,14 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { BaseText, type BaseTextProps } from "./BaseText";
+import { Text, type TextProps } from "./Text";
 
-export type SpanProps = BaseTextProps<"span">;
+export type SpanProps = TextProps<"span">;
 
 export function Span({ children, ...restProps }: SpanProps) {
     return (
-        <BaseText tag="span" size="sm" weight="normal" {...restProps}>
+        <Text tag="span" size="sm" weight="normal" {...restProps}>
             {children}
-        </BaseText>
+        </Text>
     );
 }
