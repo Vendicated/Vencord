@@ -100,7 +100,7 @@ function PickerModal(props: RenderModalProps) {
                 }}
             />
 
-            <Heading>Format</Heading>
+            <Heading className={cl("format-heading")}>Format</Heading>
             <Grid columns={3} className={cl("format-grid")}>
                 {Formats.map(m =>
                     <Button

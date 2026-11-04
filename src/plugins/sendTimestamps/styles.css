@@ -24,6 +24,10 @@
     padding: 0;
 }
 
+.vc-st-format-heading {
+    margin-bottom: 0.5em;
+}
+
 .vc-st-format-grid {
     margin-bottom: 1em;
     gap: 0.5em;
