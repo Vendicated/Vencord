@@ -72,7 +72,7 @@ export const VoiceRecorderDesktop: VoiceRecorder = ({ setAudioBlob, onRecordingC
                 (success: boolean) => {
                     // native recording can finish starting after the modal has closed
                     if (closed.current) {
-                        if (success) discordVoice.stopLocalAudioRecording(() => {});
+                        if (success) discordVoice.stopLocalAudioRecording(filePath => filePath && Native.readRecording(filePath));
                         return;
                     }
 
