@@ -35,11 +35,10 @@ function getGradientColors(guildId: string, colorStrings: GuildMember["colorStri
     return colorStrings;
 }
 
-function makeColorStyle(guildId: string, { colorString, colorStrings }: Pick<GuildMember | Role, "colorString" | "colorStrings">): React.CSSProperties | undefined {
-    const gradient = getGradientColors(guildId, colorStrings);
-    if (!gradient) return colorString ? { color: colorString } : undefined;
+function makeColorStyle({ colorString, colorStrings }: Pick<GuildMember | Role, "colorString" | "colorStrings">): React.CSSProperties | undefined {
+    if (!colorStrings) return { color: colorString };
 
-    const { primaryColor, secondaryColor, tertiaryColor } = gradient;
+    const { primaryColor, secondaryColor, tertiaryColor } = colorStrings;
     const colors = [primaryColor, secondaryColor, tertiaryColor, primaryColor].filter(Boolean).join(",");
 
     return {
@@ -191,7 +190,7 @@ export default definePlugin({
         }
     ],
 
-    getMember(userId: string, channelOrGuildId: string) {
+    getColors(userId: string, channelOrGuildId: string) {
         try {
             const channel = ChannelStore.getChannel(channelOrGuildId);
             const guildId = channel?.guild_id ?? GuildStore.getGuild(channelOrGuildId)?.id;
@@ -201,12 +200,16 @@ export default definePlugin({
                 colorString: member?.colorString,
                 isPrivate: channel?.isPrivate() ?? false
             });
-            if (color && color !== member?.colorString)
-                return { guildId: guildId ?? channelOrGuildId, member: { colorString: color, colorStrings: null } };
+            if (!color && !member) return null;
 
-            return guildId != null && member ? { guildId, member } : null;
+            return {
+                colorString: color ?? undefined,
+                colorStrings: guildId != null && member && color === member.colorString
+                    ? getGradientColors(guildId, member.colorStrings)
+                    : null
+            };
         } catch (e) {
-            logger.error("Failed to get member", e);
+            logger.error("Failed to get colors", e);
         }
 
         return null;
@@ -214,7 +217,7 @@ export default definePlugin({
 
     getColorInt(userId: string, channelOrGuildId: string) {
         try {
-            const colorString = this.getMember(userId, channelOrGuildId)?.member.colorString;
+            const colorString = this.getColors(userId, channelOrGuildId)?.colorString;
             return colorString && parseInt(colorString.slice(1), 16);
         } catch (e) {
             logger.error(e);
@@ -222,18 +225,13 @@ export default definePlugin({
     },
 
     getRoleColors(userId: string, channelOrGuildId: string) {
-        try {
-            const data = this.getMember(userId, channelOrGuildId);
-            return data && getGradientColors(data.guildId, data.member.colorStrings);
-        } catch (e) {
-            logger.error(e);
-        }
+        return this.getColors(userId, channelOrGuildId)?.colorStrings ?? null;
     },
 
     getColorStyle(userId: string, channelOrGuildId: string) {
         try {
-            const data = this.getMember(userId, channelOrGuildId);
-            return data && makeColorStyle(data.guildId, data.member);
+            const data = this.getColors(userId, channelOrGuildId);
+            return data && makeColorStyle(data);
         } catch (e) {
             logger.error(e);
         }
@@ -271,7 +269,10 @@ export default definePlugin({
     getRoleStyle(props: any) {
         try {
             const role = GuildRoleStore.getRole(props?.guildId, props?.id);
-            return role && makeColorStyle(props.guildId, role);
+            return role && makeColorStyle({
+                colorString: role.colorString,
+                colorStrings: getGradientColors(props.guildId, role.colorStrings)
+            });
         } catch (e) {
             logger.error("Failed to get role style", e);
         }
