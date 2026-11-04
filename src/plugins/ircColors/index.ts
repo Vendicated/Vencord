@@ -20,6 +20,9 @@ import { definePluginSettings } from "@api/Settings";
 import { hash as h64 } from "@intrnl/xxhash64";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
+import { GuildMember, Role } from "@vencord/discord-types";
+
+type ColorProps = Pick<GuildMember | Role, "colorString" | "colorStrings">;
 
 // https://stackoverflow.com/a/44134328
 // Role Color Everywhere expects colorString to be hex, so...
@@ -107,27 +110,52 @@ export default definePlugin({
                 replace: "colorString:$self.calculateNameColorForListContext(arguments[0]),originalColor:"
             },
             predicate: () => settings.store.memberListColors
-        }
+        },
+        // Activity bar
+        {
+            find: "Masks.CONTENT_INVENTORY_CARD_FACE_PILE_AVATAR",
+            replacement: {
+                match: /\{colorString:.+?\}/,
+                replace: "$self.wrapAuthorColorProps($&,arguments[0])"
+            },
+            predicate: () => settings.store.memberListColors
+        },
     ],
 
-    wrapMessageColorProps(colorProps: { colorString: string, colorStrings?: Record<"primaryColor" | "secondaryColor" | "tertiaryColor", string>; }, context: any) {
-        try {
-            const colorString = this.calculateNameColorForMessageContext(context);
-            if (colorString === colorProps.colorString) {
-                return colorProps;
-            }
+    wrapColorProps(colorProps: ColorProps, colorString: ColorProps["colorString"] | null) {
+        if (colorString === colorProps.colorString) {
+            return colorProps;
+        }
 
-            return {
-                ...colorProps,
-                colorString,
-                colorStrings: colorProps.colorStrings && {
-                    primaryColor: colorString,
-                    secondaryColor: undefined,
-                    tertiaryColor: undefined
-                }
-            };
+        return {
+            ...colorProps,
+            colorString,
+            colorStrings: colorProps.colorStrings && {
+                primaryColor: colorString,
+                secondaryColor: undefined,
+                tertiaryColor: undefined
+            }
+        };
+    },
+
+    wrapMessageColorProps(colorProps: ColorProps, context: any) {
+        try {
+            return this.wrapColorProps(colorProps, this.calculateNameColorForMessageContext(context));
         } catch (e) {
             console.error("Failed to calculate message color strings:", e);
+            return colorProps;
+        }
+    },
+
+    wrapAuthorColorProps(colorProps: ColorProps, context: { entry: { author_id: string; }; guildId?: string; }) {
+        try {
+            const colorString = getUserColor(context.entry.author_id, {
+                colorString: colorProps.colorString,
+                isPrivate: context.guildId == null
+            });
+            return this.wrapColorProps(colorProps, colorString);
+        } catch (e) {
+            console.error("Failed to calculate author color strings:", e);
             return colorProps;
         }
     },
