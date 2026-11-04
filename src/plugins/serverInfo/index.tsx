@@ -5,36 +5,37 @@
  */
 
 import { findGroupChildrenByChildId, NavContextMenuPatchCallback } from "@api/ContextMenu";
-import { migratePluginSettings } from "@api/Settings";
+import { InfoIcon } from "@components/Icons";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
+import { Guild } from "@vencord/discord-types";
 import { Menu } from "@webpack/common";
-import { Guild } from "discord-types/general";
 
 import { openGuildInfoModal } from "./GuildInfoModal";
 
-const Patch: NavContextMenuPatchCallback = (children, { guild }: { guild: Guild; }) => {
+const makePatch: (showIcon: boolean) => NavContextMenuPatchCallback = showIcon => (children, { guild }: { guild: Guild; }) => {
     const group = findGroupChildrenByChildId("privacy", children);
 
     group?.push(
         <Menu.MenuItem
             id="vc-server-info"
             label="Server Info"
+            leadingAccessory={showIcon ? { type: "icon", icon: InfoIcon } : undefined}
             action={() => openGuildInfoModal(guild)}
         />
     );
 };
 
-migratePluginSettings("ServerInfo", "ServerProfile"); // what was I thinking with this name lmao
 export default definePlugin({
     name: "ServerInfo",
     description: "Allows you to view info about a server",
+    tags: ["Servers", "Utility"],
     authors: [Devs.Ven, Devs.Nuckyz],
     dependencies: ["DynamicImageModalAPI"],
-    tags: ["guild", "info", "ServerProfile"],
+    searchTerms: ["guild", "info", "ServerProfile"],
 
     contextMenus: {
-        "guild-context": Patch,
-        "guild-header-popout": Patch
+        "guild-context": makePatch(false),
+        "guild-header-popout": makePatch(true)
     }
 });

@@ -38,6 +38,7 @@ const settings = definePluginSettings({
 export default definePlugin({
     name: "AlwaysTrust",
     description: "Removes the annoying untrusted domain and suspicious file popup",
+    tags: ["Utility"],
     authors: [Devs.zt, Devs.Trwy],
     patches: [
         {
@@ -51,7 +52,7 @@ export default definePlugin({
         {
             find: "bitbucket.org",
             replacement: {
-                match: /function \i\(\i\){(?=.{0,60}\.parse\(\i\))/,
+                match: /function \i\(\i\){(?=.{0,30}pathname:\i)/,
                 replace: "$&return null;"
             },
             predicate: () => settings.store.file

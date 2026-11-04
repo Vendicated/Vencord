@@ -18,8 +18,8 @@
 
 import "./style.css";
 
-import { addDecorator, removeDecorator } from "@api/MemberListDecorators";
-import { addDecoration, removeDecoration } from "@api/MessageDecorations";
+import { addMemberListDecorator, removeMemberListDecorator } from "@api/MemberListDecorators";
+import { addMessageDecoration, removeMessageDecoration } from "@api/MessageDecorations";
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
@@ -50,17 +50,18 @@ const settings = definePluginSettings({
 export default definePlugin({
     name: "UserVoiceShow",
     description: "Shows an indicator when a user is in a Voice Channel",
+    tags: ["Voice", "Appearance", "Friends"],
     authors: [Devs.Nuckyz, Devs.LordElias],
     dependencies: ["MemberListDecoratorsAPI", "MessageDecorationsAPI"],
     settings,
 
     patches: [
-        // User Popout, Full Size Profile, Direct Messages Side Profile
+        // User Popout, User Profile Modal, Direct Messages Side Profile
         {
-            find: ".Messages.USER_PROFILE_LOAD_ERROR",
+            find: "#{intl::USER_PROFILE_PRONOUNS}",
             replacement: {
-                match: /(\.fetchError.+?\?)null/,
-                replace: (_, rest) => `${rest}$self.VoiceChannelIndicator({userId:arguments[0]?.userId,isProfile:true})`
+                match: /(user:(\i).{0,100}onClickDisplayName:\i,trailing:)(\i)/,
+                replace: "$1[$self.VoiceChannelIndicator({userId:$2.id,isProfile:true}),$3]"
             },
             predicate: () => settings.store.showInUserProfileModal
         },
@@ -78,7 +79,7 @@ export default definePlugin({
         {
             find: "PrivateChannel.renderAvatar",
             replacement: {
-                match: /\.Messages\.CLOSE_DM.+?}\)(?=])/,
+                match: /#{intl::CLOSE_DM}.+?}\)(?=])/,
                 replace: "$&,$self.VoiceChannelIndicator({userId:arguments[0]?.user?.id})"
             },
             predicate: () => settings.store.showVoiceChannelIndicator
@@ -87,7 +88,7 @@ export default definePlugin({
         {
             find: "null!=this.peopleListItemRef.current",
             replacement: {
-                match: /\.actions,children:\[(?<=isFocused:(\i).+?)/,
+                match: /\.isProvisional.{0,50}?className:\i\.\i,children:\[(?<=isFocused:(\i).+?)/,
                 replace: "$&$self.VoiceChannelIndicator({userId:this?.props?.user?.id,isActionButton:true,shouldHighlight:$1}),"
             },
             predicate: () => settings.store.showInMemberList
@@ -96,16 +97,16 @@ export default definePlugin({
 
     start() {
         if (settings.store.showInMemberList) {
-            addDecorator("UserVoiceShow", ({ user }) => user == null ? null : <VoiceChannelIndicator userId={user.id} />);
+            addMemberListDecorator("UserVoiceShow", ({ user }) => user == null ? null : <VoiceChannelIndicator userId={user.id} />);
         }
         if (settings.store.showInMessages) {
-            addDecoration("UserVoiceShow", ({ message }) => message?.author == null ? null : <VoiceChannelIndicator userId={message.author.id} isMessageIndicator />);
+            addMessageDecoration("UserVoiceShow", ({ message }) => message?.author == null ? null : <VoiceChannelIndicator userId={message.author.id} isMessage={true} />);
         }
     },
 
     stop() {
-        removeDecorator("UserVoiceShow");
-        removeDecoration("UserVoiceShow");
+        removeMemberListDecorator("UserVoiceShow");
+        removeMessageDecoration("UserVoiceShow");
     },
 
     VoiceChannelIndicator

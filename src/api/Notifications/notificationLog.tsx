@@ -18,13 +18,13 @@
 
 import * as DataStore from "@api/DataStore";
 import { Settings } from "@api/Settings";
-import { classNameFactory } from "@api/Styles";
-import { Flex } from "@components/Flex";
-import { openNotificationSettingsModal } from "@components/VencordSettings/NotificationSettings";
-import { closeModal, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
+import { Paragraph } from "@components/Paragraph";
+import { openNotificationSettingsModal } from "@components/settings/tabs/vencord/NotificationSettings";
+import { classNameFactory } from "@utils/css";
+import { confirmAction } from "@utils/discord";
 import { useAwaiter } from "@utils/react";
-import { Alerts, Button, Forms, React, Text, Timestamp, useEffect, useReducer, useState } from "@webpack/common";
-import { nanoid } from "nanoid";
+import { RenderModalProps } from "@vencord/discord-types";
+import { ListScrollerThin, Modal, openModal, React, Timestamp, useEffect, useReducer, useState } from "@webpack/common";
 import type { DispatchWithoutAction } from "react";
 
 import NotificationComponent from "./NotificationComponent";
@@ -63,7 +63,7 @@ export async function persistNotification(notification: NotificationData) {
         log.unshift({
             ...pureNotification,
             timestamp: Date.now(),
-            id: nanoid()
+            id: crypto.randomUUID()
         });
 
         if (log.length > limit && limit !== 200)
@@ -75,14 +75,21 @@ export async function persistNotification(notification: NotificationData) {
     signals.forEach(x => x());
 }
 
-export async function deleteNotification(timestamp: number) {
-    const log = await getLog();
-    const index = log.findIndex(x => x.timestamp === timestamp);
-    if (index === -1) return;
+export async function deleteNotification(id: string) {
+    let found = false;
 
-    log.splice(index, 1);
-    await DataStore.set(KEY, log);
-    signals.forEach(x => x());
+    await DataStore.update(KEY, (old: PersistentNotificationData[] | undefined) => {
+        const log = old ?? [];
+        const index = log.findIndex(x => x.id === id);
+        if (index === -1) return log;
+
+        log.splice(index, 1);
+        found = true;
+        return log;
+    });
+
+    if (found)
+        signals.forEach(x => x());
 }
 
 export function useLogs() {
@@ -103,21 +110,9 @@ export function useLogs() {
 
 function NotificationEntry({ data }: { data: PersistentNotificationData; }) {
     const [removing, setRemoving] = useState(false);
-    const ref = React.useRef<HTMLDivElement>(null);
-
-    useEffect(() => {
-        const div = ref.current!;
-
-        const setHeight = () => {
-            if (div.clientHeight === 0) return requestAnimationFrame(setHeight);
-            div.style.height = `${div.clientHeight}px`;
-        };
-
-        setHeight();
-    }, []);
 
     return (
-        <div className={cl("wrapper", { removing })} ref={ref}>
+        <div className={cl("wrapper", { removing })}>
             <NotificationComponent
                 {...data}
                 permanent={true}
@@ -126,87 +121,79 @@ function NotificationEntry({ data }: { data: PersistentNotificationData; }) {
                     if (removing) return;
                     setRemoving(true);
 
-                    setTimeout(() => deleteNotification(data.timestamp), 200);
+                    setTimeout(() => deleteNotification(data.id), 200);
                 }}
                 richBody={
-                    <div className={cl("body")}>
-                        {data.body}
+                    <div className={cl("body-wrapper")}>
+                        <div className={cl("body")}>{data.body}</div>
                         <Timestamp timestamp={new Date(data.timestamp)} className={cl("timestamp")} />
                     </div>
                 }
             />
-        </div>
+        </div >
     );
 }
 
 export function NotificationLog({ log, pending }: { log: PersistentNotificationData[], pending: boolean; }) {
     if (!log.length && !pending)
         return (
-            <div className={cl("container")}>
+            <div>
                 <div className={cl("empty")} />
-                <Forms.FormText style={{ textAlign: "center" }}>
+                <Paragraph style={{ textAlign: "center" }}>
                     No notifications yet
-                </Forms.FormText>
+                </Paragraph>
             </div>
         );
 
     return (
-        <div className={cl("container")}>
-            {log.map(n => <NotificationEntry data={n} key={n.id} />)}
-        </div>
+        <ListScrollerThin
+            className={cl("container")}
+            sections={[log.length]}
+            sectionHeight={0}
+            rowHeight={120}
+            renderSection={() => null}
+            renderRow={item => <NotificationEntry data={log[item.row]} key={log[item.row].id} />}
+        />
     );
 }
 
-function LogModal({ modalProps, close }: { modalProps: ModalProps; close(): void; }) {
+function LogModal(props: RenderModalProps) {
     const [log, pending] = useLogs();
 
     return (
-        <ModalRoot {...modalProps} size={ModalSize.LARGE}>
-            <ModalHeader>
-                <Text variant="heading-lg/semibold" style={{ flexGrow: 1 }}>Notification Log</Text>
-                <ModalCloseButton onClick={close} />
-            </ModalHeader>
-
-            <ModalContent>
-                <NotificationLog log={log} pending={pending} />
-            </ModalContent>
-
-            <ModalFooter>
-                <Flex>
-                    <Button onClick={openNotificationSettingsModal}>
-                        Notification Settings
-                    </Button>
-
-                    <Button
-                        disabled={log.length === 0}
-                        color={Button.Colors.RED}
-                        onClick={() => {
-                            Alerts.show({
-                                title: "Are you sure?",
-                                body: `This will permanently remove ${log.length} notification${log.length === 1 ? "" : "s"}. This action cannot be undone.`,
-                                async onConfirm() {
-                                    await DataStore.set(KEY, []);
-                                    signals.forEach(x => x());
-                                },
-                                confirmText: "Do it!",
-                                confirmColor: "vc-notification-log-danger-btn",
-                                cancelText: "Nevermind"
-                            });
-                        }}
-                    >
-                        Clear Notification Log
-                    </Button>
-                </Flex>
-            </ModalFooter>
-        </ModalRoot>
+        <Modal
+            {...props}
+            size="xl"
+            title="Notification Log"
+            actions={[
+                {
+                    text: "Notification Settings",
+                    variant: "primary",
+                    onClick: openNotificationSettingsModal
+                },
+                {
+                    text: "Clear Notification Log",
+                    variant: "critical-primary",
+                    disabled: !log.length,
+                    onClick() {
+                        confirmAction({
+                            title: "Are you sure?",
+                            subtitle: `This will permanently remove ${log.length} notification${log.length === 1 ? "" : "s"}. This action cannot be undone.`,
+                            confirmText: "Do it!",
+                            async onConfirm() {
+                                await DataStore.set(KEY, []);
+                                signals.forEach(x => x());
+                            },
+                        });
+                    }
+                }
+            ]}
+        >
+            <NotificationLog log={log} pending={pending} />
+        </Modal>
     );
 }
 
 export function openNotificationLogModal() {
-    const key = openModal(modalProps => (
-        <LogModal
-            modalProps={modalProps}
-            close={() => closeModal(key)}
-        />
-    ));
+    openModal(props => <LogModal {...props} />);
 }

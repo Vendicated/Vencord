@@ -16,76 +16,85 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { filters, findByPropsLazy, waitFor } from "@webpack";
+import { TooltipFallback } from "@components/TooltipFallback";
+import { LazyComponent } from "@utils/lazyReact";
+import * as t from "@vencord/discord-types";
+import { filters, find, findCssClassesLazy, mapMangledCssClasses, mapMangledModuleLazy, proxyLazyWebpack, waitFor } from "@webpack";
 
 import { waitForComponent } from "./internal";
-import * as t from "./types/components";
 
-export let Forms = {} as {
-    FormTitle: t.FormTitle,
-    FormSection: t.FormSection,
-    FormDivider: t.FormDivider,
-    FormText: t.FormText,
-};
+export const Checkbox = waitForComponent<t.Checkbox>("Checkbox", filters.componentByCode('"data-toggleable-component":"checkbox'));
 
-export let Icons = {} as t.Icons;
+export const Tooltip = waitForComponent<t.Tooltip>("Tooltip", m => m.prototype?.shouldShowTooltip && m.prototype.render, TooltipFallback);
 
-export let Card: t.Card;
-export let Button: t.Button;
-export let Switch: t.Switch;
-export let Tooltip: t.Tooltip;
-export let TooltipContainer: t.TooltipContainer;
-export let TextInput: t.TextInput;
-export let TextArea: t.TextArea;
-export let Text: t.Text;
-export let Heading: t.Heading;
-export let Select: t.Select;
-export let SearchableSelect: t.SearchableSelect;
-export let Slider: t.Slider;
-export let ButtonLooks: t.ButtonLooks;
-export let Popout: t.Popout;
-export let Dialog: t.Dialog;
-export let TabBar: any;
-export let Paginator: t.Paginator;
-export let ScrollerThin: t.ScrollerThin;
-export let Clickable: t.Clickable;
-export let Avatar: t.Avatar;
-export let FocusLock: t.FocusLock;
-// token lagger real
-/** css colour resolver stuff, no clue what exactly this does, just copied usage from Discord */
+// FIXME: t.TextInput was for the old void components, and is not 100% correct for the mana component
+export const TextInput = waitForComponent<t.TextInput>("TextInput", filters.componentByCode('setHasValue?.(""!==', '="text",'));
+export const TextArea = waitForComponent<t.TextArea>("TextArea", filters.componentByCode("!0,rows:", "showRemainingCharacterCount:"));
+export const Select = waitForComponent<t.Select>("Select", filters.componentByCode('selectionMode:"single",onSelectionChange:', "isSelected:"));
+export const SearchableSelect = waitForComponent<t.SearchableSelect>("SearchableSelect", filters.componentByCode('?"multiple":"single",required:'));
+export const Slider = waitForComponent<t.Slider>("Slider", filters.componentByCode("markDash", "this.renderMark("));
+export const Popout = waitForComponent<t.Popout>("Popout", filters.componentByCode("ref:this.ref,", "renderPopout:this.renderPopout,"));
+export const Dialog = waitForComponent<t.Dialog>("Dialog", filters.componentByCode('role:"dialog",tabIndex:-1'));
+export const TabBar = waitForComponent("TabBar", filters.componentByCode("ref:this.tabBarRef,className:"));
+// TODO: remake this component
+export const Clickable = waitForComponent<t.Clickable>("Clickable", filters.componentByCode("this.context?this.renderNonInteractive():"));
+export const Avatar = waitForComponent<t.Avatar>("Avatar", filters.componentByCode(".size-1.375*"));
+export const UserSummaryItem = waitForComponent("UserSummaryItem", filters.componentByCode("defaultRenderUser", "showDefaultAvatarsForNullUsers"));
+
+export let ColorPicker: t.ColorPicker = () => null;
+export function setColorPicker(component: t.ColorPicker) {
+    ColorPicker = component;
+}
+
+export let RoleMemberPopout: t.RoleMemberPopout = () => null;
+export function setRoleMemberPopout(component: t.RoleMemberPopout) {
+    RoleMemberPopout = component;
+}
+
+export let createScroller: ((scrollbarClassName: string, fadeClassName: string, customThemeClassName: string) => t.ScrollerThin) | undefined;
+export function setCreateScroller(cs: NonNullable<typeof createScroller>) {
+    createScroller = cs;
+}
+
+export let createListScroller: (scrollBarClassName: string, fadeClassName: string, someOtherClassIdkMan: string, resizeObserverClass: typeof ResizeObserver) => t.ListScrollerThin;
+waitFor(filters.byCode("getScrollerNode:", "resizeObserver:", "sectionHeight:"), m => createListScroller = m);
+
+const listScrollerClassnames = ["thin", "auto", "fade"] as const;
+export const scrollerClasses = findCssClassesLazy("thin", "auto", "fade", "customTheme", "none");
+
+const isListScroller = filters.byClassNames(...listScrollerClassnames);
+const isNotNormalScroller = filters.byClassNames("customTheme");
+export const listScrollerClasses = proxyLazyWebpack(() => {
+    const mod = find(m => isListScroller(m) && !isNotNormalScroller(m), { topLevelOnly: true });
+    if (!mod) return {} as Record<typeof listScrollerClassnames[number], string>;
+
+    return mapMangledCssClasses(mod, listScrollerClassnames);
+});
+
+export const ScrollerNone = LazyComponent(() => createScroller?.(scrollerClasses.none, scrollerClasses.fade, scrollerClasses.customTheme)!);
+export const ScrollerThin = LazyComponent(() => createScroller?.(scrollerClasses.thin, scrollerClasses.fade, scrollerClasses.customTheme)!);
+export const ScrollerAuto = LazyComponent(() => createScroller?.(scrollerClasses.auto, scrollerClasses.fade, scrollerClasses.customTheme)!);
+
+export const ListScrollerThin = LazyComponent(() => createListScroller(listScrollerClasses.thin, listScrollerClasses.fade, "", ResizeObserver));
+export const ListScrollerAuto = LazyComponent(() => createListScroller(listScrollerClasses.auto, listScrollerClasses.fade, "", ResizeObserver));
+
+export const FocusLock = waitForComponent<t.FocusLock>("FocusLock", filters.componentByCode(".containerRef,{disableReturn:"));
+
 export let useToken: t.useToken;
+waitFor(m => {
+    if (typeof m !== "function") {
+        return false;
+    }
+
+    const str = String(m);
+    return str.includes(".resolve({theme:") && str.includes('"refresh-fast-follow-avatars"') && !str.includes("useMemo");
+}, m => useToken = m);
 
 export const MaskedLink = waitForComponent<t.MaskedLink>("MaskedLink", filters.componentByCode("MASKED_LINK)"));
-export const Timestamp = waitForComponent<t.Timestamp>("Timestamp", filters.byCode(".Messages.MESSAGE_EDITED_TIMESTAMP_A11Y_LABEL.format"));
-export const Flex = waitForComponent<t.Flex>("Flex", ["Justify", "Align", "Wrap"]);
+export const Timestamp = waitForComponent<t.Timestamp>("Timestamp", filters.componentByCode("#{intl::MESSAGE_EDITED_TIMESTAMP_A11Y_LABEL}"));
+export const OAuth2AuthorizeModal = waitForComponent("OAuth2AuthorizeModal", filters.componentByCode("hasContentBackground", "nextStep", "onClose?.()"));
 
-export const { OAuth2AuthorizeModal } = findByPropsLazy("OAuth2AuthorizeModal");
-
-waitFor(["FormItem", "Button"], m => {
-    ({
-        useToken,
-        Card,
-        Button,
-        FormSwitch: Switch,
-        Tooltip,
-        TooltipContainer,
-        TextInput,
-        TextArea,
-        Text,
-        Select,
-        SearchableSelect,
-        Slider,
-        ButtonLooks,
-        TabBar,
-        Popout,
-        Dialog,
-        Paginator,
-        ScrollerThin,
-        Clickable,
-        Avatar,
-        FocusLock,
-        Heading
-    } = m);
-    Forms = m;
-    Icons = m;
+export const Animations = mapMangledModuleLazy(".assign({colorNames:", {
+    Transition: filters.componentByCode('["items","children"]', ",null,"),
+    animated: filters.byProps("div", "text")
 });

@@ -5,18 +5,20 @@
  */
 
 import { findGroupChildrenByChildId, NavContextMenuPatchCallback } from "@api/ContextMenu";
+import { PinOrder, settings } from "@plugins/pinDms";
+import { addChannelToCategory, canMoveChannelInDirection, currentUserCategories, isPinned, moveChannel, removeChannelFromCategory } from "@plugins/pinDms/data";
 import { Menu } from "@webpack/common";
 
-import { addChannelToCategory, canMoveChannelInDirection, categories, isPinned, moveChannel, removeChannelFromCategory } from "../data";
-import { forceUpdate, PinOrder, settings } from "../index";
 import { openCategoryModal } from "./CreateCategoryModal";
 
 function createPinMenuItem(channelId: string) {
     const pinned = isPinned(channelId);
 
+    const showSeparator = pinned || currentUserCategories.length > 0;
+
     return (
         <Menu.MenuItem
-            id="pin-dm"
+            id="vc-pin-dm"
             label="Pin DMs"
         >
 
@@ -28,14 +30,15 @@ function createPinMenuItem(channelId: string) {
                         color="brand"
                         action={() => openCategoryModal(null, channelId)}
                     />
-                    <Menu.MenuSeparator />
+                    {showSeparator && <Menu.MenuSeparator />}
 
                     {
-                        categories.map(category => (
+                        currentUserCategories.map(category => (
                             <Menu.MenuItem
-                                id={`pin-category-${category.name}`}
+                                key={category.id}
+                                id={`pin-category-${category.id}`}
                                 label={category.name}
-                                action={() => addChannelToCategory(channelId, category.id).then(forceUpdate)}
+                                action={() => addChannelToCategory(channelId, category.id)}
                             />
                         ))
                     }
@@ -45,10 +48,10 @@ function createPinMenuItem(channelId: string) {
             {pinned && (
                 <>
                     <Menu.MenuItem
-                        id="unpin-dm"
+                        id="vc-unpin-dm"
                         label="Unpin DM"
                         color="danger"
-                        action={() => removeChannelFromCategory(channelId).then(forceUpdate)}
+                        action={() => removeChannelFromCategory(channelId)}
                     />
 
                     {
@@ -56,7 +59,7 @@ function createPinMenuItem(channelId: string) {
                             <Menu.MenuItem
                                 id="move-up"
                                 label="Move Up"
-                                action={() => moveChannel(channelId, -1).then(forceUpdate)}
+                                action={() => moveChannel(channelId, -1)}
                             />
                         )
                     }
@@ -66,7 +69,7 @@ function createPinMenuItem(channelId: string) {
                             <Menu.MenuItem
                                 id="move-down"
                                 label="Move Down"
-                                action={() => moveChannel(channelId, 1).then(forceUpdate)}
+                                action={() => moveChannel(channelId, 1)}
                             />
                         )
                     }

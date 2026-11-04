@@ -4,15 +4,24 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-export * from "./Badge";
+export * from "./BaseText";
+export * from "./Button";
+export * from "./Card";
 export * from "./CheckedTextInput";
 export * from "./CodeBlock";
-export * from "./DonateButton";
+export * from "./Divider";
 export { default as ErrorBoundary } from "./ErrorBoundary";
 export * from "./ErrorCard";
-export * from "./ExpandableHeader";
 export * from "./Flex";
+export * from "./FormSwitch";
+export * from "./Grid";
 export * from "./Heart";
 export * from "./Icons";
+export * from "./LegacyHeading";
 export * from "./Link";
+export * from "./margins";
+export * from "./Paragraph";
+export * from "./settings";
+export * from "./Span";
 export * from "./Switch";
+export * from "./Text";

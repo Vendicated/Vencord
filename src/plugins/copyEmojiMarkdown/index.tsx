@@ -5,8 +5,9 @@
  */
 
 import { definePluginSettings } from "@api/Settings";
+import { CopyIcon } from "@components/Icons";
 import { Devs } from "@utils/constants";
-import { copyWithToast } from "@utils/misc";
+import { copyWithToast } from "@utils/discord";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByPropsLazy } from "@webpack";
 import { Menu } from "@webpack/common";
@@ -33,11 +34,11 @@ function getEmojiMarkdown(target: Target, copyUnicode: boolean): string {
             : `:${emojiName}:`;
     }
 
-    const extension = target?.firstChild.src.match(
-        /https:\/\/cdn\.discordapp\.com\/emojis\/\d+\.(\w+)/
-    )?.[1];
+    const url = new URL(target.firstChild.src);
+    const hasParam = url.searchParams.get("animated") === "true";
+    const isGif = url.pathname.endsWith(".gif");
 
-    return `<${extension === "gif" ? "a" : ""}:${emojiName.replace(/~\d+$/, "")}:${emojiId}>`;
+    return `<${(hasParam || isGif) ? "a" : ""}:${emojiName.replace(/~\d+$/, "")}:${emojiId}>`;
 }
 
 const settings = definePluginSettings({
@@ -51,12 +52,13 @@ const settings = definePluginSettings({
 export default definePlugin({
     name: "CopyEmojiMarkdown",
     description: "Allows you to copy emojis as formatted string (<:blobcatcozy:1026533070955872337>)",
+    tags: ["Emotes", "Utility"],
     authors: [Devs.HappyEnderman, Devs.Vishnya],
     settings,
 
     contextMenus: {
-        "expression-picker"(children, { target }: { target: Target }) {
-            if (target.dataset.type !== "emoji") return;
+        "expression-picker"(children, { target }: { target: Target; }) {
+            if (target.dataset.type !== "emoji" || !target.dataset.id) return;
 
             children.push(
                 <Menu.MenuItem
@@ -68,6 +70,7 @@ export default definePlugin({
                             "Success! Copied emoji markdown."
                         );
                     }}
+                    leadingAccessory={{ type: "icon", icon: CopyIcon }}
                 />
             );
         },
