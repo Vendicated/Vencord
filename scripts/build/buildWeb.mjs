@@ -21,10 +21,10 @@
 
 import { readFileSync } from "fs";
 import { appendFile, mkdir, readdir, readFile, rm, writeFile } from "fs/promises";
-import { join } from "path";
+import { join, relative } from "path";
 import Zip from "zip-local";
 
-import { BUILD_TIMESTAMP, commonOpts, globPlugins, IS_DEV, IS_REPORTER, VERSION, commonRendererPlugins, buildOrWatchAll, stringifyValues } from "./common.mjs";
+import { BUILD_TIMESTAMP, commonOpts, globPlugins, IS_DEV, IS_REPORTER, IS_ANTI_CRASH_TEST, IS_STANDALONE, VERSION, commonRendererPlugins, buildOrWatchAll, stringifyValues } from "./common.mjs";
 
 /**
  * @type {import("esbuild").BuildOptions}
@@ -44,9 +44,10 @@ const commonOptions = {
         IS_WEB: true,
         IS_EXTENSION: false,
         IS_USERSCRIPT: false,
-        IS_STANDALONE: true,
+        IS_STANDALONE,
         IS_DEV,
         IS_REPORTER,
+        IS_ANTI_CRASH_TEST,
         IS_DISCORD_DESKTOP: false,
         IS_VESKTOP: false,
         IS_UPDATER_DISABLED: true,
@@ -55,31 +56,8 @@ const commonOptions = {
     })
 };
 
-const MonacoWorkerEntryPoints = [
-    "vs/language/css/css.worker.js",
-    "vs/editor/editor.worker.js"
-];
-
 /** @type {import("esbuild").BuildOptions[]} */
 const buildConfigs = [
-    {
-        entryPoints: MonacoWorkerEntryPoints.map(entry => `node_modules/monaco-editor/esm/${entry}`),
-        bundle: true,
-        minify: true,
-        format: "iife",
-        outbase: "node_modules/monaco-editor/esm/",
-        outdir: "dist/vendor/monaco"
-    },
-    {
-        entryPoints: ["browser/monaco.ts"],
-        bundle: true,
-        minify: true,
-        format: "iife",
-        outfile: "dist/vendor/monaco/index.js",
-        loader: {
-            ".ttf": "file"
-        }
-    },
     {
         ...commonOptions,
         outfile: "dist/browser.js",
@@ -133,11 +111,11 @@ async function globDir(dir) {
 }
 
 /**
- * @type {(dir: string, basePath?: string) => Promise<Record<string, string>>}
+ * @type {(dir: string, outDir: string) => Promise<Record<string, string>>}
  */
-async function loadDir(dir, basePath = "") {
+async function loadDir(dir, outDir) {
     const files = await globDir(dir);
-    return Object.fromEntries(await Promise.all(files.map(async f => [f.slice(basePath.length), await readFile(f)])));
+    return Object.fromEntries(await Promise.all(files.map(async f => [join(outDir, relative(dir, f)), await readFile(f)])));
 }
 
 /**
@@ -147,7 +125,7 @@ async function buildExtension(target, files) {
     const entries = {
         "dist/Vencord.js": await readFile("dist/extension.js"),
         "dist/Vencord.css": await readFile("dist/extension.css"),
-        ...await loadDir("dist/vendor/monaco", "dist/"),
+        ...await loadDir("node_modules/@vencord/monaco-editor/dist", "vendor/monaco"),
         ...Object.fromEntries(await Promise.all(files.map(async f => {
             let content = await readFile(join("browser", f));
             if (f.startsWith("manifest")) {
@@ -163,7 +141,7 @@ async function buildExtension(target, files) {
         })))
     };
 
-    await rm(target, { recursive: true, force: true });
+    await rm(join("dist", target), { recursive: true, force: true });
     await Promise.all(Object.entries(entries).map(async ([file, content]) => {
         const dest = join("dist", target, file);
         const parentDirectory = join(dest, "..");
@@ -175,14 +153,7 @@ async function buildExtension(target, files) {
 }
 
 const appendCssRuntime = readFile("dist/Vencord.user.css", "utf-8").then(content => {
-    const cssRuntime = `
-;document.addEventListener("DOMContentLoaded", () => document.documentElement.appendChild(
-    Object.assign(document.createElement("style"), {
-        textContent: \`${content.replaceAll("`", "\\`")}\`,
-        id: "vencord-css-core"
-    })
-), { once: true });
-`;
+    const cssRuntime = `unsafeWindow._vcUserScriptRendererCss=\`${content.replaceAll("`", "\\`")}\``;
 
     return appendFile("dist/Vencord.user.js", cssRuntime);
 });
@@ -190,7 +161,7 @@ const appendCssRuntime = readFile("dist/Vencord.user.css", "utf-8").then(content
 if (!process.argv.includes("--skip-extension")) {
     await Promise.all([
         appendCssRuntime,
-        buildExtension("chromium-unpacked", ["modifyResponseHeaders.json", "content.js", "manifest.json", "icon.png"]),
+        buildExtension("chromium-unpacked", ["modifyResponseHeaders.json", "content.js", "manifest.json", "icon.png", "service-worker.js"]),
         buildExtension("firefox-unpacked", ["background.js", "content.js", "manifestv2.json", "icon.png"]),
     ]);
 

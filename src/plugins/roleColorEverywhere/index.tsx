@@ -17,14 +17,38 @@
 */
 
 import { definePluginSettings } from "@api/Settings";
-import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
+import { hasGuildFeature } from "@utils/discord";
 import { Logger } from "@utils/Logger";
 import definePlugin, { makeRange, OptionType } from "@utils/types";
+import { GuildMember, Role } from "@vencord/discord-types";
 import { findByCodeLazy } from "@webpack";
 import { ChannelStore, GuildMemberStore, GuildRoleStore, GuildStore } from "@webpack/common";
 
 const useMessageAuthor = findByCodeLazy('"Result cannot be null because the message is not null"');
+
+function getGradientColors(guildId: string, colorStrings: GuildMember["colorStrings"]) {
+    const guild = GuildStore.getGuild(guildId);
+    if (!guild || !hasGuildFeature(guild, "ENHANCED_ROLE_COLORS") || !colorStrings?.secondaryColor) return null;
+
+    return colorStrings;
+}
+
+function makeColorStyle(guildId: string, { colorString, colorStrings }: Pick<GuildMember | Role, "colorString" | "colorStrings">): React.CSSProperties | undefined {
+    const gradient = getGradientColors(guildId, colorStrings);
+    if (!gradient) return colorString ? { color: colorString } : undefined;
+
+    const { primaryColor, secondaryColor, tertiaryColor } = gradient;
+    const colors = [primaryColor, secondaryColor, tertiaryColor, primaryColor].filter(Boolean).join(",");
+
+    return {
+        color: primaryColor,
+        background: `linear-gradient(to right,${colors})`,
+        backgroundClip: "text",
+        backgroundSize: "100px auto",
+        WebkitTextFillColor: "transparent"
+    };
+}
 
 const settings = definePluginSettings({
     chatMentions: {
@@ -71,10 +95,13 @@ const settings = definePluginSettings({
     }
 });
 
+const logger = new Logger("RoleColorEverywhere");
+
 export default definePlugin({
     name: "RoleColorEverywhere",
     authors: [Devs.KingFish, Devs.lewisakura, Devs.AutumnVN, Devs.Kyuuhachi, Devs.jamesbt365],
     description: "Adds the top role color anywhere possible",
+    tags: ["Roles", "Appearance"],
     settings,
 
     patches: [
@@ -84,59 +111,61 @@ export default definePlugin({
             replacement: [
                 {
                     match: /(?<=user:(\i),guildId:([^,]+?),.{0,100}?children:\i=>\i)\((\i)\)/,
-                    replace: "({...$3,color:$self.getColorInt($1?.id,$2)})",
+                    replace: "({...$3,color:$self.getColorInt($1?.id,$2),roleColors:$self.getRoleColors($1?.id,$2)})",
                 }
             ],
             predicate: () => settings.store.chatMentions
         },
         // Slate
         {
-            find: ".userTooltip,children",
+            // Same find as FullUserInChatbox
+            find: '"text":"locked"',
             replacement: [
                 {
-                    match: /let\{id:(\i),guildId:\i,channelId:(\i)[^}]*\}.*?\.\i,{(?=children)/,
-                    replace: "$&color:$self.getColorInt($1,$2),"
+                    match: /(?<=let\{id:(\i),guildId:\i,channelId:(\i)\}.{0,300}?popoutProps:)\i(?=\})/,
+                    replace: "{...$&,color:$self.getColorInt($1,$2),roleColors:$self.getRoleColors($1,$2)}"
                 }
             ],
             predicate: () => settings.store.chatMentions
         },
-        // Member List Role Headers
+        // Member List Role Headers (in threads)
         {
             find: 'tutorialId:"whos-online',
             replacement: [
                 {
-                    match: /null,\i," — ",\i\]/,
-                    replace: "null,$self.RoleGroupColor(arguments[0])]"
+                    match: /(?<=#{intl::CHANNEL_MEMBERS_A11Y_LABEL}.{0,400}?)children:(?=.{0,20}?(?:—|\\u2014) ",\i\])/,
+                    replace: "style:$self.getRoleStyle(arguments[0]),$&"
                 },
             ],
             predicate: () => settings.store.memberList
         },
+        // Member List Role Headers
         {
-            find: "#{intl::THREAD_BROWSER_PRIVATE}",
+            find: "?null:new Intl.NumberFormat",
             replacement: [
                 {
-                    match: /children:\[\i," — ",\i\]/,
-                    replace: "children:[$self.RoleGroupColor(arguments[0])]"
+                    match: /(?<=#{intl::CHANNEL_MEMBERS_A11Y_LABEL},\{title:\i,count:\i\}\)\}\),\(0,\i\.jsxs\)\("div",\{)/,
+                    replace: "style:$self.getRoleStyle(arguments[0]),"
                 },
             ],
             predicate: () => settings.store.memberList
         },
         // Voice Users
         {
-            find: ".usernameSpeaking]:",
+            find: "#{intl::GUEST_NAME_SUFFIX})]",
             replacement: [
                 {
-                    match: /\.usernameSpeaking\]:.+?,(?=children)(?<=guildId:(\i),.+?user:(\i).+?)/,
-                    replace: "$&style:$self.getColorStyle($2.id,$1),"
+                    match: /#{intl::GUEST_NAME_SUFFIX}.{0,50}?""\](?<=guildId:(\i),.+?user:(\i).+?)/,
+                    replace: "$&,style:$self.getColorStyle($2.id,$1),"
                 }
             ],
             predicate: () => settings.store.voiceUsers
         },
         // Reaction List
         {
-            find: ".reactorDefault",
+            find: "MessageReactions.render:",
             replacement: {
-                match: /,onContextMenu:\i=>.{0,15}\((\i),(\i),(\i)\).{0,250}tag:"strong"/,
+                match: /tag:"strong",variant:"body-md\/medium"(?<=onContextMenu:.{0,15}\((\i),(\i),\i\).+?)/,
                 replace: "$&,style:$self.getColorStyle($2?.id,$1?.channel?.id)"
             },
             predicate: () => settings.store.reactorsList,
@@ -145,7 +174,7 @@ export default definePlugin({
         {
             find: ",reactionVoteCounts",
             replacement: {
-                match: /\.nickname,(?=children:)/,
+                match: /\.SIZE_32.+?variant:"body-md\/normal",className:\i\.\i,(?="aria-label":)/,
                 replace: "$&style:$self.getColorStyle(arguments[0]?.user?.id,arguments[0]?.channel?.id),"
             },
             predicate: () => settings.store.pollResults
@@ -154,37 +183,52 @@ export default definePlugin({
         {
             find: ".SEND_FAILED,",
             replacement: {
-                match: /(?<=isUnsupported\]:(\i)\.isUnsupported\}\),)(?=children:\[)/,
+                match: /(?<=\]:(\i)\.isUnsupported.{0,50}?,)(?=children:\[)/,
                 replace: "style:$self.useMessageColorsStyle($1),"
             },
             predicate: () => settings.store.colorChatMessages
         }
     ],
 
-    getColorString(userId: string, channelOrGuildId: string) {
+    getMember(userId: string, channelOrGuildId: string) {
         try {
             const guildId = ChannelStore.getChannel(channelOrGuildId)?.guild_id ?? GuildStore.getGuild(channelOrGuildId)?.id;
             if (guildId == null) return null;
 
-            return GuildMemberStore.getMember(guildId, userId)?.colorString ?? null;
+            const member = GuildMemberStore.getMember(guildId, userId);
+            return member && { guildId, member };
         } catch (e) {
-            new Logger("RoleColorEverywhere").error("Failed to get color string", e);
+            logger.error("Failed to get member", e);
         }
 
         return null;
     },
 
     getColorInt(userId: string, channelOrGuildId: string) {
-        const colorString = this.getColorString(userId, channelOrGuildId);
-        return colorString && parseInt(colorString.slice(1), 16);
+        try {
+            const colorString = this.getMember(userId, channelOrGuildId)?.member.colorString;
+            return colorString && parseInt(colorString.slice(1), 16);
+        } catch (e) {
+            logger.error(e);
+        }
+    },
+
+    getRoleColors(userId: string, channelOrGuildId: string) {
+        try {
+            const data = this.getMember(userId, channelOrGuildId);
+            return data && getGradientColors(data.guildId, data.member.colorStrings);
+        } catch (e) {
+            logger.error(e);
+        }
     },
 
     getColorStyle(userId: string, channelOrGuildId: string) {
-        const colorString = this.getColorString(userId, channelOrGuildId);
-
-        return colorString && {
-            color: colorString
-        };
+        try {
+            const data = this.getMember(userId, channelOrGuildId);
+            return data && makeColorStyle(data.guildId, data.member);
+        } catch (e) {
+            logger.error(e);
+        }
     },
 
     useMessageColorsStyle(message: any) {
@@ -192,33 +236,31 @@ export default definePlugin({
             const { messageSaturation } = settings.use(["messageSaturation"]);
             const author = useMessageAuthor(message);
 
+            // Do not apply role color if the send fails, otherwise it becomes indistinguishable
+            if (message.state === "SEND_FAILED") return;
+
             if (author.colorString != null && messageSaturation !== 0) {
                 const value = `color-mix(in oklab, ${author.colorString} ${messageSaturation}%, var({DEFAULT}))`;
 
                 return {
                     color: value.replace("{DEFAULT}", "--text-default"),
-                    "--header-primary": value.replace("{DEFAULT}", "--header-primary"),
+                    "--text-strong": value.replace("{DEFAULT}", "--text-strong"),
                     "--text-muted": value.replace("{DEFAULT}", "--text-muted")
                 };
             }
         } catch (e) {
-            new Logger("RoleColorEverywhere").error("Failed to get message color", e);
+            logger.error("Failed to get message color", e);
         }
 
         return null;
     },
 
-    RoleGroupColor: ErrorBoundary.wrap(({ id, count, title, guildId, label }: { id: string; count: number; title: string; guildId: string; label: string; }) => {
-        const role = GuildRoleStore.getRole(guildId, id);
-
-        return (
-            <span style={{
-                color: role?.colorString,
-                fontWeight: "unset",
-                letterSpacing: ".05em"
-            }}>
-                {title ?? label} &mdash; {count}
-            </span>
-        );
-    }, { noop: true })
+    getRoleStyle(props: any) {
+        try {
+            const role = GuildRoleStore.getRole(props?.guildId, props?.id);
+            return role && makeColorStyle(props.guildId, role);
+        } catch (e) {
+            logger.error("Failed to get role style", e);
+        }
+    }
 });

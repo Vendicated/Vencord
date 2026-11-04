@@ -5,16 +5,21 @@
  */
 
 import { useSettings } from "@api/Settings";
+import ErrorBoundary from "@components/ErrorBoundary";
+import { Heading } from "@components/Heading";
+import { IS_MAC } from "@utils/constants";
 import { Margins } from "@utils/margins";
 import { identity } from "@utils/misc";
-import { Forms, Select } from "@webpack/common";
+import { Select } from "@webpack/common";
 
-export function VibrancySettings() {
+export function MacOSVibrancySettings() {
     const settings = useSettings(["macosVibrancyStyle"]);
 
+    if (!IS_MAC || IS_WEB) return null;
+
     return (
-        <>
-            <Forms.FormTitle tag="h5">Window vibrancy style (requires restart)</Forms.FormTitle>
+        <ErrorBoundary noop>
+            <Heading className={Margins.bottom8}>MacOS Window vibrancy style (requires restart)</Heading>
             <Select
                 className={Margins.bottom20}
                 placeholder="Window vibrancy style"
@@ -74,7 +79,8 @@ export function VibrancySettings() {
                 ]}
                 select={v => settings.macosVibrancyStyle = v}
                 isSelected={v => settings.macosVibrancyStyle === v}
-                serialize={identity} />
-        </>
+                serialize={identity}
+            />
+        </ErrorBoundary>
     );
 }

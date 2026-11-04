@@ -5,8 +5,9 @@
  */
 
 import { definePluginSettings } from "@api/Settings";
+import { CopyIcon } from "@components/Icons";
 import { Devs } from "@utils/constants";
-import { copyWithToast } from "@utils/misc";
+import { copyWithToast } from "@utils/discord";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByPropsLazy } from "@webpack";
 import { Menu } from "@webpack/common";
@@ -51,12 +52,13 @@ const settings = definePluginSettings({
 export default definePlugin({
     name: "CopyEmojiMarkdown",
     description: "Allows you to copy emojis as formatted string (<:blobcatcozy:1026533070955872337>)",
+    tags: ["Emotes", "Utility"],
     authors: [Devs.HappyEnderman, Devs.Vishnya],
     settings,
 
     contextMenus: {
         "expression-picker"(children, { target }: { target: Target; }) {
-            if (target.dataset.type !== "emoji") return;
+            if (target.dataset.type !== "emoji" || !target.dataset.id) return;
 
             children.push(
                 <Menu.MenuItem
@@ -68,6 +70,7 @@ export default definePlugin({
                             "Success! Copied emoji markdown."
                         );
                     }}
+                    leadingAccessory={{ type: "icon", icon: CopyIcon }}
                 />
             );
         },

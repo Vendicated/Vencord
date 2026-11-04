@@ -1,5 +1,6 @@
 .vc-form-switch-wrapper {
     margin-bottom: 20px;
+    cursor: pointer;
 }
 
 .vc-form-switch {
@@ -26,4 +27,8 @@
 
 .vc-form-switch-border {
     margin-top: 20px;
+}
+
+.vc-form-switch-description {
+    color: var(--text-subtle);
 }

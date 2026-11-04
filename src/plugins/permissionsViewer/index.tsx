@@ -20,21 +20,23 @@ import "./styles.css";
 
 import { findGroupChildrenByChildId, NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { definePluginSettings } from "@api/Settings";
+import { Button } from "@components/Button";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { SafetyIcon } from "@components/Icons";
+import { TooltipContainer } from "@components/TooltipContainer";
 import { Devs } from "@utils/constants";
 import { classes } from "@utils/misc";
 import definePlugin, { OptionType } from "@utils/types";
-import type { Guild, GuildMember } from "@vencord/discord-types";
-import { findByPropsLazy } from "@webpack";
-import { Button, ChannelStore, Dialog, GuildMemberStore, GuildRoleStore, GuildStore, match, Menu, PermissionsBits, Popout, TooltipContainer, useRef, UserStore } from "@webpack/common";
+import type { Guild, RoleOrUserPermission } from "@vencord/discord-types";
+import { PermissionOverwriteType } from "@vencord/discord-types/enums";
+import { findCssClassesLazy } from "@webpack";
+import { ChannelStore, Dialog, GuildMemberStore, GuildRoleStore, GuildStore, match, Menu, PermissionsBits, Popout, useEffect, useRef, UserStore } from "@webpack/common";
 
-import openRolesAndUsersPermissionsModal, { PermissionType, RoleOrUserPermission } from "./components/RolesAndUsersPermissions";
+import openRolesAndUsersPermissionsModal from "./components/RolesAndUsersPermissions";
 import UserPermissions from "./components/UserPermissions";
-import { getSortedRolesForMember, sortPermissionOverwrites } from "./utils";
+import { getSortedRolesForMember, loadGetGuildPermissionSpecMap, sortPermissionOverwrites } from "./utils";
 
-const PopoutClasses = findByPropsLazy("container", "scroller", "list");
-const RoleButtonClasses = findByPropsLazy("button", "buttonInner", "icon", "banner");
+const PopoutClasses = findCssClassesLazy("container", "popoutRoleDot");
 
 export const enum PermissionsSortOrder {
     HighestRole,
@@ -58,13 +60,14 @@ export const settings = definePluginSettings({
     },
 });
 
-function MenuItem(guildId: string, id?: string, type?: MenuItemParentType) {
+function MenuItem(guildId: string, { id, type, withIcon }: { id?: string, type?: MenuItemParentType, withIcon?: boolean; }) {
     if (type === MenuItemParentType.User && !GuildMemberStore.isMember(guildId, id!)) return null;
 
     return (
         <Menu.MenuItem
             id="perm-viewer-permissions"
-            label="Permissions"
+            label="View Permissions"
+            leadingAccessory={withIcon ? { type: "icon", icon: SafetyIcon } : undefined}
             action={() => {
                 const guild = GuildStore.getGuild(guildId);
 
@@ -75,13 +78,13 @@ function MenuItem(guildId: string, id?: string, type?: MenuItemParentType) {
 
                         const permissions: RoleOrUserPermission[] = getSortedRolesForMember(guild, member)
                             .map(role => ({
-                                type: PermissionType.Role,
+                                type: PermissionOverwriteType.ROLE,
                                 ...role
                             }));
 
                         if (guild.ownerId === id) {
                             permissions.push({
-                                type: PermissionType.Owner,
+                                type: PermissionOverwriteType.OWNER,
                                 permissions: Object.values(PermissionsBits).reduce((prev, curr) => prev | curr, 0n)
                             });
                         }
@@ -95,7 +98,7 @@ function MenuItem(guildId: string, id?: string, type?: MenuItemParentType) {
                         const channel = ChannelStore.getChannel(id!);
 
                         const permissions = sortPermissionOverwrites(Object.values(channel.permissionOverwrites).map(({ id, allow, deny, type }) => ({
-                            type: type as PermissionType,
+                            type,
                             id,
                             overwriteAllow: allow,
                             overwriteDeny: deny
@@ -108,7 +111,7 @@ function MenuItem(guildId: string, id?: string, type?: MenuItemParentType) {
                     })
                     .otherwise(() => {
                         const permissions = GuildRoleStore.getSortedRoles(guild.id).map(role => ({
-                            type: PermissionType.Role,
+                            type: PermissionOverwriteType.ROLE,
                             ...role
                         }));
 
@@ -124,7 +127,7 @@ function MenuItem(guildId: string, id?: string, type?: MenuItemParentType) {
     );
 }
 
-function makeContextMenuPatch(childId: string | string[], type?: MenuItemParentType): NavContextMenuPatchCallback {
+function makeContextMenuPatch(childId: string | string[], type?: MenuItemParentType, withIcon = false): NavContextMenuPatchCallback {
     return (children, props) => {
         if (
             !props ||
@@ -138,11 +141,10 @@ function makeContextMenuPatch(childId: string | string[], type?: MenuItemParentT
         const group = findGroupChildrenByChildId(childId, children);
 
         const item = match(type)
-            .with(MenuItemParentType.User, () => MenuItem(props.guildId, props.user.id, type))
-            .with(MenuItemParentType.Channel, () => MenuItem(props.guild.id, props.channel.id, type))
-            .with(MenuItemParentType.Guild, () => MenuItem(props.guild.id))
+            .with(MenuItemParentType.User, () => MenuItem(props.guildId, { id: props.user.id, type, withIcon }))
+            .with(MenuItemParentType.Channel, () => MenuItem(props.guild.id, { id: props.channel.id, type, withIcon }))
+            .with(MenuItemParentType.Guild, () => MenuItem(props.guild.id, { withIcon }))
             .otherwise(() => null);
-
 
         if (item == null) return;
 
@@ -160,21 +162,26 @@ function makeContextMenuPatch(childId: string | string[], type?: MenuItemParentT
 export default definePlugin({
     name: "PermissionsViewer",
     description: "View the permissions a user or channel has, and the roles of a server",
+    tags: ["Servers", "Roles", "Utility"],
     authors: [Devs.Nuckyz, Devs.Ven],
     settings,
 
     patches: [
         {
-            find: "#{intl::VIEW_ALL_ROLES}",
+            find: "#{intl::COLLAPSE_ROLES}",
             replacement: {
-                match: /\.expandButton,.+?null,/,
-                replace: "$&$self.ViewPermissionsButton(arguments[0]),"
+                match: /(?<=\i\.id\)\),\i\(\))(?=,\i\?)/,
+                replace: ",$self.ViewPermissionsButton(arguments[0])"
             }
         }
     ],
 
-    ViewPermissionsButton: ErrorBoundary.wrap(({ guild, guildMember }: { guild: Guild; guildMember: GuildMember; }) => {
+    ViewPermissionsButton: ErrorBoundary.wrap(({ className, guild, userId }: { className: string; guild: Guild; userId: string; }) => {
         const buttonRef = useRef(null);
+        useEffect(() => void loadGetGuildPermissionSpecMap(), []);
+
+        const guildMember = GuildMemberStore.getMember(guild.id, userId);
+        if (!guildMember) return null;
 
         return (
             <Popout
@@ -191,12 +198,10 @@ export default definePlugin({
                     <TooltipContainer text="View Permissions">
                         <Button
                             {...popoutProps}
-                            buttonRef={buttonRef}
-                            color={Button.Colors.CUSTOM}
-                            look={Button.Looks.FILLED}
-                            size={Button.Sizes.NONE}
-                            innerClassName={classes(RoleButtonClasses.buttonInner, RoleButtonClasses.icon)}
-                            className={classes(RoleButtonClasses.button, RoleButtonClasses.icon, "vc-permviewer-role-button")}
+                            ref={buttonRef}
+                            variant="none"
+                            size="min"
+                            className={classes(className, "vc-permviewer-role-button")}
                         >
                             <SafetyIcon height="16" width="16" />
                         </Button>
@@ -210,6 +215,6 @@ export default definePlugin({
         "user-context": makeContextMenuPatch("roles", MenuItemParentType.User),
         "channel-context": makeContextMenuPatch(["mute-channel", "unmute-channel"], MenuItemParentType.Channel),
         "guild-context": makeContextMenuPatch("privacy", MenuItemParentType.Guild),
-        "guild-header-popout": makeContextMenuPatch("privacy", MenuItemParentType.Guild)
+        "guild-header-popout": makeContextMenuPatch("privacy", MenuItemParentType.Guild, true)
     }
 });

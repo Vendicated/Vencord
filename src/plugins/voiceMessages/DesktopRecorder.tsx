@@ -16,22 +16,43 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { Button } from "@components/Button";
+import { useFluxSubscription } from "@utils/react";
 import { PluginNative } from "@utils/types";
-import { Button, showToast, Toasts, useState } from "@webpack/common";
+import { MediaEngineStore, showToast, useState } from "@webpack/common";
 
 import type { VoiceRecorder } from ".";
 import { settings } from "./settings";
-import { MediaEngineStore } from "./utils";
 
 const Native = VencordNative.pluginHelpers.VoiceMessages as PluginNative<typeof import("./native")>;
 
 export const VoiceRecorderDesktop: VoiceRecorder = ({ setAudioBlob, onRecordingChange }) => {
     const [recording, setRecording] = useState(false);
 
-    const changeRecording = (recording: boolean) => {
+    useFluxSubscription("VENCORD_STOP_RECORDING", stopRecording);
+
+    function changeRecording(recording: boolean) {
         setRecording(recording);
-        onRecordingChange?.(recording);
-    };
+        onRecordingChange(recording);
+    }
+
+    function stopRecording() {
+        if (!recording) return;
+
+        const discordVoice = DiscordNative.nativeModules.requireModule("discord_voice");
+
+        discordVoice.stopLocalAudioRecording(async (filePath: string) => {
+            if (filePath) {
+                const buf = await Native.readRecording(filePath);
+                if (buf)
+                    setAudioBlob(new Blob([buf], { type: "audio/ogg; codecs=opus" }));
+                else
+                    showToast({ text: "Failed to finish recording", variant: "critical" });
+            }
+            changeRecording(false);
+        });
+    }
+
 
     function toggleRecording() {
         const discordVoice = DiscordNative.nativeModules.requireModule("discord_voice");
@@ -48,20 +69,11 @@ export const VoiceRecorderDesktop: VoiceRecorder = ({ setAudioBlob, onRecordingC
                     if (success)
                         changeRecording(true);
                     else
-                        showToast("Failed to start recording", Toasts.Type.FAILURE);
+                        showToast({ text: "Failed to start recording", variant: "critical" });
                 }
             );
         } else {
-            discordVoice.stopLocalAudioRecording(async (filePath: string) => {
-                if (filePath) {
-                    const buf = await Native.readRecording(filePath);
-                    if (buf)
-                        setAudioBlob(new Blob([buf], { type: "audio/ogg; codecs=opus" }));
-                    else
-                        showToast("Failed to finish recording", Toasts.Type.FAILURE);
-                }
-                changeRecording(false);
-            });
+            stopRecording();
         }
     }
 

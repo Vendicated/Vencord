@@ -1,7 +1,7 @@
 {
     "name": "vencord",
     "private": "true",
-    "version": "1.13.2",
+    "version": "1.15.15",
     "description": "The cutest Discord client mod",
     "homepage": "https://github.com/Vendicated/Vencord#readme",
     "bugs": {
@@ -30,79 +30,55 @@
         "lint": "eslint",
         "lint-styles": "stylelint \"src/**/*.css\" --ignore-pattern src/userplugins",
         "lint:fix": "pnpm lint --fix",
-        "test": "pnpm buildStandalone && pnpm testTsc && pnpm lint && pnpm lint-styles && pnpm generatePluginJson",
-        "testWeb": "pnpm lint && pnpm buildWeb && pnpm testTsc",
-        "testTsc": "tsc --noEmit"
+        "test": "pnpm test:ts && pnpm buildStandalone && pnpm buildWebStandalone && pnpm lint && pnpm lint-styles && pnpm generatePluginJson",
+        "test:ts": "tsc --noEmit",
+        "bump": "./scripts/bump.sh"
     },
     "dependencies": {
-        "@intrnl/xxhash64": "^0.1.2",
-        "@vap/core": "0.0.12",
-        "@vap/shiki": "0.10.5",
-        "fflate": "^0.8.2",
-        "gifenc": "github:mattdesl/gifenc#64842fca317b112a8590f8fef2bf3825da8f6fe3",
-        "monaco-editor": "^0.52.2",
-        "nanoid": "^5.1.5",
-        "virtual-merge": "^1.0.1"
+        "@intrnl/xxhash64": "catalog:",
+        "@vap/core": "catalog:",
+        "@vap/shiki": "catalog:",
+        "@vencord/monaco-editor": "catalog:",
+        "fflate": "catalog:",
+        "gifenc": "catalog:"
     },
     "devDependencies": {
-        "@stylistic/eslint-plugin": "^4.2.0",
-        "@types/chrome": "^0.0.312",
-        "@types/diff": "^7.0.2",
-        "@types/lodash": "^4.17.14",
-        "@types/node": "^22.13.13",
-        "@types/react": "^19.0.10",
-        "@types/react-dom": "^19.0.4",
-        "@types/yazl": "^2.4.5",
-        "@vencord/discord-types": "link:packages/discord-types",
-        "diff": "^7.0.0",
-        "esbuild": "^0.25.1",
-        "eslint": "9.20.1",
-        "eslint-import-resolver-alias": "^1.1.2",
-        "eslint-plugin-path-alias": "2.1.0",
-        "eslint-plugin-react": "^7.37.3",
-        "eslint-plugin-simple-header": "^1.2.1",
-        "eslint-plugin-simple-import-sort": "^12.1.1",
-        "eslint-plugin-unused-imports": "^4.1.4",
-        "highlight.js": "11.11.1",
-        "html-minifier-terser": "^7.2.0",
-        "moment": "^2.22.2",
-        "puppeteer-core": "^24.4.0",
-        "standalone-electron-types": "^34.2.0",
-        "stylelint": "^16.17.0",
-        "stylelint-config-standard": "^37.0.0",
-        "ts-patch": "^3.3.0",
-        "ts-pattern": "^5.6.0",
-        "tsx": "^4.19.3",
-        "type-fest": "^4.38.0",
-        "typescript": "^5.8.2",
-        "typescript-eslint": "^8.28.0",
-        "typescript-transform-paths": "^3.5.5",
-        "zip-local": "^0.3.5"
+        "@stylistic/eslint-plugin": "catalog:",
+        "@types/chrome": "catalog:",
+        "@types/node": "catalog:",
+        "@types/react": "catalog:",
+        "@types/react-dom": "catalog:",
+        "@types/yazl": "catalog:",
+        "@vencord/discord-types": "workspace:",
+        "diff": "catalog:",
+        "esbuild": "catalog:",
+        "eslint": "catalog:",
+        "eslint-import-resolver-alias": "catalog:",
+        "eslint-plugin-path-alias": "catalog:",
+        "eslint-plugin-react": "catalog:",
+        "eslint-plugin-simple-header": "catalog:",
+        "eslint-plugin-simple-import-sort": "catalog:",
+        "eslint-plugin-unused-imports": "catalog:",
+        "html-minifier-terser": "catalog:",
+        "lodash": "catalog:",
+        "moment": "catalog:",
+        "p-limit": "catalog:",
+        "puppeteer-core": "catalog:",
+        "standalone-electron-types": "catalog:",
+        "stylelint": "catalog:",
+        "stylelint-config-standard": "catalog:",
+        "svgo": "catalog:",
+        "ts-patch": "catalog:",
+        "ts-pattern": "catalog:",
+        "tsx": "catalog:",
+        "type-fest": "catalog:",
+        "typescript": "catalog:",
+        "typescript-eslint": "catalog:",
+        "typescript-transform-paths": "catalog:",
+        "zip-local": "catalog:"
     },
-    "packageManager": "pnpm@10.4.1",
-    "pnpm": {
-        "patchedDependencies": {
-            "eslint@9.20.1": "patches/eslint@9.20.1.patch",
-            "eslint-plugin-path-alias@2.1.0": "patches/eslint-plugin-path-alias@2.1.0.patch"
-        },
-        "peerDependencyRules": {
-            "ignoreMissing": [
-                "eslint-plugin-import",
-                "eslint"
-            ]
-        },
-        "allowedDeprecatedVersions": {
-            "source-map-resolve": "*",
-            "resolve-url": "*",
-            "source-map-url": "*",
-            "urix": "*",
-            "q": "*"
-        },
-        "onlyBuiltDependencies": [
-            "esbuild"
-        ]
-    },
+    "packageManager": "pnpm@12.15.0",
     "engines": {
-        "node": ">=18"
+        "node": ">=22"
     }
 }

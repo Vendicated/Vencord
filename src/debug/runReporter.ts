@@ -6,9 +6,8 @@
 
 import { Logger } from "@utils/Logger";
 import * as Webpack from "@webpack";
-import { getBuildNumber, patchTimings } from "@webpack/patcher";
+import { getBuildNumber, patches } from "@webpack/patcher";
 
-import { addPatch, patches } from "../plugins";
 import { loadLazyChunks } from "./loadLazyChunks";
 
 async function runReporter() {
@@ -17,25 +16,30 @@ async function runReporter() {
     try {
         ReporterLogger.log("Starting test...");
 
-        const { promise: loadLazyChunksDone, resolve: loadLazyChunksResolve } = Promise.withResolvers<void>();
+        const { promise: loadLazyChunksDone, resolve: loadLazyChunksDoneResolve } = Promise.withResolvers<void>();
 
-        // The main patch for starting the reporter chunk loading
-        addPatch({
-            find: '"Could not find app-mount"',
-            replacement: {
-                match: /(?<="use strict";)/,
-                replace: "Vencord.Webpack._initReporter();"
-            }
-        }, "Vencord Reporter");
+        function startLoadingChunks() {
+            Webpack.factoryListeners.delete(startLoadingChunks);
 
-        // @ts-expect-error
-        Vencord.Webpack._initReporter = function () {
-            // initReporter is called in the patched entry point of Discord
-            // setImmediate to only start searching for lazy chunks after Discord initialized the app
-            setTimeout(() => loadLazyChunks().then(loadLazyChunksResolve), 0);
-        };
+            // Factory listeners are first called as soon as WebpackRequire is initialized, while the Webpack runtime is still being set up.
+            // Things like wreq.u, wreq.e and wreq.f are only defined later in the same task, so wait for it to finish
+            setTimeout(() => {
+                // Stylesheets are not needed for testing, so skip loading them for every chunk
+                Webpack.wreq.f.css = () => { };
 
+                loadLazyChunks().then(loadLazyChunksDoneResolve);
+            }, 0);
+        }
+
+        Webpack.factoryListeners.add(startLoadingChunks);
         await loadLazyChunksDone;
+
+        // Manually require all modules to make sure all lazily required modules are patched
+        for (const moduleId of Object.keys(Webpack.wreq.m)) {
+            try {
+                Webpack.wreq(moduleId);
+            } catch { }
+        }
 
         if (IS_REPORTER && IS_WEB && !IS_VESKTOP) {
             console.log("[REPORTER_META]", {
@@ -50,11 +54,12 @@ async function runReporter() {
             }
         }
 
-        for (const [plugin, moduleId, match, totalTime] of patchTimings) {
-            if (totalTime > 5) {
-                new Logger("WebpackPatcher").warn(`Patch by ${plugin} took ${Math.round(totalTime * 100) / 100}ms (Module id is ${String(moduleId)}): ${match}`);
-            }
-        }
+        // Slow patches reporting is disabled for now since it is too noisy
+        // for (const [plugin, moduleId, match, totalTime] of patchTimings) {
+        //     if (totalTime > 10) {
+        //         new Logger("WebpackPatcher").warn(`Patch by ${plugin} took ${Math.round(totalTime * 100) / 100}ms (Module id is ${String(moduleId)}): ${match}`);
+        //     }
+        // }
 
         for (const [searchType, args] of Webpack.lazyWebpackSearchHistory) {
             let method = searchType;

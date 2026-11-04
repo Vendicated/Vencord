@@ -12,7 +12,7 @@ chrome.webRequest.onHeadersReceived.addListener(
     ({ responseHeaders, type, url }) => {
         if (!responseHeaders) return;
 
-        if (type === "main_frame") {
+        if (type === "main_frame" && url.includes("discord.com")) {
             // In main frame requests, the CSP needs to be removed to enable fetching of custom css
             // as desired by the user
             removeFirst(responseHeaders, h => h.name.toLowerCase() === "content-security-policy");

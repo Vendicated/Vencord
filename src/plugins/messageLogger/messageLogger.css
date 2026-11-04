@@ -1,20 +1,20 @@
-.messagelogger-deleted [class^="buttons"] {
+.messagelogger-deleted [class*="buttonsInner"] [role="button"]:not([aria-label="Clear history"]),
+.messagelogger-deleted [class*="buttonsInner"] [class*="separator"] {
     display: none;
 }
 
-.messagelogger-deleted
-:is(
-    .messagelogger-deleted-attachment,
-    .emoji,
+
+/* non-deleted messages can have deleted attachments */
+.messagelogger-deleted-attachment,
+.messagelogger-deleted :is(.emoji,
     [data-type="sticker"],
     [class*="embedIframe"],
     [class*="embedSpotify"],
-    [class*="imageContainer"]
-) {
+    [class*="imageContainer"]) {
     filter: grayscale(1) !important;
     transition: 150ms filter ease-in-out;
 
-    &[class*="hiddenMosaicItem_"] {
+    &[class*="hiddenMosaicItem"] {
         filter: grayscale(1) blur(var(--custom-message-attachment-spoiler-blur-radius, 44px)) !important;
     }
 

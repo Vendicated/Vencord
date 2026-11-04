@@ -5,22 +5,15 @@
  */
 
 import { showNotice } from "@api/Notices";
+import { hasAnyVisibleSettings, isPluginEnabled, pluginRequiresRestart, startDependenciesRecursive, startPlugin, stopPlugin } from "@api/PluginManager";
+import { Settings } from "@api/Settings";
 import { CogWheel, InfoIcon } from "@components/Icons";
 import { AddonCard } from "@components/settings/AddonCard";
-import { proxyLazy } from "@utils/lazy";
-import { classes, isObjectEmpty } from "@utils/misc";
 import { Plugin } from "@utils/types";
-import { findByPropsLazy } from "@webpack";
-import { React, showToast, Toasts } from "@webpack/common";
-import { Settings } from "Vencord";
+import { React, showToast } from "@webpack/common";
 
 import { cl, logger } from ".";
 import { openPluginModal } from "./PluginModal";
-
-// Avoid circular dependency
-const { startDependenciesRecursive, startPlugin, stopPlugin, isPluginEnabled } = proxyLazy(() => require("plugins") as typeof import("plugins"));
-
-export const ButtonClasses = findByPropsLazy("button", "disabled", "enabled");
 
 interface PluginCardProps extends React.HTMLProps<HTMLDivElement> {
     plugin: Plugin;
@@ -55,8 +48,8 @@ export function PluginCard({ plugin, disabled, onRestartNeeded, onMouseEnter, on
             }
         }
 
-        // if the plugin has patches, dont use stopPlugin/startPlugin. Wait for restart to apply changes.
-        if (plugin.patches?.length) {
+        // if the plugin requires a restart, don't use stopPlugin/startPlugin. Wait for restart to apply changes.
+        if (pluginRequiresRestart(plugin)) {
             settings.enabled = !wasEnabled;
             onRestartNeeded(plugin.name, "enabled");
             return;
@@ -74,9 +67,7 @@ export function PluginCard({ plugin, disabled, onRestartNeeded, onMouseEnter, on
             settings.enabled = false;
 
             const msg = `Error while ${wasEnabled ? "stopping" : "starting"} plugin ${plugin.name}`;
-            showToast(msg, Toasts.Type.FAILURE, {
-                position: Toasts.Position.BOTTOM,
-            });
+            showToast({ text: msg, variant: "critical", position: "bottom" });
 
             return;
         }
@@ -98,9 +89,9 @@ export function PluginCard({ plugin, disabled, onRestartNeeded, onMouseEnter, on
                 <button
                     role="switch"
                     onClick={() => openPluginModal(plugin, onRestartNeeded)}
-                    className={classes(ButtonClasses.button, cl("info-button"))}
+                    className={cl("info-button")}
                 >
-                    {plugin.options && !isObjectEmpty(plugin.options)
+                    {hasAnyVisibleSettings(plugin)
                         ? <CogWheel className={cl("info-icon")} />
                         : <InfoIcon className={cl("info-icon")} />
                     }

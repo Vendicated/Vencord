@@ -18,23 +18,30 @@
 
 import { openNotificationLogModal } from "@api/Notifications/notificationLog";
 import { useSettings } from "@api/Settings";
+import { Divider } from "@components/Divider";
 import { FormSwitch } from "@components/FormSwitch";
-import { FolderIcon, GithubIcon, LogIcon, PaintbrushIcon, RestartIcon } from "@components/index";
+import { Heading } from "@components/Heading";
+import { FolderIcon, GithubIcon, LogIcon, PaintbrushIcon, RestartIcon } from "@components/Icons";
+import { Paragraph } from "@components/Paragraph";
 import { QuickAction, QuickActionCard } from "@components/settings/QuickAction";
 import { SpecialCard } from "@components/settings/SpecialCard";
 import { SettingsTab, wrapTab } from "@components/settings/tabs/BaseTab";
 import { openContributorModal } from "@components/settings/tabs/plugins/ContributorModal";
 import { openPluginModal } from "@components/settings/tabs/plugins/PluginModal";
+import NoTrack from "@plugins/_core/noTrack";
+import SettingsPlugin from "@plugins/_core/settings";
 import { gitRemote } from "@shared/vencordUserAgent";
-import { IS_MAC, IS_WINDOWS } from "@utils/constants";
+import { IS_WINDOWS } from "@utils/constants";
 import { Margins } from "@utils/margins";
 import { isPluginDev } from "@utils/misc";
 import { relaunch } from "@utils/native";
-import { Forms, React, useMemo, UserStore } from "@webpack/common";
+import { promptToRestart } from "@utils/promptToRestart";
+import { React, useMemo, UserStore } from "@webpack/common";
 
 import { DonateButtonComponent, isDonor } from "./DonateButton";
-import { VibrancySettings } from "./MacVibrancySettings";
+import { MacOSVibrancySettings } from "./MacVibrancySettings";
 import { NotificationSection } from "./NotificationSettings";
+import { WindowsMaterialSettings } from "./WindowsMaterialSettings";
 
 const DEFAULT_DONATE_IMAGE = "https://cdn.discordapp.com/emojis/1026533090627174460.png";
 const SHIGGY_DONATE_IMAGE = "https://media.discordapp.net/stickers/1039992459209490513.png";
@@ -48,58 +55,88 @@ type KeysOfType<Object, Type> = {
 }[keyof Object];
 
 function Switches() {
-    const settings = useSettings(["useQuickCss", "enableReactDevtools", "frameless", "winNativeTitleBar", "transparent", "winCtrlQ", "disableMinSize"]);
+    const settings = useSettings(["useQuickCss", "enableReactDevtools", "frameless", "nativeTitleBar", "transparent", "winCtrlQ", "disableMinSize"]);
+    const { disableAnalytics } = NoTrack.settings.use(["disableAnalytics"]);
 
     const Switches = [
         {
             key: "useQuickCss",
             title: "Enable Custom CSS",
-            note: "Loads your Custom CSS"
+            description: "Apply your configured QuickCSS"
         },
-        !IS_WEB && {
-            key: "enableReactDevtools",
-            title: "Enable React Developer Tools",
-            note: "Requires a full restart"
+        {
+            value: disableAnalytics,
+            updateSetting(newValue) {
+                NoTrack.settings.store.disableAnalytics = newValue;
+            },
+            reactKey: "NoTrack::disableAnalytics",
+            key: null!,
+            title: "Block Discord Analytics",
+            description: NoTrack.settings.def.disableAnalytics.description,
+            restartRequired: NoTrack.settings.def.disableAnalytics.restartNeeded,
         },
-        !IS_WEB && (!IS_DISCORD_DESKTOP || !IS_WINDOWS ? {
-            key: "frameless",
-            title: "Disable the window frame",
-            note: "Requires a full restart"
-        } : {
-            key: "winNativeTitleBar",
-            title: "Use Windows' native title bar instead of Discord's custom one",
-            note: "Requires a full restart"
-        }),
+        IS_DISCORD_DESKTOP && {
+            key: "nativeTitleBar",
+            title: "Enable the system's title bar in addition to Discord's custom one",
+            restartRequired: true
+        },
         !IS_WEB && {
             key: "transparent",
-            title: "Enable window transparency.",
-            note: "You need a theme that supports transparency or this will do nothing. WILL STOP THE WINDOW FROM BEING RESIZABLE!! Requires a full restart"
-        },
-        !IS_WEB && IS_WINDOWS && {
-            key: "winCtrlQ",
-            title: "Register Ctrl+Q as shortcut to close Discord (Alternative to Alt+F4)",
-            note: "Requires a full restart"
+            title: "Enable window transparency",
+            description: "A theme that supports transparency is required or this will do nothing. Stops the window from being resizable as a side effect",
+            restartRequired: true
         },
         IS_DISCORD_DESKTOP && {
             key: "disableMinSize",
             title: "Disable minimum window size",
-            note: "Requires a full restart"
+            description: "Allows you to resize the window to any size, even smaller than Discord's minimum size",
+            restartRequired: true
+        },
+        !IS_WEB && IS_WINDOWS && {
+            key: "winCtrlQ",
+            title: "Register Ctrl+Q as shortcut to close Discord (Alternative to Alt+F4)",
+            restartRequired: true
+        },
+        !IS_WEB && {
+            key: "enableReactDevtools",
+            title: "Enable React Developer Tools",
+            description: "Mainly useful for plugin developers. Ignore this if you don't know what it is",
+            restartRequired: true
         },
     ] satisfies Array<false | {
         key: KeysOfType<typeof settings, boolean>;
+        reactKey?: string;
         title: string;
-        note: string;
+        description?: string;
+        restartRequired?: boolean;
+        updateSetting?(newValue: boolean): void;
+        value?: boolean;
     }>;
 
-    return Switches.map(s => s && (
-        <FormSwitch
-            key={s.key}
-            title={s.title}
-            description={s.note}
-            value={settings[s.key]}
-            onChange={v => settings[s.key] = v}
-        />
-    ));
+    return Switches.map(setting => {
+        if (!setting) {
+            return null;
+        }
+
+        const { reactKey, key, value, title, description, restartRequired, updateSetting = v => (settings[key] = v) } = setting;
+
+        return (
+            <FormSwitch
+                key={reactKey ?? key}
+                title={title}
+                description={description}
+                value={value ?? settings[key]}
+                hideBorder
+                onChange={v => {
+                    updateSetting(v);
+
+                    if (restartRequired) {
+                        promptToRestart("relaunch");
+                    }
+                }}
+            />
+        );
+    });
 }
 
 function VencordSettings() {
@@ -108,12 +145,10 @@ function VencordSettings() {
         []
     );
 
-    const needsVibrancySettings = IS_DISCORD_DESKTOP && IS_MAC;
-
-    const user = UserStore.getCurrentUser();
+    const user = UserStore?.getCurrentUser();
 
     return (
-        <SettingsTab title="Vencord Settings">
+        <SettingsTab>
             {isDonor(user?.id)
                 ? (
                     <SpecialCard
@@ -153,7 +188,9 @@ function VencordSettings() {
                 />
             )}
 
-            <Forms.FormSection title="Quick Actions">
+            <section>
+                <Heading className={Margins.bottom8}>Quick Actions</Heading>
+
                 <QuickActionCard>
                     <QuickAction
                         Icon={LogIcon}
@@ -185,23 +222,27 @@ function VencordSettings() {
                         action={() => VencordNative.native.openExternal("https://github.com/" + gitRemote)}
                     />
                 </QuickActionCard>
-            </Forms.FormSection>
+            </section>
 
-            <Forms.FormDivider />
+            <Divider />
 
-            <Forms.FormSection className={Margins.top16} title="Settings" tag="h5">
-                <Forms.FormText className={Margins.bottom20} style={{ color: "var(--text-muted)" }}>
+            <section className={Margins.top16}>
+                <Heading className={Margins.bottom8}>Settings</Heading>
+                <Paragraph className={Margins.bottom20} style={{ color: "var(--text-muted)" }}>
                     Hint: You can change the position of this settings section in the{" "}
-                    <a onClick={() => openPluginModal(Vencord.Plugins.plugins.Settings)}>
+                    <a onClick={() => openPluginModal(SettingsPlugin)}>
                         settings of the Settings plugin
                     </a>!
-                </Forms.FormText>
+                </Paragraph>
 
-                <Switches />
-            </Forms.FormSection>
+                <div className="vc-settings-switches">
+                    <Switches />
+                </div>
+            </section>
 
 
-            {needsVibrancySettings && <VibrancySettings />}
+            <MacOSVibrancySettings />
+            <WindowsMaterialSettings />
 
             <NotificationSection />
         </SettingsTab>

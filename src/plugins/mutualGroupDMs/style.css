@@ -5,3 +5,13 @@
 .vc-mutual-gdms-modal-v2-tab-bar {
     --space-xl: 16px;
 }
+
+.vc-mutual-gdms-scroller {
+    gap: 12px;
+    margin-inline-start: -12px;
+}
+
+.vc-mutual-gdms-dm-page-list {
+    gap: 0;
+    margin-inline-start: -8px;
+}
