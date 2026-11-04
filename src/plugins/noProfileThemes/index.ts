@@ -27,9 +27,12 @@ export default definePlugin({
     authors: [Devs.TheKodeToad],
     patches: [
         {
-            find: "hasThemeColors(){",
+            find: "canEditThemes(){",
             replacement: {
-                match: /get canUsePremiumProfileCustomization\(\){return /,
+                // FakeProfileThemes patches the same function to always return true. If both are enabled, the final code will be
+                // `return $self.isCurrentUser(this?.userId) && true`, which still works
+                // This relies on the fact that FakeProfileThemes is applied first due to alphabetical order
+                match: /get canEditThemes\(\){return /,
                 replace: "$&$self.isCurrentUser(this?.userId)&&"
             }
         },

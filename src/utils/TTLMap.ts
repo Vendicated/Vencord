@@ -15,6 +15,10 @@ export class TTLMap<K, V> extends Map<K, V> {
     }
 
     public set(key: K, value: V) {
+        if (this._timers.has(key)) {
+            clearTimeout(this._timers.get(key));
+        }
+
         const timeoutId = setTimeout(() => {
             this.delete(key);
             this.onExpire?.(key, value);

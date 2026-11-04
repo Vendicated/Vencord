@@ -107,6 +107,11 @@ export const settings = definePluginSettings({
         description: "Close other folders when opening a folder",
         default: false
     },
+    closeServerFolder: {
+        type: OptionType.BOOLEAN,
+        description: "Close folder when selecting a server in that folder",
+        default: false,
+    },
     forceOpen: {
         type: OptionType.BOOLEAN,
         description: "Force a folder to open when switching to a server of that folder",
@@ -149,7 +154,7 @@ export default definePlugin({
                 // Create the isBetterFolders and betterFoldersExpandedIds variables in the GuildsBar component
                 // Needed because we access this from a non-arrow closure so we can't use arguments[0]
                 {
-                    match: /let{disableAppDownload:\i=\i\.isPlatformEmbedded,isOverlay:.+?(?=}=\i)/,
+                    match: /{disableAppDownload:\i=\i\.isPlatformEmbedded,isOverlay:.+?(?=}=\i)/,
                     replace: "$&,isBetterFolders,betterFoldersExpandedIds"
                 },
                 // Export the isBetterFolders and betterFoldersExpandedIds variable to the Guild List component
@@ -213,7 +218,7 @@ export default definePlugin({
                 // If we are rendering the normal GuildsBar sidebar, we make Discord think the folder is always collapsed to show better icons (the mini guild icons) and avoid transitions
                 {
                     predicate: () => settings.store.keepIcons,
-                    match: /let ?(?:\i,)*?{folderNode:\i,setNodeRef:\i,.+?expanded:(\i),.+?;(?=let)/,
+                    match: /{folderNode:\i,setNodeRef:\i,.+?expanded:(\i),.+?;(?=let)/,
                     replace: (m, isExpanded) => `${m}${isExpanded}=!!arguments[0]?.isBetterFolders&&${isExpanded};`
                 },
                 // Disable expanding and collapsing folders transition in the normal GuildsBar sidebar
@@ -260,6 +265,11 @@ export default definePlugin({
                     // Add grid styles to fix aligment with other visual refresh elements
                     match: /(?<=className:)\i\.\i(?=,"data-fullscreen")/,
                     replace: `"${GRID_STYLE_NAME} "+$&`
+                },
+                {
+                    // Channels resize slider uses hardcoded offset which is wrong when the Better Folders sidebar is opened
+                    match: /(?<="aria-valuemax":\d+,className:\i\.\i,onClick:\i,onMouseDown:)(\i)/,
+                    replace: "vcEvent=>$1($self.fixChannelsResizeSliderOffset(vcEvent))"
                 }
             ]
         },
@@ -276,7 +286,7 @@ export default definePlugin({
 
     flux: {
         CHANNEL_SELECT(data) {
-            if (!settings.store.closeAllFolders && !settings.store.forceOpen)
+            if (!settings.store.closeAllFolders && !settings.store.forceOpen && !settings.store.closeServerFolder)
                 return;
 
             if (lastGuildId !== data.guildId) {
@@ -284,7 +294,12 @@ export default definePlugin({
                 const guildFolder = getGuildFolder(data.guildId);
 
                 if (guildFolder?.folderId) {
-                    if (settings.store.forceOpen && !ExpandedGuildFolderStore.isFolderExpanded(guildFolder.folderId)) {
+                    const wasExpanded = ExpandedGuildFolderStore.isFolderExpanded(guildFolder.folderId);
+
+                    if (settings.store.forceOpen && !wasExpanded) {
+                        FolderUtils.toggleGuildFolderExpand(guildFolder.folderId);
+                    }
+                    if (settings.store.closeServerFolder && wasExpanded) {
                         FolderUtils.toggleGuildFolderExpand(guildFolder.folderId);
                     }
                 } else if (settings.store.closeAllFolders) {
@@ -386,6 +401,17 @@ export default definePlugin({
             default:
                 return true;
         }
+    },
+
+    fixChannelsResizeSliderOffset(event: MouseEvent) {
+        const betterFoldersSidebar = document.querySelector<HTMLElement>(".vc-betterFolders-sidebar");
+
+        if (betterFoldersSidebar != null) {
+            // @ts-expect-error Readonly, but browser doesn't care
+            event.screenX += sidebar.offsetWidth;
+        }
+
+        return event;
     },
 
     shouldShowTransition(props: any) {

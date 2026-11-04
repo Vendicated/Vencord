@@ -98,7 +98,7 @@ export default definePlugin({
 
             const prefix = withMentionPrefix ? "@" : "";
 
-            if (isRepliedMessage && !inReplies || username.toLowerCase() === nick.toLowerCase())
+            if (isRepliedMessage && !inReplies || (username.toLowerCase() === nick.toLowerCase() && mode !== "user"))
                 return <>{prefix}{nick}</>;
 
             if (mode === "user-nick")
