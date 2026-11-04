@@ -31,7 +31,7 @@ import { traceFunction } from "@debug/Tracer";
 import { Logger } from "@utils/Logger";
 import { onlyOnce } from "@utils/onlyOnce";
 import { canonicalizeFind, canonicalizeReplacement } from "@utils/patches";
-import { Patch, Plugin, PluginDef, ReporterTestable, StartAt } from "@utils/types";
+import { DefinedSettings, Patch, Plugin, PluginDef, PluginSettingDef, ReporterTestable, StartAt } from "@utils/types";
 import { FluxEvents } from "@vencord/discord-types";
 import { FluxDispatcher } from "@webpack/common";
 import { patches } from "@webpack/patcher";
@@ -54,7 +54,30 @@ export function isPluginEnabled(p: string) {
     ) ?? false;
 }
 
+export function isSettingHidden(settings: DefinedSettings, setting: PluginSettingDef) {
+    if (!("hidden" in setting)) return false;
+
+    return typeof setting.hidden === "function"
+        ? setting.hidden.call(settings)
+        : Boolean(setting.hidden);
+}
+
+export function isSettingDisabled(settings: DefinedSettings, setting: PluginSettingDef) {
+    if (!("disabled" in setting)) return false;
+
+    return typeof setting.disabled === "function"
+        ? setting.disabled.call(settings)
+        : Boolean(setting.disabled);
+}
+
+export function hasAnyVisibleSettings({ settings }: Plugin) {
+    return !!settings && Object.values(settings.def).some(s => !isSettingHidden(settings, s));
+}
+
 export function addPatch(newPatch: Omit<Patch, "plugin">, pluginName: string, pluginPath = `Vencord.Plugins.plugins[${JSON.stringify(pluginName)}]`) {
+    // TODO: this causes crashes
+    if (pluginName === "Vesktop" && newPatch.find === ".STREAMING_AUTO_STREAMER_MODE,") return;
+
     const patch = newPatch as Patch;
     patch.plugin = pluginName;
 
@@ -356,22 +379,11 @@ export const initPluginManager = onlyOnce(function init() {
 
     for (const p of pluginsValues) {
         if (p.settings) {
-            p.options ??= {};
-
             p.settings.pluginName = p.name;
-            for (const name in p.settings.def) {
-                const def = p.settings.def[name];
-                const checks = p.settings.checks?.[name];
-                p.options[name] = { ...def, ...checks };
-            }
-        }
 
-        if (p.options) {
-            for (const name in p.options) {
-                const opt = p.options[name];
-                if (opt.onChange != null) {
-                    SettingsStore.addChangeListener(`plugins.${p.name}.${name}`, opt.onChange);
-                }
+            for (const [key, def] of Object.entries(p.settings.def)) {
+                if (def.onChange)
+                    SettingsStore.addChangeListener(`plugins.${p.name}.${key}`, def.onChange);
             }
         }
 

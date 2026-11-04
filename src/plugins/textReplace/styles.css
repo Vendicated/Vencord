@@ -9,3 +9,18 @@
     width: 100%;
     margin-block: 0.75em 0.5em
 }
+
+.vc-textReplace-drop-indicator {
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: var(--brand-experiment, #5865f2);
+    border-radius: 1px;
+    pointer-events: none;
+    z-index: 1;
+}
+
+.vc-textReplace-search-input {
+    margin-top: 8px;
+}

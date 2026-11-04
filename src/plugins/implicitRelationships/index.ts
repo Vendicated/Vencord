@@ -96,8 +96,8 @@ export default definePlugin({
         {
             find: ".REQUEST_GUILD_MEMBERS,",
             replacement: {
-                match: /\.send\(\i\.\i\.REQUEST_GUILD_MEMBERS,{/,
-                replace: "$&nonce:arguments[1].nonce,"
+                match: /\.REQUEST_GUILD_MEMBERS,{/,
+                replace: "$&nonce:arguments[1]?.nonce,"
             }
         },
         {
@@ -163,7 +163,7 @@ export default definePlugin({
             FluxDispatcher.dispatch({
                 type: "GUILD_MEMBERS_REQUEST",
                 guildIds: allGuildIds,
-                userIds: toRequest.slice(i, i + 100),
+                userIds: toRequest.slice(i, i + 100).map(e => e.otherUserId),
                 presences: true,
                 nonce: sentNonce,
             });

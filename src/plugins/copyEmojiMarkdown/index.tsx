@@ -5,6 +5,7 @@
  */
 
 import { definePluginSettings } from "@api/Settings";
+import { CopyIcon } from "@components/Icons";
 import { Devs } from "@utils/constants";
 import { copyWithToast } from "@utils/discord";
 import definePlugin, { OptionType } from "@utils/types";
@@ -57,7 +58,7 @@ export default definePlugin({
 
     contextMenus: {
         "expression-picker"(children, { target }: { target: Target; }) {
-            if (target.dataset.type !== "emoji") return;
+            if (target.dataset.type !== "emoji" || !target.dataset.id) return;
 
             children.push(
                 <Menu.MenuItem
@@ -69,6 +70,7 @@ export default definePlugin({
                             "Success! Copied emoji markdown."
                         );
                     }}
+                    leadingAccessory={{ type: "icon", icon: CopyIcon }}
                 />
             );
         },

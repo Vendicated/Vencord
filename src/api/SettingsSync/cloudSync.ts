@@ -16,8 +16,16 @@ import { exportSettings, importSettings } from "./offline";
 
 const logger = new Logger("SettingsSync:Cloud", "#39b7e0");
 
+const SYNC_DIRECTION_KEY = "Vencord_cloudSyncDirection";
+const SETTINGS_DIRTY_KEY = "Vencord_settingsDirty";
+export const getCloudSyncDirection = () => localStorage.getItem(SYNC_DIRECTION_KEY) || "both";
+export const setCloudSyncDirection = (direction: "push" | "pull" | "both" | "manual") => localStorage.setItem(SYNC_DIRECTION_KEY, direction);
+export const areLocalSettingsDirty = () => localStorage.getItem(SETTINGS_DIRTY_KEY) === "true";
+export const markLocalSettingsDirty = () => localStorage.setItem(SETTINGS_DIRTY_KEY, "true");
+export const markLocalSettingsClean = () => localStorage.removeItem(SETTINGS_DIRTY_KEY);
+
 export function shouldCloudSync(direction: "push" | "pull") {
-    const localDirection = localStorage.Vencord_cloudSyncDirection;
+    const localDirection = getCloudSyncDirection();
 
     return localDirection === direction || localDirection === "both";
 }
@@ -61,7 +69,7 @@ export async function putCloudSettings(manual?: boolean) {
             });
         }
 
-        delete localStorage.Vencord_settingsDirty;
+        markLocalSettingsClean();
     } catch (e: any) {
         logger.error("Failed to sync up", e);
         showNotification({
@@ -150,7 +158,7 @@ export async function getCloudSettings(shouldNotify = true, force = false) {
                 noPersist: true
             });
 
-        delete localStorage.Vencord_settingsDirty;
+        markLocalSettingsClean();
 
         return true;
     } catch (e: any) {

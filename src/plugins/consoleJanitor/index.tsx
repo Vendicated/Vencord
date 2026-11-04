@@ -6,10 +6,11 @@
 
 import { definePluginSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
+import { Paragraph } from "@components/Paragraph";
 import { SettingsSection } from "@components/settings/tabs/plugins/components/Common";
 import { Devs } from "@utils/constants";
 import definePlugin, { defineDefault, OptionType, StartAt } from "@utils/types";
-import { Checkbox, Text } from "@webpack/common";
+import { Checkbox } from "@webpack/common";
 
 const Noop = () => { };
 const NoopLogger = {
@@ -50,14 +51,14 @@ function AllowLevelSetting({ settingKey }: AllowLevelSettingProps) {
             onChange={(_, newValue) => settings.store.allowLevel[settingKey] = newValue}
             size={20}
         >
-            <Text variant="text-sm/normal">{settingKey[0].toUpperCase() + settingKey.slice(1)}</Text>
+            <Paragraph>{settingKey[0].toUpperCase() + settingKey.slice(1)}</Paragraph>
         </Checkbox>
     );
 }
 
 const AllowLevelSettings = ErrorBoundary.wrap(() => {
     return (
-        <SettingsSection name="Filter List" description="Always allow loggers of these types">
+        <SettingsSection name="Filter List" id="filterList" description="Always allow loggers of these types">
             <div style={{ display: "flex", flexDirection: "row" }}>
                 {Object.keys(settings.store.allowLevel).map(key => (
                     <AllowLevelSetting key={key} settingKey={key as keyof AllowLevels} />
@@ -126,16 +127,9 @@ export default definePlugin({
 
     patches: [
         {
-            find: "https://github.com/highlightjs/highlight.js/issues/2277",
-            replacement: {
-                match: /\(console.log\(`Deprecated.+?`\),/,
-                replace: "("
-            }
-        },
-        {
             find: 'The "interpolate" function is deprecated in v10 (use "to" instead)',
             replacement: {
-                match: /,console.warn\(\i\+'The "interpolate" function is deprecated in v10 \(use "to" instead\)'\)/,
+                match: /,console.warn\('react-spring: The "interpolate" function is deprecated in v10 \(use "to" instead\)'\)/,
                 replace: ""
             }
         },
@@ -196,7 +190,7 @@ export default definePlugin({
             find: "Slow dispatch on",
             replacement: [
                 {
-                    match: /\i\.totalTime>\i&&\i\.verbose\([`"]Slow dispatch on.{0,55}\);/,
+                    match: /\i\.totalTime>\d+?&&\i\.verbose\([`"]Slow dispatch on.{0,55}\);/,
                     replace: ""
                 },
             ]

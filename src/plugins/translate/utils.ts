@@ -19,9 +19,9 @@
 import { classNameFactory } from "@utils/css";
 import { onlyOnce } from "@utils/onlyOnce";
 import { PluginNative } from "@utils/types";
-import { showToast, Toasts } from "@webpack/common";
+import { showToast } from "@webpack/common";
 
-import { DeeplLanguages, deeplLanguageToGoogleLanguage, GoogleLanguages } from "./languages";
+import { DeeplLanguages, deeplLanguageToGoogleLanguage, GoogleLanguages, KagiLanguages } from "./languages";
 import { resetLanguageDefaults, settings } from "./settings";
 
 export const cl = classNameFactory("vc-trans-");
@@ -40,19 +40,43 @@ interface DeeplData {
     }[];
 }
 
+interface KagiData {
+    translation: string;
+    detected_language: {
+        label: string;
+    };
+}
+
 export interface TranslationValue {
     sourceLanguage: string;
     text: string;
 }
 
-export const getLanguages = () => IS_WEB || settings.store.service === "google"
-    ? GoogleLanguages
-    : DeeplLanguages;
+export const getLanguages = () => {
+    if (IS_WEB) {
+        return GoogleLanguages;
+    }
+    switch (settings.store.service) {
+        case "google":
+            return GoogleLanguages;
+        case "kagi":
+            return KagiLanguages;
+        default:
+            return DeeplLanguages;
+    }
+};
 
 export async function translate(kind: "received" | "sent", text: string): Promise<TranslationValue> {
-    const translate = IS_WEB || settings.store.service === "google"
-        ? googleTranslate
-        : deeplTranslate;
+    const translate = IS_WEB ? googleTranslate : (() => {
+        switch (settings.store.service) {
+            case "google":
+                return googleTranslate;
+            case "kagi":
+                return kagiTranslate;
+            default:
+                return deeplTranslate;
+        }
+    })();
 
     try {
         return await translate(
@@ -65,7 +89,7 @@ export async function translate(kind: "received" | "sent", text: string): Promis
             ? e
             : "Something went wrong. If this issue persists, please check the console or ask for help in the support server.";
 
-        showToast(userMessage, Toasts.Type.FAILURE);
+        showToast({ text: userMessage, variant: "critical" });
 
         throw e instanceof Error
             ? e
@@ -107,12 +131,12 @@ function fallbackToGoogle(text: string, sourceLang: string, targetLang: string):
 }
 
 const showDeeplApiQuotaToast = onlyOnce(
-    () => showToast("Deepl API quota exceeded. Falling back to Google Translate", Toasts.Type.FAILURE)
+    () => showToast({ text: "Deepl API quota exceeded. Falling back to Google Translate", variant: "critical" })
 );
 
 async function deeplTranslate(text: string, sourceLang: string, targetLang: string): Promise<TranslationValue> {
     if (!settings.store.deeplApiKey) {
-        showToast("DeepL API key is not set. Resetting to Google", Toasts.Type.FAILURE);
+        showToast({ text: "DeepL API key is not set. Resetting to Google", variant: "critical" });
 
         settings.store.service = "google";
         resetLanguageDefaults();
@@ -151,5 +175,27 @@ async function deeplTranslate(text: string, sourceLang: string, targetLang: stri
     return {
         sourceLanguage: DeeplLanguages[src] ?? src,
         text: translations[0].text
+    };
+}
+
+async function kagiTranslate(text: string, sourceLang: string, targetLang: string): Promise<TranslationValue> {
+    const { status, data } = await Native.makeKagiTranslateRequest(
+        settings.store.kagiSession, text, sourceLang, targetLang
+    );
+
+    switch (status) {
+        case 200:
+            break;
+        case 401:
+            throw "Invalid or expired Kagi session token";
+        default:
+            throw new Error(`Failed to translate "${text}" (${sourceLang} -> ${targetLang})\n${status} ${data}`);
+    }
+
+    const { detected_language, translation }: KagiData = data;
+
+    return {
+        sourceLanguage: detected_language.label,
+        text: translation
     };
 }
