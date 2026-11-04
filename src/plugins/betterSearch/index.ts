@@ -143,8 +143,8 @@ export default definePlugin({
             find: "FILTER_LINK_FROM:",
             replacement: [
                 {
-                    match: /(\i)=\(.+?\i\.\i\[(\i)\]\).+?queryKey:null.+?;/,
-                    replace: "$&$1=$self.getCustomQueryKey($2)??$1;"
+                    match: /\i\.\i\[(\i)\]\)\?(?=\i\.queryKey)/,
+                    replace: "$&$self.getCustomQueryKey($1)??"
                 },
                 {
                     match: /\.add\((\i)\.getFullMatch\(\)\.trim\(\)\)/,
