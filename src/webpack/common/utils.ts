@@ -66,38 +66,7 @@ waitFor("parseTopic", m => Parser = m);
 export let Alerts: t.Alerts;
 waitFor(["show", "close"], m => Alerts = m);
 
-export interface ToastData {
-    message: string,
-    id: string,
-    /**
-     * Toasts.Type
-     */
-    type: string,
-    options?: ToastOptions;
-}
-
-export interface ToastOptions {
-    /**
-     * Toasts.Position
-     */
-    position?: number;
-    component?: React.ReactNode,
-    duration?: number;
-}
-
-export const Toasts: t.Toasts = mapMangledModuleLazy(".currentToastMap.has(", {
-    show: filters.byCode(".currentToastMap.has("),
-    pop: filters.byCode(".delete(")
-});
-
-export const createToast: t.createToast = findByCodeLazy('variant:"default",icon:', ".duration");
-
-/**
- * Show a simple toast. If you need more options, use Toasts.show manually
- */
-export function showToast(message: string, type: t.ToastType = "message", options?: ToastOptions) {
-    Toasts.show(createToast({ message, type, options }));
-}
+export const showToast: t.showToast = findByCodeLazy(".currentToastMap.has(");
 
 export const UserUtils = {
     getUser: findByCodeLazy(".USER(")
@@ -122,12 +91,13 @@ export const NavigationRouter: t.NavigationRouter = mapMangledModuleLazy("transi
     forward: filters.byCode("goForward()"),
 });
 export const ChannelRouter: t.ChannelRouter = mapMangledModuleLazy('"Thread must have a parent ID."', {
-    transitionToChannel: filters.byCode(".preload"),
+    transitionToChannel: filters.byCode(".openTextInVoiceIfVoiceChannel"),
     transitionToThread: filters.byCode('"Thread must have a parent ID."')
 });
 
-export let SettingsRouter: any;
-waitFor(["openUserSettings", "USER_SETTINGS_MODAL_KEY"], m => SettingsRouter = m);
+export const SettingsRouter: t.SettingsRouter = mapMangledModuleLazy('type:"USER_SETTINGS_MODAL_OPEN"', {
+    openUserSettings: filters.byCode('type:"USER_SETTINGS_MODAL_OPEN"')
+});
 
 export const PermissionsBits: t.PermissionsBits = findLazy(m => typeof m.ADMINISTRATOR === "bigint");
 
@@ -141,7 +111,7 @@ export const { zustandPersist } = mapMangledModuleLazy(".onRehydrateStorage)?", 
 
 export const MessageActions = findByPropsLazy("editMessage", "sendMessage");
 export const MessageCache = findByPropsLazy("clearCache", "_channelMessages");
-export const UserProfileActions = findByPropsLazy("openUserProfileModal", "closeUserProfileModal");
+export const openUserProfileModal: t.OpenUserProfileModal = findByCodeLazy('type:"USER_PROFILE_MODAL_OPEN"');
 export const InviteActions = findByPropsLazy("resolveInvite");
 export const ChannelActionCreators = findByPropsLazy("openPrivateChannel");
 

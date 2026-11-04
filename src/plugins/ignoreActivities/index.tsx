@@ -91,12 +91,12 @@ function ImportCustomRPCComponent() {
                     onClick={() => {
                         const id = CustomRpcPlugin.settings.store.appID;
                         if (!id) {
-                            return showToast("CustomRPC application ID is not set.", "failure");
+                            return showToast({ text: "CustomRPC application ID is not set.", variant: "critical" });
                         }
 
                         const isAlreadyAdded = idsListPushID?.(id);
                         if (isAlreadyAdded) {
-                            showToast("CustomRPC application ID is already added.", "failure");
+                            showToast({ text: "CustomRPC application ID is already added.", variant: "critical" });
                         }
                     }}
                 >
@@ -135,7 +135,7 @@ function IdsListComponent(props: { setValue: (value: string) => void; }) {
 
     return (
         <section>
-            <Heading tag="h3">Filter List</Heading>
+            <Heading className={Margins.bottom8}>Filter List</Heading>
             <Paragraph className={Margins.bottom8}>Comma separated list of activity IDs to filter (Useful for filtering specific RPC activities and CustomRPC</Paragraph>
             <TextArea
                 type="text"

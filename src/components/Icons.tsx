@@ -626,6 +626,20 @@ export function DownArrow(props: IconProps) {
     );
 }
 
+export function UpArrowIcon(props: IconProps) {
+    return (
+        <Icon
+            {...props}
+            viewBox="0 0 24 24"
+        >
+            <path
+                fill={props.fill || "currentColor"}
+                d="M12.7 3.3a1 1 0 0 0-1.4 0l-8 8a1 1 0 1 0 1.4 1.4L11 6.42V20a1 1 0 1 0 2 0V6.41l6.3 6.3a1 1 0 0 0 1.4-1.42l-8-8Z"
+            />
+        </Icon>
+    );
+}
+
 export function RightArrow(props: IconProps) {
     return (
         <Icon
@@ -722,6 +736,41 @@ export function EyeIcon(props: IconProps) {
             <path
                 fill={props.fill || "currentColor"}
                 d="M22.89 11.7c.07.2.07.4 0 .6C22.27 13.9 19.1 21 12 21c-7.11 0-10.27-7.11-10.89-8.7a.83.83 0 0 1 0-.6C1.73 10.1 4.9 3 12 3c7.11 0 10.27 7.11 10.89 8.7Zm-4.5-3.62A15.11 15.11 0 0 1 20.85 12c-.38.88-1.18 2.47-2.46 3.92C16.87 17.62 14.8 19 12 19c-2.8 0-4.87-1.38-6.39-3.08A15.11 15.11 0 0 1 3.15 12c.38-.88 1.18-2.47 2.46-3.92C7.13 6.38 9.2 5 12 5c2.8 0 4.87 1.38 6.39 3.08ZM15.56 11.77c.2-.1.44.02.44.23a4 4 0 1 1-4-4c.21 0 .33.25.23.44a2.5 2.5 0 0 0 3.32 3.32Z"
+            />
+        </Icon>
+    );
+}
+
+export function HistoryIcon(props: IconProps) {
+    return (
+        <Icon
+            {...props}
+            viewBox="0 0 24 24"
+            fill="none"
+        >
+            <path
+                d="M5.63606 18.3639C9.15077 21.8786 14.8493 21.8786 18.364 18.3639C21.8787 14.8492 21.8787 9.1507 18.364 5.63598C14.8493 2.12126 9.15077 2.12126 5.63606 5.63598C3.87757 7.39447 2.99889 9.6996 3.00002 12.0044L3 13.9999"
+                stroke="currentColor"
+                strokeWidth={2.5}
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                style={{ fill: "none" }}
+            />
+            <path
+                d="M1 11.9999L3 13.9999L5 11.9999"
+                stroke="currentColor"
+                strokeWidth={2.5}
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                style={{ fill: "none" }}
+            />
+            <path
+                d="M11 7.99994L11 12.9999L16 12.9999"
+                stroke="currentColor"
+                strokeWidth={2.5}
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                style={{ fill: "none" }}
             />
         </Icon>
     );
