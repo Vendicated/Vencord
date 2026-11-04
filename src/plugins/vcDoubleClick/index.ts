@@ -24,7 +24,7 @@ import { ChannelStore, NavigationRouter, SelectedChannelStore } from "@webpack/c
 const settings = definePluginSettings({
     openOnSingleClick: {
         type: OptionType.BOOLEAN,
-        description: "Open the voice channel on single click without joining it",
+        description: "A single click focuses on the voice channel without joining it",
         default: false
     }
 });
