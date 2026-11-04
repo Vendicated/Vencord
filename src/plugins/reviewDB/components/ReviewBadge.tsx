@@ -16,11 +16,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { Badge } from "@plugins/reviewDB/entities";
+import { cl } from "@plugins/reviewDB/utils";
 import { MaskedLink, React, Tooltip } from "@webpack/common";
 import { HTMLAttributes } from "react";
-
-import { Badge } from "../entities";
-import { cl } from "../utils";
 
 export default function ReviewBadge(badge: Badge & { onClick?(): void; }) {
     const Wrapper = badge.redirectURL

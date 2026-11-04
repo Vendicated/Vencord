@@ -16,13 +16,17 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { isPluginEnabled } from "@api/PluginManager";
 import { definePluginSettings } from "@api/Settings";
 import { getUserSettingLazy } from "@api/UserSettings";
+import { Button } from "@components/Button";
+import { Card } from "@components/Card";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Flex } from "@components/Flex";
 import { Link } from "@components/Link";
-import { openUpdaterModal } from "@components/VencordSettings/UpdaterTab";
-import { Devs, SUPPORT_CHANNEL_ID } from "@utils/constants";
+import { Paragraph } from "@components/Paragraph";
+import { openSettingsTabModal, UpdaterTab } from "@components/settings";
+import { CONTRIB_ROLE_ID, Devs, DONOR_ROLE_ID, KNOWN_ISSUES_CHANNEL_ID, REGULAR_ROLE_ID, SUPPORT_CATEGORY_ID, SUPPORT_CHANNEL_ID, VENBOT_USER_ID, VENCORD_GUILD_ID } from "@utils/constants";
 import { sendMessage } from "@utils/discord";
 import { Logger } from "@utils/Logger";
 import { Margins } from "@utils/margins";
@@ -32,7 +36,8 @@ import { onlyOnce } from "@utils/onlyOnce";
 import { makeCodeblock } from "@utils/text";
 import definePlugin from "@utils/types";
 import { checkForUpdates, isOutdated, update } from "@utils/updater";
-import { Alerts, Button, Card, ChannelStore, Forms, GuildMemberStore, Parser, RelationshipStore, showToast, Text, Toasts, UserStore } from "@webpack/common";
+import { Channel, RenderModalProps } from "@vencord/discord-types";
+import { ChannelStore, ConfirmModal, GuildMemberStore, openModal, Parser, PermissionsBits, PermissionStore, RelationshipStore, showToast, UserStore } from "@webpack/common";
 import { JSX } from "react";
 
 import gitHash from "~git-hash";
@@ -40,26 +45,19 @@ import plugins, { PluginMeta } from "~plugins";
 
 import SettingsPlugin from "./settings";
 
-const VENCORD_GUILD_ID = "1015060230222131221";
-const VENBOT_USER_ID = "1017176847865352332";
-const KNOWN_ISSUES_CHANNEL_ID = "1222936386626129920";
-const CodeBlockRe = /```js\n(.+?)```/s;
-
-const AllowedChannelIds = [
-    SUPPORT_CHANNEL_ID,
-    "1024286218801926184", // Vencord > #bot-spam
-    "1033680203433660458", // Vencord > #v
+const AdditionalAllowedChannelIds = [
+    "1024286218801926184", // Vencord > #bot-commands
 ];
 
 const TrustedRolesIds = [
-    "1026534353167208489", // contributor
-    "1026504932959977532", // regular
-    "1042507929485586532", // donor
+    CONTRIB_ROLE_ID, // contributor
+    REGULAR_ROLE_ID, // regular
+    DONOR_ROLE_ID, // donor
 ];
 
-const AsyncFunction = async function () { }.constructor;
-
 const ShowCurrentGame = getUserSettingLazy<boolean>("status", "showCurrentGame")!;
+
+const isSupportAllowedChannel = (channel: Channel) => channel.parent_id === SUPPORT_CATEGORY_ID || AdditionalAllowedChannelIds.includes(channel.id);
 
 async function forceUpdate() {
     const outdated = await checkForUpdates();
@@ -89,7 +87,7 @@ async function generateDebugInfoMessage() {
             `v${VERSION} • [${gitHash}](<https://github.com/Vendicated/Vencord/commit/${gitHash}>)` +
             `${SettingsPlugin.additionalInfo} - ${Intl.DateTimeFormat("en-GB", { dateStyle: "medium" }).format(BUILD_TIMESTAMP)}`,
         Client: `${RELEASE_CHANNEL} ~ ${client}`,
-        Platform: window.navigator.platform
+        Platform: navigator.platform
     };
 
     if (IS_DISCORD_DESKTOP) {
@@ -97,7 +95,6 @@ async function generateDebugInfoMessage() {
     }
 
     const commonIssues = {
-        "NoRPC enabled": Vencord.Plugins.isPluginEnabled("NoRPC"),
         "Activity Sharing disabled": tryOrElse(() => !ShowCurrentGame.getSetting(), false),
         "Vencord DevBuild": !IS_STANDALONE,
         "Has UserPlugins": Object.values(PluginMeta).some(m => m.userPlugin),
@@ -116,7 +113,7 @@ function generatePluginList() {
     const isApiPlugin = (plugin: string) => plugin.endsWith("API") || plugins[plugin].required;
 
     const enabledPlugins = Object.keys(plugins)
-        .filter(p => Vencord.Plugins.isPluginEnabled(p) && !isApiPlugin(p));
+        .filter(p => isPluginEnabled(p) && !isApiPlugin(p));
 
     const enabledStockPlugins = enabledPlugins.filter(p => !PluginMeta[p].userPlugin);
     const enabledUserPlugins = enabledPlugins.filter(p => PluginMeta[p].userPlugin);
@@ -136,6 +133,34 @@ const checkForUpdatesOnce = onlyOnce(checkForUpdates);
 const settings = definePluginSettings({}).withPrivateSettings<{
     dismissedDevBuildWarning?: boolean;
 }>();
+
+function DevBuildConfirmModal(props: RenderModalProps) {
+    const s = settings.use(["dismissedDevBuildWarning"]);
+
+    return (
+        <ConfirmModal
+            {...props}
+            title="Hold on!"
+            confirmText="Understood"
+            variant="primary"
+            checkboxProps={{
+                checked: s.dismissedDevBuildWarning === true,
+                onChange: checked => s.dismissedDevBuildWarning = checked
+            }}
+        >
+            <div>
+                <Paragraph>You are using a custom build of Vencord, which we do not provide support for!</Paragraph>
+
+                <Paragraph className={Margins.top8}>
+                    We only provide support for <Link href="https://vencord.dev/download">official builds</Link>.
+                    Either <Link href="https://vencord.dev/download">switch to an official build</Link> or figure your issue out yourself.
+                </Paragraph>
+
+                <Paragraph size="md" weight="bold" className={Margins.top8}>You will be banned from receiving support if you ignore this rule.</Paragraph>
+            </div>
+        </ConfirmModal>
+    );
+}
 
 export default definePlugin({
     name: "SupportHelper",
@@ -158,20 +183,21 @@ export default definePlugin({
         {
             name: "vencord-debug",
             description: "Send Vencord debug info",
-            predicate: ctx => isPluginDev(UserStore.getCurrentUser()?.id) || AllowedChannelIds.includes(ctx.channel.id),
+            predicate: ctx => isPluginDev(UserStore.getCurrentUser()?.id) || isSupportAllowedChannel(ctx.channel),
             execute: async () => ({ content: await generateDebugInfoMessage() })
         },
         {
             name: "vencord-plugins",
             description: "Send Vencord plugin list",
-            predicate: ctx => isPluginDev(UserStore.getCurrentUser()?.id) || AllowedChannelIds.includes(ctx.channel.id),
+            predicate: ctx => isPluginDev(UserStore.getCurrentUser()?.id) || isSupportAllowedChannel(ctx.channel),
             execute: () => ({ content: generatePluginList() })
         }
     ],
 
     flux: {
         async CHANNEL_SELECT({ channelId }) {
-            if (channelId !== SUPPORT_CHANNEL_ID) return;
+            const isSupportChannel = channelId === SUPPORT_CHANNEL_ID || ChannelStore.getChannel(channelId)?.parent_id === SUPPORT_CATEGORY_ID;
+            if (!isSupportChannel) return;
 
             const selfId = UserStore.getCurrentUser()?.id;
             if (!selfId || isPluginDev(selfId)) return;
@@ -180,86 +206,88 @@ export default definePlugin({
                 await checkForUpdatesOnce().catch(() => { });
 
                 if (isOutdated) {
-                    return Alerts.show({
-                        title: "Hold on!",
-                        body: <div>
-                            <Forms.FormText>You are using an outdated version of Vencord! Chances are, your issue is already fixed.</Forms.FormText>
-                            <Forms.FormText className={Margins.top8}>
-                                Please first update before asking for support!
-                            </Forms.FormText>
-                        </div>,
-                        onCancel: () => openUpdaterModal!(),
-                        cancelText: "View Updates",
-                        confirmText: "Update & Restart Now",
-                        onConfirm: forceUpdate,
-                        secondaryConfirmText: "I know what I'm doing or I can't update"
-                    });
+                    openModal(props => (
+                        <ConfirmModal
+                            {...props}
+                            variant="primary"
+                            title="Hold on!"
+                            confirmText="Update & Restart Now"
+                            cancelText="View Updates"
+                            onConfirm={forceUpdate}
+                            onCancel={() => openSettingsTabModal(UpdaterTab!)}
+                        >
+                            <div>
+                                <Paragraph>You are using an outdated version of Vencord! Chances are, your issue is already fixed.</Paragraph>
+                                <Paragraph className={Margins.top8}>
+                                    Please first update before asking for support!
+                                </Paragraph>
+                                <Paragraph className={Margins.top8}>
+                                    If you know what you're doing or cannot update, you can dismiss this prompt.
+                                </Paragraph>
+                            </div>
+                        </ConfirmModal>
+                    ));
+                    return;
                 }
             }
 
-            // @ts-ignore outdated type
             const roles = GuildMemberStore.getSelfMember(VENCORD_GUILD_ID)?.roles;
             if (!roles || TrustedRolesIds.some(id => roles.includes(id))) return;
 
             if (!IS_WEB && IS_UPDATER_DISABLED) {
-                return Alerts.show({
-                    title: "Hold on!",
-                    body: <div>
-                        <Forms.FormText>You are using an externally updated Vencord version, which we do not provide support for!</Forms.FormText>
-                        <Forms.FormText className={Margins.top8}>
-                            Please either switch to an <Link href="https://vencord.dev/download">officially supported version of Vencord</Link>, or
-                            contact your package maintainer for support instead.
-                        </Forms.FormText>
-                    </div>
-                });
+                openModal(props => (
+                    <ConfirmModal
+                        {...props}
+                        title="Hold on!"
+                        confirmText="OK"
+                        variant="primary"
+                    >
+                        <div>
+                            <Paragraph>You are using an externally updated Vencord version, which we do not provide support for!</Paragraph>
+                            <Paragraph className={Margins.top8}>
+                                Please either switch to an <Link href="https://vencord.dev/download">officially supported version of Vencord</Link>, or
+                                contact your package maintainer for support instead.
+                            </Paragraph>
+                        </div>
+                    </ConfirmModal>
+                ));
+                return;
             }
 
             if (!IS_STANDALONE && !settings.store.dismissedDevBuildWarning) {
-                return Alerts.show({
-                    title: "Hold on!",
-                    body: <div>
-                        <Forms.FormText>You are using a custom build of Vencord, which we do not provide support for!</Forms.FormText>
-
-                        <Forms.FormText className={Margins.top8}>
-                            We only provide support for <Link href="https://vencord.dev/download">official builds</Link>.
-                            Either <Link href="https://vencord.dev/download">switch to an official build</Link> or figure your issue out yourself.
-                        </Forms.FormText>
-
-                        <Text variant="text-md/bold" className={Margins.top8}>You will be banned from receiving support if you ignore this rule.</Text>
-                    </div>,
-                    confirmText: "Understood",
-                    secondaryConfirmText: "Don't show again",
-                    onConfirmSecondary: () => settings.store.dismissedDevBuildWarning = true
-                });
+                openModal(props => <DevBuildConfirmModal {...props} />);
+                return;
             }
         }
     },
 
     renderMessageAccessory(props) {
+        if (props.message.vencordEmbeddedBy) return null;
+
         const buttons = [] as JSX.Element[];
 
         const shouldAddUpdateButton =
             !IS_UPDATER_DISABLED
             && (
                 (props.channel.id === KNOWN_ISSUES_CHANNEL_ID) ||
-                (props.channel.id === SUPPORT_CHANNEL_ID && props.message.author.id === VENBOT_USER_ID)
+                (props.channel.parent_id === SUPPORT_CATEGORY_ID && props.message.author.id === VENBOT_USER_ID)
             )
-            && props.message.content?.includes("update");
+            && props.message.content?.toLowerCase().includes("update");
 
         if (shouldAddUpdateButton) {
             buttons.push(
                 <Button
                     key="vc-update"
-                    color={Button.Colors.GREEN}
+                    variant="positive"
                     onClick={async () => {
                         try {
                             if (await forceUpdate())
-                                showToast("Success! Restarting...", Toasts.Type.SUCCESS);
+                                showToast({ text: "Success! Restarting...", variant: "success" });
                             else
-                                showToast("Already up to date!", Toasts.Type.MESSAGE);
+                                showToast({ text: "Already up to date!" });
                         } catch (e) {
                             new Logger(this.name).error("Error while updating:", e);
-                            showToast("Failed to update :(", Toasts.Type.FAILURE);
+                            showToast({ text: "Failed to update :(", variant: "critical" });
                         }
                     }}
                 >
@@ -268,44 +296,24 @@ export default definePlugin({
             );
         }
 
-        if (props.channel.id === SUPPORT_CHANNEL_ID) {
+        if (props.channel.parent_id === SUPPORT_CATEGORY_ID && PermissionStore.can(PermissionsBits.SEND_MESSAGES, props.channel)) {
             if (props.message.content.includes("/vencord-debug") || props.message.content.includes("/vencord-plugins")) {
                 buttons.push(
                     <Button
                         key="vc-dbg"
+                        variant="secondary"
                         onClick={async () => sendMessage(props.channel.id, { content: await generateDebugInfoMessage() })}
                     >
                         Run /vencord-debug
                     </Button>,
                     <Button
                         key="vc-plg-list"
+                        variant="secondary"
                         onClick={async () => sendMessage(props.channel.id, { content: generatePluginList() })}
                     >
                         Run /vencord-plugins
                     </Button>
                 );
-            }
-
-            if (props.message.author.id === VENBOT_USER_ID) {
-                const match = CodeBlockRe.exec(props.message.content || props.message.embeds[0]?.rawDescription || "");
-                if (match) {
-                    buttons.push(
-                        <Button
-                            key="vc-run-snippet"
-                            onClick={async () => {
-                                try {
-                                    await AsyncFunction(match[1])();
-                                    showToast("Success!", Toasts.Type.SUCCESS);
-                                } catch (e) {
-                                    new Logger(this.name).error("Error while running snippet:", e);
-                                    showToast("Failed to run snippet :(", Toasts.Type.FAILURE);
-                                }
-                            }}
-                        >
-                            Run Snippet
-                        </Button>
-                    );
-                }
             }
         }
 
@@ -320,7 +328,7 @@ export default definePlugin({
         if (RelationshipStore.isFriend(userId) || isPluginDev(UserStore.getCurrentUser()?.id)) return null;
 
         return (
-            <Card className={`vc-plugins-restart-card ${Margins.top8}`}>
+            <Card variant="warning" className={Margins.top8} defaultPadding>
                 Please do not private message Vencord plugin developers for support!
                 <br />
                 Instead, use the Vencord support channel: {Parser.parse("https://discord.com/channels/1015060230222131221/1026515880080842772")}

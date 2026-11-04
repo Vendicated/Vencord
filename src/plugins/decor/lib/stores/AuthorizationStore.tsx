@@ -4,13 +4,11 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { DataStore } from "@api/index";
+import * as DataStore from "@api/DataStore";
+import { AUTHORIZE_URL, CLIENT_ID } from "@plugins/decor/lib/constants";
 import { proxyLazy } from "@utils/lazy";
 import { Logger } from "@utils/Logger";
-import { openModal } from "@utils/modal";
-import { OAuth2AuthorizeModal, showToast, Toasts, UserStore, zustandCreate, zustandPersist } from "@webpack/common";
-
-import { AUTHORIZE_URL, CLIENT_ID } from "../constants";
+import { OAuth2AuthorizeModal, openModal, showToast, UserStore, zustandCreate, zustandPersist } from "@webpack/common";
 
 interface AuthorizationState {
     token: string | null;
@@ -76,7 +74,7 @@ export const useAuthorizationStore = proxyLazy(() => zustandCreate(
                                 resolve(void 0);
                             } catch (e) {
                                 if (e instanceof Error) {
-                                    showToast(`Failed to authorize: ${e.message}`, Toasts.Type.FAILURE);
+                                    showToast({ text: `Failed to authorize: ${e.message}`, variant: "critical" });
                                     new Logger("Decor").error("Failed to authorize", e);
                                     reject(e);
                                 }

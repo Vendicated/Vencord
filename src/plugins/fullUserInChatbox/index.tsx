@@ -8,6 +8,7 @@ import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 import { findComponentByCodeLazy } from "@webpack";
+import { UserStore, useStateFromStores } from "@webpack/common";
 import { ReactNode } from "react";
 
 const UserMentionComponent = findComponentByCodeLazy(".USER_MENTION)");
@@ -22,26 +23,33 @@ interface UserMentionComponentProps {
 export default definePlugin({
     name: "FullUserInChatbox",
     description: "Makes the user mention in the chatbox have more functionalities, like left/right clicking",
+    tags: ["Shortcuts", "Utility"],
     authors: [Devs.sadan],
 
     patches: [
         {
-            find: ':"text":',
+            // Same find as RoleColorEverywhere chatbox mentions
+            find: '"text":"locked"',
             replacement: {
-                match: /(hidePersonalInformation\).+?)(if\(null!=\i\){.+?return \i)(?=})/,
+                match: /(hidePersonalInformation\).+?)(if\(null!=\i\){.{0,600}?)(?=}function \i\(\i\){let{id:)/,
                 replace: "$1return $self.UserMentionComponent({...arguments[0],originalComponent:()=>{$2}});"
             }
         }
     ],
 
-    UserMentionComponent: ErrorBoundary.wrap((props: UserMentionComponentProps) => (
-        <UserMentionComponent
+    UserMentionComponent: ErrorBoundary.wrap((props: UserMentionComponentProps) => {
+        const user = useStateFromStores([UserStore], () => UserStore.getUser(props.id));
+        if (user == null) {
+            return props.originalComponent();
+        }
+
+        return <UserMentionComponent
             // This seems to be constant
             className="mention"
             userId={props.id}
             channelId={props.channelId}
-        />
-    ), {
+        />;
+    }, {
         fallback: ({ wrappedProps: { originalComponent } }) => originalComponent()
     })
 });

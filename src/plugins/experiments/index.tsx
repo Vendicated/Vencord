@@ -16,42 +16,33 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { definePluginSettings } from "@api/Settings";
-import { disableStyle, enableStyle } from "@api/Styles";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { ErrorCard } from "@components/ErrorCard";
-import { Devs } from "@utils/constants";
+import { Flex } from "@components/Flex";
+import { Heading } from "@components/Heading";
+import { Paragraph } from "@components/Paragraph";
+import { Devs, IS_MAC } from "@utils/constants";
 import { Margins } from "@utils/margins";
-import definePlugin, { OptionType } from "@utils/types";
-import { findByPropsLazy, findLazy } from "@webpack";
-import { Forms, React } from "@webpack/common";
+import definePlugin from "@utils/types";
+import { findByPropsLazy } from "@webpack";
+import { React } from "@webpack/common";
 
-import hideBugReport from "./hideBugReport.css?managed";
 
 const KbdStyles = findByPropsLazy("key", "combo");
-const BugReporterExperiment = findLazy(m => m?.definition?.id === "2024-09_bug_reporter");
-
-const settings = definePluginSettings({
-    toolbarDevMenu: {
-        type: OptionType.BOOLEAN,
-        description: "Change the Help (?) toolbar button (top right in chat) to Discord's developer menu",
-        default: false,
-        restartNeeded: true
-    }
-});
+const modKey = IS_MAC ? "cmd" : "ctrl";
+const altKey = IS_MAC ? "opt" : "alt";
 
 export default definePlugin({
     name: "Experiments",
     description: "Enable Access to Experiments & other dev-only features in Discord!",
+    tags: ["Developers", "Utility"],
     authors: [
         Devs.Megu,
         Devs.Ven,
         Devs.Nickyux,
         Devs.BanTheNons,
-        Devs.Nuckyz
+        Devs.Nuckyz,
     ],
-
-    settings,
 
     patches: [
         {
@@ -64,84 +55,101 @@ export default definePlugin({
         {
             find: 'type:"user",revision',
             replacement: {
-                match: /!(\i)&&"CONNECTION_OPEN".+?;/g,
-                replace: "$1=!0;"
+                match: /!(\i)(?=&&"CONNECTION_OPEN")/,
+                replace: "!($1=true)"
             }
         },
         {
-            find: 'H1,title:"Experiments"',
+            find: 'placeholder:"Search experiments"',
+            replacement: [
+                {
+                    match: /(?<=children:\[)(?=null!=.{0,150}"Installation ID:)/,
+                    replace: "$self.WarningCard(),"
+                },
+                // for some reason the installation id and copy buttons are on
+                // different lines so it looks stupid when the card above is added
+                {
+                    match: /(?<=,marginBottom:16)(?=\},children:\[)/,
+                    replace: ',flexDirection:"row",alignItems:"center"'
+                }
+            ]
+        },
+        // Enable experiment embed on sent experiment links
+        {
+            find: "Clear Treatment ",
+            replacement: [
+                {
+                    match: /\i\?\.isStaff\(\)/,
+                    replace: "true"
+                },
+                // Fix some tricky experiments name causing a client crash
+                {
+                    match: /\.isStaffPersonal\(\).+?if\(null==(\i)\|\|null==\i(?=\)return null;)/,
+                    replace: "$&||({})[$1]!=null"
+                }
+            ]
+        },
+        // Fix another function which cases crashes with tricky experiment names and the experiment embed
+        {
+            find: "}getServerAssignment(",
             replacement: {
-                match: 'title:"Experiments",children:[',
-                replace: "$&$self.WarningCard(),"
+                match: /}getServerAssignment\((\i),\i,\i\){/,
+                replace: "$&if($1==null)return;"
             }
         },
-        // change top right chat toolbar button from the help one to the dev one
+        // Enable playground embed on sent playground links
+        // dev://playground/mana, dev://playground/payments, dev://playground/virtual-currency,
+        // dev://playground/nitro, dev://playground/mfa, dev://playground/cms, dev://playground/void
         {
-            find: "toolbar:function",
+            find: '"Open Playground',
             replacement: {
-                match: /hasBugReporterAccess:(\i)/,
-                replace: "_hasBugReporterAccess:$1=true"
-            },
-            predicate: () => settings.store.toolbarDevMenu
-        },
-
-        // makes the Favourites Server experiment allow favouriting DMs and threads
-        {
-            find: "useCanFavoriteChannel",
-            replacement: {
-                match: /\i\.isDM\(\)\|\|\i\.isThread\(\)/,
-                replace: "false",
+                match: "isStaff()||",
+                replace: "$& true||"
             }
         },
-        // enable option to always record clips even if you are not streaming
         {
-            find: "isDecoupledGameClippingEnabled(){",
+            // Expands the experiment uri regex to allow negative numbers, e.g. dev://experiment/2026-02-mana-playground-access/-1
+            // -1 is "Not Eligible"
+            find: '"^dev://experiment/',
             replacement: {
-                match: /\i\.isStaff\(\)/,
-                replace: "true"
+                match: /(?<=dev:\/\/experiment.{0,20}?)\[0-9\]\+/,
+                replace: "[0-9-]+"
             }
         }
     ],
 
-    start: () => !BugReporterExperiment.getCurrentConfig().hasBugReporterAccess && enableStyle(hideBugReport),
-    stop: () => disableStyle(hideBugReport),
-
     settingsAboutComponent: () => {
-        const isMacOS = navigator.platform.includes("Mac");
-        const modKey = isMacOS ? "cmd" : "ctrl";
-        const altKey = isMacOS ? "opt" : "alt";
         return (
-            <React.Fragment>
-                <Forms.FormTitle tag="h3">More Information</Forms.FormTitle>
-                <Forms.FormText variant="text-md/normal">
-                    You can open Discord's DevTools via {" "}
-                    <div className={KbdStyles.combo} style={{ display: "inline-flex" }}>
-                        <kbd className={KbdStyles.key}>{modKey}</kbd> +{" "}
-                        <kbd className={KbdStyles.key}>{altKey}</kbd> +{" "}
-                        <kbd className={KbdStyles.key}>O</kbd>{" "}
-                    </div>
-                </Forms.FormText>
-            </React.Fragment>
+            <Paragraph size="md">
+                Tip: You can open Discord's DevTools via {" "}
+                <div className={KbdStyles.combo} style={{ display: "inline-flex" }}>
+                    <kbd className={KbdStyles.key}>{modKey}</kbd>{" "}
+                    <kbd className={KbdStyles.key}>{altKey}</kbd>{" "}
+                    <kbd className={KbdStyles.key}>O</kbd>{" "}
+                </div>
+            </Paragraph>
         );
     },
 
     WarningCard: ErrorBoundary.wrap(() => (
         <ErrorCard id="vc-experiments-warning-card" className={Margins.bottom16}>
-            <Forms.FormTitle tag="h2">Hold on!!</Forms.FormTitle>
+            <Flex flexDirection="column" gap={8}>
+                <Heading tag="h3">Hold on!!</Heading>
 
-            <Forms.FormText>
-                Experiments are unreleased Discord features. They might not work, or even break your client or get your account disabled.
-            </Forms.FormText>
+                <Paragraph>
+                    Experiments are unreleased Discord features. They might not work, or even break your client or get your account disabled.
+                </Paragraph>
 
-            <Forms.FormText className={Margins.top8}>
-                Only use experiments if you know what you're doing. Vencord is not responsible for any damage caused by enabling experiments.
+                <Paragraph>
+                    Only use experiments if you know what you're doing. Vencord is not responsible for any damage caused by enabling experiments.
 
-                If you don't know what an experiment does, ignore it. Do not ask us what experiments do either, we probably don't know.
-            </Forms.FormText>
+                    If you don't know what an experiment does, ignore it. Do not ask us what experiments do either, we probably don't know.
+                </Paragraph>
 
-            <Forms.FormText className={Margins.top8}>
-                No, you cannot use server-side features like checking the "Send to Client" box.
-            </Forms.FormText>
+                <Paragraph>
+                    <b>You cannot use server-side features like checking the "Send to Client" box.</b>
+                </Paragraph>
+            </Flex>
         </ErrorCard>
     ), { noop: true })
 });

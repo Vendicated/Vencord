@@ -5,14 +5,16 @@
  */
 
 import { Devs } from "@utils/constants";
+import { Logger } from "@utils/Logger";
 import definePlugin from "@utils/types";
+import { Message } from "@vencord/discord-types";
 import { UserStore } from "@webpack/common";
-import { Message } from "discord-types/general";
 
 
 export default definePlugin({
     name: "ThemeAttributes",
     description: "Adds data attributes to various elements for theming purposes",
+    tags: ["Appearance", "Customisation"],
     authors: [Devs.Ven, Devs.Board],
 
     patches: [
@@ -21,17 +23,17 @@ export default definePlugin({
         {
             find: ".tabBarRef",
             replacement: {
-                match: /style:this\.getStyle\(\),role:"tab"/,
-                replace: "$&,'data-tab-id':this.props.id"
+                match: /style:this\.getStyle\(\),role:\i/,
+                replace: "$&,'data-tab-id':this?.props?.id"
             }
         },
 
         // Add data-author-id and data-is-self to all messages
         {
-            find: ".messageListItem",
+            find: "Message must not be a thread starter message",
             replacement: {
-                match: /\.messageListItem(?=,"aria)/,
-                replace: "$&,...$self.getMessageProps(arguments[0])"
+                match: /"aria-setsize":-1,(?=.{0,150}?#{intl::MESSAGE_A11Y_ROLE_DESCRIPTION})/,
+                replace: "...$self.getMessageProps(arguments[0]),$&"
             }
         },
 
@@ -39,10 +41,12 @@ export default definePlugin({
         // popout profiles
         {
             find: "#{intl::LABEL_WITH_ONLINE_STATUS}",
-            replacement: {
-                match: /src:null!=\i\?(\i).{1,50}"aria-hidden":!0/,
-                replace: "$&,style:$self.getAvatarStyles($1)"
-            }
+            replacement: [
+                {
+                    match: /src:(\i)\?\?void 0.{1,50}"aria-hidden":!0/,
+                    replace: "$&,style:$self.getAvatarStyles($1)"
+                }
+            ]
         },
         // chat avatars
         {
@@ -54,8 +58,8 @@ export default definePlugin({
         }
     ],
 
-    getAvatarStyles(src: string) {
-        if (src.startsWith("data:")) return {};
+    getAvatarStyles(src: string | null) {
+        if (typeof src !== "string" || src.startsWith("data:")) return {};
 
         return Object.fromEntries(
             [128, 256, 512, 1024, 2048, 4096].map(size => [
@@ -66,12 +70,17 @@ export default definePlugin({
     },
 
     getMessageProps(props: { message: Message; }) {
-        const author = props.message?.author;
-        const authorId = author?.id;
-        return {
-            "data-author-id": authorId,
-            "data-author-username": author?.username,
-            "data-is-self": authorId && authorId === UserStore.getCurrentUser()?.id,
-        };
+        try {
+            const author = props.message?.author;
+            const authorId = author?.id;
+            return {
+                "data-author-id": authorId,
+                "data-author-username": author?.username,
+                "data-is-self": authorId && authorId === UserStore.getCurrentUser()?.id,
+            };
+        } catch (e) {
+            new Logger("ThemeAttributes").error("Error in getMessageProps", e);
+            return {};
+        }
     }
 });

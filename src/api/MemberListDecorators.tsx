@@ -17,55 +17,49 @@
 */
 
 import ErrorBoundary from "@components/ErrorBoundary";
-import { Channel, User } from "discord-types/general/index.js";
+import { Channel, User } from "@vencord/discord-types";
 import { JSX } from "react";
 
 interface DecoratorProps {
-    activities: any[];
-    channel: Channel;
-    /**
-     * Only for DM members
-     */
-    channelName?: string;
-    /**
-     * Only for server members
-     */
-    currentUser?: User;
-    guildId?: string;
-    isMobile: boolean;
-    isOwner?: boolean;
-    isTyping: boolean;
-    selected: boolean;
-    status: string;
+    type: "guild" | "dm";
     user: User;
-    [key: string]: any;
+    /** only present when this is a DM list item */
+    channel: Channel;
+    /** only present when this is a guild list item */
+    isOwner: boolean;
 }
+
 export type MemberListDecoratorFactory = (props: DecoratorProps) => JSX.Element | null;
 type OnlyIn = "guilds" | "dms";
 
-export const decorators = new Map<string, { render: MemberListDecoratorFactory, onlyIn?: OnlyIn; }>();
+export const decoratorsFactories = new Map<string, { render: MemberListDecoratorFactory, onlyIn?: OnlyIn; }>();
 
 export function addMemberListDecorator(identifier: string, render: MemberListDecoratorFactory, onlyIn?: OnlyIn) {
-    decorators.set(identifier, { render, onlyIn });
+    decoratorsFactories.set(identifier, { render, onlyIn });
 }
 
 export function removeMemberListDecorator(identifier: string) {
-    decorators.delete(identifier);
+    decoratorsFactories.delete(identifier);
 }
 
-export function __getDecorators(props: DecoratorProps): (JSX.Element | null)[] {
-    const isInGuild = !!(props.guildId);
-    return Array.from(
-        decorators.entries(),
+export function __getDecorators(props: DecoratorProps, type: "guild" | "dm"): JSX.Element {
+    const decorators = Array.from(
+        decoratorsFactories.entries(),
         ([key, { render: Decorator, onlyIn }]) => {
-            if ((onlyIn === "guilds" && !isInGuild) || (onlyIn === "dms" && isInGuild))
+            if ((onlyIn === "guilds" && type !== "guild") || (onlyIn === "dms" && type !== "dm"))
                 return null;
 
             return (
                 <ErrorBoundary noop key={key} message={`Failed to render ${key} Member List Decorator`}>
-                    <Decorator {...props} />
+                    <Decorator {...props} type={type} />
                 </ErrorBoundary>
             );
         }
+    );
+
+    return (
+        <div className="vc-member-list-decorators-wrapper">
+            {decorators}
+        </div>
     );
 }

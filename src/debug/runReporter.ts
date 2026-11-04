@@ -6,27 +6,60 @@
 
 import { Logger } from "@utils/Logger";
 import * as Webpack from "@webpack";
-import { patches } from "plugins";
+import { getBuildNumber, patches } from "@webpack/patcher";
 
 import { loadLazyChunks } from "./loadLazyChunks";
 
-const ReporterLogger = new Logger("Reporter");
-
 async function runReporter() {
+    const ReporterLogger = new Logger("Reporter");
+
     try {
         ReporterLogger.log("Starting test...");
 
-        let loadLazyChunksResolve: (value: void | PromiseLike<void>) => void;
-        const loadLazyChunksDone = new Promise<void>(r => loadLazyChunksResolve = r);
+        const { promise: loadLazyChunksDone, resolve: loadLazyChunksDoneResolve } = Promise.withResolvers<void>();
 
-        Webpack.beforeInitListeners.add(() => loadLazyChunks().then((loadLazyChunksResolve)));
+        function startLoadingChunks() {
+            Webpack.factoryListeners.delete(startLoadingChunks);
+
+            // Factory listeners are first called as soon as WebpackRequire is initialized, while the Webpack runtime is still being set up.
+            // Things like wreq.u, wreq.e and wreq.f are only defined later in the same task, so wait for it to finish
+            setTimeout(() => {
+                // Stylesheets are not needed for testing, so skip loading them for every chunk
+                Webpack.wreq.f.css = () => { };
+
+                loadLazyChunks().then(loadLazyChunksDoneResolve);
+            }, 0);
+        }
+
+        Webpack.factoryListeners.add(startLoadingChunks);
         await loadLazyChunksDone;
+
+        // Manually require all modules to make sure all lazily required modules are patched
+        for (const moduleId of Object.keys(Webpack.wreq.m)) {
+            try {
+                Webpack.wreq(moduleId);
+            } catch { }
+        }
+
+        if (IS_REPORTER && IS_WEB && !IS_VESKTOP) {
+            console.log("[REPORTER_META]", {
+                buildNumber: getBuildNumber(),
+                buildHash: window.GLOBAL_ENV.SENTRY_TAGS.buildId
+            });
+        }
 
         for (const patch of patches) {
             if (!patch.all) {
-                new Logger("WebpackInterceptor").warn(`Patch by ${patch.plugin} found no module (Module id is -): ${patch.find}`);
+                new Logger("WebpackPatcher").warn(`Patch by ${patch.plugin} found no module (Module id is -): ${patch.find}`);
             }
         }
+
+        // Slow patches reporting is disabled for now since it is too noisy
+        // for (const [plugin, moduleId, match, totalTime] of patchTimings) {
+        //     if (totalTime > 10) {
+        //         new Logger("WebpackPatcher").warn(`Patch by ${plugin} took ${Math.round(totalTime * 100) / 100}ms (Module id is ${String(moduleId)}): ${match}`);
+        //     }
+        // }
 
         for (const [searchType, args] of Webpack.lazyWebpackSearchHistory) {
             let method = searchType;
@@ -50,16 +83,15 @@ async function runReporter() {
                     result = await Webpack.extractAndLoadChunks(code, matcher);
                     if (result === false) result = null;
                 } else if (method === "mapMangledModule") {
-                    const [code, mapper] = args;
+                    const [code, mapper, includeBlacklistedExports] = args;
 
-                    result = Webpack.mapMangledModule(code, mapper);
+                    result = Webpack.mapMangledModule(code, mapper, includeBlacklistedExports);
                     if (Object.keys(result).length !== Object.keys(mapper).length) throw new Error("Webpack Find Fail");
                 } else {
-                    // @ts-ignore
                     result = Webpack[method](...args);
                 }
 
-                if (result == null || (result.$$vencordInternal != null && result.$$vencordInternal() == null)) throw new Error("Webpack Find Fail");
+                if (result == null || (result.$$vencordGetWrappedComponent != null && result.$$vencordGetWrappedComponent() == null)) throw new Error("Webpack Find Fail");
             } catch (e) {
                 let logMessage = searchType;
                 if (method === "find" || method === "proxyLazyWebpack" || method === "LazyComponentWebpack") {
@@ -88,4 +120,6 @@ async function runReporter() {
     }
 }
 
-runReporter();
+// Run after the Vencord object has been created.
+// We need to add extra properties to it, and it is only created after all of Vencord code has ran
+setTimeout(runReporter, 0);

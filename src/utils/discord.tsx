@@ -16,16 +16,14 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import "./discord.css";
-
-import { MessageObject } from "@api/MessageEvents";
-import { ChannelStore, ComponentDispatch, Constants, FluxDispatcher, GuildStore, i18n, IconUtils, InviteActions, MessageActions, PrivateChannelsStore, RestAPI, SelectedChannelStore, SelectedGuildStore, UserProfileActions, UserProfileStore, UserSettingsActionCreators, UserUtils } from "@webpack/common";
-import { Channel, Guild, Message, User } from "discord-types/general";
+import type { MessageObject } from "@api/MessageEvents";
+import type { Channel, CloudUpload, ConfirmModalProps, Guild, GuildFeatures, MediaModalItem, MediaModalProps, Message, User } from "@vencord/discord-types";
+import { ChannelActionCreators, ChannelStore, ComponentDispatch, ConfirmModal, Constants, FluxDispatcher, GuildStore, i18n, InviteActions, MessageActions, openMediaModal, openModal, openUserProfileModal, RestAPI, SelectedChannelStore, SelectedGuildStore, showToast, UserProfileStore, UserSettingsActionCreators, UserUtils } from "@webpack/common";
 import { Except } from "type-fest";
 
+import { copyToClipboard } from "./clipboard";
 import { runtimeHashMessageKey } from "./intlHash";
 import { Logger } from "./Logger";
-import { MediaModalItem, MediaModalProps, openMediaModal } from "./modal";
 
 const IntlManagerLogger = new Logger("IntlManager");
 
@@ -93,7 +91,7 @@ export function getCurrentGuild(): Guild | undefined {
 }
 
 export function openPrivateChannel(userId: string) {
-    PrivateChannelsStore.openPrivateChannel(userId);
+    ChannelActionCreators.openPrivateChannel(userId);
 }
 
 export const enum Theme {
@@ -102,7 +100,11 @@ export const enum Theme {
 }
 
 export function getTheme(): Theme {
-    return UserSettingsActionCreators.PreloadedUserSettingsActionCreators.getCurrentValue()?.appearance?.theme;
+    try {
+        return UserSettingsActionCreators.PreloadedUserSettingsActionCreators.getCurrentValue()?.appearance?.theme;
+    } catch {
+        return Theme.Dark;
+    }
 }
 
 export function insertTextIntoChatInputBox(text: string) {
@@ -112,20 +114,39 @@ export function insertTextIntoChatInputBox(text: string) {
     });
 }
 
-interface MessageExtra {
+export async function copyWithToast(text: string, toastMessage = "Copied to clipboard!") {
+    await copyToClipboard(text);
+    showToast({ text: toastMessage, variant: "success" });
+}
+
+interface MessageOptions {
     messageReference: Message["messageReference"];
     allowedMentions: {
         parse: string[];
         replied_user: boolean;
     };
     stickerIds: string[];
+    attachmentsToUpload: CloudUpload[];
+    poll: {
+        allow_multiselect: boolean;
+        answers: Array<{
+            poll_media: {
+                text: string;
+                attachment_ids?: unknown;
+                emoji?: { name: string; id?: string; };
+            };
+        }>;
+        duration: number;
+        layout_type: number;
+        question: { text: string; };
+    };
 }
 
 export function sendMessage(
     channelId: string,
     data: Partial<MessageObject>,
-    waitForChannelReady?: boolean,
-    extra?: Partial<MessageExtra>
+    waitForChannelReady = true,
+    options: Partial<MessageOptions> = {}
 ) {
     const messageData = {
         content: "",
@@ -135,7 +156,7 @@ export function sendMessage(
         ...data
     };
 
-    return MessageActions.sendMessage(channelId, messageData, waitForChannelReady, extra);
+    return MessageActions.sendMessage(channelId, messageData, waitForChannelReady, options);
 }
 
 /**
@@ -143,9 +164,6 @@ export function sendMessage(
  */
 export function openImageModal(item: Except<MediaModalItem, "type">, mediaModalProps?: Omit<MediaModalProps, "items">) {
     return openMediaModal({
-        className: "vc-image-modal",
-        fit: "vc-position-inherit",
-        shouldAnimateCarousel: true,
         items: [{
             type: "IMAGE",
             original: item.original ?? item.url,
@@ -160,14 +178,14 @@ export async function openUserProfile(id: string) {
     if (!user) throw new Error("No such user: " + id);
 
     const guildId = SelectedGuildStore.getGuildId();
-    UserProfileActions.openUserProfileModal({
+    openUserProfileModal({
         userId: id,
         guildId,
         channelId: SelectedChannelStore.getChannelId(),
-        analyticsLocation: {
-            page: guildId ? "Guild Channel" : "DM Channel",
-            section: "Profile Popout"
-        }
+        sourceAnalyticsLocations: [
+            "username",
+            "user profile popout",
+        ]
     });
 }
 
@@ -199,7 +217,7 @@ export async function fetchUserProfile(id: string, options?: FetchUserProfileOpt
     });
 
     FluxDispatcher.dispatch({ type: "USER_UPDATE", user: body.user });
-    await FluxDispatcher.dispatch({ type: "USER_PROFILE_FETCH_SUCCESS", ...body });
+    await FluxDispatcher.dispatch({ type: "USER_PROFILE_FETCH_SUCCESS", userProfile: body });
     if (options?.guild_id && body.guild_member)
         FluxDispatcher.dispatch({ type: "GUILD_MEMBER_PROFILE_UPDATE", guildId: options.guild_id, guildMember: body.guild_member });
 
@@ -213,13 +231,45 @@ export function getUniqueUsername(user: User) {
     return user.discriminator === "0" ? user.username : user.tag;
 }
 
-/**
- *  Get the URL for an emoji. This function always returns a gif URL for animated emojis, instead of webp
- * @param id The emoji id
- * @param animated Whether the emoji is animated
- * @param size The size for the emoji
- */
-export function getEmojiURL(id: string, animated: boolean, size: number) {
-    const url = IconUtils.getEmojiURL({ id, animated, size });
-    return animated ? url.replace(".webp", ".gif") : url;
+// Discord has a similar function in their code
+export function getGuildAcronym(guild: Guild): string {
+    return guild.name
+        .replaceAll("'s ", " ")
+        .replace(/\w+/g, m => m[0])
+        .replace(/\s/g, "");
+}
+
+export function hasGuildFeature(guild: Guild, feature: GuildFeatures): boolean {
+    return guild.features?.has(feature) ?? false;
+}
+
+export type ConfirmOptions = Pick<ConfirmModalProps, "title" | "subtitle" | "confirmText" | "cancelText" | "variant" | "onConfirm" | "onCancel" | "onCloseCallback">;
+
+export async function confirmAction({ variant, confirmText, title, cancelText, subtitle, onConfirm, onCancel, onCloseCallback }: ConfirmOptions) {
+    return new Promise<boolean>((res, rej) => {
+        const wrap = (fn: Function | undefined, value: boolean) => async (...args: any[]): Promise<void> => {
+            try {
+                await fn?.(...args);
+                res(value);
+            } catch (e) {
+                rej(e);
+            }
+        };
+
+        openModal(modalProps => {
+            return (
+                <ConfirmModal
+                    {...modalProps}
+                    variant={variant}
+                    confirmText={confirmText}
+                    cancelText={cancelText}
+                    title={title}
+                    subtitle={subtitle}
+                    onConfirm={wrap(onConfirm, true)}
+                    onCancel={wrap(onCancel, false)}
+                    onCloseCallback={wrap(onCloseCallback, false)}
+                />
+            );
+        });
+    });
 }

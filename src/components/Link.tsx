@@ -23,11 +23,16 @@ interface Props extends React.DetailedHTMLProps<React.AnchorHTMLAttributes<HTMLA
 }
 
 export function Link(props: React.PropsWithChildren<Props>) {
+    props = { ...props };
+
     if (props.disabled) {
         props.style ??= {};
         props.style.pointerEvents = "none";
         props["aria-disabled"] = true;
     }
+
+    props.rel ??= "noreferrer";
+
     return (
         <a role="link" target="_blank" {...props}>
             {props.children}

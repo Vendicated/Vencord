@@ -4,10 +4,9 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { cl } from "@plugins/decor/ui";
 import { React } from "@webpack/common";
 import { JSX } from "react";
-
-import { cl } from "../";
 
 export interface GridProps<ItemT> {
     renderItem: (item: ItemT) => JSX.Element;

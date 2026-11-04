@@ -6,26 +6,24 @@
 
 import "./styles.css";
 
-import { classNameFactory } from "@api/Styles";
-import { openImageModal, openUserProfile } from "@utils/discord";
+import { Heading } from "@components/Heading";
+import { Margins } from "@components/margins";
+import { Paragraph } from "@components/Paragraph";
+import { classNameFactory } from "@utils/css";
+import { getGuildAcronym, openImageModal, openUserProfile } from "@utils/discord";
 import { classes } from "@utils/misc";
-import { ModalRoot, ModalSize, openModal } from "@utils/modal";
 import { useAwaiter } from "@utils/react";
-import { findByPropsLazy, findComponentByCodeLazy } from "@webpack";
-import { FluxDispatcher, Forms, GuildChannelStore, GuildMemberStore, GuildStore, IconUtils, Parser, PresenceStore, RelationshipStore, ScrollerThin, SnowflakeUtils, TabBar, Timestamp, useEffect, UserStore, UserUtils, useState, useStateFromStores } from "@webpack/common";
-import { Guild, User } from "discord-types/general";
+import { Guild, RenderModalProps, User } from "@vencord/discord-types";
+import { findComponentByCodeLazy, findCssClassesLazy } from "@webpack";
+import { FluxDispatcher, GuildChannelStore, GuildMemberStore, GuildRoleStore, IconUtils, Modal, openModal, Parser, PresenceStore, RelationshipStore, ScrollerThin, SnowflakeUtils, TabBar, Timestamp, useEffect, UserStore, UserUtils, useState, useStateFromStores } from "@webpack/common";
 
-const IconClasses = findByPropsLazy("icon", "acronym", "childWrapper");
-const FriendRow = findComponentByCodeLazy(".listName,discriminatorClass");
+const IconClasses = findCssClassesLazy("icon", "acronym", "childWrapper");
+const FriendRow = findComponentByCodeLazy("discriminatorClass:", ".isMobileOnline", "avatarSrc:");
 
 const cl = classNameFactory("vc-gp-");
 
 export function openGuildInfoModal(guild: Guild) {
-    openModal(props =>
-        <ModalRoot {...props} size={ModalSize.MEDIUM}>
-            <GuildInfoModal guild={guild} />
-        </ModalRoot>
-    );
+    openModal(props => <GuildInfoModal guild={guild} modalProps={props} />);
 }
 
 const enum Tabs {
@@ -55,7 +53,7 @@ function renderTimestamp(timestamp: number) {
     );
 }
 
-function GuildInfoModal({ guild }: GuildProps) {
+function GuildInfoModal({ guild, modalProps }: GuildProps & { modalProps: RenderModalProps; }) {
     const [friendCount, setFriendCount] = useState<number>();
     const [blockedCount, setBlockedCount] = useState<number>();
     const [ignoredCount, setIgnoredCount] = useState<number>();
@@ -78,7 +76,32 @@ function GuildInfoModal({ guild }: GuildProps) {
     });
 
     return (
-        <div className={cl("root")}>
+        <Modal
+            {...modalProps}
+            size="lg"
+            title={
+                <div className={cl("header")}>
+                    {iconUrl
+                        ? <img
+                            className={cl("icon")}
+                            src={iconUrl}
+                            alt=""
+                            onClick={() => openImageModal({
+                                url: iconUrl,
+                                height: 512,
+                                width: 512,
+                            })}
+                        />
+                        : <div aria-hidden className={classes(IconClasses.childWrapper, IconClasses.acronym)}>{getGuildAcronym(guild)}</div>
+                    }
+
+                    <div className={cl("name-and-description")}>
+                        <Heading className={cl("name")}>{guild.name}</Heading>
+                        {guild.description && <Paragraph>{guild.description}</Paragraph>}
+                    </div>
+                </div>
+            }
+        >
             {bannerUrl && currentTab === Tabs.ServerInfo && (
                 <img
                     className={cl("banner")}
@@ -90,26 +113,6 @@ function GuildInfoModal({ guild }: GuildProps) {
                     })}
                 />
             )}
-
-            <div className={cl("header")}>
-                {iconUrl
-                    ? <img
-                        src={iconUrl}
-                        alt=""
-                        onClick={() => openImageModal({
-                            url: iconUrl,
-                            height: 512,
-                            width: 512,
-                        })}
-                    />
-                    : <div aria-hidden className={classes(IconClasses.childWrapper, IconClasses.acronym)}>{guild.acronym}</div>
-                }
-
-                <div className={cl("name-and-description")}>
-                    <Forms.FormTitle tag="h5" className={cl("name")}>{guild.name}</Forms.FormTitle>
-                    {guild.description && <Forms.FormText>{guild.description}</Forms.FormText>}
-                </div>
-            </div>
 
             <TabBar
                 type="top"
@@ -150,7 +153,7 @@ function GuildInfoModal({ guild }: GuildProps) {
                 {currentTab === Tabs.BlockedUsers && <BlockedUsersTab guild={guild} setCount={setBlockedCount} />}
                 {currentTab === Tabs.IgnoredUsers && <IgnoredUserTab guild={guild} setCount={setIgnoredCount} />}
             </div>
-        </div>
+        </Modal>
     );
 }
 
@@ -170,6 +173,7 @@ function Owner(guildId: string, owner: User) {
     return (
         <div className={cl("owner")}>
             <img
+                className={cl("owner-avatar")}
                 src={ownerAvatarUrl}
                 alt=""
                 onClick={() => openImageModal({
@@ -196,16 +200,16 @@ function ServerInfoTab({ guild }: GuildProps) {
         "Vanity Link": guild.vanityURLCode ? (<a>{`discord.gg/${guild.vanityURLCode}`}</a>) : "-", // Making the anchor href valid would cause Discord to reload
         "Preferred Locale": guild.preferredLocale || "-",
         "Verification Level": ["None", "Low", "Medium", "High", "Highest"][guild.verificationLevel] || "?",
-        "Nitro Boosts": `${guild.premiumSubscriberCount ?? 0} (Level ${guild.premiumTier ?? 0})`,
+        "Server Boosts": `${guild.premiumSubscriberCount ?? 0} (Level ${guild.premiumTier ?? 0})`,
         "Channels": GuildChannelStore.getChannels(guild.id)?.count - 1 || "?", // - null category
-        "Roles": Object.keys(GuildStore.getRoles(guild.id)).length - 1, // - @everyone
+        "Roles": GuildRoleStore.getSortedRoles(guild.id).length - 1, // - @everyone
     };
 
     return (
         <div className={cl("info")}>
             {Object.entries(Fields).map(([name, node]) =>
                 <div className={cl("server-info-pair")} key={name}>
-                    <Forms.FormTitle tag="h5">{name}</Forms.FormTitle>
+                    <Heading className={Margins.bottom8}>{name}</Heading>
                     {typeof node === "string" ? <span>{node}</span> : node}
                 </div>
             )}
@@ -218,12 +222,12 @@ function FriendsTab({ guild, setCount }: RelationshipProps) {
 }
 
 function BlockedUsersTab({ guild, setCount }: RelationshipProps) {
-    const blockedIds = Object.keys(RelationshipStore.getRelationships()).filter(id => RelationshipStore.isBlocked(id));
+    const blockedIds = RelationshipStore.getBlockedIDs();
     return UserList("blocked", guild, blockedIds, setCount);
 }
 
 function IgnoredUserTab({ guild, setCount }: RelationshipProps) {
-    const ignoredIds = Object.keys(RelationshipStore.getRelationships()).filter(id => RelationshipStore.isIgnored(id));
+    const ignoredIds = RelationshipStore.getIgnoredIDs();
     return UserList("ignored", guild, ignoredIds, setCount);
 }
 

@@ -28,13 +28,15 @@ const timers = {} as Record<string, {
 export default definePlugin({
     name: "VoiceChatDoubleClick",
     description: "Join voice chats via double click instead of single click",
+    tags: ["Voice"],
     authors: [Devs.Ven, Devs.D3SOX],
     patches: [
-        ...[
-            ".handleVoiceStatusClick", // voice channels
-            ".handleClickChat" // stage channels
-        ].map(find => ({
-            find,
+        // Stage Channels & Voice Channels
+        // the find is for stage channels, but it also handles voice
+        // channels because they're both in the same concatenated module
+        // the find for voice channels was `.handleVoiceStatusClick`
+        {
+            find: ".handleClickChat",
             // hack: these are not React onClick, it is a custom prop handled by Discord
             // thus, replacing this with onDoubleClick won't work, and you also cannot check
             // e.detail since instead of the event they pass the channel.
@@ -45,10 +47,10 @@ export default definePlugin({
                     replace: "onClick:()=>{$self.schedule(()=>{this.handleClick()},this)",
                 },
             ]
-        })),
+        },
         {
             // channel mentions
-            find: 'className:"channelMention",children',
+            find: 'className:"channelMention",children:[null!=',
             replacement: {
                 match: /onClick:(\i)(?=,.{0,30}className:"channelMention".+?(\i)\.inContent)/,
                 replace: (_, onClick, props) => ""

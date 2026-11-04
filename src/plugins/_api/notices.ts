@@ -29,12 +29,12 @@ export default definePlugin({
             find: '"NoticeStore"',
             replacement: [
                 {
-                    match: /(?<=!1;)\i=null;(?=.{0,80}getPremiumSubscription\(\))/g,
+                    match: /(?<=!1(?:;|}))\i=null;(?=.{0,80}getPremiumSubscription\(\))/g,
                     replace: "if(Vencord.Api.Notices.currentNotice)return false;$&"
                 },
                 {
                     match: /(?<=,NOTICE_DISMISS:function\(\i\){)return null!=(\i)/,
-                    replace: "if($1?.id==\"VencordNotice\")return($1=null,Vencord.Api.Notices.nextNotice(),true);$&"
+                    replace: (m, notice) => `if(${notice}?.id=="VencordNotice")return(${notice}=null,Vencord.Api.Notices.nextNotice(),true);${m}`
                 }
             ]
         }

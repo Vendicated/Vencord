@@ -26,12 +26,13 @@ const FriendInvites = findByPropsLazy("createFriendInvite");
 export default definePlugin({
     name: "FriendInvites",
     description: "Create and manage friend invite links via slash commands (/create friend invite, /view friend invites, /revoke friend invites).",
+    tags: ["Friends", "Commands"],
     authors: [Devs.afn, Devs.Dziurwa],
     commands: [
         {
             name: "create friend invite",
             description: "Generates a friend invite link.",
-            inputType: ApplicationCommandInputType.BOT,
+            inputType: ApplicationCommandInputType.BUILT_IN,
 
             execute: async (args, ctx) => {
                 const invite = await FriendInvites.createFriendInvite();
@@ -39,7 +40,7 @@ export default definePlugin({
                 sendBotMessage(ctx.channel.id, {
                     content: `
                         discord.gg/${invite.code} ·
-                        Expires: <t:${new Date(invite.expires_at).getTime() / 1000}:R> ·
+                        Expires: <t:${Math.round(new Date(invite.expires_at).getTime() / 1000)}:R> ·
                         Max uses: \`${invite.max_uses}\`
                     `.trim().replace(/\s+/g, " ")
                 });
@@ -48,13 +49,13 @@ export default definePlugin({
         {
             name: "view friend invites",
             description: "View a list of all generated friend invites.",
-            inputType: ApplicationCommandInputType.BOT,
+            inputType: ApplicationCommandInputType.BUILT_IN,
             execute: async (_, ctx) => {
                 const invites = await FriendInvites.getAllFriendInvites();
                 const friendInviteList = invites.map(i =>
                     `
                     _discord.gg/${i.code}_ ·
-                    Expires: <t:${new Date(i.expires_at).getTime() / 1000}:R> ·
+                    Expires: <t:${Math.round(new Date(i.expires_at).getTime() / 1000)}:R> ·
                     Times used: \`${i.uses}/${i.max_uses}\`
                     `.trim().replace(/\s+/g, " ")
                 );
@@ -67,7 +68,7 @@ export default definePlugin({
         {
             name: "revoke friend invites",
             description: "Revokes all generated friend invites.",
-            inputType: ApplicationCommandInputType.BOT,
+            inputType: ApplicationCommandInputType.BUILT_IN,
             execute: async (_, ctx) => {
                 await FriendInvites.revokeFriendInvites();
 

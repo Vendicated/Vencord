@@ -21,11 +21,8 @@ import { Devs } from "@utils/constants";
 import { runtimeHashMessageKey } from "@utils/intlHash";
 import { Logger } from "@utils/Logger";
 import definePlugin, { OptionType } from "@utils/types";
-import { findByPropsLazy } from "@webpack";
-import { i18n } from "@webpack/common";
-import { Message } from "discord-types/general";
-
-const RelationshipStore = findByPropsLazy("getRelationships", "isBlocked");
+import { Message } from "@vencord/discord-types";
+import { i18n, RelationshipStore } from "@webpack/common";
 
 interface MessageDeleteProps {
     // Internal intl message for BLOCKED_MESSAGE_COUNT
@@ -53,56 +50,62 @@ export default definePlugin({
     name: "NoBlockedMessages",
     description: "Hides all blocked/ignored messages from chat completely",
     authors: [Devs.rushii, Devs.Samu, Devs.jamesbt365],
+    tags: ["Accessibility", "Chat"],
     settings,
 
     patches: [
         {
-            find: "#{intl::BLOCKED_MESSAGES_HIDE}",
+            find: ".__invalid_blocked,",
             replacement: [
                 {
-                    match: /let\{[^}]*collapsedReason[^}]*\}/,
+                    match: /let{messages:\i,[^}]*?collapsedReason[^}]*}/,
                     replace: "if($self.shouldHide(arguments[0]))return null;$&"
                 }
             ]
         },
-        ...[
-            '"MessageStore"',
-            '"ReadStateStore"'
-        ].map(find => ({
-            find,
+        {
+            find: '"MessageStore"',
             predicate: () => settings.store.ignoreMessages,
             replacement: [
                 {
-                    match: /(?<=function (\i)\((\i)\){)(?=.*MESSAGE_CREATE:\1)/,
-                    replace: (_, _funcName, props) => `if($self.shouldIgnoreMessage(${props}.message))return;`
+                    match: /(?<=MESSAGE_CREATE:function\((\i)\){)/,
+                    replace: (_, props) => `if($self.shouldIgnoreMessage(${props}.message))return;`
                 }
             ]
-        }))
+        },
+        {
+            find: '"ReadStateStore"',
+            predicate: () => settings.store.ignoreMessages,
+            replacement: [
+                {
+                    match: /(?<=MESSAGE_CREATE:function\((\i)\){)/,
+                    replace: (_, props) => `if($self.shouldIgnoreMessage(${props}.message))return;`
+                }
+            ]
+        }
     ],
 
-    shouldIgnoreMessage(message: Message) {
+    shouldIgnoreUser(userId: string) {
         try {
-            if (RelationshipStore.isBlocked(message.author.id)) {
-                return true;
-            }
-            return settings.store.applyToIgnoredUsers && RelationshipStore.isIgnored(message.author.id);
+            return RelationshipStore.isBlocked(userId) || (settings.store.applyToIgnoredUsers && RelationshipStore.isIgnored(userId));
         } catch (e) {
             new Logger("NoBlockedMessages").error("Failed to check if user is blocked or ignored:", e);
             return false;
         }
     },
 
+    shouldIgnoreMessage(message: Message) {
+        return this.shouldIgnoreUser(message?.author?.id);
+    },
+
     shouldHide(props: MessageDeleteProps): boolean {
         try {
             const collapsedReason = props.collapsedReason();
-            const blockedReason = i18n.t[runtimeHashMessageKey("BLOCKED_MESSAGE_COUNT")]();
-            const ignoredReason = settings.store.applyToIgnoredUsers
-                ? i18n.t[runtimeHashMessageKey("IGNORED_MESSAGE_COUNT")]()
-                : null;
+            const is = (key: string) => collapsedReason === i18n.t[runtimeHashMessageKey(key)]();
 
-            return collapsedReason === blockedReason || collapsedReason === ignoredReason;
+            return is("BLOCKED_MESSAGE_COUNT") || (settings.store.applyToIgnoredUsers && is("IGNORED_MESSAGE_COUNT"));
         } catch (e) {
-            console.error(e);
+            new Logger("NoBlockedMessages").error("Failed to check if message should be hidden:", e);
             return false;
         }
     }
