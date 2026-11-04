@@ -18,12 +18,13 @@
 
 import { Divider } from "@components/Divider";
 import { FormSwitch } from "@components/FormSwitch";
+import { Heading } from "@components/Heading";
 import { Margins } from "@utils/margins";
-import { ModalCloseButton, ModalContent, ModalHeader, ModalProps, ModalRoot } from "@utils/modal";
-import { Forms, SearchableSelect, useMemo } from "@webpack/common";
+import { RenderModalProps } from "@vencord/discord-types";
+import { Modal, openModal, SearchableSelect, useMemo } from "@webpack/common";
 
 import { settings } from "./settings";
-import { cl, getLanguages } from "./utils";
+import { getLanguages } from "./utils";
 
 const LanguageSettingKeys = ["receivedInput", "receivedOutput", "sentInput", "sentOutput"] as const;
 
@@ -42,9 +43,9 @@ function LanguageSelect({ settingsKey, includeAuto }: { settingsKey: typeof Lang
 
     return (
         <section className={Margins.bottom16}>
-            <Forms.FormTitle tag="h3">
+            <Heading className={Margins.bottom8}>
                 {settings.def[settingsKey].description}
-            </Forms.FormTitle>
+            </Heading>
 
             <SearchableSelect
                 options={options}
@@ -73,29 +74,27 @@ function AutoTranslateToggle() {
 }
 
 
-export function TranslateModal({ rootProps }: { rootProps: ModalProps; }) {
+function TranslateModal({ rootProps }: { rootProps: RenderModalProps; }) {
     return (
-        <ModalRoot {...rootProps}>
-            <ModalHeader className={cl("modal-header")}>
-                <Forms.FormTitle tag="h2" className={cl("modal-title")}>
-                    Translate
-                </Forms.FormTitle>
-                <ModalCloseButton onClick={rootProps.onClose} />
-            </ModalHeader>
+        <Modal
+            {...rootProps}
+            title="Translate"
+        >
+            {LanguageSettingKeys.map(s => (
+                <LanguageSelect
+                    key={s}
+                    settingsKey={s}
+                    includeAuto={s.endsWith("Input")}
+                />
+            ))}
 
-            <ModalContent className={cl("modal-content")}>
-                {LanguageSettingKeys.map(s => (
-                    <LanguageSelect
-                        key={s}
-                        settingsKey={s}
-                        includeAuto={s.endsWith("Input")}
-                    />
-                ))}
+            <Divider className={Margins.bottom16} />
 
-                <Divider className={Margins.bottom16} />
-
-                <AutoTranslateToggle />
-            </ModalContent>
-        </ModalRoot>
+            <AutoTranslateToggle />
+        </Modal>
     );
+}
+
+export function openTranslateModal() {
+    openModal(props => <TranslateModal rootProps={props} />);
 }

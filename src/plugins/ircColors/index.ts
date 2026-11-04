@@ -24,8 +24,8 @@ import { useMemo } from "@webpack/common";
 
 // Calculate a CSS color string based on the user ID
 function calculateNameColorForUser(id?: string) {
-    const { lightness, saturation } = settings.use(["lightness","saturation"]);
-    const idHash = useMemo(() => id ? h64(id) : null, [id]);
+    const { lightness, saturation, seed } = settings.use(["lightness", "saturation", "seed"]);
+    const idHash = useMemo(() => id ? h64(id + seed) : null, [id, seed]);
 
     return idHash && `hsl(${idHash % 360n}, ${saturation}%, ${lightness}%)`;
 }
@@ -39,7 +39,12 @@ const settings = definePluginSettings({
     saturation: {
         description: "Saturation, in %. Change if the colors are too vibrant or dull",
         type: OptionType.NUMBER,
-        default: 70,
+        default: 70
+    },
+    seed: {
+        description: "Changing this will shuffle everyone's username color to a new color",
+        type: OptionType.STRING,
+        default: "",
     },
     memberListColors: {
         description: "Replace role colors in the member list",
@@ -54,6 +59,7 @@ const settings = definePluginSettings({
         default: false
     },
     applyColorOnlyInDms: {
+        displayName: "Apply Color Only In DMs",
         description: "Apply colors only in direct messages; do not apply colors in servers.",
         restartNeeded: false,
         type: OptionType.BOOLEAN,

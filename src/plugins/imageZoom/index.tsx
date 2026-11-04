@@ -117,6 +117,7 @@ const imageContextMenuPatch: NavContextMenuPatchCallback = (children, props) => 
                         maxValue={50}
                         value={settings.store.zoom}
                         onChange={debounce((value: number) => settings.store.zoom = value, 100)}
+                        renderValue={(value: number) => `${value.toFixed(3)}x`}
                     />
                 )}
             />
@@ -171,7 +172,7 @@ export default definePlugin({
                     replace: `id:"${ELEMENT_ID}",$&`
                 },
                 {
-                    match: /(?<=null!=(\i)\?.{0,20})\i\.\i,{children:\1/,
+                    match: /(?<=null!=(\i)\?.{0,20})\i(?:\.\i)?,{children:\1/, // TODO: (?:\.\i)? is stable compat
                     replace: "'div',{onClick:e=>e.stopPropagation(),children:$1"
                 }
             ]

@@ -1,0 +1,49 @@
+name: Release Browser Extension
+on:
+    push:
+        tags:
+            - v*
+permissions:
+    contents: read
+
+jobs:
+    publish-extension:
+        if: github.repository == 'Vendicated/Vencord'
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+            - name: check that tag matches package.json version
+              run: |
+                  pkg_version="v$(jq -r .version < package.json)"
+                  if [[ "${{ github.ref_name }}" != "$pkg_version" ]]; then
+                      echo "Tag ${{ github.ref_name }} does not match package.json version $pkg_version" >&2
+                      exit 1
+                  fi
+
+            - name: Setup pnpm
+              uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
+
+            - name: Use Node.js
+              uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+              with:
+                  node-version: 24
+                  cache: "pnpm"
+
+            - name: Install dependencies
+              run: pnpm install --frozen-lockfile
+
+            - name: Build web
+              run: pnpm buildWebStandalone
+
+            - name: Publish extension
+              run: |
+                  cd dist/chromium-unpacked
+                  pnpx chrome-webstore-upload-cli@2.1.0 upload --auto-publish
+              env:
+                  EXTENSION_ID: ${{ secrets.CHROME_EXTENSION_ID }}
+                  CLIENT_ID: ${{ secrets.CHROME_CLIENT_ID }}
+                  CLIENT_SECRET: ${{ secrets.CHROME_CLIENT_SECRET }}
+                  REFRESH_TOKEN: ${{ secrets.CHROME_REFRESH_TOKEN }}
