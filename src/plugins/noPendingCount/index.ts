@@ -19,9 +19,7 @@
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { findByPropsLazy } from "@webpack";
-
-const MessageRequestStore = findByPropsLazy("getMessageRequestsCount");
+import { MessageRequestStore } from "@webpack/common";
 
 const settings = definePluginSettings({
     hideFriendRequestsCount: {
@@ -47,6 +45,7 @@ const settings = definePluginSettings({
 export default definePlugin({
     name: "NoPendingCount",
     description: "Removes the ping count of incoming friend requests, message requests, and nitro offers.",
+    tags: ["Notifications", "Appearance"],
     authors: [Devs.amia],
 
     settings: settings,
@@ -74,10 +73,10 @@ export default definePlugin({
         // This prevents the Message Requests tab from always hiding due to the previous patch (and is compatible with spam requests)
         // In short, only the red badge is hidden. Button visibility behavior isn't changed.
         {
-            find: ".getSpamChannelsCount()",
+            find: ".getSpamChannelsCount();return",
             predicate: () => settings.store.hideMessageRequestsCount,
             replacement: {
-                match: /(?<=getSpamChannelsCount\(\),\i=)\i\.getMessageRequestsCount\(\)/,
+                match: /(?<=getSpamChannelsCount\(\);return )\i\.getMessageRequestsCount\(\)/,
                 replace: "$self.getRealMessageRequestCount()"
             }
         },
@@ -87,8 +86,8 @@ export default definePlugin({
             replacement: {
                 // The two groups inside the first group grab the minified names of the variables,
                 // they are then referenced later to find unviewedTrialCount + unviewedDiscountCount.
-                match: /(?<=\{unviewedTrialCount:(\i),unviewedDiscountCount:(\i)\}.{0,200}\i=)\1\+\2/,
-                replace: "0"
+                match: /(\{unviewedTrialCount:(\i),unviewedDiscountCount:(\i)\}.+?)\2\+\3/,
+                replace: (_, rest) => `${rest}0`
             }
         }
     ],

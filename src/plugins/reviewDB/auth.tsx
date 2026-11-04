@@ -4,17 +4,13 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { DataStore } from "@api/index";
+import * as DataStore from "@api/DataStore";
 import { Logger } from "@utils/Logger";
-import { openModal } from "@utils/modal";
-import { findByPropsLazy } from "@webpack";
-import { showToast, Toasts, UserStore } from "@webpack/common";
+import { OAuth2AuthorizeModal, openModal, showToast, UserStore } from "@webpack/common";
 
 import { ReviewDBAuth } from "./entities";
 
 const DATA_STORE_KEY = "rdb-auth";
-
-const { OAuth2AuthorizeModal } = findByPropsLazy("OAuth2AuthorizeModal");
 
 export let Auth: ReviewDBAuth = {};
 
@@ -44,7 +40,7 @@ export async function updateAuth(newAuth: ReviewDBAuth) {
     });
 }
 
-export function authorize(callback?: any) {
+export function authorize(callback?: () => void) {
     openModal(props =>
         <OAuth2AuthorizeModal
             {...props}
@@ -54,7 +50,7 @@ export function authorize(callback?: any) {
             permissions={0n}
             clientId="915703782174752809"
             cancelCompletesFlow={false}
-            callback={async (response: any) => {
+            callback={async (response: { location: string; }) => {
                 try {
                     const url = new URL(response.location);
                     url.searchParams.append("clientMod", "vencord");
@@ -64,13 +60,13 @@ export function authorize(callback?: any) {
 
                     if (!res.ok) {
                         const { message } = await res.json();
-                        showToast(message || "An error occured while authorizing", Toasts.Type.FAILURE);
+                        showToast({ text: message ?? "An error occured while authorizing", variant: "critical" });
                         return;
                     }
 
                     const { token } = await res.json();
                     updateAuth({ token });
-                    showToast("Successfully logged in!", Toasts.Type.SUCCESS);
+                    showToast({ text: "Successfully logged in!", variant: "success" });
                     callback?.();
                 } catch (e) {
                     new Logger("ReviewDB").error("Failed to authorize", e);

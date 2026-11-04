@@ -22,6 +22,7 @@ import definePlugin from "@utils/types";
 export default definePlugin({
     name: "AlwaysAnimate",
     description: "Animates anything that can be animated",
+    tags: ["Appearance", "Fun"],
     authors: [Devs.FieryFlames],
 
     patches: [
@@ -41,18 +42,42 @@ export default definePlugin({
         },
         {
             // Status emojis
-            find: ".Messages.GUILD_OWNER,",
+            find: "#{intl::GUILD_OWNER}),children:",
             replacement: {
-                match: /(?<=\.activityEmoji,.+?animate:)\i/,
-                replace: "!0"
+                match: /(\.CUSTOM_STATUS.+?animateEmoji:)\i/,
+                replace: "$1!0"
             }
         },
         {
             // Guild Banner
-            find: ".animatedBannerHoverLayer,onMouseEnter:",
+            find: "#{intl::DISCOVERABLE_GUILD_HEADER_PUBLIC_INFO}",
             replacement: {
-                match: /(?<=guildBanner:\i,animate:)\i(?=}\))/,
-                replace: "!0"
+                match: /(guildBanner:\i,animate:)\i(?=}\):null)/,
+                replace: "$1!0"
+            }
+        },
+        {
+            // Gradient roles in chat
+            find: "=!1,contentOnly:",
+            replacement: {
+                match: /animate:\i/,
+                replace: "animate:!0"
+            }
+        },
+        {
+            // Gradient roles in member list
+            find: '="left",className:',
+            replacement: {
+                match: /,animateGradient:/,
+                replace: ",animateGradient:!0,_oldAnimateGradient:"
+            }
+        },
+        {
+            // Nameplates
+            find: ".MINI_PREVIEW,[",
+            replacement: {
+                match: /animate:\i,loop:/,
+                replace: "animate:true,loop:true,_loop:"
             }
         }
     ]

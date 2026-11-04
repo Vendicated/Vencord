@@ -24,19 +24,20 @@ const settings = definePluginSettings({
 export default definePlugin({
     name: "PictureInPicture",
     description: "Adds picture in picture to videos (next to the Download button)",
+    tags: ["Media", "Utility"],
     authors: [Devs.Lumap],
     settings,
     patches: [
         {
-            find: ".removeMosaicItemHoverButton),",
+            find: '["VIDEO","CLIP","AUDIO"]',
             replacement: {
-                match: /\.nonMediaMosaicItem\]:!(\i).{0,50}?children:\[\S,(\S)/,
-                replace: "$&,$1&&$2&&$self.renderPiPButton(),"
-            },
-        },
+                match: /(\[\i>0&&\i\.length>0.{0,150}?children:)(\i.slice\(\i\))(?<=showDownload:(\i).+?isVisualMediaType:(\i).+?)/,
+                replace: (_, rest, origChildren, showDownload, isVisualMediaType) => `${rest}[${showDownload}&&${isVisualMediaType}&&$self.PictureInPictureButton(),...${origChildren}]`
+            }
+        }
     ],
 
-    renderPiPButton: ErrorBoundary.wrap(() => {
+    PictureInPictureButton: ErrorBoundary.wrap(() => {
         return (
             <Tooltip text="Toggle Picture in Picture">
                 {tooltipProps => (
@@ -56,16 +57,44 @@ export default definePlugin({
 
                             videoClone.loop = settings.store.loop;
                             videoClone.style.display = "none";
-                            videoClone.onleavepictureinpicture = () => videoClone.remove();
 
-                            function launchPiP() {
-                                videoClone.currentTime = video.currentTime;
-                                videoClone.requestPictureInPicture();
-                                video.pause();
-                                videoClone.play();
+                            let cleaned = false;
+                            function cleanup() {
+                                if (cleaned) return;
+                                cleaned = true;
+
+                                const { currentTime } = videoClone;
+
+                                videoClone.onloadedmetadata = null;
+                                videoClone.onleavepictureinpicture = null;
+
+                                videoClone.pause();
+                                videoClone.removeAttribute("src");
+                                videoClone.load();
+                                videoClone.remove();
+
+                                // resume original if still in the document
+                                if (video.isConnected) {
+                                    video.currentTime = currentTime;
+                                    video.play().catch(() => 0);
+                                }
                             }
 
-                            if (videoClone.readyState === 4 /* HAVE_ENOUGH_DATA */)
+                            videoClone.onleavepictureinpicture = cleanup;
+
+                            async function launchPiP() {
+                                try {
+                                    videoClone.currentTime = video.currentTime;
+                                    video.pause();
+                                    await videoClone.play();
+                                    await videoClone.requestPictureInPicture();
+                                } catch (err) {
+                                    console.error("Failed to enter Picture-in-Picture", err);
+                                    cleanup();
+                                }
+                            }
+
+                            if (videoClone.readyState >= 1)
                                 launchPiP();
                             else
                                 videoClone.onloadedmetadata = launchPiP;

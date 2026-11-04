@@ -19,13 +19,14 @@
 import { findGroupChildrenByChildId, NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { migratePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
+import { getIntlMessage } from "@utils/discord";
 import { NoopComponent } from "@utils/react";
 import definePlugin from "@utils/types";
-import { filters, findByPropsLazy, waitFor } from "@webpack";
-import { ChannelStore, ContextMenuApi, i18n, UserStore } from "@webpack/common";
-import { Message } from "discord-types/general";
+import { Message } from "@vencord/discord-types";
+import { filters, findByCodeLazy, waitFor } from "@webpack";
+import { ChannelStore, ContextMenuApi, UserStore } from "@webpack/common";
 
-const { useMessageMenu } = findByPropsLazy("useMessageMenu");
+const useMessageMenu = findByCodeLazy(".MESSAGE,commandTargetId:");
 
 interface CopyIdMenuItemProps {
     id: string;
@@ -33,7 +34,7 @@ interface CopyIdMenuItemProps {
 }
 
 let CopyIdMenuItem: (props: CopyIdMenuItemProps) => React.ReactElement | null = NoopComponent;
-waitFor(filters.componentByCode('"devmode-copy-id-".concat'), m => CopyIdMenuItem = m);
+waitFor(filters.componentByCode('"cannot copy null text"'), m => CopyIdMenuItem = m);
 
 function MessageMenu({ message, channel, onHeightUpdate }) {
     const canReport = message.author &&
@@ -41,7 +42,7 @@ function MessageMenu({ message, channel, onHeightUpdate }) {
 
     return useMessageMenu({
         navId: "message-actions",
-        ariaLabel: i18n.Messages.MESSAGE_UTILITIES_A11Y_LABEL,
+        ariaLabel: getIntlMessage("MESSAGE_UTILITIES_A11Y_LABEL"),
 
         message,
         channel,
@@ -72,7 +73,7 @@ const contextMenuPatch: NavContextMenuPatchCallback = (children, props: MessageA
 
     const group = findGroupChildrenByChildId("devmode-copy-id", children, true);
     group?.push(
-        CopyIdMenuItem({ id: props.message.author.id, label: i18n.Messages.COPY_ID_AUTHOR })
+        CopyIdMenuItem({ id: props.message.author.id, label: getIntlMessage("COPY_ID_AUTHOR") })
     );
 };
 
@@ -80,10 +81,11 @@ migratePluginSettings("FullSearchContext", "SearchReply");
 export default definePlugin({
     name: "FullSearchContext",
     description: "Makes the message context menu in message search results have all options you'd expect",
+    tags: ["Utility"],
     authors: [Devs.Ven, Devs.Aria],
 
     patches: [{
-        find: "onClick:this.handleMessageClick,",
+        find: "Listbox navigator was given an unhandled action",
         replacement: {
             match: /this(?=\.handleContextMenu\(\i,\i\))/,
             replace: "$self"

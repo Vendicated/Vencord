@@ -10,11 +10,13 @@ import adguard from "file://adguard.js?minify";
 
 app.on("browser-window-created", (_, win) => {
     win.webContents.on("frame-created", (_, { frame }) => {
-        frame.once("dom-ready", () => {
+        frame?.once("dom-ready", () => {
             if (!RendererSettings.store.plugins?.YoutubeAdblock?.enabled) return;
 
-            if (frame.url.includes("youtube.com/embed/") || (frame.url.includes("discordsays") && frame.url.includes("youtube.com"))) {
+            if (frame.url.includes("youtube.com/embed/")) {
                 frame.executeJavaScript(adguard);
+            } else if (frame.parent?.url.includes("youtube.com/embed/")) {
+                frame.parent.executeJavaScript(adguard);
             }
         });
     });

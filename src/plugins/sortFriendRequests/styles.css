@@ -1,0 +1,18 @@
+.vc-sortFriendRequests-wrapper {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    margin-right: 0.5em;
+}
+
+.vc-sortFriendRequests-tooltip {
+    max-width: none;
+    white-space: nowrap;
+}
+
+.vc-sortFriendRequests-date {
+    color: var(--text-muted);
+    font-family: var(--font-code);
+}

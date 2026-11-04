@@ -16,16 +16,18 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot } from "@utils/modal";
-import { Button, Forms, React, TextInput } from "@webpack/common";
+import { TextButton } from "@components/Button";
+import { Heading } from "@components/Heading";
+import { Margins } from "@components/margins";
+import { SessionInfo } from "@plugins/betterSessions/types";
+import { getDefaultName, savedSessionsCache, saveSessionsToDataStore } from "@plugins/betterSessions/utils";
+import { RenderModalProps } from "@vencord/discord-types";
+import { Modal, React, TextInput, useState } from "@webpack/common";
 import { KeyboardEvent } from "react";
 
-import { SessionInfo } from "../types";
-import { getDefaultName, savedSessionsCache, saveSessionsToDataStore } from "../utils";
-
-export function RenameModal({ props, session, state }: { props: ModalProps, session: SessionInfo["session"], state: [string, React.Dispatch<React.SetStateAction<string>>]; }) {
+export function RenameModal({ props, session, state }: { props: RenderModalProps, session: SessionInfo["session"], state: [string, React.Dispatch<React.SetStateAction<string>>]; }) {
     const [title, setTitle] = state;
-    const [value, setValue] = React.useState(savedSessionsCache.get(session.id_hash)?.name ?? "");
+    const [value, setValue] = useState(savedSessionsCache.get(session.id_hash)?.name ?? "");
 
     function onSaveClick() {
         savedSessionsCache.set(session.id_hash, { name: value, isNew: false });
@@ -40,13 +42,24 @@ export function RenameModal({ props, session, state }: { props: ModalProps, sess
     }
 
     return (
-        <ModalRoot {...props}>
-            <ModalHeader>
-                <Forms.FormTitle tag="h4">Rename</Forms.FormTitle>
-            </ModalHeader>
-
-            <ModalContent>
-                <Forms.FormTitle tag="h5" style={{ marginTop: "10px" }}>New device name</Forms.FormTitle>
+        <Modal
+            {...props}
+            title="Rename"
+            actions={[
+                {
+                    text: "Cancel",
+                    variant: "secondary",
+                    onClick: () => props.onClose()
+                },
+                {
+                    text: "Save",
+                    variant: "primary",
+                    onClick: onSaveClick
+                }
+            ]}
+        >
+            <div>
+                <Heading className={Margins.bottom8}>New device name</Heading>
                 <TextInput
                     style={{ marginBottom: "10px" }}
                     placeholder={getDefaultName(session.client_info)}
@@ -58,37 +71,16 @@ export function RenameModal({ props, session, state }: { props: ModalProps, sess
                         }
                     }}
                 />
-                <Button
+                <TextButton
                     style={{
-                        marginBottom: "20px",
                         paddingLeft: "1px",
-                        paddingRight: "1px",
                         opacity: 0.6
                     }}
-                    look={Button.Looks.LINK}
-                    color={Button.Colors.LINK}
-                    size={Button.Sizes.NONE}
                     onClick={() => setValue("")}
                 >
                     Reset Name
-                </Button>
-            </ModalContent>
-
-            <ModalFooter>
-                <Button
-                    color={Button.Colors.BRAND}
-                    onClick={onSaveClick}
-                >
-                    Save
-                </Button>
-                <Button
-                    color={Button.Colors.TRANSPARENT}
-                    look={Button.Looks.LINK}
-                    onClick={() => props.onClose()}
-                >
-                    Cancel
-                </Button>
-            </ModalFooter>
-        </ModalRoot >
+                </TextButton>
+            </div>
+        </Modal>
     );
 }
