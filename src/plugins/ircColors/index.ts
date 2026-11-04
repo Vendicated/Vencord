@@ -39,7 +39,8 @@ function hslToHex(hue, saturation, lightness) {
     const f = n => {
         const k = (n + hue / 30) % 12;
         const color = lightness - a * Math.max(Math.min(k - 3, 9 - k, 1), -1);
-        return Math.round(255 * color).toString(16).padStart(2, "0"); // convert to Hex and prefix "0" if needed
+        // Clip RGB, not HSL, so extended saturation and lightness still affect the color.
+        return Math.round(255 * Math.max(0, Math.min(1, color))).toString(16).padStart(2, "0");
     };
     return `#${f(0)}${f(8)}${f(4)}`;
 }
