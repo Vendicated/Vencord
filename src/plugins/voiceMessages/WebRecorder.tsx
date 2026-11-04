@@ -16,11 +16,12 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Button, useState } from "@webpack/common";
+import { Button } from "@components/Button";
+import { useFluxSubscription } from "@utils/react";
+import { MediaEngineStore, useState } from "@webpack/common";
 
 import type { VoiceRecorder } from ".";
 import { settings } from "./settings";
-import { MediaEngineStore } from "./utils";
 
 export const VoiceRecorderWeb: VoiceRecorder = ({ setAudioBlob, onRecordingChange }) => {
     const [recording, setRecording] = useState(false);
@@ -28,10 +29,25 @@ export const VoiceRecorderWeb: VoiceRecorder = ({ setAudioBlob, onRecordingChang
     const [recorder, setRecorder] = useState<MediaRecorder>();
     const [chunks, setChunks] = useState<Blob[]>([]);
 
-    const changeRecording = (recording: boolean) => {
+    useFluxSubscription("VENCORD_STOP_RECORDING", stopRecording);
+
+    function changeRecording(recording: boolean) {
         setRecording(recording);
         onRecordingChange?.(recording);
-    };
+    }
+
+    function stopRecording() {
+        if (recording && recorder) {
+            recorder.addEventListener("stop", () => {
+                setAudioBlob(new Blob(chunks, { type: "audio/ogg; codecs=opus" }));
+
+                changeRecording(false);
+            });
+            recorder.stop();
+            recorder.stream.getTracks().forEach(track => track.stop());
+        }
+    }
+
 
     function toggleRecording() {
         const nowRecording = !recording;
@@ -57,14 +73,7 @@ export const VoiceRecorderWeb: VoiceRecorder = ({ setAudioBlob, onRecordingChang
                 changeRecording(true);
             });
         } else {
-            if (recorder) {
-                recorder.addEventListener("stop", () => {
-                    setAudioBlob(new Blob(chunks, { type: "audio/ogg; codecs=opus" }));
-
-                    changeRecording(false);
-                });
-                recorder.stop();
-            }
+            stopRecording();
         }
     }
 

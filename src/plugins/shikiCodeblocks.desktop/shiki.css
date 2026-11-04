@@ -1,9 +1,12 @@
 .vc-shiki-container {
+    display: flex;
+    min-height: 100%;
     border: 4px;
     background-color: var(--background-base-lower);
 }
 
 .vc-shiki-root {
+    flex: 1;
     border-radius: 4px;
 }
 
@@ -92,6 +95,7 @@
     padding-left: 5px;
     padding-right: 8px;
     user-select: none;
+    white-space: nowrap;
 }
 
 .vc-shiki-root .vc-shiki-table-cell:last-child {

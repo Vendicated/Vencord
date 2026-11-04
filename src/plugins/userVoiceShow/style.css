@@ -1,5 +1,5 @@
 .vc-uvs-speaker {
-    color: var(--interactive-normal);
+    color: var(--interactive-icon-default);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -10,12 +10,13 @@
 }
 
 .vc-uvs-clickable:hover {
-    color: var(--interactive-hover);
+    color: var(--interactive-icon-hover);
 }
 
 .vc-uvs-profile-speaker {
-    width: var(--custom-nickname-icon-size);
     height: var(--custom-nickname-icon-size);
+    margin-right: 4px;
+    transform: translateY(1.3px);
 }
 
 .vc-uvs-tooltip-container {

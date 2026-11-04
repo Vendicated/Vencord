@@ -1,4 +1,15 @@
-import { FluxStore } from "@vencord/discord-types";
+import { FluxStore } from "..";
+
+export interface StreamerModeSettings {
+    enabled: boolean;
+    autoToggle: boolean;
+    hideInstantInvites: boolean;
+    hidePersonalInformation: boolean;
+    disableSounds: boolean;
+    disableNotifications: boolean;
+    enableContentProtection: boolean;
+    disabledOverlayWidgets?: string[];
+}
 
 export class StreamerModeStore extends FluxStore {
     get autoToggle(): boolean;
@@ -8,4 +19,8 @@ export class StreamerModeStore extends FluxStore {
     get enabled(): boolean;
     get hideInstantInvites(): boolean;
     get hidePersonalInformation(): boolean;
+
+    getSettings(): StreamerModeSettings;
+    getState(): Record<string, StreamerModeSettings>;
+    isOverlayWidgetDisabled(widget: string): boolean;
 }

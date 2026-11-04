@@ -19,12 +19,14 @@
 import "./styles.css";
 
 import { definePluginSettings } from "@api/Settings";
-import { classNameFactory } from "@api/Styles";
 import ErrorBoundary from "@components/ErrorBoundary";
+import { Paragraph } from "@components/Paragraph";
+import { TooltipContainer } from "@components/TooltipContainer";
 import { Devs } from "@utils/constants";
+import { classNameFactory } from "@utils/css";
 import definePlugin, { OptionType } from "@utils/types";
 import { User } from "@vencord/discord-types";
-import { DateUtils, RelationshipStore, Text, TooltipContainer } from "@webpack/common";
+import { DateUtils, RelationshipStore } from "@webpack/common";
 import { PropsWithChildren } from "react";
 
 const formatter = new Intl.DateTimeFormat(undefined, {
@@ -52,6 +54,7 @@ export default definePlugin({
     name: "SortFriendRequests",
     authors: [Devs.Megu],
     description: "Sorts friend requests by date of receipt",
+    tags: ["Friends", "Organisation"],
     settings,
 
     patches: [{
@@ -64,7 +67,7 @@ export default definePlugin({
         find: "#{intl::FRIEND_REQUEST_CANCEL}",
         replacement: {
             predicate: () => settings.store.showDates,
-            match: /(?<=\.listItemContents,children:\[)\(0,.+?(?=,\(0)(?<=user:(\i).+?)/,
+            match: /(?<=children:\[)\(0,.{0,100}user:\i,hovered:\i.+?(?=,\(0)(?<=user:(\i).+?)/,
             replace: (children, user) => `$self.WrapperDateComponent({user:${user},children:${children}})`
         }
     }],
@@ -82,7 +85,7 @@ export default definePlugin({
             {children}
             {!isNaN(since.getTime()) && (
                 <TooltipContainer text={DateUtils.dateFormat(since, "LLLL")} tooltipClassName={cl("tooltip")}>
-                    <Text variant="text-xs/normal" className={cl("date")}>{formatter.format(since)}</Text>
+                    <Paragraph size="xs" className={cl("date")}>{formatter.format(since)}</Paragraph>
                 </TooltipContainer>
             )}
         </div>;

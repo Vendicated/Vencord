@@ -6,15 +6,17 @@
 
 import "./settings.css";
 
-import { classNameFactory } from "@api/Styles";
+import { isPluginEnabled } from "@api/PluginManager";
 import { Divider } from "@components/Divider";
 import { Heading } from "@components/Heading";
+import { Paragraph } from "@components/Paragraph";
 import { resolveError } from "@components/settings/tabs/plugins/components/Common";
 import { debounce } from "@shared/debounce";
+import { classNameFactory } from "@utils/css";
 import { ActivityType } from "@vencord/discord-types/enums";
-import { Select, Text, TextInput, useState } from "@webpack/common";
+import { Select, TextInput, useState } from "@webpack/common";
 
-import { setRpc, settings, TimestampMode } from ".";
+import CustomRPCPlugin, { setRpc, settings, TimestampMode } from ".";
 
 const cl = classNameFactory("vc-customRPC-settings-");
 
@@ -50,7 +52,7 @@ function isAppIdValid(value: string) {
 
 const updateRPC = debounce(() => {
     setRpc(true);
-    if (Vencord.Plugins.isPluginEnabled("CustomRPC")) setRpc();
+    if (isPluginEnabled(CustomRPCPlugin.name)) setRpc();
 });
 
 function isStreamLinkDisabled() {
@@ -70,6 +72,11 @@ function parseNumber(value: string) {
 function isNumberValid(value: number) {
     if (isNaN(value)) return "Must be a number.";
     if (value < 0) return "Must be a positive number.";
+    return true;
+}
+
+function isUrlValid(value: string) {
+    if (value && !/^https?:\/\/.+/.test(value)) return "Must be a valid URL.";
     return true;
 }
 
@@ -111,7 +118,7 @@ function SingleSetting<T>({ settingsKey, label, disabled, isValid, transform }: 
 
     return (
         <div className={cl("single", { disabled })}>
-            <Heading tag="h5">{label}</Heading>
+            <Heading>{label}</Heading>
             <TextInput
                 type="text"
                 placeholder={"Enter a value"}
@@ -119,7 +126,7 @@ function SingleSetting<T>({ settingsKey, label, disabled, isValid, transform }: 
                 onChange={handleChange}
                 disabled={disabled}
             />
-            {error && <Text className={cl("error")} variant="text-sm/normal">{error}</Text>}
+            {error && <Paragraph className={cl("error")}>{error}</Paragraph>}
         </div>
     );
 }
@@ -127,13 +134,16 @@ function SingleSetting<T>({ settingsKey, label, disabled, isValid, transform }: 
 function SelectSetting<T>({ settingsKey, label, options, disabled }: SelectOption<T>) {
     return (
         <div className={cl("single", { disabled })}>
-            <Heading tag="h5">{label}</Heading>
+            <Heading>{label}</Heading>
             <Select
                 placeholder={"Select an option"}
                 options={options}
                 maxVisibleItems={5}
                 closeOnSelect={true}
-                select={v => settings.store[settingsKey] = v}
+                select={v => {
+                    settings.store[settingsKey] = v;
+                    updateRPC();
+                }}
                 isSelected={v => v === settings.store[settingsKey]}
                 serialize={v => String(v)}
                 isDisabled={disabled}
@@ -180,8 +190,15 @@ export function RPCSettings() {
                 { settingsKey: "appName", label: "Application Name", isValid: makeValidator(128, true) },
             ]} />
 
-            <SingleSetting settingsKey="details" label="Detail (line 1)" isValid={maxLength128} />
-            <SingleSetting settingsKey="state" label="State (line 2)" isValid={maxLength128} />
+            <PairSetting data={[
+                { settingsKey: "details", label: "Detail (line 1)", isValid: maxLength128 },
+                { settingsKey: "detailsURL", label: "Detail URL", isValid: isUrlValid },
+            ]} />
+
+            <PairSetting data={[
+                { settingsKey: "state", label: "State (line 2)", isValid: maxLength128 },
+                { settingsKey: "stateURL", label: "State URL", isValid: isUrlValid },
+            ]} />
 
             <SingleSetting
                 settingsKey="streamLink"
@@ -195,13 +212,15 @@ export function RPCSettings() {
                     settingsKey: "partySize",
                     label: "Party Size",
                     transform: parseNumber,
-                    isValid: isNumberValid
+                    isValid: isNumberValid,
+                    disabled: s.type !== ActivityType.PLAYING,
                 },
                 {
                     settingsKey: "partyMaxSize",
                     label: "Maximum Party Size",
                     transform: parseNumber,
-                    isValid: isNumberValid
+                    isValid: isNumberValid,
+                    disabled: s.type !== ActivityType.PLAYING,
                 },
             ]} />
 
@@ -211,21 +230,23 @@ export function RPCSettings() {
                 { settingsKey: "imageBig", label: "Large Image URL/Key", isValid: isImageKeyValid },
                 { settingsKey: "imageBigTooltip", label: "Large Image Text", isValid: maxLength128 },
             ]} />
+            <SingleSetting settingsKey="imageBigURL" label="Large Image clickable URL" isValid={isUrlValid} />
 
             <PairSetting data={[
                 { settingsKey: "imageSmall", label: "Small Image URL/Key", isValid: isImageKeyValid },
                 { settingsKey: "imageSmallTooltip", label: "Small Image Text", isValid: maxLength128 },
             ]} />
+            <SingleSetting settingsKey="imageSmallURL" label="Small Image clickable URL" isValid={isUrlValid} />
 
             <Divider />
 
             <PairSetting data={[
                 { settingsKey: "buttonOneText", label: "Button1 Text", isValid: makeValidator(31) },
-                { settingsKey: "buttonOneURL", label: "Button1 URL" },
+                { settingsKey: "buttonOneURL", label: "Button1 URL", isValid: isUrlValid },
             ]} />
             <PairSetting data={[
                 { settingsKey: "buttonTwoText", label: "Button2 Text", isValid: makeValidator(31) },
-                { settingsKey: "buttonTwoURL", label: "Button2 URL" },
+                { settingsKey: "buttonTwoURL", label: "Button2 URL", isValid: isUrlValid },
             ]} />
 
             <Divider />

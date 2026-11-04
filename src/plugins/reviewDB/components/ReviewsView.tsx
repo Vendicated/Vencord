@@ -16,22 +16,23 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { Paragraph } from "@components/Paragraph";
+import { Auth, authorize } from "@plugins/reviewDB/auth";
+import { Review, ReviewType } from "@plugins/reviewDB/entities";
+import { addReview, getReviews, REVIEWS_PER_PAGE, UserReviewsData } from "@plugins/reviewDB/reviewDbApi";
+import { settings } from "@plugins/reviewDB/settings";
+import { cl, showToast } from "@plugins/reviewDB/utils";
 import { useAwaiter, useForceUpdater } from "@utils/react";
 import { findByCodeLazy, findByPropsLazy, findComponentByCodeLazy } from "@webpack";
-import { Forms, React, RelationshipStore, useRef, UserStore } from "@webpack/common";
+import { React, RelationshipStore, useRef, UserStore } from "@webpack/common";
 
-import { Auth, authorize } from "../auth";
-import { Review, ReviewType } from "../entities";
-import { addReview, getReviews, Response, REVIEWS_PER_PAGE } from "../reviewDbApi";
-import { settings } from "../settings";
-import { cl, showToast } from "../utils";
 import ReviewComponent from "./ReviewComponent";
 
 const Transforms = findByPropsLazy("insertNodes", "textToText");
 const Editor = findByPropsLazy("start", "end", "toSlateRange");
 const ChatInputTypes = findByPropsLazy("FORM", "USER_PROFILE");
 const InputComponent = findComponentByCodeLazy("editorClassName", "CHANNEL_TEXT_AREA");
-const createChannelRecordFromServer = findByCodeLazy(".GUILD_TEXT])", "fromServer)");
+const createChannelRecordFromServer = findByCodeLazy(".GUILD_TEXT]", "fromServer)");
 
 interface UserProps {
     discordId: string;
@@ -39,7 +40,7 @@ interface UserProps {
 }
 
 interface Props extends UserProps {
-    onFetchReviews(data: Response): void;
+    onFetchReviews(data: UserReviewsData): void;
     refetchSignal?: unknown;
     showInput?: boolean;
     page?: number;
@@ -61,13 +62,15 @@ export default function ReviewsView({
 }: Props) {
     const [signal, refetch] = useForceUpdater(true);
 
-    const [reviewData] = useAwaiter(() => getReviews(discordId, (page - 1) * REVIEWS_PER_PAGE), {
+    const [reviewData] = useAwaiter(() => getReviews(discordId, { offset: (page - 1) * REVIEWS_PER_PAGE, limit: REVIEWS_PER_PAGE, fetchVotes: true }), {
         fallbackValue: null,
         deps: [refetchSignal, signal, page],
         onSuccess: data => {
-            if (settings.store.hideBlockedUsers)
-                data!.reviews = data!.reviews?.filter(r => !RelationshipStore.isBlocked(r.sender.discordID));
+            if (settings.store.hideBlockedUsers) data!.reviews = data!.reviews?.filter(r => !RelationshipStore.isBlocked(r.sender.discordID));
+            const systemReviews = data!.reviews.filter(r => r.type === ReviewType.System);
+            const normalReviews = data!.reviews.filter(r => r.type !== ReviewType.System);
 
+            data!.reviews = [...systemReviews, ...normalReviews];
             scrollToTop?.();
             onFetchReviews(data!);
         }
@@ -113,9 +116,9 @@ function ReviewList({ refetch, reviews, hideOwnReview, profileId, type }: { refe
             )}
 
             {reviews?.length === 0 && (
-                <Forms.FormText className={cl("placeholder")}>
+                <Paragraph className={cl("placeholder")}>
                     Looks like nobody reviewed this {type === ReviewType.User ? "user" : "server"} yet. You could be the first!
-                </Forms.FormText>
+                </Paragraph>
             )}
         </div>
     );
@@ -136,7 +139,7 @@ export function ReviewsInputComponent(
         <>
             <div onClick={() => {
                 if (!token) {
-                    showToast("Opening authorization window...");
+                    showToast({ text: "Opening authorization window..." });
                     authorize();
                 }
             }}>

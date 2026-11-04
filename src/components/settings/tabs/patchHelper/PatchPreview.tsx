@@ -4,15 +4,18 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { Button } from "@components/Button";
+import { Heading } from "@components/Heading";
+import { Paragraph } from "@components/Paragraph";
 import { Margins } from "@utils/margins";
 import { canonicalizeMatch, canonicalizeReplace } from "@utils/patches";
 import { makeCodeblock } from "@utils/text";
 import { ReplaceFn } from "@utils/types";
-import { Button, Forms, Parser, useMemo, useState } from "@webpack/common";
+import { Parser, useMemo, useState } from "@webpack/common";
 import type { Change } from "diff";
 
-// Do not include diff in non dev builds (side effects import)
-if (IS_DEV) {
+// Do not include diff in standalone builds (side effects import)
+if (!IS_STANDALONE) {
     var differ = require("diff") as typeof import("diff");
 }
 
@@ -53,7 +56,7 @@ function Match({ matchResult }: { matchResult: RegExpMatchArray | null; }) {
 
     return (
         <>
-            <Forms.FormTitle>Match</Forms.FormTitle>
+            <Heading className={Margins.bottom8}>Match</Heading>
             <div style={{ userSelect: "text" }}>{Parser.parse(fullMatch)}</div>
             <div style={{ userSelect: "text" }}>{Parser.parse(groups)}</div>
         </>
@@ -83,7 +86,7 @@ function Diff({ diff }: { diff: Change[] | null; }) {
 
     return (
         <>
-            <Forms.FormTitle>Diff</Forms.FormTitle>
+            <Heading className={Margins.bottom8}>Diff</Heading>
             {diffLines}
         </>
     );
@@ -118,7 +121,7 @@ export function PatchPreview({ module, match, replacement, setReplacementError }
 
     return (
         <>
-            <Forms.FormTitle>Module {id}</Forms.FormTitle>
+            <Heading className={Margins.bottom8} style={{ userSelect: "text" }}>Module {id}</Heading>
 
             <Match matchResult={matchResult} />
             <Diff diff={diff} />
@@ -128,7 +131,10 @@ export function PatchPreview({ module, match, replacement, setReplacementError }
                     className={Margins.top20}
                     onClick={() => {
                         try {
-                            Function(patchedCode.replace(/^(?=function\()/, "0,"));
+                            const isArrowFunction = patchedCode.startsWith("(");
+                            const wrappedCode = "0," + (!isArrowFunction ? "function" : "") + patchedCode.slice(patchedCode.indexOf("("));
+                            Function(wrappedCode);
+
                             setCompileResult([true, "Compiled successfully"]);
                         } catch (err) {
                             setCompileResult([false, (err as Error).message]);
@@ -140,9 +146,9 @@ export function PatchPreview({ module, match, replacement, setReplacementError }
             )}
 
             {compileResult && (
-                <Forms.FormText style={{ color: compileResult[0] ? "var(--status-positive)" : "var(--text-danger)" }}>
+                <Paragraph style={{ color: compileResult[0] ? "var(--status-positive)" : "var(--text-feedback-critical)" }}>
                     {compileResult[1]}
-                </Forms.FormText>
+                </Paragraph>
             )}
         </>
     );

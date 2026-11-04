@@ -25,7 +25,7 @@ const VerifiedIconComponent = findComponentByCodeLazy("#{intl::CONNECTIONS_ROLE_
 
 export function VerifiedIcon() {
     const color = useToken(ColorMap.colors.INTERACTIVE_MUTED).hex();
-    const forcedIconColor = useToken(ColorMap.colors.INTERACTIVE_ACTIVE).hex();
+    const forcedIconColor = useToken(ColorMap.colors.INTERACTIVE_ICON_ACTIVE ?? ColorMap.colors.INTERACTIVE_ACTIVE).hex();
 
     return (
         <VerifiedIconComponent

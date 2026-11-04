@@ -16,34 +16,40 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { classNameFactory } from "@api/Styles";
-import { hljs } from "@webpack/common";
-
-import { resolveLang } from "../api/languages";
-import { HighlighterProps } from "../components/Highlighter";
-import { HljsSetting } from "../types";
+import { resolveLang } from "@plugins/shikiCodeblocks.desktop/api/languages";
+import { HighlighterProps } from "@plugins/shikiCodeblocks.desktop/components/Highlighter";
+import { HighlighterSetting } from "@plugins/shikiCodeblocks.desktop/types";
+import { classNameFactory } from "@utils/css";
+import { filters, mapMangledModuleLazy } from "@webpack";
 
 export const cl = classNameFactory("vc-shiki-");
 
-export const shouldUseHljs = ({
+export const arboriumLanguages = mapMangledModuleLazy('jldoctest:"julia"', {
+    resolveLang: filters.byCode(/!\i.test\(/, ".toLowerCase();")
+});
+export const arboriumGrammars = mapMangledModuleLazy(".createSession();try{", {
+    getGrammar: filters.byCode(/return null==\i&&/, /\i\.set\(\i/)
+});
+
+export const shouldUseArborium = ({
     lang,
-    tryHljs,
+    tryDiscordHighlighter,
 }: {
     lang: HighlighterProps["lang"],
-    tryHljs: HljsSetting,
+    tryDiscordHighlighter: HighlighterSetting,
 }) => {
-    const hljsLang = lang ? hljs?.getLanguage?.(lang) : null;
+    const arboriumLang = lang ? arboriumLanguages.resolveLang(lang) : null;
     const shikiLang = lang ? resolveLang(lang) : null;
     const langName = shikiLang?.name;
 
-    switch (tryHljs) {
-        case HljsSetting.Always:
+    switch (tryDiscordHighlighter) {
+        case HighlighterSetting.Always:
             return true;
-        case HljsSetting.Primary:
-            return !!hljsLang || lang === "";
-        case HljsSetting.Secondary:
-            return !langName && !!hljsLang;
-        case HljsSetting.Never:
+        case HighlighterSetting.Primary:
+            return !!arboriumLang || lang === "";
+        case HighlighterSetting.Secondary:
+            return !langName && !!arboriumLang;
+        case HighlighterSetting.Never:
             return false;
         default: return false;
     }

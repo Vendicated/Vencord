@@ -5,18 +5,20 @@
  */
 
 import { findGroupChildrenByChildId, NavContextMenuPatchCallback } from "@api/ContextMenu";
+import { PinOrder, settings } from "@plugins/pinDms";
+import { addChannelToCategory, canMoveChannelInDirection, currentUserCategories, isPinned, moveChannel, removeChannelFromCategory } from "@plugins/pinDms/data";
 import { Menu } from "@webpack/common";
 
-import { addChannelToCategory, canMoveChannelInDirection, currentUserCategories, isPinned, moveChannel, removeChannelFromCategory } from "../data";
-import { PinOrder, settings } from "../index";
 import { openCategoryModal } from "./CreateCategoryModal";
 
 function createPinMenuItem(channelId: string) {
     const pinned = isPinned(channelId);
 
+    const showSeparator = pinned || currentUserCategories.length > 0;
+
     return (
         <Menu.MenuItem
-            id="pin-dm"
+            id="vc-pin-dm"
             label="Pin DMs"
         >
 
@@ -28,7 +30,7 @@ function createPinMenuItem(channelId: string) {
                         color="brand"
                         action={() => openCategoryModal(null, channelId)}
                     />
-                    <Menu.MenuSeparator />
+                    {showSeparator && <Menu.MenuSeparator />}
 
                     {
                         currentUserCategories.map(category => (
@@ -46,7 +48,7 @@ function createPinMenuItem(channelId: string) {
             {pinned && (
                 <>
                     <Menu.MenuItem
-                        id="unpin-dm"
+                        id="vc-unpin-dm"
                         label="Unpin DM"
                         color="danger"
                         action={() => removeChannelFromCategory(channelId)}

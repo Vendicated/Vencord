@@ -20,13 +20,15 @@ import "./styles.css";
 
 import { ChatBarButton, ChatBarButtonFactory } from "@api/ChatButtons";
 import { definePluginSettings } from "@api/Settings";
-import { classNameFactory } from "@api/Styles";
+import { Heading } from "@components/Heading";
+import { Paragraph } from "@components/Paragraph";
 import { Devs } from "@utils/constants";
+import { classNameFactory } from "@utils/css";
 import { getTheme, insertTextIntoChatInputBox, Theme } from "@utils/discord";
 import { Margins } from "@utils/margins";
-import { closeModal, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, openModal } from "@utils/modal";
-import definePlugin, { OptionType } from "@utils/types";
-import { Button, Forms, Parser, Select, useMemo, useState } from "@webpack/common";
+import definePlugin, { IconComponent, OptionType } from "@utils/types";
+import { RenderModalProps } from "@vencord/discord-types";
+import { Modal, openModal, Parser, Select, useMemo, useState } from "@webpack/common";
 
 const settings = definePluginSettings({
     replaceMessageContents: {
@@ -39,21 +41,21 @@ const settings = definePluginSettings({
 function parseTime(time: string) {
     const cleanTime = time.slice(1, -1).replace(/(\d)(AM|PM)$/i, "$1 $2");
 
-    let ms = new Date(`${new Date().toDateString()} ${cleanTime}`).getTime() / 1000;
-    if (isNaN(ms)) return time;
+    const date = new Date(`${new Date().toDateString()} ${cleanTime}`);
+    if (Number.isNaN(date.getTime())) return time;
 
-    // add 24h if time is in the past
-    if (Date.now() / 1000 > ms) ms += 86400;
+    // tomorrow can be 23 or 25 hours away across dst changes
+    if (Date.now() > date.getTime()) date.setDate(date.getDate() + 1);
 
-    return `<t:${Math.round(ms)}:t>`;
+    return `<t:${Math.round(date.getTime() / 1000)}:t>`;
 }
 
-const Formats = ["", "t", "T", "d", "D", "f", "F", "R"] as const;
+const Formats = ["", "t", "T", "d", "D", "f", "F", "s", "S", "R"] as const;
 type Format = typeof Formats[number];
 
 const cl = classNameFactory("vc-st-");
 
-function PickerModal({ rootProps, close }: { rootProps: ModalProps, close(): void; }) {
+function PickerModal(props: RenderModalProps) {
     const [value, setValue] = useState<string>();
     const [format, setFormat] = useState<Format>("");
     const time = Math.round((new Date(value!).getTime() || Date.now()) / 1000);
@@ -66,94 +68,86 @@ function PickerModal({ rootProps, close }: { rootProps: ModalProps, close(): voi
     }, [time, format]);
 
     return (
-        <ModalRoot {...rootProps}>
-            <ModalHeader className={cl("modal-header")}>
-                <Forms.FormTitle tag="h2" className={cl("modal-title")}>
-                    Timestamp Picker
-                </Forms.FormTitle>
+        <Modal
+            {...props}
+            title="Timestamp Picker"
+            actions={[{
+                text: "Insert",
+                variant: "primary",
+                onClick() {
+                    insertTextIntoChatInputBox(formatted + " ");
+                    props.onClose();
+                }
+            }]}
+        >
+            <input
+                className={cl("date-picker")}
+                type="datetime-local"
+                value={value}
+                onChange={e => setValue(e.currentTarget.value)}
+                style={{
+                    colorScheme: getTheme() === Theme.Light ? "light" : "dark",
+                }}
+            />
 
-                <ModalCloseButton onClick={close} className={cl("modal-close-button")} />
-            </ModalHeader>
-
-            <ModalContent className={cl("modal-content")}>
-                <input
-                    className={cl("date-picker")}
-                    type="datetime-local"
-                    value={value}
-                    onChange={e => setValue(e.currentTarget.value)}
-                    style={{
-                        colorScheme: getTheme() === Theme.Light ? "light" : "dark",
-                    }}
+            <Heading className={Margins.bottom8}>Timestamp Format</Heading>
+            <div className={cl("format-select")}>
+                <Select
+                    options={
+                        Formats.map(m => ({
+                            label: m,
+                            value: m
+                        }))
+                    }
+                    isSelected={v => v === format}
+                    select={v => setFormat(v)}
+                    serialize={v => v}
+                    renderOptionLabel={o => (
+                        <div className={cl("format-label")}>
+                            {Parser.parse(formatTimestamp(time, o.value))}
+                        </div>
+                    )}
+                    renderOptionValue={() => rendered}
                 />
+            </div>
 
-                <Forms.FormTitle>Timestamp Format</Forms.FormTitle>
-                <div className={cl("format-select")}>
-                    <Select
-                        options={
-                            Formats.map(m => ({
-                                label: m,
-                                value: m
-                            }))
-                        }
-                        isSelected={v => v === format}
-                        select={v => setFormat(v)}
-                        serialize={v => v}
-                        renderOptionLabel={o => (
-                            <div className={cl("format-label")}>
-                                {Parser.parse(formatTimestamp(time, o.value))}
-                            </div>
-                        )}
-                        renderOptionValue={() => rendered}
-                    />
-                </div>
-
-                <Forms.FormTitle className={Margins.bottom8}>Preview</Forms.FormTitle>
-                <Forms.FormText className={cl("preview-text")}>
-                    {rendered} ({formatted})
-                </Forms.FormText>
-            </ModalContent>
-
-            <ModalFooter>
-                <Button
-                    onClick={() => {
-                        insertTextIntoChatInputBox(formatted + " ");
-                        close();
-                    }}
-                >Insert</Button>
-            </ModalFooter>
-        </ModalRoot>
+            <Heading className={Margins.bottom8}>Preview</Heading>
+            <Paragraph className={cl("preview-text")}>
+                {rendered} ({formatted})
+            </Paragraph>
+        </Modal>
     );
 }
 
-const ChatBarIcon: ChatBarButtonFactory = ({ isMainChat }) => {
-    if (!isMainChat) return null;
+const SendTimestampIcon: IconComponent = ({ height = 20, width = 20, className }) => {
+    return (
+        <svg
+            aria-hidden="true"
+            role="img"
+            width={width}
+            height={height}
+            className={className}
+            viewBox="0 0 24 24"
+            style={{ scale: "1.2" }}
+        >
+            <g fill="none" fillRule="evenodd">
+                <path fill="currentColor" d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19a2 2 0 0 0 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7v-5z" />
+                <rect width="24" height="24" />
+            </g>
+        </svg>
+    );
+};
+
+const SendTimestampButton: ChatBarButtonFactory = ({ isAnyChat }) => {
+    if (!isAnyChat) return null;
 
     return (
         <ChatBarButton
             tooltip="Insert Timestamp"
-            onClick={() => {
-                const key = openModal(props => (
-                    <PickerModal
-                        rootProps={props}
-                        close={() => closeModal(key)}
-                    />
-                ));
-            }}
+            onClick={() => openModal(props => <PickerModal {...props} />)}
             buttonProps={{ "aria-haspopup": "dialog" }}
         >
-            <svg
-                aria-hidden="true"
-                role="img"
-                width="20"
-                height="20"
-                viewBox="0 0 24 24"
-                style={{ scale: "1.2" }}
-            >
-                <g fill="none" fillRule="evenodd">
-                    <path fill="currentColor" d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19a2 2 0 0 0 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7v-5z" />
-                    <rect width="24" height="24" />
-                </g>
-            </svg>
+            <SendTimestampIcon />
         </ChatBarButton>
     );
 };
@@ -161,10 +155,14 @@ const ChatBarIcon: ChatBarButtonFactory = ({ isMainChat }) => {
 export default definePlugin({
     name: "SendTimestamps",
     description: "Send timestamps easily via chat box button & text shortcuts. Read the extended description!",
+    tags: ["Chat", "Commands"],
     authors: [Devs.Ven, Devs.Tyler, Devs.Grzesiek11],
     settings,
 
-    renderChatBarButton: ChatBarIcon,
+    chatBarButton: {
+        icon: SendTimestampIcon,
+        render: SendTimestampButton
+    },
 
     onBeforeMessageSend(_, msg) {
         if (settings.store.replaceMessageContents) {
@@ -184,14 +182,14 @@ export default definePlugin({
 
         return (
             <>
-                <Forms.FormText>
-                    To quickly send send time only timestamps, include timestamps formatted as `HH:MM` (including the backticks!) in your message
-                </Forms.FormText>
-                <Forms.FormText>
+                <Paragraph>
+                    To quickly send time only timestamps, include timestamps formatted as `HH:MM` (including the backticks!) in your message
+                </Paragraph>
+                <Paragraph>
                     See below for examples.
                     If you need anything more specific, use the Date button in the chat bar!
-                </Forms.FormText>
-                <Forms.FormText>
+                </Paragraph>
+                <Paragraph>
                     Examples:
                     <ul>
                         {samples.map(s => (
@@ -200,7 +198,7 @@ export default definePlugin({
                             </li>
                         ))}
                     </ul>
-                </Forms.FormText>
+                </Paragraph>
             </>
         );
     },

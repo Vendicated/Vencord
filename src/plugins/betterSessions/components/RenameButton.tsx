@@ -5,9 +5,10 @@
  */
 
 import { Button } from "@components/Button";
-import { openModal } from "@utils/modal";
+import { SessionInfo } from "@plugins/betterSessions/types";
+import { cl } from "@plugins/betterSessions/utils";
+import { openModal } from "@webpack/common";
 
-import { SessionInfo } from "../types";
 import { RenameModal } from "./RenameModal";
 
 export function RenameButton({ session, state }: { session: SessionInfo["session"], state: [string, React.Dispatch<React.SetStateAction<string>>]; }) {
@@ -15,7 +16,7 @@ export function RenameButton({ session, state }: { session: SessionInfo["session
         <Button
             variant="secondary"
             size="xs"
-            className="vc-betterSessions-rename-btn"
+            className={cl("rename-btn")}
             onClick={() =>
                 openModal(props => (
                     <RenameModal
@@ -27,6 +28,18 @@ export function RenameButton({ session, state }: { session: SessionInfo["session
             }
         >
             Rename
+        </Button>
+    );
+}
+
+export function NewButton() {
+    return (
+        <Button
+            variant="dangerPrimary"
+            size="min"
+            className={cl("new-btn")}
+        >
+            NEW
         </Button>
     );
 }

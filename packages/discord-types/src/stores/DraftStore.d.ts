@@ -1,18 +1,10 @@
-import { FluxStore } from "..";
-
-export enum DraftType {
-    ChannelMessage = 0,
-    ThreadSettings = 1,
-    FirstThreadMessage = 2,
-    ApplicationLauncherCommand = 3,
-    Poll = 4,
-    SlashCommand = 5,
-    ForwardContextMessage = 6
-}
+import { Command, FluxStore } from "..";
+import { DraftType } from "../../enums";
 
 export interface Draft {
     timestamp: number;
     draft: string;
+    command?: Command;
 }
 
 export interface ThreadSettingsDraft {
@@ -24,10 +16,16 @@ export interface ThreadSettingsDraft {
     location?: string;
 }
 
+export interface ScheduledMessageDraft {
+    timestamp: number;
+    [key: string]: unknown;
+}
+
 export type ChannelDrafts = {
     [DraftType.ThreadSettings]: ThreadSettingsDraft;
+    [DraftType.ScheduledMessage]: ScheduledMessageDraft;
 } & {
-    [key in Exclude<DraftType, DraftType.ThreadSettings>]: Draft;
+    [key in Exclude<DraftType, DraftType.ThreadSettings | DraftType.ScheduledMessage>]: Draft;
 };
 
 export type UserDrafts = Partial<Record<string, ChannelDrafts>>;
@@ -37,6 +35,8 @@ export class DraftStore extends FluxStore {
     getState(): DraftState;
     getRecentlyEditedDrafts(type: DraftType): Array<Draft & { channelId: string; }>;
     getDraft(channelId: string, type: DraftType): string;
+    getDraftCommand(channelId: string, type: DraftType): Command | undefined;
+    getScheduledMessage(channelId: string): ScheduledMessageDraft | undefined;
 
     getThreadSettings(channelId: string): ThreadSettingsDraft | null | undefined;
     getThreadDraftWithParentMessageId(parentMessageId: string): ThreadSettingsDraft | null | undefined;

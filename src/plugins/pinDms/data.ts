@@ -4,10 +4,9 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { PinOrder, PrivateChannelSortStore, settings } from "@plugins/pinDms";
 import { useForceUpdater } from "@utils/react";
 import { UserStore } from "@webpack/common";
-
-import { PinOrder, PrivateChannelSortStore, settings } from "./index";
 
 export interface Category {
     id: string;
@@ -16,11 +15,6 @@ export interface Category {
     channels: string[];
     collapsed?: boolean;
 }
-
-const CATEGORY_BASE_KEY = "PinDMsCategories-";
-const CATEGORY_MIGRATED_PINDMS_KEY = "PinDMsMigratedPinDMs";
-const CATEGORY_MIGRATED_KEY = "PinDMsMigratedOldCategories";
-const OLD_CATEGORY_KEY = "BetterPinDMsCategories-";
 
 let forceUpdateDms: (() => void) | undefined = undefined;
 export let currentUserCategories: Category[] = [];
