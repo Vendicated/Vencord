@@ -61,12 +61,13 @@ function CropCircle({ src, size, state }: { src: string; size: number; state: Ed
     );
 }
 
-export default function Preview({ src, state }: { src: string; state: EditorState; }) {
+export default function Preview({ src, state, isPFPModal }: { src: string; state: EditorState; isPFPModal: boolean; }) {
     const user = UserStore.getCurrentUser();
     const deco = user.avatarDecorationData?.asset as string | undefined;
     const name = user.globalName ?? user.username;
 
-    console.log("BLEH");
+    if (!isPFPModal) return null;
+
     return (
         <div style={{ display: "flex", alignItems: "center", gap: 16, padding: 16 }}>
             <div style={{ position: "relative", width: SIZE, height: SIZE }}>

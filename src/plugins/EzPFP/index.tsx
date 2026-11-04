@@ -7,7 +7,6 @@
 import { definePluginSettings } from "@api/Settings";
 import { ErrorBoundary } from "@components/index";
 import { Devs } from "@utils/constants";
-import { Logger } from "@utils/index";
 import definePlugin, { OptionType } from "@utils/types";
 
 import Preview, { EditorState, updateOffset } from "./Preview";
@@ -18,14 +17,7 @@ const settings = definePluginSettings({
         description: "Enable EzPFP",
         default: true
     },
-    partyMode: {
-        type: OptionType.BOOLEAN,
-        description: "Enable Party Mode",
-        default: false
-    }
 });
-
-const logger = new Logger("EzPFP", "#a6d189");
 
 export default definePlugin({
     name: "EzPFP",
@@ -38,16 +30,15 @@ export default definePlugin({
             replacement: [
                 {
                     match: /(?<=minValue:1,maxValue:)2(?=,keyboardStep:\.025)/,
-                    replace: "arguments[0].uploadType !== null && arguments[0].uploadType === 'AVATAR' ? 20 : 2",
+                    replace: "arguments[0].uploadType === 'AVATAR' ? 20 : 2",
                 },
-
                 {
                     match: /(\{cropDimensions:(\i),dragBoundaries:\i,imageDimensions:(\i),imageRotation:(\i),imageTransformCoordinates:\i,zoomRatio:(\i),startingCoordinates:\i,isDragging:\i,hasImageEdits:\i\}=\i)/,
                     replace: "$1,ezpfpState={crop:$2,image:$3,rotation:$4,zoom:$5}"
                 },
                 {
                     match: /(showUpsell:!0,position:"inline",className:\i\.\i\}\))(?=\])/,
-                    replace: "$1,$self.renderPreview(arguments[0].imageUri,ezpfpState)"
+                    replace: "$1,$self.renderPreview(arguments[0].imageUri,ezpfpState,arguments[0].uploadType==='AVATAR')"
                 },
                 {
                     match: /(\i)\.current=\(0,\i\.\i\)\(\i,\i,\i\),/,
@@ -59,9 +50,9 @@ export default definePlugin({
 
     updateOffset,
 
-    renderPreview: (src: string, state: EditorState) => (
+    renderPreview: (src: string, state: EditorState, isPFPModal: boolean) => (
         <ErrorBoundary noop>
-            <Preview src={src} state={state} />
+            <Preview src={src} state={state} isPFPModal={isPFPModal} />
         </ErrorBoundary>
     ),
 });
