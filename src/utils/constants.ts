@@ -702,6 +702,10 @@ export const Devs = /* #__PURE__*/ Object.freeze({
         name: "Nays",
         id: 344871509677965313n
     },
+    BioTomateDE: {
+        name: "BioTomateDE",
+        id: 1383525574508679228n
+    },
     NiNoX: {
         name: "NiNoX",
         id: 123435354958200833n
