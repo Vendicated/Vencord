@@ -39,7 +39,7 @@ const settings = definePluginSettings({
     saturation: {
         description: "Saturation, in %. Change if the colors are too vibrant or dull",
         type: OptionType.NUMBER,
-        default: 70
+        default: 100
     },
     seed: {
         description: "Changing this will shuffle everyone's username color to a new color",
