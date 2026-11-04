@@ -150,24 +150,3 @@
         </p>
     </section>
 </body>
-<script>
-    const data = new URLSearchParams(location.search);
-
-    // replace all {{FOO}} placeholders in the document with the values from the URL
-
-    /** @param {Node} [node] */
-    function walk(node) {
-        if (node.nodeType === Node.TEXT_NODE) {
-            node.textContent = node.textContent.replace(/{{(\w+)}}/g, (match, key) => data.get(key) || match);
-            return;
-        }
-
-        if (node.nodeType === Node.ELEMENT_NODE && node.nodeName !== "SCRIPT") {
-            for (const child of node.childNodes) {
-                walk(child);
-            }
-        }
-    }
-
-    walk(document.body);
-</script>
