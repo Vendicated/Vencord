@@ -41,9 +41,9 @@ const settings = definePluginSettings({
         description: "Toggle functionality",
         default: true,
     },
-    excludeChannels: {
+    showTypingIn: {
         type: OptionType.STRING,
-        description: "Comma-separated list of channel IDs to show typing in",
+        description: "Comma-separated list of channel IDs to always show typing in",
         default: ""
     },
 });
@@ -129,7 +129,7 @@ export default definePlugin({
     }],
 
     async startTyping(channelId: string) {
-        if (settings.store.isEnabled && !settings.store.excludeChannels.includes(channelId)) {
+        if (settings.store.isEnabled && !settings.store.showTypingIn.includes(channelId)) {
             return;
         }
         FluxDispatcher.dispatch({ type: "TYPING_START_LOCAL", channelId });
