@@ -22,7 +22,7 @@ import { findGroupChildrenByChildId, NavContextMenuPatchCallback } from "@api/Co
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 import { Message } from "@vencord/discord-types";
-import { ChannelStore, Menu } from "@webpack/common";
+import { Menu } from "@webpack/common";
 
 import { settings } from "./settings";
 import { setShouldShowTranslateEnabledTooltip, TranslateChatBarIcon, TranslateIcon } from "./TranslateIcon";
@@ -30,7 +30,7 @@ import { handleTranslate, TranslationAccessory } from "./TranslationAccessory";
 import { translate } from "./utils";
 
 const messageCtxPatch: NavContextMenuPatchCallback = (children, { message }: { message: Message; }) => {
-    const content = getMessageContent(message);
+    const content = document.getSelection()?.toString() || getMessageContent(message);
     if (!content) return;
 
     const group = findGroupChildrenByChildId("copy-text", children);
@@ -90,8 +90,6 @@ export default definePlugin({
             return {
                 label: "Translate",
                 icon: TranslateIcon,
-                message,
-                channel: ChannelStore.getChannel(message.channel_id),
                 onClick: async () => {
                     const trans = await translate("received", content);
                     handleTranslate(message.id, trans);
