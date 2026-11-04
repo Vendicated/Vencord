@@ -404,10 +404,46 @@ export interface ClipMetadata {
  * Result of saving a clip.
  */
 export interface SavedClip {
-    /** unique clip identifier. */
-    id: string;
-    /** path where clip was saved. */
+    /** clip duration in milliseconds. */
+    duration: number;
+    /** parsed clip encoder stats. */
+    clipStats: Record<string, unknown>;
+    /** thumbnail data, if generated. */
+    thumbnail?: string;
+    /** serialized clip metadata, if any. */
+    metadata?: string;
+}
+
+/**
+ * Options for saving a clip from the recording buffer.
+ */
+export interface SaveClipOptions {
+    /** path to write the clip to. */
     filepath: string;
+    /** serialized clip metadata. */
+    metadata: string;
+    /** timestamp to take the thumbnail from. */
+    thumbnailMs: number;
+    /** buffer start timestamp. */
+    startMs: number;
+    /** buffer end timestamp. */
+    endMs: number;
+    /** trim start timestamp. */
+    trimStartMs: number;
+    /** trim end timestamp. */
+    trimEndMs: number;
+    /** current user id when streaming. */
+    userId?: string;
+}
+
+/**
+ * Result of exporting a clip to a file.
+ */
+export interface ExportedClip {
+    /** path of the exported file. */
+    filepath: string;
+    /** whether the file is already formatted for upload. */
+    formattedForUpload: boolean;
 }
 
 /**
@@ -1423,6 +1459,18 @@ export interface MediaEngine {
     Video: React.ComponentType & { onContainerResized: () => void; };
     /** set of active voice/video connections. */
     connections: Set<MediaEngineConnection>;
+    /** current audio input device id. */
+    audioInputDeviceId: string;
+    /** current audio output device id. */
+    audioOutputDeviceId: string;
+    /** current video input device id, or "disabled". */
+    videoInputDeviceId: string;
+    /** active audio layer name. */
+    audioLayer: string;
+    /** active audio subsystem. */
+    audioSubsystem: AudioSubsystem;
+    /** cached codec survey JSON, set after the first getCodecSurvey call. */
+    codecSurvey?: string;
 
     /**
      * Registers a listener for device changes.
@@ -1579,6 +1627,8 @@ export interface MediaEngine {
      * @param settings filter settings to apply.
      */
     applyMediaFilterSettings(settings: MediaFilterSettings): Promise<void>;
+    /** cancels an in-progress batch audio processing run. */
+    cancelBatchAudioProcessing(): void;
     /**
      * Creates a new voice connection.
      * @param userId user id for the connection.
@@ -1613,12 +1663,13 @@ export interface MediaEngine {
      */
     enable(): Promise<void>;
     /**
-     * Exports a clip as a blob.
-     * @param clipId clip identifier.
-     * @param userId user who owns the clip.
-     * @returns promise resolving to the clip blob.
+     * Exports a clip to a file, applying edits.
+     * @param sourcePath path of the source clip.
+     * @param outputPath path to write the exported clip to.
+     * @param editMetadata trim, crop and track settings.
+     * @returns promise resolving to the exported file info, rejects with "unsupported" if unavailable.
      */
-    exportClip(clipId: string, userId: string): Promise<Blob>;
+    exportClipToFile(sourcePath: string, outputPath: string, editMetadata: Record<string, unknown>): Promise<ExportedClip>;
     /**
      * Fetches async resources like DAVE keys.
      * @param options fetch options.
@@ -1651,10 +1702,10 @@ export interface MediaEngine {
      */
     getCodecCapabilities(callback: (capabilities: string) => void): void;
     /**
-     * Gets a survey of supported codecs.
-     * @returns promise resolving to codec info.
+     * Gets a survey of available video encoders and decoders.
+     * @returns promise resolving to JSON with available_video_encoders and available_video_decoders.
      */
-    getCodecSurvey(): Promise<{ codecs: CodecInfo[]; }>;
+    getCodecSurvey(): Promise<string>;
     /**
      * Gets whether debug logging is enabled.
      * @returns true if enabled.
@@ -1665,6 +1716,24 @@ export interface MediaEngine {
      * @returns promise that rejects with NO_STREAM error if not streaming.
      */
     getDesktopSource(): Promise<DesktopSource>;
+    /**
+     * Gets audio effects applied by the OS to a device, Windows only.
+     * @param deviceId device identifier.
+     * @returns promise resolving to effect info, rejects if unsupported.
+     */
+    getDeviceAudioEffects(deviceId: string): Promise<Record<string, unknown>>;
+    /**
+     * Gets whether a device is muted at the OS level.
+     * @param deviceId device identifier.
+     * @returns promise resolving to muted state, undefined if unsupported.
+     */
+    getDeviceOSMuted(deviceId: string): Promise<boolean | undefined>;
+    /**
+     * Gets a device's OS volume.
+     * @param deviceId device identifier.
+     * @returns promise resolving to volume, undefined if unsupported.
+     */
+    getDeviceOSVolume(deviceId: string): Promise<number | undefined>;
     /**
      * Gets whether loopback is active.
      * @returns always false for native engine.
@@ -1686,9 +1755,19 @@ export interface MediaEngine {
      * Gets screen preview thumbnails.
      * @param width thumbnail width.
      * @param height thumbnail height.
+     * @param useWgc whether to capture previews with Windows Graphics Capture.
      * @returns promise resolving to preview list.
      */
-    getScreenPreviews(width: number, height: number): Promise<ScreenPreview[]>;
+    getScreenPreviews(width: number, height: number, useWgc?: boolean): Promise<ScreenPreview[]>;
+    /**
+     * Gets a preview thumbnail for a single window.
+     * @param windowId window source identifier.
+     * @param width thumbnail width.
+     * @param height thumbnail height.
+     * @param useWgc whether to capture previews with Windows Graphics Capture.
+     * @returns promise resolving to the preview, or null if unavailable.
+     */
+    getSingleWindowPreview(windowId: string, width: number, height: number, useWgc?: boolean): Promise<WindowPreview | null>;
     /**
      * Gets supported bandwidth estimation experiments.
      * @param callback called with experiment list.
@@ -1700,15 +1779,15 @@ export interface MediaEngine {
      */
     getSupportedSecureFramesProtocolVersion(): number;
     /**
-     * Gets supported video codecs.
-     * @param callback called with codec name list.
-     */
-    getSupportedVideoCodecs(callback: (codecs: string[]) => void): void;
-    /**
      * Gets system microphone mode.
      * @returns promise resolving to mode string.
      */
     getSystemMicrophoneMode(): Promise<string>;
+    /**
+     * Gets the native steady clock time.
+     * @returns time in milliseconds, or null if unsupported.
+     */
+    getSystemSteadyClockNowMs(): number | null;
     /**
      * Gets current video input device id.
      * @returns device id or "disabled".
@@ -1723,10 +1802,16 @@ export interface MediaEngine {
      * Gets window preview thumbnails.
      * @param width thumbnail width.
      * @param height thumbnail height.
+     * @param useWgc whether to capture previews with Windows Graphics Capture.
      * @returns promise resolving to preview list.
      */
-    getWindowPreviews(width: number, height: number): Promise<WindowPreview[]>;
+    getWindowPreviews(width: number, height: number, useWgc?: boolean): Promise<WindowPreview[]>;
 
+    /**
+     * Checks if the native module supports clips v3.
+     * @returns true if supported.
+     */
+    hasClipsV3Support(): boolean;
     /** signals user interaction to enable autoplay. */
     interact(): void;
     /**
@@ -1734,6 +1819,19 @@ export interface MediaEngine {
      * @param options picker options.
      */
     presentNativeScreenSharePicker(options?: string): void;
+    /**
+     * Runs audio processing over every file in a directory.
+     * @param inputDir directory to read audio files from.
+     * @param outputDir directory to write processed files to.
+     * @param onProgress called after each file.
+     * @param onComplete called when finished or cancelled.
+     */
+    processBatchAudioFiles(
+        inputDir: string,
+        outputDir: string,
+        onProgress: (filename: string, current: number, total: number, success: boolean) => void,
+        onComplete: (processed: number, failed: number) => void
+    ): void;
     /**
      * Queues an audio subsystem switch.
      * @param subsystem subsystem to switch to.
@@ -1745,24 +1843,17 @@ export interface MediaEngine {
      * @returns promise resolving to sorted region ids.
      */
     rankRtcRegions(regions: string[]): Promise<string[]>;
+    /** registers the native clips recording event handler, once. */
+    registerClipsRecordingEventHandler(): void;
     /** releases native desktop video source picker stream. */
     releaseNativeDesktopVideoSourcePickerStream(): void;
 
     /**
-     * Saves a clip.
-     * @param clipId clip identifier.
-     * @param userId user who owns the clip.
+     * Saves a clip from the recording buffer.
+     * @param options clip save options.
      * @returns promise resolving to saved clip info.
      */
-    saveClip(clipId: string, userId: string): Promise<SavedClip>;
-    /**
-     * Saves a clip for another user.
-     * @param clipId clip identifier.
-     * @param userId user to save for.
-     * @param options clip metadata.
-     * @returns promise resolving to saved clip info.
-     */
-    saveClipForUser(clipId: string, userId: string, options: ClipMetadata): Promise<SavedClip>;
+    saveClipEx(options: SaveClipOptions): Promise<SavedClip>;
     /**
      * Saves a screenshot.
      * @param channelId channel context.
@@ -1780,15 +1871,10 @@ export interface MediaEngine {
      */
     setAecDump(enabled: boolean): void;
     /**
-     * Sets callback for async clips source deinit.
-     * @param callback callback function.
+     * Sets whether video input devices initialize asynchronously.
+     * @param enabled whether to enable.
      */
-    setAsyncClipsSourceDeinit(callback: () => void): void;
-    /**
-     * Sets callback for async video input device init.
-     * @param callback callback function.
-     */
-    setAsyncVideoInputDeviceInit(callback: () => void): void;
+    setAsyncVideoInputDeviceInit(enabled: boolean): void;
     /**
      * Sets whether to bypass system audio input processing.
      * @param bypass whether to bypass.
@@ -1800,6 +1886,11 @@ export interface MediaEngine {
      */
     setAudioInputDevice(deviceId: string): void;
     /**
+     * Sets spatial audio mixer options.
+     * @param options mixer options.
+     */
+    setAudioMixerOptions(options: Record<string, unknown>): void;
+    /**
      * Sets the audio output device.
      * @param deviceId device identifier.
      */
@@ -1810,39 +1901,66 @@ export interface MediaEngine {
      */
     setAudioSubsystem(subsystem: AudioSubsystem): void;
     /**
-     * Enables or disables AV1 codec.
-     * @param enabled whether to enable.
-     */
-    setAv1Enabled(enabled: boolean): void;
-    /**
      * Sets clip buffer length in seconds.
      * @param seconds buffer duration.
      */
     setClipBufferLength(seconds: number): void;
     /**
-     * Enables or disables clips ML pipeline.
-     * @param enabled whether to enable.
+     * Overrides the clips audio model.
+     * @param model model identifier.
      */
-    setClipsMLPipelineEnabled(enabled: boolean): void;
+    setClipsAudioModelOverride(model: string): void;
     /**
-     * Enables or disables a clips ML pipeline type.
-     * @param type pipeline type.
-     * @param enabled whether to enable.
+     * Sets the clips data directory.
+     * @param path directory path.
      */
-    setClipsMLPipelineTypeEnabled(type: string, enabled: boolean): void;
+    setClipsDataPath(path: string): void;
+    /**
+     * Sets the clips native module path and registers the recording event handler.
+     * @param path module path.
+     */
+    setClipsModulePath(path: string): void;
+    /**
+     * Configures clips performance monitoring.
+     * @returns promise resolving to monitoring state, rejects with "unsupported" if unavailable.
+     */
+    setClipsPerfMonitoring(...args: unknown[]): Promise<{ enabled: boolean; }>;
     /**
      * Sets clips quality settings.
-     * @param resolution resolution height.
+     * @param width resolution width.
+     * @param height resolution height.
      * @param frameRate frame rate.
-     * @param hdr whether HDR is enabled.
+     * @param bitratePercent bitrate percentage.
      * @returns true if settings were applied.
      */
-    setClipsQualitySettings(resolution: number, frameRate: number, hdr: boolean): boolean;
+    setClipsQualitySettings(width: number, height: number, frameRate: number, bitratePercent: number): boolean;
+    /**
+     * Enables or disables clips recording.
+     * @param enabled whether to enable.
+     */
+    setClipsRecordingEnabled(enabled: boolean): void;
+    /**
+     * Configures Sentry for the clips module.
+     * @param release release identifier.
+     * @param dir Sentry data directory.
+     * @param environment release channel.
+     */
+    setClipsSentryConfig(release: string, dir: string, environment: string): void;
     /**
      * Sets or clears the clips source.
      * @param source source config or null to clear.
      */
     setClipsSource(source: ClipsSource | null): void;
+    /**
+     * Sets whether the clips UI is active.
+     * @param active whether active.
+     */
+    setClipsUIActive(active: boolean): void;
+    /**
+     * Enables or disables the clips v3 ML pipeline.
+     * @param enabled whether to enable.
+     */
+    setClipsV3MLEnabled(enabled: boolean): void;
     /**
      * Enables or disables debug logging.
      * @param enabled whether to enable.
@@ -1854,16 +1972,6 @@ export interface MediaEngine {
      * @param context context to apply to, defaults to "default".
      */
     setGoLiveSource(source: GoLiveSource | null, context?: MediaEngineContextType): void;
-    /**
-     * Enables or disables H264 codec.
-     * @param enabled whether to enable.
-     */
-    setH264Enabled(enabled: boolean): void;
-    /**
-     * Enables or disables H265 codec.
-     * @param enabled whether to enable.
-     */
-    setH265Enabled(enabled: boolean): void;
     /**
      * Sets whether device has fullband performance.
      * @param has whether it has fullband performance.
@@ -1886,15 +1994,15 @@ export interface MediaEngine {
      */
     setMaxSyncDelayOverride(delay: number): void;
     /**
-     * Sets maybe preprocess mute state.
-     * @param mute whether to mute.
-     */
-    setMaybePreprocessMute(mute: boolean): void;
-    /**
      * Sets native desktop video source picker active state.
      * @param active whether picker is active.
      */
     setNativeDesktopVideoSourcePickerActive(active: boolean): void;
+    /**
+     * Sets noise cancellation models.
+     * @param models model config.
+     */
+    setNcModels(models: unknown): void;
     /**
      * Enables or disables noise cancellation stats.
      * @param enabled whether to enable.
@@ -1937,6 +2045,16 @@ export interface MediaEngine {
      * @param deviceId device identifier.
      */
     setVideoInputDevice(deviceId: string): Promise<void>;
+    /**
+     * Caps the voice channel count.
+     * @param count max channel count, 0 for no cap.
+     */
+    setVoiceChannelCountCap(count: number): void;
+    /**
+     * Caps the voice sample rate.
+     * @param rate max sample rate in Hz, 0 for no cap.
+     */
+    setVoiceSampleRateCap(rate: number): void;
 
     /**
      * Checks if a connection should broadcast video.
@@ -1989,6 +2107,17 @@ export interface MediaEngine {
      * @param metadata new metadata.
      */
     updateClipMetadata(clipId: string, metadata: ClipMetadata): Promise<void>;
+    /**
+     * Updates a WebRTC field trial.
+     * @param name field trial name.
+     * @param value field trial value.
+     */
+    updateFieldTrial(name: string, value: string): void;
+    /**
+     * Starts watching a device for hardware mute changes.
+     * @param deviceId device identifier.
+     */
+    watchDeviceHardwareMutedChange(deviceId: string): void;
     /** ticks the watchdog timer. */
     watchdogTick(): void;
     /**
@@ -2123,6 +2252,28 @@ export interface Shortcut {
 }
 
 /**
+ * Spatial audio mixer settings.
+ */
+export interface AudioMixerSettings {
+    enabled: boolean;
+    spatialBlend: number;
+    reflectionsEnabled: boolean;
+    roomSize: number;
+    distanceAttenuationEnabled: boolean;
+    mode: string;
+    spread: number;
+    arcAngle: number;
+    gridColumns: number;
+    gridSpacing: number;
+    buckets: number;
+    listenerHeight: number;
+    distance: number;
+}
+
+/** 0 unknown, 1 active, 2 mono output, 3 init failed, 4 HRTF failed. */
+export type SpatialAudioStatus = 0 | 1 | 2 | 3 | 4;
+
+/**
  * Flux store managing audio/video settings, devices, and the media engine.
  * Handles voice activity detection, noise cancellation, device selection,
  * and go live streaming configuration.
@@ -2135,16 +2286,6 @@ export class MediaEngineStore extends FluxStore {
      * @returns current input profile.
      */
     getActiveInputProfile(): InputProfile;
-    /**
-     * Gets the active voice filter id.
-     * @returns voice filter id or null if none active.
-     */
-    getActiveVoiceFilter(): string | null;
-    /**
-     * Gets when the active voice filter was applied.
-     * @returns application date or null if none active.
-     */
-    getActiveVoiceFilterAppliedAt(): Date | null;
     /**
      * Gets whether AEC dump is enabled.
      * @returns true if enabled.
@@ -2165,6 +2306,11 @@ export class MediaEngineStore extends FluxStore {
      * @returns attenuation 0-100, default 0.
      */
     getAttenuation(): number;
+    /**
+     * Gets spatial audio mixer settings.
+     * @returns mixer settings.
+     */
+    getAudioMixerSettings(): AudioMixerSettings;
     /**
      * Gets the current audio subsystem.
      * @returns active audio subsystem.
@@ -2201,11 +2347,6 @@ export class MediaEngineStore extends FluxStore {
      */
     getEnableSilenceWarning(): boolean;
     /**
-     * Gets whether user has ever spoken while muted.
-     * @returns true if has spoken while muted.
-     */
-    getEverSpeakingWhileMuted(): boolean;
-    /**
      * Gets whether experimental soundshare is enabled.
      * @returns true if enabled.
      */
@@ -2241,10 +2382,30 @@ export class MediaEngineStore extends FluxStore {
      */
     getInputDetected(): boolean | null;
     /**
+     * Gets whether input was detected during the current connection.
+     * @returns true if detected.
+     */
+    getInputDetectedThisConnection(): boolean;
+    /**
+     * Gets whether the input device is muted in hardware.
+     * @returns true if muted, undefined if unknown.
+     */
+    getInputDeviceHardwareMuted(): boolean | undefined;
+    /**
      * Gets the selected audio input device id.
      * @returns device id.
      */
     getInputDeviceId(): string;
+    /**
+     * Gets whether the input device is muted by the OS.
+     * @returns true if muted, undefined if unknown.
+     */
+    getInputDeviceOSMuted(): boolean | undefined;
+    /**
+     * Gets the OS volume of the input device.
+     * @returns volume, undefined if unknown.
+     */
+    getInputDeviceOSVolume(): number | undefined;
     /**
      * Gets available audio input devices.
      * @returns devices keyed by device id.
@@ -2285,6 +2446,11 @@ export class MediaEngineStore extends FluxStore {
      * @returns timestamp in milliseconds.
      */
     getLastAudioInputDeviceChangeTimestamp(): number;
+    /**
+     * Gets when input detection state last changed.
+     * @returns timestamp in milliseconds.
+     */
+    getLastInputDetectedUpdateTime(): number;
     /**
      * Gets the stereo pan for a user.
      * @param userId user to get pan for.
@@ -2334,11 +2500,6 @@ export class MediaEngineStore extends FluxStore {
      */
     getModeOptions(context?: MediaEngineContextType): ModeOptions;
     /**
-     * Gets the most recently requested voice filter.
-     * @returns voice filter id or null if none.
-     */
-    getMostRecentlyRequestedVoiceFilter(): string | null;
-    /**
      * Gets whether no input detected notice is shown.
      * @returns true if shown.
      */
@@ -2353,6 +2514,11 @@ export class MediaEngineStore extends FluxStore {
      * @returns true if enabled.
      */
     getNoiseSuppression(): boolean;
+    /**
+     * Gets whether OpenH264 is enabled, only on Linux.
+     * @returns true if enabled.
+     */
+    getOpenH264Enabled(): boolean;
     /**
      * Gets the selected audio output device id.
      * @returns device id.
@@ -2373,16 +2539,6 @@ export class MediaEngineStore extends FluxStore {
      * @returns delay in milliseconds.
      */
     getPacketDelay(): number;
-    /**
-     * Gets the previous voice filter.
-     * @returns voice filter id or null if none.
-     */
-    getPreviousVoiceFilter(): string | null;
-    /**
-     * Gets when the previous voice filter was applied.
-     * @returns application date or null if none.
-     */
-    getPreviousVoiceFilterAppliedAt(): Date | null;
     /**
      * Gets whether QoS is enabled.
      * @returns true if enabled.
@@ -2409,6 +2565,11 @@ export class MediaEngineStore extends FluxStore {
      * @returns strength 0-100, default 50.
      */
     getSidechainCompressionStrength(): number;
+    /**
+     * Gets the spatial audio status reported by the engine.
+     * @returns spatial audio status.
+     */
+    getSpatialAudioStatus(): SpatialAudioStatus;
     /**
      * Gets whether currently speaking while muted.
      * @returns true if speaking while muted.
@@ -2460,6 +2621,13 @@ export class MediaEngineStore extends FluxStore {
      */
     getVideoDevices(): { [deviceId: string]: VideoDevice; };
     /**
+     * Builds the video encoder experiment flags.
+     * @param context media engine context.
+     * @param role "streamer" when encoding own stream.
+     * @returns comma separated experiment flags.
+     */
+    getVideoEncoderExperiments(context: MediaEngineContextType, role?: string): string;
+    /**
      * Gets whether video hook is enabled.
      * @returns true if enabled.
      */
@@ -2477,18 +2645,6 @@ export class MediaEngineStore extends FluxStore {
      * @returns toggle state, NONE if not in map.
      */
     getVideoToggleState(userId: string, context?: MediaEngineContextType): VideoToggleState;
-    /**
-     * Gets whether voice filter playback is enabled.
-     * @returns true if enabled.
-     */
-    getVoiceFilterPlaybackEnabled(): boolean;
-
-    /**
-     * Gets whether go live simulcast is enabled.
-     * @returns true if enabled.
-     */
-    goLiveSimulcastEnabled(): boolean;
-
     /**
      * Checks if there is an active CallKit call.
      * @returns true if active.
@@ -2510,7 +2666,11 @@ export class MediaEngineStore extends FluxStore {
      * @returns true if available.
      */
     hasH265HardwareDecode(): boolean;
-
+    /**
+     * Checks if any video input device is available.
+     * @returns true if available.
+     */
+    hasVideoDevice(): boolean;
     /**
      * Checks if advanced voice activity is supported.
      * @returns true if supported.
@@ -2533,26 +2693,41 @@ export class MediaEngineStore extends FluxStore {
      */
     isAutomaticGainControlSupported(): boolean;
     /**
+     * Checks if clips recording is ready.
+     * @returns true if ready.
+     */
+    isClipsRecordingReady(): boolean;
+    /**
+     * Checks if the engine emits clips recording ready events.
+     * @returns true if supported.
+     */
+    isClipsRecordingReadySignalSupported(): boolean;
+    /**
      * Checks if self is deafened.
      * @returns true if deafened.
      */
     isDeaf(): boolean;
-    /**
-     * Checks if hardware mute notice is enabled.
-     * @returns true if enabled.
-     */
-    isEnableHardwareMuteNotice(): boolean;
     /**
      * Checks if media engine is enabled.
      * @returns true if enabled.
      */
     isEnabled(): boolean;
     /**
+     * Checks if Media Foundation H264 decoding is available.
+     * @returns true if available.
+     */
+    isH264MfDecodeAvailable(): boolean;
+    /**
      * Checks if hardware mute is active.
      * @param context settings context, defaults to "default".
      * @returns true if hardware muted.
      */
     isHardwareMute(context?: MediaEngineContextType): boolean;
+    /**
+     * Checks if hardware mute notice is enabled.
+     * @returns true if enabled.
+     */
+    isHardwareMuteNoticeEnabled(): boolean;
     /**
      * Checks if input profile is custom.
      * @returns true if custom.
@@ -2639,6 +2814,16 @@ export class MediaEngineStore extends FluxStore {
      */
     isSelfMutedTemporarily(context?: MediaEngineContextType): boolean;
     /**
+     * Checks if self is server deafened.
+     * @returns true if server deafened.
+     */
+    isServerDeaf(): boolean;
+    /**
+     * Checks if self is server muted.
+     * @returns true if server muted.
+     */
+    isServerMute(): boolean;
+    /**
      * Checks if simulcast is supported.
      * @returns true if supported.
      */
@@ -2649,6 +2834,16 @@ export class MediaEngineStore extends FluxStore {
      * @returns true if sharing.
      */
     isSoundSharing(context?: MediaEngineContextType): boolean;
+    /**
+     * Checks if spatial audio is enabled in mixer settings.
+     * @returns true if enabled.
+     */
+    isSpatialAudioEnabled(): boolean;
+    /**
+     * Checks if spatial audio was requested.
+     * @returns true if requested.
+     */
+    isSpatialAudioRequested(): boolean;
     /**
      * Checks if media engine is supported.
      * @returns true if supported.
@@ -2664,7 +2859,6 @@ export class MediaEngineStore extends FluxStore {
      * @returns true if enabled.
      */
     isVideoEnabled(): boolean;
-
     /** notifies that mute/unmute sound was skipped. */
     notifyMuteUnmuteSoundWasSkipped(): void;
     /**
@@ -2693,10 +2887,8 @@ export class MediaEngineStore extends FluxStore {
      * @returns true if should show.
      */
     showBypassSystemInputProcessing(): boolean;
-
     /** starts preloading DAVE encryption. */
     startDavePreload(): void;
-
     /**
      * Checks if a feature is supported.
      * @param feature feature to check.
