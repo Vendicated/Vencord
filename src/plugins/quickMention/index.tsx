@@ -41,6 +41,7 @@ export default definePlugin({
     name: "QuickMention",
     authors: [Devs.kemo],
     description: "Adds a quick mention button to the message actions bar",
+    tags: ["Chat", "Shortcuts"],
 
     messagePopoverButton: {
         icon: Icon,
@@ -51,8 +52,6 @@ export default definePlugin({
             return {
                 label: "Quick Mention",
                 icon: Icon,
-                message: msg,
-                channel,
                 onClick: () => insertTextIntoChatInputBox(`<@${msg.author.id}> `)
             };
         }

@@ -17,14 +17,13 @@
 */
 
 import type { MessageObject } from "@api/MessageEvents";
-import type { Channel, CloudUpload, Guild, GuildFeatures, Message, User } from "@vencord/discord-types";
-import { ChannelActionCreators, ChannelStore, ComponentDispatch, Constants, FluxDispatcher, GuildStore, i18n, IconUtils, InviteActions, MessageActions, RestAPI, SelectedChannelStore, SelectedGuildStore, Toasts, UserProfileActions, UserProfileStore, UserSettingsActionCreators, UserUtils } from "@webpack/common";
+import type { Channel, CloudUpload, ConfirmModalProps, Guild, GuildFeatures, MediaModalItem, MediaModalProps, Message, User } from "@vencord/discord-types";
+import { ChannelActionCreators, ChannelStore, ComponentDispatch, ConfirmModal, Constants, FluxDispatcher, GuildStore, i18n, InviteActions, MessageActions, openMediaModal, openModal, openUserProfileModal, RestAPI, SelectedChannelStore, SelectedGuildStore, showToast, UserProfileStore, UserSettingsActionCreators, UserUtils } from "@webpack/common";
 import { Except } from "type-fest";
 
 import { copyToClipboard } from "./clipboard";
 import { runtimeHashMessageKey } from "./intlHash";
 import { Logger } from "./Logger";
-import { MediaModalItem, MediaModalProps, openMediaModal } from "./modal";
 
 const IntlManagerLogger = new Logger("IntlManager");
 
@@ -117,11 +116,7 @@ export function insertTextIntoChatInputBox(text: string) {
 
 export async function copyWithToast(text: string, toastMessage = "Copied to clipboard!") {
     await copyToClipboard(text);
-    Toasts.show({
-        message: toastMessage,
-        id: Toasts.genId(),
-        type: Toasts.Type.SUCCESS
-    });
+    showToast({ text: toastMessage, variant: "success" });
 }
 
 interface MessageOptions {
@@ -183,14 +178,14 @@ export async function openUserProfile(id: string) {
     if (!user) throw new Error("No such user: " + id);
 
     const guildId = SelectedGuildStore.getGuildId();
-    UserProfileActions.openUserProfileModal({
+    openUserProfileModal({
         userId: id,
         guildId,
         channelId: SelectedChannelStore.getChannelId(),
-        analyticsLocation: {
-            page: guildId ? "Guild Channel" : "DM Channel",
-            section: "Profile Popout"
-        }
+        sourceAnalyticsLocations: [
+            "username",
+            "user profile popout",
+        ]
     });
 }
 
@@ -236,17 +231,6 @@ export function getUniqueUsername(user: User) {
     return user.discriminator === "0" ? user.username : user.tag;
 }
 
-/**
- *  Get the URL for an emoji. This function always returns a gif URL for animated emojis, instead of webp
- * @param id The emoji id
- * @param animated Whether the emoji is animated
- * @param size The size for the emoji
- */
-export function getEmojiURL(id: string, animated: boolean, size: number) {
-    const url = IconUtils.getEmojiURL({ id, animated, size });
-    return animated ? url.replace(".webp", ".gif") : url;
-}
-
 // Discord has a similar function in their code
 export function getGuildAcronym(guild: Guild): string {
     return guild.name
@@ -257,4 +241,35 @@ export function getGuildAcronym(guild: Guild): string {
 
 export function hasGuildFeature(guild: Guild, feature: GuildFeatures): boolean {
     return guild.features?.has(feature) ?? false;
+}
+
+export type ConfirmOptions = Pick<ConfirmModalProps, "title" | "subtitle" | "confirmText" | "cancelText" | "variant" | "onConfirm" | "onCancel" | "onCloseCallback">;
+
+export async function confirmAction({ variant, confirmText, title, cancelText, subtitle, onConfirm, onCancel, onCloseCallback }: ConfirmOptions) {
+    return new Promise<boolean>((res, rej) => {
+        const wrap = (fn: Function | undefined, value: boolean) => async (...args: any[]): Promise<void> => {
+            try {
+                await fn?.(...args);
+                res(value);
+            } catch (e) {
+                rej(e);
+            }
+        };
+
+        openModal(modalProps => {
+            return (
+                <ConfirmModal
+                    {...modalProps}
+                    variant={variant}
+                    confirmText={confirmText}
+                    cancelText={cancelText}
+                    title={title}
+                    subtitle={subtitle}
+                    onConfirm={wrap(onConfirm, true)}
+                    onCancel={wrap(onCancel, false)}
+                    onCloseCallback={wrap(onCloseCallback, false)}
+                />
+            );
+        });
+    });
 }

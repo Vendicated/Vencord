@@ -22,11 +22,11 @@ import definePlugin from "@utils/types";
 export default definePlugin({
     name: "BetterGifAltText",
     authors: [Devs.Ven],
-    description:
-        "Change GIF alt text from simply being 'GIF' to containing the gif tags / filename",
+    description: "Change GIF alt text from simply being 'GIF' to containing the gif tags / filename",
+    tags: ["Media", "Accessibility", "Customisation"],
     patches: [
         {
-            find: '"onCloseImage",',
+            find: ".modalContext})};",
             replacement: {
                 match: /(return.{0,10}\.jsx.{0,50}isWindowFocused)/,
                 replace:
@@ -45,6 +45,8 @@ export default definePlugin({
     ],
 
     altify(props: any) {
+        if (props.contentType && props.contentType !== "image/gif") return props.alt;
+
         props.alt ??= "GIF";
         if (props.alt !== "GIF") return props.alt;
 

@@ -136,6 +136,8 @@ export default tseslint.config(
             "use-isnan": "error",
             "prefer-const": ["error", { destructuring: "all" }],
             "prefer-spread": "error",
+            // These are old deprecated browser globals which may be used by mistake, e.g. `addEventListener(e => console.log(event))`
+            "no-restricted-globals": ["error", "event", "name"],
 
             // Plugin Rules
             "simple-import-sort/imports": "error",
