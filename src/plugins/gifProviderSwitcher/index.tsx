@@ -11,7 +11,7 @@ import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import { identity } from "@utils/misc";
 import definePlugin, { OptionType } from "@utils/types";
-import { FluxDispatcher, GIFPickerViewStore, LocaleStore, RestAPI, Select } from "@webpack/common";
+import { FluxDispatcher, GIFPickerViewStore, LocaleStore, RestAPI, Select, useEffect } from "@webpack/common";
 
 import * as GiphyProvider from "./giphy";
 import * as TenorProvider from "./tenor";
@@ -162,8 +162,15 @@ export default definePlugin({
         return providers[settings.store.provider!];
     },
 
-    SearchWrapper: ErrorBoundary.wrap(({ Component, placeholder, "aria-label": ariaLabel, ...restProps }) => {
+    SearchWrapper: ErrorBoundary.wrap(({ Component, ...props }) => {
+        let { placeholder, "aria-label": ariaLabel, ref, query, onChange } = props;
+
         const { provider } = settings.use(["provider"]);
+
+        // restProps contains `autoFocus: true`, which should in theory focus the input automatically.
+        // However, for whatever reason it focuses our Select instead, despite that not having autoFocus.
+        // Discord is probably focusing it somewhere else for whatever reason, solved via this effect
+        useEffect(() => ref?.current?.focus(), [ref]);
 
         if (provider !== "klipy") {
             const name = provider![0].toUpperCase() + provider!.slice(1);
@@ -173,12 +180,25 @@ export default definePlugin({
 
         return (
             <div className="vc-tenorGifSearch-wrapper">
-                <Component placeholder={placeholder} aria-label={ariaLabel} {...restProps} />
+                <Component placeholder={placeholder} aria-label={ariaLabel} ref={ref} {...props} />
                 <Select
                     placeholder="Provider"
                     options={settings.def.provider.options}
                     isSelected={v => v === provider}
-                    select={v => settings.store.provider = v}
+                    select={v => {
+                        settings.store.provider = v;
+
+                        if (!query || v === provider) return;
+
+                        // Discord memos it somewhere in a different place.
+                        // It already re-fetches the results internally, but doesn't re-render.
+                        // As a workaround we force a re-render by toggling a space at the start of the query
+                        onChange(
+                            query.startsWith(" ")
+                                ? query.slice(1)
+                                : " " + query
+                        );
+                    }}
                     serialize={identity}
                 />
             </div>

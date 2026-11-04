@@ -1,41 +1,6 @@
 import { Moment } from "moment";
 import type { ComponentClass, ComponentPropsWithRef, ComponentType, CSSProperties, FunctionComponent, HtmlHTMLAttributes, HTMLProps, JSX, KeyboardEvent, MouseEvent, PointerEvent, PropsWithChildren, ReactNode, Ref, RefObject } from "react";
 
-
-// #region Old compability
-
-export type HeadingTag = `h${1 | 2 | 3 | 4 | 5 | 6}`;
-export type Margins = Record<"marginTop16" | "marginTop8" | "marginBottom8" | "marginTop20" | "marginBottom20", string>;
-
-// copy(find(m => Array.isArray(m) && m.includes("heading-sm/normal")).map(JSON.stringify).join("|"))
-export type TextVariant = "heading-sm/normal" | "heading-sm/medium" | "heading-sm/semibold" | "heading-sm/bold" | "heading-sm/extrabold" | "heading-md/normal" | "heading-md/medium" | "heading-md/semibold" | "heading-md/bold" | "heading-md/extrabold" | "heading-lg/normal" | "heading-lg/medium" | "heading-lg/semibold" | "heading-lg/bold" | "heading-lg/extrabold" | "heading-xl/normal" | "heading-xl/medium" | "heading-xl/semibold" | "heading-xl/bold" | "heading-xl/extrabold" | "heading-xxl/normal" | "heading-xxl/medium" | "heading-xxl/semibold" | "heading-xxl/bold" | "heading-xxl/extrabold" | "text-xxs/normal" | "text-xxs/medium" | "text-xxs/semibold" | "text-xxs/bold" | "text-xs/normal" | "text-xs/medium" | "text-xs/semibold" | "text-xs/bold" | "text-sm/normal" | "text-sm/medium" | "text-sm/semibold" | "text-sm/bold" | "text-md/normal" | "text-md/medium" | "text-md/semibold" | "text-md/bold" | "text-lg/normal" | "text-lg/medium" | "text-lg/semibold" | "text-lg/bold";
-
-export type TextProps = PropsWithChildren<HtmlHTMLAttributes<HTMLDivElement> & {
-    variant?: TextVariant;
-    tag?: "div" | "span" | "p" | "strong" | HeadingTag;
-}>;
-
-export type Text = ComponentType<TextProps>;
-
-export interface ButtonProps extends PropsWithChildren<Omit<HTMLProps<HTMLButtonElement>, "size">> {
-    /** Button.Looks.FILLED */
-    look?: string;
-    /** Button.Colors.BRAND */
-    color?: string;
-    /** Button.Sizes.MEDIUM */
-    size?: string;
-
-    className?: string;
-}
-
-export type Button = ComponentType<ButtonProps> & {
-    Colors: Record<"BRAND" | "RED" | "GREEN" | "PRIMARY" | "LINK" | "WHITE" | "TRANSPARENT" | "CUSTOM", string>;
-    Looks: Record<"FILLED" | "LINK", string>;
-    Sizes: Record<"NONE" | "SMALL" | "MEDIUM" | "LARGE" | "XLARGE" | "MIN", string>;
-};
-
-// #endregion
-
 export interface TooltipChildrenProps {
     onClick(): void;
     onMouseEnter(): void;
@@ -72,28 +37,6 @@ export type Tooltip = ComponentType<TooltipProps> & {
 };
 
 export type TooltipPositions = Record<"BOTTOM" | "CENTER" | "LEFT" | "RIGHT" | "TOP" | "WINDOW_CENTER", string>;
-
-export type TooltipContainer = ComponentType<PropsWithChildren<{
-    text: ReactNode;
-    element?: "div" | "span";
-    "aria-label"?: string | false;
-
-    delay?: number;
-    /** Tooltip.Colors.BLACK */
-    color?: string;
-    /** TooltipPositions.TOP */
-    position?: PopoutPosition;
-    spacing?: number;
-
-    className?: string;
-    tooltipClassName?: string | null;
-    tooltipContentClassName?: string | null;
-
-    allowOverflow?: boolean;
-    forceOpen?: boolean;
-    hideOnClick?: boolean;
-    disableTooltipPointerEvents?: boolean;
-}>>;
 
 export type Card = ComponentType<PropsWithChildren<HTMLProps<HTMLDivElement> & {
     editable?: boolean;

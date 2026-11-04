@@ -4,10 +4,9 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { addPatch } from "@api/PluginManager";
 import { Logger } from "@utils/Logger";
 import * as Webpack from "@webpack";
-import { getBuildNumber, patches, patchTimings } from "@webpack/patcher";
+import { getBuildNumber, patches } from "@webpack/patcher";
 
 import { loadLazyChunks } from "./loadLazyChunks";
 
@@ -19,21 +18,20 @@ async function runReporter() {
 
         const { promise: loadLazyChunksDone, resolve: loadLazyChunksDoneResolve } = Promise.withResolvers<void>();
 
-        // The main patch for starting the reporter chunk loading
-        addPatch({
-            find: '"Could not find app-mount"',
-            replacement: {
-                match: /"Could not find app-mount"/,
-                replace: "(Vencord.Webpack._initReporter(),$&)"
-            }
-        }, "Vencord Reporter");
+        function startLoadingChunks() {
+            Webpack.factoryListeners.delete(startLoadingChunks);
 
-        // initReporter is called in the patched entry point of Discord
-        // @ts-expect-error
-        Vencord.Webpack._initReporter = function () {
-            loadLazyChunks().then(loadLazyChunksDoneResolve);
-        };
+            // Factory listeners are first called as soon as WebpackRequire is initialized, while the Webpack runtime is still being set up.
+            // Things like wreq.u, wreq.e and wreq.f are only defined later in the same task, so wait for it to finish
+            setTimeout(() => {
+                // Stylesheets are not needed for testing, so skip loading them for every chunk
+                Webpack.wreq.f.css = () => { };
 
+                loadLazyChunks().then(loadLazyChunksDoneResolve);
+            }, 0);
+        }
+
+        Webpack.factoryListeners.add(startLoadingChunks);
         await loadLazyChunksDone;
 
         // Manually require all modules to make sure all lazily required modules are patched
@@ -56,11 +54,12 @@ async function runReporter() {
             }
         }
 
-        for (const [plugin, moduleId, match, totalTime] of patchTimings) {
-            if (totalTime > 10) {
-                new Logger("WebpackPatcher").warn(`Patch by ${plugin} took ${Math.round(totalTime * 100) / 100}ms (Module id is ${String(moduleId)}): ${match}`);
-            }
-        }
+        // Slow patches reporting is disabled for now since it is too noisy
+        // for (const [plugin, moduleId, match, totalTime] of patchTimings) {
+        //     if (totalTime > 10) {
+        //         new Logger("WebpackPatcher").warn(`Patch by ${plugin} took ${Math.round(totalTime * 100) / 100}ms (Module id is ${String(moduleId)}): ${match}`);
+        //     }
+        // }
 
         for (const [searchType, args] of Webpack.lazyWebpackSearchHistory) {
             let method = searchType;
