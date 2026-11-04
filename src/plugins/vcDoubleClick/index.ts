@@ -70,9 +70,9 @@ export default definePlugin({
     ],
 
     shouldRunOnClick(e: MouseEvent, { channelId }) {
+        if (settings.store.openOnSingleClick) return true;
         const channel = ChannelStore.getChannel(channelId);
         if (!channel || ![2, 13].includes(channel.type)) return true;
-        if (e.detail === 1) this.openChannel(channel);
         return e.detail >= 2;
     },
 
