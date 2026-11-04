@@ -70,11 +70,13 @@ const patchMessageContextMenu: NavContextMenuPatchCallback = (children, { messag
 
     if (!deleted && !editHistory?.length) return;
 
-    for (const id of buttonsToRemove) {
-        const group = findGroupChildrenByChildId(id, children);
-        if (group) {
-            const index = group.findIndex(c => c?.props?.id === id);
-            group.splice(index, 1);
+    if (deleted) {
+        for (const id of buttonsToRemove) {
+            const group = findGroupChildrenByChildId(id, children);
+            if (group) {
+                const index = group.findIndex(c => c?.props?.id === id);
+                group.splice(index, 1);
+            }
         }
     }
 
