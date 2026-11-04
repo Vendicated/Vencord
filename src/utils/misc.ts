@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Clipboard, ToastData, Toasts } from "@webpack/common";
+import { Clipboard, Toasts } from "@webpack/common";
 
 import { DevsById } from "./constants";
 
@@ -36,19 +36,15 @@ export function sleep(ms: number): Promise<void> {
 }
 
 export function copyWithToast(text: string, toastMessage = "Copied to clipboard!") {
-    const opts: Pick<ToastData, "type" | "message"> = {
-        message: toastMessage,
-        type: Toasts.Type.SUCCESS
-    };
     if (Clipboard.SUPPORTS_COPY) {
         Clipboard.copy(text);
     } else {
-        opts.message = "Your browser does not support copying to clipboard";
-        opts.type = Toasts.Type.FAILURE;
+        toastMessage = "Your browser does not support copying to clipboard";
     }
     Toasts.show({
+        message: toastMessage,
         id: Toasts.genId(),
-        ...opts
+        type: Toasts.Type.SUCCESS
     });
 }
 
