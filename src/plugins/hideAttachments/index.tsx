@@ -27,7 +27,6 @@ import { classes } from "@utils/misc";
 import definePlugin from "@utils/types";
 import { Message } from "@vencord/discord-types";
 import { ChannelStore } from "@webpack/common";
-import { ReactNode } from "react";
 
 const KEY = "HideAttachments_HiddenIds";
 
@@ -91,16 +90,11 @@ export default definePlugin({
         },
     },
 
-    renderMediaHidden(message: Message, reactions: ReactNode) {
-        if (!this.shouldHide(message.id)) return reactions;
-
+    renderMediaHidden(message: Message) {
         return (
-            <>
-                <span className={classes("vc-hideAttachments-accessory", !message.content && "vc-hideAttachments-no-content")}>
-                    Media Hidden
-                </span>
-                {reactions}
-            </>
+            <span className={classes("vc-hideAttachments-accessory", !message.content && "vc-hideAttachments-no-content")}>
+                Media Hidden
+            </span>
         );
     },
 
