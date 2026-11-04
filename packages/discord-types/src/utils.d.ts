@@ -107,7 +107,7 @@ interface RestRequestData {
     retries?: number;
 }
 
-export type RestAPI = Record<"del" | "get" | "patch" | "post" | "put", (data: RestRequestData) => Promise<any>>;
+export type RestAPI = Record<"del" | "get" | "patch" | "post" | "put", (data: RestRequestData | string) => Promise<any>>;
 
 export type Permissions = "CREATE_INSTANT_INVITE"
     | "KICK_MEMBERS"
@@ -163,10 +163,6 @@ export type Permissions = "CREATE_INSTANT_INVITE"
     | "CREATE_EVENTS";
 
 export type PermissionsBits = Record<Permissions, bigint>;
-
-export interface MessageSnapshot {
-    message: Message;
-}
 
 export interface Locale {
     name: string;
@@ -244,7 +240,10 @@ export interface IconUtils {
 }
 
 export interface Constants {
-    Endpoints: Record<string, any>;
+    // hack: static endpoints with no arguments are strings, ones with arguments are functions returning strings
+    // We just type them as both at once, it's up to the caller to use them correctly.
+    // Otherwise callers have to cast the endpoint to the correct type manually or we have to individually type each endpoint
+    Endpoints: Record<string, string & ((...args: string[]) => string)>;
     UserFlags: Record<string, number>;
     FriendsSections: Record<string, string>;
 }
@@ -255,16 +254,17 @@ export interface ExpressionPickerStoreState extends Record<PropertyKey, any> {
     activeView: ActiveView | null;
     lastActiveView: ActiveView | null;
     activeViewType: any | null;
+    activeChannelId: string | null;
     searchQuery: string;
     isSearchSuggestion: boolean,
     pickerId: string;
 }
 
 export interface ExpressionPickerStore {
-    openExpressionPicker(activeView: ActiveView, activeViewType?: any): void;
-    closeExpressionPicker(activeViewType?: any): void;
-    toggleMultiExpressionPicker(activeViewType?: any): void;
-    toggleExpressionPicker(activeView: ActiveView, activeViewType?: any): void;
+    openExpressionPicker(activeView: ActiveView, activeViewType?: any, channelId?: string): void;
+    closeExpressionPicker(activeViewType?: any, channelId?: string): void;
+    toggleMultiExpressionPicker(activeViewType?: any, channelId?: string): void;
+    toggleExpressionPicker(activeView: ActiveView, activeViewType?: any, channelId?: string): void;
     setExpressionPickerView(activeView: ActiveView): void;
     setSearchQuery(searchQuery: string, isSearchSuggestion?: boolean): void;
     useExpressionPickerStore(): ExpressionPickerStoreState;
@@ -414,3 +414,46 @@ export interface EmojiUtils {
     triggerFullscreenAnimation(emoji: any, node: HTMLElement): void;
     applyPlatformToThemedEmojiColorPalette(colors: any): any;
 }
+
+export interface OpenUserSettingsOptions {
+    /**
+     * a *sub*section of settings to navigate to
+     *
+     * to navigate to a top-level section, use the navigationTarget parameter of {@link SettingsRouter.openUserSettings} instead
+     *
+     * discord has an enum with all the possible values (go dig in the {@link SettingsRouter.openUserSettings} source)
+     */
+    path?: string;
+    /**
+     * modal stacking behavior, defaults to "replaceAll"
+     */
+    stackingBehavior?: "replaceAll" | "stack" | "replace";
+    // ... misc analytics options
+}
+
+export interface SettingsRouter {
+    openUserSettings(navigationTarget?: string, opts?: OpenUserSettingsOptions, onOpen?: () => void): Promise<void>;
+}
+
+export interface OpenUserProfileModalOptions {
+    userId: string;
+    guildId?: string | null;
+    originGuildId?: string | null;
+    channelId?: string | null;
+    messageId?: string | null;
+    roleId?: string | null;
+    sessionId?: unknown | null;
+    joinRequestId?: unknown;
+    tabSection?: unknown;
+    scrollTarget?: unknown;
+    hideRestrictedProfile?: boolean;
+    sourceAnalyticsLocations?: string[];
+    appContext?: unknown;
+    /**
+     * defaults to null
+     */
+    customStatusPrompt?: unknown;
+    onModalOpen?: unknown;
+}
+
+export type OpenUserProfileModal = (opts: OpenUserProfileModalOptions) => Promise<void>;

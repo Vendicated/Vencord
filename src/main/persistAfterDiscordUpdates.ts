@@ -17,6 +17,7 @@
 */
 
 import { app } from "electron";
+import EventEmitter from "events";
 import { copyFileSync, existsSync, readdirSync, renameSync } from "original-fs";
 import { basename, dirname, join } from "path";
 
@@ -54,7 +55,7 @@ function patchLatest() {
         const newAppAsar = join(resources, "app.asar");
         const newAppAsarBackup = join(resources, "_app.asar");
 
-        if (!existsSync(oldVencordAsar) || !existsSync(newAppAsar)) return;
+        if (!existsSync(oldVencordAsar) || !existsSync(newAppAsar) || existsSync(newAppAsarBackup)) return;
 
         console.info(`[Vencord] Detected Host Update (${currentVersion} -> ${latestVersion}). Repatching...`);
 
@@ -65,6 +66,18 @@ function patchLatest() {
     }
 }
 
-// Try to patch latest on before-quit
-// Discord's Win32 updater will call app.quit() on restart and open new version on will-quit
-app.on("before-quit", patchLatest);
+if (process.platform === "win32" || process.platform === "linux") {
+    EventEmitter.prototype.emit = new Proxy(EventEmitter.prototype.emit, {
+        apply(target, thisArg, argArray) {
+            if (argArray[0] === "host-updated") {
+                patchLatest();
+            }
+
+            return Reflect.apply(target, thisArg, argArray);
+        },
+    });
+
+    // Try to patch latest on before-quit
+    // Discord's Win32 updater will call app.quit() on restart and open new version on will-quit
+    app.on("before-quit", patchLatest);
+}
