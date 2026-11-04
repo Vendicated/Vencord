@@ -58,11 +58,13 @@ function ReplyTimestamp({
 export default definePlugin({
     name: "ReplyTimestamp",
     description: "Shows a timestamp on replied-message previews",
+    tags: ["Chat", "Appearance"],
     authors: [Devs.Kyuuhachi],
 
     patches: [
         {
-            find: "#{intl::REPLY_QUOTE_MESSAGE_BLOCKED}",
+            // Same find as in ValidReply
+            find: "#{intl::REPLY_QUOTE_MESSAGE_NOT_LOADED}",
             replacement: {
                 match: /\.onClickReply,.+?}\),(?=\i,\i,\i\])/,
                 replace: "$&$self.ReplyTimestamp(arguments[0]),"

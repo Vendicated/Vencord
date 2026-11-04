@@ -9,9 +9,16 @@ export interface FriendInvite extends Invite {
     revoked?: boolean;
 }
 
+export interface InstantInviteTarget {
+    targetType?: number;
+    targetUserId?: string;
+    targetApplicationId?: string;
+}
+
 export class InstantInviteStore extends FluxStore {
-    getInvite(channelId: string): Invite;
+    getInvite(channelId: string, target?: InstantInviteTarget): Invite | undefined;
     getFriendInvite(): FriendInvite | null;
     getFriendInvitesFetching(): boolean;
     canRevokeFriendInvite(): boolean;
+    getReceivedInstallationIdForInviteCode(inviteCode: string): string | undefined;
 }

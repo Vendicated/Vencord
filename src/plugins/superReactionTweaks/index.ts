@@ -37,6 +37,7 @@ export const settings = definePluginSettings({
 export default definePlugin({
     name: "SuperReactionTweaks",
     description: "Customize the limit of Super Reactions playing at once, and super react by default",
+    tags: ["Reactions", "Emotes"],
     authors: [Devs.FieryFlames, Devs.ant0n],
     patches: [
         {
@@ -44,27 +45,16 @@ export default definePlugin({
             replacement: [
                 {
                     // if (inlinedCalculatePlayingCount(a,b) >= limit) return;
-                    match: /(BURST_REACTION_EFFECT_PLAY:\i=>{.+?if\()(\(\(\i,\i\)=>.+?\(\i,\i\))>=5+?(?=\))/,
+                    match: /(BURST_REACTION_EFFECT_PLAY:(?:\i=>|function\(\i\)){.+?if\()(\(?(?:function)?\(\i,\i\)(?:=>)?{.+?\(\i,\i\))>=5+?(?=\))/,
                     replace: (_, rest, playingCount) => `${rest}!$self.shouldPlayBurstReaction(${playingCount})`
-                },
-                // FIXME(Bundler agressive inline): Remove the non used compability once enough time has passed
-                {
-                    /*
-                     * var limit = 5
-                     * ...
-                     * if (calculatePlayingCount(a,b) >= limit) return;
-                     */
-                    match: /((\i)=5.+?)if\((.{0,20}?)>=\2\)return;/,
-                    replace: (_, rest, playingCount) => `${rest}if(!$self.shouldPlayBurstReaction(${playingCount}))return;`,
-                    noWarn: true
                 }
             ]
         },
         {
             find: ".EMOJI_PICKER_CONSTANTS_EMOJI_CONTAINER_PADDING_HORIZONTAL)",
             replacement: {
-                match: /(openPopoutType:void 0(?=.+?isBurstReaction:(\i).+?(\i===\i\.\i.REACTION)).+?\[\2,\i\]=\i\.useState\().+?\)/,
-                replace: (_, rest, _isBurstReactionVariable, isReactionIntention) => `${rest}$self.shouldSuperReactByDefault&&${isReactionIntention})`
+                match: /(openPopoutType:void 0(?=.+?isBurstReaction:(\i).+?\.intention===(\i\.\i\.REACTION)).+?\[\2,\i\]=\i\.useState\()!1\)(?<=pickerIntention:(\i).+?)/,
+                replace: (_, rest, _isBurstReactionVariable, REACTION_INTENTION, pickerIntention) => `${rest}$self.shouldSuperReactByDefault&&${pickerIntention}===${REACTION_INTENTION})`
             }
         }
     ],

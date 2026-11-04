@@ -50,6 +50,7 @@ const settings = definePluginSettings({
 export default definePlugin({
     name: "USRBG",
     description: "Displays user banners from USRBG, allowing anyone to get a banner without Nitro",
+    tags: ["Appearance", "Customisation"],
     authors: [Devs.AutumnVN, Devs.katlyn, Devs.pylix, Devs.TheKodeToad],
     settings,
     patches: [
@@ -66,13 +67,13 @@ export default definePlugin({
             predicate: () => settings.store.voiceBackground,
             replacement: [
                 {
-                    match: /(?<=function\((\i),\i\)\{)(?=let.{20,40},style:)/,
+                    match: /(?<=function \i\((\i)\)\{)(?=let.{20,40},style:)/,
                     replace: "$1.style=$self.getVoiceBackgroundStyles($1);"
                 }
             ]
         },
         {
-            find: '"VideoBackground-web"',
+            find: ".VIDEO_TILE_BACKGROUND,primaryColor:",
             predicate: () => settings.store.voiceBackground,
             replacement: {
                 match: /backgroundColor:.{0,25},\{style:(?=\i\?)/,

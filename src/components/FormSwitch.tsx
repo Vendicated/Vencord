@@ -7,7 +7,7 @@
 import "./FormSwitch.css";
 
 import { classes } from "@utils/misc";
-import type { PropsWithChildren, ReactNode } from "react";
+import type { ReactNode } from "react";
 
 import { Divider } from "./Divider";
 import { Span } from "./Span";
@@ -30,7 +30,7 @@ export function FormSwitch({ onChange, title, value, description, disabled, clas
             <div className={classes("vc-form-switch", className, disabled && "vc-form-switch-disabled")}>
                 <div className={"vc-form-switch-text"}>
                     <Span size="md" weight="medium">{title}</Span>
-                    {description && <Span size="sm" weight="normal">{description}</Span>}
+                    {description && <Span size="sm" weight="normal" className="vc-form-switch-description">{description}</Span>}
                 </div>
 
                 <Switch checked={value} onChange={onChange} disabled={disabled} />
@@ -39,11 +39,3 @@ export function FormSwitch({ onChange, title, value, description, disabled, clas
         </label>
     );
 }
-
-// #region Old compatibility
-
-export function FormSwitchCompat({ note, children, ...restProps }: PropsWithChildren<any>) {
-    return <FormSwitch title={children ?? ""} description={note} {...restProps} />;
-}
-
-// #endregion

@@ -6,10 +6,11 @@
 
 import { definePluginSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
+import { Paragraph } from "@components/Paragraph";
 import { SettingsSection } from "@components/settings/tabs/plugins/components/Common";
 import { Devs } from "@utils/constants";
 import definePlugin, { defineDefault, OptionType, StartAt } from "@utils/types";
-import { Checkbox, Text } from "@webpack/common";
+import { Checkbox } from "@webpack/common";
 
 const Noop = () => { };
 const NoopLogger = {
@@ -50,14 +51,14 @@ function AllowLevelSetting({ settingKey }: AllowLevelSettingProps) {
             onChange={(_, newValue) => settings.store.allowLevel[settingKey] = newValue}
             size={20}
         >
-            <Text variant="text-sm/normal">{settingKey[0].toUpperCase() + settingKey.slice(1)}</Text>
+            <Paragraph>{settingKey[0].toUpperCase() + settingKey.slice(1)}</Paragraph>
         </Checkbox>
     );
 }
 
 const AllowLevelSettings = ErrorBoundary.wrap(() => {
     return (
-        <SettingsSection name="Filter List" description="Always allow loggers of these types">
+        <SettingsSection name="Filter List" id="filterList" description="Always allow loggers of these types">
             <div style={{ display: "flex", flexDirection: "row" }}>
                 {Object.keys(settings.store.allowLevel).map(key => (
                     <AllowLevelSetting key={key} settingKey={key as keyof AllowLevels} />
@@ -108,6 +109,7 @@ export default definePlugin({
     name: "ConsoleJanitor",
     description: "Disables annoying console messages/errors",
     authors: [Devs.Nuckyz, Devs.sadan],
+    tags: ["Developers", "Console", "Utility"],
     settings,
 
     startAt: StartAt.Init,
@@ -125,16 +127,9 @@ export default definePlugin({
 
     patches: [
         {
-            find: "https://github.com/highlightjs/highlight.js/issues/2277",
-            replacement: {
-                match: /\(console.log\(`Deprecated.+?`\),/,
-                replace: "("
-            }
-        },
-        {
             find: 'The "interpolate" function is deprecated in v10 (use "to" instead)',
             replacement: {
-                match: /,console.warn\(\i\+'The "interpolate" function is deprecated in v10 \(use "to" instead\)'\)/,
+                match: /,console.warn\('react-spring: The "interpolate" function is deprecated in v10 \(use "to" instead\)'\)/,
                 replace: ""
             }
         },
@@ -148,10 +143,6 @@ export default definePlugin({
         {
             find: "is not a valid locale.",
             replacement: [
-                {
-                    match: /\i\.error(?=\(""\.concat\(\i," is not a valid locale."\)\))/,
-                    replace: "$self.Noop"
-                },
                 {
                     match: /\i\.error(?=\(`\$\{\i\} is not a valid locale.`)/,
                     replace: "$self.Noop"
@@ -167,16 +158,10 @@ export default definePlugin({
         },
         {
             find: "RPCServer:WSS",
-            replacement: [
-                {
-                    match: /\i\.error\("Error: "\.concat\((\i)\.message/,
-                    replace: '!$1.message.includes("EADDRINUSE")&&$&'
-                },
-                {
-                    match: /\i\.error\(`Error: \$\{(\i)\.message\}/,
-                    replace: '!$1.message.includes("EADDRINUSE")&&$&'
-                }
-            ]
+            replacement: {
+                match: /\i\.error\(`Error: \$\{(\i)\.message\}/,
+                replace: '!$1.message.includes("EADDRINUSE")&&$&'
+            }
         },
         {
             find: "Tried getting Dispatch instance before instantiated",
@@ -196,10 +181,6 @@ export default definePlugin({
             find: "failed to send analytics events",
             replacement: [
                 {
-                    match: /console\.error\("\[analytics\] failed to send analytics events query: "\.concat\(\i\)\)/,
-                    replace: ""
-                },
-                {
                     match: /console\.error\(`\[analytics\] failed to send analytics events query: \$\{\i\}`\)/,
                     replace: ""
                 }
@@ -209,7 +190,7 @@ export default definePlugin({
             find: "Slow dispatch on",
             replacement: [
                 {
-                    match: /\i\.totalTime>\i&&\i\.verbose\([`"]Slow dispatch on.{0,55}\);/,
+                    match: /\i\.totalTime>\d+?&&\i\.verbose\([`"]Slow dispatch on.{0,55}\);/,
                     replace: ""
                 },
             ]

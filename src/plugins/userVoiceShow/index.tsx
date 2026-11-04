@@ -50,6 +50,7 @@ const settings = definePluginSettings({
 export default definePlugin({
     name: "UserVoiceShow",
     description: "Shows an indicator when a user is in a Voice Channel",
+    tags: ["Voice", "Appearance", "Friends"],
     authors: [Devs.Nuckyz, Devs.LordElias],
     dependencies: ["MemberListDecoratorsAPI", "MessageDecorationsAPI"],
     settings,
@@ -59,8 +60,8 @@ export default definePlugin({
         {
             find: "#{intl::USER_PROFILE_PRONOUNS}",
             replacement: {
-                match: /(\i).isVerifiedBot\(\)}\),/,
-                replace: "$&$self.VoiceChannelIndicator({userId:$1.id,isProfile:true}),"
+                match: /(user:(\i).{0,100}onClickDisplayName:\i,trailing:)(\i)/,
+                replace: "$1[$self.VoiceChannelIndicator({userId:$2.id,isProfile:true}),$3]"
             },
             predicate: () => settings.store.showInUserProfileModal
         },
@@ -99,7 +100,7 @@ export default definePlugin({
             addMemberListDecorator("UserVoiceShow", ({ user }) => user == null ? null : <VoiceChannelIndicator userId={user.id} />);
         }
         if (settings.store.showInMessages) {
-            addMessageDecoration("UserVoiceShow", ({ message }) => message?.author == null ? null : <VoiceChannelIndicator userId={message.author.id} />);
+            addMessageDecoration("UserVoiceShow", ({ message }) => message?.author == null ? null : <VoiceChannelIndicator userId={message.author.id} isMessage={true} />);
         }
     },
 

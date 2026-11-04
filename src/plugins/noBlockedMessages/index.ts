@@ -50,6 +50,7 @@ export default definePlugin({
     name: "NoBlockedMessages",
     description: "Hides all blocked/ignored messages from chat completely",
     authors: [Devs.rushii, Devs.Samu, Devs.jamesbt365],
+    tags: ["Accessibility", "Chat"],
     settings,
 
     patches: [
@@ -62,31 +63,39 @@ export default definePlugin({
                 }
             ]
         },
-        ...[
-            '"MessageStore"',
-            '"ReadStateStore"'
-        ].map(find => ({
-            find,
+        {
+            find: '"MessageStore"',
             predicate: () => settings.store.ignoreMessages,
             replacement: [
                 {
-                    match: /(?<=function (\i)\((\i)\){)(?=.*MESSAGE_CREATE:\1)/,
-                    replace: (_, _funcName, props) => `if($self.shouldIgnoreMessage(${props}.message))return;`
+                    match: /(?<=MESSAGE_CREATE:function\((\i)\){)/,
+                    replace: (_, props) => `if($self.shouldIgnoreMessage(${props}.message))return;`
                 }
             ]
-        }))
+        },
+        {
+            find: '"ReadStateStore"',
+            predicate: () => settings.store.ignoreMessages,
+            replacement: [
+                {
+                    match: /(?<=MESSAGE_CREATE:function\((\i)\){)/,
+                    replace: (_, props) => `if($self.shouldIgnoreMessage(${props}.message))return;`
+                }
+            ]
+        }
     ],
 
-    shouldIgnoreMessage(message: Message) {
+    shouldIgnoreUser(userId: string) {
         try {
-            if (RelationshipStore.isBlocked(message.author.id)) {
-                return true;
-            }
-            return settings.store.applyToIgnoredUsers && RelationshipStore.isIgnored(message.author.id);
+            return RelationshipStore.isBlocked(userId) || (settings.store.applyToIgnoredUsers && RelationshipStore.isIgnored(userId));
         } catch (e) {
             new Logger("NoBlockedMessages").error("Failed to check if user is blocked or ignored:", e);
             return false;
         }
+    },
+
+    shouldIgnoreMessage(message: Message) {
+        return this.shouldIgnoreUser(message?.author?.id);
     },
 
     shouldHide(props: MessageDeleteProps): boolean {

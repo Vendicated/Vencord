@@ -1,0 +1,41 @@
+export const enum ApplicationType {
+    DEPRECATED_GAME = 1,
+    TICKETED_EVENTS = 3,
+    GUILD_ROLE_SUBSCRIPTIONS = 4,
+    GAME = 5,
+    NON_GAME_DETECTABLE = 6,
+}
+
+export const enum LinkedGameType {
+    LINKED = 1,
+    OFFICIAL = 2,
+    NVIDIA = 3,
+}
+
+export const enum CarouselItemType {
+    IMG = 1,
+    YOUTUBE_VIDEO = 2,
+    VIDEO = 3,
+}
+
+export const enum ApplicationFlags {
+    EMBEDDED_RELEASED = 1 << 1,
+    EMBEDDED_IAP = 1 << 3,
+    APPLICATION_AUTO_MODERATION_RULE_CREATE_BADGE = 1 << 6,
+    GAME_PROFILE_DISABLED = 1 << 7,
+    CONTEXTLESS_ACTIVITY = 1 << 9,
+    SOCIAL_LAYER_INTEGRATION_LIMITED = 1 << 10,
+    CLOUD_GAMING_DEMO = 1 << 11,
+    GATEWAY_PRESENCE = 1 << 12,
+    GATEWAY_PRESENCE_LIMITED = 1 << 13,
+    GATEWAY_GUILD_MEMBERS = 1 << 14,
+    GATEWAY_GUILD_MEMBERS_LIMITED = 1 << 15,
+    EMBEDDED = 1 << 17,
+    GATEWAY_MESSAGE_CONTENT = 1 << 18,
+    GATEWAY_MESSAGE_CONTENT_LIMITED = 1 << 19,
+    EMBEDDED_FIRST_PARTY = 1 << 20,
+    APPLICATION_COMMAND_BADGE = 1 << 23,
+    SOCIAL_LAYER_INTEGRATION = 1 << 27,
+    PROMOTED = 1 << 29,
+    PARTNER = 1 << 30,
+}

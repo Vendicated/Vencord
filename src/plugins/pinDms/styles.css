@@ -3,26 +3,27 @@
     text-overflow: ellipsis;
     white-space: nowrap;
     overflow: hidden;
-    text-transform: uppercase;
-    font-size: 12px;
+    font-size: 14px;
     line-height: 16px;
     letter-spacing: .02em;
-    font-family: var(--font-display);
-    font-weight: 600;
+    font-family: var(--font-primary);
+    font-weight: 500;
     flex: 1 1 auto;
     color: var(--channels-default);
     cursor: pointer;
 }
 
-.vc-pindms-modal-content {
-    display: grid;
-    justify-content: center;
-    padding: 1rem;
-    gap: 1.5rem;
+.vc-pindms-modal-color-picker {
+    margin-inline-end: 0;
+
+    [class*="defaultContainer"] {
+        display: none;
+    }
 }
 
-.vc-pindms-modal-content [class*="defaultContainer"] {
-    display: none;
+.vc-pindms-modal-content {
+    display: grid;
+    gap: 1.5em;
 }
 
 .vc-pindms-collapse-icon {

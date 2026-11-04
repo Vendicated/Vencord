@@ -44,6 +44,7 @@ declare global {
     export var IS_VESKTOP: boolean;
     export var VERSION: string;
     export var BUILD_TIMESTAMP: number;
+    export var DESKTOP_MONACO_EDITOR_URL: string;
 
     export var VencordNative: typeof import("./VencordNative").default;
     export var Vencord: typeof import("./Vencord");
@@ -62,6 +63,30 @@ declare global {
     export var VesktopNative: any;
 
     interface Window extends Record<PropertyKey, any> { }
+
+    interface MediaTrackConstraintSet {
+        restrictOwnAudio?: boolean;
+        suppressLocalAudioPlayback?: boolean;
+    }
+
+
+    type CaptureController = {
+        decreaseZoomLevel(): Promise<undefined>;
+        forwardWheel(): Promise<undefined>;
+        getSupportedZoomLevels(): number[];
+        increaseZoomLevel(): Promise<undefined>;
+        resetZoomLevel(): Promise<undefined>;
+        setFocusBehavior(): undefined;
+    };
+
+    interface DisplayMediaStreamOptions {
+        surfaceSwitching?: "include" | "exclude";
+        selfBrowserSurface?: "include" | "exclude";
+        systemAudio?: "include" | "exclude";
+        monitorTypeSurfaces?: "include" | "exclude";
+        controller?: CaptureController;
+        preferCurrentTab?: boolean;
+    }
 }
 
 export { };

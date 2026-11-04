@@ -21,6 +21,7 @@ import "./style.css";
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import { getIntlMessage } from "@utils/discord";
+import { Logger } from "@utils/Logger";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByPropsLazy, findStoreLazy } from "@webpack";
 import { FluxDispatcher } from "@webpack/common";
@@ -106,6 +107,11 @@ export const settings = definePluginSettings({
         description: "Close other folders when opening a folder",
         default: false
     },
+    closeServerFolder: {
+        type: OptionType.BOOLEAN,
+        description: "Close folder when selecting a server in that folder",
+        default: false,
+    },
     forceOpen: {
         type: OptionType.BOOLEAN,
         description: "Force a folder to open when switching to a server of that folder",
@@ -137,7 +143,7 @@ export default definePlugin({
     name: "BetterFolders",
     description: "Shows server folders on dedicated sidebar and adds folder related improvements",
     authors: [Devs.juby, Devs.AutumnVN, Devs.Nuckyz],
-
+    tags: ["Organisation", "Servers", "Appearance"],
     settings,
 
     patches: [
@@ -148,7 +154,7 @@ export default definePlugin({
                 // Create the isBetterFolders and betterFoldersExpandedIds variables in the GuildsBar component
                 // Needed because we access this from a non-arrow closure so we can't use arguments[0]
                 {
-                    match: /let{disableAppDownload:\i=\i\.isPlatformEmbedded,isOverlay:.+?(?=}=\i,)/,
+                    match: /{disableAppDownload:\i=\i\.isPlatformEmbedded,isOverlay:.+?(?=}=\i)/,
                     replace: "$&,isBetterFolders,betterFoldersExpandedIds"
                 },
                 // Export the isBetterFolders and betterFoldersExpandedIds variable to the Guild List component
@@ -196,7 +202,7 @@ export default definePlugin({
                 {
                     // Modify the expanded prop to use the boolean if the above patch fails, or check if the folder is expanded from the list if it succeeds
                     // Also export the list of expanded folders to the child folder component if the patch above succeeds, else export undefined
-                    match: /(?<=folderNode:(\i),expanded:)\i(?=,)/,
+                    match: /(?<=\.\.\.\i,folderNode:(\i),expanded:)\i(?=,)/,
                     replace: (isExpandedOrExpandedIds, folderNote) => ""
                         + `typeof ${isExpandedOrExpandedIds}==="boolean"?${isExpandedOrExpandedIds}:${isExpandedOrExpandedIds}.has(${folderNote}.id),`
                         + `betterFoldersExpandedIds:${isExpandedOrExpandedIds} instanceof Set?${isExpandedOrExpandedIds}:void 0`
@@ -212,8 +218,8 @@ export default definePlugin({
                 // If we are rendering the normal GuildsBar sidebar, we make Discord think the folder is always collapsed to show better icons (the mini guild icons) and avoid transitions
                 {
                     predicate: () => settings.store.keepIcons,
-                    match: /(?<=let ?(?:\i,)*?{folderNode:\i,setNodeRef:\i,.+?expanded:(\i),.+?;)(?=let)/,
-                    replace: (_, isExpanded) => `${isExpanded}=!!arguments[0]?.isBetterFolders&&${isExpanded};`
+                    match: /{folderNode:\i,setNodeRef:\i,.+?expanded:(\i),.+?;(?=let)/,
+                    replace: (m, isExpanded) => `${m}${isExpanded}=!!arguments[0]?.isBetterFolders&&${isExpanded};`
                 },
                 // Disable expanding and collapsing folders transition in the normal GuildsBar sidebar
                 {
@@ -259,6 +265,11 @@ export default definePlugin({
                     // Add grid styles to fix aligment with other visual refresh elements
                     match: /(?<=className:)\i\.\i(?=,"data-fullscreen")/,
                     replace: `"${GRID_STYLE_NAME} "+$&`
+                },
+                {
+                    // Channels resize slider uses hardcoded offset which is wrong when the Better Folders sidebar is opened
+                    match: /(?<="aria-valuemax":\d+,className:\i\.\i,onClick:\i,onMouseDown:)(\i)/,
+                    replace: "vcEvent=>$1($self.fixChannelsResizeSliderOffset(vcEvent))"
                 }
             ]
         },
@@ -267,7 +278,7 @@ export default definePlugin({
             predicate: () => settings.store.closeAllHomeButton,
             replacement: {
                 // Close all folders when clicking the home button
-                match: /(?<=onClick:\(\)=>{)(?=.{0,300}"discodo")/,
+                match: /(?<=onClick:(?:function)?\(\)(?:=>)?{)(?=.{0,300}"discodo")/,
                 replace: "$self.closeFolders();"
             }
         }
@@ -275,7 +286,7 @@ export default definePlugin({
 
     flux: {
         CHANNEL_SELECT(data) {
-            if (!settings.store.closeAllFolders && !settings.store.forceOpen)
+            if (!settings.store.closeAllFolders && !settings.store.forceOpen && !settings.store.closeServerFolder)
                 return;
 
             if (lastGuildId !== data.guildId) {
@@ -283,7 +294,12 @@ export default definePlugin({
                 const guildFolder = getGuildFolder(data.guildId);
 
                 if (guildFolder?.folderId) {
-                    if (settings.store.forceOpen && !ExpandedGuildFolderStore.isFolderExpanded(guildFolder.folderId)) {
+                    const wasExpanded = ExpandedGuildFolderStore.isFolderExpanded(guildFolder.folderId);
+
+                    if (settings.store.forceOpen && !wasExpanded) {
+                        FolderUtils.toggleGuildFolderExpand(guildFolder.folderId);
+                    }
+                    if (settings.store.closeServerFolder && wasExpanded) {
                         FolderUtils.toggleGuildFolderExpand(guildFolder.folderId);
                     }
                 } else if (settings.store.closeAllFolders) {
@@ -341,7 +357,13 @@ export default definePlugin({
             }
 
             try {
-                return child?.props?.["aria-label"] === getIntlMessage("SERVERS");
+                // can cause hang if intl message is not found
+                const serversIntlMsg = getIntlMessage("SERVERS");
+                if (!serversIntlMsg) {
+                    new Logger("BetterFolders").error("Failed to get SERVERS intl message");
+                    return true;
+                }
+                return child?.props?.["aria-label"] === serversIntlMsg;
             } catch (e) {
                 console.error(e);
                 return true;
@@ -379,6 +401,17 @@ export default definePlugin({
             default:
                 return true;
         }
+    },
+
+    fixChannelsResizeSliderOffset(event: MouseEvent) {
+        const betterFoldersSidebar = document.querySelector<HTMLElement>(".vc-betterFolders-sidebar");
+
+        if (betterFoldersSidebar != null) {
+            // @ts-expect-error Readonly, but browser doesn't care
+            event.screenX += sidebar.offsetWidth;
+        }
+
+        return event;
     },
 
     shouldShowTransition(props: any) {

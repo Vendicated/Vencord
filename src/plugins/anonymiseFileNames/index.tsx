@@ -53,21 +53,27 @@ const settings = definePluginSettings({
     randomisedLength: {
         description: "Random characters length",
         type: OptionType.NUMBER,
-        default: 7,
-        disabled: () => settings.store.method !== Methods.Random,
+        default: 7
     },
     consistent: {
         description: "Consistent filename",
         type: OptionType.STRING,
-        default: "image",
-        disabled: () => settings.store.method !== Methods.Consistent,
+        default: "image"
     },
+}, {
+    randomisedLength: {
+        disabled() { return this.store.method !== Methods.Random; },
+    },
+    consistent: {
+        disabled() { return this.store.method !== Methods.Consistent; },
+    }
 });
 
 export default definePlugin({
     name: "AnonymiseFileNames",
     authors: [Devs.fawn],
     description: "Anonymise uploaded file names",
+    tags: ["Privacy", "Utility"],
     settings,
 
     patches: [
@@ -123,7 +129,7 @@ export default definePlugin({
         const newFilename = (() => {
             switch (settings.store.method) {
                 case Methods.Random:
-                    const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+                    const chars = "0123456789bdfhjkmnpqrstvwxz";
                     return Array.from(
                         { length: settings.store.randomisedLength },
                         () => chars[Math.floor(Math.random() * chars.length)]

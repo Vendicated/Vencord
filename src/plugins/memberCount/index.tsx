@@ -62,6 +62,7 @@ export const cl = classNameFactory("vc-membercount-");
 export default definePlugin({
     name: "MemberCount",
     description: "Shows the number of online members, total members, and users in voice channels on the server — in the member list and tooltip.",
+    tags: ["Servers", "Utility"],
     authors: [Devs.Ven, Devs.Commandtechno, Devs.Apexo],
     settings,
 
@@ -83,6 +84,13 @@ export default definePlugin({
                 replace: "$&,$self.renderTooltip(arguments[0].guild)"
             },
             predicate: () => settings.store.toolTip
+        },
+        {
+            find: '"GuildSubscriptionsStore"',
+            replacement: {
+                match: /(\i\.\i\.getSection\(\i\))===(\i\.\i)\.MEMBERS/,
+                replace: (m, section, ChannelSectionTypes) => `(${m}||${section}===${ChannelSectionTypes}.NONE)`
+            }
         }
     ],
     render: ErrorBoundary.wrap(() => <MemberCount />, { noop: true }),

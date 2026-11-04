@@ -246,6 +246,7 @@ function initWs(isManual = false) {
 export default definePlugin({
     name: "DevCompanion",
     description: "Dev Companion Plugin",
+    tags: ["Developers", "Utility"],
     authors: [Devs.Ven],
     reporterTestable: ReporterTestable.None,
     settings,

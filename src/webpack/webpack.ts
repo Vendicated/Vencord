@@ -16,6 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { traceFunction } from "@debug/Tracer";
 import { makeLazy, proxyLazy } from "@utils/lazy";
 import { LazyComponent } from "@utils/lazyReact";
 import { Logger } from "@utils/Logger";
@@ -24,7 +25,6 @@ import { escapeRegExp } from "@utils/text";
 import type { FluxStore } from "@vencord/discord-types";
 import type { ModuleExports, ModuleFactory, WebpackRequire } from "@vencord/discord-types/webpack";
 
-import { traceFunction } from "../debug/Tracer";
 import type { AnyModuleFactory, AnyWebpackRequire } from "./types";
 
 const logger = new Logger("Webpack");
@@ -55,7 +55,7 @@ export const stringMatches = (s: string, filter: CodeFilter) =>
     );
 
 export function makeClassNameRegex(className: string) {
-    return new RegExp(`(?:\\b|_)${escapeRegExp(className)}(?:\\b|_)`);
+    return new RegExp(`(?<=^|\\s)${escapeRegExp(className)}(?:_\\S*)?(?=$|\\s)`);
 }
 
 export const filters = {
@@ -233,7 +233,7 @@ export const find = traceFunction("find", function find(filter: FilterFn, { isIn
 
     for (const key in cache) {
         const mod = cache[key];
-        if (!mod?.loaded || mod.exports == null) continue;
+        if (mod == null || mod.loaded === false || mod.exports == null) continue;
 
         if (filter(mod.exports)) {
             return isWaitFor ? [mod.exports, key] : mod.exports;
@@ -263,7 +263,7 @@ export function findAll(filter: FilterFn, { topLevelOnly = false }: { topLevelOn
     const ret = [] as any[];
     for (const key in cache) {
         const mod = cache[key];
-        if (!mod?.loaded || mod.exports == null) continue;
+        if (mod == null || mod.loaded === false || mod.exports == null) continue;
 
         if (filter(mod.exports))
             ret.push(mod.exports);
@@ -312,7 +312,7 @@ export const findBulk = traceFunction("findBulk", function findBulk(...filterFns
     outer:
     for (const key in cache) {
         const mod = cache[key];
-        if (!mod?.loaded || mod.exports == null) continue;
+        if (mod == null || mod.loaded === false || mod.exports == null) continue;
 
         for (let j = 0; j < length; j++) {
             const filter = filters[j];
@@ -726,12 +726,12 @@ export async function extractAndLoadChunks(code: CodeFilter, matcher = DefaultEx
     }
 
     const numEntryPoint = Number(entryPointId);
-    const entryPoint = Number.isNaN(numEntryPoint) ? entryPointId : numEntryPoint;
+    const entryPoint = Number.isNaN(numEntryPoint) ? entryPointId : String(numEntryPoint);
 
     if (rawChunkIds) {
         const chunkIds = Array.from(rawChunkIds.matchAll(ChunkIdsRegex)).map(m => {
             const numChunkId = Number(m[1]);
-            return Number.isNaN(numChunkId) ? m[1] : numChunkId;
+            return Number.isNaN(numChunkId) ? m[1] : String(numChunkId);
         });
 
         await Promise.all(chunkIds.map(id => wreq.e(id)));
