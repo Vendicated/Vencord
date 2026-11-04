@@ -91,6 +91,12 @@ export interface Settings {
         settingsSync: boolean;
         settingsSyncVersion: number;
     };
+
+    themeSettings: {
+        [fileName: string]: {
+            [property: string]: string;
+        };
+    };
 }
 
 const DefaultSettings: Settings = {
@@ -127,7 +133,9 @@ const DefaultSettings: Settings = {
         url: "https://api.vencord.dev/",
         settingsSync: false,
         settingsSyncVersion: 0
-    }
+    },
+
+    themeSettings: {}
 };
 
 const settings = !IS_REPORTER ? VencordNative.settings.get() : {} as Settings;

@@ -30,6 +30,10 @@
     color: var(--text-subtle);
 }
 
+.vc-plugins-setting-slider {
+    white-space: nowrap;
+}
+
 .vc-plugins-setting-error {
     color: var(--text-feedback-critical, #FF5C5C);
 }
