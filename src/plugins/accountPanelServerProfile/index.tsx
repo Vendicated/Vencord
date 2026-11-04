@@ -19,7 +19,7 @@ interface UserProfileProps {
     originalRenderPopout: () => React.ReactNode;
 }
 
-const UserProfile = findComponentByCodeLazy(".POPOUT,user");
+const UserProfile = findComponentByCodeLazy(".isNonUserBot()?", ",onClickContainer:");
 
 let openAlternatePopout = false;
 let accountPanelRef: React.RefObject<HTMLDivElement | null> = { current: null };
@@ -62,16 +62,17 @@ const settings = definePluginSettings({
 export default definePlugin({
     name: "AccountPanelServerProfile",
     description: "Right click your account panel in the bottom left to view your profile in the current server",
+    tags: ["Appearance", "Servers"],
     authors: [Devs.Nuckyz, Devs.relitrix],
     settings,
 
     patches: [
         {
-            find: ".WIDGETS_RTC_UPSELL_COACHMARK)",
+            find: "handleOpenSettingsContextMenu=",
             group: true,
             replacement: [
                 {
-                    match: /(\.AVATAR,children:.+?renderPopout:\((\i),\i\)=>){(.+?)}(?=,position)(?<=currentUser:(\i).+?)/,
+                    match: /(\.AVATAR,children:.+?renderPopout:\((\i),\i\)=>)\{(.+?)\}(?=,position)(?<=currentUser:(\i).+?)/,
                     replace: (_, rest, popoutProps, originalPopout, currentUser) => `${rest}$self.UserProfile({popoutProps:${popoutProps},currentUser:${currentUser},originalRenderPopout:()=>{${originalPopout}}})`
                 },
                 {

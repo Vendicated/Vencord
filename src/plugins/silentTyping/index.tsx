@@ -40,7 +40,12 @@ const settings = definePluginSettings({
         type: OptionType.BOOLEAN,
         description: "Toggle functionality",
         default: true,
-    }
+    },
+    showTypingIn: {
+        type: OptionType.STRING,
+        description: "Comma-separated list of channel IDs to always show typing in",
+        default: ""
+    },
 });
 
 function SilentTypingEnabledIcon() {
@@ -112,6 +117,7 @@ export default definePlugin({
     name: "SilentTyping",
     authors: [Devs.Ven, Devs.Rini, Devs.ImBanana],
     description: "Hide that you are typing",
+    tags: ["Chat", "Privacy"],
     settings,
 
     contextMenus: {
@@ -135,7 +141,7 @@ export default definePlugin({
         options: [
             {
                 name: "value",
-                description: "whether to hide or not that you're typing (default is toggle)",
+                description: "Whether to hide or not that you're typing (default is toggle)",
                 required: false,
                 type: ApplicationCommandOptionType.BOOLEAN,
             },
@@ -149,7 +155,9 @@ export default definePlugin({
     }],
 
     async startTyping(channelId: string) {
-        if (settings.store.isEnabled) return;
+        if (settings.store.isEnabled && !settings.store.showTypingIn.includes(channelId)) {
+            return;
+        }
         FluxDispatcher.dispatch({ type: "TYPING_START_LOCAL", channelId });
     },
 

@@ -56,6 +56,7 @@ const settings = definePluginSettings({
 export default definePlugin({
     name: "ShowMeYourName",
     description: "Display usernames next to nicks, or no nicks at all",
+    tags: ["Appearance", "Customisation"],
     authors: [Devs.Rini, Devs.TheKodeToad, Devs.rae],
     patches: [
         {
@@ -97,7 +98,7 @@ export default definePlugin({
 
             const prefix = withMentionPrefix ? "@" : "";
 
-            if (isRepliedMessage && !inReplies || username.toLowerCase() === nick.toLowerCase())
+            if (isRepliedMessage && !inReplies || (username.toLowerCase() === nick.toLowerCase() && mode !== "user"))
                 return <>{prefix}{nick}</>;
 
             if (mode === "user-nick")

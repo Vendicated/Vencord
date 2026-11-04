@@ -18,6 +18,9 @@
 
 // DO NOT REMOVE UNLESS YOU WISH TO FACE THE WRATH OF THE CIRCULAR DEPENDENCY DEMON!!!!!!!
 import "~plugins";
+import "./fixWeirdAppRegionBug.css";
+
+import nativeTitleBarStyles from "./nativeTitleBar.css?managed";
 
 export * as Api from "./api";
 export * as Plugins from "./api/PluginManager";
@@ -28,11 +31,9 @@ export * as Webpack from "./webpack";
 export * as WebpackPatcher from "./webpack/patchWebpack";
 export { PlainSettings, Settings };
 
-import { coreStyleRootNode, initStyles } from "@api/Styles";
+import { enableStyle, initStyles } from "@api/Styles";
 import { openSettingsTabModal, UpdaterTab } from "@components/settings";
 import { debounce } from "@shared/debounce";
-import { IS_WINDOWS } from "@utils/constants";
-import { createAndAppendStyle } from "@utils/css";
 import { StartAt } from "@utils/types";
 import { SettingsRouter } from "@webpack/common";
 
@@ -40,8 +41,7 @@ import { get as dsGet } from "./api/DataStore";
 import { NotificationData, showNotification } from "./api/Notifications";
 import { initPluginManager, PMLogger, startAllPlugins } from "./api/PluginManager";
 import { PlainSettings, Settings, SettingsStore } from "./api/Settings";
-import { getCloudSettings, putCloudSettings, shouldCloudSync } from "./api/SettingsSync/cloudSync";
-import { localStorage } from "./utils/localStorage";
+import { areLocalSettingsDirty, getCloudSettings, getCloudSyncDirection, markLocalSettingsDirty, putCloudSettings, shouldCloudSync } from "./api/SettingsSync/cloudSync";
 import { relaunch } from "./utils/native";
 import { checkForUpdates, update, UpdateLogger } from "./utils/updater";
 import { onceReady } from "./webpack";
@@ -52,11 +52,6 @@ if (IS_REPORTER) {
 }
 
 async function syncSettings() {
-    if (localStorage.Vencord_cloudSyncDirection === undefined) {
-        // by default, sync bi-directionally
-        localStorage.Vencord_cloudSyncDirection = "both";
-    }
-
     // pre-check for local shared settings
     if (
         Settings.cloud.authenticated &&
@@ -68,7 +63,8 @@ async function syncSettings() {
             body: "We've noticed you have cloud integrations enabled in another client! Due to limitations, you will " +
                 "need to re-authenticate to continue using them. Click here to go to the settings page to do so!",
             color: "var(--yellow-360)",
-            onClick: () => SettingsRouter.openUserSettings("vencord_cloud_panel")
+            onClick: () => SettingsRouter.openUserSettings("vencord_cloud_panel"),
+            noPersist: true
         });
         return;
     }
@@ -76,9 +72,9 @@ async function syncSettings() {
     if (
         Settings.cloud.settingsSync && // if it's enabled
         Settings.cloud.authenticated && // if cloud integrations are enabled
-        localStorage.Vencord_cloudSyncDirection !== "manual" // if we're not in manual mode
+        getCloudSyncDirection() !== "manual" // if we're not in manual mode
     ) {
-        if (localStorage.Vencord_settingsDirty && shouldCloudSync("push")) {
+        if (areLocalSettingsDirty() && shouldCloudSync("push")) {
             await putCloudSettings();
         } else if (shouldCloudSync("pull") && await getCloudSettings(false)) { // if we synchronized something (false means no sync)
             // we show a notification here instead of allowing getCloudSettings() to show one to declutter the amount of
@@ -101,7 +97,7 @@ async function syncSettings() {
     }, 60_000);
 
     SettingsStore.addGlobalChangeListener(() => {
-        localStorage.Vencord_settingsDirty = true;
+        markLocalSettingsDirty();
         saveSettingsOnFrequentAction();
     });
 }
@@ -185,8 +181,7 @@ init();
 document.addEventListener("DOMContentLoaded", () => {
     startAllPlugins(StartAt.DOMContentLoaded);
 
-    // FIXME
-    if (IS_DISCORD_DESKTOP && Settings.winNativeTitleBar && IS_WINDOWS) {
-        createAndAppendStyle("vencord-native-titlebar-style", coreStyleRootNode).textContent = "[class*=titleBar]{display: none!important}";
+    if (IS_DISCORD_DESKTOP && Settings.nativeTitleBar) {
+        enableStyle(nativeTitleBarStyles);
     }
 }, { once: true });

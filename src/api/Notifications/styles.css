@@ -15,7 +15,7 @@
     position: absolute;
     z-index: 2147483647;
     right: 1rem;
-    width: 25vw;
+    width: min(25vw, 400px);
     min-height: 10vh;
 }
 
@@ -87,12 +87,6 @@
     height: 218px;
     background: url("/assets/b36de980b174d7b798c89f35c116e5c6.svg") center no-repeat;
     margin-bottom: 40px;
-}
-
-.vc-notification-log-container {
-    padding: 1em;
-    max-height: min(750px, 75vh);
-    width: 100%;
 }
 
 .vc-notification-log-wrapper {

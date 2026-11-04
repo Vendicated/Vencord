@@ -1,11 +1,27 @@
-.vc-settings-modal-content {
-    padding-bottom: 24px;
+.vc-plugin-modal-header {
+    display: flex;
 }
 
 .vc-plugin-modal-info {
-    align-items: center;
+    display: flex;
+    gap: 1em;
+    justify-content: space-between;
+    align-items: start;
 }
 
-.vc-plugin-modal-description {
-    flex-grow: 1;
+.vc-plugin-modal-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin-top: 8px;
+}
+
+.vc-plugin-modal-tag {
+    align-items: center;
+    border: 1px solid var(--border-normal);
+    border-radius: 9999px;
+    display: flex;
+    justify-content: center;
+    padding: 6px 12px;
+    color: var(--text-default);
 }

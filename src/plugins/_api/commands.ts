@@ -26,7 +26,7 @@ export default definePlugin({
     patches: [
         // obtain BUILT_IN_COMMANDS instance
         {
-            find: ',"tenor"',
+            find: ',"tableflip","unflip"',
             replacement: [
                 {
                     // Matches BUILT_IN_COMMANDS. This is not exported so this is
@@ -34,7 +34,7 @@ export default definePlugin({
                     // patch simpler
 
                     // textCommands = builtInCommands.filter(...)
-                    match: /(?<=\w=)(\w)(\.filter\(.{0,60}tenor)/,
+                    match: /(?<=\w=)(\w)(\.filter\(.{0,60}tableflip)/,
                     replace: "Vencord.Api.Commands._init($1)$2",
                 }
             ],
@@ -52,12 +52,6 @@ export default definePlugin({
         {
             find: "#{intl::COMMANDS_OPTIONAL_COUNT}",
             replacement: [
-                {
-                    // ...children: p?.name
-                    match: /(?<=:(\i)\.displayDescription\}.{0,200}children:).{0,50}\.name(?=\}\))/,
-                    replace: "$1.plugin||($&)",
-                    noWarn: true // TODO: remove legacy compatibility code in the future
-                },
                 {
                     match: /children:(?=\i\?\?\i\?\.name)(?<=command:(\i),.+?)/,
                     replace: "children:$1.plugin??"

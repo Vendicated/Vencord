@@ -10,7 +10,8 @@ import definePlugin from "@utils/types";
 export default definePlugin({
     name: "WebScreenShareFixes",
     authors: [Devs.Kaitlyn],
-    description: "Removes 2500kbps bitrate cap on chromium and vesktop clients.",
+    description: "Removes 2500kbps bitrate cap on chromium and vesktop clients and fixes CPU usage growing endlessly while screensharing.",
+    tags: ["Voice"],
     enabledByDefault: true,
 
     patches: [
@@ -19,17 +20,20 @@ export default definePlugin({
             replacement: [
                 {
                     match: /`x-google-max-bitrate=\$\{\i\}`/,
-                    replace: '"x-google-max-bitrate=80_000"'
-                },
-                {
-                    match: ";level-asymmetry-allowed=1",
-                    replace: ";b=AS:800000;level-asymmetry-allowed=1"
+                    replace: '"x-google-max-bitrate=80000"'
                 },
                 {
                     match: /;usedtx=\$\{(\i)\?"0":"1"\}/,
                     replace: '$&${$1?";stereo=1;sprop-stereo=1":""}'
                 },
             ]
+        },
+        {
+            find: "ApplicationStreamPreviewUploadManager",
+            replacement: {
+                match: /removeAttribute\("srcObject"\)(?<=(\i)\..+?)/,
+                replace: "pause(),$1.srcObject=null"
+            }
         }
     ]
 });

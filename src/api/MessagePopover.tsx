@@ -18,22 +18,27 @@
 
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Logger } from "@utils/Logger";
-import { IconComponent } from "@utils/types";
-import { Channel, Message } from "@vencord/discord-types";
-import type { ComponentType, MouseEventHandler } from "react";
+import { IconComponent, IconProps } from "@utils/types";
+import { Message } from "@vencord/discord-types";
+import type { ComponentType, HTMLProps, ReactElement } from "react";
 
 import { useSettings } from "./Settings";
 
 const logger = new Logger("MessagePopover");
 
-export interface MessagePopoverButtonItem {
+export interface MessagePopoverButtonItem extends HTMLProps<HTMLDivElement> {
     key?: string,
     label: string,
     icon: ComponentType<any>,
-    message: Message,
-    channel: Channel,
-    onClick?: MouseEventHandler<HTMLButtonElement>,
-    onContextMenu?: MouseEventHandler<HTMLButtonElement>;
+    ariaLabel?: string,
+    buttonClassName?: string
+    dangerous?: boolean,
+    disabled?: boolean,
+    iconProps?: IconProps,
+    onTooltipShow?: () => void,
+    onTooltipHide?: () => void,
+    separator?: boolean,
+    tooltipText?: ReactElement,
 }
 
 export type MessagePopoverButtonFactory = (message: Message) => MessagePopoverButtonItem | null;

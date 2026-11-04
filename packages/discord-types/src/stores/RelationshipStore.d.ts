@@ -1,15 +1,17 @@
 import { FluxStore } from "..";
+import { Message, MessageJSON } from "../common/messages";
 import { RelationshipType } from "../../enums";
 
 export class RelationshipStore extends FluxStore {
     getBlockedIDs(): string[];
-    getBlockedOrIgnoredIDs(): string[];
+    getBlockedOrIgnoredIDs(): Set<string>;
     getFriendCount(): number;
     getFriendIDs(): string[];
     getIgnoredIDs(): string[];
 
     getMutableRelationships(): Map<string, RelationshipType>;
-    getNickname(userId: string): string;
+    getNickname(userId: string): string | undefined;
+    getNote(userId: string): string | undefined;
     getOriginApplicationId(userId: string): string | undefined;
     getOutgoingCount(): number;
     getPendingCount(): number;
@@ -24,19 +26,19 @@ export class RelationshipStore extends FluxStore {
     getVersion(): number;
 
     isBlocked(userId: string): boolean;
-    isBlockedForMessage(userId: string): boolean;
+    isBlockedForMessage(message: Message | MessageJSON): boolean;
 
     /**
      * @see {@link isBlocked}
      * @see {@link isIgnored}
      */
     isBlockedOrIgnored(userId: string): boolean;
-    isBlockedOrIgnoredForMessage(userId: string): boolean;
+    isBlockedOrIgnoredForMessage(message: Message | MessageJSON): boolean;
 
     isFriend(userId: string): boolean;
     isIgnored(userId: string): boolean;
-    isIgnoredForMessage(userId: string): boolean;
+    isIgnoredForMessage(message: Message | MessageJSON): boolean;
     isSpam(userId: string): boolean;
-    isStranger(userId: string): boolean;
+    isStranger(userId: string): boolean | undefined;
     isUnfilteredPendingIncoming(userId: string): boolean;
 }

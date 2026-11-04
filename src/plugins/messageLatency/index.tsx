@@ -29,6 +29,7 @@ const DISCORD_KT_DELAY = 1471228928;
 export default definePlugin({
     name: "MessageLatency",
     description: "Displays an indicator for messages that took ≥n seconds to send",
+    tags: ["Chat", "Utility"],
     authors: [Devs.arHSM],
 
     settings: definePluginSettings({

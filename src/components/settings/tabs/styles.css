@@ -61,10 +61,7 @@
     height: 1.25em;
 }
 
-.vc-settings-modal {
-    padding: 1.5em !important;
-}
-
-.vc-settings-modal-close {
-    float: right;
+.vc-settings-switches {
+    display: grid;
+    gap: 8px;
 }

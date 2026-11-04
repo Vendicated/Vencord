@@ -1,5 +1,6 @@
-import { FluxStore, User, VoiceState } from "..";
-import { ParticipantType, RTCPlatform } from "../../enums";
+import { AvatarDecorationData, FluxStore, User, VoiceState } from "..";
+import { ActivityType, ParticipantType, RTCPlatform } from "../../enums";
+import { StreamType } from "./FriendsStore";
 
 export type RTCLayout = "normal" | "minimum" | "no-chat" | "full-screen" | "haven";
 export type RTCMode = "video" | "voice";
@@ -15,7 +16,7 @@ export interface Stream {
     channelId: string;
     guildId: string | null;
     ownerId: string;
-    streamType: string;
+    streamType: StreamType;
 }
 
 export interface BaseParticipant {
@@ -36,8 +37,7 @@ export interface UserParticipant extends BaseParticipant {
     soundsharing: boolean;
     ringing: boolean;
     userNick: string;
-    // TODO: type
-    userAvatarDecoration: any | null;
+    userAvatarDecoration: AvatarDecorationData | null;
     localVideoDisabled: boolean;
     userVideo?: boolean;
     streamId?: string;
@@ -57,7 +57,7 @@ export interface StreamParticipant extends BaseParticipant {
 export interface ActivityParticipant extends BaseParticipant {
     type: ParticipantType.ACTIVITY;
     applicationId: string;
-    activityType: number;
+    activityType: ActivityType;
     activityUrl: string;
     participants: string[];
     guildId: string | null;
@@ -78,15 +78,14 @@ export interface ChannelRTCState {
 
 export class ChannelRTCStore extends FluxStore {
     getActivityParticipants(channelId: string): ActivityParticipant[];
-    getAllChatOpen(): Record<string, boolean>;
     getChatOpen(channelId: string): boolean;
     getFilteredParticipants(channelId: string): Participant[];
     getGuildRingingUsers(channelId: string): Set<string>;
     getLayout(channelId: string, context?: RTCLayoutContext): RTCLayout;
     getMode(channelId: string): RTCMode;
+    getOpenChatChannelIds(): Set<string>;
     getParticipant(channelId: string, participantId: string): Participant | null;
     getParticipants(channelId: string): Participant[];
-    getParticipantsListOpen(channelId: string): boolean;
     getParticipantsOpen(channelId: string): boolean;
     getParticipantsVersion(channelId: string): number;
     getSelectedParticipant(channelId: string): Participant | null;
