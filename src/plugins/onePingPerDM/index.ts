@@ -41,7 +41,7 @@ export default definePlugin({
     settings,
     patches: [
         {
-            find: ".getDesktopType()===",
+            find: '"NotificationStore"',
             replacement: [
                 {
                     match: /(\i\.\i\.getDesktopType\(\)===\i\.\i\.NEVER)\)/,
