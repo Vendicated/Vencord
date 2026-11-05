@@ -89,12 +89,14 @@ function InChatPreview({ src, state, isPFPModal, SIZE }: { src: string; state: E
 
 export default function FullPreview({ src, state, isPFPModal }: { src: string; state: EditorState; isPFPModal: boolean; }) {
     return (
-        <div style={{ position: "relative", height: 80, width: "100%", backgroundColor: "#c45b6c", overflow: "visible" }}>
-            <div style={{ position: "absolute", backgroundColor: "black", right: "100%" }}>
+        <div style={{ display: "flex", flexDirection: "column" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8 }}>
                 <InChatPreview src={src} state={state} isPFPModal={isPFPModal} SIZE={40} />
+                <InChatPreview src={src} state={state} isPFPModal={isPFPModal} SIZE={80} />
             </div>
-            <div style={{ position: "absolute", backgroundColor: "black", left: "100%", marginLeft: -40 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8 }}>
                 <InChatPreview src={src} state={state} isPFPModal={isPFPModal} SIZE={40} />
+                <InChatPreview src={src} state={state} isPFPModal={isPFPModal} SIZE={80} />
             </div>
         </div>
     );
