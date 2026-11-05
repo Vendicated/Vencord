@@ -73,7 +73,7 @@ export async function loadLazyChunks() {
         let pendingSearches = 0;
 
         // This regex loads all language packs which makes webpack finds testing extremely slow, so for now, we prioritize using the one which doesn't include those
-        const ChunkLoader = String.raw`[A-Za-z_$][\w$]*\.e\("[^"]+"\)`;
+        const ChunkLoader = String.raw`[A-Za-z_$][\w$]*\.e\((?:"[^"]+?"|[\de]+?)\)`;
         const Identifier = String.raw`[A-Za-z_$][\w$]*`;
         const PromiseAllChunkLoad = String.raw`Promise\.all\(\[((?:${ChunkLoader},?)+)\]\)`;
         const CompleteThen = String.raw`\.then\(${Identifier}(?:\.${Identifier})?\.bind\(${Identifier},"?([^)]+?)"?(?:,[^)]+?)?\)\)`;
@@ -97,7 +97,7 @@ export async function loadLazyChunks() {
             }
 
             index = 0;
-            while ((index = factoryCode.indexOf('.e("', index)) !== -1) {
+            while ((index = factoryCode.indexOf(".e(", index)) !== -1) {
                 let start = index;
                 while (start > 0 && /[\w$]/.test(factoryCode[start - 1])) start--;
 
@@ -107,7 +107,7 @@ export async function loadLazyChunks() {
                     if (match) matches.push(match);
                 }
 
-                index += 4;
+                index += 3;
             }
 
             return matches.sort((a, b) => a.index! - b.index!);
@@ -126,14 +126,7 @@ export async function loadLazyChunks() {
             const validChunkGroups = new Set<[chunkIds: PropertyKey[], entryPoint: PropertyKey]>();
 
             for (const [, rawChunkIds, entryPoint] of lazyChunks) {
-                const chunkIds = rawChunkIds
-                    ?.matchAll(Webpack.ChunkIdsRegex)
-                    .map(m => {
-                        const numChunkId = Number(m[1]);
-                        return Number.isNaN(numChunkId) ? m[1] : String(numChunkId);
-                    })
-                    .toArray()
-                    ?? [];
+                const chunkIds = rawChunkIds ? Webpack.parseChunkIds(rawChunkIds) : [];
 
                 if (chunkIds.length === 0) {
                     continue;
