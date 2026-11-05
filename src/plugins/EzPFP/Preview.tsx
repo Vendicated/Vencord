@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { useEffect, UserStore, useState } from "@webpack/common";
+import { useEffect, UserProfileStore, UserStore, useState, useStateFromStores } from "@webpack/common";
 
 export interface EditorState {
     crop: { width: number; height: number; };
@@ -75,12 +75,10 @@ function PFPAndDeco({ src, size, state, deco }: { src: string; size: number; sta
     );
 }
 
-function InChatPreview({ src, state, isPFPModal, SIZE }: { src: string; state: EditorState; isPFPModal: boolean; SIZE: number; }) {
+function InChatPreview({ src, state, SIZE }: { src: string; state: EditorState; SIZE: number; }) {
     const user = UserStore.getCurrentUser();
     const deco = user.avatarDecorationData?.asset as string | undefined;
     const name = user.globalName ?? user.username;
-
-    if (!isPFPModal) return null;
 
     return (
         <div style={{ display: "flex", alignItems: "center", gap: 16, padding: 16 }}>
@@ -94,13 +92,55 @@ function InChatPreview({ src, state, isPFPModal, SIZE }: { src: string; state: E
 }
 
 
-export default function FullPreview({ src, state, isPFPModal }: { src: string; state: EditorState; isPFPModal: boolean; }) {
+function ProfileBannerPreview({ src, state, size }: { src: string; state: EditorState; size: number; }) {
+    const user = UserStore.getCurrentUser();
+    const profile = useStateFromStores([UserProfileStore], () => UserProfileStore.getUserProfile(user.id));
+    const RING = 6;
+
+    const deco = user.avatarDecorationData?.asset;
+
+    console.log("profile: ", profile);
+    console.log("user: ", user);
+
+    const bannerHash = profile?.banner ?? user.banner;
+    const bannerUrl = bannerHash
+        ? `https://cdn.discordapp.com/banners/${user.id}/${bannerHash}.${bannerHash.startsWith("a_") ? "gif" : "png"}?size=300`
+        : null;
+    const fallbackColor = profile?.accentColor != null
+        ? `#${profile.accentColor.toString(16).padStart(6, "0")}`
+        : "#000000";
+
+    const outer = size + RING * 2;
+
     return (
-        <div style={{ display: "flex", flexDirection: "column" }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8 }}>
-                <InChatPreview src={src} state={state} isPFPModal={isPFPModal} SIZE={40} />
-                <InChatPreview src={src} state={state} isPFPModal={isPFPModal} SIZE={80} />
+        <div style={{ width: 300, borderRadius: 8, overflow: "hidden", background: "#232428" }}>
+            <div style={{ height: 105, background: bannerUrl ? `center / cover url(${bannerUrl})` : fallbackColor }} />
+
+            <div style={{ position: "relative", padding: `${outer / 2 + 8}px 16px 16px` }}>
+                <div style={{
+                    position: "absolute", top: -outer / 2, left: 16,
+                    width: outer, height: outer, borderRadius: "50%", background: "#232428",
+                    display: "flex", alignItems: "center", justifyContent: "center"
+                }}>
+                    <PFPAndDeco src={src} size={size} state={state} deco={deco} />
+                </div>
+
+                <div style={{ display: "flex", flexDirection: "column" }}>
+                    <span style={{ color: "var(--text-default)", fontWeight: 600, fontSize: 20 }}>{user.globalName ?? user.username}</span>
+                    <span style={{ color: "var(--text-strong)", fontWeight: 400, fontSize: 14 }}>{user.username}</span>
+                </div>
             </div>
+        </div>
+    );
+}
+
+export default function FullPreview({ src, state, isPFPModal }: { src: string; state: EditorState; isPFPModal: boolean; }) {
+    if (!isPFPModal) return null;
+
+    return (
+        <div style={{ display: "flex", flexDirection: "row", justifyContent: "space-between", marginTop: 8 }}>
+            <ProfileBannerPreview src={src} state={state} size={80} />
+            <InChatPreview src={src} state={state} SIZE={40} />
         </div>
     );
 }
