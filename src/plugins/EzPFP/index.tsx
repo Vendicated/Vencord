@@ -21,7 +21,7 @@ const settings = definePluginSettings({
 
 export default definePlugin({
     name: "EzPFP",
-    description: "Tired of rechanging and rechecking your profile picture until it feels right?, This plugin will allow you to preview your profile picture in different contexts and sizes before saving it.",
+    description: "Preview your profile picture before saving and getting rate limited when you can't get it right",
     authors: [Devs.RandomCat],
     settings,
     patches: [
