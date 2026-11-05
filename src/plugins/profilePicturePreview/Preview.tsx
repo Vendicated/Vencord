@@ -81,11 +81,13 @@ function InChatPreview({ src, state, SIZE, decoVisible }: { src: string; state: 
     const name = user.globalName ?? user.username;
 
     return (
-        <div style={{ display: "flex", alignItems: "center", gap: 16, padding: 16 }}>
-            <PFPAndDeco src={src} size={SIZE} state={state} deco={deco} decoVisible={decoVisible} />
-            <div style={{ display: "flex", flexDirection: "column" }}>
-                <span style={{ color: "var(--header-primary)", fontWeight: 500, fontSize: 16, lineHeight: "1.375rem" }}>{name}</span>
-                <span style={{ color: "var(--text-default)", fontWeight: 400, fontSize: 16, lineHeight: "1.375rem" }}>Hello Peter, welcome to fortnite</span>
+        <div style={{ display: "flex", alignItems: "center", width: "50%" }}>
+            <div style={{ display: "flex", gap: 16 }}>
+                <PFPAndDeco src={src} size={SIZE} state={state} deco={deco} decoVisible={decoVisible} />
+                <div style={{ display: "flex", flexDirection: "column" }}>
+                    <span style={{ color: "var(--header-primary)", fontWeight: 500, fontSize: 16, lineHeight: "1.375rem" }}>{name}</span>
+                    <span style={{ color: "var(--text-default)", fontWeight: 400, fontSize: 16, lineHeight: "1.375rem" }}>Oh wow I can see how my pfp will look while I'm changing it?, thanks ezPFP</span>
+                </div>
             </div>
         </div>
     );
