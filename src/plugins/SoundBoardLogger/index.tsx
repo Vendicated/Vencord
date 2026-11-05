@@ -34,7 +34,7 @@ const HeaderBarIcon = findComponentByCodeLazy(".HEADER_BAR_BADGE_BOTTOM,", 'posi
 export default definePlugin({
     name: "SoundBoardLogger",
     authors: [
-        { id: 843448897737064448n, name: "Fres" },
+        Devs.Fres,
         Devs.Moxxie
     ],
     description: "Logs soundboard sounds played in a voice chat and allows you to download them",
