@@ -76,7 +76,7 @@ export default definePlugin({
             // Nameplates
             find: ".MINI_PREVIEW,[",
             replacement: {
-                match: /animate:\i,loop:/,
+                match: /animate:\i,loop:(?=!0===)/,
                 replace: "animate:true,loop:true,_loop:"
             }
         }
