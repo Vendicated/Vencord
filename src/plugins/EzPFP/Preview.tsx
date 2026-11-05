@@ -59,6 +59,22 @@ function CropCircle({ src, size, state }: { src: string; size: number; state: Ed
     );
 }
 
+function PFPAndDeco({ src, size, state, deco }: { src: string; size: number; state: EditorState; deco: string | undefined; }) {
+
+    return (
+        <div style={{ position: "relative", width: size, height: size }}>
+            <CropCircle src={src} size={size} state={state} />
+            {deco && (
+                <img
+                    src={`https://cdn.discordapp.com/avatar-decoration-presets/${deco}.png?size=128`}
+                    draggable={false}
+                    style={{ position: "absolute", top: -size * 0.1, left: -size * 0.1, width: size * 1.2, height: size * 1.2, pointerEvents: "none" }}
+                />
+            )}
+        </div>
+    );
+}
+
 function InChatPreview({ src, state, isPFPModal, SIZE }: { src: string; state: EditorState; isPFPModal: boolean; SIZE: number; }) {
     const user = UserStore.getCurrentUser();
     const deco = user.avatarDecorationData?.asset as string | undefined;
@@ -68,16 +84,7 @@ function InChatPreview({ src, state, isPFPModal, SIZE }: { src: string; state: E
 
     return (
         <div style={{ display: "flex", alignItems: "center", gap: 16, padding: 16 }}>
-            <div style={{ position: "relative", width: SIZE, height: SIZE }}>
-                <CropCircle src={src} size={SIZE} state={state} />
-                {deco && (
-                    <img
-                        src={`https://cdn.discordapp.com/avatar-decoration-presets/${deco}.png?size=128`}
-                        draggable={false}
-                        style={{ position: "absolute", top: -SIZE * 0.1, left: -SIZE * 0.1, width: SIZE * 1.2, height: SIZE * 1.2, pointerEvents: "none" }}
-                    />
-                )}
-            </div>
+            <PFPAndDeco src={src} size={SIZE} state={state} deco={deco} />
             <div style={{ display: "flex", flexDirection: "column" }}>
                 <span style={{ color: "var(--header-primary)", fontWeight: 500, fontSize: 16, lineHeight: "1.375rem" }}>{name}</span>
                 <span style={{ color: "var(--text-default)", fontWeight: 400, fontSize: 16, lineHeight: "1.375rem" }}>Hello Peter, welcome to fortnite</span>
@@ -90,10 +97,6 @@ function InChatPreview({ src, state, isPFPModal, SIZE }: { src: string; state: E
 export default function FullPreview({ src, state, isPFPModal }: { src: string; state: EditorState; isPFPModal: boolean; }) {
     return (
         <div style={{ display: "flex", flexDirection: "column" }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8 }}>
-                <InChatPreview src={src} state={state} isPFPModal={isPFPModal} SIZE={40} />
-                <InChatPreview src={src} state={state} isPFPModal={isPFPModal} SIZE={80} />
-            </div>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8 }}>
                 <InChatPreview src={src} state={state} isPFPModal={isPFPModal} SIZE={40} />
                 <InChatPreview src={src} state={state} isPFPModal={isPFPModal} SIZE={80} />
