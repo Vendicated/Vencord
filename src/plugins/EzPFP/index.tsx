@@ -9,7 +9,7 @@ import { ErrorBoundary } from "@components/index";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 
-import Preview, { EditorState, updateOffset } from "./Preview";
+import FullPreview, { EditorState, updateOffset } from "./Preview";
 
 const settings = definePluginSettings({
     ezPFP: {
@@ -30,7 +30,7 @@ export default definePlugin({
             replacement: [
                 {
                     match: /(?<=minValue:1,maxValue:)2(?=,keyboardStep:\.025)/,
-                    replace: "arguments[0].uploadType === 'AVATAR' ? 20 : 2",
+                    replace: "arguments[0].uploadType === 'AVATAR' ? 5 : 2",
                 },
                 {
                     match: /(\{cropDimensions:(\i),dragBoundaries:\i,imageDimensions:(\i),imageRotation:(\i),imageTransformCoordinates:\i,zoomRatio:(\i),startingCoordinates:\i,isDragging:\i,hasImageEdits:\i\}=\i)/,
@@ -43,6 +43,10 @@ export default definePlugin({
                 {
                     match: /(\i)\.current=\(0,\i\.\i\)\(\i,\i,\i\),/,
                     replace: "$&$self.updateOffset($1.current),"
+                },
+                {
+                    match: /(?<=size:)"md"(?=,actionBarInput)/,
+                    replace: "arguments[0].uploadType === 'AVATAR' ? 'lg' : 'md'"
                 }
             ],
         },
@@ -52,7 +56,7 @@ export default definePlugin({
 
     renderPreview: (src: string, state: EditorState, isPFPModal: boolean) => (
         <ErrorBoundary noop>
-            <Preview src={src} state={state} isPFPModal={isPFPModal} />
+            <FullPreview src={src} state={state} isPFPModal={isPFPModal} />
         </ErrorBoundary>
     ),
 });

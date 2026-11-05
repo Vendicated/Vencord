@@ -6,8 +6,6 @@
 
 import { useEffect, UserStore, useState } from "@webpack/common";
 
-const SIZE = 40;
-
 export interface EditorState {
     crop: { width: number; height: number; };
     image: { width: number; height: number; };
@@ -61,7 +59,7 @@ function CropCircle({ src, size, state }: { src: string; size: number; state: Ed
     );
 }
 
-export default function Preview({ src, state, isPFPModal }: { src: string; state: EditorState; isPFPModal: boolean; }) {
+function InChatPreview({ src, state, isPFPModal, SIZE }: { src: string; state: EditorState; isPFPModal: boolean; SIZE: number; }) {
     const user = UserStore.getCurrentUser();
     const deco = user.avatarDecorationData?.asset as string | undefined;
     const name = user.globalName ?? user.username;
@@ -83,6 +81,20 @@ export default function Preview({ src, state, isPFPModal }: { src: string; state
             <div style={{ display: "flex", flexDirection: "column" }}>
                 <span style={{ color: "var(--header-primary)", fontWeight: 500, fontSize: 16, lineHeight: "1.375rem" }}>{name}</span>
                 <span style={{ color: "var(--text-default)", fontWeight: 400, fontSize: 16, lineHeight: "1.375rem" }}>Hello Peter, welcome to fortnite</span>
+            </div>
+        </div>
+    );
+}
+
+
+export default function FullPreview({ src, state, isPFPModal }: { src: string; state: EditorState; isPFPModal: boolean; }) {
+    return (
+        <div style={{ position: "relative", height: 80, width: "100%", backgroundColor: "#c45b6c", overflow: "visible" }}>
+            <div style={{ position: "absolute", backgroundColor: "black", right: "100%" }}>
+                <InChatPreview src={src} state={state} isPFPModal={isPFPModal} SIZE={40} />
+            </div>
+            <div style={{ position: "absolute", backgroundColor: "black", left: "100%", marginLeft: -40 }}>
+                <InChatPreview src={src} state={state} isPFPModal={isPFPModal} SIZE={40} />
             </div>
         </div>
     );
