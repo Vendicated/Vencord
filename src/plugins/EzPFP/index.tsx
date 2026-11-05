@@ -20,7 +20,7 @@ const settings = definePluginSettings({
     maxZoom: {
         type: OptionType.SLIDER,
         description: "Maximum zoom multiplier",
-        markers: [2, 3, 4, 5, 6, 7, 8, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20],
+        markers: [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20],
         default: 5,
         stickToMarkers: true
     },
@@ -36,6 +36,7 @@ export default definePlugin({
     name: "EzPFP",
     description: "Preview your profile picture before saving and getting rate limited when you can't get it right",
     authors: [Devs.RandomCat],
+    tags: ["Appearance", "Customisation", "Utility"],
     settings,
     patches: [
         {
