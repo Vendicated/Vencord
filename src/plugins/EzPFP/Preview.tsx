@@ -118,7 +118,7 @@ function ProfileBannerPreview({ src, state, size }: { src: string; state: Editor
 
             <div style={{ position: "relative", padding: `${outer / 2 + 8}px 16px 16px` }}>
                 <div style={{
-                    position: "absolute", top: -outer / 2, left: 16,
+                    position: "absolute", top: -outer / 2 - 7, left: 10,
                     width: outer, height: outer, borderRadius: "50%", background: "#232428",
                     display: "flex", alignItems: "center", justifyContent: "center"
                 }}>
@@ -126,8 +126,8 @@ function ProfileBannerPreview({ src, state, size }: { src: string; state: Editor
                 </div>
 
                 <div style={{ display: "flex", flexDirection: "column" }}>
-                    <span style={{ color: "var(--text-default)", fontWeight: 600, fontSize: 20 }}>{user.globalName ?? user.username}</span>
-                    <span style={{ color: "var(--text-strong)", fontWeight: 400, fontSize: 14 }}>{user.username}</span>
+                    <span style={{ color: "var(--text-default)", fontWeight: 600, fontSize: 20, lineHeight: "1.375rem" }}>{user.globalName ?? user.username}</span>
+                    <span style={{ color: "var(--text-strong)", fontWeight: 400, fontSize: 14, lineHeight: "1.375rem" }}>{user.username}</span>
                 </div>
             </div>
         </div>
