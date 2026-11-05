@@ -82,7 +82,7 @@ function Presets({ text, setText, emoji, setEmoji }: PresetsProps) {
                         className={cl("apply")}
                         onClick={() => {
                             setText(preset.text);
-                            setEmoji(preset.emoji);
+                            setEmoji(preset.emoji && { ...preset.emoji });
                         }}
                     >
                         <PresetLabel preset={preset} />
@@ -90,7 +90,7 @@ function Presets({ text, setText, emoji, setEmoji }: PresetsProps) {
                     <button
                         className={cl("delete")}
                         aria-label="Delete preset"
-                        onClick={() => settings.store.presets = presets.filter(p => p !== preset)}
+                        onClick={() => presets.splice(i, 1)}
                     >
                         ×
                     </button>
@@ -100,7 +100,7 @@ function Presets({ text, setText, emoji, setEmoji }: PresetsProps) {
                 size="min"
                 variant="secondary"
                 disabled={!canSave}
-                onClick={() => settings.store.presets = [...presets, current]}
+                onClick={() => presets.push(current)}
             >
                 Save as Preset
             </Button>
