@@ -81,20 +81,8 @@ const mediaSizes = [16, 32, 48, 56, 64, 96, 128, 160, 256, 512, 1024];
 const DEFAULT_EMOJI_SIZE = 48;
 const DEFAULT_STICKER_SIZE = 160;
 
-interface ClipsSettings {
-    clipsEnabled: boolean;
-    storageLocation?: string;
-    clipsLength?: number;
-    remindersEnabled?: boolean;
-    decoupledClipsEnabled?: boolean;
-    enableAutoclipping?: boolean;
-    [key: string]: unknown;
-}
-
 interface ClipsStoreType {
-    getSettings(): ClipsSettings;
-    hasClips(): boolean;
-    [key: string]: unknown;
+    getSettings(): { clipsEnabled: boolean; };
 }
 
 const ClipsStore = findStoreLazy("ClipsStore") as ClipsStoreType;
