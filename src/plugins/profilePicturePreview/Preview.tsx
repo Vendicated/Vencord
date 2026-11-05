@@ -99,9 +99,6 @@ function ProfileBannerPreview({ src, state, size, decoVisible }: { src: string; 
 
     const deco = user.avatarDecorationData?.asset;
 
-    console.log("profile: ", profile);
-    console.log("user: ", user);
-
     const bannerHash = profile?.banner ?? user.banner;
     const bannerUrl = bannerHash
         ? `https://cdn.discordapp.com/banners/${user.id}/${bannerHash}.${bannerHash.startsWith("a_") ? "gif" : "png"}?size=300`
