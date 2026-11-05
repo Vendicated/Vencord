@@ -33,7 +33,7 @@ const settings = definePluginSettings({
 });
 
 export default definePlugin({
-    name: "EzPFP",
+    name: "ProfilePicturePreview",
     description: "Preview your profile picture before saving and getting rate limited when you can't get it right",
     authors: [Devs.RandomCat],
     tags: ["Appearance", "Customisation", "Utility"],
