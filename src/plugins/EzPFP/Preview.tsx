@@ -59,12 +59,12 @@ function CropCircle({ src, size, state }: { src: string; size: number; state: Ed
     );
 }
 
-function PFPAndDeco({ src, size, state, deco }: { src: string; size: number; state: EditorState; deco: string | undefined; }) {
+function PFPAndDeco({ src, size, state, deco, decoVisible }: { src: string; size: number; state: EditorState; deco: string | undefined; decoVisible: boolean; }) {
 
     return (
         <div style={{ position: "relative", width: size, height: size }}>
             <CropCircle src={src} size={size} state={state} />
-            {deco && (
+            {deco && decoVisible && (
                 <img
                     src={`https://cdn.discordapp.com/avatar-decoration-presets/${deco}.png?size=128`}
                     draggable={false}
@@ -75,14 +75,14 @@ function PFPAndDeco({ src, size, state, deco }: { src: string; size: number; sta
     );
 }
 
-function InChatPreview({ src, state, SIZE }: { src: string; state: EditorState; SIZE: number; }) {
+function InChatPreview({ src, state, SIZE, decoVisible }: { src: string; state: EditorState; SIZE: number; decoVisible: boolean; }) {
     const user = UserStore.getCurrentUser();
     const deco = user.avatarDecorationData?.asset as string | undefined;
     const name = user.globalName ?? user.username;
 
     return (
         <div style={{ display: "flex", alignItems: "center", gap: 16, padding: 16 }}>
-            <PFPAndDeco src={src} size={SIZE} state={state} deco={deco} />
+            <PFPAndDeco src={src} size={SIZE} state={state} deco={deco} decoVisible={decoVisible} />
             <div style={{ display: "flex", flexDirection: "column" }}>
                 <span style={{ color: "var(--header-primary)", fontWeight: 500, fontSize: 16, lineHeight: "1.375rem" }}>{name}</span>
                 <span style={{ color: "var(--text-default)", fontWeight: 400, fontSize: 16, lineHeight: "1.375rem" }}>Hello Peter, welcome to fortnite</span>
@@ -92,7 +92,7 @@ function InChatPreview({ src, state, SIZE }: { src: string; state: EditorState; 
 }
 
 
-function ProfileBannerPreview({ src, state, size }: { src: string; state: EditorState; size: number; }) {
+function ProfileBannerPreview({ src, state, size, decoVisible }: { src: string; state: EditorState; size: number; decoVisible: boolean; }) {
     const user = UserStore.getCurrentUser();
     const profile = useStateFromStores([UserProfileStore], () => UserProfileStore.getUserProfile(user.id));
     const RING = 6;
@@ -122,7 +122,7 @@ function ProfileBannerPreview({ src, state, size }: { src: string; state: Editor
                     width: outer, height: outer, borderRadius: "50%", background: "#232428",
                     display: "flex", alignItems: "center", justifyContent: "center"
                 }}>
-                    <PFPAndDeco src={src} size={size} state={state} deco={deco} />
+                    <PFPAndDeco src={src} size={size} state={state} deco={deco} decoVisible={decoVisible} />
                 </div>
 
                 <div style={{ display: "flex", flexDirection: "column" }}>
@@ -136,11 +136,17 @@ function ProfileBannerPreview({ src, state, size }: { src: string; state: Editor
 
 export default function FullPreview({ src, state, isPFPModal }: { src: string; state: EditorState; isPFPModal: boolean; }) {
     if (!isPFPModal) return null;
+    const [decoVisible, setDecoVisible] = useState<boolean>(true);
 
     return (
-        <div style={{ display: "flex", flexDirection: "row", justifyContent: "space-between", marginTop: 8 }}>
-            <ProfileBannerPreview src={src} state={state} size={80} />
-            <InChatPreview src={src} state={state} SIZE={40} />
+        <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+            <div style={{ display: "flex", flexDirection: "row", justifyContent: "space-between", marginTop: 8 }}>
+                <ProfileBannerPreview src={src} state={state} size={80} decoVisible={decoVisible} />
+                <InChatPreview src={src} state={state} SIZE={40} decoVisible={decoVisible} />
+            </div>
+            <button
+                style={{ backgroundColor: "var(--control-primary-background-default)", color: "white", borderRadius: 8, width: "fit-content", padding: "4px 8px" }}
+                onClick={() => setDecoVisible(!decoVisible)}>Decoration {decoVisible ? "On" : "Off"}</button>
         </div>
     );
 }
