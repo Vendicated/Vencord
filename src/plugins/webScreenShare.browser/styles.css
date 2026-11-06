@@ -9,7 +9,8 @@
 
     .vc-screen-picker-option-radios {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(0, 1fr));
+        grid-auto-flow: column;
+        grid-auto-columns: minmax(max-content, 1fr);
         width: 100%;
 
         .vc-screen-picker-option-radio {

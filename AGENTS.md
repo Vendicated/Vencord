@@ -10,6 +10,7 @@ Follow these deeper instructions when applicable:
 
 - Always use pnpm, not npm
 - Verify changes by running `pnpm build --dev` and `pnpm test`, or more specific package.json scripts. Always build with `--dev`
+- Use `pnpm test:ts` to only typecheck and `pnpm lint` to only lint
 
 ## Style
 

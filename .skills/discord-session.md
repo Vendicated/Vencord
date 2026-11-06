@@ -18,4 +18,12 @@ ConsoleShortcuts exposes helpers for interacting with webpack, most notably:
 - `wreq.m[id].toString()` to read module source code
 - `wreq(id)` to load the exports of a module
 - `loadLazyChunks()` loads **all** lazy loaded modules. Use this sparingly, it downloads a significant amount of code.
-- `getIntlMessageFromHash("hash")`: Retrieves a Discord intl message based on its hash
+- `Vencord.Util.getIntlMessageFromHash("hash")`: Retrieves a Discord intl message based on its hash
+- `findByProps`, `findByCode`, `findComponentByCode`, `findStore`: Same as the `find*` methods in plugins
+- `fakeRender(Component, props)`: Renders a component in a popup
+- `canonicalizeMatch(regex)`: Converts `\i` and intl keys like patches do. Use it to test matches with `.test()` and `.replace()` against module source before building
+- `wpPatcher.getFactoryPatchedSource(id)` and `wpPatcher.getFactoryPatchedBy(id)`: Patched source of a module and which plugins patched it. Dev builds only. `wreq.m[id].toString()` always returns the unpatched source
+
+Run `shortcutList` for the full list.
+
+Module IDs can change between Discord builds. Never hardcode them.
