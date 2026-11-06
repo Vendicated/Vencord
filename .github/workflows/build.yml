@@ -12,6 +12,7 @@ on:
             - pnpm-lock.yaml
 env:
     FORCE_COLOR: true
+    plugins_changed: false
 permissions:
     contents: write
 
@@ -76,9 +77,21 @@ jobs:
                   cp -r ../dist/* .
 
                   git add -A
+
+                  if ! git diff --cached --quiet -- plugins.json plugin-readmes.json; then
+                      echo "plugins_changed=true" >> $GITHUB_ENV
+                  fi
+
                   git commit -m "Builds for https://github.com/$GITHUB_REPOSITORY/commit/$GITHUB_SHA"
                   git push --force https://$USERNAME:$API_TOKEN@github.com/$GH_REPO.git
               env:
                   API_TOKEN: ${{ secrets.BUILDS_TOKEN }}
                   GH_REPO: Vencord/builds
                   USERNAME: GitHub-Actions
+
+            - name: Redeploy vencord.dev if plugin data changed
+              if: github.repository == 'Vendicated/Vencord' && env.plugins_changed == 'true'
+              run:
+                curl --fail --silent --show-error -X POST "$CLOUDFLARE_DEPLOY_HOOK"
+              env:
+                  CLOUDFLARE_DEPLOY_HOOK: ${{ secrets.CLOUDFLARE_DEPLOY_HOOK }}
