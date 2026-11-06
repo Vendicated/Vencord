@@ -28,7 +28,7 @@ import { Paragraph } from "@components/Paragraph";
 import { copyToClipboard } from "@utils/clipboard";
 import { Devs } from "@utils/constants";
 import { classNameFactory } from "@utils/css";
-import { getTheme, insertTextIntoChatInputBox, Theme } from "@utils/discord";
+import { copyWithToast, getTheme, insertTextIntoChatInputBox, Theme } from "@utils/discord";
 import definePlugin, { IconComponent, OptionType } from "@utils/types";
 import { RenderModalProps } from "@vencord/discord-types";
 import { Modal, openModal, Parser, useMemo, useState } from "@webpack/common";
@@ -74,21 +74,23 @@ function PickerModal(props: RenderModalProps) {
         <Modal
             {...props}
             title="Timestamp Picker"
-            actions={[{
-                text: "Insert",
-                variant: "primary",
-                onClick() {
-                    insertTextIntoChatInputBox(formatted + " ");
-                    props.onClose();
+            actions={[
+                {
+                    text: "Copy",
+                    variant: "secondary",
+                    onClick() {
+                        copyWithToast(formatted);
+                    }
+                },
+                {
+                    text: "Insert",
+                    variant: "primary",
+                    onClick() {
+                        insertTextIntoChatInputBox(formatted + " ");
+                        props.onClose();
+                    }
                 }
-            }, {
-                text: "Copy",
-                variant: "secondary",
-                onClick() {
-                    copyToClipboard(formatted);
-                    props.onClose();
-                }
-            }]}
+            ]}
         >
             <input
                 className={cl("date-picker")}
