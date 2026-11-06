@@ -21,7 +21,6 @@
 
 // Be very careful with imports in this file to avoid circular dependency issues.
 // Only import pure modules that don't import other parts of Vencord.
-import monacoHtmlLocal from "file://monacoWin.html?minify";
 import * as DataStore from "@api/DataStore";
 import type { Settings } from "@api/Settings";
 import { getThemeInfo } from "@main/themes";
@@ -29,6 +28,7 @@ import { debounce } from "@shared/debounce";
 import { localStorage } from "@utils/localStorage";
 import { getStylusWebStoreUrl } from "@utils/web";
 import { EXTENSION_BASE_URL, metaReady, RENDERER_CSS_URL } from "@utils/web-metadata";
+import monacoHtmlLocal from "file://monacoWin.html?minify";
 
 // listeners for ipc.on
 const cssListeners = new Set<(css: string) => void>();
@@ -58,7 +58,7 @@ window.VencordNative = {
     native: {
         getVersions: () => ({}),
         supportsWindowsMaterial: () => false,
-        openExternal: async (url) => void open(url, "_blank"),
+        openExternal: async url => void open(url, "_blank"),
         getRendererCss: async () => {
             if (IS_USERSCRIPT)
                 // need to wait for next tick for _vcUserScriptRendererCss to be set

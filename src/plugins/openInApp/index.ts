@@ -104,7 +104,7 @@ export default definePlugin({
                     replace: "true"
                 },
                 {
-                    match: /\(0,\i\.isDesktop\)\(\)/,
+                    match: /\(0,\i\.\i\)\(\)(?=\|\|\(\i=window\.open)/,
                     replace: "true"
                 }
             ]

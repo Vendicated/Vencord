@@ -19,7 +19,7 @@
 import { Button } from "@components/Button";
 import { Logger } from "@utils/Logger";
 import { useFluxSubscription } from "@utils/react";
-import { MediaEngineStore, useState } from "@webpack/common";
+import { MediaEngineStore, useRef, useState } from "@webpack/common";
 
 import type { VoiceRecorder } from ".";
 import { settings } from "./settings";
@@ -41,8 +41,12 @@ export const VoiceRecorderWeb: VoiceRecorder = ({ setAudioBlob, onRecordingChang
     const [paused, setPaused] = useState(false);
     const [recorder, setRecorder] = useState<MediaRecorder>();
     const [chunks, setChunks] = useState<Blob[]>([]);
+    const closed = useRef(false);
 
-    useFluxSubscription("VENCORD_STOP_RECORDING", stopRecording);
+    useFluxSubscription("VENCORD_STOP_RECORDING", () => {
+        closed.current = true;
+        stopRecording();
+    });
 
     function changeRecording(recording: boolean) {
         setRecording(recording);
@@ -74,6 +78,12 @@ export const VoiceRecorderWeb: VoiceRecorder = ({ setAudioBlob, onRecordingChang
                     deviceId: MediaEngineStore.getInputDeviceId()
                 }
             }).then(stream => {
+                // mic permission can resolve after the modal has closed
+                if (closed.current) {
+                    stream.getTracks().forEach(track => track.stop());
+                    return;
+                }
+
                 const chunks = [] as Blob[];
                 setChunks(chunks);
 

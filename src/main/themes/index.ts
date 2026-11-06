@@ -1,5 +1,3 @@
-/* eslint-disable simple-header/header */
-
 /*!
  * BetterDiscord addon meta parser
  * Copyright 2023 BetterDiscord contributors
