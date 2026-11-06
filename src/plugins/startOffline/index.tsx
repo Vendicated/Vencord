@@ -4,11 +4,17 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import * as DataStore from "@api/DataStore";
 import { currentNotice, noticesQueue, popNotice, showNotice } from "@api/Notices";
 import { definePluginSettings } from "@api/Settings";
 import { getUserSettingLazy } from "@api/UserSettings";
 import definePlugin, { makeRange, OptionType } from "@utils/types";
-import { useEffect, useState } from "@webpack/common";
+import {
+    SelfPresenceStore,
+    useEffect,
+    UserSettingsProtoStore,
+    useState
+} from "@webpack/common";
 
 const StatusSettings = getUserSettingLazy<string>("status", "status")!;
 
@@ -44,38 +50,84 @@ const settings = definePluginSettings({
 
 let isDeciding = true;
 let userChoseOffline = false;
+let savedStatus: string | null = null;
+let lastPluginStatus: string | null = null;
+let decisionTimer: ReturnType<typeof setTimeout> | null = null;
+
+function safePopNotice() {
+    try {
+        popNotice();
+    } catch {
+        // Ignored
+    }
+}
 
 async function setStatus(status: string) {
-    try {
-        await StatusSettings.updateSetting(status);
-    } catch {
-        // Ignored if user settings module not ready yet
+    lastPluginStatus = status;
+    for (let i = 0; i < 20; i++) {
+        try {
+            if (StatusSettings?.updateSetting) {
+                await StatusSettings.updateSetting(status);
+                SelfPresenceStore?.emitChange?.();
+                return;
+            }
+        } catch {
+            // Ignored if user settings module not ready yet
+        }
+        await new Promise(resolve => setTimeout(resolve, 250));
     }
 }
 
 function goOnline() {
+    if (decisionTimer) clearTimeout(decisionTimer);
     isDeciding = false;
     userChoseOffline = false;
-    setStatus("online");
+    safePopNotice();
+    const targetStatus = savedStatus || "online";
+    setStatus(targetStatus);
 }
 
 function stayOffline() {
+    if (decisionTimer) clearTimeout(decisionTimer);
     isDeciding = false;
     userChoseOffline = true;
+    safePopNotice();
     setStatus("invisible");
 
     if (settings.store.showNoticeWhenOffline) {
-        const noticeMsg = "You started Discord offline. Click to go online whenever you're ready.";
-        if (
-            currentNotice?.[1] === noticeMsg ||
-            noticesQueue.some(([, msg]) => msg === noticeMsg)
-        ) return;
+        setTimeout(() => {
+            if (!userChoseOffline) return;
+            const noticeMsg = "You started Discord offline. Click to go online whenever you're ready.";
+            if (
+                currentNotice?.[1] === noticeMsg ||
+                noticesQueue.some(([, msg]) => msg === noticeMsg)
+            ) return;
 
-        showNotice(noticeMsg, "Go Online", () => {
-            popNotice();
-            goOnline();
-        });
+            showNotice(noticeMsg, "Go Online", () => {
+                goOnline();
+            });
+        }, 100);
     }
+}
+
+function handleUserSettingsChange() {
+    const currentStatus = StatusSettings?.getSetting?.();
+    if (!currentStatus || currentStatus === lastPluginStatus) return;
+
+    lastPluginStatus = currentStatus;
+
+    // User manually changed their status in Discord
+    if (decisionTimer) clearTimeout(decisionTimer);
+    isDeciding = false;
+    userChoseOffline = false;
+
+    if (currentStatus !== "invisible") {
+        savedStatus = currentStatus;
+        DataStore.set("StartOffline_savedStatus", currentStatus);
+    }
+
+    safePopNotice();
+    SelfPresenceStore?.emitChange?.();
 }
 
 function StartupNotice({
@@ -136,20 +188,11 @@ function displayStartupPrompt() {
     try {
         showNotice(
             <StartupNotice
-                onStayOffline={() => {
-                    popNotice();
-                    stayOffline();
-                }}
-                onGoOnline={() => {
-                    popNotice();
-                    goOnline();
-                }}
+                onStayOffline={stayOffline}
+                onGoOnline={goOnline}
             />,
             "Go Online Now",
-            () => {
-                popNotice();
-                goOnline();
-            }
+            goOnline
         );
     } catch {
         // Fallback if notice module encounters any issue
@@ -160,7 +203,12 @@ function displayStartupPrompt() {
 function onBeforeUnload() {
     // When closing Discord, save status as invisible so next launch is guaranteed to connect silently
     try {
-        StatusSettings.updateSetting("invisible");
+        const current = StatusSettings?.getSetting?.();
+        if (current && current !== "invisible") {
+            savedStatus = current;
+            DataStore.set("StartOffline_savedStatus", current);
+        }
+        StatusSettings?.updateSetting?.("invisible");
     } catch {
         // Ignore
     }
@@ -178,7 +226,7 @@ export default definePlugin({
     settings,
 
     overrideStatus(originalStatus: string) {
-        if (isDeciding || userChoseOffline) {
+        if (isDeciding) {
             return "invisible";
         }
         return originalStatus;
@@ -204,15 +252,40 @@ export default definePlugin({
         isDeciding = true;
         userChoseOffline = false;
 
+        DataStore.get<string>("StartOffline_savedStatus").then(val => {
+            if (val && val !== "invisible") {
+                savedStatus = val;
+            }
+        });
+
+        lastPluginStatus = StatusSettings?.getSetting?.() ?? "invisible";
+
+        UserSettingsProtoStore?.addChangeListener?.(handleUserSettingsChange);
         window.addEventListener("beforeunload", onBeforeUnload);
 
-        // Display notice bar with 3s countdown
+        // Fallback safety timer in case notice is dismissed or unmounted
+        if (decisionTimer) clearTimeout(decisionTimer);
+        decisionTimer = setTimeout(() => {
+            if (isDeciding) {
+                if (settings.store.defaultAction === "invisible") {
+                    stayOffline();
+                } else {
+                    goOnline();
+                }
+            }
+        }, (settings.store.countdownSeconds + 2) * 1000);
+
+        // Display notice bar with countdown immediately on start
         displayStartupPrompt();
     },
 
     stop() {
+        if (decisionTimer) clearTimeout(decisionTimer);
         window.removeEventListener("beforeunload", onBeforeUnload);
+        UserSettingsProtoStore?.removeChangeListener?.(handleUserSettingsChange);
         isDeciding = false;
         userChoseOffline = false;
+        safePopNotice();
+        SelfPresenceStore?.emitChange?.();
     }
 });

@@ -22,16 +22,26 @@ import { waitFor } from "@webpack";
 import { ReactNode } from "react";
 
 let NoticesModule: any;
-waitFor(m => m.show && m.dismiss && !m.suppressAll, m => NoticesModule = m);
+waitFor(m => m.show && m.dismiss && !m.suppressAll, m => {
+    NoticesModule = m;
+    if (currentNotice) {
+        NoticesModule.show(...currentNotice, "VencordNotice");
+    } else if (noticesQueue.length) {
+        nextNotice();
+    }
+});
 
 export const noticesQueue = [] as any[];
 export let currentNotice: any = null;
 
 export function popNotice() {
-    NoticesModule.dismiss();
+    NoticesModule?.dismiss?.();
+    currentNotice = null;
+    nextNotice();
 }
 
 export function nextNotice() {
+    if (!NoticesModule) return;
     currentNotice = noticesQueue.shift();
 
     if (currentNotice) {
