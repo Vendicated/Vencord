@@ -139,6 +139,10 @@ const buttonsToRemove = [
     "thread",
     "pin",
     "delete",
+    "mark-unread",
+    "apps",
+    "bookmark",
+    "reminder"
 ];
 
 const REMOVE_HISTORY_ID = "ml-remove-history";
