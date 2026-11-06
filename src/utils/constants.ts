@@ -702,6 +702,10 @@ export const Devs = /* #__PURE__*/ Object.freeze({
         name: "I'm not playing in real life",
         id: 841939724306087986n
     },
+    iflex0x: {
+        name: "iFlex0x",
+        id: 1007939118925361212n
+    },
     Nays: {
         name: "Nays",
         id: 344871509677965313n
