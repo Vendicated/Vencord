@@ -12,6 +12,7 @@ export default definePlugin({
     name: "AutoMuteMedia",
     authors: [Devs.sadan],
     description: "Mutes media by default",
+    tags: ["Media", "Chat"],
 
     patches: [
         {
@@ -21,13 +22,13 @@ export default definePlugin({
                 // current muted state to its return type.
                 // Don't call it the first time the play button is clicked so our default is not overwritten
                 {
-                    match: /\i!==this\.state\.muted/,
-                    replace: "!this.state.hasClickedPlay && $&"
+                    match: /!==this\.state\.muted/,
+                    replace: "$& && !this.state.hasClickedPlay"
                 },
                 // when the play button is clicked, if it hasn't been clicked before discord sets the muted state to the default
                 // overwrite the default to always be true
                 {
-                    match: /(?<=this\.setState\(\{[^}]+muted:)\(!!\i\|\|!\i\)&&\i(?=[,}])/,
+                    match: /(?<=muted:)!this\.shouldUnmuteOnFirstInteraction\(\)&&\i(?=[,}])/,
                     replace: "this.state.hasClickedPlay ? this.state.muted : true"
                 },
             ]
