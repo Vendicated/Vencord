@@ -25,13 +25,12 @@ import { InlineCode } from "@components/CodeBlock";
 import { Grid } from "@components/Grid";
 import { Heading } from "@components/Heading";
 import { Paragraph } from "@components/Paragraph";
-import { copyToClipboard } from "@utils/clipboard";
 import { Devs } from "@utils/constants";
 import { classNameFactory } from "@utils/css";
 import { copyWithToast, getTheme, insertTextIntoChatInputBox, Theme } from "@utils/discord";
 import definePlugin, { IconComponent, OptionType } from "@utils/types";
 import { RenderModalProps } from "@vencord/discord-types";
-import { Modal, openModal, Parser, useMemo, useState } from "@webpack/common";
+import { Modal, openModal, Parser, useState } from "@webpack/common";
 
 const settings = definePluginSettings({
     replaceMessageContents: {
@@ -65,10 +64,7 @@ function PickerModal(props: RenderModalProps) {
 
     const formatTimestamp = (time: number, format: Format) => `<t:${time}${format && `:${format}`}>`;
 
-    const [formatted, rendered] = useMemo(() => {
-        const formatted = formatTimestamp(time, format);
-        return [formatted, Parser.parse(formatted)];
-    }, [time, format]);
+    const formatted = formatTimestamp(time, format);
 
     return (
         <Modal
