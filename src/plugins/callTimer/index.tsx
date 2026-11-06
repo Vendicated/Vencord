@@ -61,7 +61,7 @@ export default definePlugin({
         {
             find: '"RTCConnectionMenu"',
             replacement: {
-                match: /("RTCConnectionMenu".{0,200}?lineClamp:1,children:)(\i)(?=,|}\))/,
+                match: /("RTCConnectionMenu".{0,300}?lineClamp:1,children:)(\i)(?=,|}\))/,
                 replace: "$1[$2,$self.renderTimer({ channelId: this?.props?.channel?.id })]"
             }
         },

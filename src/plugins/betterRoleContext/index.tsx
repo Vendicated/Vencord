@@ -206,13 +206,19 @@ export default definePlugin({
     settings,
     openRoleContextMenu,
     patches: [
-        // Conflicts with RoleColorEverywhere which changes the code at the end of our match. (and also uses same find & similar match)
-        // However, BetterRoleContext applies first (alphabetic order), so it's not an issue
         {
             find: 'tutorialId:"whos-online',
             replacement: {
-                match: /(?<=#{intl::CHANNEL_MEMBERS_A11Y_LABEL}.{0,200}?"aria-hidden":!0,)children:.{0,200}?(?:—|\\u2014) ",\i\]\}\)\]/,
+                match: /(?<=#{intl::CHANNEL_MEMBERS_A11Y_LABEL}.{0,400}?)children:(?=.{0,20}?(?:—|\\u2014) ",\i\])/,
                 replace: "onContextMenu:e=>$self.openRoleContextMenu(e,arguments[0]),$&"
+            }
+        },
+        // member list role headers
+        {
+            find: "?null:new Intl.NumberFormat",
+            replacement: {
+                match: /(?<=#{intl::CHANNEL_MEMBERS_A11Y_LABEL},\{title:\i,count:\i\}\)\}\),\(0,\i\.jsxs\)\("div",\{)/,
+                replace: "onContextMenu:e=>$self.openRoleContextMenu(e,arguments[0]),"
             }
         }
     ],

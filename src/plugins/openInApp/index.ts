@@ -19,7 +19,7 @@
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType, PluginNative, SettingsDefinition } from "@utils/types";
-import { showToast, Toasts } from "@webpack/common";
+import { showToast } from "@webpack/common";
 import type { MouseEvent } from "react";
 
 interface URLReplacementRule {
@@ -104,7 +104,7 @@ export default definePlugin({
                     replace: "true"
                 },
                 {
-                    match: /\(0,\i\.isDesktop\)\(\)/,
+                    match: /\(0,\i\.\i\)\(\)(?=\|\|\(\i=window\.open)/,
                     replace: "true"
                 }
             ]
@@ -135,7 +135,7 @@ export default definePlugin({
             }
 
             if (rule.match.test(url)) {
-                showToast("Opened link in native app", Toasts.Type.SUCCESS);
+                showToast({ text: "Opened link in native app", variant: "success" });
 
                 const newUrl = url.replace(rule.match, rule.replace);
                 VencordNative.native.openExternal(newUrl);

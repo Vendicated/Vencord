@@ -20,24 +20,28 @@
 import "./styles.css";
 
 import { definePluginSettings } from "@api/Settings";
+import { Button } from "@components/Button";
 import { Divider } from "@components/Divider";
-import ErrorBoundary from "@components/ErrorBoundary";
 import { Flex } from "@components/Flex";
+import { Heading } from "@components/Heading";
+import { Paragraph } from "@components/Paragraph";
+import { Text } from "@components/Text";
 import { Devs } from "@utils/constants";
 import { copyWithToast, fetchUserProfile } from "@utils/discord";
 import { Margins } from "@utils/margins";
 import { classes } from "@utils/misc";
 import { useAwaiter } from "@utils/react";
 import definePlugin, { OptionType } from "@utils/types";
-import { User, UserProfile } from "@vencord/discord-types";
+import { User } from "@vencord/discord-types";
 import { findComponentByCodeLazy } from "@webpack";
-import { Button, ColorPicker, Forms, React, Text, UserProfileStore, UserStore, useState } from "@webpack/common";
-import virtualMerge from "virtual-merge";
+import { ColorPicker, React, UserProfileStore, UserStore, useState } from "@webpack/common";
 
-interface Colors {
-    primary: number;
-    accent: number;
+interface CachedDecodedThemeColors {
+    decodedBio: string;
+    themeColors: number[] | null;
 }
+
+const decodedThemeColorsCache = new Map<string, CachedDecodedThemeColors>();
 
 function encode(primary: number, accent: number): string {
     const message = `[#${primary.toString(16).padStart(6, "0")},#${accent.toString(16).padStart(6, "0")}]`;
@@ -51,26 +55,22 @@ function encode(primary: number, accent: number): string {
     return (padding || "") + " " + encoded;
 }
 
-// Courtesy of Cynthia.
+const DecodeRegex = /\[#([a-fA-F0-9]{1,6}),#([a-fA-F0-9]{1,6})\]/;
 function decode(bio: string): Array<number> | null {
     if (bio == null) return null;
 
-    const colorString = bio.match(
-        /\u{e005b}\u{e0023}([\u{e0061}-\u{e0066}\u{e0041}-\u{e0046}\u{e0030}-\u{e0039}]{1,6})\u{e002c}\u{e0023}([\u{e0061}-\u{e0066}\u{e0041}-\u{e0046}\u{e0030}-\u{e0039}]{1,6})\u{e005d}/u,
-    );
-    if (colorString != null) {
-        const parsed = [...colorString[0]]
-            .map(x => String.fromCodePoint(x.codePointAt(0)! - 0xe0000))
-            .join("");
-        const colors = parsed
-            .substring(1, parsed.length - 1)
-            .split(",")
-            .map(x => parseInt(x.replace("#", "0x"), 16));
-
-        return colors;
-    } else {
-        return null;
+    let ascii = "";
+    for (const ch of bio) {
+        const cp = ch.codePointAt(0)!;
+        if (cp >= 0xe0000 && cp <= 0xe007f) {
+            ascii += String.fromCodePoint(cp - 0xe0000);
+        }
     }
+
+    const match = ascii.match(DecodeRegex);
+    if (!match) return null;
+
+    return [parseInt(match[1], 16), parseInt(match[2], 16)];
 }
 
 const settings = definePluginSettings({
@@ -116,12 +116,12 @@ function SettingsAboutComponent() {
 
     return (
         <section>
-            <Forms.FormTitle tag="h3">Usage</Forms.FormTitle>
-            <Forms.FormText>
+            <Heading className={Margins.bottom8}>Usage</Heading>
+            <Paragraph>
                 After enabling this plugin, you will see custom colors in
                 the profiles of other people using compatible plugins.{" "}
-            </Forms.FormText>
-            <Forms.FormText className={Margins.top8}>
+            </Paragraph>
+            <Text size="sm" className={Margins.top8}>
                 <strong>To set your own profile theme colors:</strong>
                 <ul>
                     <li>&mdash; use the color pickers below to choose your colors</li>
@@ -131,17 +131,17 @@ function SettingsAboutComponent() {
                 <Divider
                     className={classes(Margins.top8, Margins.bottom8)}
                 />
-                <Forms.FormTitle tag="h3">Color pickers</Forms.FormTitle>
+                <Heading className={Margins.bottom8}>Color pickers</Heading>
                 <Flex gap="1em">
                     <ColorPicker
                         color={color1}
                         label={
-                            <Text
-                                variant={"text-xs/normal"}
+                            <Paragraph
+                                size="xs"
                                 style={{ marginTop: "4px" }}
                             >
                                 Primary
-                            </Text>
+                            </Paragraph>
                         }
                         onChange={(color: number) => {
                             setColor1(color);
@@ -150,12 +150,12 @@ function SettingsAboutComponent() {
                     <ColorPicker
                         color={color2}
                         label={
-                            <Text
-                                variant={"text-xs/normal"}
+                            <Paragraph
+                                size="xs"
                                 style={{ marginTop: "4px" }}
                             >
                                 Accent
-                            </Text>
+                            </Paragraph>
                         }
                         onChange={(color: number) => {
                             setColor2(color);
@@ -166,8 +166,7 @@ function SettingsAboutComponent() {
                             const colorString = encode(color1, color2);
                             copyWithToast(colorString);
                         }}
-                        color={Button.Colors.PRIMARY}
-                        size={Button.Sizes.XLARGE}
+                        variant="secondary"
                         style={{ marginBottom: "auto" }}
                     >
                         Copy 3y3
@@ -176,7 +175,7 @@ function SettingsAboutComponent() {
                 <Divider
                     className={classes(Margins.top8, Margins.bottom8)}
                 />
-                <Forms.FormTitle tag="h3">Preview</Forms.FormTitle>
+                <Heading className={Margins.bottom8}>Preview</Heading>
                 <div className="vc-fpt-preview">
                     <ProfileModal
                         user={UserStore.getCurrentUser()}
@@ -189,7 +188,7 @@ function SettingsAboutComponent() {
                         isTryItOut={true}
                     />
                 </div>
-            </Forms.FormText>
+            </Text>
         </section>);
 }
 
@@ -198,50 +197,44 @@ export default definePlugin({
     description: "Allows profile theming by hiding the colors in your bio thanks to invisible 3y3 encoding",
     tags: ["Appearance", "Customisation"],
     authors: [Devs.Alyxia, Devs.Remty],
+    settings,
+    settingsAboutComponent: SettingsAboutComponentWrapper,
+
     patches: [
         {
-            find: "UserProfileStore",
-            replacement: {
-                match: /(?<=getUserProfile\(\i\){return )(.+?)(?=})/,
-                replace: "$self.colorDecodeHook($1)"
-            },
-        },
-        {
-            find: "#{intl::USER_SETTINGS_RESET_PROFILE_THEME}),onClick:",
-            replacement: {
-                match: /#{intl::USER_SETTINGS_RESET_PROFILE_THEME}\).+?}\)(?=\])(?<=color:(\i),.{0,500}?color:(\i),.{0,500}?)/,
-                replace: "$&,$self.addCopy3y3Button({primary:$1,accent:$2})"
-            }
+            find: "}getPreviewThemeColors(",
+            replacement: [
+                {
+                    match: /(}getPreviewThemeColors\(.+?)this\.themeColors/,
+                    replace: "$1$self.colorDecodeHook(this)"
+                },
+                {
+                    match: /canEditThemes\(\){/,
+                    replace: "$&return true;"
+                }
+            ],
         }
     ],
 
-    settingsAboutComponent: SettingsAboutComponentWrapper,
+    colorDecodeHook(profile: any) {
+        if (settings.store.nitroFirst && profile?.themeColors != null) {
+            return profile?.themeColors;
+        }
 
-    settings,
-    colorDecodeHook(user: UserProfile) {
-        if (user?.bio) {
-            // don't replace colors if already set with nitro
-            if (settings.store.nitroFirst && user.themeColors) return user;
-            const colors = decode(user.bio);
-            if (colors) {
-                return virtualMerge(user, {
-                    premiumType: 2,
-                    themeColors: colors
-                });
+        if (profile?.bio != null) {
+            const cached = decodedThemeColorsCache.get(profile.userId);
+            if (cached != null && cached.decodedBio === profile.bio) {
+                return cached.themeColors ?? profile?.themeColors;
+            }
+
+            const decodedThemeColors = decode(profile.bio);
+            decodedThemeColorsCache.set(profile.userId, { decodedBio: profile.bio, themeColors: decodedThemeColors });
+
+            if (decodedThemeColors != null) {
+                return decodedThemeColors;
             }
         }
-        return user;
-    },
-    addCopy3y3Button: ErrorBoundary.wrap(function ({ primary, accent }: Colors) {
-        return <Button
-            onClick={() => {
-                const colorString = encode(primary, accent);
-                copyWithToast(colorString);
-            }}
-            color={Button.Colors.PRIMARY}
-            size={Button.Sizes.XLARGE}
-            className={Margins.left16}
-        >Copy 3y3
-        </Button >;
-    }, { noop: true }),
+
+        return profile?.themeColors;
+    }
 });

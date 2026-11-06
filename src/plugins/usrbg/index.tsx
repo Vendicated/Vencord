@@ -67,7 +67,8 @@ export default definePlugin({
             predicate: () => settings.store.voiceBackground,
             replacement: [
                 {
-                    match: /(?<=function\((\i),\i\)\{)(?=let.{20,40},style:)/,
+                    // FIXME: Stable compat: (?: \i)?
+                    match: /(?<=function(?: \i)?\((\i)\)\{)(?=let.{20,40},style:)/,
                     replace: "$1.style=$self.getVoiceBackgroundStyles($1);"
                 }
             ]
