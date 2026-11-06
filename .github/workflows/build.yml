@@ -91,7 +91,6 @@ jobs:
 
             - name: Redeploy vencord.dev if plugin data changed
               if: github.repository == 'Vendicated/Vencord' && env.plugins_changed == 'true'
-              run:
-                curl --fail --silent --show-error -X POST "$CLOUDFLARE_DEPLOY_HOOK"
+              run: curl --fail --silent --show-error -X POST "$CLOUDFLARE_DEPLOY_HOOK"
               env:
                   CLOUDFLARE_DEPLOY_HOOK: ${{ secrets.CLOUDFLARE_DEPLOY_HOOK }}

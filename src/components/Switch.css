@@ -24,7 +24,6 @@
 }
 
 .vc-switch-focusVisible {
-    /* stylelint-disable-next-line custom-property-pattern */
     box-shadow: 0 0 0 4px var(--__adaptive-focus-ring-color, var(--border-focus, #00b0f4));
 }
 
@@ -52,6 +51,6 @@
 
     &:disabled {
         pointer-events: none;
-        cursor: not-allowed
+        cursor: not-allowed;
     }
 }
