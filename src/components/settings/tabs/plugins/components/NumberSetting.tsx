@@ -20,7 +20,7 @@ import { isSettingDisabled } from "@api/PluginManager";
 import { OptionType, PluginSettingBigIntDef, PluginSettingNumberDef } from "@utils/types";
 import { React, TextInput, useState } from "@webpack/common";
 
-import { resolveError, SettingProps, SettingsSection } from "./Common";
+import { resolveError, SettingProps, SettingsSection, useSettingState } from "./Common";
 
 const MAX_SAFE_NUMBER = BigInt(Number.MAX_SAFE_INTEGER);
 
@@ -30,7 +30,7 @@ export function NumberSetting({ setting, pluginSettings, definedSettings, id, on
         return Number(value);
     }
 
-    const [state, setState] = useState<any>(`${pluginSettings[id] ?? setting.default ?? 0}`);
+    const [state, setState] = useSettingState<any>(`${pluginSettings[id] ?? setting.default ?? 0}`);
     const [error, setError] = useState<string | null>(null);
 
     function getRangeError(value: number | bigint) {
