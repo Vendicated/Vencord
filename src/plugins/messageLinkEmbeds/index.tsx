@@ -20,13 +20,14 @@ import { addMessageAccessory, removeMessageAccessory } from "@api/MessageAccesso
 import { updateMessage } from "@api/MessageUpdater";
 import { definePluginSettings } from "@api/Settings";
 import { getUserSettingLazy } from "@api/UserSettings";
+import { Button } from "@components/Button";
+import { Span } from "@components/Span";
 import { Devs } from "@utils/constants.js";
 import { Queue } from "@utils/Queue";
 import definePlugin, { OptionType } from "@utils/types";
 import { Channel, Message } from "@vencord/discord-types";
 import { findComponentByCodeLazy, findComponentLazy, findCssClassesLazy } from "@webpack";
 import {
-    Button,
     ChannelStore,
     Constants,
     GuildStore,
@@ -36,7 +37,6 @@ import {
     PermissionsBits,
     PermissionStore,
     RestAPI,
-    Text,
     UserStore
 } from "@webpack/common";
 import { ComponentType, JSX } from "react";
@@ -308,10 +308,10 @@ function ChannelMessageEmbedAccessory({ message, channel }: MessageEmbedProps): 
                 rawDescription: "",
                 color: "var(--background-base-lower)",
                 author: {
-                    name: <Text variant="text-xs/medium" tag="span">
+                    name: <Span size="xs" weight="medium">
                         <span>{channelLabel} - </span>
                         {Parser.parse(channel.isDM() ? `<@${dmReceiver.id}>` : `<#${channel.id}>`)}
-                    </Text>,
+                    </Span>,
                     iconProxyURL: iconUrl
                 }
             }}
@@ -346,7 +346,7 @@ function AutomodEmbedAccessory(props: MessageEmbedProps): JSX.Element | null {
     return <AutoModEmbed
         channel={channel}
         childrenAccessories={
-            <Text color="text-muted" variant="text-xs/medium" tag="span" className={`${EmbedClasses.embedAuthor} ${EmbedClasses.embedMargin}`}>
+            <Span size="xs" weight="medium" style={{ color: "var(--text-muted, var(--text-default))" }} className={`${EmbedClasses.embedAuthor} ${EmbedClasses.embedMargin}`}>
                 {iconUrl && <img src={iconUrl} className={EmbedClasses.embedAuthorIcon} alt="" />}
                 <span>
                     <span>{channelLabel} - </span>
@@ -355,7 +355,7 @@ function AutomodEmbedAccessory(props: MessageEmbedProps): JSX.Element | null {
                         : Parser.parse(`<#${channel.id}>`)
                     }
                 </span>
-            </Text>
+            </Span>
         }
         compact={compact}
         content={

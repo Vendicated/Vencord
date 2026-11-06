@@ -10,7 +10,6 @@ import { Settings } from "@api/Settings";
 import { CogWheel, InfoIcon } from "@components/Icons";
 import { AddonCard } from "@components/settings/AddonCard";
 import { Plugin } from "@utils/types";
-import { ToastPosition } from "@vencord/discord-types/enums";
 import { React, showToast } from "@webpack/common";
 
 import { cl, logger } from ".";
@@ -68,7 +67,7 @@ export function PluginCard({ plugin, disabled, onRestartNeeded, onMouseEnter, on
             settings.enabled = false;
 
             const msg = `Error while ${wasEnabled ? "stopping" : "starting"} plugin ${plugin.name}`;
-            showToast(msg, "failure", { position: ToastPosition.BOTTOM });
+            showToast({ text: msg, variant: "critical", position: "bottom" });
 
             return;
         }

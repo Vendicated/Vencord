@@ -125,7 +125,7 @@ export default definePlugin({
                     if (lastReviewId && lastReviewId < user.lastReviewID) {
                         s.lastReviewId = user.lastReviewID;
                         if (user.lastReviewID !== 0)
-                            showToast("You have new reviews on your profile!");
+                            showToast({ text: "You have new reviews on your profile!" });
                     }
                 }
 
