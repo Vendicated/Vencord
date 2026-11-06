@@ -1,11 +1,11 @@
 blank_issues_enabled: false
 contact_links:
-  - name: 💬 Discord Community
-    url: https://discord.gg/D9uwnFnqmd
-    about: For plugin requests, support questions, and general help - join our Discord server
-  - name: 🔌 Plugin Requests
-    url: https://discord.gg/D9uwnFnqmd
-    about: Want a new plugin? Request it in our Discord community, not here
-  - name: ❓ Support & Questions
-    url: https://discord.gg/D9uwnFnqmd
-    about: Need help? Ask in our Discord server for faster responses
+    - name: 💬 Discord Community
+      url: https://discord.gg/D9uwnFnqmd
+      about: For plugin requests, support questions, and general help - join our Discord server
+    - name: 🔌 Plugin Requests
+      url: https://discord.gg/D9uwnFnqmd
+      about: Want a new plugin? Request it in our Discord community, not here
+    - name: ❓ Support & Questions
+      url: https://discord.gg/D9uwnFnqmd
+      about: Need help? Ask in our Discord server for faster responses
