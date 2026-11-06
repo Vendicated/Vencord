@@ -19,7 +19,6 @@
 import { isPluginEnabled } from "@api/PluginManager";
 import { definePluginSettings } from "@api/Settings";
 import { getUserSettingLazy } from "@api/UserSettings";
-import ErrorBoundary from "@components/ErrorBoundary";
 import VencordToolboxPlugin from "@plugins/vencordToolbox";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
@@ -27,7 +26,6 @@ import { FluxStore } from "@vencord/discord-types";
 import { findByPropsLazy, findComponentByCodeLazy, findStoreLazy } from "@webpack";
 import { Menu, Popout, useRef, useState, useStateFromStores } from "@webpack/common";
 
-import managedStyle from "./style.css?managed";
 
 interface ConnectedAccount {
     id: string;
@@ -159,20 +157,13 @@ export default definePlugin({
     description: "Adds a button next to the mic and deafen button to toggle game activity. Right click it to toggle Spotify activity.",
     tags: ["Activity", "Shortcuts"],
     authors: [Devs.Nuckyz, Devs.RuukuLada],
-    dependencies: ["UserSettingsAPI"],
+    dependencies: ["UserAreaAPI", "UserSettingsAPI"],
     settings,
 
-    managedStyle,
-
-    patches: [
-        {
-            find: "#{intl::USER_PROFILE_ACCOUNT_POPOUT_BUTTON_A11Y_LABEL}",
-            replacement: {
-                match: /children:\[(?=.{0,25}?accountContainerRef)/,
-                replace: "children:[$self.GameActivityToggleButton(arguments[0]),"
-            }
-        }
-    ],
+    userAreaButton: {
+        icon: Icon,
+        render: GameActivityToggleButton
+    },
 
     toolboxActions() {
         const { location } = settings.use(["location"]);
@@ -189,6 +180,4 @@ export default definePlugin({
             />
         );
     },
-
-    GameActivityToggleButton: ErrorBoundary.wrap(GameActivityToggleButton, { noop: true }),
 });
