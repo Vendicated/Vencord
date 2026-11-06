@@ -6,7 +6,7 @@
 
 import { Logger } from "@utils/Logger";
 import * as Webpack from "@webpack";
-import { getBuildNumber, patches } from "@webpack/patcher";
+import { patches } from "@webpack/patcher";
 
 import { loadLazyChunks } from "./loadLazyChunks";
 
@@ -43,7 +43,7 @@ async function runReporter() {
 
         if (IS_REPORTER && IS_WEB && !IS_VESKTOP) {
             console.log("[REPORTER_META]", {
-                buildNumber: getBuildNumber(),
+                buildNumber: window.GLOBAL_ENV.BUILD_NUMBER || -1,
                 buildHash: window.GLOBAL_ENV.SENTRY_TAGS.buildId
             });
         }
