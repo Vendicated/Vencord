@@ -34,6 +34,7 @@ interface SettingsStoreOptions {
 }
 
 // merges the SettingsStoreOptions type into the class
+// oxlint-disable-next-line no-unused-vars - type parameter must match the class for declaration merging
 export interface SettingsStore<T extends object> extends SettingsStoreOptions { }
 
 interface ProxyContext<T extends object = any> {

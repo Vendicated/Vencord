@@ -1,7 +1,7 @@
+import { GuildScheduledEventPrivacyLevel, InviteTargetType } from "../../enums";
 import { Channel, FluxStore, Guild, User } from "..";
 import { Application } from "../common/Application";
 import { GuildScheduledEvent } from "./GuildScheduledEventStore";
-import { GuildScheduledEventPrivacyLevel, InviteTargetType } from "../../enums";
 
 export interface StageInstance {
     id: string;
