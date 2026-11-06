@@ -103,7 +103,13 @@ export const filters = {
         return (m: any) => {
             if (typeof m !== "object") return false;
 
-            const values = Object.values(m);
+            // Some exports might have not been initialized yet due to circular imports, so try catch it.
+            try {
+                var values = Object.values(m);
+            } catch {
+                return false;
+            }
+
             return regexes.every(cls => values.some(v => typeof v === "string" && cls.test(v)));
         };
     }
@@ -233,7 +239,7 @@ export const find = traceFunction("find", function find(filter: FilterFn, { isIn
 
     for (const key in cache) {
         const mod = cache[key];
-        if (mod == null || mod.loaded === false || mod.exports == null) continue;
+        if (mod == null || mod.exports == null) continue;
 
         if (filter(mod.exports)) {
             return isWaitFor ? [mod.exports, key] : mod.exports;
@@ -242,7 +248,13 @@ export const find = traceFunction("find", function find(filter: FilterFn, { isIn
         if (typeof mod.exports !== "object" || topLevelOnly) continue;
 
         for (const nestedMod in mod.exports) {
-            const nested = mod.exports[nestedMod];
+            // Some exports might have not been initialized yet due to circular imports, so try catch it.
+            try {
+                var nested = mod.exports[nestedMod];
+            } catch {
+                continue;
+            }
+
             if (nested && filter(nested)) {
                 return isWaitFor ? [nested, key] : nested;
             }
@@ -263,7 +275,7 @@ export function findAll(filter: FilterFn, { topLevelOnly = false }: { topLevelOn
     const ret = [] as any[];
     for (const key in cache) {
         const mod = cache[key];
-        if (mod == null || mod.loaded === false || mod.exports == null) continue;
+        if (mod == null || mod.exports == null) continue;
 
         if (filter(mod.exports))
             ret.push(mod.exports);
@@ -272,7 +284,13 @@ export function findAll(filter: FilterFn, { topLevelOnly = false }: { topLevelOn
             continue;
 
         for (const nestedMod in mod.exports) {
-            const nested = mod.exports[nestedMod];
+            // Some exports might have not been initialized yet due to circular imports, so try catch it.
+            try {
+                var nested = mod.exports[nestedMod];
+            } catch {
+                continue;
+            }
+
             if (nested && filter(nested)) ret.push(nested);
         }
     }
@@ -312,7 +330,7 @@ export const findBulk = traceFunction("findBulk", function findBulk(...filterFns
     outer:
     for (const key in cache) {
         const mod = cache[key];
-        if (mod == null || mod.loaded === false || mod.exports == null) continue;
+        if (mod == null || mod.exports == null) continue;
 
         for (let j = 0; j < length; j++) {
             const filter = filters[j];
@@ -330,7 +348,13 @@ export const findBulk = traceFunction("findBulk", function findBulk(...filterFns
                 continue;
 
             for (const nestedMod in mod.exports) {
-                const nested = mod.exports[nestedMod];
+                // Some exports might have not been initialized yet due to circular imports, so try catch it.
+                try {
+                    var nested = mod.exports[nestedMod];
+                } catch {
+                    continue;
+                }
+
                 if (nested && filter(nested)) {
                     results[j] = nested;
                     filters[j] = undefined;
@@ -676,8 +700,12 @@ export function mapMangledModuleLazy<S extends string>(code: string | RegExp | C
     return proxyLazy(() => mapMangledModule(code, mappers, includeBlacklistedExports));
 }
 
-export const DefaultExtractAndLoadChunksRegex = /(?:(?:Promise\.all\(\[)?((?:\i\.e\("?[^)]+?"?\),?)+?)(?:\]\))?|Promise\.resolve\(\))\.then\(\i\.bind\(\i,"?([^)]+?)"?\)\)/;
-export const ChunkIdsRegex = /\("([^"]+?)"\)/g;
+export const DefaultExtractAndLoadChunksRegex = /(?:(?:Promise\.all\(\[)?((?:\i\.e\("?[^)]+?"?\),?)+?)(?:\]\))?|Promise\.resolve\(\))\.then\(\i\.bind\(\i,"?([^)]+?)"?(?:,[^)]+?)?\)\)/;
+const ChunkIdsRegex = /\((?:"([^"]+?)"|([\de]+?))\)/g;
+
+export function parseChunkIds(rawChunkIds: string): Array<string | number> {
+    return Array.from(rawChunkIds.matchAll(ChunkIdsRegex), m => m[1] ?? Number(m[2]));
+}
 
 /**
  * Extract and load chunks using their entry point
@@ -729,10 +757,7 @@ export async function extractAndLoadChunks(code: CodeFilter, matcher = DefaultEx
     const entryPoint = Number.isNaN(numEntryPoint) ? entryPointId : String(numEntryPoint);
 
     if (rawChunkIds) {
-        const chunkIds = Array.from(rawChunkIds.matchAll(ChunkIdsRegex)).map(m => {
-            const numChunkId = Number(m[1]);
-            return Number.isNaN(numChunkId) ? m[1] : String(numChunkId);
-        });
+        const chunkIds = parseChunkIds(rawChunkIds);
 
         await Promise.all(chunkIds.map(id => wreq.e(id)));
     }

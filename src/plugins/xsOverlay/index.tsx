@@ -96,6 +96,8 @@ const settings = definePluginSettings({
         type: OptionType.NUMBER,
         description: "Websocket port",
         default: 42070,
+        min: 1,
+        max: 65535,
         async onChange() {
             await start();
         }
@@ -153,6 +155,7 @@ const settings = definePluginSettings({
         type: OptionType.NUMBER,
         description: "Notification duration (secs)",
         default: 3,
+        min: 0
     },
     lengthBasedTimeout: {
         type: OptionType.BOOLEAN,

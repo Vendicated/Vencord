@@ -1,6 +1,6 @@
 {
     "name": "@vencord/discord-types",
-    "version": "1.15.15",
+    "version": "1.15.16",
     "private": false,
     "description": "Typescript definitions for the webpack modules of the Discord Web app",
     "license": "LGPL-3.0-or-later",
