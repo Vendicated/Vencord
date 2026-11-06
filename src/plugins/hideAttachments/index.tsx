@@ -25,7 +25,7 @@ import { ImageInvisible, ImageVisible } from "@components/Icons";
 import { Devs } from "@utils/constants";
 import { classes } from "@utils/misc";
 import definePlugin from "@utils/types";
-import { Message } from "@vencord/discord-types";
+import { BasicMessage } from "@vencord/discord-types";
 
 const KEY = "HideAttachments_HiddenIds";
 
@@ -40,7 +40,7 @@ const saveHiddenMessages = (ids: Set<string>) => set(KEY, ids);
 
 migratePluginSettings("HideMedia", "HideAttachments");
 
-const hasMedia = (msg: Message) => msg.attachments.length > 0 || msg.embeds.length > 0 || msg.stickerItems.length > 0 || msg.components.length > 0;
+const hasMedia = (msg: BasicMessage) => msg.attachments.length > 0 || msg.embeds.length > 0 || msg.stickerItems.length > 0 || msg.components.length > 0;
 
 async function toggleHide(channelId: string, messageId: string) {
     const ids = await getHiddenMessages();
@@ -55,15 +55,21 @@ export default definePlugin({
     name: "HideMedia",
     description: "Hide attachments and embeds for individual messages via hover button",
     tags: ["Chat", "Appearance"],
-    authors: [Devs.Ven],
+    authors: [Devs.Ven, Devs.c0nnorgg],
     dependencies: ["MessageUpdaterAPI"],
 
     patches: [{
         find: "this.renderAttachments(",
-        replacement: {
-            match: /(?<=\i=)this\.render(?:Attachments|Embeds|StickersAccessories|ComponentAccessories)\((\i)\)/g,
-            replace: "$self.shouldHide($1?.id)?null:$&"
-        }
+        replacement: [
+            {
+                match: /(?<=\i=)this\.render(?:Attachments|Embeds|StickersAccessories)\((\i)\)/g,
+                replace: "$self.shouldHide($1?.id)?null:$&"
+            },
+            {
+                match: /(?<=\i=)this\.renderComponentAccessories\((\i)\)/,
+                replace: "$self.shouldHide($1?.id)?$self.renderMediaHidden($1):$&"
+            }
+        ]
     }],
 
     messagePopoverButton: {
@@ -81,9 +87,7 @@ export default definePlugin({
         },
     },
 
-    renderMessageAccessory({ message }) {
-        if (!this.shouldHide(message.id)) return null;
-
+    renderMediaHidden(message: BasicMessage) {
         return (
             <span className={classes("vc-hideAttachments-accessory", !message.content && "vc-hideAttachments-no-content")}>
                 Media Hidden
