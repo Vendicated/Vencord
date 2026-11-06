@@ -81,7 +81,7 @@ export default definePlugin({
 
     patches: [
         {
-            find: ",\"Message\")}function",
+            find: 'source:"message-actions"',
             replacement: {
                 match: /:(\i),shouldMention:!(\i)\.shiftKey/,
                 replace: ":$1,shouldMention:$self.shouldMention($1,$2.shiftKey)"
