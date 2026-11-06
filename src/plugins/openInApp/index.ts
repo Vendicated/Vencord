@@ -104,7 +104,7 @@ export default definePlugin({
                     replace: "true"
                 },
                 {
-                    match: /\(0,\i\.isDesktop\)\(\)/,
+                    match: /\(0,\i\.\i\)\(\)(?=\|\|\(\i=window\.open)/,
                     replace: "true"
                 }
             ]
@@ -135,7 +135,7 @@ export default definePlugin({
             }
 
             if (rule.match.test(url)) {
-                showToast("Opened link in native app", "success");
+                showToast({ text: "Opened link in native app", variant: "success" });
 
                 const newUrl = url.replace(rule.match, rule.replace);
                 VencordNative.native.openExternal(newUrl);

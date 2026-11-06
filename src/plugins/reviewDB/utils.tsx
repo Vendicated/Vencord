@@ -17,8 +17,7 @@
 */
 
 import { classNameFactory } from "@utils/css";
-import { ToastType } from "@vencord/discord-types";
-import { ToastPosition } from "@vencord/discord-types/enums";
+import * as t from "@vencord/discord-types";
 import { showToast as originalShowToast, UserStore } from "@webpack/common";
 
 import { Auth } from "./auth";
@@ -44,8 +43,7 @@ export function canReportReview(review: Review) {
     return review.sender.discordID !== UserStore.getCurrentUser().id;
 }
 
-export function showToast(message: string, type: ToastType = "message") {
-    originalShowToast(message, type, {
-        position: ToastPosition.BOTTOM
-    });
-}
+export const showToast: t.showToast = function (options) {
+    options.position = options.position ?? "bottom";
+    return originalShowToast(options);
+};
