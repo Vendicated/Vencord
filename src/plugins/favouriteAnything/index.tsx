@@ -110,8 +110,8 @@ export default definePlugin({
             find: "#{intl::FAVORITE_GIFS_LIMIT_REACHED_BODY}",
             replacement: {
                 // Intercept add/remove actions to generate a valid thumbnail url before storing the item
-                match: /function (\i)\((\i)\)\{(?=\i\.\i\.updateAsync\("favoriteGifs")/g,
-                replace: "async function $1($2){if(!await $self.fixFavItem($2))return;await "
+                match: /(function(?: \i)?)\((\i)\)\{(?=\i\.\i\.updateAsync\("favoriteGifs")/g,
+                replace: "async $1($2){if(!await $self.fixFavItem($2))return;await "
             }
         }
     ],
