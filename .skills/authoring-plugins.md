@@ -42,7 +42,7 @@ Failed patches don't throw, they log `Patch by <plugin> had no effect`. Check th
 
 ## Discord Modules
 
-Vencord exports many Discord modules from `@webpack/commons`. Use `find*` methods when no common exists. Discord organises all data into stores, `window.Stores` contains all of them.
+Vencord exports many Discord modules from `@webpack/commons`. Use `find*` methods when no common exists. Discord organises all data into stores. Find them with `findStore("Name")`.
 Subscribe to store changes with `useStateFromStores`.
 
 ## Error Safety
