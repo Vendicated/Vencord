@@ -1,0 +1,11 @@
+/* Discord's native APP tag supplies the typography, sizing and colour. */
+.vc-staff-badge {
+    flex-shrink: 0;
+    white-space: nowrap;
+}
+
+/* Keep the badge before PlatformIndicators regardless of plugin start order. */
+.vc-member-list-decorators-wrapper > .vc-staff-badge,
+.vc-message-decorations-wrapper > .vc-staff-badge {
+    order: -1;
+}
