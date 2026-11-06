@@ -43,6 +43,7 @@ import { JSX } from "react";
 
 import Plugins, { ExcludedPlugins, PluginMeta } from "~plugins";
 
+import { PluginBisectCard } from "./PluginBisect";
 import { PluginCard } from "./PluginCard";
 import { UIElementsButton } from "./UIElements";
 
@@ -263,6 +264,7 @@ function PluginSettings() {
             <ReloadRequiredCard required={changes.hasChanges} />
 
             <UIElementsButton />
+            <PluginBisectCard />
 
             <Heading tag="h4" className={classes(Margins.top20, Margins.bottom8)}>
                 Filters

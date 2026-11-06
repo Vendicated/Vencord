@@ -33,12 +33,14 @@ export { PlainSettings, Settings };
 
 import { enableStyle, initStyles } from "@api/Styles";
 import { openSettingsTabModal, UpdaterTab } from "@components/settings";
+import { showPluginBisectNotice } from "@components/settings/tabs/plugins/PluginBisect";
 import { debounce } from "@shared/debounce";
 import { StartAt } from "@utils/types";
 import { SettingsRouter } from "@webpack/common";
 
 import { get as dsGet } from "./api/DataStore";
 import { NotificationData, showNotification } from "./api/Notifications";
+import { isBisecting } from "./api/PluginBisect";
 import { initPluginManager, PMLogger, startAllPlugins } from "./api/PluginManager";
 import { PlainSettings, Settings, SettingsStore } from "./api/Settings";
 import { areLocalSettingsDirty, getCloudSettings, getCloudSyncDirection, markLocalSettingsDirty, putCloudSettings, shouldCloudSync } from "./api/SettingsSync/cloudSync";
@@ -52,6 +54,9 @@ if (IS_REPORTER) {
 }
 
 async function syncSettings() {
+    // don't sync the temporary plugin state of a bisect
+    if (isBisecting()) return;
+
     // pre-check for local shared settings
     if (
         Settings.cloud.authenticated &&
@@ -149,6 +154,7 @@ async function init() {
     startAllPlugins(StartAt.WebpackReady);
 
     syncSettings();
+    showPluginBisectNotice();
 
     if (!IS_WEB && !IS_UPDATER_DISABLED) {
         runUpdateCheck();
