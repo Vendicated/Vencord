@@ -12,7 +12,9 @@ const settings = definePluginSettings({
     reactionCount: {
         description: "Number of reactions (0-42)",
         type: OptionType.NUMBER,
-        default: 5
+        default: 5,
+        min: 0,
+        max: 42
     },
 });
 
