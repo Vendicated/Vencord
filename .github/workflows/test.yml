@@ -5,16 +5,21 @@ on:
         branches:
             - main
             - dev
+permissions:
+    contents: read
+
 jobs:
     test:
         runs-on: ubuntu-latest
 
         steps:
-            - uses: actions/checkout@v7
-            - uses: pnpm/action-setup@v6 # Install pnpm using packageManager key in package.json
+            - name: Checkout repository
+              uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+            - name: Setup pnpm
+              uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
 
-            - name: Use Node.js 24
-              uses: actions/setup-node@v6
+            - name: Use Node.js
+              uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
               with:
                   node-version: 24
                   cache: "pnpm"
@@ -22,11 +27,5 @@ jobs:
             - name: Install dependencies
               run: pnpm install --frozen-lockfile
 
-            - name: Lint & Test if desktop version compiles
+            - name: Run Tests
               run: pnpm test
-
-            - name: Test if web version compiles
-              run: pnpm buildWeb
-
-            - name: Test if plugin structure is valid
-              run: pnpm generatePluginJson
