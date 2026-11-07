@@ -54,7 +54,7 @@ let hardwareH264Profiles: string[] = [];
 
 export default definePlugin({
     name: "WebScreenShareFixes",
-    authors: [Devs.Kaitlyn],
+    authors: [Devs.Kaitlyn, Devs.ThaUnknown],
     description: "Removes 2500kbps bitrate cap on chromium and vesktop clients, enables stereo stream audio with a higher bitrate, raises the start bitrate of streams, uses hardware H264 encoding and fixes CPU usage growing endlessly while screensharing.",
     tags: ["Voice"],
     enabledByDefault: true,
