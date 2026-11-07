@@ -26,7 +26,7 @@ import { Modal, React, TextInput, useState } from "@webpack/common";
 import { KeyboardEvent } from "react";
 
 export function RenameModal({ props, session, state }: { props: RenderModalProps, session: SessionInfo["session"], state: [string, React.Dispatch<React.SetStateAction<string>>]; }) {
-    const [title, setTitle] = state;
+    const [, setTitle] = state;
     const [value, setValue] = useState(savedSessionsCache.get(session.id_hash)?.name ?? "");
 
     function onSaveClick() {

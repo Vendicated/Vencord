@@ -132,6 +132,19 @@ function addDeleteStyle() {
     }
 }
 
+const buttonsToRemove = [
+    "edit",
+    "reply",
+    "forward",
+    "thread",
+    "pin",
+    "delete",
+    "mark-unread",
+    "apps",
+    "bookmark",
+    "reminder"
+];
+
 const REMOVE_HISTORY_ID = "ml-remove-history";
 const TOGGLE_DELETE_STYLE_ID = "ml-toggle-style";
 
@@ -166,11 +179,20 @@ function doesMessageHaveHistory(message: MLMessage): boolean {
 
 }
 
-const patchMessageContextMenu: NavContextMenuPatchCallback = (children, props) => {
-    const { message } = props;
+const patchMessageContextMenu: NavContextMenuPatchCallback = (children, { message }) => {
     const { deleted, id, channel_id } = message;
 
     if (!doesMessageHaveHistory(message)) return;
+
+    if (deleted) {
+        for (const id of buttonsToRemove) {
+            const group = findGroupChildrenByChildId(id, children);
+            if (group) {
+                const index = group.findIndex(c => c?.props?.id === id);
+                group.splice(index, 1);
+            }
+        }
+    }
 
     toggle: {
         if (!deleted) break toggle;
