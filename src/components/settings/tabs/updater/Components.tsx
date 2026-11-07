@@ -4,15 +4,17 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { Button } from "@components/Button";
 import { Card } from "@components/Card";
 import { ErrorCard } from "@components/ErrorCard";
 import { Flex } from "@components/Flex";
 import { Link } from "@components/Link";
+import { Paragraph } from "@components/Paragraph";
 import { Margins } from "@utils/margins";
 import { classes } from "@utils/misc";
-import { relaunch } from "@utils/native";
+import { promptToRestart } from "@utils/promptToRestart";
 import { changes, checkForUpdates, update, updateError } from "@utils/updater";
-import { Button, ConfirmModal, Forms, openModal, React, showToast, useState } from "@webpack/common";
+import { React, showToast, useState } from "@webpack/common";
 
 import { runWithDispatch } from "./runWithDispatch";
 
@@ -59,9 +61,9 @@ export function Changes({ updates, repo, repoPending }: CommonProps & { updates:
 export function Newer(props: CommonProps) {
     return (
         <>
-            <Forms.FormText className={Margins.bottom8}>
+            <Paragraph className={Margins.bottom8}>
                 Your local copy has more recent commits. Please stash or reset them.
-            </Forms.FormText>
+            </Paragraph>
             <Changes {...props} updates={changes} />
         </>
     );
@@ -78,15 +80,15 @@ export function Updatable(props: CommonProps) {
         <>
             {!updates && updateError ? (
                 <>
-                    <Forms.FormText>Failed to check updates. Check the console for more info</Forms.FormText>
+                    <Paragraph>Failed to check updates. Check the console for more info</Paragraph>
                     <ErrorCard style={{ padding: "1em" }}>
                         <p>{updateError.stderr || updateError.stdout || "An unknown error occurred"}</p>
                     </ErrorCard>
                 </>
             ) : (
-                <Forms.FormText className={Margins.bottom8}>
+                <Paragraph className={Margins.bottom8}>
                     {isOutdated ? (updates.length === 1 ? "There is 1 Update" : `There are ${updates.length} Updates`) : "Up to Date!"}
-                </Forms.FormText>
+                </Paragraph>
             )}
 
             {isOutdated && <Changes updates={updates} {...props} />}
@@ -99,22 +101,11 @@ export function Updatable(props: CommonProps) {
                             if (await update()) {
                                 setUpdates([]);
 
-                                await new Promise<void>(r => {
-                                    openModal(props => (
-                                        <ConfirmModal
-                                            {...props}
-                                            title="Update Success!"
-                                            subtitle="Successfully updated. Restart now to apply the changes?"
-                                            confirmText="Restart"
-                                            cancelText="Not now!"
-                                            variant="primary"
-                                            onConfirm={() => {
-                                                relaunch();
-                                                r();
-                                            }}
-                                            onCancel={r}
-                                        />
-                                    ));
+                                promptToRestart("relaunch", {
+                                    title: "Update Success!",
+                                    subtitle: "Successfully updated. Restart now to apply the changes?",
+                                    confirmText: "Restart",
+                                    cancelText: "Not now!"
                                 });
                             }
                         })}

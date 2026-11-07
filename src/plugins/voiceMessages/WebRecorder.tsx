@@ -16,21 +16,56 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Button, MediaEngineStore, useState } from "@webpack/common";
+import { Button } from "@components/Button";
+import { Logger } from "@utils/Logger";
+import { useFluxSubscription } from "@utils/react";
+import { MediaEngineStore, useRef, useState } from "@webpack/common";
 
 import type { VoiceRecorder } from ".";
 import { settings } from "./settings";
+import { webmToOgg } from "./webmToOgg";
+
+const OGG_OPUS = "audio/ogg; codecs=opus";
+
+async function tryRemux(webm: Blob) {
+    try {
+        return webmToOgg(await webm.arrayBuffer());
+    } catch (e) {
+        new Logger("VoiceMessages").error("Failed to remux WebM to Ogg, falling back to WebM", e);
+        return webm;
+    }
+}
 
 export const VoiceRecorderWeb: VoiceRecorder = ({ setAudioBlob, onRecordingChange }) => {
     const [recording, setRecording] = useState(false);
     const [paused, setPaused] = useState(false);
     const [recorder, setRecorder] = useState<MediaRecorder>();
     const [chunks, setChunks] = useState<Blob[]>([]);
+    const closed = useRef(false);
 
-    const changeRecording = (recording: boolean) => {
+    useFluxSubscription("VENCORD_STOP_RECORDING", () => {
+        closed.current = true;
+        stopRecording();
+    });
+
+    function changeRecording(recording: boolean) {
         setRecording(recording);
         onRecordingChange?.(recording);
-    };
+    }
+
+    function stopRecording() {
+        if (recording && recorder) {
+            recorder.addEventListener("stop", async () => {
+                const blob = new Blob(chunks, { type: recorder.mimeType });
+                setAudioBlob(blob.type.startsWith("audio/webm") ? await tryRemux(blob) : blob);
+
+                changeRecording(false);
+            });
+            recorder.stop();
+            recorder.stream.getTracks().forEach(track => track.stop());
+        }
+    }
+
 
     function toggleRecording() {
         const nowRecording = !recording;
@@ -43,10 +78,19 @@ export const VoiceRecorderWeb: VoiceRecorder = ({ setAudioBlob, onRecordingChang
                     deviceId: MediaEngineStore.getInputDeviceId()
                 }
             }).then(stream => {
+                // mic permission can resolve after the modal has closed
+                if (closed.current) {
+                    stream.getTracks().forEach(track => track.stop());
+                    return;
+                }
+
                 const chunks = [] as Blob[];
                 setChunks(chunks);
 
-                const recorder = new MediaRecorder(stream);
+                // Chromium can't record Ogg, so record WebM and remux it on stop
+                const recorder = new MediaRecorder(stream, {
+                    mimeType: MediaRecorder.isTypeSupported(OGG_OPUS) ? OGG_OPUS : "audio/webm; codecs=opus"
+                });
                 setRecorder(recorder);
                 recorder.addEventListener("dataavailable", e => {
                     chunks.push(e.data);
@@ -56,15 +100,7 @@ export const VoiceRecorderWeb: VoiceRecorder = ({ setAudioBlob, onRecordingChang
                 changeRecording(true);
             });
         } else {
-            if (recorder) {
-                recorder.addEventListener("stop", () => {
-                    setAudioBlob(new Blob(chunks, { type: "audio/ogg; codecs=opus" }));
-
-                    changeRecording(false);
-                });
-                recorder.stop();
-                recorder.stream.getTracks().forEach(track => track.stop());
-            }
+            stopRecording();
         }
     }
 
