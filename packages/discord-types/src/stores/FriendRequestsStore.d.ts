@@ -1,5 +1,5 @@
-import { FluxStore } from "..";
 import { RelationshipType } from "../../enums";
+import { FluxStore } from "..";
 
 export interface FriendRequest {
     /** userId, or `${userId}-${applicationId}` for game relationships */

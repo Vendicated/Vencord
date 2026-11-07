@@ -1,5 +1,5 @@
-import { FluxStore } from "..";
 import { ApplicationStreamFPS, ApplicationStreamPresets, ApplicationStreamResolutions } from "../../enums";
+import { FluxStore } from "..";
 
 export interface ApplicationStreamingSettingsState {
     preset: ApplicationStreamPresets;

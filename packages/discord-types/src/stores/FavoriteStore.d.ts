@@ -1,5 +1,5 @@
-import { Channel, FluxStore } from "..";
 import { ChannelType } from "../../enums";
+import { Channel, FluxStore } from "..";
 
 export interface FavoriteChannel {
     id: string;
