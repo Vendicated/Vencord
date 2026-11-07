@@ -18,7 +18,8 @@
 
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Flex } from "@components/Flex";
-import { InfoIcon, OwnerCrownIcon } from "@components/Icons";
+import { CopyIdIcon, InfoIcon, OwnerCrownIcon } from "@components/Icons";
+import { Paragraph } from "@components/Paragraph";
 import { buildExtraRoleContextMenuItems } from "@plugins/betterRoleContext";
 import { cl, getGuildPermissionSpecMap, loadGetGuildPermissionSpecMap } from "@plugins/permissionsViewer/utils";
 import { copyToClipboard } from "@utils/clipboard";
@@ -26,10 +27,10 @@ import { getIntlMessage, getUniqueUsername } from "@utils/discord";
 import { Guild, RenderModalProps, Role, RoleOrUserPermission, UnicodeEmoji, User } from "@vencord/discord-types";
 import { PermissionOverwriteType } from "@vencord/discord-types/enums";
 import { findByCodeLazy } from "@webpack";
-import { ContextMenuApi, FluxDispatcher, GuildMemberStore, GuildRoleStore, i18n, Menu, Modal,openModalLazy, PermissionsBits, ScrollerThin, Text, Tooltip, useEffect, useMemo, useRef, UserStore, useState, useStateFromStores } from "@webpack/common";
+import { ContextMenuApi, FluxDispatcher, GuildMemberStore, GuildRoleStore, i18n, Menu, Modal, openModalLazy, PermissionsBits, ScrollerThin, Tooltip, useEffect, useMemo, useRef, UserStore, useState, useStateFromStores } from "@webpack/common";
 
 import { settings } from "..";
-import { PermissionAllowedIcon, PermissionDefaultIcon, PermissionDeniedIcon } from "./icons";
+import { PermissionAllowedIcon, PermissionDeniedIcon } from "./icons";
 
 type GetRoleIconData = (role: Role, size: number) => { customIconSrc?: string; unicodeEmoji?: UnicodeEmoji; };
 const getRoleIconData: GetRoleIconData = findByCodeLazy("convertSurrogateToName", "customIconSrc", "unicodeEmoji");
@@ -81,7 +82,7 @@ function RolesAndUsersPermissionsComponent({ permissions, guild, modalProps, hea
         >
             {!selectedItem && (
                 <div className={cl("modal-no-perms")}>
-                    <Text variant="heading-lg/normal">No permissions to display!</Text>
+                    <Paragraph size="lg">No permissions to display!</Paragraph>
                 </div>
             )}
 
@@ -139,7 +140,7 @@ function RolesAndUsersPermissionsComponent({ permissions, guild, modalProps, hea
                                                 src={user.getAvatarURL(void 0, void 0, false)}
                                             />
                                         )}
-                                        <Text variant="text-md/normal" className={cl("modal-list-item-text")}>
+                                        <Paragraph size="md" className={cl("modal-list-item-text")}>
                                             {
                                                 permission.type === PermissionOverwriteType.ROLE
                                                     ? role?.name ?? "Unknown Role"
@@ -152,7 +153,7 @@ function RolesAndUsersPermissionsComponent({ permissions, guild, modalProps, hea
                                                             </Flex>
                                                         )
                                             }
-                                        </Text>
+                                        </Paragraph>
                                     </div>
                                 </div>
                             );
@@ -160,50 +161,48 @@ function RolesAndUsersPermissionsComponent({ permissions, guild, modalProps, hea
                     </ScrollerThin>
                     <div className={cl("modal-divider")} />
                     <ScrollerThin className={cl("modal-perms")} orientation="auto">
-                        {Object.values(PermissionsBits).map(bit => (
-                            <div key={bit} className={cl("modal-perms-item")}>
-                                <div className={cl("modal-perms-item-icon")}>
-                                    {(() => {
-                                        const { permissions, overwriteAllow, overwriteDeny } = selectedItem;
+                        {Object.values(PermissionsBits).map(bit => {
+                            const overrideType = (() => {
+                                const { permissions, overwriteAllow, overwriteDeny } = selectedItem;
 
-                                        if (permissions)
-                                            return (permissions & bit) === bit
-                                                ? PermissionAllowedIcon()
-                                                : PermissionDeniedIcon();
+                                if (permissions != null)
+                                    return (permissions & bit) === bit
+                                        ? "allowed"
+                                        : "denied";
 
-                                        if (overwriteAllow && (overwriteAllow & bit) === bit)
-                                            return PermissionAllowedIcon();
-                                        if (overwriteDeny && (overwriteDeny & bit) === bit)
-                                            return PermissionDeniedIcon();
+                                if (overwriteAllow && (overwriteAllow & bit) === bit)
+                                    return "allowed";
+                                if (overwriteDeny && (overwriteDeny & bit) === bit)
+                                    return "denied";
 
-                                        return PermissionDefaultIcon();
-                                    })()}
+                                return "default";
+                            })();
+
+                            if (overrideType === "default") return null;
+
+                            return (
+                                <div key={bit} className={cl("modal-perms-item")}>
+                                    <div className={cl("modal-perms-item-icon")}>
+                                        {overrideType === "allowed" && <PermissionAllowedIcon />}
+                                        {overrideType === "denied" && <PermissionDeniedIcon />}
+                                    </div>
+                                    <Paragraph size="md">{guildPermissionSpecMap[String(bit)].title}</Paragraph>
+
+                                    <Tooltip text={
+                                        (() => {
+                                            const { description } = guildPermissionSpecMap[String(bit)];
+                                            return typeof description === "function" ? i18n.intl.format(description, {}) : description;
+                                        })()
+                                    }>
+                                        {props => <InfoIcon {...props} />}
+                                    </Tooltip>
                                 </div>
-                                <Text variant="text-md/normal">{guildPermissionSpecMap[String(bit)].title}</Text>
-
-                                <Tooltip text={
-                                    (() => {
-                                        const { description } = guildPermissionSpecMap[String(bit)];
-                                        return typeof description === "function" ? i18n.intl.format(description, {}) : description;
-                                    })()
-                                }>
-                                    {props => <InfoIcon {...props} />}
-                                </Tooltip>
-                            </div>
-                        ))}
+                            );
+                        })}
                     </ScrollerThin>
                 </div>
             )}
         </Modal>
-    );
-}
-
-function IDIcon() {
-    return (
-        <svg width="18" height="18" viewBox="0 0 24 24">
-            <path fill="currentColor" d="M15.3 14.48c-.46.45-1.08.67-1.86.67h-1.39V9.2h1.39c.78 0 1.4.22 1.86.67.46.45.68 1.22.68 2.31 0 1.1-.22 1.86-.68 2.31Z" />
-            <path fill="currentColor" fillRule="evenodd" clipRule="evenodd" d="M5 2a3 3 0 0 0-3 3v14a3 3 0 0 0 3 3h14a3 3 0 0 0 3-3V5a3 3 0 0 0-3-3H5Zm1 15h2.04V7.34H6V17Zm4-9.66V17h3.44c1.46 0 2.6-.42 3.38-1.25.8-.83 1.2-2.02 1.2-3.58s-.4-2.75-1.2-3.58c-.79-.83-1.92-1.25-3.38-1.25H10Z" />
-        </svg>
     );
 }
 
@@ -231,7 +230,8 @@ function RoleContextMenu({ guild, roleId, onClose }: { guild: Guild; roleId: str
             <Menu.MenuItem
                 id={cl("copy-role-id")}
                 label={getIntlMessage("COPY_ID_ROLE")}
-                icon={IDIcon}
+                icon={CopyIdIcon}
+                leadingAccessory={{ type: "icon", icon: CopyIdIcon }}
                 action={() => copyToClipboard(roleId)}
             />
 
@@ -242,6 +242,7 @@ function RoleContextMenu({ guild, roleId, onClose }: { guild: Guild; roleId: str
                     id={cl("view-as-role")}
                     label={getIntlMessage("VIEW_AS_ROLE")}
                     icon={ViewAsRoleIcon}
+                    leadingAccessory={{ type: "icon", icon: ViewAsRoleIcon }}
                     action={() => {
                         onClose();
                         FluxDispatcher.dispatch({
@@ -271,6 +272,7 @@ function UserContextMenu({ userId }: { userId: string; }) {
             <Menu.MenuItem
                 id={cl("copy-user-id")}
                 label={getIntlMessage("COPY_ID_USER")}
+                leadingAccessory={{ type: "icon", icon: CopyIdIcon }}
                 action={() => {
                     copyToClipboard(userId);
                 }}

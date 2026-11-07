@@ -18,7 +18,7 @@ function createPinMenuItem(channelId: string) {
 
     return (
         <Menu.MenuItem
-            id="pin-dm"
+            id="vc-pin-dm"
             label="Pin DMs"
         >
 
@@ -48,7 +48,7 @@ function createPinMenuItem(channelId: string) {
             {pinned && (
                 <>
                     <Menu.MenuItem
-                        id="unpin-dm"
+                        id="vc-unpin-dm"
                         label="Unpin DM"
                         color="danger"
                         action={() => removeChannelFromCategory(channelId)}

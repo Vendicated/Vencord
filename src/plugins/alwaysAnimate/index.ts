@@ -57,10 +57,26 @@ export default definePlugin({
             }
         },
         {
+            // Gradient roles in chat
+            find: "=!1,contentOnly:",
+            replacement: {
+                match: /animate:\i/,
+                replace: "animate:!0"
+            }
+        },
+        {
+            // Gradient roles in member list
+            find: '="left",className:',
+            replacement: {
+                match: /,animateGradient:/,
+                replace: ",animateGradient:!0,_oldAnimateGradient:"
+            }
+        },
+        {
             // Nameplates
             find: ".MINI_PREVIEW,[",
             replacement: {
-                match: /animate:\i,loop:/,
+                match: /animate:\i,loop:(?=!0===)/,
                 replace: "animate:true,loop:true,_loop:"
             }
         }

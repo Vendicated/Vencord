@@ -9,11 +9,12 @@ import { disableStyle, enableStyle } from "@api/Styles";
 import { buildPluginMenuEntries, buildThemeMenuEntries } from "@plugins/vencordToolbox/menu";
 import { Devs } from "@utils/constants";
 import { classNameFactory } from "@utils/css";
+import { getIntlMessage } from "@utils/discord";
 import { Logger } from "@utils/Logger";
 import definePlugin, { OptionType } from "@utils/types";
 import { findCssClassesLazy } from "@webpack";
 import { ComponentDispatch, FocusLock, Menu, useEffect, useRef } from "@webpack/common";
-import type { HTMLAttributes, ReactNode } from "react";
+import type { HTMLAttributes, ReactElement, ReactNode } from "react";
 
 import fullHeightStyle from "./fullHeightContext.css?managed";
 
@@ -95,8 +96,8 @@ export default definePlugin({
             find: "this.renderArtisanalHack()",
             replacement: [
                 {
-                    match: /class (\i)(?= extends \i\.PureComponent.+?static contextType=.+?jsx\)\(\1,\{mode:)/,
-                    replace: "var $1=$self.Layer;class VencordPatchedOldFadeLayer",
+                    match: /class (\i)( extends \i\.PureComponent.+?jsx\)\(\1,\{mode:)/,
+                    replace: "var $1=$self.Layer;class VencordPatchedOldFadeLayer$2",
                     predicate: () => settings.store.disableFade
                 },
                 { // Lazy-load contents
@@ -135,11 +136,19 @@ export default definePlugin({
             predicate: () => settings.store.disableFade
         },
         { // Disable initial and exit delay for settings menu
-            find: "headerId:void 0,headerIdIsManaged:!1",
-            replacement: {
-                match: /let (\i)=300/,
-                replace: "let $1=0"
-            },
+            find: '||"replace"===',
+            replacement: [
+                {
+                    // FIXME: Stable compat: everything, keep only 300(?=\*!\i)
+                    match: /(?:(?<=\?0:\i\.\i))|(?:300(?=\*!\i))/g,
+                    replace: "0"
+                },
+                {
+                    // FIXME: Stable compat: \i\.\i|300, keep only 300
+                    match: /(?<=setTimeout\(\(\)=>\i\(\),)\i\.\i|300(?=\))/,
+                    replace: "0"
+                }
+            ],
             predicate: () => settings.store.disableFade
         },
         { // Load menu TOC eagerly
@@ -177,7 +186,7 @@ export default definePlugin({
         return <Layer {...props} />;
     },
 
-    transformSettingsEntries(list) {
+    transformSettingsEntries(list: ReactElement<any>[]): ReactNode[] {
         const items: ReactNode[] = [];
 
         for (const item of list) {
@@ -194,9 +203,13 @@ export default definePlugin({
                         {children}
                     </Menu.MenuItem>
                 );
-            } else if (key.endsWith("_section") && props.label) {
+            } else if (key === "user_section" || (key?.endsWith("_section") && props.label)) {
+                const label = key === "user_section"
+                    ? getIntlMessage("USER_SETTINGS")
+                    : props.label;
+
                 items.push(
-                    <Menu.MenuItem key={key} label={props.label} id={props.label}>
+                    <Menu.MenuItem key={key} label={label} id={label}>
                         {this.transformSettingsEntries(props.children)}
                     </Menu.MenuItem>
                 );
