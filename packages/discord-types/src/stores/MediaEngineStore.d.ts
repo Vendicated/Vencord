@@ -624,10 +624,59 @@ export interface StreamParameter {
     maxBitrate?: number;
     /** max framerate. */
     maxFrameRate?: number;
-    /** max resolution. */
-    maxResolution?: { width: number; height: number; };
+    /** max resolution. type "source" uses the capture size and has width and height 0. */
+    maxResolution?: { type: "fixed" | "source"; width: number; height: number; };
     /** quality percentage. */
     quality?: number;
+}
+
+/**
+ * Video size and frame rate for encoding or capture.
+ */
+export interface VideoSize {
+    /** width in pixels. */
+    width: number;
+    /** height in pixels. */
+    height: number;
+    /** frame rate in fps. */
+    framerate: number;
+    /** width * height. */
+    pixelCount?: number;
+}
+
+/**
+ * Video quality limits for a connection.
+ */
+export interface VideoQuality {
+    /** capture size. */
+    capture?: VideoSize;
+    /** encode size. */
+    encode?: VideoSize;
+    /** min bitrate in bps. */
+    bitrateMin?: number;
+    /** max bitrate in bps. */
+    bitrateMax?: number;
+    /** target bitrate in bps. */
+    bitrateTarget?: number;
+}
+
+/**
+ * Calculates the video quality of a connection from the local settings and the remote sink wants.
+ */
+export interface VideoQualityManager {
+    /** max quality of a go live stream. */
+    goliveMaxQuality: VideoQuality;
+    /**
+     * Sets the max quality of a go live stream. Unset fields keep the current value.
+     * @param quality new quality.
+     */
+    setGoliveQuality(quality: VideoQuality): void;
+    /**
+     * Gets the go live quality for the remote sink wants.
+     * @param localWant local want.
+     * @param sinkPixelCount pixel count that the viewers want.
+     */
+    getGoliveQuality(localWant: number, sinkPixelCount: number): VideoQuality;
 }
 
 /**
@@ -696,6 +745,8 @@ export interface MediaEngineConnection {
     videoSupported: boolean;
     /** video stream parameters. */
     videoStreamParameters: StreamParameter[];
+    /** calculates the video quality from the local settings and the remote sink wants. */
+    videoQualityManager: VideoQualityManager;
     /** soundshare source id. */
     soundshareId: number | null;
     /** whether soundshare is active. */
@@ -1446,6 +1497,24 @@ export interface MediaEngineConnection {
      * @param ssrc optional ssrc to update.
      */
     updateVideoQuality(ssrc?: number): void;
+}
+
+/**
+ * Connection of the web media engine (BaseWebRTCConnection).
+ */
+export interface WebRTCConnection extends Omit<MediaEngineConnection, "handleVideo"> {
+    /** local audio and video input. */
+    input: {
+        /** gets the current video stream. */
+        getVideoStream(): MediaStream | null;
+        /** gets the id of the current video stream. */
+        getVideoStreamId(): string;
+    };
+    /**
+     * Emits the video event for a video stream.
+     * @param streamId id of the video stream.
+     */
+    handleVideo(streamId: string): void;
 }
 
 /**
