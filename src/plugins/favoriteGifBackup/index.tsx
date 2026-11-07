@@ -41,7 +41,7 @@ async function exportGifs() {
     const gifs: FavoriteGifs = FrecencySettings.getCurrentValue().favoriteGifs?.gifs ?? {};
 
     if (!Object.keys(gifs).length)
-        return showToast("You don't have any favorite GIFs.", "failure");
+        return showToast({ text: "You don't have any favorite GIFs.", variant: "critical" });
 
     const filename = `favorite-gifs-${moment().format("YYYY-MM-DD")}.json`;
     const data = new TextEncoder().encode(JSON.stringify(gifs, null, 4));
@@ -101,13 +101,13 @@ async function saveGifs(imported: FavoriteGifs, replace: boolean) {
                 throw new Error("Discord doesn't allow this many favorite GIFs");
         });
     } catch (err) {
-        return showToast(`Failed to import GIFs: ${err}`, "failure");
+        return showToast({ text: `Failed to import GIFs: ${err}`, variant: "critical" });
     }
 
     if (!count)
-        return showToast("All of these GIFs are already in your favorites.");
+        return showToast({ text: "All of these GIFs are already in your favorites." });
 
-    showToast(`Imported ${pluralise(count, "GIF")}.`, "success");
+    showToast({ text: `Imported ${pluralise(count, "GIF")}.`, variant: "success" });
 }
 
 async function importGifs() {
@@ -117,7 +117,7 @@ async function importGifs() {
     try {
         var gifs = parseGifs(await file.text());
     } catch (err) {
-        return showToast(`Failed to import GIFs: ${err}`, "failure");
+        return showToast({ text: `Failed to import GIFs: ${err}`, variant: "critical" });
     }
 
     openModal(props => (
