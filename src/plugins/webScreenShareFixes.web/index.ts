@@ -23,7 +23,7 @@ export default definePlugin({
                     replace: '"x-google-max-bitrate=80000"'
                 },
                 {
-                    match: /;usedtx=\$\{(\i)\?"0":"1"\}/,
+                    match: /;usedtx=\$\{((?:!1===)?\i)\?"0":"1"\}/,
                     replace: '$&${$1?";stereo=1;sprop-stereo=1":""}'
                 },
             ]
