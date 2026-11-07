@@ -1,4 +1,5 @@
 import EventEmitter from "events";
+
 import { CloudUploadPlatform } from "../../enums";
 
 interface BaseUploadItem {

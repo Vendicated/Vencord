@@ -21,12 +21,12 @@ import { Switch } from "@components/Switch";
 import { PluginSettingBooleanDef } from "@utils/types";
 import { React, useState } from "@webpack/common";
 
-import { resolveError, SettingProps, SettingsSection } from "./Common";
+import { resolveError, SettingProps, SettingsSection, useSettingState } from "./Common";
 
 export function BooleanSetting({ setting, pluginSettings, definedSettings, id, onChange }: SettingProps<PluginSettingBooleanDef>) {
     const def = pluginSettings[id] ?? setting.default;
 
-    const [state, setState] = useState(def ?? false);
+    const [state, setState] = useSettingState<boolean>(def ?? false);
     const [error, setError] = useState<string | null>(null);
 
     function handleChange(newValue: boolean): void {

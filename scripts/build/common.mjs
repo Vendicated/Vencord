@@ -26,12 +26,12 @@ import esbuild, { build, context } from "esbuild";
 import { constants as FsConstants, readFileSync } from "fs";
 import { access, readdir, readFile } from "fs/promises";
 import { minify as minifyHtml } from "html-minifier-terser";
-import { optimize as optimizeSvg } from 'svgo';
+import { builtinModules } from "module";
 import { join, relative, resolve } from "path";
+import { optimize as optimizeSvg } from "svgo";
 import { promisify } from "util";
 
 import { getPluginTarget } from "../utils.mjs";
-import { builtinModules } from "module";
 
 /** @type {import("../../package.json")} */
 const PackageJSON = JSON.parse(readFileSync("package.json", "utf-8"));
@@ -57,6 +57,20 @@ export const banner = {
 // Updater Disabled: ${IS_UPDATER_DISABLED}
 `.trim()
 };
+
+export async function getMonacoEditorCdnUrl() {
+    const manifest = await readFile(resolve(import.meta.dirname, "../../node_modules/@vencord/monaco-editor/package.json"), "utf8");
+    /**
+     * @type {import("type-fest").PackageJson}
+     */
+    const { version } = JSON.parse(manifest);
+
+    if (!version) {
+        throw new Error("Failed to extract editor version");
+    }
+
+    return `https://cdn.jsdelivr.net/npm/@vencord/monaco-editor@${version}/dist/index.html`;
+}
 
 /**
  * JSON.stringify all values in an object

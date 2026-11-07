@@ -60,7 +60,7 @@ interface PatchInfo {
     id: string;
     match: string;
     error?: string;
-};
+}
 
 const report = {
     badPatches: [] as PatchInfo[],
@@ -310,6 +310,7 @@ page.on("console", async e => {
                 switch (message) {
                     case "A fatal error occurred:":
                         process.exit(1);
+                        break;
                     case "Webpack Find Fail:":
                         process.exitCode = 1;
                         report.badWebpackFinds.push(otherMessage);

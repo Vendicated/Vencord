@@ -53,3 +53,8 @@ export const enum PremiumType {
     TIER_2 = 2,
     TIER_0 = 3,
 }
+
+export const enum ToastPosition {
+    TOP = 0,
+    BOTTOM = 1,
+}

@@ -1,0 +1,6 @@
+.vc-tenorGifSearch-wrapper {
+    display: grid;
+    width: 100%;
+    gap: 0.5em;
+    grid-template-columns: 1fr max-content;
+}
