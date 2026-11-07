@@ -43,7 +43,7 @@ function makeColorStyle(guildId: string, { colorString, colorStrings }: Pick<Gui
 
     return {
         color: primaryColor,
-        background: `linear-gradient(to right,${colors})`,
+        backgroundImage: `linear-gradient(to right,${colors})`,
         backgroundClip: "text",
         backgroundSize: "100px auto",
         WebkitTextFillColor: "transparent"
