@@ -11,17 +11,20 @@ import { copyToClipboard } from "@utils/clipboard";
 import { Devs } from "@utils/constants";
 import { getCurrentChannel, getCurrentGuild, getIntlMessage, openImageModal } from "@utils/discord";
 import { isTruthy } from "@utils/guards";
+import { proxyLazy } from "@utils/lazy";
 import { classes } from "@utils/misc";
 import definePlugin, { OptionType } from "@utils/types";
 import { Guild, Role } from "@vencord/discord-types";
 import { findByCodeLazy, findByPropsLazy, findCssClassesLazy } from "@webpack";
-import { ContextMenuApi, GuildRoleStore, Menu, PermissionStore, Popout, RoleMemberPopout, useRef } from "@webpack/common";
+import { ContextMenuApi, GuildRoleStore, Menu, PermissionStore, Popout, RoleMemberPopout, useEffect, useRef, zustandCreate } from "@webpack/common";
 
 const GuildSettingsActions = findByPropsLazy("open", "selectRole", "updateGuild");
 const MenuItemClasses = findCssClassesLazy("item", "labelContainer", "colorDefault", "label", "iconContainer");
 const loadRoleMembers = findByCodeLazy(".GUILD_ROLE_MEMBER_IDS(", "requestMembersById");
 
 const DeveloperMode = getUserSettingLazy("appearance", "developerMode")!;
+
+const useOpenProfileStore = proxyLazy(() => zustandCreate(() => ({ userId: null as string | null })));
 
 function PencilIcon() {
     return (
@@ -220,8 +223,36 @@ export default definePlugin({
                 match: /(?<=#{intl::CHANNEL_MEMBERS_A11Y_LABEL},\{title:\i,count:\i\}\)\}\),\(0,\i\.jsxs\)\("div",\{)/,
                 replace: "onContextMenu:e=>$self.openRoleContextMenu(e,arguments[0]),"
             }
+        },
+        {
+            find: ".id,spacing:14,",
+            replacement: [
+                {
+                    match: /function \i\((\i)\)\{(?=let\{member:\i,guildId:\i,channelId:\i,role:\i\}=\1)/,
+                    replace: "$&const vcProfileProps=$self.useMemberProfileProps($1.member.userId);"
+                },
+                {
+                    match: /\.id,spacing:14,/,
+                    replace: "$&...vcProfileProps,"
+                }
+            ]
         }
     ],
+
+    useMemberProfileProps(userId: string) {
+        const openUserId = useOpenProfileStore(s => s.userId);
+
+        useEffect(() => () => {
+            if (useOpenProfileStore.getState().userId === userId)
+                useOpenProfileStore.setState({ userId: null });
+        }, []);
+
+        return {
+            shouldShow: openUserId === userId,
+            onRequestOpen: () => useOpenProfileStore.setState({ userId }),
+            onRequestClose: () => useOpenProfileStore.setState({ userId: null })
+        };
+    },
 
     start() {
         // DeveloperMode needs to be enabled for the context menu to be shown
