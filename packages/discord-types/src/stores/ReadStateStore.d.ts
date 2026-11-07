@@ -1,5 +1,5 @@
 import { ReadStateType } from "../../enums";
-import { Channel, FluxStore } from "..";
+import { Channel, ChannelOverride, FluxStore } from "..";
 
 export interface GuildChannelUnreadState {
     mentionCount: number;
@@ -39,9 +39,10 @@ export class ReadStateStore extends FluxStore {
     getGuildChannelUnreadState(
         channel: Channel,
         isOptInEnabled: boolean,
-        guildHasActiveThreads: boolean,
+        channelOverrides: Record<string, ChannelOverride>,
         isChannelMuted: boolean,
-        isGuildHome: boolean
+        guildHasUnread: boolean,
+        nsfwContext?: { userCanSeeNSFW: boolean; guildIsNSFW: boolean; }
     ): GuildChannelUnreadState;
     getGuildUnreadsSentinel(guildId: string): number;
     getIsMentionLowImportance(channelId: string, type?: ReadStateType): boolean;
@@ -51,6 +52,7 @@ export class ReadStateStore extends FluxStore {
     getNotifCenterReadState(channelId: string): object | undefined;
     getOldestUnreadMessageId(channelId: string, type?: ReadStateType): string | null;
     getOldestUnreadTimestamp(channelId: string, type?: ReadStateType): number;
+    getResourceIds(type: ReadStateType): string[];
     getReadStatesByChannel(): Record<string, object>;
     getSnapshot(channelId: string, maxAge: number): ReadStateSnapshot;
     getTrackedAckMessageId(channelId: string, type?: ReadStateType): string | null;
@@ -69,4 +71,5 @@ export class ReadStateStore extends FluxStore {
     lastMessageId(channelId: string, type?: ReadStateType): string | null;
     lastMessageTimestamp(channelId: string, type?: ReadStateType): number;
     lastPinTimestamp(channelId: string): number;
+    wasUnreadOnSelect(channelId: string): boolean;
 }

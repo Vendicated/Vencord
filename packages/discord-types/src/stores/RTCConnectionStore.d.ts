@@ -51,6 +51,7 @@ export class RTCConnectionStore extends FluxStore {
     getState(): RTCConnectionState;
     isConnected(): boolean;
     isDisconnected(): boolean;
+    didReconnectTimeOut(): boolean;
     getRemoteDisconnectVoiceChannelId(): string | null;
     getLastSessionVoiceChannelId(): string | null;
     setLastSessionVoiceChannelId(channelId: string | null): void;
