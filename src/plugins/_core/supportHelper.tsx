@@ -19,10 +19,12 @@
 import { isPluginEnabled } from "@api/PluginManager";
 import { definePluginSettings } from "@api/Settings";
 import { getUserSettingLazy } from "@api/UserSettings";
+import { Button } from "@components/Button";
 import { Card } from "@components/Card";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Flex } from "@components/Flex";
 import { Link } from "@components/Link";
+import { Paragraph } from "@components/Paragraph";
 import { openSettingsTabModal, UpdaterTab } from "@components/settings";
 import { CONTRIB_ROLE_ID, Devs, DONOR_ROLE_ID, KNOWN_ISSUES_CHANNEL_ID, REGULAR_ROLE_ID, SUPPORT_CATEGORY_ID, SUPPORT_CHANNEL_ID, VENBOT_USER_ID, VENCORD_GUILD_ID } from "@utils/constants";
 import { sendMessage } from "@utils/discord";
@@ -35,15 +37,13 @@ import { makeCodeblock } from "@utils/text";
 import definePlugin from "@utils/types";
 import { checkForUpdates, isOutdated, update } from "@utils/updater";
 import { Channel, RenderModalProps } from "@vencord/discord-types";
-import { Button, ChannelStore, ConfirmModal, Forms, GuildMemberStore, openModal, Parser, PermissionsBits, PermissionStore, RelationshipStore, showToast, Text, Toasts, UserStore } from "@webpack/common";
+import { ChannelStore, ConfirmModal, GuildMemberStore, openModal, Parser, PermissionsBits, PermissionStore, RelationshipStore, showToast, UserStore } from "@webpack/common";
 import { JSX } from "react";
 
 import gitHash from "~git-hash";
 import plugins, { PluginMeta } from "~plugins";
 
 import SettingsPlugin from "./settings";
-
-const CodeBlockRe = /```js\n(.+?)```/s;
 
 const AdditionalAllowedChannelIds = [
     "1024286218801926184", // Vencord > #bot-commands
@@ -54,8 +54,6 @@ const TrustedRolesIds = [
     REGULAR_ROLE_ID, // regular
     DONOR_ROLE_ID, // donor
 ];
-
-const AsyncFunction = async function () { }.constructor;
 
 const ShowCurrentGame = getUserSettingLazy<boolean>("status", "showCurrentGame")!;
 
@@ -151,14 +149,14 @@ function DevBuildConfirmModal(props: RenderModalProps) {
             }}
         >
             <div>
-                <Forms.FormText>You are using a custom build of Vencord, which we do not provide support for!</Forms.FormText>
+                <Paragraph>You are using a custom build of Vencord, which we do not provide support for!</Paragraph>
 
-                <Forms.FormText className={Margins.top8}>
+                <Paragraph className={Margins.top8}>
                     We only provide support for <Link href="https://vencord.dev/download">official builds</Link>.
                     Either <Link href="https://vencord.dev/download">switch to an official build</Link> or figure your issue out yourself.
-                </Forms.FormText>
+                </Paragraph>
 
-                <Text variant="text-md/bold" className={Margins.top8}>You will be banned from receiving support if you ignore this rule.</Text>
+                <Paragraph size="md" weight="bold" className={Margins.top8}>You will be banned from receiving support if you ignore this rule.</Paragraph>
             </div>
         </ConfirmModal>
     );
@@ -219,13 +217,13 @@ export default definePlugin({
                             onCancel={() => openSettingsTabModal(UpdaterTab!)}
                         >
                             <div>
-                                <Forms.FormText>You are using an outdated version of Vencord! Chances are, your issue is already fixed.</Forms.FormText>
-                                <Forms.FormText className={Margins.top8}>
+                                <Paragraph>You are using an outdated version of Vencord! Chances are, your issue is already fixed.</Paragraph>
+                                <Paragraph className={Margins.top8}>
                                     Please first update before asking for support!
-                                </Forms.FormText>
-                                <Forms.FormText className={Margins.top8}>
+                                </Paragraph>
+                                <Paragraph className={Margins.top8}>
                                     If you know what you're doing or cannot update, you can dismiss this prompt.
-                                </Forms.FormText>
+                                </Paragraph>
                             </div>
                         </ConfirmModal>
                     ));
@@ -245,11 +243,11 @@ export default definePlugin({
                         variant="primary"
                     >
                         <div>
-                            <Forms.FormText>You are using an externally updated Vencord version, which we do not provide support for!</Forms.FormText>
-                            <Forms.FormText className={Margins.top8}>
+                            <Paragraph>You are using an externally updated Vencord version, which we do not provide support for!</Paragraph>
+                            <Paragraph className={Margins.top8}>
                                 Please either switch to an <Link href="https://vencord.dev/download">officially supported version of Vencord</Link>, or
                                 contact your package maintainer for support instead.
-                            </Forms.FormText>
+                            </Paragraph>
                         </div>
                     </ConfirmModal>
                 ));
@@ -280,16 +278,16 @@ export default definePlugin({
             buttons.push(
                 <Button
                     key="vc-update"
-                    color={Button.Colors.GREEN}
+                    variant="positive"
                     onClick={async () => {
                         try {
                             if (await forceUpdate())
-                                showToast("Success! Restarting...", Toasts.Type.SUCCESS);
+                                showToast({ text: "Success! Restarting...", variant: "success" });
                             else
-                                showToast("Already up to date!", Toasts.Type.MESSAGE);
+                                showToast({ text: "Already up to date!" });
                         } catch (e) {
                             new Logger(this.name).error("Error while updating:", e);
-                            showToast("Failed to update :(", Toasts.Type.FAILURE);
+                            showToast({ text: "Failed to update :(", variant: "critical" });
                         }
                     }}
                 >
@@ -303,39 +301,17 @@ export default definePlugin({
                 buttons.push(
                     <Button
                         key="vc-dbg"
-                        color={Button.Colors.PRIMARY}
+                        variant="secondary"
                         onClick={async () => sendMessage(props.channel.id, { content: await generateDebugInfoMessage() })}
                     >
                         Run /vencord-debug
                     </Button>,
                     <Button
                         key="vc-plg-list"
-                        color={Button.Colors.PRIMARY}
+                        variant="secondary"
                         onClick={async () => sendMessage(props.channel.id, { content: generatePluginList() })}
                     >
                         Run /vencord-plugins
-                    </Button>
-                );
-            }
-        }
-
-        if (props.channel.parent_id === KNOWN_ISSUES_CHANNEL_ID || (props.channel.parent_id === SUPPORT_CATEGORY_ID && props.message.author.id === VENBOT_USER_ID)) {
-            const match = CodeBlockRe.exec(props.message.content || props.message.embeds[0]?.rawDescription || "");
-            if (match) {
-                buttons.push(
-                    <Button
-                        key="vc-run-snippet"
-                        onClick={async () => {
-                            try {
-                                await AsyncFunction(match[1])();
-                                showToast("Success!", Toasts.Type.SUCCESS);
-                            } catch (e) {
-                                new Logger(this.name).error("Error while running snippet:", e);
-                                showToast("Failed to run snippet :(", Toasts.Type.FAILURE);
-                            }
-                        }}
-                    >
-                        Run Snippet
                     </Button>
                 );
             }
