@@ -64,9 +64,9 @@ export const playerStore = {
     }
 };
 
-const Volume = mapMangledModuleLazy(["Math.pow(", "2.8", ".35714285714285715", "Math.log10("], {
-    toAmplitude: filters.byCode("Math.pow(", "2.8"),
-    toPerceptual: filters.byCode("Math.log10(", ".35714285714285715")
+const Volume = mapMangledModuleLazy(["Math.pow(", "2.8", "Math.log10("], {
+    toAmplitude: filters.byCode(/Math\.pow\(\i,2\.8\)/),
+    toPerceptual: filters.byCode("Math.log10(")
 }) as Record<"toAmplitude" | "toPerceptual", (volume: number, max: number) => number>;
 const MediaPlayerPreferences = mapMangledModuleLazy("MediaPlayerVolume", {
     setVolume: filters.byCode(/volume:\i,muted:\i\(\)/),
