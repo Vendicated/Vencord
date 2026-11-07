@@ -4,56 +4,41 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
+
+const settings = definePluginSettings({
+    showSeconds: {
+        type: OptionType.BOOLEAN,
+        description: "Show seconds in message timestamps",
+        default: true
+    }
+});
 
 export default definePlugin({
     name: "ExactTimestamps",
     description: "Shows exact message timestamps including seconds.",
     authors: [Devs.hashy143],
-
-    options: {
-        showSeconds: {
-            type: OptionType.BOOLEAN,
-            description: "Show time with seconds",
-            default: true,
-            restartNeeded: true
-        },
-        use24Hour: {
-            type: OptionType.BOOLEAN,
-            description: "Use 24-hour time format",
-            default: true,
-            restartNeeded: true
-        }
-    },
+    settings,
 
     patches: [
         {
-            find: ".toISOString()",
-            replacement: [
-                {
-                    match: /timeFormatted:(\i),.*?timestamp:(\i)/,
-                    replace: "timeFormatted:$self.formatTime($1,$2),timestamp:$2"
-                }
-            ]
+            find: "cozyAlt:",
+            replacement: {
+                match: /(\i)\?\(0,(\i\.i\$)\)\((\i),"LT",(\i)\):\(0,(\i\.mk)\)\(\3,!0\)/,
+                replace: "$1?(0,$2)($3,$self.token(),$4):$self.cozy($3,(0,$5)($3,!0))"
+            }
         }
     ],
 
-    formatTime(defaultFormatted: string, timestamp: any) {
-        if (!this.options.showSeconds || !timestamp) return defaultFormatted;
+    token() {
+        return settings.store.showSeconds ? "LTS" : "LT";
+    },
 
-        try {
-            const date = timestamp instanceof Date ? timestamp : new Date(timestamp);
-            if (isNaN(date.getTime())) return defaultFormatted;
-
-            return date.toLocaleTimeString([], {
-                hour: "2-digit",
-                minute: "2-digit",
-                second: "2-digit",
-                hour12: !this.options.use24Hour
-            });
-        } catch {
-            return defaultFormatted;
-        }
+    cozy(date: Date, text: string) {
+        if (!settings.store.showSeconds) return text;
+        const ss = String(date.getSeconds()).padStart(2, "0");
+        return text.replace(/(\d{1,2}[:.]\d{2})(?!.*\d[:.]\d{2})/, `$1:${ss}`);
     }
 });
