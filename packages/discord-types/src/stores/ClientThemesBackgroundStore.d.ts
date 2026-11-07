@@ -10,5 +10,6 @@ export class ClientThemesBackgroundStore extends FluxStore {
     get isPreview(): boolean;
     get isCoachmark(): boolean;
     get mobilePendingThemeIndex(): number | undefined;
+    get hasHiddenHexagonCampaignPreset(): boolean;
     getLinearGradient(): string | null;
 }

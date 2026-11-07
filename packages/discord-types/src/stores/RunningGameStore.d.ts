@@ -43,6 +43,7 @@ export class RunningGameStore extends FluxStore {
     getGameOverlayStatus(game: RunningGame): GameOverlayStatus | null;
     getGamesSeen(includeHidden?: boolean): RunningGame[];
     getLauncherForPID(pid: number): RunningGame | null;
+    getSdkResolutionForPID(pid: number): { type: 0; } | { type: 1 | 2; game: { id: string; name: string; }; };
     getObservedAppNameForWindow(windowHandle: number): string | null;
     getOverlayEnabledForGame(game: RunningGame): boolean;
     getOverlayOptionsForPID(pid: number): object | null;

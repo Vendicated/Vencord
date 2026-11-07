@@ -23,6 +23,7 @@ interface UserAffinitiesResponse {
 export class UserAffinitiesStore extends FluxStore {
     compare(firstUserId: string, secondUserId: string): number;
     compareByDmProbability(firstUserId: string, secondUserId: string): number;
+    getDevToolsOverride(): UserAffinity | null;
     getState(): UserAffinitiesResponse;
     getUserAffinities(): UserAffinity[];
     getUserAffinitiesMap(): Map<string, UserAffinity>;
