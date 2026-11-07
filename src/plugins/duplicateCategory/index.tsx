@@ -6,6 +6,7 @@
 
 import { findGroupChildrenByChildId, NavContextMenuPatchCallback } from "@api/ContextMenu";
 import ErrorBoundary from "@components/ErrorBoundary";
+import { FormSwitch } from "@components/FormSwitch";
 import definePlugin from "@utils/types";
 import type { Channel, RenderModalProps } from "@vencord/discord-types";
 import { ChannelType } from "@vencord/discord-types/enums";
@@ -13,6 +14,7 @@ import { ChannelStore, Menu, Modal, openModal, PermissionsBits, PermissionStore,
 
 const DuplicateCategoryModal = ErrorBoundary.wrap(({ category, ...props }: RenderModalProps & { category: Channel; }) => {
     const [name, setName] = useState(category.name);
+    const [copyPermissions, setCopyPermissions] = useState(true);
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
@@ -29,12 +31,12 @@ const DuplicateCategoryModal = ErrorBoundary.wrap(({ category, ...props }: Rende
                 body: {
                     name: name.trim(),
                     type: ChannelType.GUILD_CATEGORY,
-                    permission_overwrites: Object.values(source.permissionOverwrites).map(overwrite => ({
+                    permission_overwrites: copyPermissions ? Object.values(source.permissionOverwrites).map(overwrite => ({
                         id: overwrite.id,
                         type: overwrite.type,
                         allow: String(overwrite.allow),
                         deny: String(overwrite.deny)
-                    }))
+                    })) : []
                 }
             });
             props.onClose();
@@ -68,6 +70,16 @@ const DuplicateCategoryModal = ErrorBoundary.wrap(({ category, ...props }: Rende
                     onChange={setName}
                 />
             </form>
+            <div style={{ marginTop: 16 }}>
+                <FormSwitch
+                    title={<><svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="currentColor" style={{ marginRight: 4, verticalAlign: "-2px" }}><path d="M18 8h-1V6a5 5 0 0 0-10 0v2H6a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V10a2 2 0 0 0-2-2ZM9 6a3 3 0 0 1 6 0v2H9Zm9 14H6V10h12Z" /></svg>Copy Permissions</>}
+                    description="Copy the original category's permissions to the new category. Turn this off to use the server's default permissions."
+                    value={copyPermissions}
+                    onChange={setCopyPermissions}
+                    disabled={saving}
+                    hideBorder
+                />
+            </div>
         </Modal>
     );
 }, { noop: false });
