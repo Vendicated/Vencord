@@ -12,19 +12,6 @@ import definePlugin, { OptionType } from "@utils/types";
 import FullPreview, { EditorState, updateOffset } from "./Preview";
 
 const settings = definePluginSettings({
-    extendedZoom: {
-        type: OptionType.BOOLEAN,
-        description: "Allow zooming further than Discord's default in the avatar editor",
-        default: true
-    },
-    maxZoom: {
-        type: OptionType.SLIDER,
-        description: "Maximum zoom multiplier",
-        markers: [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20],
-        default: 5,
-        stickToMarkers: true
-    },
-
     showPreview: {
         type: OptionType.BOOLEAN,
         description: "Show previews in the avatar editor modal",
@@ -40,12 +27,8 @@ export default definePlugin({
     settings,
     patches: [
         {
-            find: "keyboardStep:.025",
+            find: /keyboardStep:\.025,asValueChanges:\i,disabled:\i,equidistant:!0,hideBubble:!0,"aria-label":\i\.intl\.string\(\i.\i#{intl::EqiCcq::raw}\)/,
             replacement: [
-                {
-                    match: /(?<=minValue:1,maxValue:)2(?=,keyboardStep:\.025)/,
-                    replace: "$self.getMaxZoom(arguments[0].uploadType)"
-                },
                 {
                     match: /(\{cropDimensions:(\i),dragBoundaries:\i,imageDimensions:(\i),imageRotation:(\i),imageTransformCoordinates:\i,zoomRatio:(\i),startingCoordinates:\i,isDragging:\i,hasImageEdits:\i\}=\i)/,
                     replace: "$1,ezpfpState={crop:$2,image:$3,rotation:$4,zoom:$5}"
@@ -67,11 +50,6 @@ export default definePlugin({
     ],
 
     updateOffset,
-
-    getMaxZoom(uploadType: string) {
-        const { extendedZoom, maxZoom } = settings.store;
-        return extendedZoom && uploadType === "AVATAR" ? maxZoom : 2;
-    },
 
     getModalSize(uploadType: string) {
         return settings.store.showPreview && uploadType === "AVATAR" ? "lg" : "md";
