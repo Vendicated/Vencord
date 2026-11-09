@@ -239,7 +239,7 @@ export default definePlugin({
             find: ".id,spacing:14,",
             replacement: [
                 {
-                    match: /(?=let\{member:\i,guildId:\i,channelId:\i,role:\i\}=)/,
+                    match: /(?=let\{member:)/,
                     replace: "const vcProfileProps=$self.useMemberProfileProps(arguments[0].member.userId);"
                 },
                 {
