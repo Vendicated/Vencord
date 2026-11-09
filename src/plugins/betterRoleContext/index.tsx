@@ -244,7 +244,7 @@ export default definePlugin({
                 },
                 {
                     match: /\.id,spacing:14,/,
-                    replace: "$&...(typeof vcProfileProps!=="undefined"?vcProfileProps:undefined),"
+                    replace: "$&...(typeof vcProfileProps!=='undefined'?vcProfileProps:undefined),"
                 }
             ]
         }
