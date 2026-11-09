@@ -12,7 +12,3 @@ Preview your profile picture to make sure it looks right, which allows you to ma
 
 ## Matching your profile picture with decorations has never been so easy (ez)
 ![](./assets/PFPDecoMatch.png)
-
-## It also unlocks zoom up to 20x (because why would you need more than that)
-![](./assets/ZoomUnlock.png)
-![](./assets/MegaZoom.png)
