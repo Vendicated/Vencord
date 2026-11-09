@@ -66,7 +66,7 @@ export default definePlugin({
         },
         {
             // Gradient roles in member list
-            find: /="left",className:\i,nameTextClassName:/,
+            find: ".roleStyle);",
             replacement: {
                 match: /,animateGradient:/,
                 replace: ",animateGradient:!0,_oldAnimateGradient:"
