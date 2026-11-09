@@ -239,8 +239,8 @@ export default definePlugin({
             find: ".id,spacing:14,",
             replacement: [
                 {
-                    match: /function \i\((\i)\)\{(?=let\{member:\i,guildId:\i,channelId:\i,role:\i\}=\1)/,
-                    replace: "$&const vcProfileProps=$self.useMemberProfileProps($1.member.userId);"
+                    match: /(?=let\{member:\i,guildId:\i,channelId:\i,role:\i\}=)/,
+                    replace: "const vcProfileProps=$self.useMemberProfileProps(arguments[0].member.userId);"
                 },
                 {
                     match: /\.id,spacing:14,/,
