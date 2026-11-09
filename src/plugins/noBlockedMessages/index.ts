@@ -58,7 +58,7 @@ export default definePlugin({
             find: ".__invalid_blocked,",
             replacement: [
                 {
-                    match: /let{messages:\i,[^}]*?collapsedReason[^}]*}/,
+                    match: /let{messages:\i,[^}]*?canUncollapse[^}]*}/,
                     replace: "if($self.shouldHide(arguments[0]))return null;$&"
                 }
             ]
