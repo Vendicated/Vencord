@@ -11,12 +11,12 @@ import { copyToClipboard } from "@utils/clipboard";
 import { Devs } from "@utils/constants";
 import { getCurrentChannel, getCurrentGuild, getIntlMessage, openImageModal } from "@utils/discord";
 import { isTruthy } from "@utils/guards";
-import { proxyLazy } from "@utils/lazy";
+import { makeLazy } from "@utils/lazy";
 import { classes } from "@utils/misc";
 import definePlugin, { OptionType } from "@utils/types";
 import { Guild, Role } from "@vencord/discord-types";
 import { findByCodeLazy, findByPropsLazy, findCssClassesLazy } from "@webpack";
-import { ContextMenuApi, GuildRoleStore, Menu, PermissionStore, Popout, RoleMemberPopout, useEffect, useRef, zustandCreate } from "@webpack/common";
+import { ContextMenuApi, GuildRoleStore, Menu, PermissionStore, Popout, React, RoleMemberPopout, useRef, useState } from "@webpack/common";
 
 const GuildSettingsActions = findByPropsLazy("open", "selectRole", "updateGuild");
 const MenuItemClasses = findCssClassesLazy("item", "labelContainer", "colorDefault", "label", "iconContainer");
@@ -24,7 +24,23 @@ const loadRoleMembers = findByCodeLazy(".GUILD_ROLE_MEMBER_IDS(", "requestMember
 
 const DeveloperMode = getUserSettingLazy("appearance", "developerMode")!;
 
-const useOpenProfileStore = proxyLazy(() => zustandCreate(() => ({ userId: null as string | null })));
+const getOpenProfileContext = makeLazy(() => React.createContext<[string | null, (userId: string | null) => void] | null>(null));
+
+function RoleMembers({ popoutProps, guildId, roleId }: { popoutProps: any; guildId: string; roleId: string; }) {
+    const OpenProfileContext = getOpenProfileContext();
+    const openProfile = useState<string | null>(null);
+
+    return (
+        <OpenProfileContext.Provider value={openProfile}>
+            <RoleMemberPopout
+                popoutProps={popoutProps}
+                guildId={guildId}
+                channelId={getCurrentChannel()!.id}
+                roleId={roleId}
+            />
+        </OpenProfileContext.Provider>
+    );
+}
 
 function PencilIcon() {
     return (
@@ -137,12 +153,7 @@ export function buildExtraRoleContextMenuItems(role: Role, guild: Guild, popoutR
                         targetElementRef={popoutRef}
                         preload={() => loadRoleMembers(guild.id, role.id)}
                         renderPopout={popoutProps => (
-                            <RoleMemberPopout
-                                popoutProps={popoutProps}
-                                guildId={guild.id}
-                                channelId={getCurrentChannel()!.id}
-                                roleId={role.id}
-                            />
+                            <RoleMembers popoutProps={popoutProps} guildId={guild.id} roleId={role.id} />
                         )}
                     >
                         {popoutProps => (
@@ -240,17 +251,15 @@ export default definePlugin({
     ],
 
     useMemberProfileProps(userId: string) {
-        const openUserId = useOpenProfileStore(s => s.userId);
+        const openProfile = React.useContext(getOpenProfileContext());
+        if (!openProfile) return {};
 
-        useEffect(() => () => {
-            if (useOpenProfileStore.getState().userId === userId)
-                useOpenProfileStore.setState({ userId: null });
-        }, []);
+        const [openUserId, setOpenUserId] = openProfile;
 
         return {
             shouldShow: openUserId === userId,
-            onRequestOpen: () => useOpenProfileStore.setState({ userId }),
-            onRequestClose: () => useOpenProfileStore.setState({ userId: null })
+            onRequestOpen: () => setOpenUserId(userId),
+            onRequestClose: () => setOpenUserId(null)
         };
     },
 
