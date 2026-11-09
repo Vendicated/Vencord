@@ -271,6 +271,12 @@ export default definePlugin({
                         <Flex flexDirection="column" gap=".5em" alignItems="flex-start">
                             <Heading tag="h4" weight="bold">Custom RPC disabled</Heading>
                             <Paragraph>The "Enable Presence" setting is disabled, so your presence won't show. If this was unintentional, enable it below.</Paragraph>
+                            <Button
+                                variant="overlayPrimary"
+                                onClick={() => settings.store.enablePresence = true}
+                            >
+                                Enable Presence
+                            </Button>
                         </Flex>
                     </Card>
                 )}
