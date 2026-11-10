@@ -5,7 +5,7 @@
 .vc-expandable-card-header {
     display: flex;
     cursor: pointer;
-    padding: .75em 1em;
+    padding: 0.75em 1em;
     margin: 4px;
     border-radius: var(--radius-xs);
 
