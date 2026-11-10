@@ -59,10 +59,11 @@ async function fetchCoverArt(releaseMBID: string, releaseGroupMBID: string, orig
     );
 }
 
-async function tryLookup(query: string): Promise<Record<string, any> | undefined> {
+async function tryLookup(query: string, dismax: boolean): Promise<Record<string, any> | undefined> {
     const params = new URLSearchParams({
         fmt: "json",
-        limit: "1"
+        limit: "1",
+        dismax: `${dismax}`
     });
     return await fetch("https://musicbrainz.org/ws/2/recording/?" + params + "&query=" + query, {
         headers: { "User-Agent": VENCORD_USER_AGENT }
@@ -95,20 +96,27 @@ async function getUrls(
     }
 
     // If no MBIDs are present, try searching MusicBrainz: first by ISRC (if present), then by name.
-    const nameQuery = encodeURIComponent(
-        `artist:"${artistName}" AND recording:"${trackName}"${releaseName ? ` AND release:"${releaseName}"` : ""}`
-    ).replace(/[!()*\-~]/g, "\\$&");
+    const nameQuery = encodeURIComponent(`${trackName} ${artistName}`);
 
-    const queries = additionalInfo?.isrc
-        ? [encodeURIComponent(`isrc:${additionalInfo.isrc}`), nameQuery]
-        : [nameQuery];
+    const queries: { query: string; dismax: boolean; }[] = [
+        ...(additionalInfo?.isrc
+            ? [{ query: encodeURIComponent(`isrc:${additionalInfo.isrc}`), dismax: false }]
+            : []),
+        { query: nameQuery, dismax: true },
+    ];
 
-    for (const query of queries) {
-        if (metadataCache.has(query)) {
-            return metadataCache.get(query) ?? {};
+    const getCacheKey = ({ query, dismax }: { query: string; dismax: boolean; }) =>
+        `${dismax ? "dismax:" : ""}${query}`;
+
+
+    for (const q of queries) {
+        const cacheKey = getCacheKey(q);
+
+        if (metadataCache.has(cacheKey)) {
+            return metadataCache.get(cacheKey) ?? {};
         }
 
-        const metadata = await tryLookup(query);
+        const metadata = await tryLookup(q.query, q.dismax);
         if (!metadata) continue;
 
         const artist = metadata["artist-credit"]?.[0]?.artist;
@@ -125,14 +133,14 @@ async function getUrls(
             artistURL: artist?.id ? url(`/artist/${artist.id}/`) : undefined,
             album: additionalInfo?.release_name ?? release?.title ?? "Unknown",
         };
-        metadataCache.set(query, data);
+        metadataCache.set(cacheKey, data);
         return data;
     }
 
     const fallback: Partial<TrackData> = additionalInfo?.origin_url
         ? { imageURL: fallbackToYoutubeThumbnail(additionalInfo.origin_url) }
         : {};
-    metadataCache.set(queries.at(-1)!, fallback);
+    metadataCache.set(getCacheKey(queries.at(-1)!), fallback);
 
     return fallback;
 }
