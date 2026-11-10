@@ -207,27 +207,28 @@ export default definePlugin({
         {
             find: "canUseCustomStickersEverywhere:",
             replacement: [
+                // Rename to _can* and replace with () => true
                 {
                     match: /canUseCustomStickersEverywhere:/,
                     replace: "$&()=>true,_$&",
                     predicate: () => settings.store.enableStickerBypass
                 },
                 {
-                    match: /(canUseHighVideoUploadQuality:)/,
+                    match: /canUseHighVideoUploadQuality:/,
                     replace: "$&()=>true,_$&",
                     predicate: () => settings.store.enableStreamQualityBypass
                 },
                 {
-                    match: /(canStreamQuality:)/,
+                    match: /canStreamQuality:/,
                     replace: "$&()=>true,_$&",
                     predicate: () => settings.store.enableStreamQualityBypass
                 },
                 {
-                    match: /(canUseClientThemes:)/,
+                    match: /canUseClientThemes:/,
                     replace: "$&()=>true,_$&"
                 },
                 {
-                    match: /(canUsePremiumAppIcons:)/,
+                    match: /canUsePremiumAppIcons:/,
                     replace: "$&()=>true,_$&"
                 }
             ],
