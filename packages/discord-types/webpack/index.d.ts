@@ -213,8 +213,16 @@ export type WebpackRequire = ((moduleId: PropertyKey) => ModuleExports) & {
 
     /* rspack only */
 
-    /** rspack version */
-    rv: (this: WebpackRequire) => string;
-    /** rspack unique id */
-    ruid: string;
+    /**
+     * rspack version
+     *
+     * Only present on rspack <= 2
+     */
+    rv?: (this: WebpackRequire) => string;
+    /**
+     * rspack unique id
+     *
+     * Only present on rspack <= 2
+     */
+    ruid?: string;
 };
