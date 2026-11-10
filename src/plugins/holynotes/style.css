@@ -1,0 +1,136 @@
+/* stylelint-disable shorthand-property-no-redundant-values */
+/* stylelint-disable length-zero-no-unit */
+
+/*
+$modifier: var(--background-modifier-accent);
+*/
+
+.vc-notebook-search {
+    flex: auto;
+    margin-right: 15px;
+    margin-bottom: 6px;
+    background-color: var(--background-tertiary);
+    border: solid 2px var(--background-secondary);
+}
+
+.vc-notebook-header {
+    margin-bottom: 10px;
+    padding: 16px 16px 10px 16px;
+}
+
+.vc-notebook-header-main {
+    padding-top: 15px;
+    padding-left: 10px;
+    padding-bottom: 0px;
+    background-color: var(--background-tertiary);
+    box-shadow: 0 1px 0 0 var(--background-tertiary), 0 1px 2px 0 var(--background-tertiary) !important;
+}
+
+.vc-notebook-heading {
+    max-width: 110px;
+    margin-right: 0px;
+    padding-bottom: 6px;
+    transform: scale(1);
+}
+
+
+.vc-notebook-flex {
+    overflow: hidden;
+}
+
+.vc-notebook-flex .vc-help-icon {
+    width: 23px;
+    opacity: 0.5;
+    cursor: pointer;
+    padding-left: 0px;
+    margin: 0px 14px 6px 0px;
+    color: var(--interactive-normal);
+    transition: opacity 0.2s ease-in-out;
+}
+
+.vc-notebook-flex .help-icon:hover {
+    opacity: 1;
+}
+
+.vc-notebook-display-left {
+    flex: auto;
+    display: flex;
+}
+
+.vc-help-markdown {
+    margin-top: 6px;
+}
+
+.vc-help-markdown hr {
+    border: 0;
+    height: 2px;
+    margin: 12px 0px 16px 0px;
+    background-color: var(--background-modifier-accent);
+}
+
+.vc-holy-note [class*="buttonContainer"] {
+    display: none;
+}
+
+.vc-holy-note [class*="messageListItem"] {
+    list-style-type: none;
+}
+
+.vc-notebook-tabbar {
+    border-bottom: 1px solid var(--background-tertiary);
+    background-color: var(--background-tertiary);
+    white-space: nowrap;
+    overflow: hidden;
+    height: 36px;
+    flex-shrink: 0;
+}
+
+
+/* .vc-notebook-tabbar-bar {
+    margin: 0;
+    padding: 10px 20px 0;
+} */
+
+.vc-notebook-overflow-chevron {
+    display: inline-block;
+    padding: 0 6px 2px;
+    height: 16px;
+    position: relative;
+    top: -10px;
+}
+
+.vc-notebook-tabbar-container {
+    border-bottom: 1px solid var(--profile-body-divider-color);
+    margin: 20px 12px 0;
+    padding: 0;
+}
+
+.vc-notebook-tabbar-item {
+    display: inline-block;
+    padding: 6px 12px;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    line-height: 22px;
+    font-size: 16px;
+    font-weight: 500;
+    cursor: pointer;
+    color: var(--interactive-normal);
+    border-bottom-width: 2px;
+    border-bottom-style: solid;
+    /* stylelint-disable-next-line declaration-block-no-redundant-longhand-properties */
+    border-bottom-color: transparent;
+}
+
+.vc-notebook-selected {
+    border-bottom-color: var(--control-brand-foreground);
+}
+
+.vc-notebook-tabbar-item:hover {
+    border-bottom-color: var(--brand-experiment);
+}
+
+.vc-notebook-top-section {
+    margin-bottom: calc(-8px + .15*(var(--custom-user-profile-modal-header-avatar-size) + var(--custom-user-profile-modal-header-total-avatar-border-size)));
+    z-index: 1;
+}
