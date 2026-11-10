@@ -16,13 +16,12 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { IpcEvents } from "@shared/IpcEvents";
 import { execFile as cpExecFile } from "child_process";
-import { ipcMain } from "electron";
 import { join } from "path";
 import { promisify } from "util";
 
-import { serializeErrors } from "./common";
+import { Updater } from ".";
+
 
 const VENCORD_SRC_DIR = join(__dirname, "..");
 
@@ -84,7 +83,11 @@ async function build() {
     return !res.stderr.includes("Build failed");
 }
 
-ipcMain.handle(IpcEvents.GET_REPO, serializeErrors(getRepo));
-ipcMain.handle(IpcEvents.GET_UPDATES, serializeErrors(calculateGitChanges));
-ipcMain.handle(IpcEvents.UPDATE, serializeErrors(pull));
-ipcMain.handle(IpcEvents.BUILD, serializeErrors(build));
+const GitUpdater: Updater = {
+    getRepo,
+    listUpdates: calculateGitChanges,
+    fetchUpdate: pull,
+    applyUpdate: build
+};
+
+export default GitUpdater;
