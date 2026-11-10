@@ -122,7 +122,7 @@ export default definePlugin({
             find: '"text":"locked"',
             replacement: [
                 {
-                    match: /(?<=let\{id:(\i),guildId:\i,channelId:(\i)\}.{0,300}?popoutProps:)\i(?=\})/,
+                    match: /(?<=let\{id:(\i),guildId:\i,channelId:(\i)\}.{0,500}?popoutProps:)\i(?=[},])/,
                     replace: "{...$&,color:$self.getColorInt($1,$2),roleColors:$self.getRoleColors($1,$2)}"
                 }
             ],
