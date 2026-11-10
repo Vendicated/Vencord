@@ -26,8 +26,8 @@ import { Logger } from "@utils/Logger";
 import definePlugin, { OptionType } from "@utils/types";
 import type { Emoji, Message, RenderModalProps, Sticker } from "@vencord/discord-types";
 import { StickerFormatType } from "@vencord/discord-types/enums";
-import { findByCodeLazy, findByPropsLazy, proxyLazyWebpack } from "@webpack";
-import { ChannelStore, ConfirmModal, DraftType, EmojiStore, FluxDispatcher, GuildMemberStore, IconUtils, openModal, PermissionsBits, PermissionStore, StickersStore, UploadHandler, UserSettingsActionCreators, UserSettingsProtoStore, UserStore } from "@webpack/common";
+import { findByCodeLazy, findByPropsLazy, findStoreLazy, proxyLazyWebpack } from "@webpack";
+import { ChannelStore, ConfirmModal, DraftType, EmojiStore, FluxDispatcher, GuildMemberStore, IconUtils, openModal, OverridePremiumTypeStore, PermissionsBits, PermissionStore, StickersStore, UploadHandler, UserSettingsActionCreators, UserSettingsProtoStore, UserStore } from "@webpack/common";
 import { applyPalette, GIFEncoder, quantize } from "gifenc";
 import type { ReactElement, ReactNode } from "react";
 
@@ -80,6 +80,34 @@ const mediaSizes = [16, 32, 48, 56, 64, 96, 128, 160, 256, 512, 1024];
 
 const DEFAULT_EMOJI_SIZE = 48;
 const DEFAULT_STICKER_SIZE = 160;
+
+interface ClipsStoreType {
+    getSettings(): { clipsEnabled: boolean; };
+}
+
+const ClipsStore = findStoreLazy("ClipsStore") as ClipsStoreType;
+
+const canUseClips = () => {
+    const actual = OverridePremiumTypeStore?.getState?.()?.premiumTypeActual;
+    if (actual != null) return actual >= 2;
+    return (UserStore?.getCurrentUser?.()?.premiumType ?? 0) >= 2;
+};
+
+function ensureClipsEnabled() {
+    if (IS_WEB || settings.store.enableClipsBypass === false) return;
+
+    setTimeout(() => {
+        if (settings.store.enableClipsBypass === false || canUseClips()) return;
+
+        const currentSettings = ClipsStore?.getSettings?.();
+        if (!currentSettings || !currentSettings.clipsEnabled) {
+            FluxDispatcher.dispatch({
+                type: "CLIPS_SETTINGS_UPDATE",
+                settings: { clipsEnabled: true }
+            });
+        }
+    }, 0);
+}
 
 const settings = definePluginSettings({
     enableEmojiBypass: {
@@ -149,6 +177,12 @@ const settings = definePluginSettings({
         description: "Whether to disable the embed permission check when sending fake emojis and stickers",
         type: OptionType.BOOLEAN,
         default: false
+    },
+    enableClipsBypass: {
+        description: "Allow Discord's native game clipping",
+        type: OptionType.BOOLEAN,
+        default: true,
+        restartNeeded: true
     }
 });
 
@@ -196,9 +230,9 @@ function showCannotEmbedNotice() {
 
 export default definePlugin({
     name: "FakeNitro",
-    authors: [Devs.Arjix, Devs.D3SOX, Devs.Ven, Devs.fawn, Devs.captain, Devs.Nuckyz, Devs.AutumnVN, Devs.sadan],
-    description: "Allows you to send fake emojis/stickers, use nitro themes, and stream in nitro quality",
-    tags: ["Emotes", "Appearance", "Customisation", "Chat"],
+    authors: [Devs.Arjix, Devs.D3SOX, Devs.Ven, Devs.fawn, Devs.captain, Devs.Nuckyz, Devs.AutumnVN, Devs.sadan, Devs.amp],
+    description: "Allows you to send fake emojis/stickers, use nitro themes, stream in nitro quality, and use clips",
+    tags: ["Emotes", "Appearance", "Customisation", "Chat", "Media"],
     dependencies: ["MessageEventsAPI"],
 
     settings,
@@ -412,6 +446,15 @@ export default definePlugin({
                 match: /(?<=type:"(?:SOUNDBOARD_SOUNDS_RECEIVED|GUILD_SOUNDBOARD_SOUND_CREATE|GUILD_SOUNDBOARD_SOUND_UPDATE|GUILD_SOUNDBOARD_SOUNDS_UPDATE)".+?available:)\i\.available/g,
                 replace: "true"
             }
+        },
+        // Allows using Discord's built-in game clipping feature
+        {
+            find: ".hasClipsV3Support()",
+            predicate: () => settings.store.enableClipsBypass ?? true,
+            replacement: {
+                match: /\i\.\i\.isPremiumAtLeast\(\i\?\.premiumType,\i\.PremiumTypes\.TIER_2\)/,
+                replace: "true"
+            }
         }
     ],
 
@@ -425,6 +468,10 @@ export default definePlugin({
 
     get canUseStickers() {
         return (UserStore.getCurrentUser().premiumType ?? 0) > 1;
+    },
+
+    get canUseClips() {
+        return canUseClips();
     },
 
     handleProtoChange(proto: any, user: any) {
@@ -772,6 +819,8 @@ export default definePlugin({
     },
 
     start() {
+        ensureClipsEnabled();
+
         const s = settings.store;
 
         if (!s.enableEmojiBypass && !s.enableStickerBypass) {
@@ -905,5 +954,10 @@ export default definePlugin({
     stop() {
         removeMessagePreSendListener(this.preSend);
         removeMessagePreEditListener(this.preEdit);
+    },
+
+    flux: {
+        POST_CONNECTION_OPEN: ensureClipsEnabled,
+        CONNECTION_OPEN: ensureClipsEnabled
     }
 });
