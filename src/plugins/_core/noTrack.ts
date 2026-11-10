@@ -51,6 +51,7 @@ export default definePlugin({
         },
         {
             find: ".METRICS_V2",
+            predicate: () => settings.store.disableAnalytics,
             replacement: [
                 {
                     match: /this\._intervalId=/,
