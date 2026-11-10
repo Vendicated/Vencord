@@ -21,21 +21,50 @@ import { Devs } from "@utils/constants";
 import { Logger } from "@utils/Logger";
 import definePlugin, { OptionType, StartAt } from "@utils/types";
 import { WebpackRequire } from "@vencord/discord-types/webpack";
-import { Flux, FluxDispatcher } from "@webpack/common";
+import { Flux, FluxDispatcher, RestAPI } from "@webpack/common";
+
+interface AnalyticsEvent {
+    type: string;
+    properties: Record<string, unknown>;
+}
 
 const settings = definePluginSettings({
     disableAnalytics: {
         type: OptionType.BOOLEAN,
-        description: "Block Discord's tracking analytics. Disable this if you want badges to track your progress (eg: hours streamed).",
+        description: "Block Discord's tracking analytics. Badge progress (eg: hours played) is still tracked if 'Allow Badge Tracking' is enabled in NoTrack settings.",
         default: true,
         restartNeeded: true
+    },
+    allowBadgeTracking: {
+        type: OptionType.BOOLEAN,
+        description: "Still send the events Discord needs to track badge progress (games played, hours played, hours streamed)",
+        default: true,
+        restartNeeded: true,
+        disabled: () => !settings.store.disableAnalytics
     }
 });
+
+const gameEvents = new Set(["launch_game", "running_game_heartbeat"]);
+const streamEvents = new Set(["media_session_joined", "video_stream_started", "video_stream_ended"]);
+
+const anonymizedProperties: Record<string, unknown> = {
+    accessibility_features: 0,
+    activity_status_shared_guilds: [],
+    client_performance_cpu: null,
+    client_performance_memory: null,
+    cpu_core_count: null,
+    voice_channel_bitrate: null,
+    voice_channel_guild_id: null,
+    voice_channel_id: null,
+    voice_channel_type: null
+};
+
+const omittedPropertyPrefixes = ["client_viewport_", "discord_memory_pct_", "system_cpu_pct_", "system_memory_pct_"];
 
 export default definePlugin({
     name: "NoTrack",
     description: "Disable Discord's tracking (analytics/'science'), metrics and Sentry crash reporting",
-    authors: [Devs.Cyn, Devs.Ven, Devs.Nuckyz, Devs.Arrow],
+    authors: [Devs.Cyn, Devs.Ven, Devs.Nuckyz, Devs.Arrow, Devs.Cramber],
     required: true,
 
     settings,
@@ -45,8 +74,8 @@ export default definePlugin({
             find: "AnalyticsActionHandlers.handle",
             predicate: () => settings.store.disableAnalytics,
             replacement: {
-                match: /\(0,\i\.analyticsTrackingStoreMaker\)/,
-                replace: "$self.analyticsTrackingStoreMaker",
+                match: /\(0,(\i)\.analyticsTrackingStoreMaker\)\(/,
+                replace: "$self.analyticsTrackingStoreMaker($1.analyticsTrackingStoreMaker,",
             },
         },
         {
@@ -143,7 +172,48 @@ export default definePlugin({
         });
     },
 
-    analyticsTrackingStoreMaker() {
+    isBadgeEvent({ type, properties }: AnalyticsEvent) {
+        if (gameEvents.has(type)) return true;
+
+        return streamEvents.has(type) && properties.context === "stream" && properties.participant_type !== "receiver";
+    },
+
+    anonymize(properties: Record<string, unknown>) {
+        const anonymized = { ...properties };
+
+        for (const key in anonymized) {
+            if (omittedPropertyPrefixes.some(prefix => key.startsWith(prefix))) {
+                delete anonymized[key];
+            } else if (Object.hasOwn(anonymizedProperties, key)) {
+                anonymized[key] = anonymizedProperties[key];
+            }
+        }
+
+        return anonymized;
+    },
+
+    submitBadgeEvents(url: string, events: AnalyticsEvent[], token: string) {
+        const allowedEvents = events
+            .filter(event => this.isBadgeEvent(event))
+            .map(event => ({ ...event, properties: this.anonymize(event.properties) }));
+
+        if (!allowedEvents.length) return Promise.resolve();
+
+        return RestAPI.post({ url, body: { token, events: allowedEvents } });
+    },
+
+    analyticsTrackingStoreMaker(makeStore: (options: any) => any, options: any) {
+        if (settings.store.allowBadgeTracking) {
+            if (String(makeStore).includes("submitEvents")) {
+                return makeStore({
+                    ...options,
+                    submitEvents: (events: AnalyticsEvent[], token: string) => this.submitBadgeEvents(options.TRACKING_URL, events, token)
+                });
+            }
+
+            new Logger("NoTrack", "#8caaee").error("Failed to allow badge tracking, blocking all analytics instead");
+        }
+
         class AnalyticsTrackingStoreStub extends Flux.Store {
             static displayName = "AnalyticsTrackingStore";
 
