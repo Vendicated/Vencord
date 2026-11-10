@@ -39,6 +39,9 @@ export interface ChannelMessages {
     forEach(callback: (message: Message, index: number, array: Message[]) => void, thisArg?: any): void;
     receiveMessage(msg: any): this;
     get(msgId: string): Message | undefined;
+    getByIndex(index: number): Message | undefined;
+    last(): Message | undefined;
+    readonly length: number;
 }
 
 export class MessageStore extends FluxStore {
@@ -51,7 +54,7 @@ export class MessageStore extends FluxStore {
     /** @see {@link ChannelMessages} */
     getMessages(channelId: string): ChannelMessages;
     hasCurrentUserSentMessage(channelId: string): boolean;
-    hasCurrentUserSentMessageSinceAppStart(channelId: string): boolean;
+    hasCurrentUserSentMessageSinceAppStart(): boolean;
     hasCurrentUserSentWaveBlockingMessage(channelId: string): boolean;
     getAutomodRemovalNotice(messageId: string): unknown;
     hasPresent(channelId: string): boolean;

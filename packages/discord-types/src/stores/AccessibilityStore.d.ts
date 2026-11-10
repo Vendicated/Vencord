@@ -73,6 +73,8 @@ export class AccessibilityStore extends FluxStore {
     get expressionPickerFormat(): string;
     get condensePickerWhenNarrow(): boolean;
     get youBarNameplateAnimation(): YouBarAnimationPreference;
+    get minToastDurationMs(): number;
+    get prefersReducedMotion(): boolean;
     get youBarAvatarDecoAnimation(): YouBarAnimationPreference;
     get animateYouBarNameplate(): boolean;
     get animateYouBarAvatarDeco(): boolean;

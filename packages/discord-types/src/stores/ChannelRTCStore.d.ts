@@ -80,7 +80,6 @@ export class ChannelRTCStore extends FluxStore {
     getActivityParticipants(channelId: string): ActivityParticipant[];
     getChatOpen(channelId: string): boolean;
     getFilteredParticipants(channelId: string): Participant[];
-    getGuildRingingUsers(channelId: string): Set<string>;
     getLayout(channelId: string, context?: RTCLayoutContext): RTCLayout;
     getMode(channelId: string): RTCMode;
     getOpenChatChannelIds(): Set<string>;
@@ -92,6 +91,8 @@ export class ChannelRTCStore extends FluxStore {
     getSelectedParticipantId(channelId: string): string | null;
     getSelectedParticipantStats(channelId: string): SelectedParticipantStats;
     getSpeakingParticipants(channelId: string): UserParticipant[];
+    getStageAudienceSidebarOpen(channelId: string): boolean;
+    getStageSpeakerParticipants(channelId: string): Participant[];
     getStageStreamSize(channelId: string): StreamResolution | undefined;
     getStageVideoLimitBoostUpsellDismissed(channelId: string): boolean | undefined;
     getState(): ChannelRTCState;

@@ -2252,28 +2252,6 @@ export interface Shortcut {
 }
 
 /**
- * Spatial audio mixer settings.
- */
-export interface AudioMixerSettings {
-    enabled: boolean;
-    spatialBlend: number;
-    reflectionsEnabled: boolean;
-    roomSize: number;
-    distanceAttenuationEnabled: boolean;
-    mode: string;
-    spread: number;
-    arcAngle: number;
-    gridColumns: number;
-    gridSpacing: number;
-    buckets: number;
-    listenerHeight: number;
-    distance: number;
-}
-
-/** 0 unknown, 1 active, 2 mono output, 3 init failed, 4 HRTF failed. */
-export type SpatialAudioStatus = 0 | 1 | 2 | 3 | 4;
-
-/**
  * Flux store managing audio/video settings, devices, and the media engine.
  * Handles voice activity detection, noise cancellation, device selection,
  * and go live streaming configuration.
@@ -2306,11 +2284,6 @@ export class MediaEngineStore extends FluxStore {
      * @returns attenuation 0-100, default 0.
      */
     getAttenuation(): number;
-    /**
-     * Gets spatial audio mixer settings.
-     * @returns mixer settings.
-     */
-    getAudioMixerSettings(): AudioMixerSettings;
     /**
      * Gets the current audio subsystem.
      * @returns active audio subsystem.
@@ -2376,6 +2349,11 @@ export class MediaEngineStore extends FluxStore {
      * @returns true if enabled.
      */
     getHardwareEncoding(): boolean;
+    /**
+     * Checks if the system has an NVIDIA GPU.
+     * @returns true if detected.
+     */
+    getHasNvidiaGpu(): boolean;
     /**
      * Gets whether audio input is detected.
      * @returns true if detected, false if not, null if unknown.
@@ -2566,11 +2544,6 @@ export class MediaEngineStore extends FluxStore {
      */
     getSidechainCompressionStrength(): number;
     /**
-     * Gets the spatial audio status reported by the engine.
-     * @returns spatial audio status.
-     */
-    getSpatialAudioStatus(): SpatialAudioStatus;
-    /**
      * Gets whether currently speaking while muted.
      * @returns true if speaking while muted.
      */
@@ -2646,10 +2619,10 @@ export class MediaEngineStore extends FluxStore {
      */
     getVideoToggleState(userId: string, context?: MediaEngineContextType): VideoToggleState;
     /**
-     * Checks if there is an active CallKit call.
+     * Checks if there is an active system telecom call.
      * @returns true if active.
      */
-    hasActiveCallKitCall(): boolean;
+    hasActiveSystemTelecomCall(): boolean;
     /**
      * Checks if there is a clips source.
      * @returns true if has source.
@@ -2824,26 +2797,11 @@ export class MediaEngineStore extends FluxStore {
      */
     isServerMute(): boolean;
     /**
-     * Checks if simulcast is supported.
-     * @returns true if supported.
-     */
-    isSimulcastSupported(): boolean;
-    /**
      * Checks if sound sharing is active.
      * @param context settings context, defaults to "default".
      * @returns true if sharing.
      */
     isSoundSharing(context?: MediaEngineContextType): boolean;
-    /**
-     * Checks if spatial audio is enabled in mixer settings.
-     * @returns true if enabled.
-     */
-    isSpatialAudioEnabled(): boolean;
-    /**
-     * Checks if spatial audio was requested.
-     * @returns true if requested.
-     */
-    isSpatialAudioRequested(): boolean;
     /**
      * Checks if media engine is supported.
      * @returns true if supported.
@@ -2868,10 +2826,10 @@ export class MediaEngineStore extends FluxStore {
      */
     setCanHavePriority(userId: string, canHavePriority: boolean): void;
     /**
-     * Sets whether there is an active CallKit call.
+     * Sets whether there is an active system telecom call.
      * @param active whether active.
      */
-    setHasActiveCallKitCall(active: boolean): void;
+    setHasActiveSystemTelecomCall(active: boolean): void;
     /**
      * Checks if manual subsystem selection should be offered.
      * @returns true if should offer.

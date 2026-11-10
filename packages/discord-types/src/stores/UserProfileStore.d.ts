@@ -48,6 +48,8 @@ export interface ConnectedAccount {
     name: string;
     verified: boolean;
     metadata?: Record<string, string>;
+    revoked: boolean;
+    showActivity: boolean;
 }
 
 export interface ProfileApplication {
@@ -120,6 +122,7 @@ export class UserProfileStore extends FluxStore {
      * @returns an array of mutual friends, or undefined if the user has no mutual friends
      */
     getMutualFriends(userId: string): MutualFriend[] | undefined;
+    getProfileReadStateSectionAckedAt(userId: string, section: string): number | null;
     /**
      * Get the count of mutual friends for a user.
      *
