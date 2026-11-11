@@ -39,12 +39,9 @@
     }
 }
 
-/* force hide trailing icons when standalone so there's no ugly pixel overflow */
-@media all and (display-mode: standalone) {
+/* without window controls overlay the title bar is 0px tall, hide it so its icons don't overflow. Firefox uses minimal-ui */
+@media all and ((display-mode: standalone) or (display-mode: minimal-ui)) {
     [data-fullscreen] > [class*="bar_"] {
-        [class*="trailing_"],
-        [class*="leading"] {
-            display: none;
-        }
+        display: none;
     }
 }

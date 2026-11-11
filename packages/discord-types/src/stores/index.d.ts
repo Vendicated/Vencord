@@ -3,6 +3,7 @@ export * from "./AccessibilityStore";
 export * from "./ActiveJoinedThreadsStore";
 export * from "./ApplicationCommandIndexStore";
 export * from "./ApplicationStore";
+export * from "./ApplicationStreamingSettingsStore";
 export * from "./ApplicationStreamingStore";
 export * from "./ApplicationStreamPreviewStore";
 export * from "./AuthenticationStore";
