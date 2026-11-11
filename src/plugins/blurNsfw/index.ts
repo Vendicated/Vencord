@@ -22,6 +22,7 @@ import { Devs } from "@utils/constants";
 import { createAndAppendStyle } from "@utils/css";
 import definePlugin, { OptionType } from "@utils/types";
 import { Channel } from "@vencord/discord-types";
+import { Menu, React } from "@webpack/common";
 
 let style: HTMLStyleElement;
 
@@ -61,6 +62,23 @@ export default definePlugin({
     tags: ["Privacy", "Appearance"],
     authors: [Devs.Ven],
     settings,
+
+    contextMenus: {
+        "channel-context"(children, { channel }: { channel: Channel; }) {
+            const ignoredChannels = settings.store.ignoredChannels.split(/[\s,]+/).filter(Boolean);
+            const ignored = ignoredChannels.includes(channel.id);
+            children.push(React.createElement(Menu.MenuCheckboxItem, {
+                id: "vc-blur-nsfw-ignore-channel",
+                label: "Disable blurNSFW",
+                checked: ignored,
+                action: () => {
+                    settings.store.ignoredChannels = (ignored
+                        ? ignoredChannels.filter(id => id !== channel.id)
+                        : [...ignoredChannels, channel.id]).join(", ");
+                }
+            }));
+        }
+    },
 
     shouldBlur(channel?: Channel) {
         if (!channel?.nsfw) return false;
