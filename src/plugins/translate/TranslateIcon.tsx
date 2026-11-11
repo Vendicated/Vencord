@@ -62,7 +62,7 @@ function AutoTranslateConfirmModal(props: RenderModalProps) {
     );
 }
 
-export const TranslateChatBarIcon: ChatBarButtonFactory = ({ isMainChat }) => {
+export const TranslateChatBarIcon: ChatBarButtonFactory = ({ isAnyChat }) => {
     const { autoTranslate } = settings.use(["autoTranslate"]);
 
     const [shouldShowTranslateEnabledTooltip, setter] = useState(false);
@@ -71,7 +71,7 @@ export const TranslateChatBarIcon: ChatBarButtonFactory = ({ isMainChat }) => {
         return () => setShouldShowTranslateEnabledTooltip = undefined;
     }, []);
 
-    if (!isMainChat) return null;
+    if (!isAnyChat) return null;
 
     const toggle = () => {
         const newState = !autoTranslate;
