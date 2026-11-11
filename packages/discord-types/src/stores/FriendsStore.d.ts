@@ -1,5 +1,5 @@
-import { Activity, FluxStore, Guild, User } from "..";
 import { GiftIntentType, RelationshipType } from "../../enums";
+import { Activity, FluxStore, Guild, User } from "..";
 
 export type FriendsSection = "ADD_FRIEND" | "ALL" | "ONLINE" | "PENDING" | "PENDING_IGNORED" | "SPAM" | "SUGGESTIONS";
 

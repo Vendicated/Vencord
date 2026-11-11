@@ -1,5 +1,5 @@
-import { FluxStore } from "..";
 import { ActivityFlags } from "../../enums";
+import { FluxStore } from "..";
 
 export type SpotifyDeviceType = "computer" | "smartphone" | "speaker" | "tv" | "game_console" | "automobile" | "unknown";
 export type SpotifyMediaType = "track" | "episode";

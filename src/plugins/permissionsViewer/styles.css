@@ -145,11 +145,10 @@
     border-radius: var(--radius-sm);
     color: var(--interactive-icon-default);
     border: 1px solid var(--user-profile-border);
-    /* stylelint-disable-next-line value-no-vendor-prefix */
     width: -moz-fit-content;
     width: fit-content;
     height: 24px;
-    padding: 4px
+    padding: 4px;
 }
 
 .vc-permviewer-role-button:hover {
