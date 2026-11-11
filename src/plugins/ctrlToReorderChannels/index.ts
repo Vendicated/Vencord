@@ -38,6 +38,6 @@ export default definePlugin({
     isCtrlHeld(): boolean {
         const e = window.event as DragEvent | undefined;
         if (!e || e.type !== "dragstart") return true;
-        return e.ctrlKey;
+        return IS_MAC ? e.metaKey : e.ctrlKey;
     }
 });
