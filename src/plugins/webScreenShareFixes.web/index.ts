@@ -8,6 +8,7 @@ import { Devs } from "@utils/constants";
 import { Logger } from "@utils/Logger";
 import definePlugin from "@utils/types";
 import { MediaEngineConnection } from "@vencord/discord-types";
+import { FluxDispatcher } from "@webpack/common";
 
 const logger = new Logger("WebScreenShareFixes");
 
@@ -58,8 +59,21 @@ export default definePlugin({
     description: "Removes 2500kbps bitrate cap on chromium and vesktop clients, enables stereo stream audio with a higher bitrate, raises the start bitrate of streams, uses hardware H264 encoding and fixes CPU usage growing endlessly while screensharing.",
     tags: ["Voice"],
     enabledByDefault: true,
+    stop() {
+        FluxDispatcher.dispatch({
+            type: "EXPERIMENT_OVERRIDE_BUCKET",
+            experimentId: "2026-10-web-screen-share-audio",
+            experimentBucket: null,
+        });
+    },
 
     async start() {
+        FluxDispatcher.dispatch({
+            type: "EXPERIMENT_OVERRIDE_BUCKET",
+            experimentId: "2026-10-web-screen-share-audio",
+            experimentBucket: 1,
+        });
+
         try {
             const hardwareProfilesSet = new Set<string>();
 
