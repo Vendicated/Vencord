@@ -49,7 +49,9 @@
     cursor: pointer;
     color: var(--interactive-icon-default);
     opacity: 0.5;
-    transition: opacity 0.2s ease-in-out, color 0.2s ease-in-out;
+    transition:
+        opacity 0.2s ease-in-out,
+        color 0.2s ease-in-out;
 }
 
 .vc-notification-close-btn:hover {
@@ -97,7 +99,6 @@
     transition: 200ms ease;
     transition-property: height, opacity;
 
-    /* stylelint-disable-next-line no-descending-specificity */
     .vc-notification-root {
         height: 104px;
     }
