@@ -22,14 +22,15 @@ import { findGroupChildrenByChildId, NavContextMenuPatchCallback } from "@api/Co
 import { definePluginSettings } from "@api/Settings";
 import { CodeBlock } from "@components/CodeBlock";
 import ErrorBoundary from "@components/ErrorBoundary";
-import { HeadingSecondary } from "@components/Heading";
+import { Heading } from "@components/Heading";
 import { Margins } from "@components/margins";
 import { Devs } from "@utils/constants";
 import { copyWithToast, getCurrentGuild, getIntlMessage } from "@utils/discord";
 import { isTruthy } from "@utils/guards";
+import { classes } from "@utils/misc";
 import definePlugin, { IconComponent, OptionType } from "@utils/types";
 import { Message } from "@vencord/discord-types";
-import { GuildRoleStore, Menu, Modal, openModal, UserProfileStore } from "@webpack/common";
+import { GuildRoleStore, Menu, Modal, openModal, showToast, UserProfileStore } from "@webpack/common";
 import { MouseEventHandler } from "react";
 
 const CopyRawIcon: IconComponent = ({ height = 20, width = 20, className }) => {
@@ -121,9 +122,9 @@ function openViewRawModal(data: object, type: string, msgContent?: string) {
             >
                 {!!msgContent && (
                     <>
-                        <HeadingSecondary>Message Content</HeadingSecondary>
+                        <Heading className={Margins.bottom8}>Message Content</Heading>
                         <CodeBlock className="vc-viewRaw-codeBlock" content={msgContent} lang="" />
-                        <HeadingSecondary className={Margins.top16}>Message Data</HeadingSecondary>
+                        <Heading className={classes(Margins.top16, Margins.bottom8)}>Message Data</Heading>
                     </>
                 )}
                 <CodeBlock className="vc-viewRaw-codeBlock" content={json} lang="json" />
@@ -133,6 +134,12 @@ function openViewRawModal(data: object, type: string, msgContent?: string) {
 }
 
 const openViewRawModalMessage = (msg: Message) => openViewRawModal(cleanMessage(msg), "Message", msg.content);
+
+const copyMessage = (msg: Message) => {
+    const message = msg.messageSnapshots?.[0]?.message ?? msg;
+    if (!message.content) return showToast({ text: "Can't copy empty message.", variant: "critical" });
+    copyWithToast(message.content);
+};
 
 const settings = definePluginSettings({
     clickMethod: {
@@ -232,20 +239,18 @@ export default definePlugin({
         render(msg) {
             const handleClick = () => {
                 if (settings.store.clickMethod === "Right") {
-                    copyWithToast(msg.content);
+                    copyMessage(msg);
                 } else {
                     openViewRawModalMessage(msg);
                 }
             };
 
             const handleContextMenu: MouseEventHandler<HTMLDivElement> = e => {
+                e.preventDefault();
+                e.stopPropagation();
                 if (settings.store.clickMethod === "Left") {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    copyWithToast(msg.content);
+                    copyMessage(msg);
                 } else {
-                    e.preventDefault();
-                    e.stopPropagation();
                     openViewRawModalMessage(msg);
                 }
             };

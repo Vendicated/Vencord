@@ -30,7 +30,7 @@ import { handleTranslate, TranslationAccessory } from "./TranslationAccessory";
 import { translate } from "./utils";
 
 const messageCtxPatch: NavContextMenuPatchCallback = (children, { message }: { message: Message; }) => {
-    const content = getMessageContent(message);
+    const content = document.getSelection()?.toString() || getMessageContent(message);
     if (!content) return;
 
     const group = findGroupChildrenByChildId("copy-text", children);
@@ -74,7 +74,10 @@ export default definePlugin({
     // not used, just here in case some other plugin wants it or w/e
     translate,
 
-    renderMessageAccessory: props => <TranslationAccessory message={props.message} />,
+    renderMessageAccessory: props =>
+        !props.isMessageSnapshot
+            ? <TranslationAccessory message={props.message} />
+            : null,
 
     chatBarButton: {
         icon: TranslateIcon,

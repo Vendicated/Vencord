@@ -1,8 +1,8 @@
 // TODO: a lot of optional params can also be null, not just undef
 
-import { DiscordRecord } from "./Record";
-import { AvatarDecorationData, ClanData, Collectibles, DisplayNameStyles } from "./Channel";
 import { PremiumType, UserFlags } from "../../enums";
+import { AvatarDecorationData, ClanData, Collectibles, DisplayNameStyles } from "./Channel";
+import { DiscordRecord } from "./Record";
 
 export class User extends DiscordRecord {
     constructor(user: object);

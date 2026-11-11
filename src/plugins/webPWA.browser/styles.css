@@ -9,7 +9,6 @@
         --custom-app-top-bar-height: env(titlebar-area-height, 0px) !important;
     }
 
-
     /* position trailing/leading titlebar elements alongside WCO */
     [data-fullscreen] > [class*="bar_"] {
         [class*="leading_"] {
@@ -32,7 +31,9 @@
 
             /* position trailing toolbar elements alongside WCO */
             [class*="toolbar_"] {
-                padding-right: calc(100vw - env(titlebar-area-width, 100%) - env(titlebar-area-x, 0px));
+                padding-right: calc(
+                    100vw - env(titlebar-area-width, 100%) - env(titlebar-area-x, 0px)
+                );
             }
         }
     }

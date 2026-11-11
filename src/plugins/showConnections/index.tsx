@@ -48,7 +48,8 @@ const settings = definePluginSettings({
     iconSize: {
         type: OptionType.NUMBER,
         description: "Icon size (px)",
-        default: 32
+        default: 32,
+        min: 1
     },
     iconSpacing: {
         type: OptionType.SELECT,
@@ -154,7 +155,7 @@ function CompactConnectionComponent({ connection, theme }: { connection: Connect
 
 export default definePlugin({
     name: "ShowConnections",
-    description: "Show connected accounts in user popouts",
+    description: "Show connected accounts in user popouts and the DM sidebar",
     tags: ["Friends", "Appearance"],
     authors: [Devs.TheKodeToad],
     settings,
@@ -165,6 +166,14 @@ export default definePlugin({
             find: '"UserProfilePopout");',
             replacement: {
                 match: /userId:\i\.id,guild:\i\}\)(?=])/,
+                replace: "$&,$self.profilePopoutComponent(arguments[0])"
+            }
+        },
+        {
+            // Same as FakeNitro
+            find: '.getByName("fork_and_knife")',
+            replacement: {
+                match: /targetUserId:\i\.id.{0,60}?]}\)(?=])/,
                 replace: "$&,$self.profilePopoutComponent(arguments[0])"
             }
         }

@@ -23,7 +23,6 @@ import "./settings";
 import { debounce } from "@shared/debounce";
 import { IpcEvents } from "@shared/IpcEvents";
 import { BrowserWindow, ipcMain, nativeTheme, shell, systemPreferences } from "electron";
-import monacoHtml from "file://monacoWin.html?minify&base64";
 import { FSWatcher, mkdirSync, readFileSync, watch, writeFileSync } from "fs";
 import { open, readdir, readFile } from "fs/promises";
 import { release } from "os";
@@ -167,9 +166,23 @@ ipcMain.handle(IpcEvents.OPEN_MONACO_EDITOR, async () => {
         }
     });
 
+    // Intercept quit shortcuts so they don't quit the main application
+    win.webContents.on("before-input-event", (e, input) => {
+        if (input.type !== "keyDown") return;
+
+        const key = input.key.toLowerCase();
+        const isQuit = (input.control && !input.alt && !input.shift && key === "q")
+            || (input.alt && !input.control && !input.shift && key === "f4");
+
+        if (isQuit) {
+            e.preventDefault();
+            win.close();
+        }
+    });
+
     makeLinksOpenExternally(win);
 
-    await win.loadURL(`data:text/html;base64,${monacoHtml}`);
+    await win.loadURL(DESKTOP_MONACO_EDITOR_URL);
 });
 
 ipcMain.handle(IpcEvents.GET_RENDERER_CSS, () => readFile(RENDERER_CSS_PATH, "utf-8"));

@@ -5,7 +5,7 @@
     overflow: hidden;
     font-size: 14px;
     line-height: 16px;
-    letter-spacing: .02em;
+    letter-spacing: 0.02em;
     font-family: var(--font-primary);
     font-weight: 500;
     flex: 1 1 auto;
@@ -30,7 +30,7 @@
     width: 16px;
     height: 16px;
     color: var(--interactive-icon-default);
-    transform: rotate(90deg)
+    transform: rotate(90deg);
 }
 
 .vc-pindms-collapsed .vc-pindms-collapse-icon {
