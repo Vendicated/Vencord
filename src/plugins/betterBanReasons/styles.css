@@ -1,0 +1,31 @@
+.vc-bbr-reason-wrapper {
+    display: grid;
+    padding-bottom: 12px;
+    gap: 4px 12px;
+    align-items: center;
+    grid-template-columns: 1fr 24px;
+}
+
+.vc-bbr-remove-button {
+    color: var(--text-muted);
+}
+
+.vc-bbr-remove-button:hover {
+    color: var(--button-danger-background-hover);
+}
+
+.vc-bbr-add-button {
+    justify-content: start !important;
+    border: 0;
+    padding: 2px 12px;
+    color: var(--text-muted) !important;
+    font-size: 16px;
+}
+
+.vc-bbr-add-button div {
+    display: flex;
+    justify-content: start;
+    align-items: center;
+    gap: 12px;
+    margin: 0 !important;
+}
