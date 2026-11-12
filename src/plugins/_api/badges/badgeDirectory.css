@@ -1,0 +1,37 @@
+.vc-badge-directory-section {
+    margin-top: 16px;
+    margin-bottom: 16px;
+}
+
+.vc-badge-directory-plugins {
+    display: grid;
+    gap: 0.5em;
+    margin-top: 0.75em;
+}
+
+.vc-badge-directory-section .vc-special-card-special {
+    margin-bottom: 0;
+    padding: 1em 1.25em;
+}
+
+.vc-badge-directory-section .vc-special-card-flex {
+    align-items: center;
+}
+
+.vc-badge-directory-section .vc-special-image-container {
+    width: 76px;
+    height: 76px;
+    margin-left: 0.75em;
+    align-self: center;
+}
+
+.vc-badge-directory-section .vc-special-subtitle {
+    font-size: 1.1em;
+    margin-top: 0.25em;
+}
+
+.vc-badge-directory-section .vc-special-text {
+    font-size: 0.9em;
+    margin-top: 0.35em;
+    line-height: 1.3;
+}
