@@ -1,0 +1,253 @@
+.vc-soundlog-log {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.vc-soundlog-summary,
+.vc-soundlog-modal-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.vc-soundlog-muted {
+    color: var(--text-muted);
+}
+
+.vc-soundlog-modal-content {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.vc-soundlog-sound {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 14px;
+    border: 1px solid var(--border-subtle, rgb(255 255 255 / 6%));
+    border-radius: 12px;
+    background: var(--background-secondary, rgb(0 0 0 / 12%));
+    transition: border-color 150ms ease;
+}
+
+.vc-soundlog-sound:hover {
+    border-color: var(--brand-500);
+}
+
+.vc-soundlog-sound-info {
+    align-items: center;
+    gap: 12px;
+    flex: 1;
+    min-width: 0;
+}
+
+.vc-soundlog-emoji-tile {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    background: var(--background-tertiary, rgb(0 0 0 / 15%));
+}
+
+.vc-soundlog-sound-emoji {
+    width: 30px;
+    height: 30px;
+    object-fit: contain;
+}
+
+.vc-soundlog-sound-details {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    min-width: 0;
+}
+
+.vc-soundlog-sound-name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.vc-soundlog-sound-id {
+    font-family: var(--font-code);
+    color: var(--text-muted);
+    overflow-wrap: anywhere;
+    font-size: 10px;
+}
+
+.vc-soundlog-sound-users {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    flex-shrink: 0;
+}
+
+.vc-soundlog-sound-buttons {
+    flex-shrink: 0;
+    gap: 6px;
+}
+
+.vc-soundlog-modal-footer {
+    border-top: 1px solid var(--border-subtle, rgb(255 255 255 / 6%));
+    padding-top: 16px;
+}
+
+.vc-soundlog-empty {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 48px 16px;
+    text-align: center;
+}
+
+.vc-soundlog-more-user {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px;
+    margin-top: 8px;
+    border-radius: 8px;
+    background: var(--background-secondary);
+}
+
+.vc-soundlog-more-user-profile {
+    align-items: center;
+    gap: 10px;
+}
+
+@media (width <= 650px) {
+    .vc-soundlog-sound,
+    .vc-soundlog-summary {
+        flex-wrap: wrap;
+    }
+
+    .vc-soundlog-sound-buttons {
+        width: 100%;
+        justify-content: flex-end;
+    }
+}
+
+.vc-soundlog-more,
+.vc-soundlog-user {
+    padding: 1em;
+}
+
+.vc-soundlog-more-header,
+.vc-soundlog-user-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 1em;
+    width: fit-content;
+}
+
+.vc-soundlog-more-soundId,
+.vc-soundlog-user-name {
+    text-transform: none;
+    flex-grow: 0;
+    background: var(--background-tertiary);
+    border-radius: 0 9999px 9999px 0;
+    padding: 6px 0.8em 6px 0.5em;
+    font-size: 20px;
+    height: 20px;
+    position: relative;
+    text-wrap: nowrap;
+}
+
+.vc-soundlog-more-soundId {
+    background: unset;
+}
+
+.vc-soundlog-user-name::before {
+    content: "";
+    display: block;
+    position: absolute;
+    height: 100%;
+    width: 16px;
+    background: var(--background-tertiary);
+    z-index: -1;
+    left: -16px;
+    top: 0;
+}
+
+.vc-soundlog-more-emoji,
+.vc-soundlog-user-avatar {
+    height: 32px;
+    width: 32px;
+    border-radius: 50%;
+}
+
+.vc-soundlog-more-emoji {
+    border-radius: 0%;
+}
+
+.vc-soundlog-user-buttons {
+    margin-left: auto;
+    display: flex;
+    gap: 0.2em;
+}
+
+.vc-soundlog-user-sound-emoji {
+    height: 48px;
+    margin-top: 20px;
+}
+
+/* input style from https://github.com/Vendicated/Vencord/blob/ea11f2244fde469ce308f8a4e7224430be62f8f1/src/plugins/sendTimestamps/styles.css#L1-L13 */
+.vc-soundlog-clone-input {
+    background-color: var(--input-background);
+    color: var(--text-normal);
+    width: 100%;
+    padding: 8px 8px 8px 12px;
+    outline: none;
+    border: 1px solid var(--input-background);
+    border-radius: 4px;
+    font-weight: 500;
+    font-style: inherit;
+    font-size: 100%;
+    box-sizing: border-box;
+    height: 40px;
+}
+
+.vc-soundlog-avatar-button,
+.vc-soundlog-avatar-placeholder,
+.vc-soundlog-avatar-overflow {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+}
+
+.vc-soundlog-avatar-button {
+    cursor: pointer;
+}
+
+.vc-soundlog-avatar {
+    display: block;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.vc-soundlog-avatar-overflow {
+    box-sizing: border-box;
+    background: var(--background-modifier-accent, #35363c);
+    border: 1px solid var(--border-subtle, rgb(255 255 255 / 10%));
+    color: var(--text-normal, #dbdee1);
+    font-size: 11px;
+    font-weight: 600;
+    line-height: 1;
+}
+
+.vc-soundlog-avatar-button:hover .vc-soundlog-avatar-overflow {
+    background: var(--brand-500, #5865f2);
+    color: white;
+}
