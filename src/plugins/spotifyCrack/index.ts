@@ -46,10 +46,16 @@ export default definePlugin({
         {
 
             find: 'dispatch({type:"SPOTIFY_PROFILE_UPDATE"',
-            replacement: {
-                match: /SPOTIFY_PROFILE_UPDATE.+?isPremium:(?="premium"===(\i)\.body\.product)/,
-                replace: (m, req) => `${m}(${req}.body.product="premium")&&`
-            },
+            replacement: [
+                {
+                    match: /SPOTIFY_PROFILE_UPDATE.+?isPremium:(?="premium"===(\i)\.body\.product)/,
+                    replace: (m, req) => `${m}(${req}.body.product="premium")&&`
+                },
+                {
+                    match: /return (\i)(\.put\((\i,\i),\{url:\i\.\i\.PLAYER_PLAY.+?uris:null==(\i)\?\[(\i)\].+?\}\}\))/,
+                    replace: "return $self.getAlbumUri($1,$3,$5,$4).then(vcUri=>($4=vcUri,$1$2))"
+                }
+            ]
         },
         {
             find: "}getPlayableComputerDevices(){",
@@ -66,5 +72,17 @@ export default definePlugin({
                 }
             ]
         }
-    ]
+    ],
+
+    async getAlbumUri(api: any, accountId: string, accessToken: string, uri: string, contextUri?: string) {
+        const [, type, id] = uri.split(":");
+        if (contextUri != null || type !== "track") return contextUri;
+
+        try {
+            const { body } = await api.get(accountId, accessToken, { url: `https://api.spotify.com/v1/tracks/${id}` });
+            return body.album.uri;
+        } catch {
+            return undefined;
+        }
+    }
 });
