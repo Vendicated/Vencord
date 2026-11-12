@@ -1,5 +1,5 @@
-import { Application, FluxStore } from "..";
 import { ApplicationType } from "../../enums";
+import { Application, FluxStore } from "..";
 
 export interface ApplicationStoreState {
     botUserIdToAppUsage: Record<string, ApplicationUsage>;

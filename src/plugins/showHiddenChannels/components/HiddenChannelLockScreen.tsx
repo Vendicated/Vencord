@@ -23,14 +23,13 @@ import { Paragraph } from "@components/Paragraph";
 import PermissionsViewerPlugin from "@plugins/permissionsViewer";
 import openRolesAndUsersPermissionsModal from "@plugins/permissionsViewer/components/RolesAndUsersPermissions";
 import { sortPermissionOverwrites } from "@plugins/permissionsViewer/utils";
+import { cl, settings } from "@plugins/showHiddenChannels";
 import { classes } from "@utils/misc";
 import { formatDurationVerbose } from "@utils/text";
 import type { Channel, RoleOrUserPermission } from "@vencord/discord-types";
 import { findByPropsLazy, findComponentByCodeLazy, findCssClassesLazy } from "@webpack";
 import { EmojiStore, FluxDispatcher, GuildMemberStore, GuildStore, Parser, PermissionsBits, PermissionStore, SnowflakeUtils, Timestamp, Tooltip, useEffect, useState } from "@webpack/common";
 import { ComponentType } from "react";
-
-import { cl, settings } from "..";
 
 const enum SortOrderTypes {
     LATEST_ACTIVITY = 0,
@@ -41,11 +40,6 @@ const enum ForumLayoutTypes {
     DEFAULT = 0,
     LIST = 1,
     GRID = 2
-}
-
-interface DefaultReaction {
-    emojiId: string | null;
-    emojiName: string | null;
 }
 
 const enum ChannelTypes {
