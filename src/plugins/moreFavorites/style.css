@@ -1,0 +1,5 @@
+.vc-morefavorites-icon {
+    flex-shrink: 0;
+    margin-left: 4px;
+    color: var(--channels-default);
+}
