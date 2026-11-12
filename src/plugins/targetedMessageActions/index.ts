@@ -33,24 +33,24 @@ export default definePlugin({
             find: "searchReplace",
             replacement: [
                 {
-                    match: /=\S*getMessages\((.*)\).last\(\)/,
-                    replace: "=$self.getTargetMessage($1, false)"
+                    match: /=\i\.\i\.getMessages\((\i\.id)\).last\(\);/,
+                    replace: "=$self.getTargetMessage($1, false);"
                 },
                 {
-                    match: /=\S*getLastEditableMessage\((.\.id)\)/,
-                    replace: "=$self.getTargetMessage($1, true)"
+                    match: /=\i\.\i\.getLastEditableMessage\((\i\.id)\);/,
+                    replace: "=$self.getTargetMessage($1, true);"
                 },
                 {
-                    match: /(searchReplace.*action\(.*"")};/,
-                    replace: "$1,_bmc_notself:true};"
+                    match: /(?<=searchReplace.*return{content:"")/,
+                    replace: ",_tma_notself:true"
                 }
             ],
         },
         {
             find: "handleSendMessage",
             replacement: {
-                match: /(!1}\);)(null!=(.))/,
-                replace: "$1if ($3?._bmc_notself) return {shouldClear: false, shouldRefocus: true};$2"
+                match: /(?<={channel:\i,isEdit:!1}\);)(?=null!=(\i))/,
+                replace: "if ($1?._tma_notself) return {shouldClear: false, shouldRefocus: true};"
             }
         }
     ],
