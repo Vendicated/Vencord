@@ -43,12 +43,12 @@
 .vc-special-text {
     color: black;
     font-size: 1em;
-    margin-top: .75em;
+    margin-top: 0.75em;
     white-space: pre-line;
 }
 
 .vc-special-seperator {
-    margin-top: .75em;
+    margin-top: 0.75em;
     border-top: 1px solid white;
     opacity: 0.4;
 }

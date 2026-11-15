@@ -46,5 +46,5 @@
 }
 
 .vc-vmsg-error {
-    color: var(--text-feedback-critical, #FF5C5C);
+    color: var(--text-feedback-critical, #ff5c5c);
 }

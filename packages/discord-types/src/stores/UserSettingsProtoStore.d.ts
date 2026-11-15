@@ -1,5 +1,5 @@
-import { FluxStore } from "..";
 import { StickerAnimationSetting, Theme, UIDensity } from "../../enums";
+import { FluxStore } from "..";
 
 export type UserStatus = "online" | "idle" | "dnd" | "invisible";
 

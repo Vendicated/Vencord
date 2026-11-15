@@ -1,7 +1,8 @@
+import { Promisable } from "type-fest";
+
+import { ApplicationCommandInputType, ApplicationCommandOptionType, ApplicationCommandType } from "../../../enums";
 import { Channel } from "../Channel";
 import { Guild } from "../Guild";
-import { Promisable } from "type-fest";
-import { ApplicationCommandInputType, ApplicationCommandOptionType, ApplicationCommandType } from "../../../enums";
 
 export interface CommandContext {
     channel: Channel;

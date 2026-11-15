@@ -1,5 +1,5 @@
-import { Command, FluxStore } from "..";
 import { DraftType } from "../../enums";
+import { Command, FluxStore } from "..";
 
 export interface Draft {
     timestamp: number;
