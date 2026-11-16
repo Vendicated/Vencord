@@ -7,7 +7,7 @@
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import { Logger } from "@utils/Logger";
-import definePlugin from "@utils/types";
+import definePlugin, { OptionType } from "@utils/types";
 import { MediaEngineConnection } from "@vencord/discord-types";
 
 const logger = new Logger("WebScreenShareFixes");
@@ -68,6 +68,7 @@ export default definePlugin({
     description: "Removes 2500kbps bitrate cap on chromium and vesktop clients, enables stereo stream audio with a higher bitrate, raises the start bitrate of streams, uses hardware H264 encoding and fixes CPU usage growing endlessly while screensharing.",
     tags: ["Voice"],
     enabledByDefault: true,
+
     async start() {
         try {
             const hardwareProfilesSet = new Set<string>();
