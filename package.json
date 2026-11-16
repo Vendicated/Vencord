@@ -1,18 +1,18 @@
 {
     "name": "vencord",
+    "version": "1.15.17",
     "private": "true",
-    "version": "1.15.16",
     "description": "The cutest Discord client mod",
     "homepage": "https://github.com/Vendicated/Vencord#readme",
     "bugs": {
         "url": "https://github.com/Vendicated/Vencord/issues"
     },
+    "license": "GPL-3.0-or-later",
+    "author": "Vendicated",
     "repository": {
         "type": "git",
         "url": "git+https://github.com/Vendicated/Vencord.git"
     },
-    "license": "GPL-3.0-or-later",
-    "author": "Vendicated",
     "scripts": {
         "build": "node --require=./scripts/suppressExperimentalWarnings.js scripts/build/build.mjs",
         "buildStandalone": "pnpm build --standalone",
@@ -27,10 +27,11 @@
         "generateTypes": "tspc --emitDeclarationOnly --declaration --outDir packages/vencord-types --allowJs false",
         "inject": "node scripts/runInstaller.mjs -- --install",
         "uninject": "node scripts/runInstaller.mjs -- --uninstall",
-        "lint": "eslint",
-        "lint-styles": "stylelint \"src/**/*.css\" --ignore-pattern src/userplugins",
+        "lint": "oxlint",
+        "fmt": "oxfmt \"**/*.{css,html,json,yml,yaml}\"",
+        "fmt:check": "pnpm fmt --check",
         "lint:fix": "pnpm lint --fix",
-        "test": "pnpm test:ts && pnpm buildStandalone && pnpm buildWebStandalone && pnpm lint && pnpm lint-styles && pnpm generatePluginJson",
+        "test": "pnpm test:ts && pnpm buildStandalone && pnpm buildWebStandalone && pnpm lint && pnpm fmt:check && pnpm generatePluginJson",
         "test:ts": "tsc --noEmit",
         "bump": "./scripts/bump.sh"
     },
@@ -52,33 +53,29 @@
         "@vencord/discord-types": "workspace:",
         "diff": "catalog:",
         "esbuild": "catalog:",
-        "eslint": "catalog:",
-        "eslint-import-resolver-alias": "catalog:",
         "eslint-plugin-path-alias": "catalog:",
-        "eslint-plugin-react": "catalog:",
         "eslint-plugin-simple-header": "catalog:",
         "eslint-plugin-simple-import-sort": "catalog:",
-        "eslint-plugin-unused-imports": "catalog:",
         "html-minifier-terser": "catalog:",
         "lodash": "catalog:",
         "moment": "catalog:",
+        "oxfmt": "catalog:",
+        "oxlint": "catalog:",
+        "oxlint-tsgolint": "catalog:",
         "p-limit": "catalog:",
         "puppeteer-core": "catalog:",
         "standalone-electron-types": "catalog:",
-        "stylelint": "catalog:",
-        "stylelint-config-standard": "catalog:",
         "svgo": "catalog:",
         "ts-patch": "catalog:",
         "ts-pattern": "catalog:",
         "tsx": "catalog:",
         "type-fest": "catalog:",
         "typescript": "catalog:",
-        "typescript-eslint": "catalog:",
         "typescript-transform-paths": "catalog:",
         "zip-local": "catalog:"
     },
-    "packageManager": "pnpm@12.15.0",
     "engines": {
         "node": ">=22"
-    }
+    },
+    "packageManager": "pnpm@12.15.0"
 }

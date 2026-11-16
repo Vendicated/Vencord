@@ -1,25 +1,20 @@
 {
     "name": "@vencord/types",
+    "version": "1.15.17",
     "private": false,
-    "version": "1.15.16",
     "description": "",
-    "types": "index.d.ts",
+    "keywords": [],
+    "license": "GPL-3.0-or-later",
+    "author": "Vencord",
     "repository": {
         "type": "git",
         "url": "git+https://github.com/Vendicated/Vencord.git",
         "directory": "packages/vencord-types"
     },
+    "types": "index.d.ts",
     "scripts": {
         "prepublishOnly": "tsx ./prepare.ts",
         "test": "echo \"Error: no test specified\" && exit 1"
-    },
-    "keywords": [],
-    "author": "Vencord",
-    "license": "GPL-3.0-or-later",
-    "devDependencies": {
-        "@types/fs-extra": "catalog:",
-        "fs-extra": "catalog:",
-        "tsx": "catalog:"
     },
     "dependencies": {
         "@types/node": "catalog:",
@@ -28,6 +23,11 @@
         "moment": "catalog:",
         "ts-pattern": "catalog:",
         "type-fest": "catalog:"
+    },
+    "devDependencies": {
+        "@types/fs-extra": "catalog:",
+        "fs-extra": "catalog:",
+        "tsx": "catalog:"
     },
     "peerDependencies": {
         "@types/react": "catalog:",

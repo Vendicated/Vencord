@@ -113,6 +113,7 @@ export async function loadLazyChunks() {
             return matches.sort((a, b) => a.index! - b.index!);
         }
 
+        // oxlint-disable-next-line no-unused-vars
         let foundCssDebuggingLoad = false;
 
         async function searchAndLoadLazyChunks(factoryCode: string) {

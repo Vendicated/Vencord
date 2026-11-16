@@ -11,17 +11,36 @@ import { copyToClipboard } from "@utils/clipboard";
 import { Devs } from "@utils/constants";
 import { getCurrentChannel, getCurrentGuild, getIntlMessage, openImageModal } from "@utils/discord";
 import { isTruthy } from "@utils/guards";
+import { makeLazy } from "@utils/lazy";
 import { classes } from "@utils/misc";
 import definePlugin, { OptionType } from "@utils/types";
 import { Guild, Role } from "@vencord/discord-types";
 import { findByCodeLazy, findByPropsLazy, findCssClassesLazy } from "@webpack";
-import { ContextMenuApi, GuildRoleStore, Menu, PermissionStore, Popout, RoleMemberPopout, useRef } from "@webpack/common";
+import { ContextMenuApi, GuildRoleStore, Menu, PermissionStore, Popout, React, RoleMemberPopout, useRef, useState } from "@webpack/common";
 
 const GuildSettingsActions = findByPropsLazy("open", "selectRole", "updateGuild");
 const MenuItemClasses = findCssClassesLazy("item", "labelContainer", "colorDefault", "label", "iconContainer");
 const loadRoleMembers = findByCodeLazy(".GUILD_ROLE_MEMBER_IDS(", "requestMembersById");
 
 const DeveloperMode = getUserSettingLazy("appearance", "developerMode")!;
+
+const getOpenProfileContext = makeLazy(() => React.createContext<[string | null, (userId: string | null) => void] | null>(null));
+
+function RoleMembers({ popoutProps, guildId, roleId }: { popoutProps: any; guildId: string; roleId: string; }) {
+    const OpenProfileContext = getOpenProfileContext();
+    const openProfile = useState<string | null>(null);
+
+    return (
+        <OpenProfileContext.Provider value={openProfile}>
+            <RoleMemberPopout
+                popoutProps={popoutProps}
+                guildId={guildId}
+                channelId={getCurrentChannel()!.id}
+                roleId={roleId}
+            />
+        </OpenProfileContext.Provider>
+    );
+}
 
 function PencilIcon() {
     return (
@@ -134,12 +153,7 @@ export function buildExtraRoleContextMenuItems(role: Role, guild: Guild, popoutR
                         targetElementRef={popoutRef}
                         preload={() => loadRoleMembers(guild.id, role.id)}
                         renderPopout={popoutProps => (
-                            <RoleMemberPopout
-                                popoutProps={popoutProps}
-                                guildId={guild.id}
-                                channelId={getCurrentChannel()!.id}
-                                roleId={role.id}
-                            />
+                            <RoleMembers popoutProps={popoutProps} guildId={guild.id} roleId={role.id} />
                         )}
                     >
                         {popoutProps => (
@@ -220,8 +234,34 @@ export default definePlugin({
                 match: /(?<=#{intl::CHANNEL_MEMBERS_A11Y_LABEL},\{title:\i,count:\i\}\)\}\),\(0,\i\.jsxs\)\("div",\{)/,
                 replace: "onContextMenu:e=>$self.openRoleContextMenu(e,arguments[0]),"
             }
+        },
+        {
+            find: ".id,spacing:14,",
+            replacement: [
+                {
+                    match: /(?=let\{member:)/,
+                    replace: "const vcProfileProps=$self.useMemberProfileProps(arguments[0].member.userId);"
+                },
+                {
+                    match: /\.id,spacing:14,/,
+                    replace: "$&...(typeof vcProfileProps!=='undefined'?vcProfileProps:undefined),"
+                }
+            ]
         }
     ],
+
+    useMemberProfileProps(userId: string) {
+        const openProfile = React.useContext(getOpenProfileContext());
+        if (!openProfile) return {};
+
+        const [openUserId, setOpenUserId] = openProfile;
+
+        return {
+            shouldShow: openUserId === userId,
+            onRequestOpen: () => setOpenUserId(userId),
+            onRequestClose: () => setOpenUserId(null)
+        };
+    },
 
     start() {
         // DeveloperMode needs to be enabled for the context menu to be shown
