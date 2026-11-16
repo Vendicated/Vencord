@@ -153,3 +153,55 @@ export interface BadgeUserArgs {
     userId: string;
     guildId: string;
 }
+
+export const badgePatches = [
+    {
+        find: "#{intl::PROFILE_USER_BADGES}",
+        replacement: [
+            {
+                match: /alt:" ","aria-hidden":!0,src:.{0,50}(\i).iconSrc/,
+                replace: "...$1.props,$&"
+            },
+            // Path with 2026-04-badge-discovery OFF
+            {
+                match: /(?<=forceOpen:.{0,40}?ariaHidden:!0,)children:(?=.{0,50}?(\i)\.id)/,
+                replace: "children:$1.component?$self.renderBadgeComponent({...$1}):"
+            },
+            // Path with 2026-04-badge-discovery ON
+            {
+                match: /(?<=fallbackIconSrc:.{0,50}?)children:(?=.{0,50}?(\i)\.id)/,
+                replace: "children:$1.component?$self.renderBadgeComponent({...$1}):"
+            },
+            // handle onClick and onContextMenu
+            {
+                match: /href:(\i)\.link/,
+                replace: "...$self.getBadgeMouseEventHandlers($1),$&"
+            },
+            {
+                match: /legacyBadgeId:(\i),userId:(\i),.{0,100}?=\i,\i=\(0,\i\.\i\)\(\1\)/,
+                replace: "$&??$self.getDirectoryBadgeId($1,$2)"
+            }
+        ]
+    },
+    {
+        find: "getLegacyUsername(){",
+        replacement: {
+            match: /getBadges\(\)\{.{0,100}?return\[/,
+            replace: "$&...$self.getBadges(this),"
+        }
+    },
+    {
+        find: '"BadgeDirectoryStore"',
+        replacement: {
+            match: /getBadgeById\((\i),(\i)\)\{/,
+            replace: "$&const vencordBadge=$self.getDirectoryBadge($1);if(vencordBadge)return vencordBadge;"
+        }
+    },
+    {
+        find: "badge_directory_closed",
+        replacement: {
+            match: /(\i\.\i\.getBadges\((\i)\))(?=:\[\],\[\2\]\))/,
+            replace: "[...$1,...$self.getDirectoryBadges($2)]"
+        }
+    }
+];

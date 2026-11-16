@@ -16,6 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { commandPatches } from "@api/Commands";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 
@@ -23,40 +24,5 @@ export default definePlugin({
     name: "CommandsAPI",
     authors: [Devs.Arjix],
     description: "Api required by anything that uses commands",
-    patches: [
-        // obtain BUILT_IN_COMMANDS instance
-        {
-            find: ',"tableflip","unflip"',
-            replacement: [
-                {
-                    // Matches BUILT_IN_COMMANDS. This is not exported so this is
-                    // the only way. _init() just returns the same object to make the
-                    // patch simpler
-
-                    // textCommands = builtInCommands.filter(...)
-                    match: /(?<=\w=)(\w)(\.filter\(.{0,60}tableflip)/,
-                    replace: "Vencord.Api.Commands._init($1)$2",
-                }
-            ],
-        },
-        // command error handling
-        {
-            find: "Unexpected value for option",
-            replacement: {
-                // return [2, cmd.execute(args, ctx)]
-                match: /,(\i)\.execute\((\i),(\i)\)/,
-                replace: (_, cmd, args, ctx) => `,Vencord.Api.Commands._handleCommand(${cmd}, ${args}, ${ctx})`
-            }
-        },
-        // Show plugin name instead of "Built-In"
-        {
-            find: "#{intl::COMMANDS_OPTIONAL_COUNT}",
-            replacement: [
-                {
-                    match: /children:(?=\i\?\?\i\?\.name)(?<=command:(\i),.+?)/,
-                    replace: "children:$1.plugin??"
-                }
-            ]
-        }
-    ],
+    patches: commandPatches,
 });

@@ -63,3 +63,22 @@ export function __getDecorators(props: DecoratorProps, type: "guild" | "dm"): JS
         </div>
     );
 }
+
+export const memberListDecoratorPatches = [
+    {
+        find: "#{intl::GUILD_OWNER}),children:",
+        replacement: [
+            {
+                match: /children:\[(?=.{0,300},lostPermissionTooltipText:)/,
+                replace: "children:[Vencord.Api.MemberListDecorators.__getDecorators(arguments[0],'guild'),"
+            }
+        ]
+    },
+    {
+        find: "PrivateChannel.renderAvatar",
+        replacement: {
+            match: /decorators:(\i\.isSystemDM\(\)\?.+?:null)/,
+            replace: "decorators:[Vencord.Api.MemberListDecorators.__getDecorators(arguments[0],'dm'),$1]"
+        }
+    }
+];

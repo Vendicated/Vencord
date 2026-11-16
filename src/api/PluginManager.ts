@@ -25,6 +25,7 @@ import { addMessageAccessory, removeMessageAccessory } from "@api/MessageAccesso
 import { addMessageDecoration, removeMessageDecoration } from "@api/MessageDecorations";
 import { addMessageClickListener, addMessagePreEditListener, addMessagePreSendListener, removeMessageClickListener, removeMessagePreEditListener, removeMessagePreSendListener } from "@api/MessageEvents";
 import { addMessagePopoverButton, removeMessagePopoverButton } from "@api/MessagePopover";
+import { bindHooks, getBoundHookKeys, getRequiredApis, pluginHooks } from "@api/pluginHooks";
 import { Settings, SettingsStore } from "@api/Settings";
 import { disableStyle, enableStyle } from "@api/Styles";
 import { traceFunction } from "@debug/Tracer";
@@ -39,6 +40,33 @@ import { patches } from "@webpack/patcher";
 import Plugins from "~plugins";
 export { Plugins as plugins };
 const logger = new Logger("PluginManager", "#a6d189");
+
+const hookActions: Partial<Record<keyof PluginDef, { add: (p: Plugin) => void; remove: (p: Plugin) => void }>> = {
+    commands: {
+        add: p => { for (const cmd of p.commands!) registerCommand(cmd, p.name); },
+        remove: p => { for (const cmd of p.commands!) unregisterCommand(cmd.name); }
+    },
+    contextMenus: {
+        add: p => { for (const navId in p.contextMenus) addContextMenuPatch(navId, p.contextMenus[navId]); },
+        remove: p => { for (const navId in p.contextMenus) removeContextMenuPatch(navId, p.contextMenus[navId]); }
+    },
+    managedStyle: { add: p => enableStyle(p.managedStyle!), remove: p => disableStyle(p.managedStyle!) },
+    userProfileBadge: { add: p => addProfileBadge(p.userProfileBadge!), remove: p => removeProfileBadge(p.userProfileBadge!) },
+    messagePopoverButton: {
+        add: p => addMessagePopoverButton(p.name, p.messagePopoverButton!.render, p.messagePopoverButton!.icon),
+        remove: p => removeMessagePopoverButton(p.name)
+    },
+    chatBarButton: {
+        add: p => addChatBarButton(p.name, p.chatBarButton!.render, p.chatBarButton!.icon),
+        remove: p => removeChatBarButton(p.name)
+    },
+    onMessageClick: { add: p => addMessageClickListener(p.onMessageClick!), remove: p => removeMessageClickListener(p.onMessageClick!) },
+    onBeforeMessageSend: { add: p => addMessagePreSendListener(p.onBeforeMessageSend!), remove: p => removeMessagePreSendListener(p.onBeforeMessageSend!) },
+    onBeforeMessageEdit: { add: p => addMessagePreEditListener(p.onBeforeMessageEdit!), remove: p => removeMessagePreEditListener(p.onBeforeMessageEdit!) },
+    renderMessageAccessory: { add: p => addMessageAccessory(p.name, p.renderMessageAccessory!), remove: p => removeMessageAccessory(p.name) },
+    renderMessageDecoration: { add: p => addMessageDecoration(p.name, p.renderMessageDecoration!), remove: p => removeMessageDecoration(p.name) },
+    renderMemberListDecorator: { add: p => addMemberListDecorator(p.name, p.renderMemberListDecorator!), remove: p => removeMemberListDecorator(p.name) }
+};
 
 export const PMLogger = logger;
 
@@ -201,11 +229,7 @@ export function subscribeAllPluginsFluxEvents(fluxDispatcher: typeof FluxDispatc
 }
 
 export const startPlugin = traceFunction("startPlugin", function startPlugin(p: Plugin) {
-    const {
-        name, commands, contextMenus, managedStyle, userProfileBadge,
-        onBeforeMessageEdit, onBeforeMessageSend, onMessageClick,
-        chatBarButton, renderMemberListDecorator, renderMessageAccessory, renderMessageDecoration, messagePopoverButton
-    } = p;
+    const { name } = p;
 
     if (p.start) {
         logger.info("Starting plugin", name);
@@ -223,52 +247,28 @@ export const startPlugin = traceFunction("startPlugin", function startPlugin(p: 
 
     p.started = true;
 
-    if (commands?.length) {
-        logger.debug("Registering commands of plugin", name);
-        for (const cmd of commands) {
-            try {
-                registerCommand(cmd, name);
-            } catch (e) {
-                logger.error(`Failed to register command ${cmd.name}\n`, e);
-                return false;
-            }
-        }
-    }
-
     if (enabledPluginsSubscribedFlux) {
         subscribePluginFluxEvents(p, FluxDispatcher);
     }
 
-    if (contextMenus) {
-        logger.debug("Adding context menus patches of plugin", name);
-        for (const navId in contextMenus) {
-            addContextMenuPatch(navId, contextMenus[navId]);
+    for (const hook of pluginHooks) {
+        const action = hookActions[hook.key];
+        if (!action) continue;
+        const value = p[hook.key];
+        if (value == null || (hook.nonEmpty && (value as unknown[]).length === 0)) continue;
+        try {
+            action.add(p);
+        } catch (e) {
+            logger.error(`Failed to start ${name} (${String(hook.key)})\n`, e);
+            return false;
         }
     }
-
-    if (managedStyle) enableStyle(managedStyle);
-
-    if (userProfileBadge) addProfileBadge(userProfileBadge);
-
-    if (onBeforeMessageEdit) addMessagePreEditListener(onBeforeMessageEdit);
-    if (onBeforeMessageSend) addMessagePreSendListener(onBeforeMessageSend);
-    if (onMessageClick) addMessageClickListener(onMessageClick);
-
-    if (chatBarButton) addChatBarButton(name, chatBarButton.render, chatBarButton.icon);
-    if (renderMemberListDecorator) addMemberListDecorator(name, renderMemberListDecorator);
-    if (renderMessageDecoration) addMessageDecoration(name, renderMessageDecoration);
-    if (renderMessageAccessory) addMessageAccessory(name, renderMessageAccessory);
-    if (messagePopoverButton) addMessagePopoverButton(name, messagePopoverButton.render, messagePopoverButton.icon);
 
     return true;
 }, p => `startPlugin ${p.name}`);
 
 export const stopPlugin = traceFunction("stopPlugin", function stopPlugin(p: Plugin) {
-    const {
-        name, commands, contextMenus, managedStyle, userProfileBadge,
-        onBeforeMessageEdit, onBeforeMessageSend, onMessageClick,
-        chatBarButton, renderMemberListDecorator, renderMessageAccessory, renderMessageDecoration, messagePopoverButton
-    } = p;
+    const { name } = p;
 
     if (p.stop) {
         logger.info("Stopping plugin", name);
@@ -286,40 +286,20 @@ export const stopPlugin = traceFunction("stopPlugin", function stopPlugin(p: Plu
 
     p.started = false;
 
-    if (commands?.length) {
-        logger.debug("Unregistering commands of plugin", name);
-        for (const cmd of commands) {
-            try {
-                unregisterCommand(cmd.name);
-            } catch (e) {
-                logger.error(`Failed to unregister command ${cmd.name}\n`, e);
-                return false;
-            }
-        }
-    }
-
     unsubscribePluginFluxEvents(p, FluxDispatcher);
 
-    if (contextMenus) {
-        logger.debug("Removing context menus patches of plugin", name);
-        for (const navId in contextMenus) {
-            removeContextMenuPatch(navId, contextMenus[navId]);
+    for (const hook of pluginHooks) {
+        const action = hookActions[hook.key];
+        if (!action) continue;
+        const value = p[hook.key];
+        if (value == null || (hook.nonEmpty && (value as unknown[]).length === 0)) continue;
+        try {
+            action.remove(p);
+        } catch (e) {
+            logger.error(`Failed to stop ${name} (${String(hook.key)})\n`, e);
+            return false;
         }
     }
-
-    if (managedStyle) disableStyle(managedStyle);
-
-    if (userProfileBadge) removeProfileBadge(userProfileBadge);
-
-    if (onBeforeMessageEdit) removeMessagePreEditListener(onBeforeMessageEdit);
-    if (onBeforeMessageSend) removeMessagePreSendListener(onBeforeMessageSend);
-    if (onMessageClick) removeMessageClickListener(onMessageClick);
-
-    if (chatBarButton) removeChatBarButton(name);
-    if (renderMemberListDecorator) removeMemberListDecorator(name);
-    if (renderMessageDecoration) removeMessageDecoration(name);
-    if (renderMessageAccessory) removeMessageAccessory(name);
-    if (messagePopoverButton) removeMessagePopoverButton(name);
 
     return true;
 }, p => `stopPlugin ${p.name}`);
@@ -328,10 +308,7 @@ export const initPluginManager = onlyOnce(function init() {
     const pluginsValues = Object.values(Plugins);
     const settings = Settings.plugins;
 
-    const pluginKeysToBind: Array<keyof PluginDef & `${"on" | "render"}${string}`> = [
-        "onBeforeMessageEdit", "onBeforeMessageSend", "onMessageClick",
-        "renderMemberListDecorator", "renderMessageAccessory", "renderMessageDecoration"
-    ];
+    const pluginKeysToBind = getBoundHookKeys();
 
     const neededApiPlugins = new Set<string>();
 
@@ -358,18 +335,9 @@ export const initPluginManager = onlyOnce(function init() {
             dep.isDependency = true;
         });
 
-        if (p.commands?.length) neededApiPlugins.add("CommandsAPI");
-        if (p.onBeforeMessageEdit || p.onBeforeMessageSend || p.onMessageClick) neededApiPlugins.add("MessageEventsAPI");
-        if (p.chatBarButton) neededApiPlugins.add("ChatInputButtonAPI");
-        if (p.renderMemberListDecorator) neededApiPlugins.add("MemberListDecoratorsAPI");
-        if (p.renderMessageAccessory) neededApiPlugins.add("MessageAccessoriesAPI");
-        if (p.renderMessageDecoration) neededApiPlugins.add("MessageDecorationsAPI");
-        if (p.messagePopoverButton) neededApiPlugins.add("MessagePopoverAPI");
-        if (p.userProfileBadge) neededApiPlugins.add("BadgeAPI");
+        for (const api of getRequiredApis(p)) neededApiPlugins.add(api);
 
-        for (const key of pluginKeysToBind) {
-            p[key] &&= p[key].bind(p) as any;
-        }
+        bindHooks(p, pluginKeysToBind);
     }
 
     for (const p of neededApiPlugins) {

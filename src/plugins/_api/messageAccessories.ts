@@ -16,6 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { messageAccessoryPatches } from "@api/MessageAccessories";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 
@@ -23,13 +24,5 @@ export default definePlugin({
     name: "MessageAccessoriesAPI",
     description: "API to add message accessories.",
     authors: [Devs.Cyn],
-    patches: [
-        {
-            find: "#{intl::REMOVE_ATTACHMENT_BODY}",
-            replacement: {
-                match: /children:(\[[^\]]{0,100}?this.renderSuppressConfirmModal[^\]]{0,100}?\])/,
-                replace: "children:Vencord.Api.MessageAccessories._modifyAccessories($1,this?.props)",
-            },
-        },
-    ],
+    patches: messageAccessoryPatches,
 });

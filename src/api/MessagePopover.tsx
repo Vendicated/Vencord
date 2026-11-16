@@ -102,3 +102,15 @@ export function _buildPopoverElements(
 ) {
     return <VencordPopoverButtons Component={Component} message={message} />;
 }
+
+export const messagePopoverPatches = [
+    {
+        find: "#{intl::MESSAGE_UTILITIES_A11Y_LABEL}),children",
+        replacement: {
+            // TODO: (\i\.\i|\i) is for stable compat
+            match: /(?<=\]\}\)),(.{0,40}togglePopout:.+?\}\))\]\}\):null,(?<=\((\i\.\i|\i),\{label:.+?:null,(\i)\?\(0,\i\.jsxs?\)\(\i\.Fragment.+?message:(\i).+?)/,
+            replace: (_, ReactButton, ButtonComponent, showReactButton, message) => "" +
+                `]}):null,Vencord.Api.MessagePopover._buildPopoverElements(${ButtonComponent},${message}),${showReactButton}?${ReactButton}:null,`
+        }
+    }
+];

@@ -18,13 +18,13 @@
 
 import { Logger } from "@utils/Logger";
 import { LazyComponent, LazyComponentWrapper } from "@utils/react";
-import { FilterFn, filters, lazyWebpackSearchHistory, waitFor } from "@webpack";
+import { FilterFn, filters, recordFind, waitFor } from "@webpack";
 import { ComponentType } from "react";
 
 const logger = new Logger("Webpack");
 
 export function waitForComponent<T extends ComponentType<any> = ComponentType<any> & Record<string, any>>(name: string, filter: FilterFn | string | string[], fallbackValue: ComponentType<any> | null = null) {
-    if (IS_REPORTER) lazyWebpackSearchHistory.push(["waitForComponent", Array.isArray(filter) ? filter : [filter]]);
+    recordFind(typeof filter === "string" || Array.isArray(filter) ? "findByProps" : "find", Array.isArray(filter) ? filter : [filter]);
 
     let myValue: T | null = null;
 
@@ -48,7 +48,7 @@ export function waitForComponent<T extends ComponentType<any> = ComponentType<an
 }
 
 export function waitForStore(name: string, cb: (v: any) => void) {
-    if (IS_REPORTER) lazyWebpackSearchHistory.push(["waitForStore", [name]]);
+    recordFind("findStore", [name]);
 
     waitFor(filters.byStoreName(name), cb, { isIndirect: true });
 }

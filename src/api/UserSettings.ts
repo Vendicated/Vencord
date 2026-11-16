@@ -81,3 +81,27 @@ export function getUserSetting<T = any>(group: string, name: string): UserSettin
 export function getUserSettingLazy<T = any>(group: string, name: string) {
     return proxyLazy(() => getUserSetting<T>(group, name));
 }
+
+export const userSettingsPatches = [
+    {
+        find: ",updateSetting:",
+        replacement: [
+            // Main setting definition
+            {
+                match: /\.updateAsync\(.+?(?=,useSetting:)/,
+                replace: "$&,userSettingsAPIGroup:arguments[0],userSettingsAPIName:arguments[1]"
+            },
+            // Selective wrapper
+            {
+                match: /updateSetting:.{0,100}SELECTIVELY_SYNCED_USER_SETTINGS_UPDATE/,
+                replace: "userSettingsAPIGroup:arguments[0].userSettingsAPIGroup,userSettingsAPIName:arguments[0].userSettingsAPIName,$&"
+            },
+            // Override wrapper
+            {
+                match: /updateSetting:.{0,60}USER_SETTINGS_OVERRIDE_CLEAR/,
+                replace: "userSettingsAPIGroup:arguments[0].userSettingsAPIGroup,userSettingsAPIName:arguments[0].userSettingsAPIName,$&"
+            }
+
+        ]
+    }
+];

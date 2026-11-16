@@ -26,3 +26,14 @@ export function updateMessage(channelId: string, messageId: string, fields?: Par
     MessageCache.commit(newChannelMessageCache);
     MessageStore.emitChange();
 }
+
+export const messageUpdaterPatches = [
+    {
+        // Message accessories have a custom logic to decide if they should render again, so we need to make it not ignore changed message reference
+        find: "}renderStickersAccessories(",
+        replacement: {
+            match: /(?<=this.props,\i,\[)"message",/,
+            replace: ""
+        }
+    }
+];

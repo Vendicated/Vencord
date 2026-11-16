@@ -8,6 +8,7 @@ import { Logger } from "@utils/Logger";
 import { ModuleFactory } from "@vencord/discord-types/webpack";
 import * as Webpack from "@webpack";
 import { wreq } from "@webpack";
+import { findAllChunkLoads, parseChunkIds } from "@webpack/chunkLoads";
 import { AnyModuleFactory } from "@webpack/types";
 import pLimit from "p-limit";
 
@@ -72,47 +73,6 @@ export async function loadLazyChunks() {
         // Amount of factories which are still being searched, or which still have their found chunks loading
         let pendingSearches = 0;
 
-        // This regex loads all language packs which makes webpack finds testing extremely slow, so for now, we prioritize using the one which doesn't include those
-        const ChunkLoader = String.raw`[A-Za-z_$][\w$]*\.e\((?:"[^"]+?"|[\de]+?)\)`;
-        const Identifier = String.raw`[A-Za-z_$][\w$]*`;
-        const PromiseAllChunkLoad = String.raw`Promise\.all\(\[((?:${ChunkLoader},?)+)\]\)`;
-        const CompleteThen = String.raw`\.then\(${Identifier}(?:\.${Identifier})?\.bind\(${Identifier},"?([^)]+?)"?(?:,[^)]+?)?\)\)`;
-        const PartialThen = String.raw`\.then\(${Identifier}\.bind\(${Identifier},"?([^)]+?)"?\)\)`;
-        const CompletePromiseRegex = new RegExp(`${PromiseAllChunkLoad}${CompleteThen}`, "y");
-        const CompleteSingleRegex = new RegExp(`(${ChunkLoader})${CompleteThen}`, "y");
-        const PartialPromiseRegex = new RegExp(`${PromiseAllChunkLoad}${PartialThen}`, "y");
-        const PartialSingleRegex = new RegExp(`(${ChunkLoader})${PartialThen}`, "y");
-
-        function findLazyChunkMatches(factoryCode: string, complete: boolean) {
-            const promiseRegex = complete ? CompletePromiseRegex : PartialPromiseRegex;
-            const singleRegex = complete ? CompleteSingleRegex : PartialSingleRegex;
-            const matches: RegExpMatchArray[] = [];
-
-            let index = 0;
-            while ((index = factoryCode.indexOf("Promise.all([", index)) !== -1) {
-                promiseRegex.lastIndex = index;
-                const match = promiseRegex.exec(factoryCode);
-                if (match) matches.push(match);
-                index++;
-            }
-
-            index = 0;
-            while ((index = factoryCode.indexOf(".e(", index)) !== -1) {
-                let start = index;
-                while (start > 0 && /[\w$]/.test(factoryCode[start - 1])) start--;
-
-                if (start < index && /[A-Za-z_$]/.test(factoryCode[start])) {
-                    singleRegex.lastIndex = start;
-                    const match = singleRegex.exec(factoryCode);
-                    if (match) matches.push(match);
-                }
-
-                index += 3;
-            }
-
-            return matches.sort((a, b) => a.index! - b.index!);
-        }
-
         // oxlint-disable-next-line no-unused-vars
         let foundCssDebuggingLoad = false;
 
@@ -123,11 +83,11 @@ export async function loadLazyChunks() {
             // Disabled for now since this causes lots of chunks concatenated into the same module to get marked as invalid, and thus not loaded.
             const hasCssDebuggingLoad = foundCssDebuggingLoad = false;
 
-            const lazyChunks = findLazyChunkMatches(factoryCode, hasCssDebuggingLoad);
+            const lazyChunks = findAllChunkLoads(factoryCode, hasCssDebuggingLoad);
             const validChunkGroups = new Set<[chunkIds: PropertyKey[], entryPoint: PropertyKey]>();
 
             for (const [, rawChunkIds, entryPoint] of lazyChunks) {
-                const chunkIds = rawChunkIds ? Webpack.parseChunkIds(rawChunkIds) : [];
+                const chunkIds = rawChunkIds ? parseChunkIds(rawChunkIds) : [];
 
                 if (chunkIds.length === 0) {
                     continue;

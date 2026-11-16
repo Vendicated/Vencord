@@ -16,6 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { memberListDecoratorPatches } from "@api/MemberListDecorators";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 
@@ -28,22 +29,5 @@ export default definePlugin({
 
     managedStyle,
 
-    patches: [
-        {
-            find: "#{intl::GUILD_OWNER}),children:",
-            replacement: [
-                {
-                    match: /children:\[(?=.{0,300},lostPermissionTooltipText:)/,
-                    replace: "children:[Vencord.Api.MemberListDecorators.__getDecorators(arguments[0],'guild'),"
-                }
-            ]
-        },
-        {
-            find: "PrivateChannel.renderAvatar",
-            replacement: {
-                match: /decorators:(\i\.isSystemDM\(\)\?.+?:null)/,
-                replace: "decorators:[Vencord.Api.MemberListDecorators.__getDecorators(arguments[0],'dm'),$1]"
-            }
-        }
-    ]
+    patches: memberListDecoratorPatches,
 });

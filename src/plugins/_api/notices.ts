@@ -16,6 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { noticePatches } from "@api/Notices";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 
@@ -24,19 +25,5 @@ export default definePlugin({
     description: "Fixes notices being automatically dismissed",
     authors: [Devs.Ven],
     required: true,
-    patches: [
-        {
-            find: '"NoticeStore"',
-            replacement: [
-                {
-                    match: /(?<=!1(?:;|}))\i=null;(?=.{0,80}getPremiumSubscription\(\))/g,
-                    replace: "if(Vencord.Api.Notices.currentNotice)return false;$&"
-                },
-                {
-                    match: /(?<=,NOTICE_DISMISS:function\(\i\){)return null!=(\i)/,
-                    replace: (m, notice) => `if(${notice}?.id=="VencordNotice")return(${notice}=null,Vencord.Api.Notices.nextNotice(),true);${m}`
-                }
-            ]
-        }
-    ],
+    patches: noticePatches,
 });

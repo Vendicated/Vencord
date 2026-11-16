@@ -33,7 +33,9 @@
             "@webpack": ["./src/webpack/webpack"],
             "@webpack/patcher": ["./src/webpack/patchWebpack"],
             "@webpack/wreq.d": ["./src/webpack/wreq.d"],
-            "@webpack/types": ["./src/webpack/types"]
+            "@webpack/types": ["./src/webpack/types"],
+            "@webpack/chunkLoads": ["./src/webpack/chunkLoads"],
+            "@tests/*": ["./tests/*"]
         },
 
         "plugins": [
@@ -45,5 +47,5 @@
         ],
         "outDir": "who-fucking-cares-dude"
     },
-    "include": ["src/**/*", "browser/**/*", "scripts/**/*"]
+    "include": ["src/**/*", "browser/**/*", "scripts/**/*", "tests/**/*"]
 }
