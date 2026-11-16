@@ -1,0 +1,1295 @@
+.vc-soundpanel-panel-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 0;
+    padding: 0;
+    border: none;
+    cursor: pointer;
+}
+
+.vc-soundpanel-panel-button-contents {
+    justify-content: center;
+    min-width: 0;
+}
+
+.vc-soundpanel-panel-button-playing {
+    color: var(--text-feedback-positive) !important;
+}
+
+.vc-soundpanel-popout,
+.vc-soundpanel-menu {
+    --vc-soundpanel-glass: color-mix(
+        in oklab,
+        var(--background-surface-high) calc(var(--vc-soundpanel-opacity, 48) * 1%),
+        transparent
+    );
+    --vc-soundpanel-backdrop: blur(4px) saturate(1.4) brightness(0.6);
+    --vc-soundpanel-secondary: color-mix(in oklab, var(--text-muted), var(--text-default) 75%);
+    --vc-soundpanel-sheen: rgb(255 255 255 / 12%);
+    --vc-soundpanel-edge: rgb(255 255 255 / 34%);
+}
+
+.vc-soundpanel-popout {
+    --vc-soundpanel-accent: var(--control-primary-background-default, var(--brand-500));
+    --vc-soundpanel-speaking: var(--status-positive, #23a55a);
+    --vc-soundpanel-ring: var(--interactive-text-default);
+    --vc-soundpanel-thumb: rgb(255 255 255 / 16%);
+
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    width: 480px;
+    max-width: calc(100vw - 32px);
+    height: 620px;
+    max-height: calc(100vh - 96px);
+    overflow: hidden;
+    border-radius: 26px;
+    background: var(--vc-soundpanel-glass);
+    -webkit-backdrop-filter: var(--vc-soundpanel-backdrop);
+    backdrop-filter: var(--vc-soundpanel-backdrop);
+    box-shadow:
+        inset 0 1px 0 var(--vc-soundpanel-sheen),
+        0 24px 64px rgb(0 0 0 / 38%),
+        0 4px 14px rgb(0 0 0 / 22%);
+    color: var(--text-default);
+    font-size: 14px;
+}
+
+.vc-soundpanel-popout::before,
+.vc-soundpanel-menu::before {
+    position: absolute;
+    inset: 0;
+    z-index: 3;
+    padding: 1px;
+    border-radius: inherit;
+    background: linear-gradient(
+        170deg,
+        var(--vc-soundpanel-edge),
+        rgb(255 255 255 / 6%) 30%,
+        rgb(255 255 255 / 3%) 70%,
+        rgb(255 255 255 / 12%)
+    );
+    content: "";
+    pointer-events: none;
+    -webkit-mask:
+        linear-gradient(#000 0 0) content-box,
+        linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+}
+
+.theme-light :is(.vc-soundpanel-popout, .vc-soundpanel-menu) {
+    --vc-soundpanel-backdrop: blur(4px) saturate(1.3) brightness(1.2);
+    --vc-soundpanel-secondary: color-mix(in oklab, var(--text-muted), var(--text-default) 70%);
+    --vc-soundpanel-sheen: rgb(255 255 255 / 90%);
+    --vc-soundpanel-edge: rgb(255 255 255 / 95%);
+}
+
+.theme-light .vc-soundpanel-popout {
+    --vc-soundpanel-thumb: #fff;
+
+    box-shadow:
+        inset 0 1px 0 var(--vc-soundpanel-sheen),
+        0 0 0 1px rgb(0 0 0 / 7%),
+        0 24px 64px rgb(0 0 0 / 18%),
+        0 4px 14px rgb(0 0 0 / 10%);
+}
+
+.vc-soundpanel-solid {
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+}
+
+.vc-soundpanel-menu.vc-soundpanel-menu {
+    position: relative;
+    border: none;
+    border-radius: 14px;
+    background: var(--vc-soundpanel-glass);
+    -webkit-backdrop-filter: var(--vc-soundpanel-backdrop);
+    backdrop-filter: var(--vc-soundpanel-backdrop);
+    box-shadow:
+        inset 0 1px 0 var(--vc-soundpanel-sheen),
+        0 16px 40px rgb(0 0 0 / 36%),
+        0 2px 8px rgb(0 0 0 / 20%);
+}
+
+.theme-light .vc-soundpanel-menu.vc-soundpanel-menu {
+    box-shadow:
+        inset 0 1px 0 var(--vc-soundpanel-sheen),
+        0 0 0 1px rgb(0 0 0 / 7%),
+        0 16px 40px rgb(0 0 0 / 16%),
+        0 2px 8px rgb(0 0 0 / 10%);
+}
+
+.vc-soundpanel-menu.vc-soundpanel-solid {
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+}
+
+.vc-soundpanel-live {
+    --vc-soundpanel-ring: var(--vc-soundpanel-speaking);
+}
+
+.vc-soundpanel-popout :is(button, [role="button"], input):focus-visible {
+    outline: 2px solid var(--focus-primary, var(--vc-soundpanel-accent));
+    outline-offset: 2px;
+}
+
+.vc-soundpanel-header {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 16px 16px 6px;
+}
+
+.vc-soundpanel-title-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 28px;
+}
+
+.vc-soundpanel-title {
+    margin: 0;
+    color: var(--text-strong);
+    font-size: 17px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    line-height: 22px;
+    white-space: nowrap;
+}
+
+.vc-soundpanel-credit {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    min-width: 0;
+    height: 26px;
+    margin-right: auto;
+    padding: 0 10px 0 4px;
+    border: none;
+    border-radius: 999px;
+    background: var(--background-mod-normal);
+    color: var(--text-default);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition:
+        background-color 0.15s ease,
+        color 0.15s ease,
+        transform 0.1s ease;
+}
+
+.vc-soundpanel-credit:hover {
+    background: var(--background-mod-strong);
+    color: var(--text-strong);
+}
+
+.vc-soundpanel-credit:active {
+    transform: scale(0.97);
+}
+
+.vc-soundpanel-credit-avatar {
+    flex-shrink: 0;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: var(--background-mod-strong);
+    object-fit: cover;
+}
+
+.vc-soundpanel-credit-text {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.vc-soundpanel-stop-all {
+    display: flex;
+    flex-shrink: 0;
+    align-items: center;
+    gap: 6px;
+    height: 28px;
+    padding: 0 12px 0 10px;
+    border: none;
+    border-radius: 999px;
+    background: color-mix(in oklab, var(--status-danger) 16%, transparent);
+    color: var(--text-feedback-critical, var(--status-danger));
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    animation: vc-soundpanel-fade-in 0.12s ease-out;
+    transition:
+        background-color 0.15s ease,
+        color 0.15s ease;
+}
+
+.vc-soundpanel-transparency-button {
+    width: 30px;
+    height: 30px;
+}
+
+.vc-soundpanel-stop-all:hover {
+    background: var(--status-danger);
+    color: var(--white, #fff);
+}
+
+.vc-soundpanel-tabs {
+    position: relative;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    padding: 3px;
+    border-radius: 999px;
+    background: var(--background-mod-subtle);
+}
+
+.vc-soundpanel-tab-thumb {
+    position: absolute;
+    top: 3px;
+    bottom: 3px;
+    left: 3px;
+    width: calc((100% - 6px) / 3);
+    border-radius: 999px;
+    background: var(--vc-soundpanel-thumb);
+    box-shadow:
+        inset 0 1px 0 rgb(255 255 255 / 14%),
+        0 2px 6px rgb(0 0 0 / 18%);
+    transform: translateX(calc(100% * var(--vc-soundpanel-tab, 0)));
+    transition: transform 0.38s cubic-bezier(0.3, 1.3, 0.5, 1);
+}
+
+.vc-soundpanel-tab-button {
+    position: relative;
+    z-index: 1;
+    height: 30px;
+    padding: 0 10px;
+    border: none;
+    border-radius: 999px;
+    background: none;
+    color: var(--interactive-text-default);
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: color 0.15s ease;
+}
+
+.vc-soundpanel-tab-button:hover {
+    color: var(--interactive-text-hover);
+}
+
+.vc-soundpanel-tab-button-active,
+.vc-soundpanel-tab-button-active:hover {
+    color: var(--interactive-text-active);
+    font-weight: 600;
+}
+
+.vc-soundpanel-body,
+.vc-soundpanel-tab {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    min-height: 0;
+}
+
+.vc-soundpanel-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px 2px;
+}
+
+.vc-soundpanel-youtube-form {
+    display: contents;
+}
+
+.vc-soundpanel-youtube-card {
+    display: flex;
+    gap: 12px;
+    margin: 8px 16px 0;
+    padding: 12px;
+    border-radius: 20px;
+    background: var(--background-mod-subtle);
+    animation: vc-soundpanel-fade-in 0.16s ease-out;
+}
+
+.vc-soundpanel-youtube-thumbnail {
+    display: flex;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    align-self: flex-start;
+    width: 128px;
+    aspect-ratio: 16 / 9;
+    overflow: hidden;
+    border-radius: 12px;
+    background: var(--background-mod-normal);
+    color: var(--vc-soundpanel-secondary);
+}
+
+.vc-soundpanel-youtube-thumbnail img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.vc-soundpanel-youtube-info {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
+.vc-soundpanel-youtube-title {
+    display: -webkit-box;
+    overflow: hidden;
+    color: var(--text-strong);
+    font-size: 15px;
+    font-weight: 600;
+    line-height: 20px;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+}
+
+.vc-soundpanel-youtube-title-quiet {
+    color: var(--text-default);
+    font-weight: 500;
+}
+
+.vc-soundpanel-youtube-detail {
+    overflow: hidden;
+    color: var(--vc-soundpanel-secondary);
+    font-size: 13px;
+    line-height: 18px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.vc-soundpanel-youtube-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: auto;
+    padding-top: 8px;
+}
+
+.vc-soundpanel-toolbar .vc-soundpanel-icon-button {
+    border-radius: 50%;
+    background: var(--background-mod-subtle);
+}
+
+.vc-soundpanel-toolbar .vc-soundpanel-icon-button:hover {
+    background: var(--background-mod-normal);
+}
+
+.vc-soundpanel-scroller {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    padding: 12px 16px 20px;
+    -webkit-mask-image: linear-gradient(
+        to bottom,
+        transparent,
+        #000 12px,
+        #000 calc(100% - 20px),
+        transparent
+    );
+    mask-image: linear-gradient(
+        to bottom,
+        transparent,
+        #000 12px,
+        #000 calc(100% - 20px),
+        transparent
+    );
+    scrollbar-width: thin;
+    scrollbar-color: var(--scrollbar-thin-thumb) transparent;
+}
+
+.vc-soundpanel-notice {
+    margin: 6px 16px 0;
+    padding: 8px 12px;
+    border-radius: 12px;
+    background: var(--background-mod-subtle);
+    color: var(--vc-soundpanel-secondary);
+    font-size: 12px;
+    line-height: 16px;
+}
+
+.vc-soundpanel-search {
+    display: flex;
+    flex: 1;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+    height: 34px;
+    padding: 0 14px 0 12px;
+    border-radius: 999px;
+    background: var(--background-mod-subtle);
+    color: var(--vc-soundpanel-secondary);
+    cursor: text;
+    transition:
+        background-color 0.15s ease,
+        box-shadow 0.15s ease;
+}
+
+.vc-soundpanel-search:hover {
+    background: var(--background-mod-normal);
+}
+
+.vc-soundpanel-search:focus-within {
+    background: var(--background-mod-normal);
+    box-shadow: 0 0 0 2px var(--vc-soundpanel-accent);
+}
+
+.vc-soundpanel-search input {
+    flex: 1;
+    min-width: 0;
+    padding: 0;
+    border: none;
+    outline: none;
+    background: none;
+    color: var(--text-strong);
+    font-size: 14px;
+}
+
+.vc-soundpanel-search input::placeholder {
+    color: var(--vc-soundpanel-secondary);
+}
+
+.vc-soundpanel-rename-input {
+    flex: 1;
+    min-width: 0;
+    height: 26px;
+    padding: 0 8px;
+    border: 1px solid var(--input-border-active);
+    border-radius: 8px;
+    outline: none;
+    background: var(--input-background-default);
+    color: var(--input-text-default, var(--text-default));
+    font-size: 13px;
+}
+
+.vc-soundpanel-range {
+    flex: 1;
+    min-width: 0;
+    height: 5px;
+    margin: 0;
+    border-radius: 3px;
+    appearance: none;
+    background: linear-gradient(
+        to right,
+        var(--vc-soundpanel-accent) var(--vc-soundpanel-fill),
+        var(--background-mod-strong) var(--vc-soundpanel-fill)
+    );
+    cursor: pointer;
+}
+
+.vc-soundpanel-range::-webkit-slider-thumb {
+    width: 22px;
+    height: 14px;
+    border: none;
+    border-radius: 999px;
+    appearance: none;
+    background: var(--white, #fff);
+    box-shadow:
+        0 1px 4px rgb(0 0 0 / 35%),
+        0 0 0 0.5px rgb(0 0 0 / 10%);
+    transition:
+        transform 0.25s cubic-bezier(0.3, 1.3, 0.5, 1),
+        background-color 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+.vc-soundpanel-range::-moz-range-thumb {
+    width: 22px;
+    height: 14px;
+    border: none;
+    border-radius: 999px;
+    background: var(--white, #fff);
+    box-shadow: 0 1px 4px rgb(0 0 0 / 35%);
+}
+
+.vc-soundpanel-range:hover::-webkit-slider-thumb {
+    transform: scale(1.1);
+}
+
+.vc-soundpanel-range:active::-webkit-slider-thumb {
+    background: rgb(255 255 255 / 28%);
+    box-shadow:
+        inset 0 1px 1px rgb(255 255 255 / 85%),
+        inset 0 -1px 1px rgb(0 0 0 / 12%),
+        0 6px 14px rgb(0 0 0 / 28%);
+    transform: scale(1.45);
+}
+
+.vc-soundpanel-action-button {
+    display: flex;
+    flex-shrink: 0;
+    align-items: center;
+    gap: 6px;
+    height: 34px;
+    padding: 0 14px 0 12px;
+    border: none;
+    border-radius: 999px;
+    background: var(--background-mod-subtle);
+    color: var(--text-strong);
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition:
+        background-color 0.15s ease,
+        transform 0.1s ease;
+}
+
+.vc-soundpanel-action-button:hover:not(:disabled) {
+    background: var(--background-mod-normal);
+}
+
+.vc-soundpanel-action-button:active:not(:disabled) {
+    transform: scale(0.97);
+}
+
+.vc-soundpanel-action-button:disabled {
+    opacity: 0.6;
+    cursor: default;
+}
+
+.vc-soundpanel-primary {
+    background: var(--vc-soundpanel-accent);
+    color: var(--control-primary-text-default, #fff);
+}
+
+.vc-soundpanel-primary:hover:not(:disabled) {
+    background: var(--control-primary-background-hover, var(--brand-560));
+}
+
+.vc-soundpanel-icon-button {
+    display: flex;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    padding: 0;
+    border: none;
+    border-radius: 50%;
+    background: none;
+    color: var(--interactive-icon-default, var(--vc-soundpanel-secondary));
+    cursor: pointer;
+    transition:
+        background-color 0.15s ease,
+        color 0.15s ease,
+        transform 0.1s ease;
+}
+
+.vc-soundpanel-icon-button:hover:not(:disabled) {
+    background: var(--background-mod-normal);
+    color: var(--interactive-icon-hover, var(--icon-strong));
+}
+
+.vc-soundpanel-icon-button:active:not(:disabled) {
+    transform: scale(0.92);
+}
+
+.vc-soundpanel-icon-button:disabled {
+    opacity: 0.35;
+    cursor: default;
+}
+
+.vc-soundpanel-icon-button-active,
+.vc-soundpanel-icon-button-active:hover:not(:disabled) {
+    color: var(--vc-soundpanel-accent);
+}
+
+.vc-soundpanel-link-button {
+    flex-shrink: 0;
+    padding: 0;
+    border: none;
+    background: none;
+    color: var(--text-link);
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.vc-soundpanel-link-button:hover {
+    text-decoration: underline;
+}
+
+.vc-soundpanel-group + .vc-soundpanel-group {
+    margin-top: 10px;
+}
+
+.vc-soundpanel-group-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    padding: 4px 4px 8px;
+    border: none;
+    background: none;
+    color: var(--vc-soundpanel-secondary);
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.vc-soundpanel-group-header:hover {
+    color: var(--text-default);
+}
+
+.vc-soundpanel-group-icon {
+    display: flex;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.vc-soundpanel-group-icon-fallback {
+    background: var(--background-mod-strong);
+    color: var(--text-default);
+    font-size: 7px;
+    font-weight: 700;
+}
+
+.vc-soundpanel-group-icon-favorites {
+    color: var(--status-warning);
+}
+
+.vc-soundpanel-group-name {
+    flex: 1;
+    overflow: hidden;
+    text-align: left;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.vc-soundpanel-group-route {
+    display: flex;
+    flex-shrink: 0;
+    color: var(--vc-soundpanel-secondary);
+}
+
+.vc-soundpanel-group-count {
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
+}
+
+.vc-soundpanel-chevron {
+    display: flex;
+    transition: transform 0.2s ease;
+}
+
+.vc-soundpanel-chevron-collapsed {
+    transform: rotate(-90deg);
+}
+
+.vc-soundpanel-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(132px, 1fr));
+    gap: 8px;
+}
+
+.vc-soundpanel-tile {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+    height: 42px;
+    padding: 0 12px 0 10px;
+    border: none;
+    border-radius: 14px;
+    background: var(--background-mod-subtle);
+    color: var(--text-default);
+    font-size: 14px;
+    font-weight: 500;
+    text-align: left;
+    cursor: pointer;
+    transition:
+        background-color 0.15s ease,
+        color 0.15s ease,
+        transform 0.1s ease;
+}
+
+.vc-soundpanel-tile:hover {
+    background: var(--background-mod-normal);
+    color: var(--text-strong);
+}
+
+.vc-soundpanel-tile:active {
+    transform: scale(0.97);
+}
+
+.vc-soundpanel-tile-local {
+    --vc-soundpanel-ring: var(--interactive-text-default);
+
+    color: var(--vc-soundpanel-secondary);
+}
+
+.vc-soundpanel-tile-discord {
+    --vc-soundpanel-ring: var(--vc-soundpanel-speaking);
+}
+
+.vc-soundpanel-emoji {
+    flex-shrink: 0;
+    width: 20px;
+    height: 20px;
+    font-size: 17px;
+    line-height: 20px;
+    text-align: center;
+    object-fit: contain;
+}
+
+.vc-soundpanel-tile-name {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.vc-soundpanel-tile-badge {
+    flex-shrink: 0;
+    color: var(--vc-soundpanel-secondary);
+}
+
+.vc-soundpanel-tile-badge-join {
+    color: var(--vc-soundpanel-accent);
+}
+
+.vc-soundpanel-tile-star {
+    flex-shrink: 0;
+    color: var(--status-warning);
+}
+
+.vc-soundpanel-tile-meta {
+    flex-shrink: 0;
+    color: var(--vc-soundpanel-secondary);
+    font-size: 12px;
+    font-weight: 400;
+    font-variant-numeric: tabular-nums;
+}
+
+.vc-soundpanel-tile-playing,
+.vc-soundpanel-tile-playing:hover {
+    background: var(--background-mod-normal);
+    box-shadow: inset 0 0 0 2px var(--vc-soundpanel-ring);
+    color: var(--text-strong);
+    animation: vc-soundpanel-ring-in 0.16s ease-out;
+}
+
+.vc-soundpanel-now-playing {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin: 6px 16px 0;
+    padding: 14px;
+    border-radius: 20px;
+    background: var(--background-mod-subtle);
+}
+
+.vc-soundpanel-now-playing-info {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    min-width: 0;
+}
+
+.vc-soundpanel-now-playing-art,
+.vc-soundpanel-track-cover {
+    display: flex;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    background: var(--background-mod-normal);
+    color: var(--vc-soundpanel-secondary);
+}
+
+.vc-soundpanel-now-playing-art {
+    width: 60px;
+    height: 60px;
+    border-radius: 12px;
+    box-shadow: 0 6px 16px rgb(0 0 0 / 28%);
+}
+
+.vc-soundpanel-cover {
+    width: 100%;
+    height: 100%;
+    border-radius: inherit;
+    object-fit: cover;
+}
+
+.vc-soundpanel-art-playing {
+    outline: 2px solid var(--vc-soundpanel-ring);
+    outline-offset: 2px;
+    animation: vc-soundpanel-outline-in 0.16s ease-out;
+}
+
+.vc-soundpanel-now-playing-text {
+    min-width: 0;
+}
+
+.vc-soundpanel-now-playing-title {
+    overflow: hidden;
+    color: var(--text-strong);
+    font-size: 17px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    line-height: 22px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.vc-soundpanel-now-playing-subtitle {
+    margin-top: 2px;
+    overflow: hidden;
+    color: var(--vc-soundpanel-secondary);
+    font-size: 13px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.vc-soundpanel-seek,
+.vc-soundpanel-inline-volume {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.vc-soundpanel-time {
+    flex-shrink: 0;
+    min-width: 32px;
+    color: var(--vc-soundpanel-secondary);
+    font-size: 12px;
+    font-variant-numeric: tabular-nums;
+    text-align: center;
+}
+
+.vc-soundpanel-controls {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+}
+
+.vc-soundpanel-transport {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+}
+
+.vc-soundpanel-play-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 42px;
+    height: 42px;
+    margin: 0 4px;
+    padding: 0;
+    border: none;
+    border-radius: 50%;
+    background: var(--vc-soundpanel-accent);
+    box-shadow: 0 3px 10px rgb(0 0 0 / 25%);
+    color: var(--control-primary-text-default, #fff);
+    cursor: pointer;
+    transition:
+        background-color 0.15s ease,
+        transform 0.12s ease;
+}
+
+.vc-soundpanel-play-button:hover:not(:disabled) {
+    background: var(--control-primary-background-hover, var(--brand-560));
+}
+
+.vc-soundpanel-play-button:active:not(:disabled) {
+    transform: scale(0.93);
+}
+
+.vc-soundpanel-play-button:disabled {
+    opacity: 0.4;
+    cursor: default;
+}
+
+.vc-soundpanel-inline-volume {
+    width: 140px;
+    color: var(--vc-soundpanel-secondary);
+}
+
+.vc-soundpanel-track-list {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.vc-soundpanel-track {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-height: 46px;
+    padding: 0 12px 0 8px;
+    border-radius: 14px;
+    cursor: pointer;
+    transition: background-color 0.15s ease;
+}
+
+.vc-soundpanel-track:hover {
+    background: var(--background-mod-subtle);
+}
+
+.vc-soundpanel-track-active,
+.vc-soundpanel-track-active:hover {
+    background: var(--background-mod-normal);
+}
+
+.vc-soundpanel-track-active .vc-soundpanel-track-name {
+    color: var(--text-strong);
+    font-weight: 600;
+}
+
+.vc-soundpanel-track-cover {
+    width: 34px;
+    height: 34px;
+    border-radius: 8px;
+}
+
+.vc-soundpanel-track-text {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.vc-soundpanel-track-name {
+    overflow: hidden;
+    font-weight: 500;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.vc-soundpanel-track-artist {
+    overflow: hidden;
+    color: var(--vc-soundpanel-secondary);
+    font-size: 12px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.vc-soundpanel-track-duration {
+    flex-shrink: 0;
+    color: var(--vc-soundpanel-secondary);
+    font-size: 12px;
+    font-variant-numeric: tabular-nums;
+}
+
+@property --vc-soundpanel-progress {
+    syntax: "<percentage>";
+    inherits: true;
+    initial-value: 0%;
+}
+
+@property --vc-soundpanel-percent {
+    syntax: "<integer>";
+    inherits: true;
+    initial-value: 0;
+}
+
+.vc-soundpanel-track-pending {
+    position: relative;
+    transition:
+        background-color 0.15s ease,
+        --vc-soundpanel-progress 0.4s linear,
+        --vc-soundpanel-percent 0.4s linear;
+}
+
+.vc-soundpanel-track-percent::after {
+    counter-reset: vc-soundpanel-percent var(--vc-soundpanel-percent);
+    content: counter(vc-soundpanel-percent) "%";
+}
+
+.vc-soundpanel-track-pending::after {
+    position: absolute;
+    right: 12px;
+    bottom: 2px;
+    left: 8px;
+    height: 2px;
+    border-radius: 1px;
+    background: linear-gradient(
+        to right,
+        var(--vc-soundpanel-accent) var(--vc-soundpanel-progress, 0%),
+        var(--background-mod-normal) var(--vc-soundpanel-progress, 0%)
+    );
+    content: "";
+}
+
+.vc-soundpanel-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    padding: 48px 24px;
+    color: var(--vc-soundpanel-secondary);
+    text-align: center;
+}
+
+.vc-soundpanel-empty-icon {
+    display: flex;
+    margin-bottom: 4px;
+    color: var(--vc-soundpanel-secondary);
+}
+
+.vc-soundpanel-empty-title {
+    color: var(--text-strong);
+    font-size: 15px;
+    font-weight: 600;
+}
+
+.vc-soundpanel-empty-body {
+    max-width: 300px;
+    font-size: 13px;
+    line-height: 18px;
+}
+
+.vc-soundpanel-dropzone {
+    position: relative;
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    min-height: 0;
+}
+
+.vc-soundpanel-dropzone-overlay {
+    position: absolute;
+    inset: 8px;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    border: 2px dashed var(--vc-soundpanel-accent);
+    border-radius: 20px;
+    background: color-mix(in oklab, var(--background-surface-high) 88%, transparent);
+    color: var(--text-strong);
+    font-weight: 600;
+    pointer-events: none;
+}
+
+.vc-soundpanel-dropzone-overlay svg {
+    color: var(--vc-soundpanel-accent);
+}
+
+.vc-soundpanel-source-tabs {
+    display: inline-flex;
+    gap: 4px;
+    margin-bottom: 16px;
+}
+
+.vc-soundpanel-source-tabs .vc-soundpanel-tab-button-active {
+    background: var(--background-mod-strong);
+}
+
+.vc-soundpanel-source-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 12px;
+    padding-bottom: 8px;
+}
+
+.vc-soundpanel-source {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-width: 0;
+    padding: 8px;
+    border: 2px solid transparent;
+    border-radius: 14px;
+    background: var(--background-mod-subtle);
+    color: var(--text-default);
+    text-align: left;
+    cursor: pointer;
+    transition:
+        background-color 0.15s ease,
+        border-color 0.15s ease;
+}
+
+.vc-soundpanel-source:hover {
+    background: var(--background-mod-normal);
+}
+
+.vc-soundpanel-source-selected,
+.vc-soundpanel-source-selected:hover {
+    border-color: var(--vc-soundpanel-accent, var(--brand-500));
+    background: color-mix(in oklab, var(--brand-500) 12%, transparent);
+}
+
+.vc-soundpanel-source-thumbnail {
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    border-radius: 8px;
+    background: var(--background-base-lowest);
+    object-fit: contain;
+}
+
+.vc-soundpanel-source-label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    min-width: 0;
+    font-size: 13px;
+    font-weight: 500;
+}
+
+.vc-soundpanel-source-icon {
+    flex-shrink: 0;
+    width: 16px;
+    height: 16px;
+}
+
+.vc-soundpanel-source-name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.vc-soundpanel-share-audio {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--text-default);
+    font-size: 14px;
+}
+
+.vc-soundpanel-footer {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 4px 16px 16px;
+}
+
+.vc-soundpanel-status {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    margin: 0;
+    color: var(--vc-soundpanel-secondary);
+    font-size: 12px;
+    line-height: 16px;
+}
+
+.vc-soundpanel-status > span {
+    flex: 1;
+}
+
+.vc-soundpanel-status-live {
+    color: var(--text-default);
+}
+
+.vc-soundpanel-status-warning {
+    color: var(--text-feedback-warning, var(--status-warning));
+}
+
+.vc-soundpanel-mixer {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.vc-soundpanel-mixer-slider {
+    display: flex;
+    flex: 1;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+    color: var(--vc-soundpanel-secondary);
+}
+
+.vc-soundpanel-transmit {
+    display: flex;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    padding: 0;
+    border: none;
+    border-radius: 50%;
+    background: var(--background-mod-normal);
+    color: var(--interactive-icon-active, var(--icon-strong));
+    cursor: pointer;
+    transition:
+        background-color 0.15s ease,
+        color 0.15s ease;
+}
+
+.vc-soundpanel-transmit:hover {
+    background: var(--background-mod-strong);
+}
+
+.vc-soundpanel-transmit-off {
+    color: var(--status-danger);
+}
+
+.vc-soundpanel-on-air .vc-soundpanel-transmit {
+    outline: 2px solid var(--vc-soundpanel-speaking);
+    outline-offset: 2px;
+    animation: vc-soundpanel-outline-in 0.16s ease-out;
+}
+
+@media (prefers-reduced-transparency: reduce) {
+    .vc-soundpanel-popout,
+    .vc-soundpanel-menu.vc-soundpanel-menu {
+        --vc-soundpanel-glass: var(--background-surface-high);
+
+        -webkit-backdrop-filter: none;
+        backdrop-filter: none;
+    }
+}
+
+@media (prefers-contrast: more) {
+    .vc-soundpanel-popout,
+    .vc-soundpanel-menu.vc-soundpanel-menu {
+        --vc-soundpanel-glass: var(--background-surface-high);
+        --vc-soundpanel-edge: var(--border-strong);
+
+        -webkit-backdrop-filter: none;
+        backdrop-filter: none;
+    }
+
+    .vc-soundpanel-tabs,
+    .vc-soundpanel-search,
+    .vc-soundpanel-now-playing,
+    .vc-soundpanel-tile:not(.vc-soundpanel-tile-playing) {
+        box-shadow: inset 0 0 0 1px var(--border-strong);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .vc-soundpanel-tab-thumb,
+    .vc-soundpanel-range::-webkit-slider-thumb {
+        transition: none;
+    }
+}
+
+@keyframes vc-soundpanel-fade-in {
+    from {
+        opacity: 0;
+    }
+}
+
+@keyframes vc-soundpanel-ring-in {
+    from {
+        box-shadow: inset 0 0 0 0 var(--vc-soundpanel-ring);
+    }
+}
+
+@keyframes vc-soundpanel-outline-in {
+    from {
+        outline-color: transparent;
+        outline-offset: 0;
+    }
+}
