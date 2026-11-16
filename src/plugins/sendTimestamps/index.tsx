@@ -20,15 +20,17 @@ import "./styles.css";
 
 import { ChatBarButton, ChatBarButtonFactory } from "@api/ChatButtons";
 import { definePluginSettings } from "@api/Settings";
+import { Button } from "@components/Button";
+import { InlineCode } from "@components/CodeBlock";
+import { Grid } from "@components/Grid";
 import { Heading } from "@components/Heading";
 import { Paragraph } from "@components/Paragraph";
 import { Devs } from "@utils/constants";
 import { classNameFactory } from "@utils/css";
-import { getTheme, insertTextIntoChatInputBox, Theme } from "@utils/discord";
-import { Margins } from "@utils/margins";
+import { copyWithToast, getTheme, insertTextIntoChatInputBox, Theme } from "@utils/discord";
 import definePlugin, { IconComponent, OptionType } from "@utils/types";
 import { RenderModalProps } from "@vencord/discord-types";
-import { Modal, openModal, Parser, Select, useMemo, useState } from "@webpack/common";
+import { Modal, openModal, Parser, useState } from "@webpack/common";
 
 const settings = definePluginSettings({
     replaceMessageContents: {
@@ -50,35 +52,41 @@ function parseTime(time: string) {
     return `<t:${Math.round(date.getTime() / 1000)}:t>`;
 }
 
-const Formats = ["", "t", "T", "d", "D", "f", "F", "s", "S", "R"] as const;
+const Formats = ["R", "t", "T", "d", "s", "S", "D", "f", "F"] as const;
 type Format = typeof Formats[number];
 
 const cl = classNameFactory("vc-st-");
 
 function PickerModal(props: RenderModalProps) {
     const [value, setValue] = useState<string>();
-    const [format, setFormat] = useState<Format>("");
+    const [format, setFormat] = useState<Format>("f");
     const time = Math.round((new Date(value!).getTime() || Date.now()) / 1000);
 
     const formatTimestamp = (time: number, format: Format) => `<t:${time}${format && `:${format}`}>`;
 
-    const [formatted, rendered] = useMemo(() => {
-        const formatted = formatTimestamp(time, format);
-        return [formatted, Parser.parse(formatted)];
-    }, [time, format]);
+    const formatted = formatTimestamp(time, format);
 
     return (
         <Modal
             {...props}
             title="Timestamp Picker"
-            actions={[{
-                text: "Insert",
-                variant: "primary",
-                onClick() {
-                    insertTextIntoChatInputBox(formatted + " ");
-                    props.onClose();
+            actions={[
+                {
+                    text: "Copy",
+                    variant: "secondary",
+                    onClick() {
+                        copyWithToast(formatted);
+                    }
+                },
+                {
+                    text: "Insert",
+                    variant: "primary",
+                    onClick() {
+                        insertTextIntoChatInputBox(formatted + " ");
+                        props.onClose();
+                    }
                 }
-            }]}
+            ]}
         >
             <input
                 className={cl("date-picker")}
@@ -90,31 +98,23 @@ function PickerModal(props: RenderModalProps) {
                 }}
             />
 
-            <Heading className={Margins.bottom8}>Timestamp Format</Heading>
-            <div className={cl("format-select")}>
-                <Select
-                    options={
-                        Formats.map(m => ({
-                            label: m,
-                            value: m
-                        }))
-                    }
-                    isSelected={v => v === format}
-                    select={v => setFormat(v)}
-                    serialize={v => v}
-                    renderOptionLabel={o => (
-                        <div className={cl("format-label")}>
-                            {Parser.parse(formatTimestamp(time, o.value))}
-                        </div>
-                    )}
-                    renderOptionValue={() => rendered}
-                />
-            </div>
+            <Heading className={cl("format-heading")}>Format</Heading>
+            <Grid columns={3} className={cl("format-grid")}>
+                {Formats.map(m =>
+                    <Button
+                        variant={format === m ? "primary" : "secondary"}
+                        onClick={() => setFormat(m)}
+                        key={m}
+                        className={cl("format-button")}>
+                        {Parser.parse(formatTimestamp(time, m))}
+                    </Button>
+                )}
+            </Grid>
 
-            <Heading className={Margins.bottom8}>Preview</Heading>
-            <Paragraph className={cl("preview-text")}>
-                {rendered} ({formatted})
-            </Paragraph>
+            <Heading>
+                Raw Markdown:
+                <InlineCode className={cl("raw-code")}>{formatted}</InlineCode>
+            </Heading>
         </Modal>
     );
 }
@@ -183,18 +183,18 @@ export default definePlugin({
         return (
             <>
                 <Paragraph>
-                    To quickly send time only timestamps, include timestamps formatted as `HH:MM` (including the backticks!) in your message
+                    To quickly send time only timestamps, include timestamps formatted as `HH:MM` (including the backticks!) in your message.
                 </Paragraph>
                 <Paragraph>
                     See below for examples.
                     If you need anything more specific, use the Date button in the chat bar!
                 </Paragraph>
                 <Paragraph>
-                    Examples:
+                    <Heading className={cl("desc-heading")}>Examples</Heading>
                     <ul>
                         {samples.map(s => (
                             <li key={s}>
-                                <code>{s}</code> {"->"} {Parser.parse(parseTime(s))}
+                                <InlineCode className={cl("desc-code")}>{s}</InlineCode> → {Parser.parse(parseTime(s))}
                             </li>
                         ))}
                     </ul>

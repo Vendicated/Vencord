@@ -1,5 +1,6 @@
 export * from "./common";
 // TODO: Splitting up components into files in the folder would be good
+export * as Webpack from "../webpack";
 export * from "./components";
 export * from "./components/Modal";
 export * from "./flux";
@@ -9,4 +10,3 @@ export * from "./modules";
 export * from "./stores";
 export * from "./toasts";
 export * from "./utils";
-export * as Webpack from "../webpack";

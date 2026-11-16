@@ -30,6 +30,7 @@ const settings = definePluginSettings({
         type: OptionType.NUMBER,
         description: "Blur Amount (in pixels)",
         default: 10,
+        min: 0,
         onChange: setCss
     },
     ignoredChannels: {

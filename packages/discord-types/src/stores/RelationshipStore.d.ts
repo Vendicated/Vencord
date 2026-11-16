@@ -1,6 +1,6 @@
+import { RelationshipType } from "../../enums";
 import { FluxStore } from "..";
 import { Message, MessageJSON } from "../common/messages";
-import { RelationshipType } from "../../enums";
 
 export class RelationshipStore extends FluxStore {
     getBlockedIDs(): string[];

@@ -30,7 +30,7 @@ import { isTruthy } from "@utils/guards";
 import { classes } from "@utils/misc";
 import definePlugin, { IconComponent, OptionType } from "@utils/types";
 import { Message } from "@vencord/discord-types";
-import { GuildRoleStore, Menu, Modal, openModal, UserProfileStore } from "@webpack/common";
+import { GuildRoleStore, Menu, Modal, openModal, showToast, UserProfileStore } from "@webpack/common";
 import { MouseEventHandler } from "react";
 
 const CopyRawIcon: IconComponent = ({ height = 20, width = 20, className }) => {
@@ -135,6 +135,12 @@ function openViewRawModal(data: object, type: string, msgContent?: string) {
 
 const openViewRawModalMessage = (msg: Message) => openViewRawModal(cleanMessage(msg), "Message", msg.content);
 
+const copyMessage = (msg: Message) => {
+    const message = msg.messageSnapshots?.[0]?.message ?? msg;
+    if (!message.content) return showToast({ text: "Can't copy empty message.", variant: "critical" });
+    copyWithToast(message.content);
+};
+
 const settings = definePluginSettings({
     clickMethod: {
         description: "Change the button to view the raw content/data of any message.",
@@ -233,20 +239,18 @@ export default definePlugin({
         render(msg) {
             const handleClick = () => {
                 if (settings.store.clickMethod === "Right") {
-                    copyWithToast(msg.content);
+                    copyMessage(msg);
                 } else {
                     openViewRawModalMessage(msg);
                 }
             };
 
             const handleContextMenu: MouseEventHandler<HTMLDivElement> = e => {
+                e.preventDefault();
+                e.stopPropagation();
                 if (settings.store.clickMethod === "Left") {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    copyWithToast(msg.content);
+                    copyMessage(msg);
                 } else {
-                    e.preventDefault();
-                    e.stopPropagation();
                     openViewRawModalMessage(msg);
                 }
             };

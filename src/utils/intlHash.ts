@@ -1,5 +1,3 @@
-/* eslint-disable simple-header/header */
-
 /**
  * discord-intl
  *

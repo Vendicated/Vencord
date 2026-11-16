@@ -1,5 +1,5 @@
-import { Channel, FluxStore, Guild } from "..";
 import { ChannelOverrideFlags, GuildSettingsFlags, NotifyHighlights, UserNotificationSetting } from "../../enums";
+import { Channel, FluxStore, Guild } from "..";
 
 export interface MuteConfig {
     selected_time_window: number;

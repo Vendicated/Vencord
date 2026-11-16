@@ -20,10 +20,10 @@ import { isSettingDisabled } from "@api/PluginManager";
 import { PluginSettingStringDef } from "@utils/types";
 import { React, TextArea, TextInput, useState } from "@webpack/common";
 
-import { resolveError, SettingProps, SettingsSection } from "./Common";
+import { resolveError, SettingProps, SettingsSection, useSettingState } from "./Common";
 
 export function TextSetting({ setting, pluginSettings, definedSettings, id, onChange }: SettingProps<PluginSettingStringDef>) {
-    const [state, setState] = useState(pluginSettings[id] ?? setting.default ?? null);
+    const [state, setState] = useSettingState(pluginSettings[id] ?? setting.default ?? null);
     const [error, setError] = useState<string | null>(null);
 
     function handleChange(newValue: string) {

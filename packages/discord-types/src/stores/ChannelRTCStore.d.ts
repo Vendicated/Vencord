@@ -1,5 +1,5 @@
-import { AvatarDecorationData, FluxStore, User, VoiceState } from "..";
 import { ActivityType, ParticipantType, RTCPlatform } from "../../enums";
+import { AvatarDecorationData, FluxStore, User, VoiceState } from "..";
 import { StreamType } from "./FriendsStore";
 
 export type RTCLayout = "normal" | "minimum" | "no-chat" | "full-screen" | "haven";
