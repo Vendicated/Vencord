@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import { Logger } from "@utils/Logger";
 import definePlugin from "@utils/types";
@@ -51,6 +52,15 @@ function getH264Profile(config = "") {
 
 // H264 profiles that encode in hardware on this device, ordered from the highest profile_idc
 let hardwareH264Profiles: string[] = [];
+
+const settings = definePluginSettings({
+    betterCodecs: {
+        type: OptionType.BOOLEAN,
+        description: "MAY CAUSE ISSUES! Prefer better codecs like AV1 and VP9 when streaming. Should improve quality but may lead to issues like infinitely loading streams.",
+        default: false,
+        restartNeeded: true
+    }
+});
 
 export default definePlugin({
     name: "WebScreenShareFixes",
@@ -110,6 +120,14 @@ export default definePlugin({
                     replace: "$1$self.getStreamAudioBitrate(this,$2)}]"
                 }
             ]
+        },
+        {
+            find: 'case"video":(',
+            predicate: () => settings.store.betterCodecs,
+            replacement: {
+                match: /\i\?\[(\i\.\i)\.H265,\i\.\i\.H264,\i\.\i\.VP8,\i\.\i\.VP9\]:\[\i\.\i\.H264,\i\.\i\.VP8,\i\.\i\.VP9\]/,
+                replace: '["AV1",$1.VP9,$1.H264,$1.VP8]'
+            }
         },
         {
             find: "ApplicationStreamPreviewUploadManager",
