@@ -10,9 +10,9 @@ import definePlugin, { OptionType } from "@utils/types";
 import { FluxDispatcher } from "@webpack/common";
 
 const settings = definePluginSettings({
-    experimentalAV1Support: {
+    betterCodecs: {
         type: OptionType.BOOLEAN,
-        description: "Prefer AV1, then VP9 when streaming. Better quality at the same bitrate, but viewers that can't decode AV1 may get stuck loading your stream",
+        description: "MAY CAUSE ISSUES! Prefer better codecs like AV1 and VP9 when streaming. Should improve quality but may lead to issues like infinitely loading streams.",
         default: false,
         restartNeeded: true
     }
@@ -52,7 +52,7 @@ export default definePlugin({
         },
         {
             find: 'case"video":(',
-            predicate: () => settings.store.experimentalAV1Support,
+            predicate: () => settings.store.betterCodecs,
             replacement: {
                 match: /\i\?\[(\i\.\i)\.H265,\i\.\i\.H264,\i\.\i\.VP8,\i\.\i\.VP9\]:\[\i\.\i\.H264,\i\.\i\.VP8,\i\.\i\.VP9\]/,
                 replace: '["AV1",$1.VP9,$1.H264,$1.VP8]'
