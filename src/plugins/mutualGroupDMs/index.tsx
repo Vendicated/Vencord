@@ -131,25 +131,6 @@ export default definePlugin({
                 },
             ]
         },
-        // Legacy DM Sidebar
-        {
-            find: 'section:"MUTUAL_FRIENDS"',
-            replacement: [
-                {
-                    match: /\i\|\|\i(?=\?\(0,\i\.jsxs?\)\(\i\.\i\.Overlay,)/,
-                    replace: "$&||$self.getMutualGroupDms(arguments[0].user.id).length>0"
-                },
-                {
-                    match: /\.openUserProfileModal.+?\)}\)}\)(?<=,(\i)&&(\i)&&(\(0,\i\.jsxs?\)\(\i\.\i,{className:(\i)\.\i}\)).{0,50}?"MUTUAL_FRIENDS".+?)/,
-                    replace: (m, hasMutualGuilds, hasMutualFriends, Divider, classes) => "" +
-                        `${m},$self.renderDMPageList({user:arguments[0].user,hasDivider:${hasMutualGuilds}||${hasMutualFriends},Divider:${Divider},listStyle:${classes}.list})`
-                },
-                {
-                    match: /(?=function (\i)\(\i\){let{section:\i,header:\i[^}]+?onExpand:)/,
-                    replace: "$self.ExpandableList=$1;"
-                }
-            ]
-        }
     ],
 
     set ExpandableList(value: any) {
