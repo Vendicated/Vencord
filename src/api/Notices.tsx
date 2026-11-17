@@ -18,10 +18,15 @@
 
 import ErrorBoundary from "@components/ErrorBoundary";
 import { isPrimitiveReactNode } from "@utils/react";
-import { waitFor } from "@webpack";
+import { filters, mapMangledModuleLazy, waitFor } from "@webpack";
 import { ReactNode } from "react";
 
 let NoticesModule: any;
+const NoticeComponents = mapMangledModuleLazy(["APP_NOTICE_PRIMARY_CTA_OPENED", "minor:"], {
+    Notice: filters.byCode(".DEFAULT,className:"),
+    NoticeCloseButton: filters.byCode("APP_NOTICE_CLOSED"),
+    NoticeButton: filters.byCode("minor:")
+});
 waitFor(m => m.show && m.dismiss && !m.suppressAll, m => NoticesModule = m);
 
 export const noticesQueue = [] as any[];
@@ -46,4 +51,16 @@ export function showNotice(message: ReactNode, buttonText: string, onOkClick: ()
 
     noticesQueue.push(["GENERIC", notice, buttonText, onOkClick]);
     if (!currentNotice) nextNotice();
+}
+
+export function renderNotice(notice: { message: ReactNode; buttonText: string; callback(): void; }) {
+    const { Notice, NoticeCloseButton, NoticeButton } = NoticeComponents;
+
+    return (
+        <Notice>
+            <NoticeCloseButton onClick={popNotice} />
+            {notice.message}
+            <NoticeButton onClick={notice.callback}>{notice.buttonText}</NoticeButton>
+        </Notice>
+    );
 }

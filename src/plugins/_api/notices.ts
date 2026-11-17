@@ -16,6 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { renderNotice } from "@api/Notices";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 
@@ -37,6 +38,15 @@ export default definePlugin({
                     replace: (m, notice) => `if(${notice}?.id=="VencordNotice")return(${notice}=null,Vencord.Api.Notices.nextNotice(),true);${m}`
                 }
             ]
+        },
+        {
+            find: ".GLOBAL_BANNER_PREVIEW:return",
+            replacement: {
+                match: /switch\((\i)\.type\){(?=case \i\.\i\.GLOBAL_BANNER_PREVIEW:)/,
+                replace: 'if($1.id==="VencordNotice")return $self.renderNotice($1);$&'
+            }
         }
     ],
+
+    renderNotice
 });
