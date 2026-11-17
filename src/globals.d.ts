@@ -62,7 +62,9 @@ declare global {
     export var Vesktop: any;
     export var VesktopNative: any;
 
-    interface Window extends Record<PropertyKey, any> { }
+    interface Window extends Record<PropertyKey, any> {
+        launchQueue?: LaunchQueue;
+    }
 
     interface MediaTrackConstraintSet {
         restrictOwnAudio?: boolean;
@@ -86,6 +88,14 @@ declare global {
         monitorTypeSurfaces?: "include" | "exclude";
         controller?: CaptureController;
         preferCurrentTab?: boolean;
+    }
+
+    interface LaunchParams {
+        readonly targetURL?: string;
+    }
+
+    interface LaunchQueue {
+        setConsumer(consumer: (params: LaunchParams) => void): void;
     }
 }
 
