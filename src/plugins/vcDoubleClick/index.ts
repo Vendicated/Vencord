@@ -56,6 +56,14 @@ export default definePlugin({
                 replace: (_, onClick, props) => ""
                     + `onClick:(vcDoubleClickEvt)=>$self.shouldRunOnClick(vcDoubleClickEvt,${props})&&${onClick}()`,
             }
+        },
+        {
+            // Active Now voice cards
+            find: ".VoiceSection=",
+            replacement: {
+                match: /onClick:\(\)=>\{(?=\i\.\i\.selectVoiceChannel\((\i)\.id\))/,
+                replace: "onClick:vcDoubleClickEvt=>{if(!$self.shouldRunOnClick(vcDoubleClickEvt,{channelId:$1.id}))return;"
+            }
         }
     ],
 
