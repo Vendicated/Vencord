@@ -72,7 +72,8 @@
     cursor: pointer;
     margin: 6px;
 
-    :is(.imageWrapper:is(:hover, :focus-within) ~ &, :hover, :focus-within) > [class*="gifFavoriteButton"] {
+    :is(.imageWrapper:is(:hover, :focus-within) ~ &, :hover, :focus-within)
+        > [class*="gifFavoriteButton"] {
         opacity: 1;
         transform: translateY(0);
     }
