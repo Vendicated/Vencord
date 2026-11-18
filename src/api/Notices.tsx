@@ -18,49 +18,66 @@
 
 import ErrorBoundary from "@components/ErrorBoundary";
 import { isPrimitiveReactNode } from "@utils/react";
-import { filters, mapMangledModuleLazy, waitFor } from "@webpack";
+import { Notice } from "@vencord/discord-types";
+import { filters, mapMangledModuleLazy } from "@webpack";
+import { FluxDispatcher } from "@webpack/common";
 import { ReactNode } from "react";
 
-let NoticesModule: any;
-const NoticeComponents = mapMangledModuleLazy(["APP_NOTICE_PRIMARY_CTA_OPENED", "minor:"], {
+const { Notice, NoticeButton, NoticeCloseButton } = mapMangledModuleLazy(["APP_NOTICE_PRIMARY_CTA_OPENED", "minor:"], {
     Notice: filters.byCode(".DEFAULT,className:"),
     NoticeCloseButton: filters.byCode("APP_NOTICE_CLOSED"),
     NoticeButton: filters.byCode("minor:")
 });
-waitFor(m => m.show && m.dismiss && !m.suppressAll, m => NoticesModule = m);
 
-export const noticesQueue = [] as any[];
-export let currentNotice: any = null;
+export const VENCORD_NOTICE_TYPE = "VencordNotice";
+export const noticesQueue = [] as Notice[];
+export let currentNotice: Notice | undefined = undefined;
 
-export function popNotice() {
-    NoticesModule.dismiss();
+export function dismissNotice(notice?: Pick<Notice, "id" | "type">) {
+    return FluxDispatcher.dispatch({ type: "NOTICE_DISMISS", ...notice });
+}
+
+export async function popNotice() {
+    const notice = currentNotice;
+    if (notice) {
+        currentNotice = undefined;
+        await dismissNotice(notice);
+    }
+
+    nextNotice();
 }
 
 export function nextNotice() {
     currentNotice = noticesQueue.shift();
 
     if (currentNotice) {
-        NoticesModule.show(...currentNotice, "VencordNotice");
+        FluxDispatcher.dispatch({ type: "NOTICE_SHOW", notice: currentNotice });
     }
 }
 
 export function showNotice(message: ReactNode, buttonText: string, onOkClick: () => void) {
-    const notice = isPrimitiveReactNode(message)
+    const wrappedMessage = isPrimitiveReactNode(message)
         ? message
         : <ErrorBoundary fallback={() => "Error Showing Notice"}>{message}</ErrorBoundary>;
 
-    noticesQueue.push(["GENERIC", notice, buttonText, onOkClick]);
+    noticesQueue.push({
+        type: VENCORD_NOTICE_TYPE,
+        id: crypto.randomUUID(),
+        message: wrappedMessage,
+        buttonText,
+        callback: onOkClick
+    });
+
     if (!currentNotice) nextNotice();
 }
 
-export function renderNotice(notice: { message: ReactNode; buttonText: string; callback(): void; }) {
-    const { Notice, NoticeCloseButton, NoticeButton } = NoticeComponents;
-
+/** Don't use this. */
+export function _renderNotice({ message, callback, buttonText }: Notice) {
     return (
         <Notice>
             <NoticeCloseButton onClick={popNotice} />
-            {notice.message}
-            <NoticeButton onClick={notice.callback}>{notice.buttonText}</NoticeButton>
+            {message}
+            <NoticeButton onClick={callback}>{buttonText}</NoticeButton>
         </Notice>
     );
 }

@@ -65,8 +65,8 @@ export default definePlugin({
 
         const backOnlineMessage = "Welcome back! Click the button to go online. Click the X to stay idle until reload.";
         if (
-            currentNotice?.[1] === backOnlineMessage ||
-            noticesQueue.some(([, noticeMessage]) => noticeMessage === backOnlineMessage)
+            currentNotice?.message === backOnlineMessage ||
+            noticesQueue.some(notice => notice.message === backOnlineMessage)
         ) return;
 
         showNotice(backOnlineMessage, "Exit idle", () => {

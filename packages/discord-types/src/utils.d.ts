@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import type { MouseEvent, ReactNode } from "react";
 import { LiteralUnion } from "type-fest";
 
 import { ApplicationCommandOptionType, ChannelType, PremiumType } from "../enums";
@@ -457,3 +457,12 @@ export interface OpenUserProfileModalOptions {
 }
 
 export type OpenUserProfileModal = (opts: OpenUserProfileModalOptions) => Promise<void>;
+
+export interface Notice {
+    id: string;
+    type: string;
+    message: ReactNode;
+    buttonText: ReactNode;
+    /** Callback for when the button is clicked. Not called when the notice is dismissed via the close button */
+    callback(event: MouseEvent<HTMLButtonElement>): void;
+}
