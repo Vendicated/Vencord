@@ -458,9 +458,14 @@ export interface OpenUserProfileModalOptions {
 
 export type OpenUserProfileModal = (opts: OpenUserProfileModalOptions) => Promise<void>;
 
+export type NoticeColorKey = "DEFAULT" | "NEUTRAL" | "BRAND" | "WARNING" | "DANGER" | "INFO" | "STREAMER_MODE" | "CUSTOM" | "SPOTIFY" | "PREMIUM_TIER_0" | "PREMIUM_TIER_1" | "PREMIUM_TIER_2";
+export type NoticeColors = Record<NoticeColorKey, string>;
+
 export interface Notice {
     id: string;
     type: string;
+    /** import NoticeColors from the Notices API */
+    color?: string;
     message: ReactNode;
     buttonText: ReactNode;
     /** Callback for when the button is clicked. Not called when the notice is dismissed via the close button */
