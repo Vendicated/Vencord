@@ -29,15 +29,12 @@ import definePlugin from "@utils/types";
 import { Channel, User } from "@vencord/discord-types";
 import { findByPropsLazy, findCssClassesLazy } from "@webpack";
 import { Avatar, ChannelStore, Clickable, IconUtils, RelationshipStore, ScrollerThin, useMemo, UsernameUtils, UserStore } from "@webpack/common";
-import { ComponentType, JSX } from "react";
 
 const SelectedChannelActionCreators = findByPropsLazy("selectPrivateChannel");
 
 const ProfileListClasses = findCssClassesLazy("empty", "textContainer", "connectionIcon");
 const TabBarClasses = findCssClassesLazy("tabPanelScroller", "tabBarPanel");
 const MutualsListClasses = findCssClassesLazy("row", "icon", "name", "details");
-
-let ExpandableList: ComponentType<any> = () => null;
 
 const logger = new Logger("MutualGroupDMs");
 
@@ -133,10 +130,6 @@ export default definePlugin({
         },
     ],
 
-    set ExpandableList(value: any) {
-        ExpandableList = value;
-    },
-
     getMutualGroupDms(userId: string) {
         try {
             return getMutualGroupDms(userId);
@@ -183,22 +176,5 @@ export default definePlugin({
                 }
             </ScrollerThin>
         );
-    }),
-
-    renderDMPageList: ErrorBoundary.wrap(({ user, hasDivider, Divider, listStyle }: { user: User, hasDivider: boolean, Divider: JSX.Element, listStyle: string; }) => {
-        const mutualGDms = getMutualGroupDms(user.id);
-        if (mutualGDms.length === 0) return null;
-
-        return (
-            <>
-                {hasDivider && Divider}
-                <ExpandableList
-                    listClassName={classes(listStyle, "vc-mutual-gdms-dm-page-list")}
-                    header={"Mutual Groups"}
-                    isLoading={false}
-                    items={renderClickableGDMs(mutualGDms)}
-                />
-            </>
-        );
-    }, { noop: true })
+    })
 });
