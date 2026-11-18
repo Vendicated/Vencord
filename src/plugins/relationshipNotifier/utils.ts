@@ -17,7 +17,7 @@
 */
 
 import * as DataStore from "@api/DataStore";
-import { popNotice, showNotice } from "@api/Notices";
+import { NoticeColors, popNotice, showNotice } from "@api/Notices";
 import { showNotification } from "@api/Notifications";
 import { getUniqueUsername, openUserProfile } from "@utils/discord";
 import { FluxStore } from "@vencord/discord-types";
@@ -112,7 +112,12 @@ export async function syncAndRunChecks() {
 
 export function notify(text: string, icon?: string, onClick?: () => void) {
     if (settings.store.notices)
-        showNotice(text, "OK", () => popNotice());
+        showNotice({
+            message: text,
+            buttonText: "OK",
+            color: NoticeColors.WARNING,
+            callback: () => popNotice()
+        });
 
     showNotification({
         title: "Relationship Notifier",
