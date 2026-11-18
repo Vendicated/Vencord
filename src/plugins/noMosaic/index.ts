@@ -45,7 +45,7 @@ export default definePlugin({
             find: "renderAttachments(",
             predicate: () => settings.store.inlineVideo,
             replacement: {
-                match: /url:(\i)\.url\}\);return /,
+                match: /url:(\i)\.url\}\);return (?:\i\.onOpenInMediaViewer=\i\[\i\],)?/,
                 replace: "$&$1.content_type?.startsWith('image/')&&"
             }
         },

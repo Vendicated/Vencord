@@ -29,15 +29,12 @@ import definePlugin from "@utils/types";
 import { Channel, User } from "@vencord/discord-types";
 import { findByPropsLazy, findCssClassesLazy } from "@webpack";
 import { Avatar, ChannelStore, Clickable, IconUtils, RelationshipStore, ScrollerThin, useMemo, UsernameUtils, UserStore } from "@webpack/common";
-import { ComponentType, JSX } from "react";
 
 const SelectedChannelActionCreators = findByPropsLazy("selectPrivateChannel");
 
 const ProfileListClasses = findCssClassesLazy("empty", "textContainer", "connectionIcon");
 const TabBarClasses = findCssClassesLazy("tabPanelScroller", "tabBarPanel");
 const MutualsListClasses = findCssClassesLazy("row", "icon", "name", "details");
-
-let ExpandableList: ComponentType<any> = () => null;
 
 const logger = new Logger("MutualGroupDMs");
 
@@ -130,41 +127,8 @@ export default definePlugin({
                     replace: '$&className:"vc-mutual-gdms-modal-v2-tab-bar",'
                 },
             ]
-        },
-        // Legacy DM Sidebar
-        {
-            find: 'section:"MUTUAL_FRIENDS"',
-            replacement: [
-                {
-                    match: /\i\|\|\i(?=\?\(0,\i\.jsxs?\)\(\i\.\i\.Overlay,)/,
-                    replace: "$&||$self.getMutualGroupDms(arguments[0].user.id).length>0"
-                },
-                {
-                    match: /\.openUserProfileModal.+?\)}\)}\)(?<=,(\i)&&(\i)&&(\(0,\i\.jsxs?\)\(\i\.\i,{className:(\i)\.\i}\)).{0,50}?"MUTUAL_FRIENDS".+?)/,
-                    replace: (m, hasMutualGuilds, hasMutualFriends, Divider, classes) => "" +
-                        `${m},$self.renderDMPageList({user:arguments[0].user,hasDivider:${hasMutualGuilds}||${hasMutualFriends},Divider:${Divider},listStyle:${classes}.list})`
-                },
-                {
-                    match: /(?=function (\i)\(\i\){let{section:\i,header:\i[^}]+?onExpand:)/,
-                    replace: "$self.ExpandableList=$1;"
-                }
-            ]
         }
     ],
-
-    set ExpandableList(value: any) {
-        ExpandableList = value;
-    },
-
-    getMutualGroupDms(userId: string) {
-        try {
-            return getMutualGroupDms(userId);
-        } catch (e) {
-            logger.error("Failed to get mutual group dms:", e);
-        }
-
-        return [];
-    },
 
     getProps(props: { user: User, items: any[]; }) {
         try {
@@ -202,22 +166,5 @@ export default definePlugin({
                 }
             </ScrollerThin>
         );
-    }),
-
-    renderDMPageList: ErrorBoundary.wrap(({ user, hasDivider, Divider, listStyle }: { user: User, hasDivider: boolean, Divider: JSX.Element, listStyle: string; }) => {
-        const mutualGDms = getMutualGroupDms(user.id);
-        if (mutualGDms.length === 0) return null;
-
-        return (
-            <>
-                {hasDivider && Divider}
-                <ExpandableList
-                    listClassName={classes(listStyle, "vc-mutual-gdms-dm-page-list")}
-                    header={"Mutual Groups"}
-                    isLoading={false}
-                    items={renderClickableGDMs(mutualGDms)}
-                />
-            </>
-        );
-    }, { noop: true })
+    })
 });
