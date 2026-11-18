@@ -16,7 +16,6 @@
     align-items: center;
     gap: 8px;
 
-
     & a {
         text-overflow: ellipsis;
         overflow: hidden;

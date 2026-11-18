@@ -8,11 +8,15 @@ import { addThemeChangeListener, removeThemeChangeListener } from "@api/Themes";
 import { Devs } from "@utils/constants";
 import { sleep } from "@utils/misc";
 import definePlugin from "@utils/types";
-import { GuildReadStateStore, NotificationSettingsStore, RelationshipStore, ThemeStore } from "@webpack/common";
+import { onceReady } from "@webpack";
+import { GuildReadStateStore, NavigationRouter, NotificationSettingsStore, RelationshipStore, ThemeStore } from "@webpack/common";
 
 import managedStyle from "./styles.css?managed";
 
 let _keybinds: Record<string, { onTrigger: () => any; }>;
+
+// Discord redirects /app to /channels/@me and removes the query, so save the launch URL first
+const initialUrl = location.href;
 
 function colorToHex(color: string) {
     const ctx = document.createElement("canvas").getContext("2d");
@@ -53,14 +57,14 @@ async function setManifest() {
         orientation: "any",
         categories: ["social"],
         shortcuts: [
-            {
-                name: "Friends",
-                url: appUrl,
-                icons: [{ src: icon, sizes: "256x256" }]
-            }
-        ],
-        protocol_handlers: [{ protocol: "web+discord", url: endpoint + "/%s" }],
-        launch_handler: { client_mode: "navigate-existing" },
+            ["Friends", "/channels/@me"],
+            ["Message Requests", "/message-requests"],
+            ["Discover", "/discovery/servers"],
+            ["Quests", "/quest-home"],
+            ["Settings", "/settings/account"]
+        ].map(([name, path]) => ({ name, url: endpoint + path, icons: [{ src: icon, sizes: "256x256" }] })),
+        protocol_handlers: [{ protocol: "web+discord", url: appUrl + "?protocol=%s" }],
+        launch_handler: { client_mode: "focus-existing" },
         // Strange CDN but these links are straight from discord.com
         screenshots: [
             { src: "https://cdn.prod.website-files.com/6257adef93867e50d84d30e2/664723dbe91e5ee8db15cfe7_Discord_Website_Refresh_Activities.webp", sizes: "691x720", type: "image/webp", label: "Activities", form_factor: "wide" },
@@ -121,6 +125,13 @@ export default definePlugin({
         RelationshipStore.addChangeListener(this.setBadge);
         this.setBadge();
 
+        // web+discord:// links and shortcuts
+        if (window.launchQueue) {
+            window.launchQueue.setConsumer(({ targetURL }) => targetURL && this.handleLaunch(targetURL));
+        } else {
+            this.handleLaunch(initialUrl);
+        }
+
         if (!IS_USERSCRIPT) {
             // keybinds
             this.ctrl.abort();
@@ -176,6 +187,19 @@ export default definePlugin({
             }
         }
     ],
+
+    async handleLaunch(targetURL: string) {
+        const url = new URL(targetURL);
+        const protocolUrl = url.searchParams.get("protocol");
+        // The app opens /app by itself, other paths come from shortcuts
+        if (!protocolUrl && url.pathname === "/app") return;
+
+        await onceReady;
+
+        // The host of a discord:// link is not part of the path, like in the desktop app
+        const { pathname, search } = protocolUrl ? new URL(protocolUrl) : url;
+        NavigationRouter.transitionTo(pathname + search);
+    },
 
     renderKeybindsButton: () => (
         <div>

@@ -318,7 +318,7 @@ export default definePlugin({
     },
 
     async updatePresence() {
-        const { username, scrobblerBackend, instanceAPIBaseUrl, instanceBaseURL } = settings.store;
+        const { username } = settings.store;
 
         if (!username) return;
         if (hasInvalidCustomInstance()) return;

@@ -1,4 +1,4 @@
-/* eslint-disable */
+/* oxlint-disable */
 
 /**
  * apng-canvas v2.1.2 - heavily modified and converted to Typescript

@@ -1,3 +1,9 @@
+/*
+ * Vencord, a Discord client mod
+ * Copyright (c) 2022 Vendicated and contributors
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
+
 if (typeof browser === "undefined") {
     var browser = chrome;
 }
@@ -15,13 +21,13 @@ document.addEventListener(
         });
 
         chrome.runtime.onMessage.addListener(request => {
-            window.postMessage({ type: "vencord:keybinds", meta: request.command });  
-        })
+            window.postMessage({ type: "vencord:keybinds", meta: request.command });
+        });
 
-        window.addEventListener('message', function(event) {
+        window.addEventListener("message", function(event) {
             if (event.source !== window) return;
 
-            if (event.data.type === 'OPEN_SHORTCUTS') {
+            if (event.data.type === "OPEN_SHORTCUTS") {
             chrome.runtime.sendMessage({ action: "openShortcuts" });
             }
         }, false);

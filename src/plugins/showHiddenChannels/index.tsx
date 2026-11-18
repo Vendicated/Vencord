@@ -19,7 +19,11 @@
 import "./style.css";
 
 import { definePluginSettings } from "@api/Settings";
+import { Card } from "@components/Card";
 import ErrorBoundary from "@components/ErrorBoundary";
+import { Flex } from "@components/Flex";
+import { Heading } from "@components/Heading";
+import { Paragraph } from "@components/Paragraph";
 import { Devs } from "@utils/constants";
 import { classNameFactory } from "@utils/css";
 import { classes } from "@utils/misc";
@@ -70,10 +74,26 @@ function isUncategorized(objChannel: { channel: Channel; comparator: number; }) 
 
 export default definePlugin({
     name: "ShowHiddenChannels",
-    description: "Show channels that you do not have access to view.",
+    description: "THIS PLUGIN IS DEAD! Discord patched it. See the plugin settings for more information.",
     tags: ["Servers", "Utility"],
     authors: [Devs.BigDuck, Devs.AverageReactEnjoyer, Devs.D3SOX, Devs.Ven, Devs.Nuckyz, Devs.Nickyux, Devs.Rini],
     settings,
+
+    settingsAboutComponent() {
+        return (
+            <Card variant="danger">
+                <Flex flexDirection="column" gap="0.5em">
+                    <Heading tag="h3">Plugin Deprecated</Heading>
+                    <Paragraph>
+                        Discord patched this plugin, it's no longer possible to see hidden channels. All channels will instead show up as "No Access"!
+                    </Paragraph>
+                    <Paragraph>
+                        There is nothing we can do to fix it, so the plugin will be removed soon.
+                    </Paragraph>
+                </Flex>
+            </Card>
+        );
+    },
 
     patches: [
         {
@@ -434,11 +454,11 @@ export default definePlugin({
             },
         },
         {
-            find: 'getConfig({location:"channel_mention"})',
+            find: ",openChatWithoutConnecting:",
             replacement: {
                 // Show inside voice channel instead of trying to join them when clicking on a channel mention
-                match: /(?<=getChannel\(\i\);if\(null!=(\i)).{0,200}?return void (?=\i\.default\.selectVoiceChannel)/,
-                replace: (m, channel) => `${m}!$self.isHiddenChannel(${channel})&&`
+                match: /(?<=getChannel\(\i\);if\(null!=(\i))(?=&&.{0,100}?selectVoiceChannel)/,
+                replace: (_, channel) => `&&!$self.isHiddenChannel(${channel})`
             }
         },
         {
