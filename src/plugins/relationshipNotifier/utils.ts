@@ -115,7 +115,7 @@ export function notify(text: string, icon?: string, onClick?: () => void) {
         showNotice({
             message: text,
             buttonText: "OK",
-            color: NoticeColors.INFO,
+            color: NoticeColors.WARNING,
             callback: () => popNotice()
         });
 
