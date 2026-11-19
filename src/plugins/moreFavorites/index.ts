@@ -63,7 +63,7 @@ function clone<T>(value: T): T {
 
 export default definePlugin({
     name: "MoreFavorites",
-    description: "Unlimited favorite people and channels.",
+    description: "200 favorite people and channels.",
     authors: [Devs.Pine],
     tags: ["Chat", "Organisation"],
     settings,
@@ -71,8 +71,8 @@ export default definePlugin({
         {
             find: "canUpsellFavoriteLimit:!",
             replacement: {
-                match: /favoriteLimit:\i\?\i\.\i:3,canUpsellFavoriteLimit:!\i/,
-                replace: "favoriteLimit:Infinity,canUpsellFavoriteLimit:false"
+                match: /favoriteLimit:\i\?200:3,canUpsellFavoriteLimit:!\i/,
+                replace: "favoriteLimit:200,canUpsellFavoriteLimit:false"
             }
         },
         {
@@ -105,19 +105,10 @@ export default definePlugin({
         },
         {
             find: '.updateAsync("favorites",',
-            group: true,
-            replacement: [
-                {
-                    // Remove the total-entry cap while retaining invalid-channel cleanup.
-                    match: /if\((\i\(\i\)),\i\(\)\.size\(\i\)>=\i\.\i\)return\{limit:\i\.\i,canUpsell:!1\};/,
-                    replace: "$1;"
-                },
-                {
-                    // Keep all native actions (including categories, rename and reorder) local.
-                    match: /return \i\.\i\.updateAsync\("favorites",\i,\i\?\i\.\i\.FREQUENT_USER_ACTION:\i\.\i\.INFREQUENT_USER_ACTION,\i\)/,
-                    replace: "return $self.updateFavorites(arguments[0])"
-                }
-            ]
+            replacement: {
+                match: /return \i\.\i\.updateAsync\("favorites",\i,\i\?\i\.\i\.FREQUENT_USER_ACTION:\i\.\i\.INFREQUENT_USER_ACTION,\i\)/,
+                replace: "return $self.updateFavorites(arguments[0])"
+            }
         }
     ],
 
