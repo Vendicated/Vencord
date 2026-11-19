@@ -1,24 +1,58 @@
 /*
- * Vencord, a Discord client mod
- * Copyright (c) 2026 Vendicated and contributors
- * SPDX-License-Identifier: GPL-3.0-or-later
- */
+ * Vencord, a modification for Discord's desktop app
+ * Copyright (c) 2022 Vendicated and contributors
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+*/
 
-import { definePluginSettings } from "@api/Settings";
+import * as DataStore from "@api/DataStore";
+import { definePluginSettings, migratePluginSettings } from "@api/Settings";
 import { SettingsSection } from "@components/settings/tabs/plugins/components/Common";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { ChannelStore, GuildChannelStore, GuildStore, NavigationRouter, SearchableSelect, SortedGuildStore } from "@webpack/common";
+import { ChannelRouter, ChannelStore, GuildChannelStore, GuildStore, NavigationRouter, SearchableSelect, SelectedChannelStore, SelectedGuildStore, SortedGuildStore } from "@webpack/common";
+
+export interface LogoutEvent {
+    type: "LOGOUT";
+    isSwitchingAccount: boolean;
+}
+
+interface ChannelSelectEvent {
+    type: "CHANNEL_SELECT";
+    channelId: string | null;
+    guildId: string | null;
+}
+
+interface PreviousChannel {
+    guildId: string | null;
+    channelId: string | null;
+}
+
+let isSwitchingAccount = false;
+let previousCache: PreviousChannel | undefined;
 
 const FRIENDS_PATH = "/channels/@me";
 const LAST_VISITED = "last";
+const PREVIOUS_CHANNEL = "previous";
 
 const settings = definePluginSettings({
     startPage: {
         type: OptionType.SELECT,
         description: "Page to open when Discord launches",
         options: [
-            { label: "Friends", value: FRIENDS_PATH, default: true },
+            { label: "Previous Channel", value: PREVIOUS_CHANNEL, default: true },
+            { label: "Friends", value: FRIENDS_PATH },
             { label: "Direct Message", value: "dm" },
             { label: "Server", value: "server" },
             { label: "Favorites", value: "/channels/@favorites" },
@@ -139,26 +173,82 @@ function getStartPath() {
         }
     }
 
-    return startPage ?? FRIENDS_PATH;
+    if (!startPage || startPage === PREVIOUS_CHANNEL) {
+        return FRIENDS_PATH;
+    }
+
+    return startPage;
 }
 
 let hasRedirected = false;
 
+migratePluginSettings("HomePagePicker", "KeepCurrentChannel");
+
 export default definePlugin({
-    name: "StartPageSelector",
-    description: "Choose your own start page, rather than whatever Discord decides to change it to",
-    authors: [Devs.blodorn],
-    tags: ["Customisation", "Utility"],
+    name: "HomePagePicker",
+    description: "Choose the page Discord opens on launch, or return to the channel you were in. Also keeps your current channel when switching accounts.",
+    tags: ["Utility", "Organisation", "Customisation"],
+    authors: [Devs.Nuckyz, Devs.blodorn],
     settings,
 
-    flux: {
-        CONNECTION_OPEN() {
-            if (hasRedirected) {
-                return;
+    patches: [
+        {
+            find: '"Switching accounts"',
+            replacement: {
+                match: /goHomeAfterSwitching:\i/,
+                replace: "goHomeAfterSwitching:!1"
             }
-            hasRedirected = true;
+        }
+    ],
 
-            NavigationRouter.transitionTo(getStartPath());
+    flux: {
+        LOGOUT(e: LogoutEvent) {
+            ({ isSwitchingAccount } = e);
+        },
+
+        CONNECTION_OPEN() {
+            if (!hasRedirected) {
+                hasRedirected = true;
+
+                if (settings.store.startPage !== PREVIOUS_CHANNEL) {
+                    NavigationRouter.transitionTo(getStartPath());
+                }
+            }
+
+            if (!isSwitchingAccount) return;
+            isSwitchingAccount = false;
+
+            if (previousCache?.channelId) {
+                if (ChannelStore.hasChannel(previousCache.channelId)) {
+                    ChannelRouter.transitionToChannel(previousCache.channelId);
+                } else {
+                    NavigationRouter.transitionToGuild("@me");
+                }
+            }
+        },
+
+        async CHANNEL_SELECT({ guildId, channelId }: ChannelSelectEvent) {
+            if (isSwitchingAccount) return;
+
+            previousCache = {
+                guildId,
+                channelId
+            };
+            await DataStore.set("KeepCurrentChannel_previousData", previousCache);
+        }
+    },
+
+    async start() {
+        previousCache = await DataStore.get<PreviousChannel>("KeepCurrentChannel_previousData");
+        if (!previousCache) {
+            previousCache = {
+                guildId: SelectedGuildStore.getGuildId(),
+                channelId: SelectedChannelStore.getChannelId() ?? null
+            };
+
+            await DataStore.set("KeepCurrentChannel_previousData", previousCache);
+        } else if (previousCache.channelId && settings.store.startPage === PREVIOUS_CHANNEL) {
+            ChannelRouter.transitionToChannel(previousCache.channelId);
         }
     }
 });
