@@ -66,6 +66,11 @@ const settings = definePluginSettings({
         type: OptionType.COMPONENT,
         component: TargetSetting
     },
+    useOnAccountSwitch: {
+        type: OptionType.BOOLEAN,
+        description: "Open the selected page when switching accounts. When disabled, switching accounts will attempt to navigate you to the last channel you were in",
+        default: false
+    },
     guildId: {
         type: OptionType.STRING,
         description: "Server to open",
@@ -218,7 +223,9 @@ export default definePlugin({
             if (!isSwitchingAccount) return;
             isSwitchingAccount = false;
 
-            if (previousCache?.channelId) {
+            if (settings.store.useOnAccountSwitch && settings.store.startPage !== PREVIOUS_CHANNEL) {
+                NavigationRouter.transitionTo(getStartPath());
+            } else if (previousCache?.channelId) {
                 if (ChannelStore.hasChannel(previousCache.channelId)) {
                     ChannelRouter.transitionToChannel(previousCache.channelId);
                 } else {
