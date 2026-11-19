@@ -21,5 +21,10 @@ lerna-debug.log*
 
 src/userplugins
 
+# self-hosted plugin bots (dependencies, runtime data, secrets)
+src/plugins/*/bot/node_modules
+src/plugins/*/bot/data
+src/plugins/*/bot/.env
+
 ExtensionCache/
 /settings
