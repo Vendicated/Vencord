@@ -45,5 +45,7 @@
         ],
         "outDir": "who-fucking-cares-dude"
     },
-    "include": ["src/**/*", "browser/**/*", "scripts/**/*"]
+    "include": ["src/**/*", "browser/**/*", "scripts/**/*"],
+    // the TypingCustomizer plugin ships a standalone bot with its own dependencies
+    "exclude": ["src/**/node_modules", "src/plugins/typingCustomizer/bot/**"]
 }

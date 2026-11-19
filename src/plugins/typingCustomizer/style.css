@@ -1,0 +1,38 @@
+.vc-typing-customizer-name {
+    cursor: pointer;
+}
+
+.vc-typing-customizer-dots {
+    display: inline-flex;
+    align-items: center;
+    gap: 1px;
+    margin-left: 3px;
+    vertical-align: -2px;
+}
+
+.vc-typing-customizer-dot {
+    display: inline-block;
+    font-size: 14px;
+    line-height: 1;
+    animation: vc-typing-customizer-wave 1.2s ease-in-out infinite;
+}
+
+.vc-typing-customizer-dot:nth-child(2) {
+    animation-delay: 0.15s;
+}
+
+.vc-typing-customizer-dot:nth-child(3) {
+    animation-delay: 0.3s;
+}
+
+@keyframes vc-typing-customizer-wave {
+    0%,
+    60%,
+    100% {
+        transform: translateY(0);
+    }
+
+    30% {
+        transform: translateY(-2px);
+    }
+}
