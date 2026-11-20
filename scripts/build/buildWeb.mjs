@@ -26,6 +26,9 @@ import Zip from "zip-local";
 
 import { BUILD_TIMESTAMP, buildOrWatchAll, commonOpts, commonRendererPlugins, globPlugins, IS_ANTI_CRASH_TEST, IS_DEV, IS_REPORTER, IS_STANDALONE, stringifyValues,VERSION } from "./common.mjs";
 
+// Public key that pins the unpacked development extension ID
+const DEV_EXTENSION_KEY = "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA4m0DSyzKtAmGYzdHOZEuU/AC925kml+If7SSHjQ1td11AptWunEE++o6iWyuPXze7Hh4el6oUkYbsss0quIFRV+AwtPI/Mmgv1bCXNlw4kovtXf5tQ28wg1Ewlg9g+6kSGAbLIZvbECzsvtET6uD67YNFKtpJwoKxNlKpjGVmTAu/vLR9MNP80FpuC8doYcqALQW+cAYfPmEZG707Flnjvixe1kbNy1F9H44WCJe6SLVG+DP7ZBNudMhXJaaXJGZYdCZOty9qwldMX3eP59rsSTkGf1kFNkzu5mC1GQCxXbnVfe2jG6m6zxqd5LDKHMN2SjW80x1dti710kup65R0QIDAQAB";
+
 /**
  * @type {import("esbuild").BuildOptions}
  */
@@ -131,6 +134,10 @@ async function buildExtension(target, files) {
             if (f.startsWith("manifest")) {
                 const json = JSON.parse(content.toString("utf-8"));
                 json.version = VERSION;
+                // Pin the unpacked development extension ID so the native host can allow it
+                if (IS_DEV && f === "manifest.json") {
+                    json.key = DEV_EXTENSION_KEY;
+                }
                 content = Buffer.from(new TextEncoder().encode(JSON.stringify(json)));
             }
 

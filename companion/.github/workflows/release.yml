@@ -1,0 +1,28 @@
+name: Release
+
+on:
+    push:
+        tags:
+            - "v*"
+
+permissions:
+    contents: write
+
+jobs:
+    build:
+        uses: ./.github/workflows/build.yml
+
+    publish:
+        needs: build
+        runs-on: ubuntu-latest
+
+        steps:
+            - uses: actions/download-artifact@v4
+              with:
+                  path: artifacts
+                  merge-multiple: true
+
+            - name: Publish release
+              run: gh release create "$GITHUB_REF_NAME" artifacts/* --generate-notes
+              env:
+                  GH_TOKEN: ${{ github.token }}

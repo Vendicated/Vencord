@@ -13,7 +13,7 @@
     "options": {
         "typeAware": true
     },
-    "ignorePatterns": ["dist", "packages/vencord-types"],
+    "ignorePatterns": ["dist", "packages/vencord-types", "companion"],
     "settings": {
         "react": {
             "version": "18"

@@ -1,0 +1,11 @@
+build*/
+build-debug/
+dist/
+out/
+.vs/
+*.exe
+*.pdb
+*.ilk
+*.obj
+*.o
+*.log

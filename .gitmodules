@@ -1,0 +1,6 @@
+[submodule "companion/vendor/game-detection"]
+	path = companion/vendor/game-detection
+	url = https://github.com/Vencord/GameDetection.git
+[submodule "companion/vendor/yyjson"]
+	path = companion/vendor/yyjson
+	url = https://github.com/ibireme/yyjson.git
