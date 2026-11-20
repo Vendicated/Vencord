@@ -72,7 +72,7 @@ export default definePlugin({
         showNotice({
             message: backOnlineMessage,
             buttonText: "Exit idle",
-            color: NoticeColors.BRAND,
+            color: NoticeColors.DEFAULT,
             callback() {
                 popNotice();
                 FluxDispatcher.dispatch({
