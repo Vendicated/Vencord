@@ -13,7 +13,7 @@ import definePlugin, { StartAt } from "@utils/types";
 import { Channel, DisplayProfile, Message, User } from "@vencord/discord-types";
 import { IconUtils, Menu, useMemo } from "@webpack/common";
 
-import { getName, getUserOverride, hasFlag, OverrideFlags, settings, UserTag,useUserOverride } from "./data";
+import { getDecorationData, getName, getUserOverride, hasFlag, OverrideFlags, settings, UserTag,useUserOverride } from "./data";
 import { loadImageKeys, useLocalImage } from "./images";
 import { ImageBackup, openUserEditModal } from "./modal";
 
@@ -191,6 +191,10 @@ export default definePlugin({
                 {
                     match: /(?<=return )(\i\((\i),\i,\i,\i,\i\))(?=\?\?\i\(\2\.id,\2\.discriminator,\2\.isProvisional,\i\))/,
                     replace: "($self.shouldUseDefaultAvatar($2.id)?null:$1)"
+                },
+                {
+                    match: /\i\(\{skuId:(\i)\.skuId,assetFormat:\i\}\)(?=;if\(null!=\i\)return \i)/,
+                    replace: "$1.skuId?$&:null"
                 }
             ]
         },
@@ -207,11 +211,11 @@ export default definePlugin({
             replacement: [
                 {
                     match: /(?=return null==(\i)\?null:.{0,350}type:"account_popout",withMutualGuilds:)/,
-                    replace: "const vcAvatar=$self.useAccountAvatar($1);"
+                    replace: "const vcAvatar=$self.useAccountAvatar($1),vcDecoration=$self.useAccountDecoration($1?.id);"
                 },
                 {
-                    match: /(?<=src:)\i\.getAvatarURL\(void 0,\d+,!1\)(?=,avatarDecoration:\i,status:.{0,65}voiceStatus:)/,
-                    replace: "vcAvatar??$&"
+                    match: /(?<=src:)(\i\.getAvatarURL\(void 0,\d+,!1\)),avatarDecoration:(\i)(?=,status:.{0,65}voiceStatus:)/,
+                    replace: "vcAvatar??$1,avatarDecoration:vcDecoration??$2"
                 }
             ]
         },
@@ -224,8 +228,8 @@ export default definePlugin({
                     replace: "vcEditUsersDecoration=$self.useDecoration($1?.id),"
                 },
                 {
-                    match: /(?<=avatarDecoration:void 0!==\i\?\i:)(\i)(?=,canAnimate:)/,
-                    replace: "vcEditUsersDecoration??$1"
+                    match: /(?<=avatarDecoration:)void 0!==\i\?\i:\i(?=,canAnimate:)/,
+                    replace: "vcEditUsersDecoration??($&)"
                 },
                 {
                     match: /(?<=,canAnimate:\i,size:\i\}\),\[)/,
@@ -369,11 +373,30 @@ export default definePlugin({
 
     useDecoration(userId?: string) {
         const { decoration } = useUserOverride(userId);
-        return useMemo(() => decoration ? { asset: decoration, skuId: "" } : undefined, [decoration]);
+        return useMemo(() => getDecorationData(decoration), [decoration]);
+    },
+
+    useAccountDecoration(userId?: string) {
+        const { decoration } = useUserOverride(userId);
+        return useMemo(() => {
+            const avatarDecoration = getDecorationData(decoration);
+            if (!avatarDecoration) {
+                return;
+            }
+
+            try {
+                return IconUtils.getAvatarDecorationURL({ avatarDecoration, size: 40 });
+            } catch {
+                return;
+            }
+        }, [decoration]);
     },
 
     getProfileEffect(userId: string) {
         const { profileEffect } = getUserOverride(userId);
-        return profileEffect ? { skuId: profileEffect } : undefined;
+        if (typeof profileEffect === "string") {
+            return profileEffect ? { skuId: profileEffect } : undefined;
+        }
+        return profileEffect;
     }
 });

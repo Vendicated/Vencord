@@ -5,6 +5,7 @@
  */
 
 import { definePluginSettings, SettingsStore } from "@api/Settings";
+import { AvatarDecorationData } from "@vencord/discord-types";
 import { React, useCallback } from "@webpack/common";
 
 export const enum OverrideFlags {
@@ -20,6 +21,12 @@ export const enum OverrideFlags {
 }
 
 export type UserTag = "" | "BOT" | "OFFICIAL" | "SERVER" | "ORIGINAL_POSTER" | "NONE";
+
+export interface CosmeticOverride {
+    skuId: string;
+    name?: string;
+    asset?: string;
+}
 
 export interface UserOverride {
     username: string;
@@ -90,4 +97,14 @@ export function getName(userId: string | undefined, nickname?: string | null) {
         return nickname;
     }
     return username || nickname || undefined;
+}
+
+export function getDecorationData(decoration?: string | CosmeticOverride): AvatarDecorationData | undefined {
+    if (!decoration) {
+        return;
+    }
+    if (typeof decoration === "string") {
+        return { asset: decoration, skuId: "", expires_at: null };
+    }
+    return { asset: decoration.asset ?? "", skuId: decoration.skuId, expires_at: null };
 }
