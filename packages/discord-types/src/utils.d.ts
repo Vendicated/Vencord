@@ -463,11 +463,27 @@ export type NoticeColors = Record<NoticeColorKey, string>;
 
 export interface Notice {
     id: string;
+    /** This is always "VencordNotice" */
     type: string;
+    message: ReactNode;
     /** import NoticeColors from the Notices API */
     color?: string;
-    message: ReactNode;
-    buttonText: ReactNode;
-    /** Callback for when the button is clicked. Not called when the notice is dismissed via the close button */
-    callback(event: MouseEvent<HTMLButtonElement>): void;
+    /** Text to display on the notice button. Defaults to "Dismiss" */
+    buttonText?: ReactNode;
+    /**
+     * Callback for when the button is clicked. Not called when the notice is dismissed via the close button.
+     *
+     * Defaults to dismissing the notice
+     */
+    callback?(event: MouseEvent<HTMLButtonElement>): void;
 }
+
+export type NoticeOptions = Omit<Notice, "id" | "type" | "callback"> & {
+    id?: string;
+    /**
+     * Callback for when the button is clicked. Not called when the notice is dismissed via the close button.
+     *
+     * Defaults to dismissing the notice
+     */
+    callback?(data: { event: MouseEvent<HTMLButtonElement>; dismiss(): Promise<void>; }): void;
+};
