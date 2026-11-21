@@ -35,8 +35,8 @@ export interface UserOverride {
     bannerUrl: string;
     bannerColor: string;
     pronouns: string;
-    decoration: string;
-    profileEffect: string;
+    decoration: string | CosmeticOverride;
+    profileEffect: string | CosmeticOverride;
     tag: UserTag;
     flags: OverrideFlags;
 }

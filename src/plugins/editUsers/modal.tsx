@@ -4,15 +4,16 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { Heading } from "@components/Heading";
 import { Button, ErrorBoundary, Flex, FormSwitch, Paragraph, Span } from "@components/index";
 import { classNameFactory } from "@utils/css";
 import { saveFile } from "@utils/web";
 import { RenderModalProps, User } from "@vencord/discord-types";
 import { DisplayProfileUtils, IconUtils, Modal, openModal, Select, showToast, TabBar, TextInput, useEffect, useRef, useState } from "@webpack/common";
 
+import { CosmeticsEditor } from "./cosmetics";
 import { emptyOverride, getUserOverride, hasFlag, OverrideFlags, saveUserOverride, UserOverride, UserTag } from "./data";
 import { exportImages, getImages, ImageChanges, ImageKind, imageTypes, importImages, saveImageChanges, UserImages, validateImage } from "./images";
-import { ShopPicker } from "./shop";
 
 const cl = classNameFactory("vc-editUsers-");
 
@@ -313,23 +314,24 @@ function EditModal({ user, modalProps }: { user: User; modalProps: RenderModalPr
             }
             case "profile":
                 return (
-                    <>
-                        <label>
-                            <Span>Pronouns</Span>
-                            <TextInput value={override.pronouns} onChange={value => setField("pronouns", value)} />
-                        </label>
+                    <div className={cl("profile")}>
+                        <section className={cl("field")}>
+                            <Heading tag="h3">Pronouns</Heading>
+                            <TextInput aria-label="Pronouns" value={override.pronouns} onChange={value => setField("pronouns", value)} />
+                        </section>
                         <ErrorBoundary noop={false}>
-                            <ShopPicker
+                            <CosmeticsEditor
                                 decoration={override.decoration}
                                 profileEffect={override.profileEffect}
                                 onSelect={setField}
                                 onError={message => setError(message ? { tab: "profile", message } : undefined)}
+                                onOpenShop={modalProps.onClose}
                                 busy={busy}
                                 onBusy={setBusy}
                             />
                         </ErrorBoundary>
-                        <div>
-                            <Span>Message Tag</Span>
+                        <section className={cl("field")}>
+                            <Heading tag="h3">Message Tag</Heading>
                             <Select
                                 options={tagOptions}
                                 serialize={String}
@@ -338,8 +340,8 @@ function EditModal({ user, modalProps }: { user: User; modalProps: RenderModalPr
                                 placeholder="Message tag"
                                 closeOnSelect
                             />
-                        </div>
-                    </>
+                        </section>
+                    </div>
                 );
         }
     }

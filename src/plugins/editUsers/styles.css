@@ -39,3 +39,54 @@
     align-items: center;
     gap: 8px;
 }
+
+.vc-editUsers-profile,
+.vc-editUsers-field {
+    display: grid;
+}
+
+.vc-editUsers-profile {
+    gap: 24px;
+}
+
+.vc-editUsers-field {
+    gap: 8px;
+}
+
+.vc-editUsers-field h3,
+.vc-editUsers-field p {
+    margin: 0;
+}
+
+.vc-editUsers-cosmeticRow,
+.vc-editUsers-inputRow {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.vc-editUsers-cosmeticRow {
+    min-height: 48px;
+}
+
+.vc-editUsers-cosmeticLabel,
+.vc-editUsers-inputRow > :first-child {
+    flex: 1;
+    min-width: 0;
+}
+
+.vc-editUsers-cosmeticLabel {
+    display: grid;
+    gap: 2px;
+    overflow-wrap: anywhere;
+}
+
+.vc-editUsers-decorationPreview {
+    width: 48px;
+    height: 48px;
+    object-fit: contain;
+}
+
+.vc-editUsers-shopButton {
+    justify-self: start;
+}
