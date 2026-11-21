@@ -6,26 +6,24 @@
 
 import "./styles.css";
 
-import { classNameFactory } from "@api/Styles";
+import { Heading } from "@components/Heading";
+import { Margins } from "@components/margins";
+import { Paragraph } from "@components/Paragraph";
+import { classNameFactory } from "@utils/css";
 import { getGuildAcronym, openImageModal, openUserProfile } from "@utils/discord";
 import { classes } from "@utils/misc";
-import { ModalRoot, ModalSize, openModal } from "@utils/modal";
 import { useAwaiter } from "@utils/react";
-import { Guild, User } from "@vencord/discord-types";
-import { findByPropsLazy, findComponentByCodeLazy } from "@webpack";
-import { FluxDispatcher, Forms, GuildChannelStore, GuildMemberStore, GuildRoleStore, IconUtils, Parser, PresenceStore, RelationshipStore, ScrollerThin, SnowflakeUtils, TabBar, Timestamp, useEffect, UserStore, UserUtils, useState, useStateFromStores } from "@webpack/common";
+import { Guild, RenderModalProps, User } from "@vencord/discord-types";
+import { findComponentByCodeLazy, findCssClassesLazy } from "@webpack";
+import { FluxDispatcher, GuildChannelStore, GuildMemberStore, GuildRoleStore, IconUtils, Modal, openModal, Parser, PresenceStore, RelationshipStore, ScrollerThin, SnowflakeUtils, TabBar, Timestamp, useEffect, UserStore, UserUtils, useState, useStateFromStores } from "@webpack/common";
 
-const IconClasses = findByPropsLazy("icon", "acronym", "childWrapper");
-const FriendRow = findComponentByCodeLazy("discriminatorClass:", ".isMobileOnline", "getAvatarURL");
+const IconClasses = findCssClassesLazy("icon", "acronym", "childWrapper");
+const FriendRow = findComponentByCodeLazy("discriminatorClass:", ".isMobileOnline", "avatarSrc:");
 
 const cl = classNameFactory("vc-gp-");
 
 export function openGuildInfoModal(guild: Guild) {
-    openModal(props =>
-        <ModalRoot {...props} size={ModalSize.MEDIUM}>
-            <GuildInfoModal guild={guild} />
-        </ModalRoot>
-    );
+    openModal(props => <GuildInfoModal guild={guild} modalProps={props} />);
 }
 
 const enum Tabs {
@@ -55,7 +53,7 @@ function renderTimestamp(timestamp: number) {
     );
 }
 
-function GuildInfoModal({ guild }: GuildProps) {
+function GuildInfoModal({ guild, modalProps }: GuildProps & { modalProps: RenderModalProps; }) {
     const [friendCount, setFriendCount] = useState<number>();
     const [blockedCount, setBlockedCount] = useState<number>();
     const [ignoredCount, setIgnoredCount] = useState<number>();
@@ -78,7 +76,32 @@ function GuildInfoModal({ guild }: GuildProps) {
     });
 
     return (
-        <div className={cl("root")}>
+        <Modal
+            {...modalProps}
+            size="lg"
+            title={
+                <div className={cl("header")}>
+                    {iconUrl
+                        ? <img
+                            className={cl("icon")}
+                            src={iconUrl}
+                            alt=""
+                            onClick={() => openImageModal({
+                                url: iconUrl,
+                                height: 512,
+                                width: 512,
+                            })}
+                        />
+                        : <div aria-hidden className={classes(IconClasses.childWrapper, IconClasses.acronym)}>{getGuildAcronym(guild)}</div>
+                    }
+
+                    <div className={cl("name-and-description")}>
+                        <Heading className={cl("name")}>{guild.name}</Heading>
+                        {guild.description && <Paragraph>{guild.description}</Paragraph>}
+                    </div>
+                </div>
+            }
+        >
             {bannerUrl && currentTab === Tabs.ServerInfo && (
                 <img
                     className={cl("banner")}
@@ -90,27 +113,6 @@ function GuildInfoModal({ guild }: GuildProps) {
                     })}
                 />
             )}
-
-            <div className={cl("header")}>
-                {iconUrl
-                    ? <img
-                        className={cl("icon")}
-                        src={iconUrl}
-                        alt=""
-                        onClick={() => openImageModal({
-                            url: iconUrl,
-                            height: 512,
-                            width: 512,
-                        })}
-                    />
-                    : <div aria-hidden className={classes(IconClasses.childWrapper, IconClasses.acronym)}>{getGuildAcronym(guild)}</div>
-                }
-
-                <div className={cl("name-and-description")}>
-                    <Forms.FormTitle tag="h5" className={cl("name")}>{guild.name}</Forms.FormTitle>
-                    {guild.description && <Forms.FormText>{guild.description}</Forms.FormText>}
-                </div>
-            </div>
 
             <TabBar
                 type="top"
@@ -151,7 +153,7 @@ function GuildInfoModal({ guild }: GuildProps) {
                 {currentTab === Tabs.BlockedUsers && <BlockedUsersTab guild={guild} setCount={setBlockedCount} />}
                 {currentTab === Tabs.IgnoredUsers && <IgnoredUserTab guild={guild} setCount={setIgnoredCount} />}
             </div>
-        </div>
+        </Modal>
     );
 }
 
@@ -207,7 +209,7 @@ function ServerInfoTab({ guild }: GuildProps) {
         <div className={cl("info")}>
             {Object.entries(Fields).map(([name, node]) =>
                 <div className={cl("server-info-pair")} key={name}>
-                    <Forms.FormTitle tag="h5">{name}</Forms.FormTitle>
+                    <Heading className={Margins.bottom8}>{name}</Heading>
                     {typeof node === "string" ? <span>{node}</span> : node}
                 </div>
             )}

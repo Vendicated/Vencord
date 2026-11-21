@@ -16,14 +16,13 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { React } from "@webpack/common";
-
-import { shiki } from "../api/shiki";
-import { settings as pluginSettings, ShikiSettings } from "../settings";
+import { shiki } from "@plugins/shikiCodeblocks.desktop/api/shiki";
+import { settings as pluginSettings, ShikiSettings } from "@plugins/shikiCodeblocks.desktop/settings";
+import { useState } from "@webpack/common";
 
 export function useShikiSettings<F extends keyof ShikiSettings>(settingKeys: F[]) {
     const settings = pluginSettings.use([...settingKeys, "customTheme", "theme"]);
-    const [isLoading, setLoading] = React.useState(false);
+    const [isLoading, setLoading] = useState(false);
 
     const themeUrl = settings.customTheme || settings.theme;
 

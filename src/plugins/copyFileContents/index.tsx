@@ -9,12 +9,12 @@ import "./style.css";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { CopyIcon, NoEntrySignIcon } from "@components/Icons";
 import { Devs } from "@utils/constants";
-import { copyWithToast } from "@utils/misc";
+import { copyWithToast } from "@utils/discord";
 import definePlugin from "@utils/types";
 import { Tooltip, useState } from "@webpack/common";
 
 const CheckMarkIcon = () => {
-    return <svg width="24" height="24" viewBox="0 0 24 24">
+    return <svg width="18" height="18" viewBox="0 0 24 24">
         <path fill="currentColor" d="M21.7 5.3a1 1 0 0 1 0 1.4l-12 12a1 1 0 0 1-1.4 0l-6-6a1 1 0 1 1 1.4-1.4L9 16.58l11.3-11.3a1 1 0 0 1 1.4 0Z"></path>
     </svg>;
 };
@@ -22,14 +22,23 @@ const CheckMarkIcon = () => {
 export default definePlugin({
     name: "CopyFileContents",
     description: "Adds a button to text file attachments to copy their contents",
+    tags: ["Utility"],
     authors: [Devs.Obsidian, Devs.Nuckyz],
     patches: [
         {
             find: "#{intl::PREVIEW_BYTES_LEFT}",
-            replacement: {
-                match: /\.footerGap.+?url:\i,fileName:\i,fileSize:\i}\),(?<=fileContents:(\i),bytesLeft:(\i).+?)/g,
-                replace: "$&$self.addCopyButton({fileContents:$1,bytesLeft:$2}),"
-            }
+            replacement: [
+                // Inline preview
+                {
+                    match: /fileContents:(\i),bytesLeft:(\i)\}\):null,/,
+                    replace: "$&$self.addCopyButton({fileContents:$1,bytesLeft:$2}),"
+                },
+                // Modal
+                {
+                    match: /align:"\i"\}\),(?=\(0,\i\.jsx\)\(\i,\{wordWrap:\i,setWordWrap:\i)/,
+                    replace: "$&$self.addCopyButton(arguments[0]),"
+                }
+            ]
         }
     ],
 
@@ -51,7 +60,12 @@ export default definePlugin({
                             }
                         }}
                     >
-                        {recentlyCopied ? <CheckMarkIcon /> : bytesLeft > 0 ? <NoEntrySignIcon color="var(--channel-icon)" /> : <CopyIcon />}
+                        {recentlyCopied
+                            ? <CheckMarkIcon />
+                            : bytesLeft > 0
+                                ? <NoEntrySignIcon width={18} height={18} color="var(--channel-icon)" />
+                                : <CopyIcon width={18} height={18} />
+                        }
                     </div>
                 )}
             </Tooltip>

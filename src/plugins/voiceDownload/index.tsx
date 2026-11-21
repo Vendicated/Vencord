@@ -12,13 +12,14 @@ import definePlugin from "@utils/types";
 export default definePlugin({
     name: "VoiceDownload",
     description: "Adds a download to voice messages. (Opens a new browser tab)",
+    tags: ["Voice", "Media"],
     authors: [Devs.puv],
     patches: [
         {
-            find: "rippleContainer,children",
+            find: "#{intl::VOICE_MESSAGES_PLAYBACK_RATE_LABEL}",
             replacement: {
-                match: /\(0,\i\.jsx\).{0,150},children:.{0,50}\("source",{src:(\i)}\)}\)/,
-                replace: "[$&, $self.renderDownload($1)]"
+                match: /(?<=onVolumeHide:\i\}\))/,
+                replace: ",$self.renderDownload(arguments[0].src)"
             }
         }
     ],

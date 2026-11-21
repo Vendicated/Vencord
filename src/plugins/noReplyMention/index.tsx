@@ -25,15 +25,17 @@ import { ChannelStore, GuildMemberStore } from "@webpack/common";
 const settings = definePluginSettings({
     userList: {
         description:
-            "List of users to allow or exempt pings for (separated by commas or spaces)",
+            "List of user ids to allow or exempt pings for (separated by commas or spaces)",
         type: OptionType.STRING,
         default: "1234567890123445,1234567890123445",
+        multiline: true
     },
     roleList: {
         description:
-            "List of roles to allow or exempt pings for (separated by commas or spaces)",
+            "List of role ids to allow or exempt pings for (separated by commas or spaces)",
         type: OptionType.STRING,
         default: "1234567890123445,1234567890123445",
+        multiline: true
     },
     shouldPingListed: {
         description: "Behaviour",
@@ -60,6 +62,7 @@ const settings = definePluginSettings({
 export default definePlugin({
     name: "NoReplyMention",
     description: "Disables reply pings by default",
+    tags: ["Chat", "Notifications"],
     authors: [Devs.DustyAngel47, Devs.rae, Devs.pylix, Devs.outfoxxed],
     settings,
 
@@ -78,7 +81,7 @@ export default definePlugin({
 
     patches: [
         {
-            find: ",\"Message\")}function",
+            find: 'source:"message-actions"',
             replacement: {
                 match: /:(\i),shouldMention:!(\i)\.shiftKey/,
                 replace: ":$1,shouldMention:$self.shouldMention($1,$2.shiftKey)"

@@ -1,7 +1,16 @@
 {
     "editor.formatOnSave": true,
     "editor.codeActionsOnSave": {
-        "source.fixAll.eslint": "explicit"
+        "source.fixAll.oxc": "explicit"
+    },
+
+    // these can also be specified in one line via "[javascript][javascriptreact]..." but that has lower priority
+    // https://github.com/microsoft/vscode/issues/168411
+    "[javascript]": {
+        "editor.defaultFormatter": "vscode.typescript-language-features"
+    },
+    "[javascriptreact]": {
+        "editor.defaultFormatter": "vscode.typescript-language-features"
     },
     "[typescript]": {
         "editor.defaultFormatter": "vscode.typescript-language-features"
@@ -9,18 +18,28 @@
     "[typescriptreact]": {
         "editor.defaultFormatter": "vscode.typescript-language-features"
     },
-    "javascript.format.semicolons": "insert",
-    "typescript.format.semicolons": "insert",
-    "typescript.preferences.quoteStyle": "double",
-    "javascript.preferences.quoteStyle": "double",
+    "[css]": {
+        "editor.defaultFormatter": "oxc.oxc-vscode"
+    },
+    "[html]": {
+        "editor.defaultFormatter": "oxc.oxc-vscode"
+    },
+    "[json]": {
+        "editor.defaultFormatter": "oxc.oxc-vscode"
+    },
+    "[jsonc]": {
+        "editor.defaultFormatter": "oxc.oxc-vscode"
+    },
+    "[yaml]": {
+        "editor.defaultFormatter": "oxc.oxc-vscode"
+    },
+
+    "js/ts.format.semicolons": "insert",
+    "js/ts.preferences.quoteStyle": "double",
     "gitlens.remotes": [
         {
             "domain": "codeberg.org",
             "type": "Gitea"
         }
-    ],
-    "css.format.spaceAroundSelectorSeparator": true,
-    "[css]": {
-        "editor.defaultFormatter": "vscode.css-language-features"
-    }
+    ]
 }

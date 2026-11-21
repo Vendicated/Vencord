@@ -11,11 +11,12 @@ import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { User } from "@vencord/discord-types";
-import { GuildRoleStore, SelectedGuildStore, useState } from "@webpack/common";
+import { GuildRoleStore, SelectedGuildStore, UserStore, useState } from "@webpack/common";
 
 const settings = definePluginSettings({
     showAtSymbol: {
         type: OptionType.BOOLEAN,
+        displayName: "Show @ Symbol",
         description: "Whether the the @ symbol should be displayed on user mentions",
         default: true
     }
@@ -45,30 +46,52 @@ function DefaultRoleIcon() {
 export default definePlugin({
     name: "MentionAvatars",
     description: "Shows user avatars and role icons inside mentions",
+    tags: ["Appearance", "Customisation"],
     authors: [Devs.Ven, Devs.SerStars],
 
-    patches: [{
-        find: ".USER_MENTION)",
-        replacement: {
-            match: /children:"@"\.concat\((null!=\i\?\i:\i)\)(?<=\.useName\((\i)\).+?)/,
-            replace: "children:$self.renderUsername({username:$1,user:$2})"
+    patches: [
+        {
+            find: ".USER_MENTION)",
+            replacement: {
+                match: /children:`@\$\{(\i\?\?\i)\}`(?<=\.useName\((\i)\).+?)/,
+                replace: "children:$self.renderUsername({username:$1,user:$2})"
+            }
+        },
+        {
+            find: ".ROLE_MENTION)",
+            replacement: {
+                match: /children:\[\i&&.{0,100}className:\i.\i,background:!1,.{0,50}?,\i(?=\])/,
+                replace: "$&,$self.renderRoleIcon(arguments[0])"
+            }
+        },
+        {
+            // Same find as FullUserInChatbox
+            find: '"text":"locked"',
+            replacement: {
+                // username == null ? `<@id>` : `@username`
+                match: /null==\i\?`<@\$\{(\i)\}>`:`@\$\{(\i)\}`/,
+                replace: "$self.renderUsernameWithId({id:$1,username:$2})"
+            }
         }
-    },
-    {
-        find: ".ROLE_MENTION)",
-        replacement: {
-            match: /children:\[\i&&.{0,100}className:\i.roleDot,.{0,200},\i(?=\])/,
-            replace: "$&,$self.renderRoleIcon(arguments[0])"
-        }
-    }],
+    ],
 
     settings,
+
+    renderUsernameWithId({ id, username }: { id: string; username: string; }) {
+        try {
+            const user = UserStore.getUser(id);
+            return this.renderUsername({ user, username });
+        } catch { }
+
+        return getUsernameString(username);
+    },
 
     renderUsername: ErrorBoundary.wrap((props: { user: User, username: string; }) => {
         const { user, username } = props;
         const [isHovering, setIsHovering] = useState(false);
 
-        if (!user) return <>{getUsernameString(username)}</>;
+        if (!user)
+            return getUsernameString(username);
 
         return (
             <span

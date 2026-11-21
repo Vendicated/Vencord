@@ -21,24 +21,36 @@ export default definePlugin({
     name: "NoMosaic",
     authors: [Devs.AutumnVN],
     description: "Removes Discord image mosaic",
-    tags: ["image", "mosaic", "media"],
+    tags: ["Media", "Appearance", "Chat"],
+    searchTerms: ["image", "mosaic", "media"],
 
     settings,
 
     patches: [
         {
-            find: '=>"IMAGE"===',
+            find: '"PLAINTEXT_PREVIEW":"OTHER"',
             replacement: {
-                match: /=>"IMAGE"===\i\|\|"VIDEO"===\i(?:\|\|("VISUAL_PLACEHOLDER"===\i))?;/,
-                replace: (_, visualPlaceholderPred) => visualPlaceholderPred != null ? `=>${visualPlaceholderPred};` : "=>false;"
+                match: /"IMAGE"===\i\|\|"VIDEO"===\i\|\|"CLIP"===\i/,
+                replace: "(false)"
+            }
+        },
+        {
+            find: "return{visualMediaItems:",
+            replacement: {
+                match: /return{visualMediaItems:.+?props:(\i)(?=.{0,20}?\1\.item\.uniqueId)/,
+                replace: '$&,useFullWidth:["IMAGE","VIDEO","CLIP"].includes($1.item?.type)?false:undefined'
             }
         },
         {
             find: "renderAttachments(",
             predicate: () => settings.store.inlineVideo,
             replacement: {
-                match: /url:(\i)\.url\}\);return /,
-                replace: "$&$1.content_type?.startsWith('image/')&&"
+                // Sets some properties on the media item before returning it. We don't want these properties, so
+                // we return early if the content type is not an image
+                //
+                // return item.openInMediaViewer=callbacks[url], item.onClick=callbacks2[url], i
+                match: /url:(\i)\.url\}\);(?=return (\i)\.onOpenInMediaViewer.{0,100}?,\2\})/,
+                replace: "$&if(!$1.content_type?.startsWith('image/'))return $2;"
             }
         },
     ]

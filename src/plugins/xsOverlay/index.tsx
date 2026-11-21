@@ -5,12 +5,12 @@
  */
 
 import { definePluginSettings } from "@api/Settings";
+import { Button } from "@components/Button";
 import { Devs } from "@utils/constants";
-import { Logger } from "@utils/Logger";
 import definePlugin, { makeRange, OptionType, PluginNative, ReporterTestable } from "@utils/types";
 import type { Channel, Embed, GuildMember, MessageAttachment, User } from "@vencord/discord-types";
 import { findByCodeLazy, findLazy } from "@webpack";
-import { Button, ChannelStore, GuildRoleStore, GuildStore, UserStore } from "@webpack/common";
+import { ChannelStore, GuildRoleStore, GuildStore, UserStore } from "@webpack/common";
 
 const ChannelTypes = findLazy(m => m.ANNOUNCEMENT_THREAD === 10);
 
@@ -90,19 +90,21 @@ interface NotificationObject {
 }
 
 const notificationsShouldNotify = findByCodeLazy(".SUPPRESS_NOTIFICATIONS))return!1");
-const logger = new Logger("XSOverlay");
 
 const settings = definePluginSettings({
     webSocketPort: {
         type: OptionType.NUMBER,
         description: "Websocket port",
         default: 42070,
+        min: 1,
+        max: 65535,
         async onChange() {
             await start();
         }
     },
     preferUDP: {
         type: OptionType.BOOLEAN,
+        displayName: "Prefer UDP",
         description: "Enable if you use an older build of XSOverlay unable to connect through websockets. This setting is ignored on web.",
         default: false,
         disabled: () => IS_WEB
@@ -119,11 +121,13 @@ const settings = definePluginSettings({
     },
     dmNotifications: {
         type: OptionType.BOOLEAN,
+        displayName: "DM Notifications",
         description: "Allow Direct Message notifications",
         default: true
     },
     groupDmNotifications: {
         type: OptionType.BOOLEAN,
+        displayName: "Group DM Notifications",
         description: "Allow Group DM notifications",
         default: true
     },
@@ -151,6 +155,7 @@ const settings = definePluginSettings({
         type: OptionType.NUMBER,
         description: "Notification duration (secs)",
         default: 3,
+        min: 0
     },
     lengthBasedTimeout: {
         type: OptionType.BOOLEAN,
@@ -188,8 +193,9 @@ const Native = VencordNative.pluginHelpers.XSOverlay as PluginNative<typeof impo
 export default definePlugin({
     name: "XSOverlay",
     description: "Forwards discord notifications to XSOverlay, for easy viewing in VR",
+    tags: ["Notifications"],
     authors: [Devs.Nyako],
-    tags: ["vr", "notify"],
+    searchTerms: ["vr", "notify"],
     reporterTestable: ReporterTestable.None,
     settings,
 
@@ -301,6 +307,7 @@ export default definePlugin({
 
     stop() {
         socket.close();
+        Native.closeSocket();
     },
 
     settingsAboutComponent: () => (

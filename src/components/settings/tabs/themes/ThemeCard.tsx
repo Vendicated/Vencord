@@ -35,7 +35,7 @@ export function ThemeCard({ theme, enabled, onChange, onDelete }: ThemeCardProps
                 )
             }
             footer={
-                <Flex flexDirection="row" style={{ gap: "0.2em" }}>
+                <Flex flexDirection="row" gap="0.2em">
                     {!!theme.website && <Link href={theme.website}>Website</Link>}
                     {!!(theme.website && theme.invite) && " • "}
                     {!!theme.invite && (
@@ -43,7 +43,7 @@ export function ThemeCard({ theme, enabled, onChange, onDelete }: ThemeCardProps
                             href={`https://discord.gg/${theme.invite}`}
                             onClick={async e => {
                                 e.preventDefault();
-                                theme.invite != null && openInviteModal(theme.invite).catch(() => showToast("Invalid or expired invite"));
+                                theme.invite != null && openInviteModal(theme.invite).catch(() => showToast({ text: "Invalid or expired invite", variant: "critical" }));
                             }}
                         >
                             Discord Server

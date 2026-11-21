@@ -16,24 +16,33 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { OptionType, PluginOptionNumber } from "@utils/types";
+import { isSettingDisabled } from "@api/PluginManager";
+import { OptionType, PluginSettingBigIntDef, PluginSettingNumberDef } from "@utils/types";
 import { React, TextInput, useState } from "@webpack/common";
 
-import { resolveError, SettingProps, SettingsSection } from "./Common";
+import { resolveError, SettingProps, SettingsSection, useSettingState } from "./Common";
 
 const MAX_SAFE_NUMBER = BigInt(Number.MAX_SAFE_INTEGER);
 
-export function NumberSetting({ option, pluginSettings, definedSettings, id, onChange }: SettingProps<PluginOptionNumber>) {
+export function NumberSetting({ setting, pluginSettings, definedSettings, id, onChange }: SettingProps<PluginSettingNumberDef | PluginSettingBigIntDef>) {
     function serialize(value: any) {
-        if (option.type === OptionType.BIGINT) return BigInt(value);
+        if (setting.type === OptionType.BIGINT) return BigInt(value);
         return Number(value);
     }
 
-    const [state, setState] = useState<any>(`${pluginSettings[id] ?? option.default ?? 0}`);
+    const [state, setState] = useSettingState<any>(`${pluginSettings[id] ?? setting.default ?? 0}`);
     const [error, setError] = useState<string | null>(null);
 
+    function getRangeError(value: number | bigint) {
+        const { min, max } = setting;
+        if ((min == null || value >= min) && (max == null || value <= max)) return null;
+
+        if (min != null && max != null) return `Value must be between ${min} and ${max}`;
+        return min != null ? `Value must be at least ${min}` : `Value must be at most ${max}`;
+    }
+
     function handleChange(newValue: any) {
-        const isValid = option.isValid?.call(definedSettings, newValue) ?? true;
+        const isValid = getRangeError(serialize(newValue)) ?? setting.isValid?.call(definedSettings, newValue) ?? true;
 
         setError(resolveError(isValid));
 
@@ -41,7 +50,7 @@ export function NumberSetting({ option, pluginSettings, definedSettings, id, onC
             onChange(serialize(newValue));
         }
 
-        if (option.type === OptionType.NUMBER && BigInt(newValue) >= MAX_SAFE_NUMBER) {
+        if (setting.type === OptionType.NUMBER && BigInt(newValue) >= MAX_SAFE_NUMBER) {
             setState(`${Number.MAX_SAFE_INTEGER}`);
         } else {
             setState(newValue);
@@ -49,15 +58,15 @@ export function NumberSetting({ option, pluginSettings, definedSettings, id, onC
     }
 
     return (
-        <SettingsSection name={id} description={option.description} error={error}>
+        <SettingsSection name={setting.displayName} id={id} description={setting.description} error={error}>
             <TextInput
                 type="number"
                 pattern="-?[0-9]+"
-                placeholder={option.placeholder ?? "Enter a number"}
+                placeholder={setting.placeholder ?? "Enter a number"}
                 value={state}
                 onChange={handleChange}
-                disabled={option.disabled?.call(definedSettings) ?? false}
-                {...option.componentProps}
+                disabled={isSettingDisabled(definedSettings, setting)}
+                {...setting.componentProps}
             />
         </SettingsSection>
     );

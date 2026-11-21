@@ -1,0 +1,29 @@
+.vc-expressionManager-guild {
+    border-radius: 50%;
+    background-color: var(--background-base-lower);
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    width: 4em;
+    height: 4em;
+    cursor: pointer;
+
+    &[data-is-cloning="true"] {
+        cursor: not-allowed;
+        filter: brightness(50%);
+    }
+}
+
+.vc-expressionManager-guild-icon {
+    border-radius: 50%;
+    width: 100%;
+    height: 100%;
+}
+
+.vc-expressionManager-guild-acronym {
+    width: 100%;
+    text-align: center;
+    overflow: hidden;
+    white-space: nowrap;
+    user-select: none;
+}

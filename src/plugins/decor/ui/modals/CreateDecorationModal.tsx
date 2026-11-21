@@ -4,25 +4,22 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { Card } from "@components/Card";
 import ErrorBoundary from "@components/ErrorBoundary";
+import { Heading } from "@components/Heading";
 import { Link } from "@components/Link";
+import { Paragraph } from "@components/Paragraph";
+import { GUILD_ID, INVITE_KEY, RAW_SKU_ID } from "@plugins/decor/lib/constants";
+import { useCurrentUserDecorationsStore } from "@plugins/decor/lib/stores/CurrentUserDecorationsStore";
+import { cl, DecorationModalClasses, requireAvatarDecorationModal, requireCreateStickerModal } from "@plugins/decor/ui";
+import { AvatarDecorationModalPreview } from "@plugins/decor/ui/components";
 import { openInviteModal } from "@utils/discord";
 import { Margins } from "@utils/margins";
-import { closeAllModals, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
-import { filters, findComponentByCodeLazy, mapMangledModuleLazy } from "@webpack";
-import { Button, FluxDispatcher, Forms, GuildStore, NavigationRouter, Text, TextInput, useEffect, useMemo, UserStore, useState } from "@webpack/common";
+import { RenderModalProps } from "@vencord/discord-types";
+import { findComponentByCodeLazy } from "@webpack";
+import { closeAllModals, FluxDispatcher, GuildStore, Modal, NavigationRouter, openModal, TextInput, useEffect, useMemo, UserStore, useState } from "@webpack/common";
 
-import { GUILD_ID, INVITE_KEY, RAW_SKU_ID } from "../../lib/constants";
-import { useCurrentUserDecorationsStore } from "../../lib/stores/CurrentUserDecorationsStore";
-import { cl, DecorationModalStyles, requireAvatarDecorationModal, requireCreateStickerModal } from "../";
-import { AvatarDecorationModalPreview } from "../components";
-
-const FileUpload = findComponentByCodeLazy(".fileUpload),");
-
-const { HelpMessage, HelpMessageTypes } = mapMangledModuleLazy('POSITIVE="positive', {
-    HelpMessageTypes: filters.byProps("POSITIVE", "WARNING", "INFO"),
-    HelpMessage: filters.byCode(".iconDiv")
-});
+const FileUpload = findComponentByCodeLazy(".currentTarget.files", "lineClamp:1");
 
 function useObjectURL(object: Blob | MediaSource | null) {
     const [url, setUrl] = useState<string | null>(null);
@@ -42,7 +39,7 @@ function useObjectURL(object: Blob | MediaSource | null) {
     return url;
 }
 
-function CreateDecorationModal(props: ModalProps) {
+function CreateDecorationModal(props: RenderModalProps) {
     const [name, setName] = useState("");
     const [file, setFile] = useState<File | null>(null);
     const [submitting, setSubmitting] = useState(false);
@@ -58,38 +55,42 @@ function CreateDecorationModal(props: ModalProps) {
 
     const decoration = useMemo(() => fileUrl ? { asset: fileUrl, skuId: RAW_SKU_ID } : null, [fileUrl]);
 
-    return <ModalRoot
+    return <Modal
         {...props}
-        size={ModalSize.MEDIUM}
-        className={DecorationModalStyles.modal}
+        size="lg"
+        title="Create Decoration"
+        actions={[
+            {
+                text: "Cancel",
+                variant: "secondary",
+                onClick: props.onClose
+            },
+            {
+                text: "Submit for Review",
+                variant: "primary",
+                onClick: () => {
+                    setSubmitting(true);
+                    createDecoration({ alt: name, file: file! })
+                        .then(props.onClose).catch(e => { setSubmitting(false); setError(e); });
+                },
+                disabled: !file || !name || submitting
+            }
+        ]}
     >
-        <ModalHeader separator={false} className={cl("modal-header")}>
-            <Text
-                color="header-primary"
-                variant="heading-lg/semibold"
-                tag="h1"
-                style={{ flexGrow: 1 }}
-            >
-                Create Decoration
-            </Text>
-            <ModalCloseButton onClick={props.onClose} />
-        </ModalHeader>
-        <ModalContent
-            className={cl("create-decoration-modal-content")}
-            scrollbarType="none"
-        >
+        <div className={cl("create-decoration-modal-content", DecorationModalClasses.modal)}>
             <ErrorBoundary>
-                <HelpMessage messageType={HelpMessageTypes.WARNING}>
+                <Card variant="warning">
                     Make sure your decoration does not violate <Link
                         href="https://github.com/decor-discord/.github/blob/main/GUIDELINES.md"
                     >
                         the guidelines
                     </Link> before submitting it.
-                </HelpMessage>
+                </Card>
                 <div className={cl("create-decoration-modal-form-preview-container")}>
                     <div className={cl("create-decoration-modal-form")}>
-                        {error !== null && <Text color="text-danger" variant="text-xs/normal">{error.message}</Text>}
-                        <Forms.FormSection title="File">
+                        {error !== null && <Paragraph size="xs" style={{ color: "var(--text-danger, var(--text-default))" }}>{error.message}</Paragraph>}
+                        <section>
+                            <Heading className={Margins.bottom8}>File</Heading>
                             <FileUpload
                                 filename={file?.name}
                                 placeholder="Choose a file"
@@ -97,29 +98,30 @@ function CreateDecorationModal(props: ModalProps) {
                                 filters={[{ name: "Decoration file", extensions: ["png", "apng"] }]}
                                 onFileSelect={setFile}
                             />
-                            <Forms.FormText className={Margins.top8}>
+                            <Paragraph className={Margins.top8}>
                                 File should be APNG or PNG.
-                            </Forms.FormText>
-                        </Forms.FormSection>
-                        <Forms.FormSection title="Name">
+                            </Paragraph>
+                        </section>
+                        <section>
+                            <Heading className={Margins.bottom8}>Name</Heading>
                             <TextInput
                                 placeholder="Companion Cube"
                                 value={name}
                                 onChange={setName}
                             />
-                            <Forms.FormText className={Margins.top8}>
+                            <Paragraph className={Margins.top8}>
                                 This name will be used when referring to this decoration.
-                            </Forms.FormText>
-                        </Forms.FormSection>
+                            </Paragraph>
+                        </section>
                     </div>
                     <div>
                         <AvatarDecorationModalPreview
-                            avatarDecorationOverride={decoration}
+                            avatarDecoration={decoration}
                             user={UserStore.getCurrentUser()}
                         />
                     </div>
                 </div>
-                <HelpMessage messageType={HelpMessageTypes.INFO} className={Margins.bottom8}>
+                <Card variant="info" defaultPadding className={Margins.bottom8}>
                     To receive updates on your decoration's review, join <Link
                         href={`https://discord.gg/${INVITE_KEY}`}
                         onClick={async e => {
@@ -139,30 +141,10 @@ function CreateDecorationModal(props: ModalProps) {
                     >
                         Decor's Discord server
                     </Link> and allow direct messages.
-                </HelpMessage>
+                </Card>
             </ErrorBoundary>
-        </ModalContent>
-        <ModalFooter className={cl("modal-footer")}>
-            <Button
-                onClick={() => {
-                    setSubmitting(true);
-                    createDecoration({ alt: name, file: file! })
-                        .then(props.onClose).catch(e => { setSubmitting(false); setError(e); });
-                }}
-                disabled={!file || !name}
-                submitting={submitting}
-            >
-                Submit for Review
-            </Button>
-            <Button
-                onClick={props.onClose}
-                color={Button.Colors.PRIMARY}
-                look={Button.Looks.LINK}
-            >
-                Cancel
-            </Button>
-        </ModalFooter>
-    </ModalRoot>;
+        </div>
+    </Modal>;
 }
 
 export const openCreateDecorationModal = () =>

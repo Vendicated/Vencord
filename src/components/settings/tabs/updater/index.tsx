@@ -17,17 +17,52 @@
 */
 
 import { useSettings } from "@api/Settings";
+import { Button } from "@components/Button";
+import { Card } from "@components/Card";
+import { Divider } from "@components/Divider";
+import { Flex } from "@components/Flex";
+import { FormSwitch } from "@components/FormSwitch";
+import { Heading } from "@components/Heading";
 import { Link } from "@components/Link";
-import { handleSettingsTabError, SettingsTab, wrapTab } from "@components/settings/tabs/BaseTab";
+import { Paragraph } from "@components/Paragraph";
+import { SettingsTab, wrapTab } from "@components/settings/tabs/BaseTab";
 import { Margins } from "@utils/margins";
-import { ModalCloseButton, ModalContent, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
+import { classes } from "@utils/misc";
 import { useAwaiter } from "@utils/react";
 import { getRepo, isNewer, UpdateLogger } from "@utils/updater";
-import { Forms, React, Switch } from "@webpack/common";
+import { React } from "@webpack/common";
 
 import gitHash from "~git-hash";
 
 import { CommonProps, HashLink, Newer, Updatable } from "./Components";
+
+function VesktopSection() {
+    if (!IS_VESKTOP) return null;
+
+    const [isVesktopOutdated] = useAwaiter<boolean>(VesktopNative.app.isOutdated, { fallbackValue: false });
+
+    return (
+        <Flex className={Margins.bottom20} flexDirection="column" gap="1em">
+            <Card variant="info">
+                <Heading className={Margins.bottom8}>Vesktop & Vencord</Heading>
+                <Paragraph>Vesktop and Vencord are two separate things. This updater is for Vencord.</Paragraph>
+                <Paragraph className={Margins.top8}>
+                    You receive separate popups for Vesktop updates. You can also manually update by installing the <Link href="https://vesktop.dev/install">latest version</Link>.
+                </Paragraph>
+            </Card>
+
+            {isVesktopOutdated && (
+                <Card variant="warning">
+                    <Heading className={Margins.bottom8}>Vesktop Outdated</Heading>
+                    <Flex flexDirection="column" gap="0.5em">
+                        <Paragraph>Your version of Vesktop is outdated!</Paragraph>
+                        <Button variant="link" onClick={() => VesktopNative.app.openUpdater()}>Open Vesktop Updater</Button>
+                    </Flex>
+                </Card>
+            )}
+        </Flex>
+    );
+}
 
 function Updater() {
     const settings = useSettings(["autoUpdate", "autoUpdateNotification"]);
@@ -43,28 +78,30 @@ function Updater() {
     };
 
     return (
-        <SettingsTab title="Vencord Updater">
-            <Forms.FormTitle tag="h5">Updater Settings</Forms.FormTitle>
+        <SettingsTab>
+            <VesktopSection />
 
-            <Switch
-                value={settings.autoUpdate}
-                onChange={(v: boolean) => settings.autoUpdate = v}
-                note="Automatically update Vencord without confirmation prompt"
-            >
-                Automatically update
-            </Switch>
-            <Switch
-                value={settings.autoUpdateNotification}
-                onChange={(v: boolean) => settings.autoUpdateNotification = v}
-                note="Show a notification when Vencord automatically updates"
-                disabled={!settings.autoUpdate}
-            >
-                Get notified when an automatic update completes
-            </Switch>
+            <div className="vc-settings-switches">
+                <FormSwitch
+                    title="Automatically update"
+                    description="Automatically update Vencord without confirmation prompt"
+                    value={settings.autoUpdate}
+                    onChange={(v: boolean) => settings.autoUpdate = v}
+                    hideBorder
+                />
+                <FormSwitch
+                    title="Get notified when an automatic update completes"
+                    description="Show a notification when Vencord automatically updates"
+                    value={settings.autoUpdateNotification}
+                    onChange={(v: boolean) => settings.autoUpdateNotification = v}
+                    disabled={!settings.autoUpdate}
+                    hideBorder
+                />
+            </div>
 
-            <Forms.FormTitle tag="h5">Repo</Forms.FormTitle>
+            <Heading className={classes(Margins.top20, Margins.bottom8)}>Repo</Heading>
 
-            <Forms.FormText>
+            <Paragraph>
                 {repoPending
                     ? repo
                     : err
@@ -77,11 +114,11 @@ function Updater() {
                 }
                 {" "}
                 (<HashLink hash={gitHash} repo={repo} disabled={repoPending} />)
-            </Forms.FormText>
+            </Paragraph>
 
-            <Forms.FormDivider className={Margins.top8 + " " + Margins.bottom8} />
+            <Divider className={classes(Margins.top16, Margins.bottom16)} />
 
-            <Forms.FormTitle tag="h5">Updates</Forms.FormTitle>
+            <Heading className={Margins.bottom8}>Updates</Heading>
 
             {isNewer
                 ? <Newer {...commonProps} />
@@ -94,22 +131,3 @@ function Updater() {
 export default IS_UPDATER_DISABLED
     ? null
     : wrapTab(Updater, "Updater");
-
-export const openUpdaterModal = IS_UPDATER_DISABLED
-    ? null
-    : function () {
-        const UpdaterTab = wrapTab(Updater, "Updater");
-
-        try {
-            openModal(wrapTab((modalProps: ModalProps) => (
-                <ModalRoot {...modalProps} size={ModalSize.MEDIUM}>
-                    <ModalContent className="vc-updater-modal">
-                        <ModalCloseButton onClick={modalProps.onClose} className="vc-updater-modal-close-button" />
-                        <UpdaterTab />
-                    </ModalContent>
-                </ModalRoot>
-            ), "UpdaterModal"));
-        } catch {
-            handleSettingsTabError();
-        }
-    };

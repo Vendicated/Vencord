@@ -22,6 +22,7 @@ import definePlugin from "@utils/types";
 export default definePlugin({
     name: "iLoveSpam",
     description: "Do not hide messages from 'likely spammers'",
+    tags: ["Utility", "Chat"],
     authors: [Devs.botato, Devs.Nyako],
     patches: [
         {

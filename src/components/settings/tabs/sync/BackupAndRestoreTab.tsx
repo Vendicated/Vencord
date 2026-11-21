@@ -16,50 +16,50 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { downloadSettingsBackup, uploadSettingsBackup } from "@api/SettingsSync/offline";
+import { Button } from "@components/Button";
+import { Card } from "@components/Card";
 import { Flex } from "@components/Flex";
+import { Heading } from "@components/Heading";
+import { Paragraph } from "@components/Paragraph";
 import { SettingsTab, wrapTab } from "@components/settings/tabs/BaseTab";
+import { Text } from "@components/Text";
 import { Margins } from "@utils/margins";
-import { classes } from "@utils/misc";
-import { downloadSettingsBackup, uploadSettingsBackup } from "@utils/settingsSync";
-import { Button, Card, Text } from "@webpack/common";
 
 function BackupAndRestoreTab() {
     return (
-        <SettingsTab title="Backup & Restore">
-            <Card className={classes("vc-settings-card", "vc-backup-restore-card")}>
-                <Flex flexDirection="column">
-                    <strong>Warning</strong>
-                    <span>Importing a settings file will overwrite your current settings.</span>
+        <SettingsTab>
+            <Flex flexDirection="column" gap="0.5em">
+                <Card variant="warning">
+                    <Heading tag="h4">Warning</Heading>
+                    <Paragraph>Importing a settings file will overwrite your current settings.</Paragraph>
+                </Card>
+
+                <Paragraph size="md" className={Margins.bottom8}>
+                    You can import and export your Vencord settings as a JSON file.
+                    This allows you to easily transfer your settings to another device,
+                    or recover your settings after reinstalling Vencord or Discord.
+                </Paragraph>
+
+                <Heading tag="h4">Settings Export contains:</Heading>
+                <Text size="md" className={Margins.bottom8}>
+                    <ul>
+                        <li>&mdash; Custom QuickCSS</li>
+                        <li>&mdash; Theme Links</li>
+                        <li>&mdash; Plugin Settings</li>
+                    </ul>
+                </Text>
+
+                <Flex>
+                    <Button onClick={() => uploadSettingsBackup()}>
+                        Import Settings
+                    </Button>
+                    <Button onClick={downloadSettingsBackup}>
+                        Export Settings
+                    </Button>
                 </Flex>
-            </Card>
-            <Text variant="text-md/normal" className={Margins.bottom8}>
-                You can import and export your Vencord settings as a JSON file.
-                This allows you to easily transfer your settings to another device,
-                or recover your settings after reinstalling Vencord or Discord.
-            </Text>
-            <Text variant="text-md/normal" className={Margins.bottom8}>
-                Settings Export contains:
-                <ul>
-                    <li>&mdash; Custom QuickCSS</li>
-                    <li>&mdash; Theme Links</li>
-                    <li>&mdash; Plugin Settings</li>
-                </ul>
-            </Text>
-            <Flex>
-                <Button
-                    onClick={() => uploadSettingsBackup()}
-                    size={Button.Sizes.SMALL}
-                >
-                    Import Settings
-                </Button>
-                <Button
-                    onClick={downloadSettingsBackup}
-                    size={Button.Sizes.SMALL}
-                >
-                    Export Settings
-                </Button>
             </Flex>
-        </SettingsTab>
+        </SettingsTab >
     );
 }
 

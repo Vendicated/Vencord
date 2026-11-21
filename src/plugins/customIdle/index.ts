@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { Notices } from "@api/index";
+import { currentNotice, NoticeColors, noticesQueue, showNotice } from "@api/Notices";
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { makeRange, OptionType } from "@utils/types";
@@ -29,6 +29,7 @@ const settings = definePluginSettings({
 export default definePlugin({
     name: "CustomIdle",
     description: "Allows you to set the time before Discord goes idle (or disable auto-idle)",
+    tags: ["Activity", "Customisation"],
     authors: [Devs.newwares],
     settings,
     patches: [
@@ -36,11 +37,13 @@ export default definePlugin({
             find: 'type:"IDLE",idle:',
             replacement: [
                 {
-                    match: /(?<=Date\.now\(\)-\i>)\i\.\i\|\|/,
+                    // FIXME: Stable compat: (?:\i\.\i|6e5), keep only 6e5
+                    match: /(?<=Date\.now\(\)-\i>)(?:\i\.\i|6e5)\|\|/,
                     replace: "$self.getIdleTimeout()||"
                 },
                 {
-                    match: /Math\.min\((\i\*\i\.\i\.\i\.SECOND),\i\.\i\)/,
+                    // FIXME: Stable compat: (?:\i\.\i|6e5), keep only 6e5
+                    match: /Math\.min\((\i\*\i\.\i\.\i\.SECOND),(?:\i\.\i|6e5)\)/,
                     replace: "$1" // Decouple idle from afk (phone notifications will remain at user setting or 10 min maximum)
                 },
                 {
@@ -62,16 +65,21 @@ export default definePlugin({
 
         const backOnlineMessage = "Welcome back! Click the button to go online. Click the X to stay idle until reload.";
         if (
-            Notices.currentNotice?.[1] === backOnlineMessage ||
-            Notices.noticesQueue.some(([, noticeMessage]) => noticeMessage === backOnlineMessage)
+            currentNotice?.message === backOnlineMessage ||
+            noticesQueue.some(notice => notice.message === backOnlineMessage)
         ) return;
 
-        Notices.showNotice(backOnlineMessage, "Exit idle", () => {
-            Notices.popNotice();
-            FluxDispatcher.dispatch({
-                type: "IDLE",
-                idle: false
-            });
+        showNotice({
+            message: backOnlineMessage,
+            buttonText: "Exit idle",
+            color: NoticeColors.DEFAULT,
+            callback({ dismiss }) {
+                dismiss();
+                FluxDispatcher.dispatch({
+                    type: "IDLE",
+                    idle: false
+                });
+            }
         });
     },
 

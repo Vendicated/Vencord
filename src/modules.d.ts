@@ -16,21 +16,16 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-/// <reference types="standalone-electron-types"/>
-
 declare module "~plugins" {
+    import { PluginTarget } from "@utils/pluginTargets";
     const plugins: Record<string, import("./utils/types").Plugin>;
+
     export default plugins;
     export const PluginMeta: Record<string, {
         folderName: string;
         userPlugin: boolean;
     }>;
-    export const ExcludedPlugins: Record<string, "web" | "discordDesktop" | "vesktop" | "desktop" | "dev">;
-}
-
-declare module "~pluginNatives" {
-    const pluginNatives: Record<string, Record<string, (event: Electron.IpcMainInvokeEvent, ...args: unknown[]) => unknown>>;
-    export default pluginNatives;
+    export const ExcludedPlugins: Record<string, PluginTarget>;
 }
 
 declare module "~git-hash" {

@@ -19,9 +19,7 @@
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { findByPropsLazy } from "@webpack";
-
-const MessageRequestStore = findByPropsLazy("getMessageRequestsCount");
+import { MessageRequestStore } from "@webpack/common";
 
 const settings = definePluginSettings({
     hideFriendRequestsCount: {
@@ -47,6 +45,7 @@ const settings = definePluginSettings({
 export default definePlugin({
     name: "NoPendingCount",
     description: "Removes the ping count of incoming friend requests, message requests, and nitro offers.",
+    tags: ["Notifications", "Appearance"],
     authors: [Devs.amia],
 
     settings: settings,

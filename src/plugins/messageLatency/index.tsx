@@ -10,7 +10,6 @@ import { Devs } from "@utils/constants";
 import { isNonNullish } from "@utils/guards";
 import definePlugin, { OptionType } from "@utils/types";
 import { Message } from "@vencord/discord-types";
-import { findComponentByCodeLazy } from "@webpack";
 import { AuthenticationStore, SnowflakeUtils, Tooltip } from "@webpack/common";
 
 type FillValue = ("status-danger" | "status-warning" | "status-positive" | "text-muted");
@@ -26,18 +25,19 @@ interface Diff {
 }
 
 const DISCORD_KT_DELAY = 1471228928;
-const HiddenVisually = findComponentByCodeLazy(".hiddenVisually]:");
 
 export default definePlugin({
     name: "MessageLatency",
     description: "Displays an indicator for messages that took ≥n seconds to send",
+    tags: ["Chat", "Utility"],
     authors: [Devs.arHSM],
 
     settings: definePluginSettings({
         latency: {
             type: OptionType.NUMBER,
             description: "Threshold in seconds for latency indicator",
-            default: 2
+            default: 2,
+            min: 0
         },
         detectDiscordKotlin: {
             type: OptionType.BOOLEAN,
@@ -161,13 +161,7 @@ export default definePlugin({
                 text={text}
                 position="top"
             >
-                {
-                    props => <>
-                        {<this.Icon delta={d.delta} fill={d.fill} props={props} />}
-                        {/* Time Out indicator uses this, I think this is for a11y */}
-                        <HiddenVisually>Delayed Message</HiddenVisually>
-                    </>
-                }
+                {props => <this.Icon delta={d.delta} fill={d.fill} props={props} />}
             </Tooltip>;
         }, { noop: true });
     },

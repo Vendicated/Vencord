@@ -4,9 +4,10 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { Paragraph } from "@components/Paragraph";
 import { Margins } from "@utils/margins";
 import { Patch, ReplaceFn } from "@utils/types";
-import { Forms, TextArea, useEffect, useRef, useState } from "@webpack/common";
+import { TextArea, useEffect, useRef, useState } from "@webpack/common";
 
 export interface FullPatchInputProps {
     setFind(v: string): void;
@@ -46,7 +47,7 @@ export function FullPatchInput({ setFind, setParsedFind, setMatch, setReplacemen
             }
 
             if (!replacement.match) throw new Error("No 'replacement.match' field");
-            if (!replacement.replace) throw new Error("No 'replacement.replace' field");
+            if (replacement.replace == null) throw new Error("No 'replacement.replace' field");
 
             setFind(find instanceof RegExp ? `/${find.source}/` : find);
             setParsedFind(find);
@@ -68,16 +69,16 @@ export function FullPatchInput({ setFind, setParsedFind, setMatch, setReplacemen
 
     return (
         <>
-            <Forms.FormText className={Margins.bottom8}>
+            <Paragraph className={Margins.bottom8}>
                 Paste your full JSON patch here to fill out the fields
-            </Forms.FormText>
+            </Paragraph>
             <TextArea
                 inputRef={textAreaRef}
                 value={patch}
                 onChange={setPatch}
                 onBlur={update}
             />
-            {error !== "" && <Forms.FormText style={{ color: "var(--text-danger)" }}>{error}</Forms.FormText>}
+            {error !== "" && <Paragraph style={{ color: "var(--text-feedback-critical)" }}>{error}</Paragraph>}
         </>
     );
 }

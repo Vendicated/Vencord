@@ -23,6 +23,7 @@ export default definePlugin({
     name: "BetterUploadButton",
     authors: [Devs.fawn, Devs.Ven],
     description: "Upload with a single click, open menu with right click",
+    tags: ["Utility", "Shortcuts"],
     patches: [
         {
             find: ".CHAT_INPUT_BUTTON_NOTIFICATION,",
