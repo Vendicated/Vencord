@@ -1,0 +1,14 @@
+.vc-bdnd-list-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+}
+
+/* This is getting around .vc-text-selectable resetting text cursors */
+.vc-bdnd-list-item * {
+    cursor: pointer;
+}
+
+.vc-bdnd-list-item:hover {
+    background-color: var(--button-danger-background-hover);
+}
