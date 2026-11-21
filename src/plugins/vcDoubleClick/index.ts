@@ -16,9 +16,18 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
-import definePlugin from "@utils/types";
-import { ChannelStore, SelectedChannelStore } from "@webpack/common";
+import definePlugin, { OptionType } from "@utils/types";
+import { ChannelStore, NavigationRouter, SelectedChannelStore } from "@webpack/common";
+
+const settings = definePluginSettings({
+    openOnSingleClick: {
+        type: OptionType.BOOLEAN,
+        description: "A single click focuses on the voice channel without joining it",
+        default: false
+    }
+});
 
 const timers = {} as Record<string, {
     timeout?: NodeJS.Timeout;
@@ -30,6 +39,7 @@ export default definePlugin({
     description: "Join voice chats via double click instead of single click",
     tags: ["Voice"],
     authors: [Devs.Ven, Devs.D3SOX],
+    settings,
     patches: [
         // Stage Channels & Voice Channels
         // the find is for stage channels, but it also handles voice
@@ -60,13 +70,20 @@ export default definePlugin({
     ],
 
     shouldRunOnClick(e: MouseEvent, { channelId }) {
+        if (settings.store.openOnSingleClick) return true;
         const channel = ChannelStore.getChannel(channelId);
         if (!channel || ![2, 13].includes(channel.type)) return true;
         return e.detail >= 2;
     },
 
+    openChannel(channel: { id: string; guild_id: string; }) {
+        if (!settings.store.openOnSingleClick) return;
+        NavigationRouter.transitionTo(`/channels/${channel.guild_id}/${channel.id}`);
+    },
+
     schedule(cb: () => void, e: any) {
-        const id = e.props.channel.id as string;
+        const { channel } = e.props;
+        const id = channel.id as string;
         if (SelectedChannelStore.getVoiceChannelId() === id) {
             cb();
             return;
@@ -81,6 +98,7 @@ export default definePlugin({
             cb();
             delete timers[id];
         } else {
+            this.openChannel(channel);
             // else reset the counter in 500ms
             data.timeout = setTimeout(() => {
                 delete timers[id];
