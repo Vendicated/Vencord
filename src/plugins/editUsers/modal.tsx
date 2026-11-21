@@ -8,10 +8,11 @@ import { Button, ErrorBoundary, Flex, FormSwitch, Paragraph, Span } from "@compo
 import { classNameFactory } from "@utils/css";
 import { saveFile } from "@utils/web";
 import { RenderModalProps, User } from "@vencord/discord-types";
-import { DisplayProfileUtils, Modal, openModal, Select, showToast, TabBar, TextInput, useEffect, useRef, useState } from "@webpack/common";
+import { DisplayProfileUtils, IconUtils, Modal, openModal, Select, showToast, TabBar, TextInput, useEffect, useRef, useState } from "@webpack/common";
 
 import { emptyOverride, getUserOverride, hasFlag, OverrideFlags, saveUserOverride, UserOverride, UserTag } from "./data";
 import { exportImages, getImages, ImageChanges, ImageKind, imageTypes, importImages, saveImageChanges, UserImages, validateImage } from "./images";
+import { ShopPicker } from "./shop";
 
 const cl = classNameFactory("vc-editUsers-");
 
@@ -72,6 +73,30 @@ function FileButton({ label, accept, disabled, onSelect }: {
     );
 }
 
+function ColorField({ label, value, disabled, onChange }: {
+    label: string;
+    value: string;
+    disabled: boolean;
+    onChange(value: string): void;
+}) {
+    return (
+        <Flex alignItems="center">
+            <label className={cl("colourPicker")}>
+                <Span>{label}</Span>
+                <input
+                    type="color"
+                    value={`#${value.padStart(6, "0")}`}
+                    disabled={disabled}
+                    onChange={({ currentTarget }) => onChange(currentTarget.value.slice(1))}
+                />
+            </label>
+            <Button variant="secondary" disabled={disabled || !value} onClick={() => onChange("")}>
+                Reset Colour
+            </Button>
+        </Flex>
+    );
+}
+
 function ImageEditor({ kind, image, url, placeholder, onFile, onUrl, onReset, disabled }: {
     kind: ImageKind;
     image?: Blob;
@@ -121,7 +146,7 @@ function EditModal({ user, modalProps }: { user: User; modalProps: RenderModalPr
     const [images, setImages] = useState<UserImages>({});
     const [changes, setChanges] = useState<ImageChanges>({});
     const [busy, setBusy] = useState(true);
-    const [error, setError] = useState("");
+    const [error, setError] = useState<{ tab?: Tab; message: string; }>();
 
     useEffect(() => {
         let closed = false;
@@ -133,7 +158,7 @@ function EditModal({ user, modalProps }: { user: User; modalProps: RenderModalPr
             })
             .catch(error => {
                 if (!closed) {
-                    setError(errorMessage(error));
+                    setError({ message: errorMessage(error) });
                 }
             })
             .finally(() => {
@@ -157,39 +182,37 @@ function EditModal({ user, modalProps }: { user: User; modalProps: RenderModalPr
 
     async function selectImage(kind: ImageKind, file: File) {
         setBusy(true);
-        setError("");
+        setError(undefined);
         try {
             await validateImage(file);
             setChanges(changes => ({ ...changes, [kind]: file }));
             setField(kind === "avatar" ? "avatarUrl" : "bannerUrl", "");
         } catch (error) {
-            setError(errorMessage(error));
+            setError({ tab: kind, message: errorMessage(error) });
         } finally {
             setBusy(false);
         }
     }
 
     async function save() {
-        setBusy(true);
-        setError("");
-        try {
-            const next = { ...override };
-            for (const key of ["username", "pronouns", "avatarUrl", "bannerUrl", "decoration", "profileEffect"] as const) {
-                next[key] = next[key].trim();
-            }
+        const next = { ...override };
+        for (const key of ["username", "pronouns", "avatarUrl", "bannerUrl"] as const) {
+            next[key] = next[key].trim();
+        }
 
-            for (const key of ["avatarUrl", "bannerUrl"] as const) {
-                const url = next[key];
-                if (url && url !== original.current[key] && !/^https?:\/\//i.test(url)) {
-                    throw new Error("Image URLs must start with http:// or https://.");
-                }
+        for (const kind of ["avatar", "banner"] as const) {
+            const key = kind === "avatar" ? "avatarUrl" : "bannerUrl";
+            const url = next[key];
+            if (url && url !== original.current[key] && !/^https?:\/\//i.test(url)) {
+                setError({ tab: kind, message: "Image URLs must start with http:// or https://." });
+                setTab(kind);
+                return;
             }
-            if (next.decoration && !/^(?:a_)?[a-f0-9]{32}$/i.test(next.decoration)) {
-                throw new Error("Enter a Discord avatar decoration asset hash.");
-            }
-            if (next.profileEffect && !/^\d{17,20}$/.test(next.profileEffect)) {
-                throw new Error("Enter a Discord profile effect SKU ID.");
-            }
+        }
+
+        setBusy(true);
+        setError(undefined);
+        try {
             if (Object.keys(changes).length) {
                 await saveImageChanges(new Map([[user.id, changes]]));
             }
@@ -198,7 +221,7 @@ function EditModal({ user, modalProps }: { user: User; modalProps: RenderModalPr
             modalProps.onClose();
             showToast({ text: "User edits saved.", variant: "success" });
         } catch (error) {
-            setError(errorMessage(error));
+            setError({ message: errorMessage(error) });
         } finally {
             setBusy(false);
         }
@@ -208,16 +231,32 @@ function EditModal({ user, modalProps }: { user: User; modalProps: RenderModalPr
         switch (tab) {
             case "name":
                 return (
-                    <TextInput
-                        aria-label="Display name"
-                        placeholder={user.globalName || user.username}
-                        value={override.username}
-                        onChange={value => setField("username", value)}
-                    />
+                    <>
+                        <TextInput
+                            aria-label="Display name"
+                            placeholder={user.globalName || user.username}
+                            value={override.username}
+                            onChange={value => setField("username", value)}
+                        />
+                        <ColorField
+                            label="Username Colour"
+                            value={override.usernameColor}
+                            disabled={busy}
+                            onChange={value => setField("usernameColor", value)}
+                        />
+                        <FormSwitch
+                            title="Override server role colours"
+                            description="Use the custom username colour even when the user has a coloured role."
+                            disabled={!override.usernameColor}
+                            value={hasFlag(override.flags, OverrideFlags.OverrideRoleColor)}
+                            onChange={value => toggleFlag(OverrideFlags.OverrideRoleColor, value)}
+                        />
+                    </>
                 );
             case "avatar":
             case "banner": {
                 const urlKey = tab === "avatar" ? "avatarUrl" : "bannerUrl";
+                const useDefault = tab === "avatar" && hasFlag(override.flags, OverrideFlags.UseDefaultAvatar);
                 const image = changes[tab] === null ? undefined : changes[tab] ?? images[tab];
                 let placeholder: string | null | undefined;
                 if (!original.current[urlKey]) {
@@ -227,38 +266,47 @@ function EditModal({ user, modalProps }: { user: User; modalProps: RenderModalPr
                 }
                 return (
                     <>
-                        <ImageEditor
-                            kind={tab}
-                            image={image}
-                            url={override[urlKey]}
-                            placeholder={placeholder ?? undefined}
-                            disabled={busy}
-                            onFile={file => selectImage(tab, file)}
-                            onUrl={value => setField(urlKey, value)}
-                            onReset={() => {
-                                setChanges(changes => ({ ...changes, [tab]: null }));
-                                setField(urlKey, "");
-                            }}
-                        />
-                        {tab === "banner" && (
-                            <Flex alignItems="center">
-                                <label className={cl("colourPicker")}>
-                                    <Span>Banner Colour</Span>
-                                    <input
-                                        type="color"
-                                        value={`#${override.bannerColor.padStart(6, "0")}`}
-                                        disabled={busy}
-                                        onChange={({ currentTarget }) => setField("bannerColor", currentTarget.value.slice(1))}
-                                    />
-                                </label>
-                                <Button
-                                    variant="secondary"
-                                    disabled={busy || !override.bannerColor}
-                                    onClick={() => setField("bannerColor", "")}
-                                >
-                                    Reset Colour
-                                </Button>
-                            </Flex>
+                        {useDefault ? (
+                            <img
+                                className={cl("preview", "avatar")}
+                                src={IconUtils.getDefaultAvatarURL(user.id, user.discriminator)}
+                                alt="Default avatar preview"
+                            />
+                        ) : (
+                            <ImageEditor
+                                kind={tab}
+                                image={image}
+                                url={override[urlKey]}
+                                placeholder={placeholder ?? undefined}
+                                disabled={busy}
+                                onFile={file => selectImage(tab, file)}
+                                onUrl={value => setField(urlKey, value)}
+                                onReset={() => {
+                                    setChanges(changes => ({ ...changes, [tab]: null }));
+                                    setField(urlKey, "");
+                                    setError(undefined);
+                                }}
+                            />
+                        )}
+                        {tab === "avatar" ? (
+                            <FormSwitch
+                                title="Use Discord’s default avatar"
+                                description="Show the default Discord avatar for this user in every server and DM."
+                                disabled={busy}
+                                value={useDefault}
+                                onChange={value => {
+                                    toggleFlag(OverrideFlags.UseDefaultAvatar, value);
+                                    setError(undefined);
+                                }}
+                                hideBorder
+                            />
+                        ) : (
+                            <ColorField
+                                label="Banner Colour"
+                                value={override.bannerColor}
+                                disabled={busy}
+                                onChange={value => setField("bannerColor", value)}
+                            />
                         )}
                     </>
                 );
@@ -270,34 +318,44 @@ function EditModal({ user, modalProps }: { user: User; modalProps: RenderModalPr
                             <Span>Pronouns</Span>
                             <TextInput value={override.pronouns} onChange={value => setField("pronouns", value)} />
                         </label>
-                        <label>
-                            <Span>Avatar Decoration Asset Hash</Span>
-                            <TextInput value={override.decoration} onChange={value => setField("decoration", value)} />
-                        </label>
-                        <label>
-                            <Span>Profile Effect SKU ID</Span>
-                            <TextInput value={override.profileEffect} onChange={value => setField("profileEffect", value)} />
-                        </label>
-                        <Select
-                            options={tagOptions}
-                            serialize={String}
-                            select={tag => setField("tag", tag)}
-                            isSelected={tag => tag === override.tag}
-                            placeholder="Message tag"
-                            closeOnSelect
-                        />
+                        <ErrorBoundary noop={false}>
+                            <ShopPicker
+                                decoration={override.decoration}
+                                profileEffect={override.profileEffect}
+                                onSelect={setField}
+                                onError={message => setError(message ? { tab: "profile", message } : undefined)}
+                                busy={busy}
+                                onBusy={setBusy}
+                            />
+                        </ErrorBoundary>
+                        <div>
+                            <Span>Message Tag</Span>
+                            <Select
+                                options={tagOptions}
+                                serialize={String}
+                                select={tag => setField("tag", tag)}
+                                isSelected={tag => tag === override.tag}
+                                placeholder="Message tag"
+                                closeOnSelect
+                            />
+                        </div>
                     </>
                 );
         }
     }
 
     const guildOption = tab === "profile" ? undefined : guildOptions[tab];
+    const disableGuildOptions = tab === "avatar" && hasFlag(override.flags, OverrideFlags.UseDefaultAvatar);
+    const notice = error && (!error.tab || error.tab === tab)
+        ? { message: error.message, type: "critical", role: "alert" }
+        : undefined;
 
     return (
         <Modal
             {...modalProps}
             title={`Edit User ${user.username}`}
             size="md"
+            notice={notice}
             actions={[
                 {
                     text: "Reset All",
@@ -306,6 +364,7 @@ function EditModal({ user, modalProps }: { user: User; modalProps: RenderModalPr
                     onClick: () => {
                         setOverride({ ...emptyOverride });
                         setChanges({ avatar: null, banner: null });
+                        setError(undefined);
                     }
                 },
                 {
@@ -335,19 +394,19 @@ function EditModal({ user, modalProps }: { user: User; modalProps: RenderModalPr
                     <div>
                         <FormSwitch
                             title={`Hide server ${guildOption[2]}`}
+                            disabled={disableGuildOptions}
                             value={hasFlag(override.flags, guildOption[0])}
                             onChange={value => toggleFlag(guildOption[0], value)}
                         />
                         <FormSwitch
                             title={`Prefer server ${guildOption[2]} over the override`}
-                            disabled={hasFlag(override.flags, guildOption[0])}
+                            disabled={disableGuildOptions || hasFlag(override.flags, guildOption[0])}
                             value={hasFlag(override.flags, guildOption[1])}
                             onChange={value => toggleFlag(guildOption[1], value)}
                             hideBorder
                         />
                     </div>
                 )}
-                {error && <Paragraph role="alert">{error}</Paragraph>}
             </div>
         </Modal>
     );
@@ -376,26 +435,24 @@ export function ImageBackup() {
     return (
         <div className={cl("backup")}>
             <Paragraph>Back up local avatars and banners. Import replaces matching images by user ID.</Paragraph>
-            {(["avatar", "banner"] as const).map(kind => (
-                <Flex key={kind}>
-                    <FileButton
-                        label={`Import ${kind}s`}
-                        accept=".json,application/json"
-                        disabled={busy}
-                        onSelect={file => run(async () => {
-                            const count = await importImages(file, kind);
-                            showToast({ text: `Imported ${count} ${kind}${count === 1 ? "" : "s"}.`, variant: "success" });
-                        })}
-                    />
-                    <Button
-                        variant="secondary"
-                        disabled={busy}
-                        onClick={() => run(async () => saveFile(await exportImages(kind)))}
-                    >
-                        Export {kind}s
-                    </Button>
-                </Flex>
-            ))}
+            <Flex>
+                <FileButton
+                    label="Import Images"
+                    accept=".json,application/json"
+                    disabled={busy}
+                    onSelect={file => run(async () => {
+                        const count = await importImages(file);
+                        showToast({ text: `Imported images for ${count} ${count === 1 ? "user" : "users"}.`, variant: "success" });
+                    })}
+                />
+                <Button
+                    variant="secondary"
+                    disabled={busy}
+                    onClick={() => run(async () => saveFile(await exportImages()))}
+                >
+                    Export Images
+                </Button>
+            </Flex>
         </div>
     );
 }

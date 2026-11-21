@@ -170,43 +170,78 @@ export async function validateImage(blob: Blob) {
     }
 }
 
-export async function exportImages(kind: ImageKind) {
+type BackupEntry = Partial<Record<ImageKind, string>>;
+
+export async function exportImages() {
     const keys = await DataStore.keys<string>(getStore());
-    const backup: Record<string, string> = {};
+    const backup: Record<string, BackupEntry> = {};
     for (const userId of keys) {
-        const image = (await getImages(userId))?.[kind];
-        if (image) {
-            backup[userId] = await new Promise<string>((resolve, reject) => {
+        const images = await getImages(userId);
+        const entry: BackupEntry = {};
+        for (const kind of imageKinds) {
+            const image = images?.[kind];
+            if (!image) {
+                continue;
+            }
+
+            entry[kind] = await new Promise<string>((resolve, reject) => {
                 const reader = new FileReader();
                 reader.onload = () => resolve(reader.result as string);
                 reader.onerror = () => reject(reader.error);
                 reader.readAsDataURL(image);
             });
         }
+        if (entry.avatar || entry.banner) {
+            backup[userId] = entry;
+        }
     }
 
-    return new File([JSON.stringify(backup)], `edit-users-${kind}s.json`, { type: "application/json" });
+    return new File([JSON.stringify(backup)], "edit-users-images.json", { type: "application/json" });
 }
 
-export async function importImages(file: File, kind: ImageKind) {
+function isRecord(value: unknown): value is Record<string, unknown> {
+    return value != null && typeof value === "object" && !Array.isArray(value);
+}
+
+async function readBackupImage(data: unknown) {
+    if (typeof data !== "string" || !dataUrlPattern.test(data)) {
+        throw new Error("The backup contains an invalid image URL.");
+    }
+    const encodedImageSize = data.length - data.indexOf(",") - 1;
+    if (encodedImageSize > Math.ceil(maxImageSize / 3) * 4) {
+        throw new Error("Images must be 10 MB or smaller.");
+    }
+    const response = await fetch(data);
+    const image = await response.blob();
+    await validateImage(image);
+    return image;
+}
+
+export async function importImages(file: File) {
     const backup: unknown = JSON.parse(await file.text());
-    if (!backup || typeof backup !== "object" || Array.isArray(backup)) {
+    if (!isRecord(backup)) {
         throw new Error("The backup must be a JSON object mapping user IDs to images.");
     }
 
+    const legacyKind = file.name.toLowerCase().startsWith("edit-users-banners") ? "banner" : "avatar";
     const changes = new Map<string, ImageChanges>();
     for (const [userId, data] of Object.entries(backup)) {
-        if (!/^\d{17,20}$/.test(userId) || typeof data !== "string" || !dataUrlPattern.test(data)) {
-            throw new Error("The backup contains an invalid user ID or image URL.");
+        if (!/^\d{17,20}$/.test(userId)) {
+            throw new Error("The backup contains an invalid user ID.");
         }
-        const encodedImageSize = data.length - data.indexOf(",") - 1;
-        if (encodedImageSize > Math.ceil(maxImageSize / 3) * 4) {
-            throw new Error("Images must be 10 MB or smaller.");
+
+        const entry = typeof data === "string" ? { [legacyKind]: data } : data;
+        if (!isRecord(entry) || (!Object.hasOwn(entry, "avatar") && !Object.hasOwn(entry, "banner"))) {
+            throw new Error("Each backup entry must contain an avatar or banner.");
         }
-        const response = await fetch(data);
-        const image = await response.blob();
-        await validateImage(image);
-        changes.set(userId, { [kind]: image });
+
+        const images: ImageChanges = {};
+        for (const kind of imageKinds) {
+            if (Object.hasOwn(entry, kind)) {
+                images[kind] = await readBackupImage(entry[kind]);
+            }
+        }
+        changes.set(userId, images);
     }
 
     await saveImageChanges(changes);
