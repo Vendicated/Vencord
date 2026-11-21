@@ -1,0 +1,30 @@
+.vc-guild-typing-wrapper {
+    position: relative;
+}
+
+.vc-guild-typing-indicator {
+    position: absolute;
+    bottom: -2px;
+    right: -2px;
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    z-index: 10;
+    pointer-events: none;
+}
+
+.vc-guild-typing-avatars {
+    pointer-events: auto;
+    cursor: pointer;
+}
+
+.vc-guild-typing-dots {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: var(--background-primary);
+    border: 2px solid var(--background-primary);
+}
