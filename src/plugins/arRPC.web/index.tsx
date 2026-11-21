@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { NoticeColors, popNotice, showNotice } from "@api/Notices";
+import { NoticeColors, showNotice } from "@api/Notices";
 import { Heading } from "@components/Heading";
 import { Link } from "@components/Link";
 import { Margins } from "@components/margins";
@@ -89,8 +89,8 @@ export default definePlugin({
                 message: "Failed to connect to arRPC, is it running?",
                 buttonText: "Retry",
                 color: NoticeColors.WARNING,
-                callback: () => {
-                    popNotice();
+                callback: ({ dismiss }) => {
+                    dismiss();
                     this.start();
                 }
             });

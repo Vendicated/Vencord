@@ -19,10 +19,10 @@
 import ErrorBoundary from "@components/ErrorBoundary";
 import { isObject } from "@utils/misc";
 import { isPrimitiveReactNode } from "@utils/react";
-import type { Notice, NoticeColors as TNoticeColors } from "@vencord/discord-types";
+import type { Notice, NoticeColors as TNoticeColors, NoticeOptions } from "@vencord/discord-types";
 import { filters, mapMangledModuleLazy } from "@webpack";
 import { FluxDispatcher } from "@webpack/common";
-import { ReactNode } from "react";
+import { MouseEvent, ReactNode } from "react";
 
 const { Notice, NoticeButton, NoticeCloseButton, _NoticeColors } = mapMangledModuleLazy(["APP_NOTICE_PRIMARY_CTA_OPENED", "DEFAULT:"], {
     Notice: filters.byCode(".DEFAULT,", '"div"'),
@@ -59,20 +59,18 @@ export function nextNotice() {
     }
 }
 
-function buildLegacyNotice(message: ReactNode, buttonText: string, onOkClick: () => void): Notice {
+function buildLegacyNotice(message: ReactNode, buttonText: string, onOkClick: () => void): NoticeOptions {
     return {
-        type: VENCORD_NOTICE_TYPE,
-        id: crypto.randomUUID(),
         message,
         buttonText,
         callback: onOkClick
     };
 }
 
-export function showNotice(notice: Omit<Notice, "id" | "type">): void;
+export function showNotice(notice: NoticeOptions): void;
 /** @deprecated use showNotice({ message, buttonText, callback }) */
 export function showNotice(message: ReactNode, buttonText: string, onOkClick: () => void): void;
-export function showNotice(messageOrNotice: ReactNode | Omit<Notice, "id" | "type">, buttonText?: string, onOkClick?: () => void) {
+export function showNotice(messageOrNotice: ReactNode | NoticeOptions, buttonText?: string, onOkClick?: () => void) {
     const notice = isObject(messageOrNotice) && "message" in messageOrNotice
         ? messageOrNotice
         : buildLegacyNotice(messageOrNotice, buttonText!, onOkClick!);
@@ -80,11 +78,29 @@ export function showNotice(messageOrNotice: ReactNode | Omit<Notice, "id" | "typ
     if (!isPrimitiveReactNode(notice.message))
         messageOrNotice = <ErrorBoundary fallback={() => "Error Showing Notice"}>{notice.message}</ErrorBoundary>;
 
-    noticesQueue.push({
+    const fullNotice: Notice = {
         id: crypto.randomUUID(),
+        buttonText: notice.buttonText || "Dismiss",
         ...notice,
+        callback(event: MouseEvent<HTMLButtonElement>) {
+            const dismiss = async () => {
+                if (currentNotice === fullNotice) {
+                    currentNotice = undefined;
+                    await dismissNotice(fullNotice);
+                    nextNotice();
+                }
+            };
+
+            if (notice.callback) {
+                notice.callback({ event, dismiss });
+            } else {
+                dismiss();
+            }
+        },
         type: VENCORD_NOTICE_TYPE
-    });
+    };
+
+    noticesQueue.push(fullNotice);
 
     if (!currentNotice) nextNotice();
 }

@@ -17,7 +17,7 @@
 */
 
 import * as DataStore from "@api/DataStore";
-import { NoticeColors, popNotice, showNotice } from "@api/Notices";
+import { NoticeColors, showNotice } from "@api/Notices";
 import { showNotification } from "@api/Notifications";
 import { getUniqueUsername, openUserProfile } from "@utils/discord";
 import { FluxStore } from "@vencord/discord-types";
@@ -114,9 +114,7 @@ export function notify(text: string, icon?: string, onClick?: () => void) {
     if (settings.store.notices)
         showNotice({
             message: text,
-            buttonText: "OK",
-            color: NoticeColors.WARNING,
-            callback: () => popNotice()
+            color: NoticeColors.WARNING
         });
 
     showNotification({
