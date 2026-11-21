@@ -19,12 +19,18 @@
 import { classNameFactory } from "@utils/css";
 import { Guild, GuildMember, Role } from "@vencord/discord-types";
 import { PermissionOverwriteType } from "@vencord/discord-types/enums";
-import { extractAndLoadChunksLazy, findByPropsLazy } from "@webpack";
+import { DefaultExtractAndLoadChunksRegex, extractAndLoadChunksLazy, findByPropsLazy } from "@webpack";
 import { GuildRoleStore } from "@webpack/common";
 
 import { PermissionsSortOrder, settings } from ".";
 
-export const loadGetGuildPermissionSpecMap = extractAndLoadChunksLazy([".PRIMARY,badgeTooltipDelay:"]);
+const memberModViewSidebar = 'name:"GuildMemberModViewSidebar"';
+
+// The sidebar's import is available at startup and includes the guild permission spec.
+export const loadGetGuildPermissionSpecMap = extractAndLoadChunksLazy(
+    [memberModViewSidebar],
+    new RegExp(String.raw`createPromise:\(\)=>${DefaultExtractAndLoadChunksRegex.source},webpackId:[^,]+,${memberModViewSidebar}`)
+);
 export const { getGuildPermissionSpecMap } = findByPropsLazy("getGuildPermissionSpecMap");
 
 export const cl = classNameFactory("vc-permviewer-");

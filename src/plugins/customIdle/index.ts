@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { currentNotice, NoticeColors, noticesQueue, popNotice, showNotice } from "@api/Notices";
+import { currentNotice, NoticeColors, noticesQueue, showNotice } from "@api/Notices";
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { makeRange, OptionType } from "@utils/types";
@@ -72,9 +72,9 @@ export default definePlugin({
         showNotice({
             message: backOnlineMessage,
             buttonText: "Exit idle",
-            color: NoticeColors.BRAND,
-            callback() {
-                popNotice();
+            color: NoticeColors.DEFAULT,
+            callback({ dismiss }) {
+                dismiss();
                 FluxDispatcher.dispatch({
                     type: "IDLE",
                     idle: false

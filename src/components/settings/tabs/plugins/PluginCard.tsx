@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { NoticeColors, popNotice, showNotice } from "@api/Notices";
+import { NoticeColors, showNotice } from "@api/Notices";
 import { hasAnyVisibleSettings, isPluginEnabled, pluginRequiresRestart, startDependenciesRecursive, startPlugin, stopPlugin } from "@api/PluginManager";
 import { Settings } from "@api/Settings";
 import { CogWheel, InfoIcon } from "@components/Icons";
@@ -38,8 +38,6 @@ export function PluginCard({ plugin, disabled, onRestartNeeded, onMouseEnter, on
                 logger.error(`Failed to start dependencies for ${plugin.name}: ${failures.join(", ")}`);
                 showNotice({
                     message: "Failed to start dependencies: " + failures.join(", "),
-                    buttonText: "Close",
-                    callback: () => popNotice(),
                     color: NoticeColors.DANGER
                 });
 
