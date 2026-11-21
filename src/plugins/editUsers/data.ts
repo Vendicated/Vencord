@@ -26,6 +26,8 @@ export interface CosmeticOverride {
     skuId: string;
     name?: string;
     asset?: string;
+    label?: string;
+    palette?: string;
 }
 
 export interface UserOverride {
@@ -37,6 +39,8 @@ export interface UserOverride {
     pronouns: string;
     decoration: string | CosmeticOverride;
     profileEffect: string | CosmeticOverride;
+    nameplate: string | CosmeticOverride;
+    profileFrame: string | CosmeticOverride;
     tag: UserTag;
     flags: OverrideFlags;
 }
@@ -50,6 +54,8 @@ export const emptyOverride: UserOverride = Object.freeze({
     pronouns: "",
     decoration: "",
     profileEffect: "",
+    nameplate: "",
+    profileFrame: "",
     tag: "",
     flags: OverrideFlags.None,
 });

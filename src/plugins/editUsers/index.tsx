@@ -11,11 +11,12 @@ import { ErrorBoundary, PencilIcon } from "@components/index";
 import { Devs } from "@utils/constants";
 import definePlugin, { StartAt } from "@utils/types";
 import { Channel, DisplayProfile, Message, User } from "@vencord/discord-types";
-import { IconUtils, Menu, useMemo } from "@webpack/common";
+import { IconUtils, Menu, useEffect, useMemo } from "@webpack/common";
 
-import { getDecorationData, getName, getUserOverride, hasFlag, OverrideFlags, settings, UserTag,useUserOverride } from "./data";
+import { CosmeticOverride, getDecorationData, getName, getUserOverride, hasFlag, OverrideFlags, settings, UserTag,useUserOverride } from "./data";
 import { loadImageKeys, useLocalImage } from "./images";
 import { ImageBackup, openUserEditModal } from "./modal";
+import { getShopProduct } from "./shop";
 
 function keepGuildAvatar(user: User, guildId?: string | null) {
     const { avatarUrl, flags } = getUserOverride(user.id);
@@ -72,6 +73,13 @@ function useNameColors(userId: string | undefined, guildId: string | undefined, 
     }
 
     return { colorString: `#${usernameColor}`, colorStrings: undefined, forceNameColor: true };
+}
+
+function getCosmeticOverride(value?: CosmeticOverride | string) {
+    if (!value) {
+        return;
+    }
+    return typeof value === "string" ? { skuId: value } : value;
 }
 
 export default definePlugin({
@@ -211,7 +219,7 @@ export default definePlugin({
             replacement: [
                 {
                     match: /(?=return null==(\i)\?null:.{0,350}type:"account_popout",withMutualGuilds:)/,
-                    replace: "const vcAvatar=$self.useAccountAvatar($1),vcDecoration=$self.useAccountDecoration($1?.id);"
+                    replace: "const vcAvatar=$self.useAccountAvatar($1),vcDecoration=$self.useDecorationUrl($1?.id,40);"
                 },
                 {
                     match: /(?<=src:)(\i\.getAvatarURL\(void 0,\d+,!1\)),avatarDecoration:(\i)(?=,status:.{0,65}voiceStatus:)/,
@@ -224,16 +232,12 @@ export default definePlugin({
             group: true,
             replacement: [
                 {
-                    match: /(?<=userValue:(\i)\?\.avatarDecoration,guildValue:\i\?\.avatarDecoration,guildId:\i\}\)\),)/,
-                    replace: "vcEditUsersDecoration=$self.useDecoration($1?.id),"
+                    match: /(?<=user:(\i),guildId:\i,size:(\i),avatarDecorationOverride:\i,.{0,180}\{canAnimate:(\i)\}=.{0,140},)(?=\i=\(0,\i\.\i\)\(\[\i\.\i\],)/,
+                    replace: "vcEditUsersDecoration=$self.useDecorationUrl($1?.id,$2,$3),"
                 },
                 {
-                    match: /(?<=avatarDecoration:)void 0!==\i\?\i:\i(?=,canAnimate:)/,
-                    replace: "vcEditUsersDecoration??($&)"
-                },
-                {
-                    match: /(?<=,canAnimate:\i,size:\i\}\),\[)/,
-                    replace: "vcEditUsersDecoration,"
+                    match: /(?<=avatarDecorationSrc:)\i(?=,isAvatarDecorationAnimating:)/,
+                    replace: "vcEditUsersDecoration??$&"
                 }
             ]
         },
@@ -258,7 +262,7 @@ export default definePlugin({
                 },
                 {
                     match: /(?<=function \i\((\i),\i\)\{)(?=return\(0,\i\.\i\)\(\[\i\.default,\i\.\i\],\(\)=>null==\1\?null:)/,
-                    replace: "const vcOverride=$self.useUserOverride($1);"
+                    replace: "const vcOverride=$self.useProfileOverride($1);"
                 },
                 {
                     match: /(?<=\(\)=>null==\i\?null:\i\(\i,\i,\[\i\.default,\i\.\i\]\))(?=\)\})/,
@@ -279,6 +283,28 @@ export default definePlugin({
                 {
                     match: /this\.profileEffect=(\i\?\.profileEffect\?\?\i\.profileEffect)/,
                     replace: "this.profileEffect=$self.getProfileEffect(this.userId)??($1)"
+                },
+                {
+                    match: /this\.profileFrame=(\i\?\.profileFrame\?\?\i\.profileFrame)/,
+                    replace: "this.profileFrame=$self.getProfileFrame(this.userId)??($1)"
+                }
+            ]
+        },
+        {
+            find: "?.collectibles?.nameplate)??",
+            group: true,
+            replacement: [
+                {
+                    match: /(?<=let\{user:(\i),guildId:\i\}=\i,)(?=\i=\(0,)/,
+                    replace: "vcNameplate=$self.useNameplate($1?.id),"
+                },
+                {
+                    match: /\i\?\.collectibles\?\.nameplate(?=\)\?\?\i\.nameplate)/,
+                    replace: "vcNameplate??$&"
+                },
+                {
+                    match: /(?<=\.nameplate\},\[)/,
+                    replace: "vcNameplate,"
                 }
             ]
         },
@@ -300,7 +326,22 @@ export default definePlugin({
 
     getName,
     getUserOverride,
-    useUserOverride,
+    useProfileOverride(userId?: string) {
+        const override = useUserOverride(userId);
+        const skuId = getCosmeticOverride(override.profileFrame)?.skuId;
+        useEffect(() => {
+            if (skuId) {
+                void getShopProduct(skuId).catch(() => {});
+            }
+        }, [skuId]);
+        return override;
+    },
+
+    useNameplate(userId?: string) {
+        const { nameplate } = useUserOverride(userId);
+        return typeof nameplate === "object" && nameplate.asset ? nameplate : undefined;
+    },
+
     keepGuildAvatar,
     keepGuildBanner,
     getUsername: (userId?: string) => getUserOverride(userId).username || undefined,
@@ -371,12 +412,7 @@ export default definePlugin({
         return useLocalImage(userId, "banner") ?? getSrc();
     },
 
-    useDecoration(userId?: string) {
-        const { decoration } = useUserOverride(userId);
-        return useMemo(() => getDecorationData(decoration), [decoration]);
-    },
-
-    useAccountDecoration(userId?: string) {
+    useDecorationUrl(userId: string | undefined, size: number, canAnimate = false) {
         const { decoration } = useUserOverride(userId);
         return useMemo(() => {
             const avatarDecoration = getDecorationData(decoration);
@@ -385,18 +421,13 @@ export default definePlugin({
             }
 
             try {
-                return IconUtils.getAvatarDecorationURL({ avatarDecoration, size: 40 });
+                return IconUtils.getAvatarDecorationURL({ avatarDecoration, size, canAnimate });
             } catch {
                 return;
             }
-        }, [decoration]);
+        }, [decoration, size, canAnimate]);
     },
 
-    getProfileEffect(userId: string) {
-        const { profileEffect } = getUserOverride(userId);
-        if (typeof profileEffect === "string") {
-            return profileEffect ? { skuId: profileEffect } : undefined;
-        }
-        return profileEffect;
-    }
+    getProfileEffect: (userId: string) => getCosmeticOverride(getUserOverride(userId).profileEffect),
+    getProfileFrame: (userId: string) => getCosmeticOverride(getUserOverride(userId).profileFrame)
 });

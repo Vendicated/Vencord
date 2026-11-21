@@ -321,8 +321,7 @@ function EditModal({ user, modalProps }: { user: User; modalProps: RenderModalPr
                         </section>
                         <ErrorBoundary noop={false}>
                             <CosmeticsEditor
-                                decoration={override.decoration}
-                                profileEffect={override.profileEffect}
+                                cosmetics={override}
                                 onSelect={setField}
                                 onError={message => setError(message ? { tab: "profile", message } : undefined)}
                                 onOpenShop={modalProps.onClose}

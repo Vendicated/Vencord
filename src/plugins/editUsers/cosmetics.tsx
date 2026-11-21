@@ -7,39 +7,40 @@
 import { Heading } from "@components/Heading";
 import { Button, Paragraph, Span } from "@components/index";
 import { classNameFactory } from "@utils/css";
-import { FluxStore } from "@vencord/discord-types";
-import { findByCodeLazy, findStoreLazy } from "@webpack";
+import { findByCodeLazy } from "@webpack";
 import { IconUtils, NavigationRouter, SelectedGuildStore, TextInput, useState } from "@webpack/common";
 
 import { CosmeticOverride, getDecorationData, UserOverride } from "./data";
+import { CosmeticType, getShopProduct } from "./shop";
 
 const cl = classNameFactory("vc-editUsers-");
 
-const enum CosmeticType {
-    AvatarDecoration = 0,
-    ProfileEffect = 1,
-}
+const cosmeticTypes = [
+    { key: "decoration", label: "Avatar Decoration", type: CosmeticType.AvatarDecoration },
+    { key: "profileEffect", label: "Profile Effect", type: CosmeticType.ProfileEffect },
+    { key: "nameplate", label: "Nameplate", type: CosmeticType.Nameplate },
+    { key: "profileFrame", label: "Profile Frame", type: CosmeticType.ProfileFrame },
+] as const;
 
-type Cosmetic = "decoration" | "profileEffect";
+type Cosmetic = typeof cosmeticTypes[number]["key"];
 type Cosmetics = Pick<UserOverride, Cosmetic>;
 
-interface ShopItem {
-    type: CosmeticType;
-    skuId: string;
+interface EquippedCosmetic {
+    sku_id?: string;
     asset?: string;
-}
-
-interface ShopProduct {
-    name: string;
-    items: ShopItem[];
+    label?: string;
+    palette?: string;
+    expires_at?: string | null;
 }
 
 interface ProfileCosmetics {
-    collectibles?: { type: CosmeticType; sku_id: string; expires_at?: string | null; }[];
+    collectibles?: (EquippedCosmetic & { type: CosmeticType; })[] | null;
+    profile_effect?: ({ id?: string; } & EquippedCosmetic) | null;
 }
 
 interface ProfileUser {
-    avatar_decoration_data?: { sku_id?: string; asset?: string; } | null;
+    avatar_decoration_data?: EquippedCosmetic | null;
+    collectibles?: { nameplate?: EquippedCosmetic | null; } | null;
 }
 
 interface ProfileResponse {
@@ -49,11 +50,6 @@ interface ProfileResponse {
     guild_member_profile?: ProfileCosmetics | null;
 }
 
-const ShopStore = findStoreLazy("CollectiblesCategoryStore") as FluxStore & {
-    getProduct(skuId: string): ShopProduct | undefined;
-};
-
-const fetchProduct = findByCodeLazy('"COLLECTIBLES_PRODUCT_FETCH_SUCCESS"', "include_bundles") as (skuId: string) => Promise<void>;
 const fetchProfile = findByCodeLazy('"USER_PROFILE_FETCH_SUCCESS"', '"USER_PROFILE_FETCH_START"', "join_request_id") as (
     userId: string,
     options: { guildId?: string; },
@@ -80,48 +76,47 @@ function getShopSku(input: string) {
     }
 }
 
-function getProfileSku(profile: ProfileCosmetics | null | undefined, type: CosmeticType) {
-    return profile?.collectibles?.find(item =>
-        item.type === type && (!item.expires_at || Date.parse(item.expires_at) > Date.now())
-    )?.sku_id;
+function isEquipped(item?: EquippedCosmetic | null): item is EquippedCosmetic {
+    return item != null && (!item.expires_at || Date.parse(item.expires_at) > Date.now());
 }
 
-function readProfileCosmetics(profile: ProfileResponse): Partial<Cosmetics> {
-    const { guild_member_profile: guild, user_profile: global, guild_member: member, user } = profile;
-    const guildDecoration = member?.avatar_decoration_data;
-    const globalDecoration = user.avatar_decoration_data;
-    const guildDecorationSku = getProfileSku(guild, CosmeticType.AvatarDecoration) || guildDecoration?.sku_id;
-    const globalDecorationSku = getProfileSku(global, CosmeticType.AvatarDecoration) || globalDecoration?.sku_id;
-    const effectSku = getProfileSku(guild, CosmeticType.ProfileEffect) || getProfileSku(global, CosmeticType.ProfileEffect);
-
+function readProfileCosmetics(profile?: ProfileCosmetics | null, user?: ProfileUser | null): Partial<Cosmetics> {
     const overrides: Partial<Cosmetics> = {};
-    if (guildDecorationSku) {
-        overrides.decoration = {
-            skuId: guildDecorationSku,
-            asset: guildDecoration?.sku_id === guildDecorationSku ? guildDecoration.asset : undefined
-        };
-    } else if (guildDecoration?.asset) {
-        overrides.decoration = guildDecoration.asset;
-    } else if (globalDecorationSku) {
-        overrides.decoration = {
-            skuId: globalDecorationSku,
-            asset: globalDecoration?.sku_id === globalDecorationSku ? globalDecoration.asset : undefined
-        };
-    } else if (globalDecoration?.asset) {
-        overrides.decoration = globalDecoration.asset;
-    }
+    for (const { key, type } of cosmeticTypes) {
+        const item = profile?.collectibles?.find(item => item.type === type && isEquipped(item));
+        const equipped = key === "decoration"
+            ? user?.avatar_decoration_data
+            : key === "nameplate" ? user?.collectibles?.nameplate : undefined;
+        const metadata = isEquipped(equipped) ? equipped : undefined;
+        const legacyEffect = key === "profileEffect" && isEquipped(profile?.profile_effect)
+            ? profile.profile_effect
+            : undefined;
 
-    if (effectSku) {
-        overrides.profileEffect = { skuId: effectSku };
+        const skuId = item?.sku_id ?? metadata?.sku_id ?? legacyEffect?.sku_id ?? legacyEffect?.id;
+        if (skuId) {
+            const details = metadata?.sku_id === skuId ? metadata : item;
+            overrides[key] = {
+                skuId,
+                asset: details?.asset,
+                label: details?.label,
+                palette: details?.palette
+            };
+        } else if (key === "decoration" && metadata?.asset) {
+            overrides.decoration = metadata.asset;
+        }
     }
     return overrides;
 }
 
 async function getProfileCosmetics(userId: string) {
     const guildId = SelectedGuildStore.getGuildId();
-    let profile: ProfileResponse | undefined;
+    let cosmetics: Partial<Cosmetics> = {};
     const receive = (response: ProfileResponse) => {
-        profile = response;
+        // Discord normalizes the response in place after this callback.
+        cosmetics = {
+            ...readProfileCosmetics(response.user_profile, response.user),
+            ...readProfileCosmetics(response.guild_member_profile, response.guild_member)
+        };
     };
     try {
         await fetchProfile(userId, { guildId: guildId ?? undefined }, receive);
@@ -133,7 +128,22 @@ async function getProfileCosmetics(userId: string) {
         await fetchProfile(userId, {}, receive);
     }
 
-    return profile && readProfileCosmetics(profile);
+    const { nameplate } = cosmetics;
+    if (typeof nameplate === "object" && !nameplate.asset) {
+        const product = await getShopProduct(nameplate.skuId);
+        const item = product?.items.find(item => item.type === CosmeticType.Nameplate && item.skuId === nameplate.skuId);
+        if (item?.asset) {
+            cosmetics.nameplate = {
+                skuId: item.skuId,
+                name: product?.name,
+                asset: item.asset,
+                label: item.label,
+                palette: item.palette
+            };
+        }
+    }
+
+    return cosmetics;
 }
 
 function OverrideRow({ title, value, src, onReset, busy }: {
@@ -159,7 +169,8 @@ function OverrideRow({ title, value, src, onReset, busy }: {
     );
 }
 
-export function CosmeticsEditor({ decoration, profileEffect, onSelect, onError, onOpenShop, busy, onBusy }: Cosmetics & {
+export function CosmeticsEditor({ cosmetics, onSelect, onError, onOpenShop, busy, onBusy }: {
+    cosmetics: Cosmetics;
     onSelect(kind: Cosmetic, value: UserOverride[Cosmetic]): void;
     onError(message: string): void;
     onOpenShop(): void;
@@ -168,7 +179,7 @@ export function CosmeticsEditor({ decoration, profileEffect, onSelect, onError, 
 }) {
     const [link, setLink] = useState("");
     const [userId, setUserId] = useState("");
-    const avatarDecoration = getDecorationData(decoration);
+    const avatarDecoration = getDecorationData(cosmetics.decoration);
     const src = avatarDecoration && IconUtils.getAvatarDecorationURL({ avatarDecoration, size: 64, canAnimate: true });
 
     async function addShopItem() {
@@ -181,10 +192,7 @@ export function CosmeticsEditor({ decoration, profileEffect, onSelect, onError, 
 
         onBusy(true);
         try {
-            if (!ShopStore.getProduct(sku)) {
-                await fetchProduct(sku);
-            }
-            const product = ShopStore.getProduct(sku);
+            const product = await getShopProduct(sku);
             if (!product) {
                 onError("Could not load that shop item.");
                 return;
@@ -192,21 +200,26 @@ export function CosmeticsEditor({ decoration, profileEffect, onSelect, onError, 
 
             const items = product.items.filter(item => item.skuId === sku);
             const source = items.length ? items : product.items;
-            const decoration = source.find(item => item.type === CosmeticType.AvatarDecoration);
-            const profileEffect = source.find(item => item.type === CosmeticType.ProfileEffect);
-            if (!decoration && !profileEffect) {
-                onError("That shop item has no avatar decoration or profile effect.");
-                return;
-            }
-            if (decoration) {
-                onSelect("decoration", {
-                    skuId: decoration.skuId,
+            let applied = false;
+            for (const { key, type } of cosmeticTypes) {
+                const item = source.find(item => item.type === type);
+                if (!item) {
+                    continue;
+                }
+
+                onSelect(key, {
+                    skuId: item.skuId,
                     name: product.name,
-                    asset: decoration.asset
+                    asset: item.asset,
+                    label: item.label,
+                    palette: item.palette
                 });
+                applied = true;
             }
-            if (profileEffect) {
-                onSelect("profileEffect", { skuId: profileEffect.skuId, name: product.name });
+
+            if (!applied) {
+                onError("That shop item has no supported cosmetics.");
+                return;
             }
             setLink("");
         } catch {
@@ -227,15 +240,16 @@ export function CosmeticsEditor({ decoration, profileEffect, onSelect, onError, 
         onBusy(true);
         try {
             const cosmetics = await getProfileCosmetics(id);
-            if (!cosmetics?.decoration && !cosmetics?.profileEffect) {
-                onError("That user has no avatar decoration or profile effect to copy.");
+            if (!Object.keys(cosmetics).length) {
+                onError("That user has no equipped cosmetics to copy.");
                 return;
             }
-            if (cosmetics.decoration) {
-                onSelect("decoration", cosmetics.decoration);
-            }
-            if (cosmetics.profileEffect) {
-                onSelect("profileEffect", cosmetics.profileEffect);
+
+            for (const { key } of cosmeticTypes) {
+                const value = cosmetics[key];
+                if (value) {
+                    onSelect(key, value);
+                }
             }
             setUserId("");
         } catch {
@@ -249,19 +263,16 @@ export function CosmeticsEditor({ decoration, profileEffect, onSelect, onError, 
         <>
             <section className={cl("field")}>
                 <Heading tag="h3">Cosmetic Overrides</Heading>
-                <OverrideRow
-                    title="Avatar Decoration"
-                    value={decoration}
-                    src={src}
-                    busy={busy}
-                    onReset={() => onSelect("decoration", "")}
-                />
-                <OverrideRow
-                    title="Profile Effect"
-                    value={profileEffect}
-                    busy={busy}
-                    onReset={() => onSelect("profileEffect", "")}
-                />
+                {cosmeticTypes.map(({ key, label }) => (
+                    <OverrideRow
+                        key={key}
+                        title={label}
+                        value={cosmetics[key]}
+                        src={key === "decoration" ? src : undefined}
+                        busy={busy}
+                        onReset={() => onSelect(key, "")}
+                    />
+                ))}
             </section>
 
             <section className={cl("field")}>
