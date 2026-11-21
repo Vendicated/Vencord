@@ -100,6 +100,14 @@ export default definePlugin({
                 match: /user:(\i),widgets:.{0,100}?\}\),/,
                 replace: "$&$self.renderProfileComponent({user:$1}),"
             }
+        },
+        {
+            // Bot popout
+            find: '"BotUserProfilePopout"',
+            replacement: {
+                match: /\(0,\i\.jsx\)\(\i\.\i,\{user:(\i),currentUser:\i,guildId:\i\?\.id,onOpenUserProfileModal:\i,onClose:\i\}\)/,
+                replace: "$self.renderProfileComponent({user:$1}),$&"
+            }
         }
     ],
 
