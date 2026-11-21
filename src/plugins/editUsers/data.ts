@@ -15,12 +15,15 @@ export const enum OverrideFlags {
     DisableServerAvatars = 1 << 3,
     KeepServerBanner = 1 << 4,
     DisableServerBanners = 1 << 5,
+    OverrideRoleColor = 1 << 6,
+    UseDefaultAvatar = 1 << 7,
 }
 
 export type UserTag = "" | "BOT" | "OFFICIAL" | "SERVER" | "ORIGINAL_POSTER" | "NONE";
 
 export interface UserOverride {
     username: string;
+    usernameColor: string;
     avatarUrl: string;
     bannerUrl: string;
     bannerColor: string;
@@ -33,6 +36,7 @@ export interface UserOverride {
 
 export const emptyOverride: UserOverride = Object.freeze({
     username: "",
+    usernameColor: "",
     avatarUrl: "",
     bannerUrl: "",
     bannerColor: "",

@@ -6,11 +6,12 @@
 
 import "./styles.css";
 
-import { ErrorBoundary } from "@components/index";
+import { NavContextMenuPatchCallback } from "@api/ContextMenu";
+import { ErrorBoundary, PencilIcon } from "@components/index";
 import { Devs } from "@utils/constants";
 import definePlugin, { StartAt } from "@utils/types";
-import { DisplayProfile, User } from "@vencord/discord-types";
-import { Menu, useMemo } from "@webpack/common";
+import { Channel, DisplayProfile, Message, User } from "@vencord/discord-types";
+import { IconUtils, Menu, useMemo } from "@webpack/common";
 
 import { getName, getUserOverride, hasFlag, OverrideFlags, settings, UserTag,useUserOverride } from "./data";
 import { loadImageKeys, useLocalImage } from "./images";
@@ -20,6 +21,7 @@ function keepGuildAvatar(user: User, guildId?: string | null) {
     const { avatarUrl, flags } = getUserOverride(user.id);
     return guildId != null && user.hasAvatarForGuild(guildId)
         && !hasFlag(flags, OverrideFlags.DisableServerAvatars)
+        && !hasFlag(flags, OverrideFlags.UseDefaultAvatar)
         && (!avatarUrl || hasFlag(flags, OverrideFlags.KeepServerAvatar));
 }
 
@@ -28,6 +30,48 @@ function keepGuildBanner(profile: DisplayProfile) {
     return profile.isUsingGuildMemberBanner()
         && !hasFlag(flags, OverrideFlags.DisableServerBanners)
         && (!bannerUrl || hasFlag(flags, OverrideFlags.KeepServerBanner));
+}
+
+const addEditUser: NavContextMenuPatchCallback = (children, { user }: { user?: User; }) => {
+    if (!user) {
+        return;
+    }
+
+    children.push(
+        <Menu.MenuItem
+            id="vc-edit-user"
+            label="Edit User"
+            action={() => openUserEditModal(user)}
+            icon={PencilIcon}
+            leadingAccessory={{ type: "icon", icon: PencilIcon }}
+        />
+    );
+};
+
+interface NameColors {
+    colorString?: string | null;
+    colorStrings?: { primaryColor?: string | null; } | null;
+}
+
+interface MessageNameContext {
+    author: NameColors & { guildId?: string; };
+    message?: Message;
+    userOverride?: User;
+    channel?: Channel;
+}
+
+function useNameColors(userId: string | undefined, guildId: string | undefined, original: NameColors) {
+    const { usernameColor, flags } = useUserOverride(userId);
+    if (!usernameColor) {
+        return;
+    }
+
+    const hasRoleColor = guildId && (original.colorString || original.colorStrings?.primaryColor);
+    if (hasRoleColor && !hasFlag(flags, OverrideFlags.OverrideRoleColor)) {
+        return original;
+    }
+
+    return { colorString: `#${usernameColor}`, colorStrings: undefined, forceNameColor: true };
 }
 
 export default definePlugin({
@@ -44,19 +88,8 @@ export default definePlugin({
     },
 
     contextMenus: {
-        "user-context"(children, { user }: { user?: User; }) {
-            if (!user) {
-                return;
-            }
-
-            children.push(
-                <Menu.MenuItem
-                    id="vc-edit-user"
-                    label="Edit User"
-                    action={() => openUserEditModal(user)}
-                />
-            );
-        }
+        "user-context": addEditUser,
+        "user-profile-overflow-menu": addEditUser
     },
 
     patches: [
@@ -92,10 +125,53 @@ export default definePlugin({
             }
         },
         {
+            find: '="SYSTEM_TAG"',
+            group: true,
+            replacement: [
+                {
+                    match: /colorString:(\i),colorStrings:(\i),(colorRoleName:\i,displayNameStyles:\i\}=\i),/,
+                    replace: "colorString:vcNativeColor,colorStrings:vcNativeColors,$3,{colorString:$1,colorStrings:$2,forceNameColor:vcForceNameColor}=$self.useMessageColors(arguments[0],vcNativeColor,vcNativeColors),"
+                },
+                {
+                    match: /(?<==)\i&&\i(?=,\i=\i\?\.isPrivate\(\)&&null!=\i;)/,
+                    replace: "!vcForceNameColor&&($&)"
+                },
+                {
+                    match: /(?<==)\i\?\.isPrivate\(\)&&null!=\i(?=;)/,
+                    replace: "!vcForceNameColor&&($&)"
+                },
+                {
+                    match: /style:function\(\)\{(?=if\(\i\)return \i&&null!=\i\?\{\.\.\.\i,textDecorationColor:).{0,200}?\{color:(\i)\}/,
+                    replace: (match, color) => match.replace("style:function(){", `style:function(){if(vcForceNameColor)return{color:${color}};`)
+                }
+            ]
+        },
+        {
             find: ".MEMBER_LIST_ITEM_AVATAR_DECORATION_PADDING)",
+            replacement: [
+                {
+                    match: /name:(\i)\?\?(\i)(?=,(?:quest|colorStrings):)/g,
+                    replace: "name:$self.getName(arguments[0].user?.id,$1)??$2"
+                },
+                {
+                    match: /(?<=guildId:\i,isHovering:\i\}=\i,)(?=\i=.{0,110}userId:\i\?\.id,guildId:)/,
+                    replace: "vcNameColors=$self.useMemberColors(arguments[0]),"
+                },
+                {
+                    match: /(?<=colorStrings:\i,name:\i,)(?=className:\i\.\i,displayNameStylesFont:)/,
+                    replace: "...vcNameColors,"
+                },
+                {
+                    match: /(?<==)null==\i&&null!=\i(?=;return\(0,\i\.jsxs\)\(\i\.Fragment,\{children:\[\i\?.{0,100}userName:)/,
+                    replace: "!vcNameColors?.forceNameColor&&($&)"
+                }
+            ]
+        },
+        {
+            find: /dotAlignment:\i="left",className:\i,nameTextClassName:/,
             replacement: {
-                match: /name:(\i)\?\?(\i)(?=,(?:quest|colorStrings):)/g,
-                replace: "name:$self.getName(arguments[0].user?.id,$1)??$2"
+                match: /(?<=\.jsx\)\(\i,\{\.\.\.(\i),roleStyle:)\i(?=\}\)\}\}\)\})/,
+                replace: '$1.forceNameColor?"username":$&'
             }
         },
         {
@@ -107,10 +183,16 @@ export default definePlugin({
         },
         {
             find: "getUserAvatarURL:",
-            replacement: {
-                match: /(?<=function \i\((\i)\)\{)(?=let .{0,330}?return \i\(\1,\i,\i,\i,\i\)\?\?\i\(\1\.id,\1\.discriminator,\1\.isProvisional,\i\))/,
-                replace: "const vcAvatar=$self.getAvatarUrl($1);if(vcAvatar)return vcAvatar;"
-            }
+            replacement: [
+                {
+                    match: /(?<=function \i\((\i)\)\{)(?=let .{0,330}?return \i\(\1,\i,\i,\i,\i\)\?\?\i\(\1\.id,\1\.discriminator,\1\.isProvisional,\i\))/,
+                    replace: "const vcAvatar=$self.getAvatarUrl($1);if(vcAvatar)return vcAvatar;"
+                },
+                {
+                    match: /(?<=return )(\i\((\i),\i,\i,\i,\i\))(?=\?\?\i\(\2\.id,\2\.discriminator,\2\.isProvisional,\i\))/,
+                    replace: "($self.shouldUseDefaultAvatar($2.id)?null:$1)"
+                }
+            ]
         },
         {
             find: /avatarSrc:\i\.useMemo\(.{0,160}?,isAvatarAnimating:/,
@@ -222,20 +304,46 @@ export default definePlugin({
     getPronouns: (userId: string) => getUserOverride(userId).pronouns || undefined,
     getTag: (userId?: string): UserTag | undefined => getUserOverride(userId).tag || undefined,
 
-    getAvatarUrl: (user?: User) => getUserOverride(user?.id).avatarUrl || undefined,
+    shouldUseDefaultAvatar: (userId: string) => hasFlag(getUserOverride(userId).flags, OverrideFlags.UseDefaultAvatar),
+
+    getAvatarUrl(user?: User) {
+        const { avatarUrl, flags } = getUserOverride(user?.id);
+        if (!hasFlag(flags, OverrideFlags.UseDefaultAvatar)) {
+            return avatarUrl || undefined;
+        }
+    },
+
+    useMessageColors(
+        { author, message, userOverride, channel }: MessageNameContext,
+        colorString: NameColors["colorString"],
+        colorStrings: NameColors["colorStrings"]
+    ) {
+        return useNameColors(userOverride?.id ?? message?.author?.id, channel?.guild_id ?? author.guildId, author)
+            ?? { colorString, colorStrings };
+    },
+
+    useMemberColors({ user, guildId, colorString, colorStrings }: NameColors & { user?: User; guildId?: string; }) {
+        return useNameColors(user?.id, guildId, { colorString, colorStrings });
+    },
 
     useAvatar(user: User | undefined, member: { avatar?: string | null; } | null, preview: unknown, getSrc: () => string | undefined) {
         const { flags } = useUserOverride(user?.id);
         const preferGuildAvatar = member?.avatar
             && !hasFlag(flags, OverrideFlags.DisableServerAvatars)
             && hasFlag(flags, OverrideFlags.KeepServerAvatar);
-        const userId = preview === undefined && !preferGuildAvatar ? user?.id : undefined;
+        const useLocalAvatar = preview === undefined && !preferGuildAvatar && !hasFlag(flags, OverrideFlags.UseDefaultAvatar);
+        const userId = useLocalAvatar ? user?.id : undefined;
         return useLocalImage(userId, "avatar") ?? getSrc();
     },
 
     useAccountAvatar(user?: User) {
-        const { avatarUrl } = useUserOverride(user?.id);
-        return useLocalImage(user?.id, "avatar") ?? (avatarUrl || undefined);
+        const { avatarUrl, flags } = useUserOverride(user?.id);
+        const useDefault = hasFlag(flags, OverrideFlags.UseDefaultAvatar);
+        const local = useLocalImage(useDefault ? undefined : user?.id, "avatar");
+        if (useDefault && user) {
+            return IconUtils.getDefaultAvatarURL(user.id, user.discriminator);
+        }
+        return local ?? (avatarUrl || undefined);
     },
 
     getBannerColor(userId: string) {
