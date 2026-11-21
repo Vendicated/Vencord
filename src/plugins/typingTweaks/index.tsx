@@ -18,6 +18,7 @@
 
 import { definePluginSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
+import { getUserColor } from "@plugins/ircColors";
 import { Devs } from "@utils/constants";
 import { classNameFactory } from "@utils/css";
 import { openUserProfile } from "@utils/discord";
@@ -77,7 +78,10 @@ const TypingUser = ErrorBoundary.wrap(function TypingUser({ user, guildId }: Typ
                 openUserProfile(user.id);
             }}
             style={{
-                color: settings.store.showRoleColors ? GuildMemberStore.getMember(guildId, user.id)?.colorString : undefined,
+                color: settings.store.showRoleColors ? getUserColor(user.id, {
+                    colorString: GuildMemberStore.getMember(guildId, user.id)?.colorString,
+                    isPrivate: !guildId
+                }) ?? undefined : undefined,
             }}
         >
             {settings.store.showAvatars && (

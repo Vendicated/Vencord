@@ -20,14 +20,22 @@ import { definePluginSettings } from "@api/Settings";
 import { hash as h64 } from "@intrnl/xxhash64";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { useMemo } from "@webpack/common";
+import { GuildMember, Role } from "@vencord/discord-types";
 
-// Calculate a CSS color string based on the user ID
-function calculateNameColorForUser(id?: string) {
-    const { lightness, saturation, seed } = settings.use(["lightness", "saturation", "seed"]);
-    const idHash = useMemo(() => id ? h64(id + seed) : null, [id, seed]);
+type ColorProps = Pick<GuildMember | Role, "colorString" | "colorStrings">;
 
-    return idHash && `hsl(${idHash % 360n}, ${saturation}%, ${lightness}%)`;
+// https://stackoverflow.com/a/44134328
+// Role Color Everywhere expects colorString to be hex, so...
+function hslToHex(hue: number, saturation: number, lightness: number) {
+    lightness /= 100;
+    const a = saturation * Math.min(lightness, 1 - lightness) / 100;
+    const f = (n: number) => {
+        const k = (n + hue / 30) % 12;
+        const color = lightness - a * Math.max(Math.min(k - 3, 9 - k, 1), -1);
+        // Clip RGB, not HSL, so extended saturation and lightness still affect the color.
+        return Math.round(255 * Math.max(0, Math.min(1, color))).toString(16).padStart(2, "0");
+    };
+    return `#${f(0)}${f(8)}${f(4)}`;
 }
 
 const settings = definePluginSettings({
@@ -71,11 +79,23 @@ const settings = definePluginSettings({
     }
 });
 
+export function getUserColor(userId: string | undefined, { colorString, isPrivate }: { colorString?: string | null; isPrivate: boolean; }) {
+    if (!Vencord.Plugins.isPluginEnabled("IrcColors")) return colorString;
+    if (settings.store.applyColorOnlyInDms && !isPrivate) return colorString;
+    if (settings.store.applyColorOnlyToUsersWithoutColor && colorString) return colorString;
+    if (!userId) return colorString;
+
+    const { lightness, saturation, seed } = settings.store;
+    const hue = Number(h64(userId + seed) % 360n);
+
+    return hslToHex(hue, saturation, lightness);
+}
+
 export default definePlugin({
     name: "IrcColors",
     description: "Makes username colors in chat unique, like in IRC clients",
     tags: ["Appearance", "Customisation"],
-    authors: [Devs.Grzesiek11, Devs.jamesbt365],
+    authors: [Devs.Grzesiek11, Devs.jamesbt365, Devs.hen],
     settings,
 
     patches: [
@@ -94,27 +114,52 @@ export default definePlugin({
                 replace: "colorString:$self.calculateNameColorForListContext(arguments[0]),originalColor:"
             },
             predicate: () => settings.store.memberListColors
-        }
+        },
+        // Activity bar
+        {
+            find: "Masks.CONTENT_INVENTORY_CARD_FACE_PILE_AVATAR",
+            replacement: {
+                match: /\{colorString:.+?\}/,
+                replace: "$self.wrapAuthorColorProps($&,arguments[0])"
+            },
+            predicate: () => settings.store.memberListColors
+        },
     ],
 
-    wrapMessageColorProps(colorProps: { colorString: string, colorStrings?: Record<"primaryColor" | "secondaryColor" | "tertiaryColor", string>; }, context: any) {
-        try {
-            const colorString = this.calculateNameColorForMessageContext(context);
-            if (colorString === colorProps.colorString) {
-                return colorProps;
-            }
+    wrapColorProps(colorProps: ColorProps, colorString: ColorProps["colorString"] | null) {
+        if (colorString === colorProps.colorString) {
+            return colorProps;
+        }
 
-            return {
-                ...colorProps,
-                colorString,
-                colorStrings: colorProps.colorStrings && {
-                    primaryColor: colorString,
-                    secondaryColor: undefined,
-                    tertiaryColor: undefined
-                }
-            };
+        return {
+            ...colorProps,
+            colorString,
+            colorStrings: colorProps.colorStrings && {
+                primaryColor: colorString,
+                secondaryColor: undefined,
+                tertiaryColor: undefined
+            }
+        };
+    },
+
+    wrapMessageColorProps(colorProps: ColorProps, context: any) {
+        try {
+            return this.wrapColorProps(colorProps, this.calculateNameColorForMessageContext(context));
         } catch (e) {
             console.error("Failed to calculate message color strings:", e);
+            return colorProps;
+        }
+    },
+
+    wrapAuthorColorProps(colorProps: ColorProps, context: { entry: { author_id: string; }; guildId?: string; }) {
+        try {
+            const colorString = getUserColor(context.entry.author_id, {
+                colorString: colorProps.colorString,
+                isPrivate: context.guildId == null
+            });
+            return this.wrapColorProps(colorProps, colorString);
+        } catch (e) {
+            console.error("Failed to calculate author color strings:", e);
             return colorProps;
         }
     },
@@ -122,34 +167,23 @@ export default definePlugin({
     calculateNameColorForMessageContext(context: any) {
         const userId: string | undefined = context?.message?.author?.id;
         const colorString = context?.author?.colorString;
-        const color = calculateNameColorForUser(userId);
 
         // Color preview in role settings
         if (context?.message?.channel_id === "1337" && userId === "313337")
             return colorString;
 
-        if (settings.store.applyColorOnlyInDms && !context?.channel?.isPrivate()) {
-            return colorString;
-        }
-
-        return (!settings.store.applyColorOnlyToUsersWithoutColor || !colorString)
-            ? color
-            : colorString;
+        return getUserColor(userId, {
+            colorString,
+            isPrivate: context?.channel?.isPrivate() ?? false
+        });
     },
 
     calculateNameColorForListContext(context: any) {
         try {
-            const id = context?.user?.id;
-            const colorString = context?.colorString;
-            const color = calculateNameColorForUser(id);
-
-            if (settings.store.applyColorOnlyInDms && context?.guildId !== undefined) {
-                return colorString;
-            }
-
-            return (!settings.store.applyColorOnlyToUsersWithoutColor || !colorString)
-                ? color
-                : colorString;
+            return getUserColor(context?.user?.id, {
+                colorString: context?.colorString,
+                isPrivate: context?.guildId === undefined
+            });
         } catch (e) {
             console.error("Failed to calculate name color for list context:", e);
         }
