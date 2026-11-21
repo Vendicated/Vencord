@@ -187,7 +187,7 @@ export type Select = ComponentType<PropsWithChildren<{
 
 export type SearchableSelect = ComponentType<PropsWithChildren<{
     placeholder?: string;
-    options: ReadonlyArray<SelectOption>; // TODO
+    options: ReadonlyArray<SelectOption> | ((query: string) => Promise<SelectOption[]>);
     value?: any;
 
     /**
@@ -218,7 +218,7 @@ export type SearchableSelect = ComponentType<PropsWithChildren<{
     renderOptionPrefix?(option: SelectOption): ReactNode;
     renderOptionSuffix?(option: SelectOption): ReactNode;
 
-    filter?(option: SelectOption[], query: string): SelectOption[];
+    filter?: boolean | ((option: SelectOption[], query: string) => SelectOption[]);
 
     centerCaret?: boolean;
     debounceTime?: number;

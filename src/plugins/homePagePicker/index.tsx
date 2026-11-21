@@ -21,7 +21,9 @@ import { definePluginSettings, migratePluginSettings } from "@api/Settings";
 import { SettingsSection } from "@components/settings/tabs/plugins/components/Common";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { ChannelRouter, ChannelStore, GuildChannelStore, GuildStore, NavigationRouter, SearchableSelect, SelectedChannelStore, SelectedGuildStore, SortedGuildStore } from "@webpack/common";
+import { Channel } from "@vencord/discord-types";
+import { findByPropsLazy } from "@webpack";
+import { ChannelRouter, ChannelStore, GuildStore, NavigationRouter, SearchableSelect, SelectedChannelStore, SelectedGuildStore } from "@webpack/common";
 
 export interface LogoutEvent {
     type: "LOGOUT";
@@ -39,11 +41,12 @@ interface PreviousChannel {
     channelId: string | null;
 }
 
+const ChannelSearch = findByPropsLazy("queryChannels", "queryGroupDMs", "queryDMChannels");
+
 let isSwitchingAccount = false;
 let previousCache: PreviousChannel | undefined;
 
 const FRIENDS_PATH = "/channels/@me";
-const LAST_VISITED = "last";
 const PREVIOUS_CHANNEL = "previous";
 
 const settings = definePluginSettings({
@@ -53,10 +56,9 @@ const settings = definePluginSettings({
         options: [
             { label: "Previous Channel", value: PREVIOUS_CHANNEL, default: true },
             { label: "Friends", value: FRIENDS_PATH },
-            { label: "Direct Message", value: "dm" },
-            { label: "Server", value: "server" },
+            { label: "Channel", value: "channel" },
             { label: "Favorites", value: "/channels/@favorites" },
-            { label: "Discover", value: "/discovery/servers" },
+            { label: "Server Discovery", value: "/discovery/servers" },
             { label: "Quests", value: "/quest-home" },
             { label: "Shop", value: "/shop" },
             { label: "Nitro Home", value: "/store" }
@@ -69,114 +71,75 @@ const settings = definePluginSettings({
     keepChannelOnSwitch: {
         type: OptionType.BOOLEAN,
         displayName: "Always Return To Previous Channel On Account Switch",
-        description: "When switching accounts, atempt to navigate back to the channel you were in. When disabled, the selected page is opened instead",
+        description: "When switching accounts, attempt to navigate back to the channel you were in. When disabled, the selected page is opened instead",
         default: true
-    },
-    guildId: {
-        type: OptionType.STRING,
-        description: "Server to open",
-        default: "",
-        hidden: true
     },
     channelId: {
         type: OptionType.STRING,
-        description: "Channel to open",
-        default: LAST_VISITED,
-        hidden: true
-    },
-    dmId: {
-        type: OptionType.STRING,
-        description: "DM to open",
-        default: "",
+        description: "Channel or DM to open",
         hidden: true
     }
 });
 
-function TargetSetting() {
-    const { startPage, guildId, channelId, dmId } = settings.use(["startPage", "guildId", "channelId", "dmId"]);
-
-    if (startPage === "dm") {
-        const dmOptions = ChannelStore.getSortedPrivateChannels().map(channel => ({
-            label: channel.name || channel.rawRecipients.map(user => user.global_name ?? user.username).join(", "),
-            value: channel.id
-        }));
-
-        return (
-            <SettingsSection id="dmId" name="DM" description={settings.def.dmId.description}>
-                <SearchableSelect
-                    placeholder="Select a DM"
-                    options={dmOptions}
-                    value={dmId}
-                    onChange={id => settings.store.dmId = id}
-                    maxVisibleItems={5}
-                    closeOnSelect
-                />
-            </SettingsSection>
-        );
-    } else if (startPage === "server") {
-        const guildOptions = SortedGuildStore.getFlattenedGuildIds()
-            .map(id => GuildStore.getGuild(id))
-            .filter(Boolean)
-            .map(guild => ({ label: guild.name, value: guild.id }));
-
-        const channelOptions = [{ label: "Last visited", value: LAST_VISITED }];
-        if (guildId) {
-            const channels = GuildChannelStore.getSelectableChannels(guildId);
-            channelOptions.push(...channels.map(({ channel }) => ({ label: `#${channel.name}`, value: channel.id })));
-        }
-
-        return (
-            <>
-                <SettingsSection id="guildId" name="Server" description={settings.def.guildId.description}>
-                    <SearchableSelect
-                        placeholder="Select a server"
-                        options={guildOptions}
-                        value={guildId}
-                        onChange={id => {
-                            settings.store.guildId = id;
-                            settings.store.channelId = LAST_VISITED;
-                        }}
-                        maxVisibleItems={5}
-                        closeOnSelect
-                    />
-                </SettingsSection>
-                {guildId && (
-                    <SettingsSection id="channelId" name="Channel" description={settings.def.channelId.description}>
-                        <SearchableSelect
-                            placeholder="Select a channel"
-                            options={channelOptions}
-                            value={channelId}
-                            onChange={id => settings.store.channelId = id}
-                            maxVisibleItems={5}
-                            closeOnSelect
-                        />
-                    </SettingsSection>
-                )}
-            </>
-        );
+function getChannelLabel(channel: Channel) {
+    if (channel.guild_id) {
+        return `#${channel.name} - ${GuildStore.getGuild(channel.guild_id)?.name}`;
     }
 
-    return null;
+    return channel.name || channel.rawRecipients.map(user => user.global_name ?? user.username).join(", ");
+}
+
+function toOption(channel: Channel) {
+    return { label: getChannelLabel(channel), value: channel.id };
+}
+
+async function searchChannels(query: string) {
+    const results = [
+        ...ChannelSearch.queryChannels({ query, limit: 10, allowEmptyQueries: true }),
+        ...ChannelSearch.queryGroupDMs({ query, limit: 10 }),
+        ...ChannelSearch.queryDMChannels({ query, limit: 10 })
+    ];
+
+    return results
+        .sort((a, b) => b.score - a.score)
+        .map(result => toOption(result.record));
+}
+
+function TargetSetting() {
+    const { startPage, channelId } = settings.use(["startPage", "channelId"]);
+
+    if (startPage !== "channel") {
+        return null;
+    }
+
+    const channel = ChannelStore.getChannel(channelId ?? "");
+
+    return (
+        <SettingsSection id="channelId" name="Channel" description={settings.def.channelId.description}>
+            <SearchableSelect
+                placeholder="Search for a channel or DM"
+                options={searchChannels}
+                value={channel && toOption(channel)}
+                onChange={option => settings.store.channelId = option.value}
+                filter={false}
+                debounceTime={100}
+                maxVisibleItems={5}
+                closeOnSelect
+            />
+        </SettingsSection>
+    );
 }
 
 function getStartPath() {
-    const { startPage, guildId, channelId, dmId } = settings.store;
+    const { startPage, channelId } = settings.store;
 
-    if (startPage === "dm") {
-        if (dmId) {
-            return `${FRIENDS_PATH}/${dmId}`;
-        } else {
+    if (startPage === "channel") {
+        const channel = ChannelStore.getChannel(channelId ?? "");
+        if (!channel) {
             return FRIENDS_PATH;
         }
-    } else if (startPage === "server") {
-        if (!guildId) {
-            return FRIENDS_PATH;
-        }
-        if (channelId === LAST_VISITED) {
-            return `/channels/${guildId}`;
-        } else {
-            return `/channels/${guildId}/${channelId}`;
-        }
+
+        return `/channels/${channel.guild_id ?? "@me"}/${channel.id}`;
     }
 
     if (!startPage || startPage === PREVIOUS_CHANNEL) {
