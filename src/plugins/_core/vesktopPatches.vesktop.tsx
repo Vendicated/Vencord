@@ -11,7 +11,17 @@
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 
-const vesktopVersion: string = VesktopNative.app.getVersion();
+// Reporter ignores plugin targets, so we need to mock VesktopPatchGlobals & Vesktop version for it to work
+
+const vesktopVersion: string = IS_VESKTOP ? VesktopNative.app.getVersion() : "0";
+
+if (IS_REPORTER && !IS_VESKTOP) {
+    window.VesktopPatchGlobals = new Proxy({}, {
+        get(target, prop) {
+            return target[prop] || (() => { });
+        }
+    });
+}
 
 function isVesktopVersionAtLeast(version: string) {
     return vesktopVersion.localeCompare(version, undefined, { numeric: true }) >= 0;
