@@ -23,12 +23,13 @@ import { Card } from "@components/Card";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Flex } from "@components/Flex";
 import { Heading } from "@components/Heading";
+import { Link } from "@components/Link";
 import { Paragraph } from "@components/Paragraph";
 import { Devs } from "@utils/constants";
 import { classNameFactory } from "@utils/css";
 import { classes } from "@utils/misc";
 import definePlugin, { OptionType } from "@utils/types";
-import type { Channel, Role } from "@vencord/discord-types";
+import type { Channel } from "@vencord/discord-types";
 import { findCssClassesLazy } from "@webpack";
 import { ChannelStore, PermissionsBits, PermissionStore, Tooltip } from "@webpack/common";
 
@@ -44,12 +45,6 @@ const enum ShowMode {
 }
 
 export const settings = definePluginSettings({
-    hideUnreads: {
-        description: "Hide Unreads",
-        type: OptionType.BOOLEAN,
-        default: true,
-        restartNeeded: true
-    },
     showMode: {
         description: "The mode used to display hidden channels.",
         type: OptionType.SELECT,
@@ -67,7 +62,7 @@ function isUncategorized(objChannel: { channel: Channel; comparator: number; }) 
 
 export default definePlugin({
     name: "ShowHiddenChannels",
-    description: "THIS PLUGIN IS DEAD! Discord patched it. See the plugin settings for more information.",
+    description: "Shows hidden channels. Discord heavily limited this functionality. More info in the plugin settings.",
     tags: ["Servers", "Utility"],
     authors: [Devs.BigDuck, Devs.AverageReactEnjoyer, Devs.D3SOX, Devs.Ven, Devs.Nuckyz, Devs.Nickyux, Devs.Rini],
     settings,
@@ -76,12 +71,13 @@ export default definePlugin({
         return (
             <Card variant="danger">
                 <Flex flexDirection="column" gap="0.5em">
-                    <Heading tag="h3">Plugin Deprecated</Heading>
+                    <Heading tag="h3">Limited Functionality</Heading>
                     <Paragraph>
-                        Discord patched this plugin, it's no longer possible to see hidden channels. All channels will instead show up as "No Access"!
+                        Discord patched most of this plugin's functionality (<Link href="https://docs.discord.com/developers/change-log#channel-obfuscation-for-users-and-bots">read their announcement</Link>).
+                        Hidden channels now show up as "No Access" instead, and seeing things like the name, topic, or people with access is no longer possible.
                     </Paragraph>
                     <Paragraph>
-                        There is nothing we can do to fix it, so the plugin will be removed soon.
+                        There is nothing we can do to fix this. However, you can still know that channels exist and see who's connected to private voice channels.
                     </Paragraph>
                 </Flex>
             </Card>
@@ -97,11 +93,6 @@ export default definePlugin({
                 {
                     match: /if\(!\i\.\i\.can\(\i\.\i\.VIEW_CHANNEL.+?{if\(this\.id===\i\).+?threadIds:\[\]}}/,
                     replace: ""
-                },
-                // Do not check for unreads when selecting the render level if the channel is hidden
-                {
-                    match: /(?<=&&)(?=!\i\.\i\.hasUnread\(this\.record\.id\))/,
-                    replace: "$self.isHiddenChannel(this.record)||"
                 },
                 // Make channels we dont have access to be the same level as normal ones
                 {
@@ -192,23 +183,6 @@ export default definePlugin({
                 {
                     match: /(?<=\?\i\.\i:\i\.\i,)(.{0,150}?)if\((\i)(?:\)return |\?)(\i\.MUTED)/,
                     replace: (_, otherClasses, isMuted, mutedClassExpression) => `${isMuted}?${mutedClassExpression}:"",${otherClasses}if(${isMuted})return ""`
-                }
-            ]
-        },
-        {
-            find: "UNREAD_IMPORTANT:",
-            replacement: [
-                {
-                    // Make muted channels also appear as unread if hide unreads is false, using the HiddenIconWithMutedStyle and the channel is hidden
-                    predicate: () => settings.store.hideUnreads === false && settings.store.showMode === ShowMode.HiddenIconWithMutedStyle,
-                    match: /(?<=\.LOCKED;if\()(?<={channel:(\i).+?)/,
-                    replace: (_, channel) => `!$self.isHiddenChannel(${channel})&&`
-                },
-                {
-                    // Hide unreads
-                    predicate: () => settings.store.hideUnreads === true,
-                    match: /Children\.count.+?;(?=return\(0,\i\.jsxs?\)\(\i\.\i,{focusTarget:)(?<={channel:(\i),name:\i,.+?unread:(\i).+?)/,
-                    replace: (m, channel, unread) => `${m}${unread}=$self.isHiddenChannel(${channel})?false:${unread};`
                 }
             ]
         },
@@ -425,15 +399,6 @@ export default definePlugin({
         }
     ],
 
-    swapViewChannelWithConnectPermission(mergedPermissions: bigint, channel: Channel) {
-        if (!PermissionStore.can(PermissionsBits.CONNECT, channel)) {
-            mergedPermissions &= ~PermissionsBits.VIEW_CHANNEL;
-            mergedPermissions |= PermissionsBits.CONNECT;
-        }
-
-        return mergedPermissions;
-    },
-
     isHiddenChannel(channel: Channel & { channelId?: string; }, checkConnect = false) {
         try {
             if (channel == null || Object.hasOwn(channel, "channelId") && channel.channelId == null) return false;
@@ -467,20 +432,6 @@ export default definePlugin({
         }
 
         return res;
-    },
-
-    makeAllowedRolesReduce(guildId: string) {
-        return [
-            (prev: Array<Role>, _: Role, index: number, originalArray: Array<Role>) => {
-                if (index !== 0) return prev;
-
-                const everyoneRole = originalArray.find(role => role.id === guildId);
-
-                if (everyoneRole) return [everyoneRole];
-                return originalArray;
-            },
-            [] as Array<Role>
-        ];
     },
 
     HiddenChannelLockScreen: (channel: any) => <HiddenChannelLockScreen channel={channel} />,
