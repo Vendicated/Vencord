@@ -12,7 +12,7 @@
 
     "host_permissions": ["*://*.discord.com/*", "https://raw.githubusercontent.com/*"],
 
-    "permissions": ["declarativeNetRequestWithHostAccess"],
+    "permissions": ["declarativeNetRequestWithHostAccess", "nativeMessaging"],
 
     "content_scripts": [
         {
