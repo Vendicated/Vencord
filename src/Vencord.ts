@@ -103,19 +103,21 @@ async function syncSettings() {
 }
 
 let notifiedForUpdatesThisSession = false;
+let checkingForUpdates = false;
 
 async function runUpdateCheck() {
-    if (IS_UPDATER_DISABLED) return;
+    if (IS_UPDATER_DISABLED || checkingForUpdates) return;
+    checkingForUpdates = true;
 
     const notify = (data: NotificationData) => {
         if (notifiedForUpdatesThisSession) return;
         notifiedForUpdatesThisSession = true;
 
-        setTimeout(() => showNotification({
+        void onceReady.then(() => setTimeout(() => showNotification({
             permanent: true,
             noPersist: true,
             ...data
-        }), 10_000);
+        }), 10_000));
     };
 
     try {
@@ -141,15 +143,13 @@ async function runUpdateCheck() {
         });
     } catch (err) {
         UpdateLogger.error("Failed to check for updates", err);
+    } finally {
+        checkingForUpdates = false;
     }
 }
 
 async function init() {
-    await onceReady;
-    startAllPlugins(StartAt.WebpackReady);
-
-    syncSettings();
-
+    // Updates must not depend on Discord initialising successfully.
     if (!IS_WEB && !IS_UPDATER_DISABLED) {
         runUpdateCheck();
 
@@ -158,6 +158,11 @@ async function init() {
             setInterval(runUpdateCheck, 1000 * 60 * 30); // 30 minutes
         }
     }
+
+    await onceReady;
+    startAllPlugins(StartAt.WebpackReady);
+
+    syncSettings();
 
     if (IS_DEV) {
         const pendingPatches = patches.filter(p => !p.all && p.predicate?.() !== false);
