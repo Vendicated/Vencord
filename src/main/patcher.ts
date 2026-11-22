@@ -133,7 +133,7 @@ if (!IS_VANILLA) {
 
     process.env.DATA_DIR = join(app.getPath("userData"), "..", "Vencord");
 
-    if (settings.enableBackgroundRendering) {
+    if (settings.disableBackgroundOptimization !== false) {
         app.commandLine.appendSwitch("disable-backgrounding-occluded-windows");
     }
 } else {
