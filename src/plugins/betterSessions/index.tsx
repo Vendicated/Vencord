@@ -46,6 +46,7 @@ const settings = definePluginSettings({
         description: "How often to check for new sessions in the background (if enabled), in minutes",
         type: OptionType.NUMBER,
         default: 20,
+        min: 1,
         restartNeeded: true
     }
 });

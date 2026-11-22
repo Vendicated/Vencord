@@ -1,4 +1,3 @@
-/* eslint-disable simple-header/header */
 import React from "react";
 
 const handleClick = async () =>

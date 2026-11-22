@@ -1,5 +1,5 @@
-import { Channel, CustomEmoji, Emoji, FluxStore } from "..";
 import { EmojiIntention, LoadState } from "../../enums";
+import { Channel, CustomEmoji, Emoji, FluxStore } from "..";
 
 /** Emoji picker category names. */
 export type EmojiCategory =

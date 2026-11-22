@@ -30,6 +30,7 @@ import { CustomEmoji, FluxStore, Guild, GuildSticker, Message, Sticker, StickerI
 import { EmojiIntention, StickerFormatType, StickerType } from "@vencord/discord-types/enums";
 import { findStoreLazy } from "@webpack";
 import { Constants, EmojiStore, GuildStore, Menu, PermissionsBits, PermissionStore, React, RestAPI, SelectedGuildStore, showToast, StickersStore, UserSettingsActionCreators } from "@webpack/common";
+import { ReactElement } from "react";
 
 import { buildCloneEmojiItem, editEmoji, EmojiURLRegex, openEmojiUploadModal, resolveEmojiName } from "./emojis";
 import { buildCloneStickerItem, buildStickerLinkItems, editSticker } from "./stickers";
@@ -206,13 +207,15 @@ function buildRemoveFrecentItem({ type, id, name }: Record<"type" | "id" | "name
     );
 }
 
+const findFavoriteGroup = (children: Array<ReactElement | null>) => findGroupChildrenByChildId("favorite", children) ?? findGroupChildrenByChildId("unfavorite", children);
+
 const patchExpressionPickerMenu: NavContextMenuPatchCallback = (children, props: { target: HTMLElement; }) => {
     const { id, name, type, formatType } = props?.target?.dataset ?? {};
 
     const removeFrecentItem = buildRemoveFrecentItem({ type, id, name });
 
     if (removeFrecentItem) {
-        const group = findGroupChildrenByChildId("favorite", children) ?? findGroupChildrenByChildId("unfavorite", children);
+        const group = findFavoriteGroup(children);
         group?.splice(1, 0, removeFrecentItem);
     }
 
@@ -271,20 +274,25 @@ const patchMessageContextMenu: NavContextMenuPatchCallback = (children, props: R
             const name = resolveEmojiName(favoriteableId, message);
             if (!name) return;
 
-            const favContainer = findGroupChildrenByChildId("favorite", children);
+            const favContainer = findFavoriteGroup(children);
             const container = favContainer ?? findGroupChildrenByChildId("copy-native-link", children);
 
-            container?.unshift(
-                buildCloneEmojiItem({ id: favoriteableId, name }),
-                !favContainer ? <Menu.MenuSeparator key="vc-em-emoji-separator" /> : null,
-            );
+            if (container) {
+                container?.unshift(
+                    buildCloneEmojiItem({ id: favoriteableId, name }),
+                    !favContainer ? <Menu.MenuSeparator key="vc-em-emoji-separator" /> : null,
+                );
+            } else {
+                children.push(buildCloneEmojiItem({ id: favoriteableId, name }));
+            }
+
             break;
         }
         case "sticker": {
             const sticker = message.stickerItems.find(s => s.id === favoriteableId);
             if (!sticker || sticker.format_type === StickerFormatType.LOTTIE) return;
 
-            const favoriteContainer = findGroupChildrenByChildId("favorite", children);
+            const favoriteContainer = findFavoriteGroup(children);
 
             const cloneItem = buildCloneStickerItem(sticker);
 

@@ -48,7 +48,8 @@ const settings = definePluginSettings({
     iconSize: {
         type: OptionType.NUMBER,
         description: "Icon size (px)",
-        default: 32
+        default: 32,
+        min: 1
     },
     iconSpacing: {
         type: OptionType.SELECT,

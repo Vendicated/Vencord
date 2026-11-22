@@ -45,8 +45,12 @@ export default definePlugin({
             find: "renderAttachments(",
             predicate: () => settings.store.inlineVideo,
             replacement: {
-                match: /url:(\i)\.url\}\);return /,
-                replace: "$&$1.content_type?.startsWith('image/')&&"
+                // Sets some properties on the media item before returning it. We don't want these properties, so
+                // we return early if the content type is not an image
+                //
+                // return item.openInMediaViewer=callbacks[url], item.onClick=callbacks2[url], i
+                match: /url:(\i)\.url\}\);(?=return (\i)\.onOpenInMediaViewer.{0,100}?,\2\})/,
+                replace: "$&if(!$1.content_type?.startsWith('image/'))return $2;"
             }
         },
     ]

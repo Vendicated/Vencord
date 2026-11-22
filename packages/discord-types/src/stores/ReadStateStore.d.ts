@@ -1,5 +1,5 @@
-import { Channel, FluxStore } from "..";
 import { ReadStateType } from "../../enums";
+import { Channel, FluxStore } from "..";
 
 export interface GuildChannelUnreadState {
     mentionCount: number;

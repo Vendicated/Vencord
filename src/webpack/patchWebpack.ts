@@ -13,7 +13,7 @@ import { Patch, PatchReplacement } from "@utils/types";
 import { WebpackRequire } from "@vencord/discord-types/webpack";
 
 import { AnyModuleFactory, AnyWebpackRequire, MaybePatchedModuleFactory, PatchedModuleFactory } from "./types";
-import { _blacklistBadModules, _initWebpack, factoryListeners, findModuleFactory, moduleListeners, waitForSubscriptions, wreq } from "./webpack";
+import { _blacklistBadModules, _initWebpack, factoryListeners, moduleListeners, waitForSubscriptions, wreq } from "./webpack";
 
 export const patches = [] as Patch[];
 
@@ -27,32 +27,7 @@ export const allWebpackInstances = new Set<AnyWebpackRequire>();
 export const patchTimings = [] as Array<[plugin: string, moduleId: PropertyKey, match: PatchReplacement["match"], totalTime: number]>;
 
 export const getBuildNumber = makeLazy(() => {
-    try {
-        function matchBuildNumber(factoryStr: string) {
-            const buildNumberMatch = factoryStr.match(/"Trying to open a changelog for an invalid build number (\d+?)"\)/);
-            if (buildNumberMatch == null) {
-                return -1;
-            }
-
-            return Number(buildNumberMatch[1]);
-        }
-
-        const hardcodedFactoryStr = String(wreq.m[927815]);
-        if (hardcodedFactoryStr.includes("Trying to open a changelog for an invalid build number")) {
-            const hardcodedBuildNumber = matchBuildNumber(hardcodedFactoryStr);
-
-            if (hardcodedBuildNumber !== -1) {
-                return hardcodedBuildNumber;
-            }
-        } else if (IS_DEV || IS_REPORTER) {
-            logger.error("Hardcoded build number module id is invalid");
-        }
-
-        const moduleFactory = findModuleFactory("Trying to open a changelog for an invalid build number");
-        return matchBuildNumber(String(moduleFactory));
-    } catch {
-        return -1;
-    }
+    return Number(window.GLOBAL_ENV?.BUILD_NUMBER ?? -1);
 });
 
 export function getFactoryPatchedSource(moduleId: PropertyKey, webpackRequire = wreq as AnyWebpackRequire) {

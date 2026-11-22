@@ -9,7 +9,6 @@
         --custom-app-top-bar-height: env(titlebar-area-height, 0px) !important;
     }
 
-
     /* position trailing/leading titlebar elements alongside WCO */
     [data-fullscreen] > [class*="bar_"] {
         [class*="leading_"] {
@@ -32,18 +31,17 @@
 
             /* position trailing toolbar elements alongside WCO */
             [class*="toolbar_"] {
-                padding-right: calc(100vw - env(titlebar-area-width, 100%) - env(titlebar-area-x, 0px));
+                padding-right: calc(
+                    100vw - env(titlebar-area-width, 100%) - env(titlebar-area-x, 0px)
+                );
             }
         }
     }
 }
 
-/* force hide trailing icons when standalone so there's no ugly pixel overflow */
-@media all and (display-mode: standalone) {
+/* without window controls overlay the title bar is 0px tall, hide it so its icons don't overflow. Firefox uses minimal-ui */
+@media all and ((display-mode: standalone) or (display-mode: minimal-ui)) {
     [data-fullscreen] > [class*="bar_"] {
-        [class*="trailing_"],
-        [class*="leading"] {
-            display: none;
-        }
+        display: none;
     }
 }

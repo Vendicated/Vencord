@@ -132,6 +132,19 @@ function addDeleteStyle() {
     }
 }
 
+const buttonsToRemove = [
+    "edit",
+    "reply",
+    "forward",
+    "thread",
+    "pin",
+    "delete",
+    "mark-unread",
+    "apps",
+    "bookmark",
+    "reminder"
+];
+
 const REMOVE_HISTORY_ID = "ml-remove-history";
 const TOGGLE_DELETE_STYLE_ID = "ml-toggle-style";
 
@@ -166,11 +179,20 @@ function doesMessageHaveHistory(message: MLMessage): boolean {
 
 }
 
-const patchMessageContextMenu: NavContextMenuPatchCallback = (children, props) => {
-    const { message } = props;
+const patchMessageContextMenu: NavContextMenuPatchCallback = (children, { message }) => {
     const { deleted, id, channel_id } = message;
 
     if (!doesMessageHaveHistory(message)) return;
+
+    if (deleted) {
+        for (const id of buttonsToRemove) {
+            const group = findGroupChildrenByChildId(id, children);
+            if (group) {
+                const index = group.findIndex(c => c?.props?.id === id);
+                group.splice(index, 1);
+            }
+        }
+    }
 
     toggle: {
         if (!deleted) break toggle;
@@ -436,6 +458,22 @@ export default definePlugin({
         ]]
     }),
 
+    /**
+     * Get the reaction target for a reaction command like `+:emoji:`
+     *
+     * in the case of something like
+     * >actual message
+     * >deleted message
+     * >chatbox
+     * discord would grab and try to react to the deleted message
+     *
+     * https://github.com/Vendicated/Vencord/issues/4063
+     */
+    getReactionTarget(channelId: string) {
+        const msgs = MessageStore.getMessages(channelId)._array;
+        return msgs.findLast(msg => !msg.deleted);
+    },
+
     patches: [
         {
             find: '"MessageStore"',
@@ -620,6 +658,14 @@ export default definePlugin({
             replacement: {
                 match: /receiveMessage\((\i)\)\{/,
                 replace: "$& $self.normalizeNonce($1);"
+            }
+        },
+        {
+            find: "anyScopeRegex(/^\\+:(.+?): *$/)",
+            replacement: {
+                match: /(?<=anyScopeRegex\(\/\^\\\+:\(\.\+\?\): \*\$\/\),action\(\i,\i\)\{.{10,80}?\i=)\i\.\i\.getMessages\((\i\.id)\)\.last\(\)/,
+                replace: "$self.getReactionTarget($1)"
+
             }
         }
     ]
