@@ -1,0 +1,13 @@
+.vc-patch-helper-diff pre code {
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+}
+
+.vc-patch-helper-disclosure > summary {
+    color: var(--text-default);
+    cursor: pointer;
+}
+
+.vc-patch-helper-disclosure[open] > summary {
+    margin-bottom: 8px;
+}
