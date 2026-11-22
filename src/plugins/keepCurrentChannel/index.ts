@@ -19,7 +19,7 @@
 import * as DataStore from "@api/DataStore";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
-import { ChannelRouter, ChannelStore, NavigationRouter, SelectedChannelStore, SelectedGuildStore } from "@webpack/common";
+import { ChannelStore, NavigationRouter, SelectedChannelStore, SelectedGuildStore } from "@webpack/common";
 
 export interface LogoutEvent {
     type: "LOGOUT";
@@ -37,8 +37,25 @@ interface PreviousChannel {
     channelId: string | null;
 }
 
+let didStart = false;
 let isSwitchingAccount = false;
 let previousCache: PreviousChannel | undefined;
+
+function save(data: PreviousChannel) {
+    previousCache = data;
+    DataStore.set("KeepCurrentChannel_previousData", data);
+}
+
+function restore({ channelId, guildId }: PreviousChannel) {
+    if (!channelId || !ChannelStore.hasChannel(channelId)) {
+        if (guildId === "@favorites") {
+            NavigationRouter.transitionToGuild("@favorites");
+        }
+        return;
+    }
+
+    NavigationRouter.transitionToGuild(guildId || "@me", channelId);
+}
 
 export default definePlugin({
     name: "KeepCurrentChannel",
@@ -65,37 +82,31 @@ export default definePlugin({
             if (!isSwitchingAccount) return;
             isSwitchingAccount = false;
 
-            if (previousCache?.channelId) {
-                if (ChannelStore.hasChannel(previousCache.channelId)) {
-                    ChannelRouter.transitionToChannel(previousCache.channelId);
-                } else {
-                    NavigationRouter.transitionToGuild("@me");
-                }
-            }
+            if (previousCache)
+                restore(previousCache);
         },
 
         async CHANNEL_SELECT({ guildId, channelId }: ChannelSelectEvent) {
-            if (isSwitchingAccount) return;
+            if (isSwitchingAccount || !didStart) return;
 
-            previousCache = {
+            save({
                 guildId,
                 channelId
-            };
-            await DataStore.set("KeepCurrentChannel_previousData", previousCache);
+            });
         }
     },
 
     async start() {
         previousCache = await DataStore.get<PreviousChannel>("KeepCurrentChannel_previousData");
         if (!previousCache) {
-            previousCache = {
+            save({
                 guildId: SelectedGuildStore.getGuildId(),
                 channelId: SelectedChannelStore.getChannelId() ?? null
-            };
-
-            await DataStore.set("KeepCurrentChannel_previousData", previousCache);
-        } else if (previousCache.channelId) {
-            ChannelRouter.transitionToChannel(previousCache.channelId);
+            });
+        } else {
+            restore(previousCache);
         }
+
+        didStart = true;
     }
 });
