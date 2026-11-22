@@ -16,8 +16,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-export * from "../shared/debounce";
-export * from "../shared/onceDefined";
 export * from "./ChangeList";
 export * from "./clipboard";
 export * from "./constants";
@@ -40,3 +38,5 @@ export * from "./promptToRestart";
 export * from "./Queue";
 export * from "./react";
 export * from "./text";
+export * from "@shared/debounce";
+export * from "@shared/onceDefined";

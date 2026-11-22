@@ -166,6 +166,20 @@ ipcMain.handle(IpcEvents.OPEN_MONACO_EDITOR, async () => {
         }
     });
 
+    // Intercept quit shortcuts so they don't quit the main application
+    win.webContents.on("before-input-event", (e, input) => {
+        if (input.type !== "keyDown") return;
+
+        const key = input.key.toLowerCase();
+        const isQuit = (input.control && !input.alt && !input.shift && key === "q")
+            || (input.alt && !input.control && !input.shift && key === "f4");
+
+        if (isQuit) {
+            e.preventDefault();
+            win.close();
+        }
+    });
+
     makeLinksOpenExternally(win);
 
     await win.loadURL(DESKTOP_MONACO_EDITOR_URL);

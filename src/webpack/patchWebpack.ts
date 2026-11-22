@@ -9,11 +9,12 @@ import { traceFunctionWithResults } from "@debug/Tracer";
 import { makeLazy } from "@utils/lazy";
 import { Logger } from "@utils/Logger";
 import { interpolateIfDefined } from "@utils/misc";
+import { wrapFactorySource } from "@utils/patches";
 import { Patch, PatchReplacement } from "@utils/types";
 import { WebpackRequire } from "@vencord/discord-types/webpack";
 
 import { AnyModuleFactory, AnyWebpackRequire, MaybePatchedModuleFactory, PatchedModuleFactory } from "./types";
-import { _blacklistBadModules, _initWebpack, factoryListeners, findModuleFactory, moduleListeners, waitForSubscriptions, wreq } from "./webpack";
+import { _blacklistBadModules, _initWebpack, factoryListeners, moduleListeners, waitForSubscriptions, wreq } from "./webpack";
 
 export const patches = [] as Patch[];
 
@@ -27,32 +28,7 @@ export const allWebpackInstances = new Set<AnyWebpackRequire>();
 export const patchTimings = [] as Array<[plugin: string, moduleId: PropertyKey, match: PatchReplacement["match"], totalTime: number]>;
 
 export const getBuildNumber = makeLazy(() => {
-    try {
-        function matchBuildNumber(factoryStr: string) {
-            const buildNumberMatch = factoryStr.match(/"Trying to open a changelog for an invalid build number (\d+?)"\)/);
-            if (buildNumberMatch == null) {
-                return -1;
-            }
-
-            return Number(buildNumberMatch[1]);
-        }
-
-        const hardcodedFactoryStr = String(wreq.m[927815]);
-        if (hardcodedFactoryStr.includes("Trying to open a changelog for an invalid build number")) {
-            const hardcodedBuildNumber = matchBuildNumber(hardcodedFactoryStr);
-
-            if (hardcodedBuildNumber !== -1) {
-                return hardcodedBuildNumber;
-            }
-        } else if (IS_DEV || IS_REPORTER) {
-            logger.error("Hardcoded build number module id is invalid");
-        }
-
-        const moduleFactory = findModuleFactory("Trying to open a changelog for an invalid build number");
-        return matchBuildNumber(String(moduleFactory));
-    } catch {
-        return -1;
-    }
+    return Number(window.GLOBAL_ENV?.BUILD_NUMBER ?? -1);
 });
 
 export function getFactoryPatchedSource(moduleId: PropertyKey, webpackRequire = wreq as AnyWebpackRequire) {
@@ -509,10 +485,7 @@ function runFactoryWithWrap(patchedFactory: PatchedModuleFactory, moduleId: Prop
  */
 function patchFactory(moduleId: PropertyKey, originalFactory: AnyModuleFactory): PatchedModuleFactory {
     const originalFactoryCode = String(originalFactory);
-    const isArrowFunction = originalFactoryCode.startsWith("(");
-
-    // 0, prefix to turn it into an expression: 0,function(){} would be invalid syntax without the 0,
-    let patchedCode = "0," + (!isArrowFunction ? "function" : "") + originalFactoryCode.slice(originalFactoryCode.indexOf("("));
+    let patchedCode = wrapFactorySource(originalFactoryCode);
     let patchedSource = patchedCode;
     let patchedFactory = originalFactory;
 
