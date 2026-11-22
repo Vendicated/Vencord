@@ -20,7 +20,7 @@ import { traceFunction } from "@debug/Tracer";
 import { makeLazy, proxyLazy } from "@utils/lazy";
 import { LazyComponent } from "@utils/lazyReact";
 import { Logger } from "@utils/Logger";
-import { canonicalizeMatch } from "@utils/patches";
+import { canonicalizeMatch, wrapFactorySource } from "@utils/patches";
 import { escapeRegExp } from "@utils/text";
 import type { FluxStore } from "@vencord/discord-types";
 import type { ModuleExports, ModuleFactory, WebpackRequire } from "@vencord/discord-types/webpack";
@@ -850,10 +850,7 @@ export function extract(moduleId: PropertyKey) {
     const originalFactory = wreq.m[moduleId];
     if (!originalFactory) return null;
 
-    const originalFactoryCode = String(originalFactory);
-    const isArrowFunction = originalFactoryCode.startsWith("(");
-
-    const wrappedCode = "0," + (!isArrowFunction ? "function" : "") + originalFactoryCode.slice(originalFactoryCode.indexOf("("));
+    const wrappedCode = wrapFactorySource(String(originalFactory));
     const code = `
 // [EXTRACTED] WebpackModule${String(moduleId)}
 // WARNING: This module was extracted to be more easily readable.

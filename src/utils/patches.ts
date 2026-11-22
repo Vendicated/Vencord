@@ -19,6 +19,13 @@
 import { runtimeHashMessageKey } from "./intlHash";
 import { Patch, PatchReplacement, ReplaceFn } from "./types";
 
+/** Wraps a Webpack factory as an expression, including factories defined as object methods. */
+export function wrapFactorySource(source: string) {
+    const isArrowFunction = source.startsWith("(");
+    const functionKeyword = isArrowFunction ? "" : "function";
+    return "0," + functionKeyword + source.slice(source.indexOf("("));
+}
+
 export function canonicalizeMatch<T extends RegExp | string>(match: T): T {
     let partialCanon = typeof match === "string" ? match : match.source;
     partialCanon = partialCanon.replaceAll(/#{intl::([\w$+/]*)(?:::(\w+))?}/g, (_, key, modifier) => {
