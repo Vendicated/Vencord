@@ -19,6 +19,7 @@ import {
     getName,
     getUserOverride,
     hasFlag,
+    logger,
     OverrideFlags,
     settings,
     UserOverride,
@@ -81,7 +82,8 @@ function useDecorationUrl(userId: string | undefined, size: number, canAnimate =
     try {
         const { decoration } = useUserOverride(userId);
         return useMemo(() => getDecorationUrl(decoration, size, canAnimate), [decoration, size, canAnimate]);
-    } catch {
+    } catch (error) {
+        logger.error("Could not get decoration URL", error);
         return;
     }
 }
@@ -247,11 +249,12 @@ export default definePlugin({
             const skuId = getCosmeticOverride(override.profileFrame)?.skuId;
             useEffect(() => {
                 if (skuId) {
-                    void getShopProduct(skuId).catch(() => {});
+                    void getShopProduct(skuId).catch(error => logger.error("Could not load profile frame", error));
                 }
             }, [skuId]);
             return override;
-        } catch {
+        } catch (error) {
+            logger.error("Could not read profile override", error);
             return;
         }
     },
@@ -279,7 +282,8 @@ export default definePlugin({
                 profile.getPreviewPronouns = pending => {
                     try {
                         return pending === undefined ? pronouns : original.getPreviewPronouns(pending);
-                    } catch {
+                    } catch (error) {
+                        logger.error("Could not get preview pronouns", error);
                         return pending ?? undefined;
                     }
                 };
@@ -304,7 +308,8 @@ export default definePlugin({
 
             profileCache.set(original, { override, profile });
             return profile;
-        } catch {
+        } catch (error) {
+            logger.error("Could not apply profile override", error);
             return original;
         }
     },
@@ -350,7 +355,8 @@ export default definePlugin({
                     "data-username-has-gradient": undefined
                 };
             }
-        } catch {
+        } catch (error) {
+            logger.error("Could not apply username colour", error);
             return;
         }
     },
@@ -383,7 +389,8 @@ export default definePlugin({
                 && hasFlag(flags, OverrideFlags.KeepServerAvatar);
             const useLocal = preview === undefined && !keepGuildAvatar && !hasFlag(flags, OverrideFlags.UseDefaultAvatar);
             return useLocalImage(useLocal ? userId : undefined, "avatar") ?? getSrc();
-        } catch {
+        } catch (error) {
+            logger.error("Could not get avatar", error);
             return;
         }
     },
@@ -416,7 +423,8 @@ export default definePlugin({
                 && hasFlag(flags, OverrideFlags.KeepServerBanner);
             const useLocal = preview === undefined && !keepGuildBanner;
             return useLocalImage(useLocal ? userId : undefined, "banner") ?? getSrc();
-        } catch {
+        } catch (error) {
+            logger.error("Could not get banner", error);
             return;
         }
     },

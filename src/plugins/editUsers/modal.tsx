@@ -9,10 +9,10 @@ import { Button, ErrorBoundary, Flex, FormSwitch, Paragraph, Span } from "@compo
 import { classNameFactory } from "@utils/css";
 import { saveFile } from "@utils/web";
 import { RenderModalProps, User } from "@vencord/discord-types";
-import { DisplayProfileUtils, IconUtils, Modal, openModal, Select, showToast, TabBar, TextInput, useEffect, useRef, useState } from "@webpack/common";
+import { DisplayProfileUtils, IconUtils, Modal, NavigationRouter, openModal, Select, showToast, TabBar, TextInput, useEffect, useRef, useState } from "@webpack/common";
 
 import { CosmeticsEditor } from "./cosmetics";
-import { emptyOverride, getUserOverride, hasFlag, OverrideFlags, saveUserOverride, UserOverride, UserTag } from "./data";
+import { emptyOverride, getUserOverride, hasFlag, logger, OverrideFlags, saveUserOverride, UserOverride, UserTag } from "./data";
 import { exportImages, getImages, ImageChanges, ImageKind, imageTypes, importImages, saveImageChanges, UserImages, validateImage } from "./images";
 
 const cl = classNameFactory("vc-editUsers-");
@@ -158,6 +158,7 @@ function EditModal({ user, modalProps }: { user: User; modalProps: RenderModalPr
                 }
             })
             .catch(error => {
+                logger.error("Could not load user images", error);
                 if (!closed) {
                     setError({ message: errorMessage(error) });
                 }
@@ -207,7 +208,7 @@ function EditModal({ user, modalProps }: { user: User; modalProps: RenderModalPr
             if (url && url !== original.current[key] && !/^https?:\/\//i.test(url)) {
                 setError({ tab: kind, message: "Image URLs must start with http:// or https://." });
                 setTab(kind);
-                return;
+                return false;
             }
         }
 
@@ -221,8 +222,11 @@ function EditModal({ user, modalProps }: { user: User; modalProps: RenderModalPr
             saveUserOverride(user.id, next);
             modalProps.onClose();
             showToast({ text: "User edits saved.", variant: "success" });
+            return true;
         } catch (error) {
+            logger.error("Could not save user edits", error);
             setError({ message: errorMessage(error) });
+            return false;
         } finally {
             setBusy(false);
         }
@@ -324,7 +328,11 @@ function EditModal({ user, modalProps }: { user: User; modalProps: RenderModalPr
                                 cosmetics={override}
                                 onSelect={setField}
                                 onError={message => setError(message ? { tab: "profile", message } : undefined)}
-                                onOpenShop={modalProps.onClose}
+                                onOpenShop={async () => {
+                                    if (await save()) {
+                                        NavigationRouter.transitionTo("/shop");
+                                    }
+                                }}
                                 busy={busy}
                                 onBusy={setBusy}
                             />
@@ -418,8 +426,8 @@ const SafeEditModal = ErrorBoundary.wrap(EditModal, { noop: false });
 export function openUserEditModal(user: User) {
     try {
         openModal(modalProps => <SafeEditModal user={user} modalProps={modalProps} />);
-    } catch {
-        return;
+    } catch (error) {
+        logger.error("Could not open edit modal", error);
     }
 }
 
@@ -431,6 +439,7 @@ export function ImageBackup() {
         try {
             await action();
         } catch (error) {
+            logger.error("Image backup failed", error);
             showToast({ text: errorMessage(error), variant: "critical" });
         } finally {
             setBusy(false);

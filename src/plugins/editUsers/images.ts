@@ -5,8 +5,9 @@
  */
 
 import * as DataStore from "@api/DataStore";
-import { Logger } from "@utils/Logger";
 import { React, useCallback } from "@webpack/common";
+
+import { logger } from "./data";
 
 export type ImageKind = "avatar" | "banner";
 export type UserImages = Partial<Record<ImageKind, Blob>>;
@@ -16,7 +17,6 @@ export const imageTypes = "image/png,image/jpeg,image/gif,image/webp,image/avif"
 const maxImageSize = 10 * 1024 * 1024;
 const dataUrlPattern = /^data:image\/(?:png|jpeg|gif|webp|avif);base64,[A-Za-z0-9+/]+={0,2}$/;
 const imageKinds = ["avatar", "banner"] as const;
-const logger = new Logger("EditUsers");
 let store: DataStore.UseStore;
 let knownUsers: Promise<Set<string>>;
 
@@ -49,7 +49,7 @@ export function getImages(userId: string) {
     return DataStore.get<UserImages>(userId, getStore());
 }
 
-function setActiveImages(entry: ActiveImages, images?: UserImages, changed: readonly ImageKind[] = imageKinds) {
+function setActiveImages(entry: ActiveImages, images: UserImages | undefined, changed: readonly ImageKind[] = imageKinds) {
     const previous: string[] = [];
     for (const kind of changed) {
         const oldUrl = entry.urls[kind];
@@ -78,7 +78,7 @@ function subscribeToImages(userId: string, listener: () => void) {
         const request = loadImageKeys()
             .then(keys => keys.has(userId) ? getImages(userId) : undefined)
             .then(images => {
-                if (activeImages.get(userId) === active && active.request === request) {
+                if (active.request === request) {
                     active.request = undefined;
                     setActiveImages(active, images);
                 }
@@ -87,15 +87,10 @@ function subscribeToImages(userId: string, listener: () => void) {
         entry.request = request;
     }
 
-    const active = entry;
-    active.listeners.add(listener);
-    return () => {
-        active.listeners.delete(listener);
-        if (!active.listeners.size) {
-            activeImages.delete(userId);
-            setActiveImages(active);
-        }
-    };
+    // Entries stay cached so remounts in the same commit don't render revoked URLs
+    const { listeners } = entry;
+    listeners.add(listener);
+    return () => listeners.delete(listener);
 }
 
 export function useLocalImage(userId: string | undefined, kind: ImageKind) {

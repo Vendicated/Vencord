@@ -8,9 +8,9 @@ import { Heading } from "@components/Heading";
 import { Button, Paragraph, Span } from "@components/index";
 import { classNameFactory } from "@utils/css";
 import { findByCodeLazy } from "@webpack";
-import { NavigationRouter, SelectedGuildStore, TextInput, useState } from "@webpack/common";
+import { SelectedGuildStore, TextInput, useState } from "@webpack/common";
 
-import { CosmeticOverride, getDecorationUrl, UserOverride } from "./data";
+import { CosmeticOverride, getDecorationUrl, logger, UserOverride } from "./data";
 import { CosmeticType, getShopProduct } from "./shop";
 
 const cl = classNameFactory("vc-editUsers-");
@@ -221,7 +221,8 @@ export function CosmeticsEditor({ cosmetics, onSelect, onError, onOpenShop, busy
                 return;
             }
             setLink("");
-        } catch {
+        } catch (error) {
+            logger.error("Could not load shop item", error);
             onError("Could not load that shop item.");
         } finally {
             onBusy(false);
@@ -251,7 +252,8 @@ export function CosmeticsEditor({ cosmetics, onSelect, onError, onOpenShop, busy
                 }
             }
             setUserId("");
-        } catch {
+        } catch (error) {
+            logger.error("Could not copy profile cosmetics", error);
             onError("Could not load that user's profile.");
         } finally {
             onBusy(false);
@@ -291,12 +293,9 @@ export function CosmeticsEditor({ cosmetics, onSelect, onError, onOpenShop, busy
                     className={cl("shopButton")}
                     variant="secondary"
                     disabled={busy}
-                    onClick={() => {
-                        onOpenShop();
-                        NavigationRouter.transitionTo("/shop");
-                    }}
+                    onClick={onOpenShop}
                 >
-                    Open Shop
+                    Save and Open Shop
                 </Button>
             </section>
 

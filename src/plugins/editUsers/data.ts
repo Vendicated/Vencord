@@ -5,7 +5,10 @@
  */
 
 import { definePluginSettings } from "@api/Settings";
+import { Logger } from "@utils/Logger";
 import { IconUtils } from "@webpack/common";
+
+export const logger = new Logger("EditUsers");
 
 export const enum OverrideFlags {
     None = 0,
@@ -72,7 +75,8 @@ export function useUserOverride(userId?: string) {
     try {
         settings.use(["users"]);
         return getUserOverride(userId);
-    } catch {
+    } catch (error) {
+        logger.error("Could not read user override", error);
         return emptyOverride;
     }
 }
@@ -117,7 +121,8 @@ export function getDecorationUrl(decoration: UserOverride["decoration"] | undefi
             size,
             canAnimate
         });
-    } catch {
+    } catch (error) {
+        logger.error("Could not get decoration URL", error);
         return;
     }
 }
