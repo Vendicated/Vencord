@@ -1,0 +1,107 @@
+.vc-pfp-gallery {
+    color: var(--text-default, var(--text-normal));
+}
+
+.vc-pfp-summary {
+    margin-bottom: 12px;
+    color: var(--text-muted);
+    font-size: 12px;
+    text-align: right;
+}
+
+.vc-pfp-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    align-items: end;
+}
+
+.vc-pfp-toolbar label {
+    display: flex;
+    flex: 1 1 200px;
+    flex-direction: column;
+    gap: 6px;
+    font-weight: 600;
+}
+
+.vc-pfp-toolbar select {
+    width: 100%;
+    padding: 8px;
+    color: var(--text-default, var(--text-normal));
+    background: var(--background-base-low, var(--background-secondary));
+    border: 1px solid var(--border-subtle, var(--background-modifier-accent));
+    border-radius: 6px;
+    font: inherit;
+}
+
+.vc-pfp-note {
+    margin: 16px 0;
+    color: var(--text-muted);
+    line-height: 1.5;
+}
+
+.vc-pfp-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+    gap: 10px;
+}
+
+.vc-pfp-card {
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+    gap: 5px;
+    padding: 8px;
+    font-size: 12px;
+    line-height: 1.35;
+    background: var(--background-base-low, var(--background-secondary));
+    border: 1px solid var(--border-subtle, var(--background-modifier-accent));
+    border-radius: 8px;
+    overflow-wrap: anywhere;
+}
+
+.vc-pfp-image {
+    display: flex;
+    aspect-ratio: 1;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    border-radius: 6px;
+}
+
+.vc-pfp-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.vc-pfp-filename {
+    color: var(--text-muted);
+    font-size: 10px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.vc-pfp-card button {
+    margin-top: auto;
+}
+
+.vc-pfp-error {
+    color: var(--text-danger);
+    overflow-wrap: anywhere;
+}
+
+.vc-pfp-pagination {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    justify-content: center;
+    margin-top: 20px;
+}
+
+.vc-pfp-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
