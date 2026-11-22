@@ -64,6 +64,7 @@ async function loadBadges(noCache = false) {
 
     DonorBadges = await fetch("https://badges.vencord.dev/badges.json", init)
         .then(r => r.json());
+    DirectoryBadges = {};
 }
 
 let intervalId: any;
