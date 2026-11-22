@@ -355,7 +355,7 @@ function EditModal({ user, modalProps }: { user: User; modalProps: RenderModalPr
         <Modal
             {...modalProps}
             title={`Edit User ${user.username}`}
-            size="md"
+            size="lg"
             notice={notice}
             actions={[
                 {
@@ -416,7 +416,11 @@ function EditModal({ user, modalProps }: { user: User; modalProps: RenderModalPr
 const SafeEditModal = ErrorBoundary.wrap(EditModal, { noop: false });
 
 export function openUserEditModal(user: User) {
-    openModal(modalProps => <SafeEditModal user={user} modalProps={modalProps} />);
+    try {
+        openModal(modalProps => <SafeEditModal user={user} modalProps={modalProps} />);
+    } catch {
+        return;
+    }
 }
 
 export function ImageBackup() {

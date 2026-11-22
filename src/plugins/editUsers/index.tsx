@@ -11,27 +11,23 @@ import { ErrorBoundary, PencilIcon } from "@components/index";
 import { Devs } from "@utils/constants";
 import definePlugin, { StartAt } from "@utils/types";
 import { Channel, DisplayProfile, Message, User } from "@vencord/discord-types";
-import { IconUtils, Menu, useEffect, useMemo } from "@webpack/common";
+import { Menu, useEffect, useMemo } from "@webpack/common";
 
-import { CosmeticOverride, getDecorationData, getName, getUserOverride, hasFlag, OverrideFlags, settings, UserTag,useUserOverride } from "./data";
+import {
+    CosmeticOverride,
+    getDecorationUrl,
+    getName,
+    getUserOverride,
+    hasFlag,
+    OverrideFlags,
+    settings,
+    UserOverride,
+    UserTag,
+    useUserOverride
+} from "./data";
 import { loadImageKeys, useLocalImage } from "./images";
 import { ImageBackup, openUserEditModal } from "./modal";
 import { getShopProduct } from "./shop";
-
-function keepGuildAvatar(user: User, guildId?: string | null) {
-    const { avatarUrl, flags } = getUserOverride(user.id);
-    return guildId != null && user.hasAvatarForGuild(guildId)
-        && !hasFlag(flags, OverrideFlags.DisableServerAvatars)
-        && !hasFlag(flags, OverrideFlags.UseDefaultAvatar)
-        && (!avatarUrl || hasFlag(flags, OverrideFlags.KeepServerAvatar));
-}
-
-function keepGuildBanner(profile: DisplayProfile) {
-    const { bannerUrl, flags } = getUserOverride(profile.userId);
-    return profile.isUsingGuildMemberBanner()
-        && !hasFlag(flags, OverrideFlags.DisableServerBanners)
-        && (!bannerUrl || hasFlag(flags, OverrideFlags.KeepServerBanner));
-}
 
 const addEditUser: NavContextMenuPatchCallback = (children, { user }: { user?: User; }) => {
     if (!user) {
@@ -61,18 +57,17 @@ interface MessageNameContext {
     channel?: Channel;
 }
 
-function useNameColors(userId: string | undefined, guildId: string | undefined, original: NameColors) {
-    const { usernameColor, flags } = useUserOverride(userId);
+function getNameColor({ usernameColor, flags }: Partial<UserOverride>, guildId: string | undefined, original: NameColors) {
     if (!usernameColor) {
         return;
     }
 
     const hasRoleColor = guildId && (original.colorString || original.colorStrings?.primaryColor);
     if (hasRoleColor && !hasFlag(flags, OverrideFlags.OverrideRoleColor)) {
-        return original;
+        return;
     }
 
-    return { colorString: `#${usernameColor}`, colorStrings: undefined, forceNameColor: true };
+    return `#${usernameColor}`;
 }
 
 function getCosmeticOverride(value?: CosmeticOverride | string) {
@@ -81,6 +76,25 @@ function getCosmeticOverride(value?: CosmeticOverride | string) {
     }
     return typeof value === "string" ? { skuId: value } : value;
 }
+
+function useDecorationUrl(userId: string | undefined, size: number, canAnimate = false) {
+    try {
+        const { decoration } = useUserOverride(userId);
+        return useMemo(() => getDecorationUrl(decoration, size, canAnimate), [decoration, size, canAnimate]);
+    } catch {
+        return;
+    }
+}
+
+interface EditableProfile extends DisplayProfile {
+    profileFrame?: CosmeticOverride;
+    getPreviewPronouns(pending?: string | null): string | undefined;
+}
+
+const profileCache = new WeakMap<DisplayProfile, {
+    override: Partial<UserOverride>;
+    profile: DisplayProfile;
+}>();
 
 export default definePlugin({
     name: "EditUsers",
@@ -128,306 +142,284 @@ export default definePlugin({
         {
             find: '"Result cannot be null because the message is not null"',
             replacement: {
-                match: /(?<=friendNickname:\i,displayNameStyles:\i\}=\i,\i=null==(\i)\?"\?\?\?":.{0,300}?\{nick:)(\i\.nick)\?\?(\i)(?=,colorString:)/,
-                replace: "$self.getName($1.id,$2)??$3"
+                match: /(?<=\{nick:)(\i\.nick)(?=\?\?\i,colorString:)/,
+                replace: "$self.getName(arguments[0]?.user?.id,$1)"
             }
         },
         {
             find: '="SYSTEM_TAG"',
-            group: true,
-            replacement: [
-                {
-                    match: /colorString:(\i),colorStrings:(\i),(colorRoleName:\i,displayNameStyles:\i\}=\i),/,
-                    replace: "colorString:vcNativeColor,colorStrings:vcNativeColors,$3,{colorString:$1,colorStrings:$2,forceNameColor:vcForceNameColor}=$self.useMessageColors(arguments[0],vcNativeColor,vcNativeColors),"
-                },
-                {
-                    match: /(?<==)\i&&\i(?=,\i=\i\?\.isPrivate\(\)&&null!=\i;)/,
-                    replace: "!vcForceNameColor&&($&)"
-                },
-                {
-                    match: /(?<==)\i\?\.isPrivate\(\)&&null!=\i(?=;)/,
-                    replace: "!vcForceNameColor&&($&)"
-                },
-                {
-                    match: /style:function\(\)\{(?=if\(\i\)return \i&&null!=\i\?\{\.\.\.\i,textDecorationColor:).{0,200}?\{color:(\i)\}/,
-                    replace: (match, color) => match.replace("style:function(){", `style:function(){if(vcForceNameColor)return{color:${color}};`)
-                }
-            ]
+            replacement: {
+                // Keep Discord's click handlers and popout props on the username.
+                match: /(?<=:(\i),"data-text":[^,]{1,50},"data-username-has-gradient":[^}]{1,50})(?=\})/,
+                replace: ",...$self.useMessageNameProps(arguments[0],$1)"
+            }
         },
         {
             find: ".MEMBER_LIST_ITEM_AVATAR_DECORATION_PADDING)",
             replacement: [
                 {
                     match: /name:(\i)\?\?(\i)(?=,(?:quest|colorStrings):)/g,
-                    replace: "name:$self.getName(arguments[0].user?.id,$1)??$2"
+                    replace: "name:$self.getName(arguments[0]?.user?.id,$1)??$2"
                 },
                 {
-                    match: /(?<=guildId:\i,isHovering:\i\}=\i,)(?=\i=.{0,110}userId:\i\?\.id,guildId:)/,
-                    replace: "vcNameColors=$self.useMemberColors(arguments[0]),"
-                },
-                {
-                    match: /(?<=colorStrings:\i,name:\i,)(?=className:\i\.\i,displayNameStylesFont:)/,
-                    replace: "...vcNameColors,"
-                },
-                {
-                    match: /(?<==)null==\i&&null!=\i(?=;return\(0,\i\.jsxs\)\(\i\.Fragment,\{children:\[\i\?.{0,100}userName:)/,
-                    replace: "!vcNameColors?.forceNameColor&&($&)"
+                    match: /(?<=children:\[)(\i\?.{0,80}?userName:.{0,350}?className:(\i\.\i),displayNameStylesFont:(\i),animateRoleGradient:\i\}\))/,
+                    replace: "$self.MemberName({member:arguments[0],className:$2,font:$3,original:$1})"
                 }
             ]
-        },
-        {
-            find: /dotAlignment:\i="left",className:\i,nameTextClassName:/,
-            replacement: {
-                match: /(?<=\.jsx\)\(\i,\{\.\.\.(\i),roleStyle:)\i(?=\}\)\}\}\)\})/,
-                replace: '$1.forceNameColor?"username":$&'
-            }
         },
         {
             find: "=this.guildMemberAvatars[",
             replacement: {
-                match: /(?<=getAvatarURL\((\i),\i\)\{.{0,350}?return )null!=\i&&null!=\1(?=\?\i\.\i\.getGuildMemberAvatarURLSimple)/,
-                replace: "$self.keepGuildAvatar(this,$1)"
+                match: /this\.guildMemberAvatars\[\i\](?=.{0,100}?\.getGuildMemberAvatarURLSimple)/,
+                replace: "($self.shouldUseGuildAvatar(this.id)?$&:null)"
             }
         },
         {
             find: "getUserAvatarURL:",
-            replacement: [
-                {
-                    match: /(?<=function \i\((\i)\)\{)(?=let .{0,330}?return \i\(\1,\i,\i,\i,\i\)\?\?\i\(\1\.id,\1\.discriminator,\1\.isProvisional,\i\))/,
-                    replace: "const vcAvatar=$self.getAvatarUrl($1);if(vcAvatar)return vcAvatar;"
-                },
-                {
-                    match: /(?<=return )(\i\((\i),\i,\i,\i,\i\))(?=\?\?\i\(\2\.id,\2\.discriminator,\2\.isProvisional,\i\))/,
-                    replace: "($self.shouldUseDefaultAvatar($2.id)?null:$1)"
-                },
-                {
-                    match: /\i\(\{skuId:(\i)\.skuId,assetFormat:\i\}\)(?=;if\(null!=\i\)return \i)/,
-                    replace: "$1.skuId?$&:null"
-                }
-            ]
+            replacement: {
+                match: /\i\((\i),\i,\i,\i,\i\)(?=\?\?\i\(\1\.id,\1\.discriminator,\1\.isProvisional)/,
+                replace: "$self.getAvatarUrl($1,$&)"
+            }
         },
         {
-            find: /avatarSrc:\i\.useMemo\(.{0,160}?,isAvatarAnimating:/,
+            find: /avatarOverride:\i\}=.{0,50}?shouldAnimate:/,
             replacement: {
-                match: /(?<=avatarSrc:)\i\.useMemo\((\(\)=>.{0,120}?),\[(\i),(\i),(\i),\i,\i\]\)(?=,isAvatarAnimating:)/,
+                match: /(?<=avatarSrc:)\i\.useMemo\((\(\)=>.{0,60}?\((\i),(\i),(\i),\{canAnimate:\i,size:\i\}\).{0,20}?),\[[^\]]{1,80}\]\)/,
                 replace: "$self.useAvatar($4,$3,$2,$1)"
             }
         },
         {
             find: '{type:"account_popout",withMutualGuilds:',
-            group: true,
-            replacement: [
-                {
-                    match: /(?=return null==(\i)\?null:.{0,350}type:"account_popout",withMutualGuilds:)/,
-                    replace: "const vcAvatar=$self.useAccountAvatar($1),vcDecoration=$self.useDecorationUrl($1?.id,40);"
-                },
-                {
-                    match: /(?<=src:)(\i\.getAvatarURL\(void 0,\d+,!1\)),avatarDecoration:(\i)(?=,status:.{0,65}voiceStatus:)/,
-                    replace: "vcAvatar??$1,avatarDecoration:vcDecoration??$2"
-                }
-            ]
+            replacement: {
+                // The account panel renders its avatar inside a popout callback.
+                match: /(\i),\{(size:\i\.\i\.SIZE_32),src:(\i)\.getAvatarURL(?=\(.{0,40}?\),avatarDecoration:)/,
+                replace: "$self.AccountAvatar,{Component:$1,$2,user:$3,getSrc:()=>$3.getAvatarURL"
+            }
         },
         {
             find: "isAvatarDecorationAnimating:",
-            group: true,
-            replacement: [
-                {
-                    match: /(?<=user:(\i),guildId:\i,size:(\i),avatarDecorationOverride:\i,.{0,180}\{canAnimate:(\i)\}=.{0,140},)(?=\i=\(0,\i\.\i\)\(\[\i\.\i\],)/,
-                    replace: "vcEditUsersDecoration=$self.useDecorationUrl($1?.id,$2,$3),"
-                },
-                {
-                    match: /(?<=avatarDecorationSrc:)\i(?=,isAvatarDecorationAnimating:)/,
-                    replace: "vcEditUsersDecoration??$&"
-                }
-            ]
+            replacement: {
+                match: /(?<=avatarDecorationSrc:)(\i)(?=,isAvatarDecorationAnimating:(\i))/,
+                replace: "$self.useDecorationUrl(arguments[0]?.user?.id,arguments[0]?.size,$2)??$1"
+            }
         },
         {
             find: "this.isUsingGuildMemberBanner()",
             replacement: [
                 {
-                    match: /(?<=getBannerURL\(\i\)\{)(?=let\{canAnimate:)/,
-                    replace: "const vcBanner=$self.getBannerUrl(this);if(vcBanner)return vcBanner;"
+                    // Recompute the Flux selector when this user's profile overrides change.
+                    match: /(?<=\(\)=>.{0,50}?\(\i,\i,\[\i\.\i,\i\.\i\]\))(?=\))/,
+                    replace: ",[$self.useProfileOverride(arguments[0])]"
                 },
                 {
-                    match: /(?<=getBannerURL\(\i\)\{.{0,250}?return )null!=this\.guildId&&this\.isUsingGuildMemberBanner\(\)/,
-                    replace: "$self.keepGuildBanner(this)"
-                },
-                {
-                    match: /(?<=getBannerURL\(\i\)\{.{0,400}?id:this\.userId,banner:)this\.banner/,
-                    replace: "this._userProfile.banner"
-                },
-                {
-                    match: /(?<=get primaryColor\(\)\{return )(?=this\.themeColors)/,
-                    replace: "$self.getBannerColor(this.userId)??"
-                },
-                {
-                    match: /(?<=function \i\((\i),\i\)\{)(?=return\(0,\i\.\i\)\(\[\i\.default,\i\.\i\],\(\)=>null==\1\?null:)/,
-                    replace: "const vcOverride=$self.useProfileOverride($1);"
-                },
-                {
-                    match: /(?<=\(\)=>null==\i\?null:\i\(\i,\i,\[\i\.default,\i\.\i\]\))(?=\)\})/,
-                    replace: ",[vcOverride]"
-                },
-                {
-                    match: /(?<=return null==\i\|\|null==\i\?null:)\i\(\i,\i(?=\)\}\}\s*$)/,
-                    replace: "$&,$self.getUserOverride(arguments[0])"
-                },
-                {
-                    match: /this\.pronouns=(\i\(\i\.pronouns,\i\?\.pronouns\))/,
-                    replace: "this.pronouns=$self.getPronouns(this.userId)??$1"
-                },
-                {
-                    match: /(?<=getPreviewPronouns\((\i)\)\{return)(?=\(0,)/,
-                    replace: " $1===undefined&&$self.getPronouns(this.userId)||"
-                },
-                {
-                    match: /this\.profileEffect=(\i\?\.profileEffect\?\?\i\.profileEffect)/,
-                    replace: "this.profileEffect=$self.getProfileEffect(this.userId)??($1)"
-                },
-                {
-                    match: /this\.profileFrame=(\i\?\.profileFrame\?\?\i\.profileFrame)/,
-                    replace: "this.profileFrame=$self.getProfileFrame(this.userId)??($1)"
+                    match: /(?<=\.getGuildMemberProfile\(\i,\i\);return .{0,60}?null:)\i\(\i,\i\)/,
+                    replace: "$self.applyProfile($&)"
                 }
             ]
         },
         {
             find: "?.collectibles?.nameplate)??",
-            group: true,
-            replacement: [
-                {
-                    match: /(?<=let\{user:(\i),guildId:\i\}=\i,)(?=\i=\(0,)/,
-                    replace: "vcNameplate=$self.useNameplate($1?.id),"
-                },
-                {
-                    match: /\i\?\.collectibles\?\.nameplate(?=\)\?\?\i\.nameplate)/,
-                    replace: "vcNameplate??$&"
-                },
-                {
-                    match: /(?<=\.nameplate\},\[)/,
-                    replace: "vcNameplate,"
-                }
-            ]
+            replacement: {
+                match: /(?<=return )(\i\.useMemo\(\(\)=>\{.{0,120}?\.collectibles\?\.nameplate.{0,80}?\},\[\i,\i\]\))/,
+                replace: "$self.useNameplate(arguments[0]?.user?.id,$1)"
+            }
         },
         {
-            find: /\?\.getPreviewBanner\(\i,\i,\i\),\[\i,\i\]=\(0,/,
+            find: 'SHOULD_LOAD="SHOULD_LOAD"',
             replacement: {
-                match: /(\i)\?\.getPreviewBanner\((\i),\i,\i\)(?=,\[\i,\i\]=\(0,)/,
+                match: /(\i)\?\.getPreviewBanner\((\i),\i,\i\)(?=,\[)/,
                 replace: "$self.useBanner($1,$2,()=>$&)"
             }
         },
         {
             find: ".Types.ORIGINAL_POSTER",
             replacement: {
-                match: /(?<=function \i\(\i\)\{let \i,\{message:\i,channel:\i,user:(\i),isRepliedMessage:\i\}=\i;)(?=return \i\?\.isSystemDM\(\)\?\i=(\i\.\i\.Types)\.SYSTEM_DM)/,
-                replace: "const vcTag=$self.getTag($1?.id);if(vcTag!==undefined)return vcTag===\"NONE\"?undefined:$2[vcTag];"
+                match: /(?<=(\i\.\i\.Types)\.ORIGINAL_POSTER\),)\i/,
+                replace: "$self.getTag(arguments[0]?.user?.id,$1,$&)"
             }
         }
     ],
 
     getName,
-    getUserOverride,
     useProfileOverride(userId?: string) {
-        const override = useUserOverride(userId);
-        const skuId = getCosmeticOverride(override.profileFrame)?.skuId;
-        useEffect(() => {
-            if (skuId) {
-                void getShopProduct(skuId).catch(() => {});
-            }
-        }, [skuId]);
-        return override;
-    },
-
-    useNameplate(userId?: string) {
-        const { nameplate } = useUserOverride(userId);
-        return typeof nameplate === "object" && nameplate.asset ? nameplate : undefined;
-    },
-
-    keepGuildAvatar,
-    keepGuildBanner,
-    getUsername: (userId?: string) => getUserOverride(userId).username || undefined,
-    useUsername: (userId?: string) => useUserOverride(userId).username || undefined,
-    getPronouns: (userId: string) => getUserOverride(userId).pronouns || undefined,
-    getTag: (userId?: string): UserTag | undefined => getUserOverride(userId).tag || undefined,
-
-    shouldUseDefaultAvatar: (userId: string) => hasFlag(getUserOverride(userId).flags, OverrideFlags.UseDefaultAvatar),
-
-    getAvatarUrl(user?: User) {
-        const { avatarUrl, flags } = getUserOverride(user?.id);
-        if (!hasFlag(flags, OverrideFlags.UseDefaultAvatar)) {
-            return avatarUrl || undefined;
-        }
-    },
-
-    useMessageColors(
-        { author, message, userOverride, channel }: MessageNameContext,
-        colorString: NameColors["colorString"],
-        colorStrings: NameColors["colorStrings"]
-    ) {
-        return useNameColors(userOverride?.id ?? message?.author?.id, channel?.guild_id ?? author.guildId, author)
-            ?? { colorString, colorStrings };
-    },
-
-    useMemberColors({ user, guildId, colorString, colorStrings }: NameColors & { user?: User; guildId?: string; }) {
-        return useNameColors(user?.id, guildId, { colorString, colorStrings });
-    },
-
-    useAvatar(user: User | undefined, member: { avatar?: string | null; } | null, preview: unknown, getSrc: () => string | undefined) {
-        const { flags } = useUserOverride(user?.id);
-        const preferGuildAvatar = member?.avatar
-            && !hasFlag(flags, OverrideFlags.DisableServerAvatars)
-            && hasFlag(flags, OverrideFlags.KeepServerAvatar);
-        const useLocalAvatar = preview === undefined && !preferGuildAvatar && !hasFlag(flags, OverrideFlags.UseDefaultAvatar);
-        const userId = useLocalAvatar ? user?.id : undefined;
-        return useLocalImage(userId, "avatar") ?? getSrc();
-    },
-
-    useAccountAvatar(user?: User) {
-        const { avatarUrl, flags } = useUserOverride(user?.id);
-        const useDefault = hasFlag(flags, OverrideFlags.UseDefaultAvatar);
-        const local = useLocalImage(useDefault ? undefined : user?.id, "avatar");
-        if (useDefault && user) {
-            return IconUtils.getDefaultAvatarURL(user.id, user.discriminator);
-        }
-        return local ?? (avatarUrl || undefined);
-    },
-
-    getBannerColor(userId: string) {
-        const { bannerColor } = getUserOverride(userId);
-        return bannerColor ? Number.parseInt(bannerColor, 16) : undefined;
-    },
-
-    getBannerUrl(profile: DisplayProfile) {
-        if (keepGuildBanner(profile)) {
+        try {
+            const override = useUserOverride(userId);
+            const skuId = getCosmeticOverride(override.profileFrame)?.skuId;
+            useEffect(() => {
+                if (skuId) {
+                    void getShopProduct(skuId).catch(() => {});
+                }
+            }, [skuId]);
+            return override;
+        } catch {
             return;
         }
-        return getUserOverride(profile.userId).bannerUrl || undefined;
     },
+
+    applyProfile(original: EditableProfile) {
+        try {
+            const override = getUserOverride(original.userId);
+            const { pronouns, profileEffect, profileFrame, bannerColor, bannerUrl, flags } = override;
+            const disableGuildBanner = hasFlag(flags, OverrideFlags.DisableServerBanners);
+            if (!(pronouns || profileEffect || profileFrame || bannerColor || bannerUrl || disableGuildBanner)) {
+                return original;
+            }
+
+            const cached = profileCache.get(original);
+            if (cached?.override === override) {
+                return cached.profile;
+            }
+
+            const profile: EditableProfile = Object.assign(
+                Object.create(Object.getPrototypeOf(original)),
+                original
+            );
+            if (pronouns) {
+                profile.pronouns = pronouns;
+                profile.getPreviewPronouns = pending => {
+                    try {
+                        return pending === undefined ? pronouns : original.getPreviewPronouns(pending);
+                    } catch {
+                        return pending ?? undefined;
+                    }
+                };
+            }
+            if (profileEffect) {
+                profile.profileEffect = getCosmeticOverride(profileEffect);
+            }
+            if (profileFrame) {
+                profile.profileFrame = getCosmeticOverride(profileFrame);
+            }
+            if (bannerColor) {
+                Object.defineProperty(profile, "primaryColor", { value: Number.parseInt(bannerColor, 16) });
+            }
+            if (disableGuildBanner && original._guildMemberProfile) {
+                profile._guildMemberProfile = { ...original._guildMemberProfile, banner: null };
+                profile.banner = original._userProfile.banner;
+            }
+            const keepGuildBanner = profile._guildMemberProfile?.banner && hasFlag(flags, OverrideFlags.KeepServerBanner);
+            if (bannerUrl && !keepGuildBanner) {
+                profile.getBannerURL = () => bannerUrl;
+            }
+
+            profileCache.set(original, { override, profile });
+            return profile;
+        } catch {
+            return original;
+        }
+    },
+
+    useNameplate(userId: string | undefined, fallback: unknown) {
+        const { nameplate } = useUserOverride(userId);
+        return typeof nameplate === "object" && nameplate?.asset ? nameplate : fallback;
+    },
+
+    getUsername: (userId?: string) => getUserOverride(userId).username || undefined,
+    useUsername: (userId?: string) => useUserOverride(userId).username || undefined,
+    getTag(userId: string | undefined, types: Record<Exclude<UserTag, "" | "NONE">, number>, fallback?: number) {
+        const { tag } = getUserOverride(userId);
+        if (tag === "NONE") {
+            return;
+        }
+        return tag ? types?.[tag] ?? fallback : fallback;
+    },
+
+    shouldUseGuildAvatar(userId: string) {
+        const { flags, avatarUrl } = getUserOverride(userId);
+        return !hasFlag(flags, OverrideFlags.DisableServerAvatars)
+            && !hasFlag(flags, OverrideFlags.UseDefaultAvatar)
+            && (!avatarUrl || hasFlag(flags, OverrideFlags.KeepServerAvatar));
+    },
+
+    getAvatarUrl(user: User, fallback?: string) {
+        const { avatarUrl, flags } = getUserOverride(user?.id);
+        if (!hasFlag(flags, OverrideFlags.UseDefaultAvatar)) {
+            return avatarUrl || fallback;
+        }
+    },
+
+    useMessageNameProps(context: MessageNameContext, children: React.ReactNode) {
+        try {
+            const { author, channel, message, userOverride } = context;
+            const override = useUserOverride(userOverride?.id ?? message?.author?.id);
+            const color = getNameColor(override, channel?.guild_id ?? author.guildId, author);
+            if (color) {
+                return {
+                    children,
+                    style: { color, backgroundImage: "none", WebkitTextFillColor: color },
+                    "data-username-has-gradient": undefined
+                };
+            }
+        } catch {
+            return;
+        }
+    },
+
+    MemberName: ErrorBoundary.wrap(function MemberName({ member, className, font, original }: {
+        member: NameColors & { user?: User; guildId?: string; name: string; };
+        className: string;
+        font: string;
+        original: React.ReactElement;
+    }) {
+        const override = useUserOverride(member.user?.id);
+        const color = getNameColor(override, member.guildId, member);
+        if (color) {
+            return <span className={`${className} ${font}`} style={{ color }}>{member.name}</span>;
+        }
+        return original;
+    }, { fallback: ({ wrappedProps }) => wrappedProps.original }),
+
+    useAvatar(
+        user: User | undefined,
+        member: { avatar?: string | null; } | null,
+        preview: unknown,
+        getSrc: () => string | undefined
+    ) {
+        try {
+            const userId = user?.id;
+            const { flags } = useUserOverride(userId);
+            const keepGuildAvatar = member?.avatar
+                && !hasFlag(flags, OverrideFlags.DisableServerAvatars)
+                && hasFlag(flags, OverrideFlags.KeepServerAvatar);
+            const useLocal = preview === undefined && !keepGuildAvatar && !hasFlag(flags, OverrideFlags.UseDefaultAvatar);
+            return useLocalImage(useLocal ? userId : undefined, "avatar") ?? getSrc();
+        } catch {
+            return;
+        }
+    },
+
+    AccountAvatar: ErrorBoundary.wrap(function AccountAvatar({ Component, user, getSrc, ...props }: {
+        Component: React.ComponentType<{ src?: string; avatarDecoration?: string; }>;
+        user: User;
+        getSrc(): string;
+        avatarDecoration?: string;
+    }) {
+        const { flags } = useUserOverride(user.id);
+        const useDefault = hasFlag(flags, OverrideFlags.UseDefaultAvatar);
+        const local = useLocalImage(useDefault ? undefined : user.id, "avatar");
+        const decoration = useDecorationUrl(user.id, 40);
+        return (
+            <Component
+                {...props}
+                src={local ?? getSrc()}
+                avatarDecoration={decoration ?? props.avatarDecoration}
+            />
+        );
+    }, { noop: true }),
 
     useBanner(profile: DisplayProfile | undefined, preview: unknown, getSrc: () => string | undefined) {
-        const { flags } = useUserOverride(profile?.userId);
-        const preferGuildBanner = profile?.isUsingGuildMemberBanner()
-            && !hasFlag(flags, OverrideFlags.DisableServerBanners)
-            && hasFlag(flags, OverrideFlags.KeepServerBanner);
-        const userId = preview === undefined && !preferGuildBanner ? profile?.userId : undefined;
-        return useLocalImage(userId, "banner") ?? getSrc();
+        try {
+            const userId = profile?.userId;
+            const { flags } = useUserOverride(userId);
+            const keepGuildBanner = profile?._guildMemberProfile?.banner != null
+                && !hasFlag(flags, OverrideFlags.DisableServerBanners)
+                && hasFlag(flags, OverrideFlags.KeepServerBanner);
+            const useLocal = preview === undefined && !keepGuildBanner;
+            return useLocalImage(useLocal ? userId : undefined, "banner") ?? getSrc();
+        } catch {
+            return;
+        }
     },
 
-    useDecorationUrl(userId: string | undefined, size: number, canAnimate = false) {
-        const { decoration } = useUserOverride(userId);
-        return useMemo(() => {
-            const avatarDecoration = getDecorationData(decoration);
-            if (!avatarDecoration) {
-                return;
-            }
-
-            try {
-                return IconUtils.getAvatarDecorationURL({ avatarDecoration, size, canAnimate });
-            } catch {
-                return;
-            }
-        }, [decoration, size, canAnimate]);
-    },
-
-    getProfileEffect: (userId: string) => getCosmeticOverride(getUserOverride(userId).profileEffect),
-    getProfileFrame: (userId: string) => getCosmeticOverride(getUserOverride(userId).profileFrame)
+    useDecorationUrl
 });

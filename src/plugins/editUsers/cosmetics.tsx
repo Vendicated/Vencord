@@ -8,9 +8,9 @@ import { Heading } from "@components/Heading";
 import { Button, Paragraph, Span } from "@components/index";
 import { classNameFactory } from "@utils/css";
 import { findByCodeLazy } from "@webpack";
-import { IconUtils, NavigationRouter, SelectedGuildStore, TextInput, useState } from "@webpack/common";
+import { NavigationRouter, SelectedGuildStore, TextInput, useState } from "@webpack/common";
 
-import { CosmeticOverride, getDecorationData, UserOverride } from "./data";
+import { CosmeticOverride, getDecorationUrl, UserOverride } from "./data";
 import { CosmeticType, getShopProduct } from "./shop";
 
 const cl = classNameFactory("vc-editUsers-");
@@ -179,8 +179,7 @@ export function CosmeticsEditor({ cosmetics, onSelect, onError, onOpenShop, busy
 }) {
     const [link, setLink] = useState("");
     const [userId, setUserId] = useState("");
-    const avatarDecoration = getDecorationData(cosmetics.decoration);
-    const src = avatarDecoration && IconUtils.getAvatarDecorationURL({ avatarDecoration, size: 64, canAnimate: true });
+    const src = getDecorationUrl(cosmetics.decoration, 64, true);
 
     async function addShopItem() {
         onError("");

@@ -36,7 +36,8 @@ function getStore() {
 }
 
 export function loadImageKeys() {
-    return knownUsers ??= DataStore.keys<string>(getStore())
+    return knownUsers ??= Promise.resolve()
+        .then(() => DataStore.keys<string>(getStore()))
         .then(keys => new Set(keys))
         .catch(error => {
             logger.error("Could not read saved image keys", error);

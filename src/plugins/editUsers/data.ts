@@ -4,9 +4,8 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { definePluginSettings, SettingsStore } from "@api/Settings";
-import { AvatarDecorationData } from "@vencord/discord-types";
-import { React, useCallback } from "@webpack/common";
+import { definePluginSettings } from "@api/Settings";
+import { IconUtils } from "@webpack/common";
 
 export const enum OverrideFlags {
     None = 0,
@@ -70,16 +69,12 @@ export function getUserOverride(userId?: string) {
 }
 
 export function useUserOverride(userId?: string) {
-    const subscribe = useCallback((listener: () => void) => {
-        if (!userId) {
-            return () => {};
-        }
-        const path = `plugins.EditUsers.users.${userId}`;
-        SettingsStore.addChangeListener(path, listener);
-        return () => SettingsStore.removeChangeListener(path, listener);
-    }, [userId]);
-    const getSnapshot = () => getUserOverride(userId);
-    return React.useSyncExternalStore(subscribe, getSnapshot);
+    try {
+        settings.use(["users"]);
+        return getUserOverride(userId);
+    } catch {
+        return emptyOverride;
+    }
 }
 
 export function saveUserOverride(userId: string, override: UserOverride) {
@@ -105,12 +100,24 @@ export function getName(userId: string | undefined, nickname?: string | null) {
     return username || nickname || undefined;
 }
 
-export function getDecorationData(decoration?: string | CosmeticOverride): AvatarDecorationData | undefined {
+export function getDecorationUrl(decoration: UserOverride["decoration"] | undefined, size: number, canAnimate: boolean) {
     if (!decoration) {
         return;
     }
-    if (typeof decoration === "string") {
-        return { asset: decoration, skuId: "", expires_at: null };
+
+    try {
+        // Older overrides only contain an asset hash and cannot be looked up by SKU.
+        if (typeof decoration === "string") {
+            const asset = encodeURIComponent(decoration);
+            return `https://${window.GLOBAL_ENV.CDN_HOST}/avatar-decoration-presets/${asset}.png?size=${size}&passthrough=${canAnimate}`;
+        }
+
+        return IconUtils.getAvatarDecorationURL({
+            avatarDecoration: { asset: decoration.asset ?? "", skuId: decoration.skuId, expires_at: null },
+            size,
+            canAnimate
+        });
+    } catch {
+        return;
     }
-    return { asset: decoration.asset ?? "", skuId: decoration.skuId, expires_at: null };
 }
