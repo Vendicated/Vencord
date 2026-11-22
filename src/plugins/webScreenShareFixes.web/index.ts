@@ -162,13 +162,16 @@ export default definePlugin({
         const fallback = rtp.find(entry => entry.codec === codec);
         if (codec !== "H264") return fallback;
 
-        for (const profile of hardwareH264Profiles) {
+        for (const profile of [...hardwareH264Profiles, "42e0"]) {
             const match = rtp.find(entry => {
                 const config = fmtp.find(f => f.payload === entry.payload)?.config;
-                return entry.codec === "H264" && getH264Profile(config) === profile && config?.includes("packetization-mode=1");
+                return entry.codec === "H264"
+                    && getH264Profile(config) === profile
+                    && config?.includes("packetization-mode=1");
             });
             if (match) return match;
         }
+
         return fallback;
     },
 
