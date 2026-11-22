@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { currentNotice, noticesQueue, popNotice, showNotice } from "@api/Notices";
+import { currentNotice, NoticeColors, noticesQueue, showNotice } from "@api/Notices";
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { makeRange, OptionType } from "@utils/types";
@@ -65,16 +65,21 @@ export default definePlugin({
 
         const backOnlineMessage = "Welcome back! Click the button to go online. Click the X to stay idle until reload.";
         if (
-            currentNotice?.[1] === backOnlineMessage ||
-            noticesQueue.some(([, noticeMessage]) => noticeMessage === backOnlineMessage)
+            currentNotice?.message === backOnlineMessage ||
+            noticesQueue.some(notice => notice.message === backOnlineMessage)
         ) return;
 
-        showNotice(backOnlineMessage, "Exit idle", () => {
-            popNotice();
-            FluxDispatcher.dispatch({
-                type: "IDLE",
-                idle: false
-            });
+        showNotice({
+            message: backOnlineMessage,
+            buttonText: "Exit idle",
+            color: NoticeColors.DEFAULT,
+            callback({ dismiss }) {
+                dismiss();
+                FluxDispatcher.dispatch({
+                    type: "IDLE",
+                    idle: false
+                });
+            }
         });
     },
 

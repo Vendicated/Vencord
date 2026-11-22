@@ -17,6 +17,7 @@
 */
 
 import { loadLazyChunks } from "@debug/loadLazyChunks";
+import { testPatch } from "@debug/testPatch";
 import { Devs } from "@utils/constants";
 import { getCurrentChannel, getCurrentGuild } from "@utils/discord";
 import { runtimeHashMessageKey } from "@utils/intlHash";
@@ -133,6 +134,7 @@ function makeShortcuts() {
         canonicalizeMatch,
         canonicalizeReplace,
         canonicalizeReplacement,
+        testPatch,
         runtimeHashMessageKey,
         fakeRender: (component: ComponentType, props: any) => {
             const prevWin = fakeRenderWin?.deref();

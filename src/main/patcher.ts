@@ -132,6 +132,10 @@ if (!IS_VANILLA) {
     });
 
     process.env.DATA_DIR = join(app.getPath("userData"), "..", "Vencord");
+
+    if (settings.disableBackgroundOptimization !== false) {
+        app.commandLine.appendSwitch("disable-backgrounding-occluded-windows");
+    }
 } else {
     console.log("[Vencord] Running in vanilla mode. Not loading Vencord");
 }
