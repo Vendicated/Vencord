@@ -43,8 +43,7 @@ async function githubGet<T = any>(endpoint: string) {
 }
 
 async function calculateGitChanges() {
-    const isOutdated = await fetchUpdates();
-    if (!isOutdated) return [];
+    if (!await fetchUpdates()) return [];
 
     const data = await githubGet(`/compare/${gitHash}...HEAD`);
 
@@ -56,20 +55,25 @@ async function calculateGitChanges() {
     }));
 }
 
-async function fetchUpdates() {
-    const data = await githubGet("/releases/latest");
+async function fetchUpdates(): Promise<[string, string][] | undefined> {
+    const data = await githubGet<{
+        name: string;
+        assets: { name: string; browser_download_url: string; }[];
+    }>("/releases/latest");
 
     const hash = data.name.slice(data.name.lastIndexOf(" ") + 1);
     if (hash === gitHash)
-        return false;
+        return;
 
-    data.assets.forEach(({ name, browser_download_url }) => {
-        if (VENCORD_FILES.some(s => name.startsWith(s))) {
-            PendingUpdates.push([name, browser_download_url]);
-        }
-    });
+    return data.assets
+        .filter(({ name }) => VENCORD_FILES.some(s => name.startsWith(s)))
+        .map(({ name, browser_download_url }) => [name, browser_download_url]);
+}
 
-    return true;
+async function prepareUpdates() {
+    const updates = await fetchUpdates();
+    PendingUpdates = updates ?? [];
+    return updates !== undefined;
 }
 
 async function applyUpdates() {
@@ -78,9 +82,12 @@ async function applyUpdates() {
         return [join(__dirname, name), contents] as const;
     }));
 
-    await Promise.all(fileContents.map(async ([filename, contents]) =>
+    // Wait for every write before allowing a retry, even when one fails.
+    const writes = await Promise.allSettled(fileContents.map(async ([filename, contents]) =>
         writeFile(filename, contents))
     );
+    const failedWrite = writes.find(write => write.status === "rejected");
+    if (failedWrite) throw failedWrite.reason;
 
     PendingUpdates = [];
     return true;
@@ -88,5 +95,5 @@ async function applyUpdates() {
 
 ipcMain.handle(IpcEvents.GET_REPO, serializeErrors(() => `https://github.com/${gitRemote}`));
 ipcMain.handle(IpcEvents.GET_UPDATES, serializeErrors(calculateGitChanges));
-ipcMain.handle(IpcEvents.UPDATE, serializeErrors(fetchUpdates));
+ipcMain.handle(IpcEvents.UPDATE, serializeErrors(prepareUpdates));
 ipcMain.handle(IpcEvents.BUILD, serializeErrors(applyUpdates));

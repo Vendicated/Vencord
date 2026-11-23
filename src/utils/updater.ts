@@ -28,6 +28,10 @@ export let isNewer = false;
 export let updateError: any;
 export let changes: Record<"hash" | "author" | "message", string>[];
 
+let updateCheck: Promise<boolean> | undefined;
+let updateInProgress: Promise<boolean> | undefined;
+let gitBuildPending = false;
+
 async function Unwrap<T>(p: Promise<IpcRes<T>>) {
     const res = await p;
 
@@ -37,8 +41,18 @@ async function Unwrap<T>(p: Promise<IpcRes<T>>) {
     throw res.error;
 }
 
-export async function checkForUpdates() {
-    changes = await Unwrap(VencordNative.updater.getUpdates());
+export function checkForUpdates() {
+    if (gitBuildPending) return Promise.resolve(true);
+
+    return updateCheck ??= fetchUpdates().finally(() => {
+        updateCheck = undefined;
+    });
+}
+
+async function fetchUpdates() {
+    const fetchedChanges = await Unwrap(VencordNative.updater.getUpdates());
+    if (gitBuildPending) return true;
+    changes = fetchedChanges;
 
     // we only want to check this for the git updater, not the http updater
     if (!IS_STANDALONE) {
@@ -51,18 +65,26 @@ export async function checkForUpdates() {
     return (isOutdated = changes.length > 0);
 }
 
-export async function update() {
-    if (!isOutdated) return true;
+export function update() {
+    if (updateInProgress) return updateInProgress;
+    if (!isOutdated && !gitBuildPending) return Promise.resolve(true);
 
-    const res = await Unwrap(VencordNative.updater.update());
+    return updateInProgress = applyUpdate().finally(() => {
+        updateInProgress = undefined;
+    });
+}
 
-    if (res) {
-        isOutdated = false;
-        if (!await Unwrap(VencordNative.updater.rebuild()))
-            throw new Error("The Build failed. Please try manually building the new update");
-    }
+async function applyUpdate() {
+    if (!gitBuildPending && !await Unwrap(VencordNative.updater.update())) return false;
 
-    return res;
+    // A successful git pull advances HEAD even if the build fails.
+    gitBuildPending = !IS_STANDALONE;
+    if (!await Unwrap(VencordNative.updater.rebuild()))
+        throw new Error("The Build failed. Please try manually building the new update");
+
+    gitBuildPending = false;
+    isOutdated = false;
+    return true;
 }
 
 export const getRepo = () => Unwrap(VencordNative.updater.getRepo());
@@ -72,13 +94,19 @@ export async function maybePromptToUpdate(confirmMessage: string, checkForDev = 
     if (checkForDev && IS_DEV) return;
 
     try {
-        const isOutdated = await checkForUpdates();
-        if (isOutdated) {
+        const outdated = !updateInProgress && await checkForUpdates();
+        if (updateInProgress) {
+            if (await updateInProgress && confirm("Vencord has been updated. Would you like to restart Discord now?")) {
+                relaunch();
+            }
+            return;
+        }
+
+        if (outdated) {
             const wantsUpdate = confirm(confirmMessage);
             if (wantsUpdate && isNewer) return alert("Your local copy has more recent commits. Please stash or reset them.");
             if (wantsUpdate) {
-                await update();
-                relaunch();
+                if (await update()) relaunch();
             }
         }
     } catch (err) {

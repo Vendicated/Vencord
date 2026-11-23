@@ -125,7 +125,7 @@ async function runUpdateCheck() {
         if (!isOutdated) return;
 
         if (Settings.autoUpdate) {
-            await update();
+            if (!await update()) return;
             if (Settings.autoUpdateNotification) {
                 notify({
                     title: "Vencord has been updated!",
@@ -143,6 +143,7 @@ async function runUpdateCheck() {
         });
     } catch (err) {
         UpdateLogger.error("Failed to check for updates", err);
+        return false;
     } finally {
         checkingForUpdates = false;
     }
@@ -151,7 +152,12 @@ async function runUpdateCheck() {
 async function init() {
     // Updates must not depend on Discord initialising successfully.
     if (!IS_WEB && !IS_UPDATER_DISABLED) {
-        runUpdateCheck();
+        void runUpdateCheck().then(async result => {
+            if (result === false) {
+                await onceReady;
+                await runUpdateCheck();
+            }
+        });
 
         // this tends to get really annoying, so only do this if the user has auto-update without notification enabled
         if (Settings.autoUpdate && !Settings.autoUpdateNotification) {
