@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { popNotice, showNotice } from "@api/Notices";
+import { NoticeColors, showNotice } from "@api/Notices";
 import { Heading } from "@components/Heading";
 import { Link } from "@components/Link";
 import { Margins } from "@components/margins";
@@ -85,10 +85,16 @@ export default definePlugin({
 
         const connectionSuccessful = await new Promise(res => setTimeout(() => res(ws.readyState === WebSocket.OPEN), 5000)); // check if open after 5s
         if (!connectionSuccessful) {
-            showNotice("Failed to connect to arRPC, is it running?", "Retry", () => { // show notice about failure to connect, with retry/ignore
-                popNotice();
-                this.start();
+            showNotice({
+                message: "Failed to connect to arRPC, is it running?",
+                buttonText: "Retry",
+                color: NoticeColors.WARNING,
+                callback: ({ dismiss }) => {
+                    dismiss();
+                    this.start();
+                }
             });
+
             return;
         }
 

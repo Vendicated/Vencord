@@ -19,16 +19,21 @@
 import "./style.css";
 
 import { definePluginSettings } from "@api/Settings";
+import { Card } from "@components/Card";
 import ErrorBoundary from "@components/ErrorBoundary";
+import { Flex } from "@components/Flex";
+import { Heading } from "@components/Heading";
+import { Link } from "@components/Link";
+import { Paragraph } from "@components/Paragraph";
 import { Devs } from "@utils/constants";
 import { classNameFactory } from "@utils/css";
 import { classes } from "@utils/misc";
 import definePlugin, { OptionType } from "@utils/types";
-import type { Channel, Role } from "@vencord/discord-types";
+import type { Channel } from "@vencord/discord-types";
 import { findCssClassesLazy } from "@webpack";
 import { ChannelStore, PermissionsBits, PermissionStore, Tooltip } from "@webpack/common";
 
-import HiddenChannelLockScreen, { setChannelBeginHeader } from "./components/HiddenChannelLockScreen";
+import HiddenChannelLockScreen from "./components/HiddenChannelLockScreen";
 
 export const cl = classNameFactory("vc-shc-");
 
@@ -39,15 +44,7 @@ const enum ShowMode {
     HiddenIconWithMutedStyle
 }
 
-const CONNECT = 1n << 20n;
-
 export const settings = definePluginSettings({
-    hideUnreads: {
-        description: "Hide Unreads",
-        type: OptionType.BOOLEAN,
-        default: true,
-        restartNeeded: true
-    },
     showMode: {
         description: "The mode used to display hidden channels.",
         type: OptionType.SELECT,
@@ -56,11 +53,6 @@ export const settings = definePluginSettings({
             { label: "Muted style with hidden eye icon on the right", value: ShowMode.HiddenIconWithMutedStyle },
         ],
         restartNeeded: true
-    },
-    defaultAllowedUsersAndRolesDropdownState: {
-        description: "Whether the allowed users and roles dropdown on hidden channels should be open by default",
-        type: OptionType.BOOLEAN,
-        default: true
     }
 });
 
@@ -70,10 +62,27 @@ function isUncategorized(objChannel: { channel: Channel; comparator: number; }) 
 
 export default definePlugin({
     name: "ShowHiddenChannels",
-    description: "Show channels that you do not have access to view.",
+    description: "Shows hidden channels. Discord heavily limited this functionality. More info in the plugin settings.",
     tags: ["Servers", "Utility"],
     authors: [Devs.BigDuck, Devs.AverageReactEnjoyer, Devs.D3SOX, Devs.Ven, Devs.Nuckyz, Devs.Nickyux, Devs.Rini],
     settings,
+
+    settingsAboutComponent() {
+        return (
+            <Card variant="danger">
+                <Flex flexDirection="column" gap="0.5em">
+                    <Heading tag="h3">Limited Functionality</Heading>
+                    <Paragraph>
+                        Discord patched most of this plugin's functionality (<Link href="https://docs.discord.com/developers/change-log#channel-obfuscation-for-users-and-bots">read their announcement</Link>).
+                        Hidden channels now show up as "No Access" instead, and seeing things like the name, topic, or people with access is no longer possible.
+                    </Paragraph>
+                    <Paragraph>
+                        There is nothing we can do to fix this. However, you can still know that channels exist and see who's connected to private voice channels.
+                    </Paragraph>
+                </Flex>
+            </Card>
+        );
+    },
 
     patches: [
         {
@@ -84,11 +93,6 @@ export default definePlugin({
                 {
                     match: /if\(!\i\.\i\.can\(\i\.\i\.VIEW_CHANNEL.+?{if\(this\.id===\i\).+?threadIds:\[\]}}/,
                     replace: ""
-                },
-                // Do not check for unreads when selecting the render level if the channel is hidden
-                {
-                    match: /(?<=&&)(?=!\i\.\i\.hasUnread\(this\.record\.id\))/,
-                    replace: "$self.isHiddenChannel(this.record)||"
                 },
                 // Make channels we dont have access to be the same level as normal ones
                 {
@@ -183,23 +187,6 @@ export default definePlugin({
             ]
         },
         {
-            find: "UNREAD_IMPORTANT:",
-            replacement: [
-                {
-                    // Make muted channels also appear as unread if hide unreads is false, using the HiddenIconWithMutedStyle and the channel is hidden
-                    predicate: () => settings.store.hideUnreads === false && settings.store.showMode === ShowMode.HiddenIconWithMutedStyle,
-                    match: /(?<=\.LOCKED;if\()(?<={channel:(\i).+?)/,
-                    replace: (_, channel) => `!$self.isHiddenChannel(${channel})&&`
-                },
-                {
-                    // Hide unreads
-                    predicate: () => settings.store.hideUnreads === true,
-                    match: /Children\.count.+?;(?=return\(0,\i\.jsxs?\)\(\i\.\i,{focusTarget:)(?<={channel:(\i),name:\i,.+?unread:(\i).+?)/,
-                    replace: (m, channel, unread) => `${m}${unread}=$self.isHiddenChannel(${channel})?false:${unread};`
-                }
-            ]
-        },
-        {
             // Hide the new version of unreads box for hidden channels
             find: '"ChannelListUnreadsStore"',
             replacement: {
@@ -276,68 +263,6 @@ export default definePlugin({
                 match: /getState\(\)\.channelId.+?(?=\.map\(\i=>\i\.id)/,
                 replace: "$&.filter(e=>!$self.isHiddenChannel(e))"
             }
-        },
-        {
-            find: "#{intl::ROLE_REQUIRED_SINGLE_USER_MESSAGE}",
-            replacement: [
-                {
-                    // Change the role permission check to CONNECT if the channel is locked
-                    match: /(forceRoles:.+?)(\i\.\i\(\i\.\i\.ADMINISTRATOR,\i\.\i\.VIEW_CHANNEL\))(?<=context:(\i)}.+?)/,
-                    replace: (_, rest, mergedPermissions, channel) => `${rest}$self.swapViewChannelWithConnectPermission(${mergedPermissions},${channel})`
-                },
-                {
-                    // Change the permissionOverwrite check to CONNECT if the channel is locked
-                    match: /permissionOverwrites\[.+?\i=(?<=context:(\i)}.+?)(?=(.+?)VIEW_CHANNEL)/,
-                    replace: (m, channel, permCheck) => `${m}!Vencord.Webpack.Common.PermissionStore.can(${CONNECT}n,${channel})?${permCheck}CONNECT):`
-                },
-                {
-                    // Include the @everyone role in the allowed roles list for Hidden Channels
-                    match: /getSortedRoles.+?\.filter\(\i=>(?=!)/,
-                    replace: m => `${m}$self.isHiddenChannel(arguments[0]?.channel)?true:`
-                },
-                {
-                    // If the @everyone role has the required permissions, make the array only contain it
-                    match: /forceRoles:.+?.value\(\)(?<=channel:(\i).+?)/,
-                    replace: (m, channel) => `${m}.reduce(...$self.makeAllowedRolesReduce(${channel}.guild_id))`
-                },
-                {
-                    // Patch the header to only return allowed users and roles if it's a hidden channel or locked channel (Like when it's used on the HiddenChannelLockScreen)
-                    match: /return\(0,\i\.jsxs?\)\(\i\.\i,{channelId:(\i)\.id,children:\[(?=.{0,1000}?(\(0,\i\.jsxs?\)\("div",{className:\i\.\i,children:\[.{0,100}\i\.length>0.+?\]}\)),)/,
-                    replace: (m, channel, allowedUsersAndRolesComponent) => `if($self.isHiddenChannel(${channel},true)){return${allowedUsersAndRolesComponent};}${m}`
-                },
-                {
-                    // Export the channel for the users allowed component patch
-                    match: /maxUsers:\d+?,users:\i(?<=channel:(\i).+?)/,
-                    replace: (m, channel) => `${m},shcChannel:${channel}`
-                },
-                {
-                    // Always render the component for multiple allowed users
-                    match: /1!==\i\.length(?=\|\|)/,
-                    replace: "true"
-                }
-            ]
-        },
-        {
-            find: '="interactive-text-default",overflowCountClassName:',
-            replacement: [
-                {
-                    // Create a variable for the channel prop
-                    match: /let{users:\i,maxUsers:\i,/,
-                    replace: "let{shcChannel}=arguments[0];$&"
-                },
-                {
-                    // Make Discord always render the plus button if the component is used inside the HiddenChannelLockScreen
-                    match: /\i>0(?=&&!\i&&!\i)/,
-                    replace: m => `($self.isHiddenChannel(typeof shcChannel!=="undefined"?shcChannel:void 0,true)?true:${m})`
-                },
-                {
-                    // Show only the plus text without overflowed children amount
-                    // if the overflow amount is <= 0 and the component is used inside the HiddenChannelLockScreen
-                    match: /(?<=`\+\$\{)\i(?=\})/,
-                    replace: overflowTextAmount => "" +
-                        `$self.isHiddenChannel(typeof shcChannel!=="undefined"?shcChannel:void 0,true)&&(${overflowTextAmount}-1)<=0?"":${overflowTextAmount}`
-                }
-            ]
         },
         {
             find: "#{intl::CHANNEL_CALL_CURRENT_SPEAKER}",
@@ -471,35 +396,8 @@ export default definePlugin({
                 match: /(getVoiceStateForUser.{0,150}?)&&\i\.\i\.canWithPartialContext.{0,20}VIEW_CHANNEL.+?}\)(?=\?)/,
                 replace: "$1"
             }
-        },
-        {
-            find: "#{intl::ROLE_REQUIRED_SINGLE_USER_MESSAGE}",
-            replacement: {
-                match: /(?=function (\i)\(\i\){let{channel:.{0,200}?getSortedRoles\()/,
-                replace: "$self.ChannelBeginHeader=$1;"
-            }
-        },
-        {
-            find: "2026-02-private-channel-hiding",
-            replacement: {
-                match: /(?<=enableObfuscation|enableIntegrityCheck):!0/g,
-                replace: ":false"
-            }
         }
     ],
-
-    set ChannelBeginHeader(value: any) {
-        setChannelBeginHeader(value);
-    },
-
-    swapViewChannelWithConnectPermission(mergedPermissions: bigint, channel: Channel) {
-        if (!PermissionStore.can(PermissionsBits.CONNECT, channel)) {
-            mergedPermissions &= ~PermissionsBits.VIEW_CHANNEL;
-            mergedPermissions |= PermissionsBits.CONNECT;
-        }
-
-        return mergedPermissions;
-    },
 
     isHiddenChannel(channel: Channel & { channelId?: string; }, checkConnect = false) {
         try {
@@ -534,20 +432,6 @@ export default definePlugin({
         }
 
         return res;
-    },
-
-    makeAllowedRolesReduce(guildId: string) {
-        return [
-            (prev: Array<Role>, _: Role, index: number, originalArray: Array<Role>) => {
-                if (index !== 0) return prev;
-
-                const everyoneRole = originalArray.find(role => role.id === guildId);
-
-                if (everyoneRole) return [everyoneRole];
-                return originalArray;
-            },
-            [] as Array<Role>
-        ];
     },
 
     HiddenChannelLockScreen: (channel: any) => <HiddenChannelLockScreen channel={channel} />,
