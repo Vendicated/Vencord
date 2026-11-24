@@ -1,9 +1,15 @@
 .vc-shiki-container {
+    display: flex;
     border: 4px;
     background-color: var(--background-base-lower);
 }
 
+.vc-shiki-container:only-child {
+    min-height: 100%;
+}
+
 .vc-shiki-root {
+    flex: 1;
     border-radius: 4px;
 }
 
@@ -20,13 +26,21 @@
     border: none;
 }
 
+.vc-shiki-plain .vc-shiki-code {
+    padding-top: 8px;
+}
+
+.vc-shiki-container:only-child .vc-shiki-root {
+    display: flex;
+}
+
+.vc-shiki-container:only-child .vc-shiki-code {
+    flex: 1;
+}
+
 .vc-shiki-devicon {
     margin-right: 8px;
     user-select: none;
-}
-
-.vc-shiki-plain .vc-shiki-code {
-    padding-top: 8px;
 }
 
 .vc-shiki-btns {

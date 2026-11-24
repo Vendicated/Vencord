@@ -310,10 +310,18 @@ export interface PluginSettingStringDef extends PluginSettingDefCommon {
 export interface PluginSettingNumberDef extends PluginSettingDefCommon {
     type: OptionType.NUMBER;
     default?: number;
+    /** The minimum allowed value (inclusive) */
+    min?: number;
+    /** The maximum allowed value (inclusive) */
+    max?: number;
 }
 export interface PluginSettingBigIntDef extends PluginSettingDefCommon {
     type: OptionType.BIGINT;
     default?: BigInt;
+    /** The minimum allowed value (inclusive) */
+    min?: bigint;
+    /** The maximum allowed value (inclusive) */
+    max?: bigint;
 }
 export interface PluginSettingBooleanDef extends PluginSettingDefCommon {
     type: OptionType.BOOLEAN;
@@ -427,3 +435,9 @@ export type PluginNative<PluginExports extends Record<string, (event: Electron.I
 };
 
 export type AllOrNothing<T> = T | { [K in keyof T]?: never; };
+
+export type ConstEnumToRuntimeEnum<T> = {
+    [K in keyof T as T[K] extends number ? T[K] : never]: K;
+} & {
+    [K in keyof T]: T[K];
+};

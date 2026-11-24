@@ -2,7 +2,8 @@
     filter: grayscale(1);
 }
 
-.vc-dearrow-toggle-on, .vc-dearrow-toggle-off {
+.vc-dearrow-toggle-on,
+.vc-dearrow-toggle-off {
     all: unset;
     display: inline;
     cursor: pointer;

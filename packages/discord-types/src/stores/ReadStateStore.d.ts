@@ -1,5 +1,5 @@
-import { Channel, FluxStore } from "..";
 import { ReadStateType } from "../../enums";
+import { Channel, FluxStore } from "..";
 
 export interface GuildChannelUnreadState {
     mentionCount: number;
@@ -59,6 +59,8 @@ export class ReadStateStore extends FluxStore {
     hasRecentlyVisitedAndRead(channelId: string): boolean;
     hasTrackedUnread(channelId: string): boolean;
     hasUnread(channelId: string, type?: ReadStateType): boolean;
+    hasLastMessage(channelId: string, type?: ReadStateType): boolean;
+    canBeUnread(channelId: string, type?: ReadStateType): boolean;
     hasUnreadOrMentions(channelId: string, type?: ReadStateType): boolean;
     hasUnreadPins(channelId: string): boolean;
     isEstimated(channelId: string, type?: ReadStateType): boolean;

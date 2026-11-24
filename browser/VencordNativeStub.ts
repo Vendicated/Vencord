@@ -21,7 +21,6 @@
 
 // Be very careful with imports in this file to avoid circular dependency issues.
 // Only import pure modules that don't import other parts of Vencord.
-import monacoHtmlLocal from "file://monacoWin.html?minify";
 import * as DataStore from "@api/DataStore";
 import type { Settings } from "@api/Settings";
 import { getThemeInfo } from "@main/themes";
@@ -29,6 +28,7 @@ import { debounce } from "@shared/debounce";
 import { localStorage } from "@utils/localStorage";
 import { getStylusWebStoreUrl } from "@utils/web";
 import { EXTENSION_BASE_URL, metaReady, RENDERER_CSS_URL } from "@utils/web-metadata";
+import monacoHtmlLocal from "file://monacoWin.html?minify";
 
 // listeners for ipc.on
 const cssListeners = new Set<(css: string) => void>();
@@ -38,6 +38,8 @@ const NOOP_ASYNC = async () => { };
 const setCssDebounced = debounce((css: string) => VencordNative.quickCss.set(css));
 
 const themeStore = DataStore.createStore("VencordThemes", "VencordThemeData");
+
+let win: Window;
 
 // probably should make this less cursed at some point
 window.VencordNative = {
@@ -56,7 +58,7 @@ window.VencordNative = {
     native: {
         getVersions: () => ({}),
         supportsWindowsMaterial: () => false,
-        openExternal: async (url) => void open(url, "_blank"),
+        openExternal: async url => void open(url, "_blank"),
         getRendererCss: async () => {
             if (IS_USERSCRIPT)
                 // need to wait for next tick for _vcUserScriptRendererCss to be set
@@ -98,7 +100,10 @@ window.VencordNative = {
             }
 
             const features = `popup,width=${Math.min(window.innerWidth, 1000)},height=${Math.min(window.innerHeight, 1000)}`;
-            const win = open("about:blank", "VencordQuickCss", features);
+
+            win?.close();
+
+            win = open("about:blank", "VencordQuickCss", features)!;
             if (!win) {
                 alert("Failed to open QuickCSS popup. Make sure to allow popups!");
                 return;

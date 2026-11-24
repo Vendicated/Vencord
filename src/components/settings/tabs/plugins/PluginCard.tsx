@@ -4,13 +4,13 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { showNotice } from "@api/Notices";
+import { NoticeColors, showNotice } from "@api/Notices";
 import { hasAnyVisibleSettings, isPluginEnabled, pluginRequiresRestart, startDependenciesRecursive, startPlugin, stopPlugin } from "@api/PluginManager";
 import { Settings } from "@api/Settings";
 import { CogWheel, InfoIcon } from "@components/Icons";
 import { AddonCard } from "@components/settings/AddonCard";
 import { Plugin } from "@utils/types";
-import { React, showToast, Toasts } from "@webpack/common";
+import { React, showToast } from "@webpack/common";
 
 import { cl, logger } from ".";
 import { openPluginModal } from "./PluginModal";
@@ -36,7 +36,11 @@ export function PluginCard({ plugin, disabled, onRestartNeeded, onMouseEnter, on
 
             if (failures.length) {
                 logger.error(`Failed to start dependencies for ${plugin.name}: ${failures.join(", ")}`);
-                showNotice("Failed to start dependencies: " + failures.join(", "), "Close", () => null);
+                showNotice({
+                    message: "Failed to start dependencies: " + failures.join(", "),
+                    color: NoticeColors.DANGER
+                });
+
                 return;
             }
 
@@ -67,9 +71,7 @@ export function PluginCard({ plugin, disabled, onRestartNeeded, onMouseEnter, on
             settings.enabled = false;
 
             const msg = `Error while ${wasEnabled ? "stopping" : "starting"} plugin ${plugin.name}`;
-            showToast(msg, Toasts.Type.FAILURE, {
-                position: Toasts.Position.BOTTOM,
-            });
+            showToast({ text: msg, variant: "critical", position: "bottom" });
 
             return;
         }

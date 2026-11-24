@@ -28,3 +28,7 @@
 .vc-form-switch-border {
     margin-top: 20px;
 }
+
+.vc-form-switch-description {
+    color: var(--text-subtle);
+}

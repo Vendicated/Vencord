@@ -21,20 +21,31 @@ import { Devs } from "@utils/constants";
 import { Logger } from "@utils/Logger";
 import definePlugin, { OptionType, StartAt } from "@utils/types";
 import { WebpackRequire } from "@vencord/discord-types/webpack";
+import { Flux, FluxDispatcher } from "@webpack/common";
 
 const settings = definePluginSettings({
     disableAnalytics: {
         type: OptionType.BOOLEAN,
-        description: "Disable Discord's tracking (analytics/'science')",
+        description: "Block Discord's tracking analytics",
         default: true,
         restartNeeded: true
+    },
+    allowBadgeTracking: {
+        type: OptionType.BOOLEAN,
+        description: "Still send the events needed for badges to track your progress (eg: hours played, hours streamed)",
+        default: true,
+        restartNeeded: true,
+        disabled() { return !this.store.disableAnalytics; }
     }
 });
+
+const gameEvents = new Set(["launch_game", "running_game_heartbeat"]);
+const streamEvents = new Set(["media_session_joined", "video_stream_started", "video_stream_ended"]);
 
 export default definePlugin({
     name: "NoTrack",
     description: "Disable Discord's tracking (analytics/'science'), metrics and Sentry crash reporting",
-    authors: [Devs.Cyn, Devs.Ven, Devs.Nuckyz, Devs.Arrow],
+    authors: [Devs.Cyn, Devs.Ven, Devs.Nuckyz, Devs.Arrow, Devs.Cramber],
     required: true,
 
     settings,
@@ -42,11 +53,26 @@ export default definePlugin({
     patches: [
         {
             find: "AnalyticsActionHandlers.handle",
-            predicate: () => settings.store.disableAnalytics,
+            predicate: () => settings.store.disableAnalytics && !settings.store.allowBadgeTracking,
             replacement: {
                 match: /\(0,\i\.analyticsTrackingStoreMaker\)/,
-                replace: "(()=>{})",
+                replace: "$self.analyticsTrackingStoreMaker",
             },
+        },
+        {
+            find: '"AnalyticsTrackingStore"',
+            predicate: () => settings.store.disableAnalytics && settings.store.allowBadgeTracking,
+            group: true,
+            replacement: [
+                {
+                    match: /handleTrack=function\((\i)\){/,
+                    replace: "$&if(!$self.isBadgeEvent($1.event,$1.properties))return false;"
+                },
+                {
+                    match: /function \i\((\i),\i\){(?=let \i=Date\.now\(\))/,
+                    replace: "$&$1=$1.filter(e=>$self.isBadgeEvent(e.type,e.properties));if(!$1.length)return Promise.resolve();"
+                }
+            ]
         },
         {
             find: ".METRICS_V2",
@@ -140,5 +166,43 @@ export default definePlugin({
                 Reflect.deleteProperty(window, "DiscordSentry");
             }
         });
+    },
+
+    isBadgeEvent(type: string, properties?: Record<string, unknown>) {
+        if (gameEvents.has(type)) return true;
+
+        return streamEvents.has(type) && properties?.context === "stream" && properties.participant_type !== "receiver";
+    },
+
+    analyticsTrackingStoreMaker() {
+        class AnalyticsTrackingStoreStub extends Flux.Store {
+            static displayName = "AnalyticsTrackingStore";
+
+            requestDrain() { }
+
+            async submitEventsImmediately() {
+                // This is supposed to return a Discord rest response but we can't know what the correct shape would be, because
+                // 1. It's not used anywhere
+                // 2. It takes a dynamic url
+                // Instead we throw an error with the same structure as a Discord rest error which they probably should handle gracefully.
+                // Discord also throws a plain object instead of Error class
+
+                throw {
+                    ok: false,
+                    status: 500,
+                    body: {
+                        message: "Analytics tracking is disabled by NoTrack",
+                        code: 0
+                    },
+                    headers: {},
+                    text: JSON.stringify({
+                        message: "Analytics tracking is disabled by NoTrack",
+                        code: 0
+                    })
+                };
+            }
+        }
+
+        return new AnalyticsTrackingStoreStub(FluxDispatcher);
     }
 });

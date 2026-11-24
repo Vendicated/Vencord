@@ -5,6 +5,7 @@ export type ForcedColorsPreference = "none" | "active";
 export type ContrastPreference = "no-preference" | "more" | "less" | "custom";
 export type RoleStyle = "username" | "dot" | "hidden";
 export type ContrastMode = "default" | "high";
+export type YouBarAnimationPreference = "animate-never" | "animate-always" | "respect-motion-settings";
 
 export interface AccessibilityState {
     fontSize: number;
@@ -32,6 +33,15 @@ export interface AccessibilityState {
     syncProfileThemeWithUserTheme: boolean;
     enableCustomCursor: boolean;
     switchIconsEnabled: boolean;
+    officialMessageStyle: string;
+    expressionPickerFormat: string;
+    condensePickerWhenNarrow: boolean;
+    appsButtonEnabled: boolean;
+    emojiButtonEnabled: boolean;
+    gifButtonEnabled: boolean;
+    stickerButtonEnabled: boolean;
+    youBarNameplateAnimation: YouBarAnimationPreference;
+    youBarAvatarDecoAnimation: YouBarAnimationPreference;
 }
 
 export class AccessibilityStore extends FluxStore {
@@ -55,6 +65,17 @@ export class AccessibilityStore extends FluxStore {
     get isMessageGroupSpacingIncreased(): boolean;
     get isMessageGroupSpacingDecreased(): boolean;
     get isSubmitButtonEnabled(): boolean;
+    get isAppsButtonEnabled(): boolean;
+    get isEmojiButtonEnabled(): boolean;
+    get isGifButtonEnabled(): boolean;
+    get isStickerButtonEnabled(): boolean;
+    get officialMessageStyle(): string;
+    get expressionPickerFormat(): string;
+    get condensePickerWhenNarrow(): boolean;
+    get youBarNameplateAnimation(): YouBarAnimationPreference;
+    get youBarAvatarDecoAnimation(): YouBarAnimationPreference;
+    get animateYouBarNameplate(): boolean;
+    get animateYouBarAvatarDeco(): boolean;
     get syncProfileThemeWithUserTheme(): boolean;
     get systemPrefersReducedMotion(): ReducedMotionPreference;
     get rawPrefersReducedMotion(): ReducedMotionPreference;

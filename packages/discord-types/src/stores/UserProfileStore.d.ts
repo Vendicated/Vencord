@@ -1,5 +1,5 @@
-import { FluxStore, Guild, User, Application, ApplicationInstallParams, ProfileEffect } from "..";
 import { ApplicationFlags, ApplicationIntegrationType } from "../../enums";
+import { Application, ApplicationInstallParams, FluxStore, Guild, ProfileEffect,User } from "..";
 
 export interface MutualFriend {
     /**
@@ -103,20 +103,13 @@ export interface UserProfile extends UserProfileBase, Pick<User, "premiumType"> 
     premiumSince: Date | null;
 }
 
-export interface ApplicationWidgetConfig {
-    applicationId: string;
-    widgetType: number;
-}
-
 export interface WishlistSettings {
     privacy: number;
 }
 
 export class UserProfileStore extends FluxStore {
-    get applicationWidgetApplicationConfigs(): Record<string, ApplicationWidgetConfig>;
     get isSubmitting(): boolean;
 
-    getApplicationWidgetApplicationConfig(applicationId: string): ApplicationWidgetConfig | undefined;
     getFirstWishlistId(userId: string): string | null;
     getGuildMemberProfile(userId: string, guildId: string | undefined): UserProfileBase | null;
     /**
@@ -147,7 +140,7 @@ export class UserProfileStore extends FluxStore {
     // TODO: finish typing
     getWidgets(userId: string): any[] | undefined;
     getWishlistIds(userId: string): string[];
-    getWishlistSettings(userId: string): WishlistSettings | null;
+    getWishlistSettings(userId: string, wishlistId: string): WishlistSettings | null;
     /**
      * Check if mutual friends for {@link userId} are currently being fetched.
      *

@@ -16,8 +16,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { generateTextCss } from "@components/BaseText";
 import { generateMarginCss } from "@components/margins";
+import { generateTextCss } from "@components/Text";
 import { classNameFactory as _classNameFactory, classNameToSelector, createAndAppendStyle } from "@utils/css";
 
 // Backwards compat for Vesktop

@@ -38,7 +38,6 @@ import { getCurrentUserInfo, getReviews, readNotification } from "./reviewDbApi"
 import { settings } from "./settings";
 import { cl, showToast } from "./utils";
 
-const DMSideBarClasses = findCssClassesLazy("widgetPreviews");
 const ProfileCardClasses = findCssClassesLazy("cardsList", "firstCardContainer", "card", "container");
 const ProfileCardContainerClasses = findCssClassesLazy("innerContainer", "icons", "icon", "displayCount", "displayCountText", "displayCountTextColor", "breadcrumb");
 const ProfileCardOverlayClasses = findCssClassesLazy("overlay", "isPrivate", "outer");
@@ -50,6 +49,7 @@ const guildPopoutPatch: NavContextMenuPatchCallback = (children, { guild }: { gu
             label="View Reviews"
             id="vc-rdb-server-reviews"
             icon={OpenExternalIcon}
+            leadingAccessory={{ type: "icon", icon: OpenExternalIcon }}
             action={() => openReviewsModal(guild.id, guild.name, ReviewType.Server)}
         />
     );
@@ -62,6 +62,7 @@ const userContextPatch: NavContextMenuPatchCallback = (children, { user }: { use
             label="View Reviews"
             id="vc-rdb-user-reviews"
             icon={OpenExternalIcon}
+            leadingAccessory={{ type: "icon", icon: OpenExternalIcon }}
             action={() => openReviewsModal(user.id, user.username, ReviewType.User)}
         />
     );
@@ -87,7 +88,7 @@ export default definePlugin({
             // DM profile sidebar
             find: ".SIDEBAR,disableToolbar:",
             replacement: {
-                match: /user:(\i),widgets:.{0,100}?\}\),(?=.{0,200}?#{intl::USER_PROFILE_WISHLIST})/,
+                match: /user:(\i),widgets:.{0,100}?\}\),(?=.{0,100}user:\i,currentUser:\i)/,
                 replace: "$&$self.renderProfileComponent({user:$1,isSideBar:true}),"
             }
         },
@@ -98,6 +99,14 @@ export default definePlugin({
             replacement: {
                 match: /user:(\i),widgets:.{0,100}?\}\),/,
                 replace: "$&$self.renderProfileComponent({user:$1}),"
+            }
+        },
+        {
+            // Bot popout
+            find: '"BotUserProfilePopout"',
+            replacement: {
+                match: /\(0,\i\.jsx\)\(\i\.\i,\{user:(\i),currentUser:\i,guildId:\i\?\.id,onOpenUserProfileModal:\i,onClose:\i\}\)/,
+                replace: "$self.renderProfileComponent({user:$1}),$&"
             }
         }
     ],
@@ -123,7 +132,7 @@ export default definePlugin({
                     if (lastReviewId && lastReviewId < user.lastReviewID) {
                         s.lastReviewId = user.lastReviewID;
                         if (user.lastReviewID !== 0)
-                            showToast("You have new reviews on your profile!");
+                            showToast({ text: "You have new reviews on your profile!" });
                     }
                 }
 
@@ -169,7 +178,7 @@ export default definePlugin({
 
         // Discord are masters at using a crap ton of html elements and css classes to create a simple ui that could have
         // been made with less than half of the number of elements, so we have to do this insanity to replicate their ui
-        const reviewsSection = (
+        return (
             <section className={ProfileCardClasses.container}>
                 <ul className={ProfileCardClasses.cardsList} tabIndex={-1}>
                     <li className={ProfileCardClasses.firstCardContainer}>
@@ -185,7 +194,6 @@ export default definePlugin({
                                             {reviewData.reviews
                                                 .filter(review => review.id !== 0)
                                                 .slice(0, 4)
-                                                .reverse()
                                                 .map((review, idx) => {
                                                     const showCount = idx === 3 && reviewData.reviewCount > 4;
 
@@ -217,9 +225,5 @@ export default definePlugin({
                 </ul>
             </section>
         );
-
-        return isSideBar
-            ? <div className={DMSideBarClasses.widgetPreviews}>{reviewsSection}</div>
-            : reviewsSection;
     }, { noop: true })
 });

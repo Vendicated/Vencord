@@ -58,7 +58,7 @@ export default definePlugin({
             find: ".__invalid_blocked,",
             replacement: [
                 {
-                    match: /let{messages:\i,[^}]*?collapsedReason[^}]*}/,
+                    match: /let{messages:\i,[^}]*?canUncollapse[^}]*}/,
                     replace: "if($self.shouldHide(arguments[0]))return null;$&"
                 }
             ]
@@ -85,21 +85,22 @@ export default definePlugin({
         }
     ],
 
-    shouldIgnoreMessage(message: Message) {
+    shouldIgnoreUser(userId: string) {
         try {
-            if (RelationshipStore.isBlocked(message.author.id)) {
-                return true;
-            }
-            return settings.store.applyToIgnoredUsers && RelationshipStore.isIgnored(message.author.id);
+            return RelationshipStore.isBlocked(userId) || (settings.store.applyToIgnoredUsers && RelationshipStore.isIgnored(userId));
         } catch (e) {
             new Logger("NoBlockedMessages").error("Failed to check if user is blocked or ignored:", e);
             return false;
         }
     },
 
+    shouldIgnoreMessage(message: Message) {
+        return this.shouldIgnoreUser(message?.author?.id);
+    },
+
     shouldHide(props: MessageDeleteProps): boolean {
         try {
-            const collapsedReason = props.collapsedReason();
+            const collapsedReason = props.collapsedReason?.();
             const is = (key: string) => collapsedReason === i18n.t[runtimeHashMessageKey(key)]();
 
             return is("BLOCKED_MESSAGE_COUNT") || (settings.store.applyToIgnoredUsers && is("IGNORED_MESSAGE_COUNT"));

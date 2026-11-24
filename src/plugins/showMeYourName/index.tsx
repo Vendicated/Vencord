@@ -30,6 +30,7 @@ const settings = definePluginSettings({
             { label: "Username then nickname", value: "user-nick", default: true },
             { label: "Nickname then username", value: "nick-user" },
             { label: "Username only", value: "user" },
+            { label: "Nickname only", value: "nick" },
         ],
     },
     friendNicknames: {
@@ -98,7 +99,7 @@ export default definePlugin({
 
             const prefix = withMentionPrefix ? "@" : "";
 
-            if (isRepliedMessage && !inReplies || username.toLowerCase() === nick.toLowerCase())
+            if (isRepliedMessage && !inReplies || (username.toLowerCase() === nick.toLowerCase() && mode !== "user"))
                 return <>{prefix}{nick}</>;
 
             if (mode === "user-nick")
@@ -106,6 +107,9 @@ export default definePlugin({
 
             if (mode === "nick-user")
                 return <>{prefix}{nick} <span className="vc-smyn-suffix">{username}</span></>;
+
+            if (mode === "nick")
+                return <>{prefix}{nick}</>;
 
             return <>{prefix}{username}</>;
         } catch {

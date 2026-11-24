@@ -12,6 +12,7 @@ export const enum DraftType {
     SlashCommand = 5,
     ForwardContextMessage = 6,
     InteractionModal = 7,
+    ScheduledMessage = 8,
 }
 
 export const enum EmojiIntention {
@@ -51,4 +52,9 @@ export const enum PremiumType {
     TIER_1 = 1,
     TIER_2 = 2,
     TIER_0 = 3,
+}
+
+export const enum ToastPosition {
+    TOP = 0,
+    BOTTOM = 1,
 }

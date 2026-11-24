@@ -71,8 +71,9 @@ export default definePlugin({
 
         if (!text.length) return null;
 
-        const premiumType = UserStore.getCurrentUser().premiumType ?? 0;
-        const charMax = premiumType === 2 ? 4000 : 2000;
+        const charMax = editorRef?.current?.props?.maxCharacterCount ?? (
+            UserStore.getCurrentUser().premiumType === 2 ? 4000 : 2000
+        );
 
         const color = getCounterColor((text.length / charMax) * 100);
 

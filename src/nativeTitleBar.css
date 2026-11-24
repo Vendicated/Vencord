@@ -1,0 +1,7 @@
+[data-window-chrome="true"] {
+    margin-inline-end: 12px !important;
+}
+
+[class*="winButtons_"] {
+    display: none !important;
+}

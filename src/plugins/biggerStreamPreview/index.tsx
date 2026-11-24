@@ -70,6 +70,7 @@ export const addViewStreamContext: NavContextMenuPatchCallback = (children, { us
             label="View Stream Preview"
             id="view-stream-preview"
             icon={ScreenshareIcon}
+            leadingAccessory={{ type: "icon", icon: ScreenshareIcon }}
             action={() => stream && handleViewPreview(stream)}
             disabled={!stream}
         />
