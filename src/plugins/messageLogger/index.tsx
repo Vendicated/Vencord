@@ -248,20 +248,6 @@ const patchChannelContextMenu: NavContextMenuPatchCallback = (children, { channe
 const patchGuildContextMenu: NavContextMenuPatchCallback = (children, { guild }: { guild: Guild; }) => {
     if (!guild) return;
 
-    const channels = GuildChannelStore.getChannels(guild.id).SELECTABLE
-        .concat(GuildChannelStore.getChannels(guild.id).VOCAL)
-        .concat(
-            Object.values(ActiveJoinedThreadsStore.getActiveJoinedThreadsForGuild(guild.id))
-                .flatMap(threadChannels => Object.values(threadChannels))
-        );
-
-    const channelIds = new Set(channels.map((c: { channel: { id: string; }; }) => c.channel.id));
-    const hasLogs = [...channelIds].some(channelId =>
-        MessageStore.getMessages(channelId)?.some(msg => doesMessageHaveHistory(msg))
-    );
-
-    if (!hasLogs) return;
-
     const group = findGroupChildrenByChildId("mark-guild-read", children) ?? children;
     group.push(
         <Menu.MenuItem
@@ -270,6 +256,14 @@ const patchGuildContextMenu: NavContextMenuPatchCallback = (children, { guild }:
             color="danger"
             leadingAccessory={{ type: "icon", icon: HistoryIcon }}
             action={() => {
+                const channels = GuildChannelStore.getChannels(guild.id).SELECTABLE
+                    .concat(GuildChannelStore.getChannels(guild.id).VOCAL)
+                    .concat(
+                        Object.values(ActiveJoinedThreadsStore.getActiveJoinedThreadsForGuild(guild.id))
+                            .flatMap(threadChannels => Object.values(threadChannels))
+                    );
+
+                const channelIds = new Set(channels.map((c: { channel: { id: string; }; }) => c.channel.id));
                 const messages: MLMessage[] = [];
 
                 channelIds.forEach(channelId => {
