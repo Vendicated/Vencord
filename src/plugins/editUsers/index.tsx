@@ -320,7 +320,7 @@ export default definePlugin({
     },
 
     getUsername: (userId?: string) => getUserOverride(userId).username || undefined,
-    useUserOverride,
+    useUsername: (userId?: string) => useUserOverride(userId).username || undefined,
     getTag(userId: string | undefined, types: Record<Exclude<UserTag, "" | "NONE">, number>, fallback?: number) {
         const { tag } = getUserOverride(userId);
         if (tag === "NONE") {
