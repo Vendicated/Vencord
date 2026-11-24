@@ -118,7 +118,7 @@ export default definePlugin({
 
     patches: [
         {
-            find: ",getUserTag:",
+            find: "getUserTag:",
             replacement: [
                 {
                     match: /(?<=function \i\((\i)\)\{)(?=return \i\(\1\.global_name\))/,
@@ -144,12 +144,12 @@ export default definePlugin({
         {
             find: '"Result cannot be null because the message is not null"',
             replacement: {
-                match: /(?<=\{nick:)(\i\.nick)(?=\?\?\i,colorString:)/,
+                match: /(?<=\bnick:)(\i\.nick)\b/,
                 replace: "$self.getName(arguments[0]?.user?.id,$1)"
             }
         },
         {
-            find: '="SYSTEM_TAG"',
+            find: '"data-username-has-gradient"',
             replacement: {
                 // Keep Discord's click handlers and popout props on the username.
                 match: /(?<=:(\i),"data-text":[^,]{1,50},"data-username-has-gradient":[^}]{1,50})(?=\})/,
@@ -170,7 +170,7 @@ export default definePlugin({
             ]
         },
         {
-            find: "=this.guildMemberAvatars[",
+            find: "this.guildMemberAvatars[",
             replacement: {
                 match: /this\.guildMemberAvatars\[\i\](?=.{0,100}?\.getGuildMemberAvatarURLSimple)/,
                 replace: "($self.shouldUseGuildAvatar(this.id)?$&:null)"
@@ -179,19 +179,19 @@ export default definePlugin({
         {
             find: "getUserAvatarURL:",
             replacement: {
-                match: /\i\((\i),\i,\i,\i,\i\)(?=\?\?\i\(\1\.id,\1\.discriminator,\1\.isProvisional)/,
+                match: /\i\((\i)(?:,\i)+\)(?=\?\?\i\(\1\.id,\1\.discriminator)/,
                 replace: "$self.getAvatarUrl($1,$&)"
             }
         },
         {
             find: /avatarOverride:\i\}=.{0,50}?shouldAnimate:/,
             replacement: {
-                match: /(?<=avatarSrc:)\i\.useMemo\((\(\)=>.{0,60}?\((\i),(\i),(\i),\{canAnimate:\i,size:\i\}\).{0,20}?),\[[^\]]{1,80}\]\)/,
-                replace: "$self.useAvatar($4,$3,$2,$1)"
+                match: /(?<=avatarSrc:)(?=.{0,80}?\((\i),(\i),(\i),\{).{1,200}?(?=,isAvatarAnimating:)/,
+                replace: "$self.useAvatar($3,$2,$1,$&)"
             }
         },
         {
-            find: '{type:"account_popout",withMutualGuilds:',
+            find: 'type:"account_popout"',
             replacement: {
                 // The account panel renders its avatar inside a popout callback.
                 match: /(\i),\{(size:\i\.\i\.SIZE_32),src:(\i)\.getAvatarURL(?=\(.{0,40}?\),avatarDecoration:)/,
@@ -220,14 +220,14 @@ export default definePlugin({
             ]
         },
         {
-            find: "?.collectibles?.nameplate)??",
+            find: ".collectibles?.nameplate)??",
             replacement: {
-                match: /(?<=return )(\i\.useMemo\(\(\)=>\{.{0,120}?\.collectibles\?\.nameplate.{0,80}?\},\[\i,\i\]\))/,
-                replace: "$self.useNameplate(arguments[0]?.user?.id,$1)"
+                match: /(?<=return )\i\.useMemo\(.{0,160}?\.collectibles\?\.nameplate.{0,100}?\]\)/,
+                replace: "$self.useNameplate(arguments[0]?.user?.id,$&)"
             }
         },
         {
-            find: 'SHOULD_LOAD="SHOULD_LOAD"',
+            find: '"SHOULD_LOAD"',
             replacement: {
                 match: /(\i)\?\.getPreviewBanner\((\i),\i,\i\)(?=,\[)/,
                 replace: "$self.useBanner($1,$2,()=>$&)"
@@ -320,7 +320,7 @@ export default definePlugin({
     },
 
     getUsername: (userId?: string) => getUserOverride(userId).username || undefined,
-    useUsername: (userId?: string) => useUserOverride(userId).username || undefined,
+    useUserOverride,
     getTag(userId: string | undefined, types: Record<Exclude<UserTag, "" | "NONE">, number>, fallback?: number) {
         const { tag } = getUserOverride(userId);
         if (tag === "NONE") {
@@ -379,7 +379,7 @@ export default definePlugin({
         user: User | undefined,
         member: { avatar?: string | null; } | null,
         preview: unknown,
-        getSrc: () => string | undefined
+        fallback: string | undefined
     ) {
         try {
             const userId = user?.id;
@@ -388,10 +388,10 @@ export default definePlugin({
                 && !hasFlag(flags, OverrideFlags.DisableServerAvatars)
                 && hasFlag(flags, OverrideFlags.KeepServerAvatar);
             const useLocal = preview === undefined && !keepGuildAvatar && !hasFlag(flags, OverrideFlags.UseDefaultAvatar);
-            return useLocalImage(useLocal ? userId : undefined, "avatar") ?? getSrc();
+            return useLocalImage(useLocal ? userId : undefined, "avatar") ?? fallback;
         } catch (error) {
             logger.error("Could not get avatar", error);
-            return;
+            return fallback;
         }
     },
 
