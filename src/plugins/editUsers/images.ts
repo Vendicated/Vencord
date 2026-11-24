@@ -24,6 +24,7 @@ interface ActiveImages {
     listeners: Set<() => void>;
     urls: Partial<Record<ImageKind, string>>;
     request?: Promise<void>;
+    cleanupTimer?: number;
 }
 
 const activeImages = new Map<string, ActiveImages>();
@@ -87,10 +88,22 @@ function subscribeToImages(userId: string, listener: () => void) {
         entry.request = request;
     }
 
-    // Entries stay cached so remounts in the same commit don't render revoked URLs
-    const { listeners } = entry;
+    const active = entry;
+    const { listeners } = active;
+    window.clearTimeout(active.cleanupTimer);
+    active.cleanupTimer = undefined;
     listeners.add(listener);
-    return () => listeners.delete(listener);
+    return () => {
+        listeners.delete(listener);
+        if (listeners.size === 0) {
+            // Keep the URLs alive if React resubscribes in the same commit.
+            active.cleanupTimer = window.setTimeout(() => {
+                activeImages.delete(userId);
+                active.request = undefined;
+                setActiveImages(active, undefined);
+            });
+        }
+    };
 }
 
 export function useLocalImage(userId: string | undefined, kind: ImageKind) {

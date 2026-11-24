@@ -130,16 +130,23 @@ async function getProfileCosmetics(userId: string) {
 
     const { nameplate } = cosmetics;
     if (typeof nameplate === "object" && !nameplate.asset) {
-        const product = await getShopProduct(nameplate.skuId);
-        const item = product?.items.find(item => item.type === CosmeticType.Nameplate && item.skuId === nameplate.skuId);
-        if (item?.asset) {
-            cosmetics.nameplate = {
-                skuId: item.skuId,
-                name: product?.name,
-                asset: item.asset,
-                label: item.label,
-                palette: item.palette
-            };
+        delete cosmetics.nameplate;
+        try {
+            const product = await getShopProduct(nameplate.skuId);
+            const item = product?.items.find(item =>
+                item.type === CosmeticType.Nameplate && item.skuId === nameplate.skuId
+            );
+            if (item?.asset) {
+                cosmetics.nameplate = {
+                    skuId: item.skuId,
+                    name: product?.name,
+                    asset: item.asset,
+                    label: item.label,
+                    palette: item.palette
+                };
+            }
+        } catch (error) {
+            logger.error("Could not load nameplate from the shop", error);
         }
     }
 
