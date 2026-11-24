@@ -272,7 +272,10 @@ const patchGuildContextMenu: NavContextMenuPatchCallback = (children, { guild }:
                     });
                 });
 
-                if (!messages.length) return;
+                if (!messages.length) {
+                	showToast({ text: "No messages to clear" });
+                	return;
+                }
 
                 openModal(props => (
                     <ConfirmModal
