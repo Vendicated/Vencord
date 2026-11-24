@@ -8,23 +8,23 @@
 }
 
 .vc-card-warning {
-    background-color: var(--background-feedback-warning);
-    border: 1px solid var(--icon-feedback-warning);
+    background-color: var(--background-feedback-mod-warning);
+    border: 1px solid var(--inlinenotice-border-warning);
 }
 
 .vc-card-danger {
-    background-color: var(--background-feedback-critical);
-    border: 1px solid var(--icon-feedback-critical);
+    background-color: var(--background-feedback-mod-critical);
+    border: 1px solid var(--inlinenotice-border-critical);
 }
 
 .vc-card-success {
-    background-color: var(--background-feedback-positive);
-    border: 1px solid var(--icon-feedback-positive);
+    background-color: var(--background-feedback-mod-positive);
+    border: 1px solid var(--inlinenotice-border-positive);
 }
 
 .vc-card-info {
-    background: var(--background-feedback-info);
-    border: 1px solid var(--icon-feedback-info);
+    background: var(--background-feedback-mod-info);
+    border: 1px solid var(--inlinenotice-border-info);
 }
 
 .vc-card-defaultPadding {

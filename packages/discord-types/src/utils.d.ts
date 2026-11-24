@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import type { MouseEvent, ReactNode } from "react";
 import { LiteralUnion } from "type-fest";
 
 import { ApplicationCommandOptionType, ChannelType, PremiumType } from "../enums";
@@ -186,8 +186,8 @@ export interface Clipboard {
 export interface NavigationRouter {
     back(): void;
     forward(): void;
-    transitionTo(path: string, ...args: unknown[]): void;
-    transitionToGuild(guildId: string, ...args: unknown[]): void;
+    transitionTo(path: string, extra?: Record<string, unknown>): void;
+    transitionToGuild(guildId: string, channelId?: string, messageId?: string, extra?: Record<string, unknown>): void;
 }
 
 export interface ChannelRouter {
@@ -457,3 +457,33 @@ export interface OpenUserProfileModalOptions {
 }
 
 export type OpenUserProfileModal = (opts: OpenUserProfileModalOptions) => Promise<void>;
+
+export type NoticeColorKey = "DEFAULT" | "NEUTRAL" | "BRAND" | "WARNING" | "DANGER" | "INFO" | "STREAMER_MODE" | "CUSTOM" | "SPOTIFY" | "PREMIUM_TIER_0" | "PREMIUM_TIER_1" | "PREMIUM_TIER_2";
+export type NoticeColors = Record<NoticeColorKey, string>;
+
+export interface Notice {
+    id: string;
+    /** This is always "VencordNotice" */
+    type: string;
+    message: ReactNode;
+    /** import NoticeColors from the Notices API */
+    color?: string;
+    /** Text to display on the notice button. Defaults to "Dismiss" */
+    buttonText?: ReactNode;
+    /**
+     * Callback for when the button is clicked. Not called when the notice is dismissed via the close button.
+     *
+     * Defaults to dismissing the notice
+     */
+    callback?(event: MouseEvent<HTMLButtonElement>): void;
+}
+
+export type NoticeOptions = Omit<Notice, "id" | "type" | "callback"> & {
+    id?: string;
+    /**
+     * Callback for when the button is clicked. Not called when the notice is dismissed via the close button.
+     *
+     * Defaults to dismissing the notice
+     */
+    callback?(data: { event: MouseEvent<HTMLButtonElement>; dismiss(): Promise<void>; }): void;
+};

@@ -58,7 +58,7 @@ export default definePlugin({
             find: ".__invalid_blocked,",
             replacement: [
                 {
-                    match: /let{messages:\i,[^}]*?collapsedReason[^}]*}/,
+                    match: /let{messages:\i,[^}]*?canUncollapse[^}]*}/,
                     replace: "if($self.shouldHide(arguments[0]))return null;$&"
                 }
             ]
@@ -100,7 +100,7 @@ export default definePlugin({
 
     shouldHide(props: MessageDeleteProps): boolean {
         try {
-            const collapsedReason = props.collapsedReason();
+            const collapsedReason = props.collapsedReason?.();
             const is = (key: string) => collapsedReason === i18n.t[runtimeHashMessageKey(key)]();
 
             return is("BLOCKED_MESSAGE_COUNT") || (settings.store.applyToIgnoredUsers && is("IGNORED_MESSAGE_COUNT"));
