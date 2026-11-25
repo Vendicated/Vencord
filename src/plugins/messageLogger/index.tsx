@@ -31,7 +31,7 @@ import { classes } from "@utils/misc";
 import definePlugin, { OptionType } from "@utils/types";
 import { Guild, Message, MessageAttachment } from "@vencord/discord-types";
 import { findCssClassesLazy } from "@webpack";
-import { ActiveJoinedThreadsStore, AuthenticationStore, ChannelStore, ConfirmModal, FluxDispatcher, GuildChannelStore, Menu, MessageStore, openModal, Parser, SelectedChannelStore, Timestamp, UserStore, useStateFromStores } from "@webpack/common";
+import { ActiveJoinedThreadsStore, AuthenticationStore, ChannelStore, ConfirmModal, FluxDispatcher, GuildChannelStore, Menu, MessageStore, openModal, Parser, SelectedChannelStore, showToast, Timestamp, UserStore, useStateFromStores } from "@webpack/common";
 
 import overlayStyle from "./deleteStyleOverlay.css?managed";
 import textStyle from "./deleteStyleText.css?managed";
@@ -273,8 +273,8 @@ const patchGuildContextMenu: NavContextMenuPatchCallback = (children, { guild }:
                 });
 
                 if (!messages.length) {
-                	showToast({ text: "No messages to clear" });
-                	return;
+                    showToast({ text: "No messages to clear" });
+                    return;
                 }
 
                 openModal(props => (
