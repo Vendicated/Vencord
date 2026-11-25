@@ -46,6 +46,8 @@ const addEditUser: NavContextMenuPatchCallback = (children, { user }: { user?: U
     );
 };
 
+export const customColorOverride = Symbol("EditUsers.customColor");
+
 interface NameColors {
     colorString?: string | null;
     colorStrings?: { primaryColor?: string | null; } | null;
@@ -356,6 +358,7 @@ export default definePlugin({
                         ...author,
                         colorString: color,
                         colorStrings: null,
+                        [customColorOverride]: true,
                         ...channel?.isPrivate() && { displayNameStyles: null }
                     }
                 };
