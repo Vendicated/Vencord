@@ -9,13 +9,15 @@ import { Button, ErrorBoundary, Flex, FormSwitch, Paragraph, Span } from "@compo
 import { classNameFactory } from "@utils/css";
 import { saveFile } from "@utils/web";
 import { RenderModalProps, User } from "@vencord/discord-types";
-import { DisplayProfileUtils, IconUtils, Modal, NavigationRouter, openModal, Select, showToast, TabBar, TextInput, useEffect, useRef, useState } from "@webpack/common";
+import { extractAndLoadChunksLazy } from "@webpack";
+import { ColorPicker, DisplayProfileUtils, IconUtils, Modal, NavigationRouter, openModalLazy, Select, showToast, TabBar, TextInput, useEffect, useLayoutEffect, useRef, useState } from "@webpack/common";
 
 import { CosmeticsEditor } from "./cosmetics";
 import { emptyOverride, getUserOverride, hasFlag, logger, OverrideFlags, saveUserOverride, UserOverride, UserTag } from "./data";
 import { exportImages, getImages, ImageChanges, ImageKind, imageTypes, importImages, saveImageChanges, UserImages, validateImage } from "./images";
 
 const cl = classNameFactory("vc-editUsers-");
+const requireColorPicker = extractAndLoadChunksLazy(['type:"USER_SETTINGS_MODAL_OPEN"']);
 
 const tabs = [
     { id: "name", label: "Display Name" },
@@ -80,21 +82,32 @@ function ColorField({ label, value, disabled, onChange }: {
     disabled: boolean;
     onChange(value: string): void;
 }) {
+    const parsed = value ? Number.parseInt(value, 16) : null;
+    const color = parsed != null && !Number.isNaN(parsed) ? parsed : null;
+
     return (
-        <Flex alignItems="center">
-            <label className={cl("colourPicker")}>
-                <Span>{label}</Span>
-                <input
-                    type="color"
-                    value={`#${value.padStart(6, "0")}`}
-                    disabled={disabled}
-                    onChange={({ currentTarget }) => onChange(currentTarget.value.slice(1))}
-                />
-            </label>
+        <div className={cl("colourRow")}>
+            <div className={cl("colourPicker", disabled && "disabled")}>
+                <ErrorBoundary noop={false}>
+                    <ColorPicker
+                        color={color}
+                        showEyeDropper
+                        onChange={next => {
+                            if (!disabled && next != null) {
+                                onChange(next.toString(16).padStart(6, "0"));
+                            }
+                        }}
+                    />
+                </ErrorBoundary>
+            </div>
+            <div className={cl("colourLabel")}>
+                <Span weight="semibold">{label}</Span>
+                <Paragraph size="sm">{value ? `#${value.toUpperCase()}` : "Default"}</Paragraph>
+            </div>
             <Button variant="secondary" disabled={disabled || !value} onClick={() => onChange("")}>
                 Reset Colour
             </Button>
-        </Flex>
+        </div>
     );
 }
 
@@ -108,21 +121,23 @@ function ImageEditor({ kind, image, url, placeholder, onFile, onUrl, onReset, di
     onReset(): void;
     disabled: boolean;
 }) {
-    const [preview, setPreview] = useState<string>();
-    useEffect(() => {
+    const [preview, setPreview] = useState<{ blob: Blob; src: string; }>();
+    useLayoutEffect(() => {
         if (!image) {
             setPreview(undefined);
             return;
         }
         const src = URL.createObjectURL(image);
-        setPreview(src);
+        setPreview({ blob: image, src });
         return () => URL.revokeObjectURL(src);
     }, [image]);
 
-    const src = image ? preview : url.trim() || placeholder;
+    const src = image
+        ? (preview?.blob === image ? preview.src : undefined)
+        : url.trim() || placeholder;
     return (
         <>
-            {src && <img src={src} className={cl("preview", kind)} alt={`${kind} preview`} />}
+            {src && <img key={src} src={src} className={cl("preview", kind)} alt={`${kind} preview`} />}
             <Flex>
                 <FileButton label="Choose Image" accept={imageTypes} disabled={disabled} onSelect={onFile} />
                 <Button variant="secondary" disabled={disabled || (!image && !url)} onClick={onReset}>
@@ -279,6 +294,7 @@ function EditModal({ user, modalProps }: { user: User; modalProps: RenderModalPr
                             />
                         ) : (
                             <ImageEditor
+                                key={tab}
                                 kind={tab}
                                 image={image}
                                 url={override[urlKey]}
@@ -425,7 +441,10 @@ const SafeEditModal = ErrorBoundary.wrap(EditModal, { noop: false });
 
 export function openUserEditModal(user: User) {
     try {
-        openModal(modalProps => <SafeEditModal user={user} modalProps={modalProps} />);
+        openModalLazy(async () => {
+            await requireColorPicker().catch(error => logger.error("Could not load colour picker", error));
+            return modalProps => <SafeEditModal user={user} modalProps={modalProps} />;
+        });
     } catch (error) {
         logger.error("Could not open edit modal", error);
     }

@@ -37,7 +37,11 @@
 .vc-editUsers-colourPicker {
     display: flex;
     align-items: center;
-    gap: 8px;
+}
+
+.vc-editUsers-disabled {
+    pointer-events: none;
+    opacity: 0.5;
 }
 
 .vc-editUsers-profile,
@@ -53,11 +57,13 @@
     gap: 8px;
 }
 
+.vc-editUsers-colourLabel p,
 .vc-editUsers-field h3,
 .vc-editUsers-field p {
     margin: 0;
 }
 
+.vc-editUsers-colourRow,
 .vc-editUsers-cosmeticRow,
 .vc-editUsers-inputRow {
     display: flex;
@@ -69,12 +75,14 @@
     min-height: 48px;
 }
 
+.vc-editUsers-colourLabel,
 .vc-editUsers-cosmeticLabel,
 .vc-editUsers-inputRow > :first-child {
     flex: 1;
     min-width: 0;
 }
 
+.vc-editUsers-colourLabel,
 .vc-editUsers-cosmeticLabel {
     display: grid;
     gap: 2px;
