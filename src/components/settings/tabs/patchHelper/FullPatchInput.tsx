@@ -5,57 +5,58 @@
  */
 
 import { Paragraph } from "@components/Paragraph";
-import { Margins } from "@utils/margins";
-import { Patch, ReplaceFn } from "@utils/types";
+import { Patch } from "@utils/types";
 import { TextArea, useEffect, useRef, useState } from "@webpack/common";
 
-export interface FullPatchInputProps {
-    setFind(v: string): void;
-    setParsedFind(v: string | RegExp): void;
-    setMatch(v: string): void;
-    setReplacement(v: string | ReplaceFn): void;
+interface FullPatchInputProps {
+    onPatch(patch: Pick<Patch, "find" | "replacement"> | undefined): void;
 }
 
-export function FullPatchInput({ setFind, setParsedFind, setMatch, setReplacement }: FullPatchInputProps) {
+export function FullPatchInput({ onPatch }: FullPatchInputProps) {
     const [patch, setPatch] = useState<string>("");
     const [error, setError] = useState<string>("");
 
     const textAreaRef = useRef<HTMLTextAreaElement>(null);
+    const hasEdits = useRef(false);
 
     function update() {
-        if (patch === "") {
-            setError("");
+        if (!hasEdits.current) {
+            return;
+        }
+        hasEdits.current = false;
 
-            setFind("");
-            setParsedFind("");
-            setMatch("");
-            setReplacement("");
+        if (patch.trim() === "") {
+            setError("");
+            onPatch(undefined);
             return;
         }
 
         try {
-            let { find, replacement } = (0, eval)(`([${patch}][0])`) as Patch;
-
-            if (!find) throw new Error("No 'find' field");
-            if (!replacement) throw new Error("No 'replacement' field");
-
-            if (replacement instanceof Array) {
-                if (replacement.length === 0) throw new Error("Invalid replacement");
-
-                // Only test the first replacement
-                replacement = replacement[0];
+            const { find, replacement } = (0, eval)(`([${patch}][0])`) as Patch;
+            if (!find || (typeof find !== "string" && !(find instanceof RegExp))) {
+                throw new Error("Expected a string or RegExp in 'find'");
             }
 
-            if (!replacement.match) throw new Error("No 'replacement.match' field");
-            if (replacement.replace == null) throw new Error("No 'replacement.replace' field");
+            const replacements = Array.isArray(replacement) ? replacement : [replacement];
+            if (!replacement || replacements.length === 0) {
+                throw new Error("No replacements to test");
+            }
 
-            setFind(find instanceof RegExp ? `/${find.source}/` : find);
-            setParsedFind(find);
-            setMatch(replacement.match instanceof RegExp ? replacement.match.source : replacement.match);
-            setReplacement(replacement.replace);
+            for (const [index, entry] of replacements.entries()) {
+                const label = `Replacement ${index + 1}`;
+                if (!entry?.match || (typeof entry.match !== "string" && !(entry.match instanceof RegExp))) {
+                    throw new Error(`${label} needs a string or RegExp match`);
+                }
+                if (typeof entry.replace !== "string" && typeof entry.replace !== "function") {
+                    throw new Error(`${label} needs a string or function replacement`);
+                }
+            }
+
+            onPatch({ find, replacement });
             setError("");
         } catch (e) {
             setError((e as Error).message);
+            onPatch(undefined);
         }
     }
 
@@ -63,19 +64,24 @@ export function FullPatchInput({ setFind, setParsedFind, setMatch, setReplacemen
         const { current: textArea } = textAreaRef;
         if (textArea) {
             textArea.style.height = "auto";
-            textArea.style.height = `${textArea.scrollHeight}px`;
+            textArea.style.height = `${Math.min(textArea.scrollHeight, 224)}px`;
         }
     }, [patch]);
 
     return (
         <>
-            <Paragraph className={Margins.bottom8}>
-                Paste your full JSON patch here to fill out the fields
+            <Paragraph>
+                Paste a full patch here. Edit replacement arrays in this field.
             </Paragraph>
             <TextArea
+                aria-label="Full patch"
+                rows={4}
                 inputRef={textAreaRef}
                 value={patch}
-                onChange={setPatch}
+                onChange={value => {
+                    hasEdits.current = true;
+                    setPatch(value);
+                }}
                 onBlur={update}
             />
             {error !== "" && <Paragraph style={{ color: "var(--text-feedback-critical)" }}>{error}</Paragraph>}

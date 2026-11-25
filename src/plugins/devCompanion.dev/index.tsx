@@ -18,9 +18,9 @@
 
 import { showNotification } from "@api/Notifications";
 import { definePluginSettings } from "@api/Settings";
+import { testPatch } from "@debug/testPatch";
 import { Devs } from "@utils/constants";
 import { Logger } from "@utils/Logger";
-import { canonicalizeMatch, canonicalizeReplace } from "@utils/patches";
 import definePlugin, { OptionType, ReporterTestable } from "@utils/types";
 import { filters, findAll, search } from "@webpack";
 
@@ -152,42 +152,18 @@ function initWs(isManual = false) {
         switch (type) {
             case "testPatch": {
                 const { find, replacement } = data as PatchData;
-
-                const candidates = search(find);
-                const keys = Object.keys(candidates);
-                if (keys.length !== 1)
-                    return reply("Expected exactly one 'find' matches, found " + keys.length);
-
-                const mod = candidates[keys[0]];
-                let src = String(mod).replaceAll("\n", "");
-
-                if (src.startsWith("function(")) {
-                    src = "0," + src;
-                } else if (src.charCodeAt(0) >= 49 /* 1*/ && src.charCodeAt(0) <= 57 /* 9*/) {
-                    src = "0,function" + src.substring(src.indexOf("("));
-                }
-
-                let i = 0;
-
-                for (const { match, replace } of replacement) {
-                    i++;
-
-                    try {
-                        const matcher = canonicalizeMatch(parseNode(match));
-                        const replacement = canonicalizeReplace(parseNode(replace), 'Vencord.Plugins.plugins["PlaceHolderPluginName"]');
-
-                        const newSource = src.replace(matcher, replacement as string);
-
-                        if (src === newSource) throw "Had no effect";
-                        Function(newSource);
-
-                        src = newSource;
-                    } catch (err) {
-                        return reply(`Replacement ${i} failed: ${err}`);
-                    }
-                }
-
-                reply();
+                const result = testPatch({
+                    find,
+                    replacement: replacement.map(({ match, replace }) => ({
+                        get match() {
+                            return parseNode(match);
+                        },
+                        get replace() {
+                            return parseNode(replace);
+                        }
+                    }))
+                });
+                reply(result.ok ? undefined : result.error);
                 break;
             }
             case "testFind": {

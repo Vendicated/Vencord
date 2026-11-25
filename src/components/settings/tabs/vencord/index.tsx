@@ -56,7 +56,7 @@ type KeysOfType<Object, Type> = {
 }[keyof Object];
 
 function Switches() {
-    const settings = useSettings(["useQuickCss", "enableReactDevtools", "frameless", "nativeTitleBar", "transparent", "winCtrlQ", "disableMinSize"]);
+    const settings = useSettings(["useQuickCss", "disableBackgroundOptimization", "enableReactDevtools", "frameless", "nativeTitleBar", "transparent", "winCtrlQ", "disableMinSize"]);
     const { disableAnalytics } = NoTrack.settings.use(["disableAnalytics"]);
 
     const Switches = [
@@ -75,6 +75,12 @@ function Switches() {
             title: "Block Discord Analytics",
             description: NoTrack.settings.def.disableAnalytics.description,
             restartRequired: NoTrack.settings.def.disableAnalytics.restartNeeded,
+        },
+        IS_DISCORD_DESKTOP && {
+            key: "disableBackgroundOptimization",
+            title: "Disable Background Optimization",
+            description: "Keeps the app window updating even when it is not fully focused. Solves Discord unloading / disconnecting",
+            restartRequired: true
         },
         IS_DISCORD_DESKTOP && {
             key: "nativeTitleBar",

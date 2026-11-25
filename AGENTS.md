@@ -22,9 +22,9 @@ Follow these deeper instructions when applicable:
 - Only add jsdoc to common API, never to private functions. Always add in api & utils, never in plugins
 - Always prefer functions or plain objects over classes
 
-## Issue and PR Guidelines
+## Contribution Guidelines
 
-AI contributions require human oversight and review.
+AI contributions require a human in the loop who reviews and understands all changes before they are submitted.
 
-- Never create an issue.
-- Never create a PR.
+- Never create an issue or PR yourself. The user must always submit contributions themselves, with you only providing assistance or guidance.
+- Commits must include an `Assisted-by: Model` trailer in the commit message that states the specific model used. Never add `Co-authored-by:`.
