@@ -11,7 +11,7 @@ import { ErrorBoundary, PencilIcon } from "@components/index";
 import { Devs } from "@utils/constants";
 import definePlugin, { StartAt } from "@utils/types";
 import { Channel, DisplayProfile, Message, User } from "@vencord/discord-types";
-import { Menu, useEffect, useMemo } from "@webpack/common";
+import { Menu, React, useEffect, useMemo } from "@webpack/common";
 
 import {
     CosmeticOverride,
@@ -58,7 +58,8 @@ interface MessageNameContext {
     channel?: Channel;
 }
 
-function getNameColor({ usernameColor, flags }: Partial<UserOverride>, guildId: string | undefined, original: NameColors) {
+function useNameColor(userId: string | undefined, guildId: string | undefined, original: NameColors) {
+    const { usernameColor, flags } = useUserOverride(userId);
     if (!usernameColor) {
         return;
     }
@@ -151,9 +152,8 @@ export default definePlugin({
         {
             find: '"data-username-has-gradient"',
             replacement: {
-                // Keep Discord's click handlers and popout props on the username.
-                match: /(?<=:(\i),"data-text":[^,]{1,50},"data-username-has-gradient":[^}]{1,50})(?=\})/,
-                replace: ",...$self.useMessageNameProps(arguments[0],$1)"
+                match: /(?<=function \i\((\i)\)\{)(?=let\{author:\i,message:\i,channel:\i,userOverride:)/,
+                replace: "$1=$self.useMessageNameProps($1);"
             }
         },
         {
@@ -164,8 +164,8 @@ export default definePlugin({
                     replace: "name:$self.getName(arguments[0]?.user?.id,$1)??$2"
                 },
                 {
-                    match: /(?<=children:\[)(\i\?.{0,80}?userName:.{0,350}?className:(\i\.\i),displayNameStylesFont:(\i),animateRoleGradient:\i\}\))/,
-                    replace: "$self.MemberName({member:arguments[0],className:$2,font:$3,original:$1})"
+                    match: /(?<=children:\[)(\i\?.{0,80}?userName:.{0,200}?\}\)):(.{0,50}?roleName:.{0,150}?animateRoleGradient:\i\}\))/,
+                    replace: "$self.MemberName({member:arguments[0],styledName:$1:null,roleName:$2})"
                 }
             ]
         },
@@ -343,37 +343,40 @@ export default definePlugin({
         }
     },
 
-    useMessageNameProps(context: MessageNameContext, children: React.ReactNode) {
+    useMessageNameProps(context: MessageNameContext) {
         try {
             const { author, channel, message, userOverride } = context;
-            const override = useUserOverride(userOverride?.id ?? message?.author?.id);
-            const color = getNameColor(override, channel?.guild_id ?? author.guildId, author);
+            const userId = userOverride?.id ?? message?.author?.id;
+            const guildId = channel?.guild_id ?? author.guildId;
+            const color = useNameColor(userId, guildId, author);
             if (color) {
                 return {
-                    children,
-                    style: { color, backgroundImage: "none", WebkitTextFillColor: color },
-                    "data-username-has-gradient": undefined
+                    ...context,
+                    author: {
+                        ...author,
+                        colorString: color,
+                        colorStrings: null,
+                        ...channel?.isPrivate() && { displayNameStyles: null }
+                    }
                 };
             }
         } catch (error) {
-            logger.error("Could not apply username colour", error);
-            return;
+            logger.error("Could not apply message author colour", error);
         }
+        return context;
     },
 
-    MemberName: ErrorBoundary.wrap(function MemberName({ member, className, font, original }: {
-        member: NameColors & { user?: User; guildId?: string; name: string; };
-        className: string;
-        font: string;
-        original: React.ReactElement;
+    MemberName: ErrorBoundary.wrap(function MemberName({ member, styledName, roleName }: {
+        member: NameColors & { user?: User; guildId?: string; };
+        styledName: React.ReactElement | null;
+        roleName: React.ReactElement<NameColors>;
     }) {
-        const override = useUserOverride(member.user?.id);
-        const color = getNameColor(override, member.guildId, member);
+        const color = useNameColor(member.user?.id, member.guildId, member);
         if (color) {
-            return <span className={`${className} ${font}`} style={{ color }}>{member.name}</span>;
+            return React.cloneElement(roleName, { colorString: color, colorStrings: null });
         }
-        return original;
-    }, { fallback: ({ wrappedProps }) => wrappedProps.original }),
+        return styledName ?? roleName;
+    }, { fallback: ({ wrappedProps }) => wrappedProps.styledName ?? wrappedProps.roleName }),
 
     useAvatar(
         user: User | undefined,
