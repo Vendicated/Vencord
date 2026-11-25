@@ -65,7 +65,7 @@ const settings = definePluginSettings({
 export default definePlugin({
     name: "WebScreenShareFixes",
     authors: [Devs.Kaitlyn, Devs.ThaUnknown],
-    description: "Removes 2500kbps bitrate cap on chromium and vesktop clients, enables stereo stream audio with a higher bitrate, raises the start bitrate of streams, uses hardware H264 encoding and fixes CPU usage growing endlessly while screensharing.",
+    description: "Removes 2500kbps bitrate cap on chromium and vesktop clients, enables stereo stream audio with a higher bitrate, raises the start bitrate of streams, uses hardware H264 encoding, fixes CPU usage growing endlessly while screensharing and prevents local audio playback during thumbnail generation.",
     tags: ["Voice"],
     enabledByDefault: true,
     settings,
@@ -131,12 +131,25 @@ export default definePlugin({
                 replace: '["AV1",$1.VP9,$1.H264,$1.VP8]'
             }
         },
+        // Stream thumbnail generator
         {
             find: "ApplicationStreamPreviewUploadManager",
-            replacement: {
-                match: /removeAttribute\("srcObject"\)(?<=(\i)\..+?)/,
-                replace: "pause(),$1.srcObject=null"
-            }
+            replacement: [
+                // Every 5 minutes, Discord generates a thumbnail and makes a copy of the stream for it
+                // However, they don't mute it, leading to a loud audio spike every 5 minutes
+                // https://github.com/Vencord/Vesktop/issues/1355
+                {
+                    match: /(\i)\.srcObject=(\i),\1\.play\(\)/,
+                    replace: "$1.muted=true,$&"
+                },
+                // Discord tries to remove the srcObject with removeAttribute, but that's not valid, it does nothing.
+                // Thus, this is a leak that gets worse every time they generate a new thumbnail
+                // Properly remove the srcObject by pausing the element and setting it to null
+                {
+                    match: /removeAttribute\("srcObject"\)(?<=(\i)\..+?)/,
+                    replace: "pause(),$1.srcObject=null"
+                }
+            ]
         }
     ],
 
@@ -149,13 +162,16 @@ export default definePlugin({
         const fallback = rtp.find(entry => entry.codec === codec);
         if (codec !== "H264") return fallback;
 
-        for (const profile of hardwareH264Profiles) {
+        for (const profile of [...hardwareH264Profiles, "42e0"]) {
             const match = rtp.find(entry => {
                 const config = fmtp.find(f => f.payload === entry.payload)?.config;
-                return entry.codec === "H264" && getH264Profile(config) === profile && config?.includes("packetization-mode=1");
+                return entry.codec === "H264"
+                    && getH264Profile(config) === profile
+                    && config?.includes("packetization-mode=1");
             });
             if (match) return match;
         }
+
         return fallback;
     },
 

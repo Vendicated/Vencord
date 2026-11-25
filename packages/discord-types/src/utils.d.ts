@@ -186,8 +186,8 @@ export interface Clipboard {
 export interface NavigationRouter {
     back(): void;
     forward(): void;
-    transitionTo(path: string, ...args: unknown[]): void;
-    transitionToGuild(guildId: string, ...args: unknown[]): void;
+    transitionTo(path: string, extra?: Record<string, unknown>): void;
+    transitionToGuild(guildId: string, channelId?: string, messageId?: string, extra?: Record<string, unknown>): void;
 }
 
 export interface ChannelRouter {

@@ -5,151 +5,152 @@
  */
 
 import { Button } from "@components/Button";
+import { Card } from "@components/Card";
+import { CodeBlock } from "@components/CodeBlock";
+import { Flex } from "@components/Flex";
 import { Heading } from "@components/Heading";
 import { Paragraph } from "@components/Paragraph";
-import { Margins } from "@utils/margins";
-import { canonicalizeMatch, canonicalizeReplace } from "@utils/patches";
-import { makeCodeblock } from "@utils/text";
-import { ReplaceFn } from "@utils/types";
-import { Parser, useMemo, useState } from "@webpack/common";
-import type { Change } from "diff";
-
-// Do not include diff in standalone builds (side effects import)
-if (!IS_STANDALONE) {
-    var differ = require("diff") as typeof import("diff");
-}
+import { PatchTarget, previewPatchReplacement, testPatchReplacements } from "@debug/testPatch";
+import { escapeRegExp } from "@utils/text";
+import { PatchReplacement } from "@utils/types";
+import { useMemo, useState } from "@webpack/common";
 
 interface PatchPreviewProps {
-    module: [id: number, factory: Function];
-    match: string;
-    replacement: string | ReplaceFn;
-    setReplacementError(error: any): void;
+    target: PatchTarget;
+    replacements: PatchReplacement[];
 }
 
-function makeDiff(original: string, patched: string, match: RegExpMatchArray | null) {
-    if (!match || original === patched) return null;
-
-    const changeSize = patched.length - original.length;
-
-    // Use 200 surrounding characters of context
-    const start = Math.max(0, match.index! - 200);
-    const end = Math.min(original.length, match.index! + match[0].length + 200);
-    // (changeSize may be negative)
-    const endPatched = end + changeSize;
-
-    const context = original.slice(start, end);
-    const patchedContext = patched.slice(start, endPatched);
-
-    return differ.diffWordsWithSpace(context, patchedContext);
+interface ReplacementPreview {
+    match?: string[];
+    diff?: ReturnType<typeof makeDiff>;
+    error?: string;
 }
 
-function Match({ matchResult }: { matchResult: RegExpMatchArray | null; }) {
-    if (!matchResult)
-        return null;
+const CONTEXT_LENGTH = 100;
+const PREVIEW_LENGTH = 1000;
 
-    const fullMatch = matchResult[0]
-        ? makeCodeblock(matchResult[0], "js")
-        : "";
-    const groups = matchResult.length > 1
-        ? makeCodeblock(matchResult.slice(1).map((g, i) => `Group ${i + 1}: ${g}`).join("\n"), "yml")
-        : "";
+function diffLines(text: string, prefix: string) {
+    return text ? text.split("\n").map(line => prefix + line) : [];
+}
+
+function makeDiff(original: string, patched: string, matchIndex: number) {
+    let firstChange = matchIndex;
+    const sharedLength = Math.min(original.length, patched.length);
+    while (firstChange < sharedLength && original[firstChange] === patched[firstChange]) {
+        firstChange++;
+    }
+
+    let remainingContext = 0;
+    while (
+        remainingContext < sharedLength - firstChange &&
+        original[original.length - 1 - remainingContext] === patched[patched.length - 1 - remainingContext]
+    ) {
+        remainingContext++;
+    }
+
+    const start = Math.max(0, firstChange - CONTEXT_LENGTH);
+    const beforeEnd = original.length - remainingContext;
+    const afterEnd = patched.length - remainingContext;
+    const limit = firstChange + PREVIEW_LENGTH;
+    const truncated = beforeEnd > limit || afterEnd > limit;
+    const trailingContext = truncated ? "" : original.slice(beforeEnd, beforeEnd + CONTEXT_LENGTH);
+
+    return {
+        content: [
+            ...diffLines(original.slice(start, firstChange), "  "),
+            ...diffLines(original.slice(firstChange, Math.min(beforeEnd, limit)), "- "),
+            ...diffLines(patched.slice(firstChange, Math.min(afterEnd, limit)), "+ "),
+            ...diffLines(trailingContext, "  ")
+        ].join("\n"),
+        truncated
+    };
+}
+
+function previewReplacements(source: string, replacements: PatchReplacement[]) {
+    const previews: ReplacementPreview[] = [];
+    for (const replacement of replacements) {
+        try {
+            const { canonicalMatch, patchedSource } = previewPatchReplacement(source, replacement, "YourPlugin");
+            const matcher = typeof canonicalMatch === "string"
+                ? new RegExp(escapeRegExp(canonicalMatch))
+                : new RegExp(canonicalMatch);
+            const result = matcher.exec(source);
+            const match = result?.map(value =>
+                value?.length > PREVIEW_LENGTH ? value.slice(0, PREVIEW_LENGTH) + "…" : value
+            );
+
+            if (source === patchedSource) {
+                previews.push({ match, error: "Had no effect" });
+            } else {
+                previews.push({
+                    match,
+                    diff: makeDiff(source, patchedSource, result?.index ?? 0)
+                });
+            }
+            source = patchedSource;
+        } catch (error) {
+            previews.push({ error: error instanceof Error ? error.message : String(error) });
+            break;
+        }
+    }
+
+    return previews;
+}
+
+function Match({ match }: { match: string[]; }) {
+    const [fullMatch, ...groups] = match;
+    const groupsCode = groups.map((value, index) => `Group ${index + 1}: ${value}`).join("\n");
 
     return (
-        <>
-            <Heading className={Margins.bottom8}>Match</Heading>
-            <div style={{ userSelect: "text" }}>{Parser.parse(fullMatch)}</div>
-            <div style={{ userSelect: "text" }}>{Parser.parse(groups)}</div>
-        </>
+        <details className="vc-patch-helper-disclosure">
+            <summary>Match</summary>
+            <Flex flexDirection="column" gap={8}>
+                {fullMatch && <CodeBlock lang="js" content={fullMatch} />}
+                {groupsCode && <CodeBlock lang="yml" content={groupsCode} />}
+            </Flex>
+        </details>
     );
 }
 
-function Diff({ diff }: { diff: Change[] | null; }) {
-    if (!diff?.length)
-        return null;
+export function PatchPreview({ target, replacements }: PatchPreviewProps) {
+    const { moduleId, source } = target;
+    const previews = useMemo(() => previewReplacements(source, replacements), [source, replacements]);
+    const [compileResult, setCompileResult] = useState<{ previews: ReplacementPreview[]; error?: string; }>();
 
-    const diffLines = diff.map((p, idx) => {
-        const color = p.added
-            ? "lime"
-            : p.removed
-                ? "red"
-                : "grey";
-
-        return (
-            <div
-                key={idx}
-                style={{ color, userSelect: "text", wordBreak: "break-all", lineBreak: "anywhere" }}
-            >
-                {p.value}
-            </div>
-        );
-    });
+    function compile() {
+        const result = testPatchReplacements(source, replacements, "YourPlugin");
+        setCompileResult({ previews, error: result.ok ? undefined : result.error });
+    }
 
     return (
-        <>
-            <Heading className={Margins.bottom8}>Diff</Heading>
-            {diffLines}
-        </>
-    );
-}
-
-export function PatchPreview({ module, match, replacement, setReplacementError }: PatchPreviewProps) {
-    const [id, fact] = module;
-    const [compileResult, setCompileResult] = useState<[boolean, string]>();
-
-    const [patchedCode, matchResult, diff] = useMemo<[string, RegExpMatchArray | null, Change[] | null]>(() => {
-        const src: string = fact.toString().replaceAll("\n", "");
-
-        try {
-            new RegExp(match);
-        } catch (e) {
-            return ["", null, null];
-        }
-
-        const canonicalMatch = canonicalizeMatch(new RegExp(match));
-        try {
-            const canonicalReplace = canonicalizeReplace(replacement, 'Vencord.Plugins.plugins["YourPlugin"]');
-            var patched = src.replace(canonicalMatch, canonicalReplace as string);
-            setReplacementError(void 0);
-        } catch (e) {
-            setReplacementError((e as Error).message);
-            return ["", null, null];
-        }
-
-        const m = src.match(canonicalMatch);
-        return [patched, m, makeDiff(src, patched, m)];
-    }, [id, match, replacement]);
-
-    return (
-        <>
-            <Heading className={Margins.bottom8} style={{ userSelect: "text" }}>Module {id}</Heading>
-
-            <Match matchResult={matchResult} />
-            <Diff diff={diff} />
-
-            {!!diff?.length && (
-                <Button
-                    className={Margins.top20}
-                    onClick={() => {
-                        try {
-                            const isArrowFunction = patchedCode.startsWith("(");
-                            const wrappedCode = "0," + (!isArrowFunction ? "function" : "") + patchedCode.slice(patchedCode.indexOf("("));
-                            Function(wrappedCode);
-
-                            setCompileResult([true, "Compiled successfully"]);
-                        } catch (err) {
-                            setCompileResult([false, (err as Error).message]);
-                        }
-                    }}
-                >
-                    Compile
+        <Flex flexDirection="column" gap={16}>
+            <Flex alignItems="center" justifyContent="space-between" flexWrap="wrap" gap={8}>
+                <Heading tag="h4" style={{ userSelect: "text" }}>Module {moduleId}</Heading>
+                <Button onClick={compile}>
+                    {replacements.length > 1 ? "Compile all replacements" : "Compile"}
                 </Button>
-            )}
-
-            {compileResult && (
-                <Paragraph style={{ color: compileResult[0] ? "var(--status-positive)" : "var(--text-feedback-critical)" }}>
-                    {compileResult[1]}
+            </Flex>
+            {compileResult?.previews === previews && (
+                <Paragraph style={{ color: compileResult.error ? "var(--text-feedback-critical)" : "var(--status-positive)" }}>
+                    {compileResult.error ?? "Compiled successfully"}
                 </Paragraph>
             )}
-        </>
+
+            {previews.map(({ match, diff, error }, index) => (
+                <Card key={index}>
+                    <Flex flexDirection="column" gap={12}>
+                        <Heading>{replacements.length > 1 ? `Replacement ${index + 1}` : "Replacement preview"}</Heading>
+                        {diff && (
+                            <>
+                                <CodeBlock className="vc-patch-helper-diff" lang="diff" content={diff.content} />
+                                {diff.truncated && <Paragraph>Diff preview truncated.</Paragraph>}
+                            </>
+                        )}
+                        {match && <Match match={match} />}
+                        {error && <Paragraph style={{ color: "var(--text-feedback-critical)" }}>{error}</Paragraph>}
+                    </Flex>
+                </Card>
+            ))}
+        </Flex>
     );
 }
