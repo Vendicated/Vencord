@@ -5,7 +5,7 @@
  */
 
 import { Heading } from "@components/Heading";
-import { Button, ErrorBoundary, Flex, FormSwitch, Paragraph, Span } from "@components/index";
+import { Button, Divider, ErrorBoundary, Flex, FormSwitch, Paragraph } from "@components/index";
 import { classNameFactory } from "@utils/css";
 import { saveFile } from "@utils/web";
 import { RenderModalProps, User } from "@vencord/discord-types";
@@ -86,36 +86,39 @@ function ColorField({ label, value, disabled, onChange }: {
     const color = parsed != null && !Number.isNaN(parsed) ? parsed : null;
 
     return (
-        <div className={cl("colourRow")}>
-            <div className={cl("colourPicker", disabled && "disabled")}>
-                <ErrorBoundary noop={false}>
-                    <ColorPicker
-                        color={color}
-                        showEyeDropper
-                        onChange={next => {
-                            if (!disabled && next != null) {
-                                onChange(next.toString(16).padStart(6, "0"));
-                            }
-                        }}
-                    />
-                </ErrorBoundary>
+        <section className={cl("section")}>
+            <Heading>{label}</Heading>
+            <div className={cl("colourRow")}>
+                <div className={cl("colourPicker", disabled && "disabled")}>
+                    <ErrorBoundary noop={false}>
+                        <ColorPicker
+                            color={color}
+                            showEyeDropper
+                            onChange={next => {
+                                if (!disabled && next != null) {
+                                    onChange(next.toString(16).padStart(6, "0"));
+                                }
+                            }}
+                        />
+                    </ErrorBoundary>
+                </div>
+                <Paragraph size="sm" className={cl("colourValue", !value && "description")}>
+                    {value ? `#${value.toUpperCase()}` : "Default"}
+                </Paragraph>
+                <Button variant="secondary" disabled={disabled || !value} onClick={() => onChange("")}>
+                    Reset Colour
+                </Button>
             </div>
-            <div className={cl("colourLabel")}>
-                <Span weight="semibold">{label}</Span>
-                <Paragraph size="sm">{value ? `#${value.toUpperCase()}` : "Default"}</Paragraph>
-            </div>
-            <Button variant="secondary" disabled={disabled || !value} onClick={() => onChange("")}>
-                Reset Colour
-            </Button>
-        </div>
+        </section>
     );
 }
 
-function ImageEditor({ kind, image, url, placeholder, onFile, onUrl, onReset, disabled }: {
+function ImageEditor({ kind, image, url, placeholder, fallbackColor, onFile, onUrl, onReset, disabled }: {
     kind: ImageKind;
     image?: Blob;
     url: string;
     placeholder?: string;
+    fallbackColor?: string;
     onFile(file: File): void;
     onUrl(url: string): void;
     onReset(): void;
@@ -135,15 +138,33 @@ function ImageEditor({ kind, image, url, placeholder, onFile, onUrl, onReset, di
     const src = image
         ? (preview?.blob === image ? preview.src : undefined)
         : url.trim() || placeholder;
+    const buttons = (
+        <Flex gap="8px">
+            <FileButton label="Choose Image" accept={imageTypes} disabled={disabled} onSelect={onFile} />
+            <Button variant="secondary" disabled={disabled || (!image && !url)} onClick={onReset}>
+                Reset Image
+            </Button>
+        </Flex>
+    );
+
     return (
-        <>
-            {src && <img key={src} src={src} className={cl("preview", kind)} alt={`${kind} preview`} />}
-            <Flex>
-                <FileButton label="Choose Image" accept={imageTypes} disabled={disabled} onSelect={onFile} />
-                <Button variant="secondary" disabled={disabled || (!image && !url)} onClick={onReset}>
-                    Reset Image
-                </Button>
-            </Flex>
+        <section className={cl("section")}>
+            <Heading>{kind === "avatar" ? "Avatar Image" : "Banner Image"}</Heading>
+            {kind === "avatar" ? (
+                <div className={cl("avatarRow")}>
+                    {src && <img key={src} src={src} className={cl("preview", "avatar")} alt="avatar preview" />}
+                    {buttons}
+                </div>
+            ) : (
+                <>
+                    {src ? (
+                        <img key={src} src={src} className={cl("preview", "banner")} alt="banner preview" />
+                    ) : fallbackColor ? (
+                        <div className={cl("preview", "banner")} style={{ backgroundColor: `#${fallbackColor}` }} />
+                    ) : null}
+                    {buttons}
+                </>
+            )}
             <TextInput
                 aria-label={`${kind} image URL`}
                 placeholder={`Optional ${kind} URL`}
@@ -151,7 +172,7 @@ function ImageEditor({ kind, image, url, placeholder, onFile, onUrl, onReset, di
                 disabled={disabled || Boolean(image)}
                 onChange={onUrl}
             />
-        </>
+        </section>
     );
 }
 
@@ -252,12 +273,15 @@ function EditModal({ user, modalProps }: { user: User; modalProps: RenderModalPr
             case "name":
                 return (
                     <>
-                        <TextInput
-                            aria-label="Display name"
-                            placeholder={user.globalName || user.username}
-                            value={override.username}
-                            onChange={value => setField("username", value)}
-                        />
+                        <section className={cl("section")}>
+                            <Heading>Display Name</Heading>
+                            <TextInput
+                                aria-label="Display name"
+                                placeholder={user.globalName || user.username}
+                                value={override.username}
+                                onChange={value => setField("username", value)}
+                            />
+                        </section>
                         <ColorField
                             label="Username Colour"
                             value={override.usernameColor}
@@ -270,6 +294,7 @@ function EditModal({ user, modalProps }: { user: User; modalProps: RenderModalPr
                             disabled={!override.usernameColor}
                             value={hasFlag(override.flags, OverrideFlags.OverrideRoleColor)}
                             onChange={value => toggleFlag(OverrideFlags.OverrideRoleColor, value)}
+                            hideBorder
                         />
                     </>
                 );
@@ -287,11 +312,19 @@ function EditModal({ user, modalProps }: { user: User; modalProps: RenderModalPr
                 return (
                     <>
                         {useDefault ? (
-                            <img
-                                className={cl("preview", "avatar")}
-                                src={IconUtils.getDefaultAvatarURL(user.id, user.discriminator)}
-                                alt="Default avatar preview"
-                            />
+                            <section className={cl("section")}>
+                                <Heading>Avatar Image</Heading>
+                                <div className={cl("avatarRow")}>
+                                    <img
+                                        className={cl("preview", "avatar")}
+                                        src={IconUtils.getDefaultAvatarURL(user.id, user.discriminator)}
+                                        alt="Default avatar preview"
+                                    />
+                                    <Paragraph size="sm" className={cl("description")}>
+                                        Using Discord's default avatar.
+                                    </Paragraph>
+                                </div>
+                            </section>
                         ) : (
                             <ImageEditor
                                 key={tab}
@@ -299,6 +332,7 @@ function EditModal({ user, modalProps }: { user: User; modalProps: RenderModalPr
                                 image={image}
                                 url={override[urlKey]}
                                 placeholder={placeholder ?? undefined}
+                                fallbackColor={tab === "banner" ? override.bannerColor : undefined}
                                 disabled={busy}
                                 onFile={file => selectImage(tab, file)}
                                 onUrl={value => setField(urlKey, value)}
@@ -334,11 +368,17 @@ function EditModal({ user, modalProps }: { user: User; modalProps: RenderModalPr
             }
             case "profile":
                 return (
-                    <div className={cl("profile")}>
-                        <section className={cl("field")}>
-                            <Heading tag="h3">Pronouns</Heading>
-                            <TextInput aria-label="Pronouns" value={override.pronouns} onChange={value => setField("pronouns", value)} />
+                    <>
+                        <section className={cl("section")}>
+                            <Heading>Pronouns</Heading>
+                            <TextInput
+                                aria-label="Pronouns"
+                                placeholder="Enter pronouns"
+                                value={override.pronouns}
+                                onChange={value => setField("pronouns", value)}
+                            />
                         </section>
+                        <Divider />
                         <ErrorBoundary noop={false}>
                             <CosmeticsEditor
                                 cosmetics={override}
@@ -353,8 +393,9 @@ function EditModal({ user, modalProps }: { user: User; modalProps: RenderModalPr
                                 onBusy={setBusy}
                             />
                         </ErrorBoundary>
-                        <section className={cl("field")}>
-                            <Heading tag="h3">Message Tag</Heading>
+                        <Divider />
+                        <section className={cl("section")}>
+                            <Heading>Message Tag</Heading>
                             <Select
                                 options={tagOptions}
                                 serialize={String}
@@ -364,7 +405,7 @@ function EditModal({ user, modalProps }: { user: User; modalProps: RenderModalPr
                                 closeOnSelect
                             />
                         </section>
-                    </div>
+                    </>
                 );
         }
     }
@@ -381,6 +422,21 @@ function EditModal({ user, modalProps }: { user: User; modalProps: RenderModalPr
             title={`Edit User ${user.username}`}
             size="lg"
             notice={notice}
+            input={
+                <TabBar
+                    type="top"
+                    look="brand"
+                    className={cl("tabBar")}
+                    selectedItem={tab}
+                    onItemSelect={setTab}
+                >
+                    {tabs.map(({ id, label }) => (
+                        <TabBar.Item id={id} key={id} className={cl("tab")}>
+                            {label}
+                        </TabBar.Item>
+                    ))}
+                </TabBar>
+            }
             actions={[
                 {
                     text: "Reset All",
@@ -401,36 +457,26 @@ function EditModal({ user, modalProps }: { user: User; modalProps: RenderModalPr
             ]}
         >
             <div className={cl("modal")}>
-                <TabBar
-                    type="top"
-                    look="brand"
-                    className={cl("tabBar")}
-                    selectedItem={tab}
-                    onItemSelect={setTab}
-                >
-                    {tabs.map(({ id, label }) => (
-                        <TabBar.Item id={id} key={id} className={cl("tab")}>
-                            {label}
-                        </TabBar.Item>
-                    ))}
-                </TabBar>
                 {renderTab()}
                 {guildOption && (
-                    <div>
-                        <FormSwitch
-                            title={`Hide server ${guildOption[2]}`}
-                            disabled={disableGuildOptions}
-                            value={hasFlag(override.flags, guildOption[0])}
-                            onChange={value => toggleFlag(guildOption[0], value)}
-                        />
-                        <FormSwitch
-                            title={`Prefer server ${guildOption[2]} over the override`}
-                            disabled={disableGuildOptions || hasFlag(override.flags, guildOption[0])}
-                            value={hasFlag(override.flags, guildOption[1])}
-                            onChange={value => toggleFlag(guildOption[1], value)}
-                            hideBorder
-                        />
-                    </div>
+                    <>
+                        <Divider />
+                        <div className={cl("switches")}>
+                            <FormSwitch
+                                title={`Hide server ${guildOption[2]}`}
+                                disabled={disableGuildOptions}
+                                value={hasFlag(override.flags, guildOption[0])}
+                                onChange={value => toggleFlag(guildOption[0], value)}
+                            />
+                            <FormSwitch
+                                title={`Prefer server ${guildOption[2]} over the override`}
+                                disabled={disableGuildOptions || hasFlag(override.flags, guildOption[0])}
+                                value={hasFlag(override.flags, guildOption[1])}
+                                onChange={value => toggleFlag(guildOption[1], value)}
+                                hideBorder
+                            />
+                        </div>
+                    </>
                 )}
             </div>
         </Modal>

@@ -5,7 +5,7 @@
  */
 
 import { Heading } from "@components/Heading";
-import { Button, Paragraph, Span } from "@components/index";
+import { Button, Card, Paragraph, Span } from "@components/index";
 import { classNameFactory } from "@utils/css";
 import { findByCodeLazy } from "@webpack";
 import { SelectedGuildStore, TextInput, useState } from "@webpack/common";
@@ -167,9 +167,9 @@ function OverrideRow({ title, value, src, onReset, busy }: {
         <div className={cl("cosmeticRow")}>
             {src && <img src={src} className={cl("decorationPreview")} alt="" />}
             <div className={cl("cosmeticLabel")}>
-                <Span weight="semibold">{title}</Span>
-                <Paragraph size="sm">{name || sku || "Discord default"}</Paragraph>
-                {name && <Paragraph size="sm">SKU {sku}</Paragraph>}
+                <Span size="sm" weight="medium">{title}</Span>
+                <Paragraph size="sm" className={cl("description")}>{name || sku || "Discord default"}</Paragraph>
+                {name && <Paragraph size="xs" className={cl("description")}>SKU {sku}</Paragraph>}
             </div>
             {value && <Button variant="secondary" disabled={busy} onClick={onReset}>Reset</Button>}
         </div>
@@ -269,23 +269,27 @@ export function CosmeticsEditor({ cosmetics, onSelect, onError, onOpenShop, busy
 
     return (
         <>
-            <section className={cl("field")}>
-                <Heading tag="h3">Cosmetic Overrides</Heading>
-                {cosmeticTypes.map(({ key, label }) => (
-                    <OverrideRow
-                        key={key}
-                        title={label}
-                        value={cosmetics[key]}
-                        src={key === "decoration" ? src : undefined}
-                        busy={busy}
-                        onReset={() => onSelect(key, "")}
-                    />
-                ))}
+            <section className={cl("section")}>
+                <Heading>Cosmetic Overrides</Heading>
+                <Card className={cl("cosmeticList")} defaultPadding={false}>
+                    {cosmeticTypes.map(({ key, label }) => (
+                        <OverrideRow
+                            key={key}
+                            title={label}
+                            value={cosmetics[key]}
+                            src={key === "decoration" ? src : undefined}
+                            busy={busy}
+                            onReset={() => onSelect(key, "")}
+                        />
+                    ))}
+                </Card>
             </section>
 
-            <section className={cl("field")}>
-                <Heading tag="h3">Add From the Shop</Heading>
-                <Paragraph size="sm">Use Share on a shop item to copy its link, or enter its SKU ID.</Paragraph>
+            <section className={cl("section")}>
+                <Heading>Add From the Shop</Heading>
+                <Paragraph size="sm" className={cl("description")}>
+                    Use Share on a shop item to copy its link, or enter its SKU ID.
+                </Paragraph>
                 <div className={cl("inputRow")}>
                     <TextInput
                         aria-label="Shop link or SKU ID"
@@ -306,9 +310,11 @@ export function CosmeticsEditor({ cosmetics, onSelect, onError, onOpenShop, busy
                 </Button>
             </section>
 
-            <section className={cl("field")}>
-                <Heading tag="h3">Copy From a User</Heading>
-                <Paragraph size="sm">Use the equipped cosmetics from their server profile when available.</Paragraph>
+            <section className={cl("section")}>
+                <Heading>Copy From a User</Heading>
+                <Paragraph size="sm" className={cl("description")}>
+                    Copy someone's cosmetics. Will prefer decorations from the currently selected server's profile if available.
+                </Paragraph>
                 <div className={cl("inputRow")}>
                     <TextInput
                         aria-label="User ID"
