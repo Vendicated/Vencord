@@ -4,11 +4,11 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { BaseText } from "@components/BaseText";
 import { Button, TextButton } from "@components/Button";
 import { Card } from "@components/Card";
 import { Flex } from "@components/Flex";
 import { DeleteIcon, SearchIcon } from "@components/Icons";
+import { Text } from "@components/Text";
 import { cl } from "@plugins/kaomojiPicker/cl";
 import { deleteUserKaomoji, useKaomojiStore } from "@plugins/kaomojiPicker/store";
 import { RenderModalProps } from "@vencord/discord-types";
@@ -67,13 +67,13 @@ function ManageKaomojiModal({ modalProps }: { modalProps: RenderModalProps; }) {
                     </Button>
                 </Flex>
                 {userKaomoji.length === 0 ? (
-                    <BaseText size="md" className={cl("manage-empty")}>
+                    <Text size="md" className={cl("manage-empty")}>
                         No kaomojis added yet.
-                    </BaseText>
+                    </Text>
                 ) : visibleKaomoji.length === 0 ? (
-                    <BaseText size="md" className={cl("manage-empty")}>
+                    <Text size="md" className={cl("manage-empty")}>
                         No kaomojis match your search.
-                    </BaseText>
+                    </Text>
                 ) : (
                     <ScrollerThin className={cl("manage-list")} orientation="auto">
                         <Flex flexDirection="column" gap={12}>
@@ -86,12 +86,12 @@ function ManageKaomojiModal({ modalProps }: { modalProps: RenderModalProps; }) {
                                             </span>
                                         </div>
                                         <Flex flexDirection="column" gap={0}>
-                                            <BaseText size="md" weight="semibold">
+                                            <Text size="md" weight="semibold">
                                                 {item.id}
-                                            </BaseText>
-                                            <BaseText size="xs" color="text-muted">
+                                            </Text>
+                                            <Text size="xs" style={{ color: "var(--text-muted)" }}>
                                                 {item.tags.map(t => t.charAt(0).toUpperCase() + t.slice(1)).join(", ")}
-                                            </BaseText>
+                                            </Text>
                                         </Flex>
                                     </Flex>
                                     <Button
@@ -108,9 +108,9 @@ function ManageKaomojiModal({ modalProps }: { modalProps: RenderModalProps; }) {
                                                         deleteUserKaomoji(item.value);
                                                     }}
                                                 >
-                                                    <BaseText size="md">
+                                                    <Text size="md">
                                                         Are you sure you want to delete the <strong>{item.value}</strong> kaomoji?
-                                                    </BaseText>
+                                                    </Text>
                                                 </ConfirmModal>
                                             ));
                                         }}

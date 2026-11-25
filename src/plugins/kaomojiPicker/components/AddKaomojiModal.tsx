@@ -6,8 +6,8 @@
 
 import { TextButton } from "@components/Button";
 import { Flex } from "@components/Flex";
-import { HeadingSecondary } from "@components/Heading";
-import { BaseText } from "@components/index";
+import { Heading } from "@components/Heading";
+import { Text } from "@components/Text";
 import { cl } from "@plugins/kaomojiPicker/cl";
 import { getAllKaomoji, getCategories, Kaomoji, parseUserSetting } from "@plugins/kaomojiPicker/data/kaomoji";
 import { saveUserKaomoji, useKaomojiStore } from "@plugins/kaomojiPicker/store";
@@ -92,7 +92,7 @@ function AddKaomojiModal({ modalProps }: { modalProps: RenderModalProps; }) {
                     <>
                         <section>
                             <Flex alignItems="center" justifyContent="space-between" className={cl("section-header-wrap")}>
-                                <HeadingSecondary>ID</HeadingSecondary>
+                                <Heading tag="h3">ID</Heading>
                                 <TextButton
                                     variant="link"
                                     onClick={() => setIsAdvanced(true)}
@@ -108,7 +108,7 @@ function AddKaomojiModal({ modalProps }: { modalProps: RenderModalProps; }) {
                                 error={isDuplicateId ? "This ID already exists" : undefined} />
                         </section>
                         <section>
-                            <HeadingSecondary>Kaomoji</HeadingSecondary>
+                            <Heading tag="h3">Kaomoji</Heading>
                             <TextInput
                                 value={value}
                                 onChange={setValue}
@@ -116,7 +116,7 @@ function AddKaomojiModal({ modalProps }: { modalProps: RenderModalProps; }) {
                                 error={isDuplicateValue ? "This Kaomoji already exists" : undefined} />
                         </section>
                         <section>
-                            <HeadingSecondary>Category</HeadingSecondary>
+                            <Heading tag="h3">Category</Heading>
                             <SearchableSelect
                                 options={categories.map(c => ({ label: c.charAt(0).toUpperCase() + c.slice(1), value: c }))}
                                 value={category}
@@ -148,7 +148,7 @@ function AddKaomojiModal({ modalProps }: { modalProps: RenderModalProps; }) {
                     <>
                         <section>
                             <Flex alignItems="center" justifyContent="space-between" className={cl("section-header-wrap")}>
-                                <HeadingSecondary>Import String / JSON</HeadingSecondary>
+                                <Heading tag="h3">Import String / JSON</Heading>
                                 <TextButton
                                     variant="link"
                                     onClick={() => setIsAdvanced(false)}
@@ -164,9 +164,9 @@ function AddKaomojiModal({ modalProps }: { modalProps: RenderModalProps; }) {
                             />
                             {errorMessage && (
                                 <div className={cl("create-category-wrap")}>
-                                    <BaseText size="xs" className={cl("error-message")}>
+                                    <Text size="xs" className={cl("error-message")}>
                                         {errorMessage}
-                                    </BaseText>
+                                    </Text>
                                 </div>
                             )}
                         </section>

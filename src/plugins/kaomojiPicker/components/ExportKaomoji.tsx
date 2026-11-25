@@ -4,9 +4,9 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { BaseText } from "@components/BaseText";
 import { Button } from "@components/Button";
 import { Flex } from "@components/Flex";
+import { Text } from "@components/Text";
 import { getExportString } from "@plugins/kaomojiPicker/store";
 import { copyWithToast } from "@utils/discord";
 import { TextInput } from "@webpack/common";
@@ -16,9 +16,9 @@ export function ExportKaomoji() {
 
     return (
         <Flex flexDirection="column" gap={8}>
-            <BaseText size="md" weight="medium">
+            <Text size="md" weight="medium">
                 Export Kaomoji
-            </BaseText>
+            </Text>
 
             <Flex gap={8}>
                 <TextInput

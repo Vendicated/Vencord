@@ -77,7 +77,7 @@ export async function saveUserKaomoji(kaomoji: Kaomoji[]) {
 }
 
 export function getExportString() {
-    const cats: Record<string, any> = {};
+    const cats: Record<string, { id: string; value: string; }[]> = {};
 
     for (const item of userKaomoji) {
         const cat = item.tags[0] || "custom";
