@@ -18,6 +18,7 @@
 
 import { ChatBarButton, ChatBarButtonFactory } from "@api/ChatButtons";
 import { generateId, sendBotMessage } from "@api/Commands";
+import { _handlePreSend, MessageObject } from "@api/MessageEvents";
 import { EyeIcon } from "@components/Icons";
 import { Devs } from "@utils/constants";
 import definePlugin, { IconComponent, StartAt } from "@utils/types";
@@ -85,12 +86,12 @@ const PreviewIcon: IconComponent = ({ height = 20, width = 20, className }) => {
     );
 };
 
-const PreviewButton: ChatBarButtonFactory = ({ isAnyChat, isEmpty, type: { attachments }, channel: { id: channelId } }) => {
-    const draft = useStateFromStores([DraftStore], () => getDraft(channelId));
+const PreviewButton: ChatBarButtonFactory = ({ isAnyChat, isEmpty, type: { attachments }, channel }) => {
+    const draft = useStateFromStores([DraftStore], () => getDraft(channel.id));
 
     if (!isAnyChat) return null;
 
-    const hasAttachments = attachments && UploadAttachmentStore.getUploads(channelId, DraftType.ChannelMessage).length > 0;
+    const hasAttachments = attachments && UploadAttachmentStore.getUploads(channel.id, DraftType.ChannelMessage).length > 0;
     const hasContent = !isEmpty && draft?.length > 0;
 
     if (!hasContent && !hasAttachments) return null;
@@ -99,11 +100,27 @@ const PreviewButton: ChatBarButtonFactory = ({ isAnyChat, isEmpty, type: { attac
         <ChatBarButton
             tooltip="Preview Message"
             onClick={async () => {
-                const attachments = hasAttachments ? await getAttachments(channelId) : undefined;
+                const messageObj: MessageObject = {
+                    content: getDraft(channel.id),
+                    validNonShortcutEmojis: [],
+                    invalidEmojis: [],
+                    tts: false
+                };
+
+                const cancelled = await _handlePreSend(channel.id, messageObj, { location: "PreviewMessage" }, {
+                    hasStickers: false,
+                    hasAttachments: !!hasAttachments,
+                    content: messageObj.content,
+                    channel,
+                    openWarningPopout: () => {}
+                });
+                if (cancelled) return;
+
+                const attachments = hasAttachments ? await getAttachments(channel.id) : undefined;
                 const message = sendBotMessage(
-                    channelId,
+                    channel.id,
                     {
-                        content: getDraft(channelId),
+                        content: messageObj.content,
                         author: UserStore.getCurrentUser(),
                         attachments: attachments?.map(a => a.attachment),
                     }
@@ -128,7 +145,7 @@ export default definePlugin({
     name: "PreviewMessage",
     description: "Lets you preview your message before sending it.",
     tags: ["Chat", "Utility"],
-    authors: [Devs.Aria],
+    authors: [Devs.Aria, Devs.Kaerion],
     // start early to ensure we're the first plugin to add our button
     // This makes the popping in less awkward
     startAt: StartAt.Init,

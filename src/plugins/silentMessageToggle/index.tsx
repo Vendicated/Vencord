@@ -77,9 +77,10 @@ const SilentMessageToggle: ChatBarButtonFactory = ({ isMainChat }) => {
     }
 
     useEffect(() => {
-        const listener: MessageSendListener = (_, message) => {
+        const listener: MessageSendListener = (_, message, options) => {
             if (enabled) {
-                if (settings.store.autoDisable) setEnabledValue(false);
+                // don't reset the toggle when PreviewMessage runs the listeners
+                if (settings.store.autoDisable && options.location !== "PreviewMessage") setEnabledValue(false);
                 if (!message.content.startsWith("@silent ")) message.content = "@silent " + message.content;
             }
         };
