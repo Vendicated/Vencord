@@ -10,13 +10,14 @@ import { NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { ErrorBoundary, PencilIcon } from "@components/index";
 import { Devs } from "@utils/constants";
 import definePlugin, { StartAt } from "@utils/types";
-import { Channel, DisplayProfile, Message, User } from "@vencord/discord-types";
+import { Channel, DisplayProfile, Message, ReferencedMessage, User } from "@vencord/discord-types";
 import { Menu, React, useEffect, useMemo } from "@webpack/common";
 
 import {
     CosmeticOverride,
     getDecorationUrl,
     getName,
+    getNameColor,
     getUserOverride,
     hasFlag,
     logger,
@@ -26,7 +27,7 @@ import {
     UserTag,
     useUserOverride
 } from "./data";
-import { loadImageKeys, useLocalImage } from "./images";
+import { getLocalImage, loadImages, useLocalImage, useUserAvatarURL } from "./images";
 import { ImageBackup, openUserEditModal } from "./modal";
 import { getShopProduct } from "./shop";
 
@@ -61,17 +62,9 @@ interface MessageNameContext {
 }
 
 function useNameColor(userId: string | undefined, guildId: string | undefined, original: NameColors) {
-    const { usernameColor, flags } = useUserOverride(userId);
-    if (!usernameColor) {
-        return;
-    }
-
-    const hasRoleColor = guildId && (original.colorString || original.colorStrings?.primaryColor);
-    if (hasRoleColor && !hasFlag(flags, OverrideFlags.OverrideRoleColor)) {
-        return;
-    }
-
-    return `#${usernameColor}`;
+    settings.use(["users"]);
+    const roleColor = guildId && (original.colorString || original.colorStrings?.primaryColor);
+    return getNameColor(userId, roleColor);
 }
 
 function getCosmeticOverride(value?: CosmeticOverride | string) {
@@ -111,7 +104,7 @@ export default definePlugin({
     settingsAboutComponent: ErrorBoundary.wrap(ImageBackup, { noop: false }),
     startAt: StartAt.Init,
     async start() {
-        await loadImageKeys();
+        await loadImages();
     },
 
     contextMenus: {
@@ -166,7 +159,7 @@ export default definePlugin({
                     replace: "name:$self.getName(arguments[0]?.user?.id,$1)??$2"
                 },
                 {
-                    match: /(?<=children:\[)(\i\?.{0,80}?userName:.{0,200}?\}\)):(.{0,50}?roleName:.{0,150}?animateRoleGradient:\i\}\))/,
+                    match: /(?<=children:\[)(\i\?.{0,80}?userName:.{0,200}?\}\)):(.{0,50}?roleName:[^}]*?animateRoleGradient:\i\}\))/,
                     replace: "$self.MemberName({member:arguments[0],styledName:$1:null,roleName:$2})"
                 }
             ]
@@ -174,8 +167,22 @@ export default definePlugin({
         {
             find: "this.guildMemberAvatars[",
             replacement: {
-                match: /this\.guildMemberAvatars\[\i\](?=.{0,100}?\.getGuildMemberAvatarURLSimple)/,
+                match: /this\.guildMemberAvatars\[\i\](?=.{0,150}?\.getGuildMemberAvatarURLSimple)/g,
                 replace: "($self.shouldUseGuildAvatar(this.id)?$&:null)"
+            }
+        },
+        {
+            find: "#{intl::REPLY_QUOTE_MESSAGE_NOT_LOADED}",
+            replacement: {
+                match: /(?<=isReplyAuthorBlocked:\i,repliedAuthor:\i,.{0,150}?onPopoutRequestClose:\i\}=)\i/,
+                replace: "$self.useReplyAvatarProps($&)"
+            }
+        },
+        {
+            find: "if(!this.props.showDefaultAvatarsForNullUsers)",
+            replacement: {
+                match: /"img",\{src:(\i)\.getAvatarURL\((\i),(\i)\)(?=,alt:\1\.username)/,
+                replace: "$self.SummaryAvatar,{user:$1,guildId:$2,size:$3"
             }
         },
         {
@@ -335,13 +342,33 @@ export default definePlugin({
         const { flags, avatarUrl } = getUserOverride(userId);
         return !hasFlag(flags, OverrideFlags.DisableServerAvatars)
             && !hasFlag(flags, OverrideFlags.UseDefaultAvatar)
-            && (!avatarUrl || hasFlag(flags, OverrideFlags.KeepServerAvatar));
+            && (hasFlag(flags, OverrideFlags.KeepServerAvatar) || !(avatarUrl || getLocalImage(userId, "avatar")));
+    },
+
+    useReplyAvatarProps(props: {
+        referencedMessage: ReferencedMessage;
+        repliedAuthor: { guildMemberAvatar?: string | null; } | null;
+    }) {
+        try {
+            const userId = props.referencedMessage.message?.author.id;
+            settings.use(["users"]);
+            useLocalImage(userId, "avatar");
+            if (userId && props.repliedAuthor?.guildMemberAvatar && !this.shouldUseGuildAvatar(userId)) {
+                return {
+                    ...props,
+                    repliedAuthor: { ...props.repliedAuthor, guildMemberAvatar: null }
+                };
+            }
+        } catch (error) {
+            logger.error("Could not apply reply avatar", error);
+        }
+        return props;
     },
 
     getAvatarUrl(user: User, fallback?: string) {
         const { avatarUrl, flags } = getUserOverride(user?.id);
         if (!hasFlag(flags, OverrideFlags.UseDefaultAvatar)) {
-            return avatarUrl || fallback;
+            return getLocalImage(user?.id, "avatar") ?? (avatarUrl || fallback);
         }
     },
 
@@ -400,6 +427,17 @@ export default definePlugin({
             return fallback;
         }
     },
+
+    SummaryAvatar: ErrorBoundary.wrap(function SummaryAvatar({ user, guildId, size, ...props }: {
+        user: User;
+        guildId?: string;
+        size: number;
+        alt: string;
+        className: string;
+    }) {
+        const src = useUserAvatarURL(user, guildId, size);
+        return <img {...props} src={src} />;
+    }, { noop: true }),
 
     AccountAvatar: ErrorBoundary.wrap(function AccountAvatar({ Component, user, getSrc, ...props }: {
         Component: React.ComponentType<{ src?: string; avatarDecoration?: string; }>;

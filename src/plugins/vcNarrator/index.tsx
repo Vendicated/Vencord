@@ -26,7 +26,7 @@ import { Margins } from "@utils/margins";
 import { classes } from "@utils/misc";
 import { wordsToTitle } from "@utils/text";
 import definePlugin, { ReporterTestable } from "@utils/types";
-import { AuthenticationStore, ChannelStore, GuildMemberStore, SelectedChannelStore, SelectedGuildStore, useMemo, UserStore, VoiceStateStore } from "@webpack/common";
+import { AuthenticationStore, ChannelStore, GuildMemberStore, SelectedChannelStore, SelectedGuildStore, useMemo, UsernameUtils, UserStore, VoiceStateStore } from "@webpack/common";
 import { ReactElement } from "react";
 
 import { getCurrentVoice, settings } from "./settings";
@@ -152,7 +152,7 @@ function playSample(type: string) {
         settings.store[type + "Message"],
         currentUser.username,
         "general",
-        currentUser.globalName ?? currentUser.username,
+        UsernameUtils.getName(currentUser),
         GuildMemberStore.getNick(myGuildId!, currentUser.id) ?? currentUser.username
     ));
 }
@@ -188,7 +188,7 @@ export default definePlugin({
 
                 const template = settings.store[type + "Message"];
                 const user = isMe && !settings.store.sayOwnName ? "" : UserStore.getUser(userId).username;
-                const displayName = user && ((UserStore.getUser(userId) as any).globalName ?? user);
+                const displayName = user && UsernameUtils.getName(UserStore.getUser(userId));
                 const nickname = user && (GuildMemberStore.getNick(myGuildId!, userId) ?? displayName);
                 const channel = ChannelStore.getChannel(id).name;
 

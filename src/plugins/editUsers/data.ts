@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { isPluginEnabled } from "@api/PluginManager";
 import { definePluginSettings } from "@api/Settings";
 import { Logger } from "@utils/Logger";
 import { IconUtils } from "@webpack/common";
@@ -91,6 +92,17 @@ export function saveUserOverride(userId: string, override: UserOverride) {
 }
 
 export const hasFlag = (field: OverrideFlags | undefined, flag: OverrideFlags) => Boolean((field ?? 0) & flag);
+
+export function getNameColor(userId: string | undefined, roleColor?: string | null) {
+    if (!isPluginEnabled("EditUsers")) {
+        return;
+    }
+
+    const { usernameColor, flags } = getUserOverride(userId);
+    if (usernameColor && (!roleColor || hasFlag(flags, OverrideFlags.OverrideRoleColor))) {
+        return `#${usernameColor}`;
+    }
+}
 
 export function getName(userId: string | undefined, nickname?: string | null) {
     const { username, flags } = getUserOverride(userId);

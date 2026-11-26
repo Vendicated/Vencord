@@ -5,9 +5,10 @@
  */
 
 import * as DataStore from "@api/DataStore";
+import { User } from "@vencord/discord-types";
 import { React, useCallback } from "@webpack/common";
 
-import { logger } from "./data";
+import { logger, settings } from "./data";
 
 export type ImageKind = "avatar" | "banner";
 export type UserImages = Partial<Record<ImageKind, Blob>>;
@@ -18,16 +19,15 @@ const maxImageSize = 10 * 1024 * 1024;
 const dataUrlPattern = /^data:image\/(?:png|jpeg|gif|webp|avif);base64,[A-Za-z0-9+/]+={0,2}$/;
 const imageKinds = ["avatar", "banner"] as const;
 let store: DataStore.UseStore;
-let knownUsers: Promise<Set<string>>;
+let loadingImages: Promise<void>;
 
-interface ActiveImages {
-    listeners: Set<() => void>;
-    urls: Partial<Record<ImageKind, string>>;
-    request?: Promise<void>;
-    cleanupTimer?: number;
+interface SavedImage {
+    blob: Blob;
+    url?: string;
 }
 
-const activeImages = new Map<string, ActiveImages>();
+const savedImages = new Map<string, Partial<Record<ImageKind, SavedImage>>>();
+const imageListeners = new Map<string, Set<() => void>>();
 
 function getStore() {
     return store ??= DataStore.createStore(
@@ -36,88 +36,83 @@ function getStore() {
     );
 }
 
-export function loadImageKeys() {
-    return knownUsers ??= Promise.resolve()
-        .then(() => DataStore.keys<string>(getStore()))
-        .then(keys => new Set(keys))
-        .catch(error => {
-            logger.error("Could not read saved image keys", error);
-            return new Set<string>();
-        });
+export function loadImages() {
+    return loadingImages ??= DataStore.entries<string, UserImages>(getStore())
+        .then(entries => {
+            for (const [userId, images] of entries) {
+                updateImages(userId, images);
+            }
+        })
+        .catch(error => logger.error("Could not load user images", error));
 }
 
 export function getImages(userId: string) {
     return DataStore.get<UserImages>(userId, getStore());
 }
 
-function setActiveImages(entry: ActiveImages, images: UserImages | undefined, changed: readonly ImageKind[] = imageKinds) {
-    const previous: string[] = [];
-    for (const kind of changed) {
-        const oldUrl = entry.urls[kind];
-        const blob = images?.[kind];
-        if (oldUrl) {
-            previous.push(oldUrl);
+function updateImages(userId: string, changes: ImageChanges) {
+    const images = savedImages.get(userId) ?? {};
+    for (const kind of imageKinds) {
+        const blob = changes[kind];
+        if (blob === undefined) {
+            continue;
         }
-        entry.urls[kind] = blob ? URL.createObjectURL(blob) : undefined;
+
+        const previous = images[kind]?.url;
+        if (previous) {
+            URL.revokeObjectURL(previous);
+        }
+        if (blob) {
+            images[kind] = { blob };
+        } else {
+            delete images[kind];
+        }
     }
 
-    for (const listener of entry.listeners) {
-        listener();
+    if (images.avatar || images.banner) {
+        savedImages.set(userId, images);
+    } else {
+        savedImages.delete(userId);
     }
-    for (const url of previous) {
-        URL.revokeObjectURL(url);
-    }
+
+    imageListeners.get(userId)?.forEach(listener => listener());
 }
 
-function subscribeToImages(userId: string, listener: () => void) {
-    let entry = activeImages.get(userId);
-    if (!entry) {
-        entry = { listeners: new Set(), urls: {} };
-        activeImages.set(userId, entry);
-
-        const active = entry;
-        const request = loadImageKeys()
-            .then(keys => keys.has(userId) ? getImages(userId) : undefined)
-            .then(images => {
-                if (active.request === request) {
-                    active.request = undefined;
-                    setActiveImages(active, images);
-                }
-            })
-            .catch(error => logger.error("Could not load user images", error));
-        entry.request = request;
+export function getLocalImage(userId: string | undefined, kind: ImageKind) {
+    const image = userId && savedImages.get(userId)?.[kind];
+    if (image) {
+        return image.url ??= URL.createObjectURL(image.blob);
     }
-
-    const active = entry;
-    const { listeners } = active;
-    window.clearTimeout(active.cleanupTimer);
-    active.cleanupTimer = undefined;
-    listeners.add(listener);
-    return () => {
-        listeners.delete(listener);
-        if (listeners.size === 0) {
-            // Keep the URLs alive if React resubscribes in the same commit.
-            active.cleanupTimer = window.setTimeout(() => {
-                activeImages.delete(userId);
-                active.request = undefined;
-                setActiveImages(active, undefined);
-            });
-        }
-    };
 }
 
 export function useLocalImage(userId: string | undefined, kind: ImageKind) {
-    const subscribe = useCallback(
-        (listener: () => void) => userId ? subscribeToImages(userId, listener) : () => {},
-        [userId]
-    );
-    const getSnapshot = () => userId ? activeImages.get(userId)?.urls[kind] : undefined;
-    return React.useSyncExternalStore(subscribe, getSnapshot);
+    const subscribe = useCallback((listener: () => void) => {
+        if (!userId) {
+            return () => {};
+        }
+
+        const listeners = imageListeners.get(userId) ?? new Set<() => void>();
+        imageListeners.set(userId, listeners);
+        listeners.add(listener);
+        return () => {
+            listeners.delete(listener);
+            if (listeners.size === 0) {
+                imageListeners.delete(userId);
+            }
+        };
+    }, [userId]);
+
+    return React.useSyncExternalStore(subscribe, () => getLocalImage(userId, kind));
+}
+
+export function useUserAvatarURL(user: User | undefined, guildId?: string | null, size?: number, canAnimate?: boolean) {
+    settings.use(["users"]);
+    useLocalImage(user?.id, "avatar");
+    return user?.getAvatarURL(guildId, size, canAnimate);
 }
 
 export async function saveImageChanges(changes: ReadonlyMap<string, ImageChanges>) {
-    const users = await loadImageKeys();
-    const results = new Map<string, UserImages>();
+    await loadImages();
     await getStore()("readwrite", objectStore => {
         for (const [userId, change] of changes) {
             const request = objectStore.get(userId);
@@ -137,25 +132,13 @@ export async function saveImageChanges(changes: ReadonlyMap<string, ImageChanges
                 } else {
                     objectStore.delete(userId);
                 }
-                results.set(userId, images);
             };
         }
         return DataStore.promisifyRequest(objectStore.transaction);
     });
 
-    for (const [userId, images] of results) {
-        if (images.avatar || images.banner) {
-            users.add(userId);
-        } else {
-            users.delete(userId);
-        }
-
-        const active = activeImages.get(userId);
-        if (active) {
-            const changed = active.request ? imageKinds : imageKinds.filter(kind => changes.get(userId)?.[kind] !== undefined);
-            active.request = undefined;
-            setActiveImages(active, images, changed);
-        }
+    for (const [userId, change] of changes) {
+        updateImages(userId, change);
     }
 }
 
