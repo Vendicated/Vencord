@@ -16,152 +16,190 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import "./styles.css";
+
 import { Button } from "@components/Button";
 import { CodeBlock } from "@components/CodeBlock";
-import { Divider } from "@components/Divider";
 import { Flex } from "@components/Flex";
 import { Heading } from "@components/Heading";
 import { SettingsTab, wrapTab } from "@components/settings/tabs/BaseTab";
+import { findPatchTarget, PatchTarget } from "@debug/testPatch";
 import { debounce } from "@shared/debounce";
 import { copyWithToast } from "@utils/discord";
-import { Margins } from "@utils/margins";
-import { classes } from "@utils/misc";
-import { stripIndent } from "@utils/text";
-import { ReplaceFn } from "@utils/types";
-import { search } from "@webpack";
+import { Patch, PatchReplacement } from "@utils/types";
 import { React, TextInput, useMemo, useState } from "@webpack/common";
 
 import { FullPatchInput } from "./FullPatchInput";
 import { PatchPreview } from "./PatchPreview";
-import { ReplacementInput } from "./ReplacementInput";
+import { isReplacementMethod, ReplacementDraft, ReplacementInput } from "./ReplacementInput";
 
-const findCandidates = debounce(function ({ find, setModule, setError }) {
-    const candidates = search(find);
-    const keys = Object.keys(candidates);
-    const len = keys.length;
+function formatReplacement({ match, replace }: PatchReplacement, indent: string) {
+    const matchCode = match instanceof RegExp ? match.toString() : JSON.stringify(match);
+    const replaceCode = typeof replace === "function" ? replace.toString() : JSON.stringify(replace);
+    const replacementLine = typeof replace === "function" && isReplacementMethod(replaceCode)
+        ? replaceCode
+        : `replace: ${replaceCode}`;
 
-    if (len === 0)
+    return [
+        "{",
+        `${indent}    match: ${matchCode},`,
+        `${indent}    ${replacementLine}`,
+        `${indent}}`
+    ].join("\n");
+}
+
+const findCandidates = debounce(function ({ find, setTarget, setError }) {
+    if (!find) {
+        return;
+    }
+
+    const result = findPatchTarget(find);
+    if (result.ok) {
+        setTarget(result.target);
+    } else if (result.matchCount === 0) {
         setError("No match. Perhaps that module is lazy loaded?");
-    else if (len !== 1)
+    } else {
         setError("Multiple matches. Please refine your filter");
-    else
-        setModule([keys[0], candidates[keys[0]]]);
+    }
 });
 
 function PatchHelper() {
     const [find, setFind] = useState("");
     const [match, setMatch] = useState("");
-    const [replacement, setReplacement] = useState<string | ReplaceFn>("");
+    const [replacement, setReplacement] = useState<ReplacementDraft>({ value: "", isFunction: false });
+    const [replacementArray, setReplacementArray] = useState<PatchReplacement[]>();
 
     const [parsedFind, setParsedFind] = useState<string | RegExp>("");
+    const [parsedMatch, setParsedMatch] = useState<PatchReplacement["match"]>();
 
     const [findError, setFindError] = useState<string>();
     const [matchError, setMatchError] = useState<string>();
-    const [replacementError, setReplacementError] = useState<string>();
+    const [target, setTarget] = useState<PatchTarget>();
 
-    const [module, setModule] = useState<[number, Function]>();
+    const replacements = useMemo(() => {
+        if (replacementArray) {
+            return replacementArray;
+        }
+        return parsedMatch && !replacement.error
+            ? [{ match: parsedMatch, replace: replacement.value }]
+            : [];
+    }, [parsedMatch, replacement, replacementArray]);
 
     const code = useMemo(() => {
+        if (!parsedFind || !replacements.length) {
+            return "";
+        }
+
         const find = parsedFind instanceof RegExp ? parsedFind.toString() : JSON.stringify(parsedFind);
-        const replace = typeof replacement === "function" ? replacement.toString() : JSON.stringify(replacement);
+        let replacementCode: string;
+        if (replacementArray) {
+            const entries = replacements.map(entry => "        " + formatReplacement(entry, "        "));
+            replacementCode = `[\n${entries.join(",\n")}\n    ]`;
+        } else {
+            replacementCode = formatReplacement(replacements[0], "    ");
+        }
 
-        return stripIndent`
-            {
-                find: ${find},
-                replacement: {
-                    match: /${match.replace(/(?<!\\)\//g, "\\/")}/,
-                    replace: ${replace}
-                }
-            }
-        `;
-    }, [parsedFind, match, replacement]);
+        return `{\n    find: ${find},\n    replacement: ${replacementCode}\n}`;
+    }, [parsedFind, replacements, replacementArray]);
 
-    function onFindChange(v: string) {
+    function onFindChange(v: string, parsed?: Patch["find"]) {
         setFind(v);
+        setTarget(undefined);
 
         try {
-            let parsedFind = v as string | RegExp;
-            if (/^\/.+?\/$/.test(v)) parsedFind = new RegExp(v.slice(1, -1));
-
+            const find = parsed ?? (/^\/.+?\/$/.test(v) ? new RegExp(v.slice(1, -1)) : v);
             setFindError(void 0);
-            setParsedFind(parsedFind);
-
-            if (v.length) {
-                findCandidates({ find: parsedFind, setModule, setError: setFindError });
-            }
+            setParsedFind(find);
+            findCandidates({ find, setTarget, setError: setFindError });
         } catch (e: any) {
+            setParsedFind("");
+            findCandidates({ find: "", setTarget, setError: setFindError });
             setFindError((e as Error).message);
         }
     }
 
-    function onMatchChange(v: string) {
+    function onMatchChange(v: string, parsed?: PatchReplacement["match"]) {
         setMatch(v);
 
         try {
-            new RegExp(v);
+            setParsedMatch(v ? parsed ?? new RegExp(v) : undefined);
             setMatchError(void 0);
         } catch (e: any) {
+            setParsedMatch(undefined);
             setMatchError((e as Error).message);
         }
     }
 
+    function onFullPatch(patch: Pick<Patch, "find" | "replacement"> | undefined) {
+        onFindChange(patch?.find.toString() ?? "", patch?.find);
+        const replacement = patch?.replacement;
+        if (!replacement || Array.isArray(replacement)) {
+            setReplacementArray(replacement);
+            onMatchChange("");
+            setReplacement({ value: "", isFunction: false });
+            return;
+        }
+
+        setReplacementArray(undefined);
+        const { match, replace } = replacement;
+        onMatchChange(match instanceof RegExp ? match.source : match, match);
+        setReplacement({ value: replace, isFunction: typeof replace === "function" });
+    }
+
     return (
         <SettingsTab>
-            <Heading className={Margins.bottom8}>Full patch</Heading>
-            <FullPatchInput
-                setFind={onFindChange}
-                setParsedFind={setParsedFind}
-                setMatch={onMatchChange}
-                setReplacement={setReplacement}
-            />
+            <Flex flexDirection="column" gap={24}>
+                <Flex flexDirection="column" gap={8}>
+                    <Heading tag="h4">Full patch</Heading>
+                    <FullPatchInput onPatch={onFullPatch} />
+                </Flex>
 
-            <Heading className={classes(Margins.top8, Margins.bottom8)}>Find</Heading>
-            <TextInput
-                type="text"
-                value={find}
-                onChange={onFindChange}
-                error={findError}
-            />
+                <Flex flexDirection="column" gap={8}>
+                    <Heading>Find</Heading>
+                    <TextInput
+                        type="text"
+                        aria-label="Find"
+                        value={find}
+                        onChange={v => onFindChange(v)}
+                        error={findError}
+                    />
+                </Flex>
 
-            <Heading className={classes(Margins.top8, Margins.bottom8)}>Match</Heading>
-            <TextInput
-                type="text"
-                value={match}
-                onChange={onMatchChange}
-                error={matchError}
-            />
+                {!replacementArray && (
+                    <>
+                        <Flex flexDirection="column" gap={8}>
+                            <Heading>Match</Heading>
+                            <TextInput
+                                type="text"
+                                aria-label="Match"
+                                value={match}
+                                onChange={v => onMatchChange(v)}
+                                error={matchError}
+                            />
+                        </Flex>
+                        <ReplacementInput draft={replacement} onChange={setReplacement} />
+                    </>
+                )}
 
-            <div className={Margins.top8} />
-            <ReplacementInput
-                replacement={replacement}
-                setReplacement={setReplacement}
-                replacementError={replacementError}
-            />
+                {target && replacements.length > 0 && (
+                    <PatchPreview target={target} replacements={replacements} />
+                )}
 
-            <Divider />
-            {module && (
-                <PatchPreview
-                    module={module}
-                    match={match}
-                    replacement={replacement}
-                    setReplacementError={setReplacementError}
-                />
-            )}
-
-            {!!(find && match && replacement) && (
-                <>
-                    <Heading className={classes(Margins.top20, Margins.bottom8)}>Code</Heading>
-                    <CodeBlock lang="js" content={code} />
-                    <Flex className={Margins.top16}>
-                        <Button onClick={() => copyWithToast(code)}>
-                            Copy to Clipboard
-                        </Button>
-                        <Button onClick={() => copyWithToast("```ts\n" + code + "\n```")}>
-                            Copy as Codeblock
-                        </Button>
+                {code && (
+                    <Flex flexDirection="column" gap={12}>
+                        <Heading tag="h4">Code</Heading>
+                        <CodeBlock lang="js" content={code} />
+                        <Flex flexWrap="wrap" gap={8}>
+                            <Button onClick={() => copyWithToast(code)}>
+                                Copy to Clipboard
+                            </Button>
+                            <Button onClick={() => copyWithToast("```ts\n" + code + "\n```")}>
+                                Copy as Codeblock
+                            </Button>
+                        </Flex>
                     </Flex>
-                </>
-            )}
+                )}
+            </Flex>
         </SettingsTab>
     );
 }

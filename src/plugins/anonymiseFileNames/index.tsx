@@ -53,7 +53,8 @@ const settings = definePluginSettings({
     randomisedLength: {
         description: "Random characters length",
         type: OptionType.NUMBER,
-        default: 7
+        default: 7,
+        min: 1
     },
     consistent: {
         description: "Consistent filename",

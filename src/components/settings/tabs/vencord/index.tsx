@@ -41,6 +41,7 @@ import { React, useMemo, UserStore } from "@webpack/common";
 import { DonateButtonComponent, isDonor } from "./DonateButton";
 import { MacOSVibrancySettings } from "./MacVibrancySettings";
 import { NotificationSection } from "./NotificationSettings";
+import { openPlayground } from "./playground";
 import { WindowsMaterialSettings } from "./WindowsMaterialSettings";
 
 const DEFAULT_DONATE_IMAGE = "https://cdn.discordapp.com/emojis/1026533090627174460.png";
@@ -55,7 +56,7 @@ type KeysOfType<Object, Type> = {
 }[keyof Object];
 
 function Switches() {
-    const settings = useSettings(["useQuickCss", "enableReactDevtools", "frameless", "nativeTitleBar", "transparent", "winCtrlQ", "disableMinSize"]);
+    const settings = useSettings(["useQuickCss", "disableBackgroundOptimization", "enableReactDevtools", "frameless", "nativeTitleBar", "transparent", "winCtrlQ", "disableMinSize"]);
     const { disableAnalytics } = NoTrack.settings.use(["disableAnalytics"]);
 
     const Switches = [
@@ -74,6 +75,12 @@ function Switches() {
             title: "Block Discord Analytics",
             description: NoTrack.settings.def.disableAnalytics.description,
             restartRequired: NoTrack.settings.def.disableAnalytics.restartNeeded,
+        },
+        IS_DISCORD_DESKTOP && {
+            key: "disableBackgroundOptimization",
+            title: "Disable Background Optimization",
+            description: "Keeps the app window updating even when it is not fully focused. Solves Discord unloading / disconnecting",
+            restartRequired: true
         },
         IS_DISCORD_DESKTOP && {
             key: "nativeTitleBar",
@@ -221,6 +228,11 @@ function VencordSettings() {
                         text="View Source Code"
                         action={() => VencordNative.native.openExternal("https://github.com/" + gitRemote)}
                     />
+                    {IS_DEV && <QuickAction
+                        Icon={PaintbrushIcon}
+                        text="Open Component Playground"
+                        action={() => openPlayground()}
+                    />}
                 </QuickActionCard>
             </section>
 

@@ -30,10 +30,10 @@
     background: transparent;
     margin-right: 8px;
     color: var(--icon-muted);
-    transition: background-color .2s ease;
+    transition: background-color 0.2s ease;
 
     &:hover {
-        color: var(--interactive-icon-hover)
+        color: var(--interactive-icon-hover);
     }
 }
 

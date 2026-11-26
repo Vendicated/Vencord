@@ -74,7 +74,10 @@ export default definePlugin({
     // not used, just here in case some other plugin wants it or w/e
     translate,
 
-    renderMessageAccessory: props => <TranslationAccessory message={props.message} />,
+    renderMessageAccessory: props =>
+        !props.isMessageSnapshot
+            ? <TranslationAccessory message={props.message} />
+            : null,
 
     chatBarButton: {
         icon: TranslateIcon,
