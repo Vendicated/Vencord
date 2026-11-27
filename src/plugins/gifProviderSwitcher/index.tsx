@@ -148,7 +148,9 @@ export default definePlugin({
     ],
 
     async start() {
-        cachedCategories = await this.provider.getCategories() ?? cachedCategories;
+        if (this.shouldReplace) {
+            cachedCategories = await this.provider.getCategories() ?? cachedCategories;
+        }
     },
 
     get shouldReplace() {
