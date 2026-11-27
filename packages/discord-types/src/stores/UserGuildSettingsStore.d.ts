@@ -2,7 +2,7 @@ import { ChannelOverrideFlags, GuildSettingsFlags, NotifyHighlights, UserNotific
 import { Channel, FluxStore, Guild } from "..";
 
 export interface MuteConfig {
-    selected_time_window: number;
+    selected_time_window: number | null;
     end_time: string | null;
 }
 
@@ -10,7 +10,7 @@ export interface ChannelOverride {
     muted: boolean;
     mute_config: MuteConfig | null;
     message_notifications: UserNotificationSetting;
-    flags: ChannelOverrideFlags;
+    flags?: ChannelOverrideFlags;
     collapsed: boolean;
     channel_id: string;
 }
@@ -49,23 +49,23 @@ export class UserGuildSettingsStore extends FluxStore {
     // TODO: finish typing
     getAllSettings(): { userGuildSettings: Record<string, GuildSettings>; };
     getChannelFlags(channel: Channel): ChannelOverrideFlags;
-    getChannelIdFlags(guildId: string, channelId: string): ChannelOverrideFlags;
-    getChannelMessageNotifications(guildId: string, channelId: string): UserNotificationSetting | null;
-    getChannelMuteConfig(guildId: string, channelId: string): MuteConfig | null;
-    getChannelOverrides(guildId: string): Record<string, ChannelOverride>;
+    getChannelIdFlags(guildId: string | null, channelId: string): ChannelOverrideFlags;
+    getChannelMessageNotifications(guildId: string | null, channelId: string): UserNotificationSetting;
+    getChannelMuteConfig(guildId: string | null, channelId: string): MuteConfig | null;
+    getChannelOverrides(guildId: string | null): Record<string, ChannelOverride>;
     getChannelRecordUnreadSetting(channel: Channel): number;
-    getChannelUnreadSetting(guildId: string, channelId: string): number;
+    getChannelUnreadSetting(guildId: string | null, channelId: string): number;
     getGuildFavorites(guildId: string): string[];
     getGuildFlags(guildId: string): GuildSettingsFlags;
     getGuildUnreadSetting(guildId: string): number;
     getMessageNotifications(guildId: string): UserNotificationSetting;
     getMuteConfig(guildId: string): MuteConfig | null;
-    getMutedChannels(guildId: string): string[];
+    getMutedChannels(guildId: string | null): Set<string>;
     getNewForumThreadsCreated(channel: Channel): boolean;
     getNotifyHighlights(guildId: string): NotifyHighlights;
-    getOptedInChannels(guildId: string): string[];
+    getOptedInChannels(guildId: string): Set<string>;
     // TODO: finish typing these
-    getOptedInChannelsWithPendingUpdates(guildId: string): Record<string, any>;
+    getOptedInChannelsWithPendingUpdates(guildId: string): Set<string> | undefined;
     getPendingChannelUpdates(guildId: string): Record<string, any>;
     getState(): UserGuildSettingsState;
     isCategoryMuted(guildId: string, channelId: string): boolean;
@@ -75,8 +75,8 @@ export class UserGuildSettingsStore extends FluxStore {
     isChannelRecordOrParentOptedIn(channel: Channel, usePending?: boolean): boolean;
     isFavorite(guildId: string, channelId: string): boolean;
     isGuildCollapsed(guildId: string): boolean;
-    isGuildOrCategoryOrChannelMuted(guildId: string, channelId: string): boolean;
-    isMessagesFavorite(guildId: string): boolean;
+    isGuildOrCategoryOrChannelMuted(guildId: string | null, channelId: string): boolean;
+    isMessagesFavorite(channelId: string): boolean;
     isMobilePushEnabled(guildId: string): boolean;
     isMuteScheduledEventsEnabled(guildId: string): boolean;
     isMuted(guildId: string): boolean;

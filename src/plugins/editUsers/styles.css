@@ -1,0 +1,118 @@
+.vc-editUsers-modal {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.vc-editUsers-modal > .vc-form-switch-wrapper,
+.vc-editUsers-switches > :last-child {
+    margin-bottom: 0;
+}
+
+.vc-editUsers-backup {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.vc-editUsers-tabBar {
+    gap: 20px;
+    border-bottom: 1px solid var(--border-subtle);
+}
+
+.vc-editUsers-tab {
+    padding-bottom: 10px;
+}
+
+.vc-editUsers-section {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.vc-editUsers-section h5,
+.vc-editUsers-section p,
+.vc-editUsers-cosmeticLabel p {
+    margin: 0;
+}
+
+.vc-editUsers-description {
+    color: var(--text-subtle);
+}
+
+.vc-editUsers-preview {
+    display: block;
+    object-fit: cover;
+    border: 1px solid var(--border-subtle);
+    box-sizing: border-box;
+}
+
+.vc-editUsers-avatar {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.vc-editUsers-banner {
+    width: 100%;
+    height: 120px;
+    border-radius: var(--radius-sm, 8px);
+}
+
+.vc-editUsers-avatarRow,
+.vc-editUsers-colourRow,
+.vc-editUsers-cosmeticRow,
+.vc-editUsers-inputRow {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.vc-editUsers-colourPicker {
+    display: flex;
+    align-items: center;
+}
+
+.vc-editUsers-disabled {
+    pointer-events: none;
+    opacity: 0.5;
+}
+
+.vc-editUsers-colourValue,
+.vc-editUsers-cosmeticLabel,
+.vc-editUsers-inputRow > :first-child {
+    flex: 1;
+    min-width: 0;
+}
+
+.vc-editUsers-cosmeticList {
+    overflow: hidden;
+}
+
+.vc-editUsers-cosmeticRow {
+    min-height: 48px;
+    padding: 10px 12px;
+    box-sizing: border-box;
+}
+
+.vc-editUsers-cosmeticRow + .vc-editUsers-cosmeticRow {
+    border-top: 1px solid var(--border-subtle);
+}
+
+.vc-editUsers-cosmeticLabel {
+    display: grid;
+    gap: 2px;
+    overflow-wrap: anywhere;
+}
+
+.vc-editUsers-decorationPreview {
+    width: 40px;
+    height: 40px;
+    object-fit: contain;
+    flex-shrink: 0;
+}
+
+.vc-editUsers-shopButton {
+    align-self: flex-start;
+}

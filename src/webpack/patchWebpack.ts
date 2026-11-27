@@ -9,6 +9,7 @@ import { traceFunctionWithResults } from "@debug/Tracer";
 import { makeLazy } from "@utils/lazy";
 import { Logger } from "@utils/Logger";
 import { interpolateIfDefined } from "@utils/misc";
+import { wrapFactorySource } from "@utils/patches";
 import { Patch, PatchReplacement } from "@utils/types";
 import { WebpackRequire } from "@vencord/discord-types/webpack";
 
@@ -484,10 +485,7 @@ function runFactoryWithWrap(patchedFactory: PatchedModuleFactory, moduleId: Prop
  */
 function patchFactory(moduleId: PropertyKey, originalFactory: AnyModuleFactory): PatchedModuleFactory {
     const originalFactoryCode = String(originalFactory);
-    const isArrowFunction = originalFactoryCode.startsWith("(");
-
-    // 0, prefix to turn it into an expression: 0,function(){} would be invalid syntax without the 0,
-    let patchedCode = "0," + (!isArrowFunction ? "function" : "") + originalFactoryCode.slice(originalFactoryCode.indexOf("("));
+    let patchedCode = wrapFactorySource(originalFactoryCode);
     let patchedSource = patchedCode;
     let patchedFactory = originalFactory;
 
