@@ -1,6 +1,6 @@
 /*
  * Vencord, a Discord client mod
- * Copyright (c) 2022 Vendicated and contributors
+ * Copyright (c) 2026 Vendicated and contributors
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
@@ -8,10 +8,92 @@ if (typeof browser === "undefined") {
     var browser = chrome;
 }
 
+// can't trigger for sub-frames like popout windows etc
+if (window === window.top) {
+    let port = null;
+    let ready = false;
+    let reconnectTimer = null;
+
+    function postStatus (status) {
+        postMessage({ type: "vencord:rpc", direction: "status", status });
+    }
+
+    function scheduleReconnect () {
+        if (!ready) return;
+
+        clearTimeout(reconnectTimer);
+        reconnectTimer = setTimeout(() => ready && connectPort(), 1000);
+    }
+
+    function fail (error) {
+        port = null;
+        postStatus({ state: "error", error: String(error) });
+        scheduleReconnect();
+    }
+
+    function connectPort () {
+        if (port) return port;
+
+        try {
+            port = browser.runtime.connect({ name: "vencord:rpc" });
+
+            port.onMessage.addListener(message => {
+                if (message?.type === "vencord:rpc") {
+                    postMessage({ type: "vencord:rpc", direction: "in", payload: message.payload });
+                } else if (message?.type === "vencord:rpc-status") {
+                    postStatus(message.status);
+                }
+            });
+
+            port.onDisconnect.addListener(() => {
+                port = null;
+                postStatus({ state: "disconnected" });
+                scheduleReconnect();
+            });
+
+            if (ready) port.postMessage({ type: "vencord:rpc", payload: { message: "ready" } });
+            return port;
+        } catch (error) {
+            fail(error);
+            return null;
+        }
+    }
+
+    function send (payload) {
+        try {
+            connectPort()?.postMessage({ type: "vencord:rpc", payload });
+        } catch (error) {
+            fail(error);
+        }
+    }
+
+    window.addEventListener("message", ({ source, data }) => {
+        if (source !== window || data?.type !== "vencord:rpc" || data.direction !== "out") return;
+
+        const { payload } = data;
+        if (typeof payload?.message !== "string") return;
+
+        switch (payload.message) {
+            case "ready":
+                ready = true;
+                connectPort();
+                break;
+            case "stop":
+                ready = false;
+                clearTimeout(reconnectTimer);
+                port?.disconnect();
+                port = null;
+                break;
+            default:
+                if (ready) send(payload);
+        }
+    });
+}
+
 document.addEventListener(
     "DOMContentLoaded",
     () => {
-        window.postMessage({
+        postMessage({
             type: "vencord:meta",
             meta: {
                 EXTENSION_VERSION: browser.runtime.getManifest().version,
@@ -21,14 +103,14 @@ document.addEventListener(
         });
 
         chrome.runtime.onMessage.addListener(request => {
-            window.postMessage({ type: "vencord:keybinds", meta: request.command });
+            postMessage({ type: "vencord:keybinds", meta: request.command });
         });
 
-        window.addEventListener("message", function(event) {
+        window.addEventListener("message", function (event) {
             if (event.source !== window) return;
 
             if (event.data.type === "OPEN_SHORTCUTS") {
-            chrome.runtime.sendMessage({ action: "openShortcuts" });
+                chrome.runtime.sendMessage({ action: "openShortcuts" });
             }
         }, false);
     },
