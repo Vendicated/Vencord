@@ -14,10 +14,9 @@ import {
 
 const VoiceStateStore = findStoreLazy("VoiceStateStore");
 const VoiceActions = findByPropsLazy("selectVoiceChannel");
-
 const GUILD_VOICE = 2;
 
-const settings = definePluginSettings({
+export const settings = definePluginSettings({
     switchFromOtherVc: {
         type: OptionType.BOOLEAN,
         description: "If you're already in another voice channel when a spot opens, leave it and join the watched one",
@@ -31,19 +30,14 @@ let checkTimer: ReturnType<typeof setTimeout> | null = null;
 let joining = false;
 
 const toast = (msg: string, type: string = "message") => showToast(msg, type as any);
-const sleep = (ms: number) => new Promise(r => setTimeout(r, ms));
-
-const getOccupancy = (channelId: string) =>
-    Object.keys(VoiceStateStore.getVoiceStatesForChannel(channelId) ?? {}).length;
-
+const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+const getOccupancy = (channelId: string) => Object.keys(VoiceStateStore.getVoiceStatesForChannel(channelId) ?? {}).length;
 const getLimit = (channel: any) => channel.userLimit ?? channel.user_limit ?? 0;
+const isFull = (channel: any) => getLimit(channel) > 0 && getOccupancy(channel.id) >= getLimit(channel);
 
-const isFull = (channel: any) => {
-    const limit = getLimit(channel);
-    return limit > 0 && getOccupancy(channel.id) >= limit;
-};
+export const getWatchedChannelId = () => watchedChannelId;
 
-function stopWatching(message?: string, type?: string) {
+export function stopWatching(message?: string, type?: string) {
     watchedChannelId = null;
     joining = false;
     if (pollTimer) clearInterval(pollTimer);
@@ -55,30 +49,23 @@ function stopWatching(message?: string, type?: string) {
 function startWatching(channel: any) {
     stopWatching();
     watchedChannelId = channel.id;
-    pollTimer = setInterval(tryJoin, 2000); // safety net in case an event is missed
+    pollTimer = setInterval(tryJoin, 2000);
     toast(`Waiting for a spot in ${channel.name}...`, "success");
 }
 
 async function tryJoin() {
     if (!watchedChannelId || joining) return;
-
     const channelId = watchedChannelId;
     const channel = ChannelStore.getChannel(channelId);
     if (!channel) return stopWatching("Auto-join cancelled: channel not available", "failure");
 
     const current = SelectedChannelStore.getVoiceChannelId();
     if (current === channel.id) return stopWatching();
-
     if (isFull(channel)) return;
 
-    // A spot is open
     if (current && !settings.store.switchFromOtherVc) {
-        return stopWatching(
-            `A spot opened in ${channel.name}, but you're in another voice channel. Auto-join cancelled.`,
-            "failure"
-        );
+        return stopWatching(`A spot opened in ${channel.name}, but you're in another voice channel. Auto-join cancelled.`, "failure");
     }
-
     if (!PermissionStore.can(PermissionsBits.CONNECT, channel)) {
         return stopWatching(`Auto-join cancelled: you can't connect to ${channel.name}`, "failure");
     }
@@ -86,11 +73,9 @@ async function tryJoin() {
     joining = true;
     try {
         VoiceActions.selectVoiceChannel(channel.id);
-
-        // Confirm quickly (up to ~3s). If someone took the spot first, keep waiting.
         for (let i = 0; i < 12; i++) {
             await sleep(250);
-            if (watchedChannelId !== channelId) return; // cancelled meanwhile
+            if (watchedChannelId !== channelId) return;
             if (SelectedChannelStore.getVoiceChannelId() === channel.id) {
                 stopWatching(`Joined ${channel.name}`, "success");
                 return;
@@ -105,8 +90,6 @@ async function tryJoin() {
 
 function onVoiceStateUpdates() {
     if (!watchedChannelId) return;
-
-    // Check immediately, then once more shortly after in case the voice store lagged behind
     tryJoin();
     if (checkTimer) clearTimeout(checkTimer);
     checkTimer = setTimeout(tryJoin, 100);
@@ -114,31 +97,20 @@ function onVoiceStateUpdates() {
 
 const contextMenuPatch = (navId: string, children: any[], ...args: any[]) => {
     if (!navId.includes("channel-context")) return;
-
     const props = args[0];
     const channel = props?.channel;
-    if (!channel || props?.user || channel.type !== GUILD_VOICE) return;
-    if (!Array.isArray(children)) return;
+    if (!channel || props?.user || channel.type !== GUILD_VOICE || !Array.isArray(children)) return;
     if (children.some((c: any) => c?.props?.id === "vc-autojoin-group")) return;
 
     const watching = watchedChannelId === channel.id;
-
-    // Only useful on a full channel, or to cancel an active watch
     if (!watching && !isFull(channel)) return;
-
     children.push(
         <Menu.MenuSeparator />,
         <Menu.MenuGroup id="vc-autojoin-group">
             <Menu.MenuItem
                 id="vc-autojoin-toggle"
                 label={watching ? "Stop auto-joining" : "Auto-join when a spot opens"}
-                action={() => {
-                    if (watching) {
-                        stopWatching("Auto-join cancelled");
-                    } else {
-                        startWatching(channel);
-                    }
-                }}
+                action={() => watching ? stopWatching("Auto-join cancelled") : startWatching(channel)}
             />
         </Menu.MenuGroup>
     );
@@ -149,12 +121,10 @@ export default definePlugin({
     description: "Right-click a full voice channel to auto-join it as soon as a spot opens",
     authors: [{ name: "thcProphet", id: 828010614349365288n }],
     settings,
-
     start() {
         addGlobalContextMenuPatch(contextMenuPatch);
         FluxDispatcher.subscribe("VOICE_STATE_UPDATES", onVoiceStateUpdates);
     },
-
     stop() {
         stopWatching();
         removeGlobalContextMenuPatch(contextMenuPatch);
