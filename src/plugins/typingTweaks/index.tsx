@@ -18,6 +18,8 @@
 
 import { definePluginSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
+import { getNameColor } from "@plugins/editUsers/data";
+import { useUserAvatarURL } from "@plugins/editUsers/images";
 import { Devs } from "@utils/constants";
 import { classNameFactory } from "@utils/css";
 import { openUserProfile } from "@utils/discord";
@@ -25,7 +27,7 @@ import { isNonNullish } from "@utils/guards";
 import { Logger } from "@utils/Logger";
 import definePlugin, { OptionType } from "@utils/types";
 import { Channel, User } from "@vencord/discord-types";
-import { AuthenticationStore, Avatar, GuildMemberStore, React, RelationshipStore, TypingStore, UserStore, useStateFromStores } from "@webpack/common";
+import { AuthenticationStore, Avatar, GuildMemberStore, React, RelationshipStore, TypingStore, UsernameUtils, UserStore, useStateFromStores } from "@webpack/common";
 import { PropsWithChildren } from "react";
 
 import managedStyle from "./style.css?managed";
@@ -69,6 +71,9 @@ interface TypingUserProps {
 }
 
 const TypingUser = ErrorBoundary.wrap(function TypingUser({ user, guildId }: TypingUserProps) {
+    const avatarUrl = useUserAvatarURL(user, guildId, 128);
+    const roleColor = GuildMemberStore.getMember(guildId, user.id)?.colorString;
+
     return (
         <strong
             className={cl("user")}
@@ -77,19 +82,18 @@ const TypingUser = ErrorBoundary.wrap(function TypingUser({ user, guildId }: Typ
                 openUserProfile(user.id);
             }}
             style={{
-                color: settings.store.showRoleColors ? GuildMemberStore.getMember(guildId, user.id)?.colorString : undefined,
+                color: settings.store.showRoleColors ? getNameColor(user.id, roleColor) ?? roleColor : undefined,
             }}
         >
             {settings.store.showAvatars && (
                 <Avatar
                     className={cl("avatar")}
                     size="SIZE_16"
-                    src={user.getAvatarURL(guildId, 128)} />
+                    src={avatarUrl} />
             )}
             {GuildMemberStore.getNick(guildId!, user.id)
                 || (!guildId && RelationshipStore.getNickname(user.id))
-                || (user as any).globalName
-                || user.username
+                || UsernameUtils.getName(user)
             }
         </strong>
     );

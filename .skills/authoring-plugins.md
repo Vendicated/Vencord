@@ -18,7 +18,7 @@ Define settings with `definePluginSettings` and read them via `settings.store.ke
 Plugins define patches to apply RegExp patches to Discord's javascript code.
 Each patch defines:
 
-* find: String or RegExp used to find the Webpack module to patch
+* find: String or RegExp used to find the Webpack module to patch. Treat RegExp as a last resort, always prefer string
 * match: RegExp or string to match code. Can use `\i` to match javascript identifiers
 * replace: String or function to replace the matched code with. Can use matches like `$1`, `$&`, etc and refer to the plugin object via `$self`. `$self` resolves via the plugin `name`, not the folder name.
 
@@ -39,6 +39,11 @@ Replacements should be as concise as possible. Create a method on the plugin obj
 `predicate()` runs once at startup, so use it for settings checks. For runtime conditions, check them in a `$self` method instead.
 
 Failed patches don't throw, they log `Patch by <plugin> had no effect`. Check the console after building.
+
+Patches should be independent from one another. Avoid introducing dependencies between patches, like one patch introducing a variable and another patch relying on it. If the first patch breaks, the second will reference an undefined variable and cause a crash. As a last resort, `group: true` only applies if all replacements in the group succeed, but avoid relying on it.
+Also check for "hidden" dependencies, like one patch leaving Discord in an invalid state if another patch fails or is not applied.
+
+If not immediately clear from reading find/match/replace keywords alone, add a short comment to explain the purpose of each patch
 
 ## Discord Modules
 

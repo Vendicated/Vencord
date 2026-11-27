@@ -17,6 +17,7 @@
 */
 
 import { definePluginSettings } from "@api/Settings";
+import { getNameColor } from "@plugins/editUsers/data";
 import { Devs } from "@utils/constants";
 import { hasGuildFeature } from "@utils/discord";
 import { Logger } from "@utils/Logger";
@@ -196,7 +197,15 @@ export default definePlugin({
             if (guildId == null) return null;
 
             const member = GuildMemberStore.getMember(guildId, userId);
-            return member && { guildId, member };
+            if (!member) {
+                return null;
+            }
+
+            const color = getNameColor(userId, member.colorString || member.colorStrings?.primaryColor);
+            return {
+                guildId,
+                member: color ? { ...member, colorString: color, colorStrings: null } : member
+            };
         } catch (e) {
             logger.error("Failed to get member", e);
         }
@@ -239,8 +248,9 @@ export default definePlugin({
             // Do not apply role color if the send fails, otherwise it becomes indistinguishable
             if (message.state === "SEND_FAILED") return;
 
-            if (author.colorString != null && messageSaturation !== 0) {
-                const value = `color-mix(in oklab, ${author.colorString} ${messageSaturation}%, var({DEFAULT}))`;
+            const color = getNameColor(message.author?.id, author.colorString) ?? author.colorString;
+            if (color != null && messageSaturation !== 0) {
+                const value = `color-mix(in oklab, ${color} ${messageSaturation}%, var({DEFAULT}))`;
 
                 return {
                     color: value.replace("{DEFAULT}", "--text-default"),

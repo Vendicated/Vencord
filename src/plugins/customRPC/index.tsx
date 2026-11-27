@@ -16,17 +16,19 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { definePluginSettings } from "@api/Settings";
+import { isPluginEnabled } from "@api/PluginManager";
+import { definePluginSettings, PlainSettings, SettingsStore } from "@api/Settings";
 import { getUserSettingLazy } from "@api/UserSettings";
 import { Button } from "@components/Button";
 import { Card } from "@components/Card";
-import { Divider } from "@components/Divider";
 import { Flex } from "@components/Flex";
 import { Heading } from "@components/Heading";
 import { Link } from "@components/Link";
+import { OrderedList } from "@components/List";
 import { Paragraph } from "@components/Paragraph";
 import { Devs } from "@utils/constants";
 import { isTruthy } from "@utils/guards";
+import { Logger } from "@utils/Logger";
 import { useAwaiter } from "@utils/react";
 import definePlugin, { OptionType } from "@utils/types";
 import { Activity } from "@vencord/discord-types";
@@ -41,8 +43,8 @@ const ActivityView = findComponentByCodeLazy(".party?(0", "USER_PROFILE_ACTIVITY
 
 const ShowCurrentGame = getUserSettingLazy<boolean>("status", "showCurrentGame")!;
 
-async function getApplicationAsset(key: string): Promise<string> {
-    return (await ApplicationAssetUtils.fetchAssetIds(settings.store.appID!, [key]))[0];
+async function getApplicationAsset(appID: string, key: string): Promise<string> {
+    return (await ApplicationAssetUtils.fetchAssetIds(appID, [key]))[0];
 }
 
 export const enum TimestampMode {
@@ -52,18 +54,7 @@ export const enum TimestampMode {
     CUSTOM,
 }
 
-export const settings = definePluginSettings({
-    enablePresence: {
-        type: OptionType.BOOLEAN,
-        description: "Whether to show the presence",
-        default: true,
-        onChange: v => setRpc(!v)
-    },
-    config: {
-        type: OptionType.COMPONENT,
-        component: RPCSettings
-    },
-}).withPrivateSettings<{
+export interface ActivityConfig {
     appID?: string;
     appName?: string;
     details?: string;
@@ -87,9 +78,80 @@ export const settings = definePluginSettings({
     buttonTwoURL?: string;
     partySize?: number;
     partyMaxSize?: number;
+}
+
+export interface RpcProfile extends ActivityConfig {
+    id: string;
+    label: string;
+}
+
+export const settings = definePluginSettings({
+    enablePresence: {
+        type: OptionType.BOOLEAN,
+        description: "Whether to show the presence",
+        default: true,
+        onChange: enabled => {
+            if (isPluginEnabled("CustomRPC")) {
+                setRpc(!enabled);
+            }
+        }
+    },
+    config: {
+        type: OptionType.COMPONENT,
+        component: RPCSettings
+    },
+}).withPrivateSettings<{
+    profiles?: RpcProfile[];
+    selectedProfileId?: string;
 }>();
 
-async function createActivity(): Promise<Activity | undefined> {
+function migrateProfiles() {
+    const legacy = PlainSettings.plugins.CustomRPC;
+    if (!legacy || legacy.profiles) {
+        return;
+    }
+
+    const keys = [
+        "appID", "appName", "details", "detailsURL",
+        "state", "stateURL", "type", "streamLink",
+        "timestampMode", "startTime", "endTime", "imageBig",
+        "imageBigURL", "imageBigTooltip", "imageSmall", "imageSmallURL",
+        "imageSmallTooltip", "buttonOneText", "buttonOneURL", "buttonTwoText",
+        "buttonTwoURL", "partySize", "partyMaxSize",
+    ] as const;
+    const config: ActivityConfig = {};
+    for (const key of keys) {
+        if (key in legacy) {
+            Object.assign(config, { [key]: legacy[key] });
+            delete legacy[key];
+        }
+    }
+
+    if (Object.keys(config).length) {
+        legacy.profiles = [{ ...config, id: "default", label: config.appName || "Default" }];
+        SettingsStore.markAsChanged();
+    }
+}
+
+migrateProfiles();
+
+export function selectedProfile() {
+    const { profiles, selectedProfileId } = settings.plain;
+    return profiles?.find(profile => profile.id === selectedProfileId) ?? profiles?.[0];
+}
+
+export function selectProfile(id: string | undefined) {
+    settings.store.selectedProfileId = id;
+    if (isPluginEnabled("CustomRPC")) {
+        setRpc();
+    }
+}
+
+async function createActivity(profile: RpcProfile): Promise<Activity | undefined> {
+    if (!profile.appName) {
+        return;
+    }
+
     const {
         appID,
         appName,
@@ -114,12 +176,11 @@ async function createActivity(): Promise<Activity | undefined> {
         partyMaxSize,
         partySize,
         timestampMode
-    } = settings.store;
+    } = profile;
 
-    if (!appName) return;
-
+    const applicationId = appID || "0";
     const activity: Activity = {
-        application_id: appID || "0",
+        application_id: applicationId,
         name: appName,
         state,
         details,
@@ -176,7 +237,7 @@ async function createActivity(): Promise<Activity | undefined> {
 
     if (imageBig) {
         activity.assets = {
-            large_image: await getApplicationAsset(imageBig),
+            large_image: await getApplicationAsset(applicationId, imageBig),
             large_text: imageBigTooltip || undefined,
             large_url: imageBigURL || undefined
         };
@@ -185,7 +246,7 @@ async function createActivity(): Promise<Activity | undefined> {
     if (imageSmall) {
         activity.assets = {
             ...activity.assets,
-            small_image: await getApplicationAsset(imageSmall),
+            small_image: await getApplicationAsset(applicationId, imageSmall),
             small_text: imageSmallTooltip || undefined,
             small_url: imageSmallURL || undefined
         };
@@ -207,15 +268,43 @@ async function createActivity(): Promise<Activity | undefined> {
     return activity;
 }
 
-export async function setRpc(disable?: boolean) {
-    const shouldDisable = disable ?? !settings.store.enablePresence;
-    const activity: Activity | undefined = await createActivity();
+let revision = 0;
 
-    FluxDispatcher.dispatch({
-        type: "LOCAL_ACTIVITY_UPDATE",
-        activity: !shouldDisable ? activity : null,
-        socketId: "CustomRPC",
-    });
+export async function setRpc(disable = !settings.store.enablePresence) {
+    const currentRevision = ++revision;
+    const profile = selectedProfile();
+    let activity: Activity | undefined;
+    if (!disable && profile) {
+        try {
+            activity = await createActivity(profile);
+        } catch (error) {
+            new Logger("CustomRPC").error(`Failed to publish profile "${profile.label}"`, error);
+        }
+    }
+
+    if (currentRevision === revision) {
+        FluxDispatcher.dispatch({
+            type: "LOCAL_ACTIVITY_UPDATE",
+            socketId: "CustomRPC",
+            activity: activity ?? null
+        });
+    }
+}
+
+export function ActivityPreview({ profile }: { profile: RpcProfile; }) {
+    const [activity] = useAwaiter(() => createActivity(profile), { fallbackValue: undefined, deps: [profile] });
+    const { profileThemeStyle } = useProfileThemeStyle({});
+    const user = UserStore.getCurrentUser();
+
+    if (!activity) {
+        return null;
+    }
+
+    return (
+        <div style={{ width: "284px", maxWidth: "100%", ...profileThemeStyle, borderRadius: 8, background: "var(--background-mod-muted)" }}>
+            <ActivityView activity={activity} user={user} currentUser={user} />
+        </div>
+    );
 }
 
 export default definePlugin({
@@ -224,32 +313,54 @@ export default definePlugin({
     tags: ["Activity", "Customisation"],
     authors: [Devs.captain, Devs.AutumnVN, Devs.nin0dev, Devs.c0nnorgg],
     dependencies: ["UserSettingsAPI"],
-    // This plugin's patch is not important for functionality, so don't require a restart
     requiresRestart: false,
     settings,
 
     toolboxActions() {
-        const { enablePresence } = settings.use(["enablePresence"]);
+        const { enablePresence, profiles = [] } = settings.use(["enablePresence", "profiles", "selectedProfileId"]);
+        const selected = selectedProfile();
 
         return (
-            <Menu.MenuCheckboxItem
-                id="custom-rpc-toggle-toolbox"
-                label="Show Custom RPC"
-                checked={enablePresence}
-                action={() => {
-                    settings.store.enablePresence = !enablePresence;
-                    setRpc();
-                }}
-            />
+            <Menu.MenuGroup>
+                <Menu.MenuCheckboxItem
+                    id="custom-rpc-toggle-toolbox"
+                    label="Show Custom RPC"
+                    checked={enablePresence}
+                    action={() => {
+                        settings.store.enablePresence = !enablePresence;
+                        setRpc();
+                    }}
+                />
+                {profiles.length > 0 && (
+                    <Menu.MenuItem id="custom-rpc-profiles" label="RPC profile">
+                        {profiles.map(profile => (
+                            <Menu.MenuRadioItem
+                                group="custom-rpc-profiles"
+                                key={profile.id}
+                                id={`custom-rpc-profile-${profile.id}`}
+                                label={profile.label || "Unnamed profile"}
+                                checked={profile.id === selected?.id}
+                                action={() => selectProfile(profile.id)}
+                            />
+                        ))}
+                    </Menu.MenuItem>
+                )}
+            </Menu.MenuGroup>
         );
     },
 
     start: setRpc,
     stop: () => setRpc(true),
 
-    // Discord hides buttons on your own Rich Presence for some reason. This patch disables that behaviour
+    flux: {
+        START_SESSION() {
+            FluxDispatcher.wait(() => setRpc());
+        }
+    },
+
     patches: [
         {
+            // Discord hides buttons on your own Rich Presence for some reason. This patch disables that behaviour
             find: ".USER_PROFILE_ACTIVITY_BUTTONS),",
             replacement: {
                 match: /.getId\(\)===\i.id/,
@@ -260,9 +371,7 @@ export default definePlugin({
 
     settingsAboutComponent: () => {
         const { enablePresence } = settings.use(["enablePresence"]);
-        const [activity] = useAwaiter(createActivity, { fallbackValue: undefined, deps: Object.values(settings.store) });
         const gameActivityEnabled = ShowCurrentGame.useSetting();
-        const { profileThemeStyle } = useProfileThemeStyle({});
 
         return (
             <Flex flexDirection="column" gap=".5em">
@@ -297,33 +406,32 @@ export default definePlugin({
                 )}
 
                 <Flex flexDirection="column" gap=".5em">
-                    <Paragraph>
-                        Go to the <Link href="https://discord.com/developers/applications">Discord Developer Portal</Link> to create an application and
-                        get the application ID.
-                    </Paragraph>
-                    <Paragraph>
-                        Upload images in the Rich Presence tab to get the image keys.
-                    </Paragraph>
-                    <Paragraph>
-                        If you want to use an image link, download your image and reupload the image to <Link href="https://imgur.com">Imgur</Link> and get the image link by right-clicking the image and selecting "Copy image address".
-                    </Paragraph>
-                    <Paragraph>
-                        You can't see your own buttons on your profile, but everyone else can see it fine.
-                    </Paragraph>
-                    <Paragraph>
-                        Some weird unicode text ("fonts" 𝖑𝖎𝖐𝖊 𝖙𝖍𝖎𝖘) may cause the rich presence to not show up, try using normal letters instead.
-                    </Paragraph>
+                    <Card>
+                        <Heading>Images</Heading>
+                        <Paragraph>To use an image link, you need to upload it to imgur first:</Paragraph>
+                        <OrderedList>
+                            <li>Go to <Link href="https://imgur.com/upload">Imgur</Link> and upload your image.</li>
+                            <li>Once uploaded, right-click the image and click "Copy image address".</li>
+                            <li>Use the copied link as your image link.</li>
+                        </OrderedList>
+                        <Paragraph>To use application assets:</Paragraph>
+                        <OrderedList>
+                            <li>Go to the <Link href="https://discord.com/developers/applications">Discord Developer Portal</Link> to create an application and
+                                get the application ID.
+                            </li>
+                            <li>Navigate to the "Rich Presence" tab and upload your images.</li>
+                        </OrderedList>
+                    </Card>
+                    <Card variant="warning">
+                        <Heading>Warning</Heading>
+                        <Paragraph>
+                            You can't see your own buttons on your profile, but everyone else can see them fine.
+                        </Paragraph>
+                        <Paragraph>
+                            Some weird unicode text ("fonts" 𝖑𝖎𝖐𝖊 𝖙𝖍𝖎𝖘) may cause the rich presence to not show up, try using normal letters instead.
+                        </Paragraph>
+                    </Card>
                 </Flex>
-
-                <Divider />
-
-                <div style={{ width: "284px", ...profileThemeStyle, borderRadius: 8, background: "var(--background-mod-muted)" }}>
-                    {activity && <ActivityView
-                        activity={activity}
-                        user={UserStore.getCurrentUser()}
-                        currentUser={UserStore.getCurrentUser()}
-                    />}
-                </div>
             </Flex>
         );
     }
