@@ -80,8 +80,8 @@ export default definePlugin({
         for (const [name, provider] of Object.entries(res.providers)) {
             const urlPattern = new RegExp(provider.urlPattern, "i");
 
-            const rules = provider.rules?.map(rule => new RegExp(rule, "i"));
-            const rawRules = provider.rawRules?.map(rule => new RegExp(rule, "i"));
+            const rules = provider.rules?.map(rule => new RegExp("^(?:" + rule + ")$", "i")); // Disallow substring matches
+            const rawRules = provider.rawRules?.map(rule => new RegExp(rule, "gi"));
             const exceptions = provider.exceptions?.map(ex => new RegExp(ex, "i"));
 
             this.rules.push({
@@ -95,20 +95,31 @@ export default definePlugin({
     },
 
     replacer(match: string) {
-        // Parse URL without throwing errors
+        let href = match, url: URL;
+
+        // Verify input is actually a valid URL
         try {
-            var url = new URL(match);
-        } catch (error) {
-            // Don't modify anything if we can't parse the URL
+            url = new URL(href);
+        } catch (e) {
             return match;
         }
 
-        // Cheap way to check if there are any search params
-        if (url.searchParams.entries().next().done) return match;
-
         // Check rules for each provider that matches
-        this.rules.forEach(({ urlPattern, exceptions, rawRules, rules }) => {
-            if (!urlPattern.test(url.href) || exceptions?.some(ex => ex.test(url.href))) return;
+        for (const { urlPattern, exceptions, rawRules, rules } of this.rules) {
+            if (!urlPattern.test(href) || exceptions?.some(ex => ex.test(href)))
+                continue;
+
+            const pHref = href;
+
+            rawRules?.forEach(rawRule => href = href.replace(rawRule, ""));
+
+            try {
+                url = new URL(href);
+            } catch (e) {
+                // If something goes wrong, restore string representation and continue
+                href = pHref;
+                continue;
+            }
 
             const toDelete: string[] = [];
 
@@ -124,15 +135,11 @@ export default definePlugin({
             // Delete matched params from list
             toDelete.forEach(param => url.searchParams.delete(param));
 
-            // Match and remove any raw rules
-            let cleanedUrl = url.href;
-            rawRules?.forEach(rawRule => {
-                cleanedUrl = cleanedUrl.replace(rawRule, "");
-            });
-            url = new URL(cleanedUrl);
-        });
+            // Update string representation of URL
+            href = url.href;
+        }
 
-        return url.toString();
+        return href;
     },
 
     cleanMessage(msg: MessageObject) {
