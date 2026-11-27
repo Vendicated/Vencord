@@ -1,0 +1,22 @@
+ol.vc-list,
+ul.vc-list {
+    color: var(--text-default);
+    font-size: 0.875rem;
+    line-height: 1.4;
+    margin: 0.25em 0;
+    padding: 0;
+    padding-inline-start: 1.75em;
+}
+
+ol.vc-list {
+    list-style: decimal outside;
+}
+
+ul.vc-list {
+    list-style: disc outside;
+}
+
+.vc-list > li {
+    display: list-item;
+    list-style: inherit;
+}

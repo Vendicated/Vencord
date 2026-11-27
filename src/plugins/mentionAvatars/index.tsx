@@ -8,6 +8,7 @@ import "./styles.css";
 
 import { definePluginSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
+import { useUserAvatarURL } from "@plugins/editUsers/images";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { User } from "@vencord/discord-types";
@@ -90,8 +91,10 @@ export default definePlugin({
         const { user, username } = props;
         const [isHovering, setIsHovering] = useState(false);
 
-        if (!user)
+        const avatarUrl = useUserAvatarURL(user, SelectedGuildStore.getGuildId(), 16, isHovering);
+        if (!user) {
             return getUsernameString(username);
+        }
 
         return (
             <span
@@ -99,7 +102,7 @@ export default definePlugin({
                 onMouseLeave={() => setIsHovering(false)}
             >
                 <img
-                    src={user.getAvatarURL(SelectedGuildStore.getGuildId(), 16, isHovering)}
+                    src={avatarUrl}
                     className="vc-mentionAvatars-icon"
                     style={{ borderRadius: "50%" }}
                 />

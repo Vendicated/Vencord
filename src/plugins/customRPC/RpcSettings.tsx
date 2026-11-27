@@ -7,20 +7,25 @@
 import "./settings.css";
 
 import { isPluginEnabled } from "@api/PluginManager";
+import { Button } from "@components/Button";
+import { Card } from "@components/Card";
 import { Divider } from "@components/Divider";
+import { Flex } from "@components/Flex";
 import { Heading } from "@components/Heading";
+import { PlusIcon } from "@components/Icons";
 import { Paragraph } from "@components/Paragraph";
 import { resolveError } from "@components/settings/tabs/plugins/components/Common";
 import { debounce } from "@shared/debounce";
 import { classNameFactory } from "@utils/css";
+import { confirmAction } from "@utils/discord";
 import { ActivityType } from "@vencord/discord-types/enums";
 import { Select, TextInput, useState } from "@webpack/common";
 
-import CustomRPCPlugin, { setRpc, settings, TimestampMode } from ".";
+import CustomRPCPlugin, { ActivityConfig, ActivityPreview, RpcProfile, selectedProfile, selectProfile, setRpc, settings, TimestampMode } from ".";
 
 const cl = classNameFactory("vc-customRPC-settings-");
 
-type SettingsKey = keyof typeof settings.store;
+type SettingsKey = keyof ActivityConfig;
 
 interface TextOption<T> {
     settingsKey: SettingsKey;
@@ -46,21 +51,28 @@ const makeValidator = (maxLength: number, isRequired = false) => (value: string)
 const maxLength128 = makeValidator(128);
 
 function isAppIdValid(value: string) {
-    if (!/^\d{16,21}$/.test(value)) return "Must be a valid Discord ID.";
+    if (value && !/^\d{16,21}$/.test(value)) {
+        return "Must be a valid Discord ID.";
+    }
     return true;
 }
 
 const updateRPC = debounce(() => {
-    setRpc(true);
-    if (isPluginEnabled(CustomRPCPlugin.name)) setRpc();
+    if (isPluginEnabled(CustomRPCPlugin.name)) {
+        setRpc();
+    }
 });
 
-function isStreamLinkDisabled() {
-    return settings.store.type !== ActivityType.STREAMING;
+function editProfile(changes: Partial<RpcProfile>) {
+    const selected = selectedProfile()!;
+    settings.store.profiles = settings.plain.profiles!.map(profile =>
+        profile.id === selected.id ? { ...profile, ...changes } : profile
+    );
+    updateRPC();
 }
 
 function isStreamLinkValid(value: string) {
-    if (!isStreamLinkDisabled() && !/https?:\/\/(www\.)?(twitch\.tv|youtube\.com)\/\w+/.test(value)) return "Streaming link must be a valid URL.";
+    if (!/https?:\/\/(www\.)?(twitch\.tv|youtube\.com)\/\w+/.test(value)) return "Streaming link must be a valid URL.";
     if (value && value.length > 512) return "Streaming link must be not longer than 512 characters.";
     return true;
 }
@@ -99,7 +111,7 @@ function PairSetting<T>(props: { data: [TextOption<T>, TextOption<T>]; }) {
 }
 
 function SingleSetting<T>({ settingsKey, label, disabled, isValid, transform }: TextOption<T>) {
-    const [state, setState] = useState(settings.store[settingsKey] ?? "");
+    const [state, setState] = useState(selectedProfile()![settingsKey] ?? "");
     const [error, setError] = useState<string | null>(null);
 
     function handleChange(newValue: any) {
@@ -111,8 +123,7 @@ function SingleSetting<T>({ settingsKey, label, disabled, isValid, transform }: 
         setError(resolveError(valid));
 
         if (valid === true) {
-            settings.store[settingsKey] = newValue;
-            updateRPC();
+            editProfile({ [settingsKey]: newValue });
         }
     }
 
@@ -141,10 +152,9 @@ function SelectSetting<T>({ settingsKey, label, options, disabled }: SelectOptio
                 maxVisibleItems={5}
                 closeOnSelect={true}
                 select={v => {
-                    settings.store[settingsKey] = v;
-                    updateRPC();
+                    editProfile({ [settingsKey]: v });
                 }}
-                isSelected={v => v === settings.store[settingsKey]}
+                isSelected={v => v === selectedProfile()![settingsKey]}
                 serialize={v => String(v)}
                 isDisabled={disabled}
             />
@@ -153,8 +163,70 @@ function SelectSetting<T>({ settingsKey, label, options, disabled }: SelectOptio
 }
 
 export function RPCSettings() {
-    const s = settings.use();
+    const { profiles = [] } = settings.use(["profiles", "selectedProfileId"]);
+    const profile = selectedProfile();
 
+    function addProfile() {
+        const id = crypto.randomUUID();
+        const newProfile = { id, label: "New profile" };
+        settings.store.profiles = [...(settings.plain.profiles ?? []), newProfile];
+        selectProfile(id);
+    }
+
+    function deleteProfile(target: RpcProfile) {
+        confirmAction({
+            title: "Delete profile",
+            subtitle: `Delete "${target.label}"?`,
+            confirmText: "Delete",
+            onConfirm() {
+                settings.store.profiles = settings.plain.profiles!.filter(p => p.id !== target.id);
+                selectProfile(selectedProfile()?.id);
+            }
+        });
+    }
+
+    return (
+        <div className={cl("root")}>
+            <Heading>Profile</Heading>
+            <Select
+                placeholder="Select a profile"
+                options={[
+                    ...profiles.map(p => ({ label: p.label || "Unnamed profile", value: p.id })),
+                    { label: "Add profile", value: "add" }
+                ]}
+                renderOptionLabel={({ label, value }) => value === "add"
+                    ? <Flex alignItems="center" gap=".5em"><PlusIcon width={16} height={16} />{label}</Flex>
+                    : label
+                }
+                select={id => {
+                    if (id === "add") {
+                        addProfile();
+                    } else {
+                        selectProfile(id);
+                    }
+                }}
+                isSelected={id => id === profile?.id}
+                serialize={id => id}
+                closeOnSelect
+            />
+            {profile && (
+                <Card key={profile.id} className={cl("root")} defaultPadding>
+                    <Heading>Profile name</Heading>
+                    <TextInput value={profile.label} onChange={label => editProfile({ label })} />
+
+                    <ActivityPreview profile={profile} />
+                    <ActivityEditor profile={profile} />
+
+                    <Button variant="dangerSecondary" onClick={() => deleteProfile(profile)}>
+                        Delete profile
+                    </Button>
+                </Card>
+            )}
+        </div>
+    );
+}
+
+function ActivityEditor({ profile: s }: { profile: RpcProfile; }) {
     return (
         <div className={cl("root")}>
             <SelectSetting
@@ -186,7 +258,7 @@ export function RPCSettings() {
             />
 
             <PairSetting data={[
-                { settingsKey: "appID", label: "Application ID", isValid: isAppIdValid },
+                { settingsKey: "appID", label: "Application ID (optional)", isValid: isAppIdValid },
                 { settingsKey: "appName", label: "Application Name", isValid: makeValidator(128, true) },
             ]} />
 

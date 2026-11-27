@@ -159,16 +159,7 @@ function GuildInfoModal({ guild, modalProps }: GuildProps & { modalProps: Render
 
 
 function Owner(guildId: string, owner: User) {
-    const guildAvatar = GuildMemberStore.getMember(guildId, owner.id)?.avatar;
-    const ownerAvatarUrl =
-        guildAvatar
-            ? IconUtils.getGuildMemberAvatarURLSimple({
-                userId: owner!.id,
-                avatar: guildAvatar,
-                guildId,
-                canAnimate: true
-            })
-            : IconUtils.getUserAvatarURL(owner, true);
+    const ownerAvatarUrl = owner.getAvatarURL(guildId, undefined, true);
 
     return (
         <div className={cl("owner")}>

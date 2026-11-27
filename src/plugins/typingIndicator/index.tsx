@@ -26,7 +26,7 @@ import { Devs } from "@utils/constants";
 import { getIntlMessage } from "@utils/discord";
 import definePlugin, { OptionType } from "@utils/types";
 import { findComponentByCodeLazy } from "@webpack";
-import { GuildMemberStore, RelationshipStore, SelectedChannelStore, Tooltip, TypingStore, UserGuildSettingsStore, UserStore, UserSummaryItem, useStateFromStores } from "@webpack/common";
+import { GuildMemberStore, RelationshipStore, SelectedChannelStore, Tooltip, TypingStore, UserGuildSettingsStore, UsernameUtils, UserStore, UserSummaryItem, useStateFromStores } from "@webpack/common";
 
 const ThreeDots = findComponentByCodeLazy("Math.min(1,Math.max(", "dotRadius:");
 
@@ -37,7 +37,7 @@ const enum IndicatorMode {
 
 function getDisplayName(guildId: string, userId: string) {
     const user = UserStore.getUser(userId);
-    return GuildMemberStore.getNick(guildId, userId) ?? (user as any).globalName ?? user.username;
+    return GuildMemberStore.getNick(guildId, userId) ?? UsernameUtils.getName(user);
 }
 
 function TypingIndicator({ channelId, guildId }: { channelId: string; guildId: string; }) {
