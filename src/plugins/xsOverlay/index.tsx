@@ -10,7 +10,7 @@ import { Devs } from "@utils/constants";
 import definePlugin, { makeRange, OptionType, PluginNative, ReporterTestable } from "@utils/types";
 import type { Channel, Embed, GuildMember, MessageAttachment, User } from "@vencord/discord-types";
 import { findByCodeLazy, findLazy } from "@webpack";
-import { ChannelStore, GuildRoleStore, GuildStore, UserStore } from "@webpack/common";
+import { ChannelStore, GuildRoleStore, GuildStore, IconUtils, UserStore } from "@webpack/common";
 
 const ChannelTypes = findLazy(m => m.ANNOUNCEMENT_THREAD === 10);
 
@@ -326,7 +326,7 @@ function shouldIgnoreForChannelType(channel: Channel) {
 }
 
 function sendMsgNotif(titleString: string, content: string, message: Message) {
-    fetch(`https://cdn.discordapp.com/avatars/${message.author.id}/${message.author.avatar}.png?size=128`)
+    fetch(IconUtils.getUserAvatarURL(message.author, false, 128))
         .then(response => response.blob())
         .then(blob => new Promise<string>(resolve => {
             const r = new FileReader();

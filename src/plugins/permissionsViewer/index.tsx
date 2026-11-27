@@ -91,7 +91,7 @@ function MenuItem(guildId: string, { id, type, withIcon }: { id?: string, type?:
 
                         return {
                             permissions,
-                            header: member.nick ?? UserStore.getUser(member.userId).username
+                            header: GuildMemberStore.getNick(guildId, member.userId) ?? UserStore.getUser(member.userId).username
                         };
                     })
                     .with(MenuItemParentType.Channel, () => {
