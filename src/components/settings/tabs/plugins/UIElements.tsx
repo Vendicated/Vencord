@@ -24,16 +24,16 @@ import { Clickable, Modal, openModal } from "@webpack/common";
 
 const cl = classNameFactory("vc-plugin-ui-elements-");
 
-export function UIElementsButton() {
+export function NavigationCard({ title, description, onClick }: { title: string; description: string; onClick(): void; }) {
     return (
-        <Clickable onClick={() => openModal(modalProps => <UIElementsModal {...modalProps} />)}>
+        <Clickable onClick={onClick}>
             <Card className={cl("button")} defaultPadding>
                 <div className={cl("button-description")}>
                     <Paragraph size="md" weight="semibold">
-                        Manage plugin UI elements
+                        {title}
                     </Paragraph>
                     <Paragraph size="xs">
-                        Allows you to hide buttons you don't like
+                        {description}
                     </Paragraph>
                 </div>
                 <svg
@@ -45,6 +45,16 @@ export function UIElementsButton() {
                 </svg>
             </Card>
         </Clickable >
+    );
+}
+
+export function UIElementsButton() {
+    return (
+        <NavigationCard
+            title="Manage plugin UI elements"
+            description="Allows you to hide buttons you don't like"
+            onClick={() => openModal(modalProps => <UIElementsModal {...modalProps} />)}
+        />
     );
 }
 
