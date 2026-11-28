@@ -30,7 +30,6 @@ import { ReactNode } from "react";
 import FolderSideBar from "./FolderSideBar";
 import { GuildFolder } from "@vencord/discord-types";
 import { UserNotificationSetting } from "@vencord/discord-types/enums";
-import { contextMenus } from "@plugins/pinDms/components/contextMenu";
 
 enum FolderIconDisplay {
     Never,
