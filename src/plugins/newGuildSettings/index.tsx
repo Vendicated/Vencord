@@ -24,9 +24,8 @@ import { definePluginSettings } from "@api/Settings";
 import { CogWheel } from "@components/Icons";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { Guild } from "@vencord/discord-types";
-import { findByCodeLazy, findByPropsLazy, mapMangledModuleLazy } from "@webpack";
-import { Menu, UserStore } from "@webpack/common";
+import { findByCodeLazy, findByPropsLazy, findStoreLazy, mapMangledModuleLazy } from "@webpack";
+import { Menu, showToast, UserStore } from "@webpack/common";
 
 const { updateGuildNotificationSettings } = findByPropsLazy("updateGuildNotificationSettings");
 const { toggleShowAllChannels } = mapMangledModuleLazy(".onboardExistingMember(", {
@@ -36,6 +35,7 @@ const { toggleShowAllChannels } = mapMangledModuleLazy(".onboardExistingMember("
     }
 });
 const isOptInEnabledForGuild = findByCodeLazy(".COMMUNITY)||", ".isOptInEnabled(");
+const SortedGuildStore = findStoreLazy("SortedGuildStore");
 
 const settings = definePluginSettings({
     guild: {
@@ -80,17 +80,26 @@ const settings = definePluginSettings({
     }
 });
 
-const makeContextMenuPatch: (shouldAddIcon: boolean) => NavContextMenuPatchCallback = (shouldAddIcon: boolean) => (children, { guild }: { guild: Guild, onClose(): void; }) => {
-    if (!guild) return;
+const makeContextMenuPatch: (shouldAddIcon: boolean) => NavContextMenuPatchCallback = (shouldAddIcon: boolean) => (children, { guild, folderId }) => {
+    if (!guild && !folderId) return;
 
-    const group = findGroupChildrenByChildId("privacy", children);
+    const guildIds: string[] = guild ? [guild.id] : SortedGuildStore.getGuildFolderById(folderId).guildIds;
+
+    const group = findGroupChildrenByChildId(guild ? "privacy" : "mark-folder-read", children);
     group?.push(
         <Menu.MenuItem
             label="Apply NewGuildSettings"
             id="vc-newguildsettings-apply"
             icon={shouldAddIcon ? CogWheel : void 0}
             leadingAccessory={shouldAddIcon ? { type: "icon", icon: CogWheel } : void 0}
-            action={() => applyDefaultSettings(guild.id)}
+            action={() => {
+                let guildsChanged = 0;
+                guildIds.forEach(id => {
+                    applyDefaultSettings(id);
+                    guildsChanged += 1;
+                });
+                showToast({ text: guildsChanged > 1 ? `Applied NewGuildSettings to ${guildsChanged} servers` : "Applied NewGuildSettings", variant: "success" });
+            }}
         />
     );
 };
@@ -121,7 +130,7 @@ export default definePlugin({
     description: "Automatically mute new servers and change various other settings upon joining",
     tags: ["Servers", "Customisation"],
     searchTerms: ["MuteNewGuild", "mute", "server"],
-    authors: [Devs.Glitch, Devs.Nuckyz, Devs.carince, Devs.Mopi, Devs.GabiRP],
+    authors: [Devs.Glitch, Devs.Nuckyz, Devs.carince, Devs.Mopi, Devs.GabiRP, Devs.rusk],
     contextMenus: {
         "guild-context": makeContextMenuPatch(false),
         "guild-header-popout": makeContextMenuPatch(true)
